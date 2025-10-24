@@ -99,6 +99,7 @@ const IPC_HANDLER_KEYS = {
   FACTORY_RUNS_SUBSCRIBE: 'factory:runs:subscribe',
   FACTORY_RUNS_START: 'factory:runs:start',
   FACTORY_RUNS_CANCEL: 'factory:runs:cancel',
+  FACTORY_RUNS_RATE: 'factory:runs:rate',
   FACTORY_RUNS_LIST_ACTIVE: 'factory:runs:list-active',
   FACTORY_RUNS_LIST_HISTORY: 'factory:runs:list-history',
   FACTORY_RUNS_GET: 'factory:runs:get',
@@ -148,7 +149,6 @@ const IPC_HANDLER_KEYS = {
   DOCUMENT_INGESTION_PROJECT: 'document-ingestion:project',
 
   // GIT
-  GIT_TODO: 'git:todo',
   GIT_GET_MERGE_PLAN: 'git:get-merge-plan',
   GIT_BUILD_MERGE_REPORT: 'git:build-merge-report',
   GIT_APPLY_MERGE: 'git:apply-merge',

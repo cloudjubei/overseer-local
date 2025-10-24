@@ -42,10 +42,10 @@
   },
   "metadata": {
     "icon": "board",
-    "githubCredentialsId": "0c5aa9e8-9d2e-4891-8239-a3ab7b841564"
+    "githubCredentialsId": "7178e311-bddf-4ce8-a99e-09a4f3b90669"
   },
   "createdAt": "2025-09-14T19:03:30.461Z",
-  "updatedAt": "2025-10-21T17:28:55.064Z",
+  "updatedAt": "2025-10-24T15:22:45.832Z",
   "codeInfo": {
     "language": "typescript",
     "framework": "electron",

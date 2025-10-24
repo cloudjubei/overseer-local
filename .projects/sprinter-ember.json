@@ -7,7 +7,7 @@
   "requirements": [],
   "metadata": {
     "icon": "chart-up",
-    "githubCredentialsId": "026119cd-3143-4750-94cb-6a010d8fe661"
+    "githubCredentialsId": "c7bd22e6-289e-4bdd-8e43-05e6ab05a652"
   },
   "codeInfo": {
     "language": "typescript",
@@ -19,5 +19,5 @@
     "42de2fcf-fd89-4f89-845c-855332bd651f": 2
   },
   "createdAt": "2025-10-09T22:29:20.873Z",
-  "updatedAt": "2025-10-21T11:49:59.521Z"
+  "updatedAt": "2025-10-24T15:23:00.876Z"
 }

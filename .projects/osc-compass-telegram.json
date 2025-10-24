@@ -7,7 +7,7 @@
   "requirements": [],
   "metadata": {
     "icon": "mobile",
-    "githubCredentialsId": "026119cd-3143-4750-94cb-6a010d8fe661"
+    "githubCredentialsId": "c7bd22e6-289e-4bdd-8e43-05e6ab05a652"
   },
   "storyIdToDisplayIndex": {
     "bcf7668d-58f6-4035-b695-0d1bcbe83aef": 1,
@@ -19,7 +19,7 @@
     "2a1623d8-03aa-410a-b7eb-dc768ec04414": 7
   },
   "createdAt": "2025-09-14T19:03:30.461Z",
-  "updatedAt": "2025-10-17T11:50:51.288Z",
+  "updatedAt": "2025-10-24T15:22:53.841Z",
   "codeInfo": {
     "language": "typescript",
     "framework": "node",

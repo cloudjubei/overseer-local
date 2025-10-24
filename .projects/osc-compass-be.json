@@ -7,7 +7,7 @@
   "requirements": [],
   "metadata": {
     "icon": "web",
-    "githubCredentialsId": "026119cd-3143-4750-94cb-6a010d8fe661"
+    "githubCredentialsId": "c7bd22e6-289e-4bdd-8e43-05e6ab05a652"
   },
   "storyIdToDisplayIndex": {
     "7d89a33c-fc59-4c54-a1e8-2cca8f032281": 1,
@@ -26,7 +26,7 @@
     "efbb2487-496f-4485-bdfc-0cd11818ad27": 14
   },
   "createdAt": "2025-09-14T19:03:30.461Z",
-  "updatedAt": "2025-10-16T19:17:18.049Z",
+  "updatedAt": "2025-10-24T15:22:50.198Z",
   "codeInfo": {
     "language": "typescript",
     "framework": "nest",
