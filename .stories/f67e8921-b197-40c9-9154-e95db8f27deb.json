@@ -2141,16 +2141,6 @@
       "completedAt": "2025-10-03T22:38:47.930Z"
     },
     {
-      "id": "f4c58b41-f321-4c7a-a4d3-247cc2eb157f",
-      "status": "?",
-      "title": "on clicking agent run start - sometimes all projects + stories disappear",
-      "description": "T",
-      "context": [],
-      "blockers": [],
-      "createdAt": "2025-10-03T21:35:49.978Z",
-      "updatedAt": "2025-10-05T19:09:56.834Z"
-    },
-    {
       "id": "64b6f2c1-f5b4-4ef5-b108-0d5f94857ad1",
       "status": "+",
       "title": "the title in modals isn't centered vertically with the close button",
@@ -2641,8 +2631,7 @@
     "67302df0-716b-46ed-aee1-828cb60373d2": 161,
     "dd9bb459-5225-4604-8d2f-6e50feaba098": 162,
     "c7a825c8-9791-4893-9b98-f89a9681e376": 163,
-    "8a6f2df4-3f7d-45da-b100-e216d46598e9": 164,
-    "f4c58b41-f321-4c7a-a4d3-247cc2eb157f": 165
+    "8a6f2df4-3f7d-45da-b100-e216d46598e9": 164
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
   "updatedAt": "2025-10-01T00:34:27.858Z"
