@@ -76,12 +76,13 @@
     },
     {
       "id": "da291627-6b44-4e5d-a19a-30d923410493",
-      "status": "-",
+      "status": "+",
       "title": "Expose GitManager Methods via IPC",
       "description": "Update `src/preload/ipcHandlersKeys.ts` to define a comprehensive set of IPC channels for Git operations. Ensure the following keys are present, adding them if they are missing: `GIT_TODO` (for fetching pending branches), `GIT_GET_BRANCH_DIFF_SUMMARY`, `GIT_GET_MERGE_PLAN`, `GIT_APPLY_MERGE`, and `GIT_GET_LOCAL_STATUS`. These keys will create a complete contract between the main and renderer processes for the required Git functionality.",
       "context": [],
       "createdAt": "2025-10-24T15:36:03.838Z",
-      "updatedAt": "2025-10-24T15:38:13.158Z"
+      "updatedAt": "2025-10-24T15:41:35.371Z",
+      "completedAt": "2025-10-24T15:41:35.371Z"
     },
     {
       "id": "39bc8bed-a411-4e3b-ac83-00da808e5a5c",

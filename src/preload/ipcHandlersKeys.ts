@@ -149,10 +149,12 @@ const IPC_HANDLER_KEYS = {
   DOCUMENT_INGESTION_PROJECT: 'document-ingestion:project',
 
   // GIT
+  GIT_TODO: 'git:todo',
   GIT_GET_MERGE_PLAN: 'git:get-merge-plan',
   GIT_BUILD_MERGE_REPORT: 'git:build-merge-report',
   GIT_APPLY_MERGE: 'git:apply-merge',
   GIT_GET_LOCAL_STATUS: 'git:get-local-status',
+  GIT_GET_BRANCH_DIFF_SUMMARY: 'git:get-branch-diff-summary',
   GIT_CREDENTIALS_SUBSCRIBE: 'git:credentials:subscribe',
   GIT_CREDENTIALS_LIST: 'git:credentials:list',
   GIT_CREDENTIALS_ADD: 'git:credentials:add',
