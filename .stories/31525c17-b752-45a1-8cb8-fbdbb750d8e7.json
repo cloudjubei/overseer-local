@@ -96,12 +96,13 @@
     },
     {
       "id": "b39ea9e9-306e-459c-9a8e-c17b277e2d5a",
-      "status": "-",
+      "status": "+",
       "title": "Connect Renderer Git Service to Main Process",
       "description": "Bridge the main and renderer processes. First, in `src/preload/index.ts`, update the `GIT_API` object to expose all the new Git methods, mapping them to their respective `IPC_HANDLER_KEYS`. Second, update the `GitService` type definition in `src/renderer/src/services/gitService.ts` to include the signatures for all the newly exposed methods, ensuring type safety in the renderer.",
       "context": [],
       "createdAt": "2025-10-24T15:36:03.840Z",
-      "updatedAt": "2025-10-24T15:38:13.160Z"
+      "updatedAt": "2025-10-24T15:45:51.531Z",
+      "completedAt": "2025-10-24T15:45:51.531Z"
     },
     {
       "id": "4bba9a50-5e90-45a4-b69e-55cec5d9c236",
