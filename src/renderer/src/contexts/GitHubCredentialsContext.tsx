@@ -1,6 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
-import type { GitHubCredentials } from '../services/credentialsService'
-import { credentialsService } from '../services/credentialsService'
+import type { GitHubCredentials } from '../services/gitCredentialsService'
+import { gitCredentialsService } from '../services/gitCredentialsService'
 
 export type GitHubCredentialsContextValue = {
   credentials: GitHubCredentials[]
@@ -17,7 +17,7 @@ export function GitHubCredentialsProvider({ children }: { children: React.ReactN
 
   const refresh = useCallback(async () => {
     try {
-      const list = await credentialsService.list()
+      const list = await gitCredentialsService.list()
       setCreds(list || [])
     } catch {
       setCreds([])
@@ -26,7 +26,7 @@ export function GitHubCredentialsProvider({ children }: { children: React.ReactN
 
   useEffect(() => {
     refresh()
-    const unsubscribe = credentialsService.subscribe(() => {
+    const unsubscribe = gitCredentialsService.subscribe(() => {
       refresh()
     })
     return () => unsubscribe?.()
@@ -34,7 +34,7 @@ export function GitHubCredentialsProvider({ children }: { children: React.ReactN
 
   const addCredentials = useCallback(
     async (c: Omit<GitHubCredentials, 'id'>) => {
-      await credentialsService.add(c)
+      await gitCredentialsService.add(c)
       await refresh()
     },
     [refresh],
@@ -42,7 +42,7 @@ export function GitHubCredentialsProvider({ children }: { children: React.ReactN
 
   const updateCredentials = useCallback(
     async (id: string, updates: Partial<GitHubCredentials>) => {
-      await credentialsService.update(id, updates)
+      await gitCredentialsService.update(id, updates)
       await refresh()
     },
     [refresh],
@@ -50,7 +50,7 @@ export function GitHubCredentialsProvider({ children }: { children: React.ReactN
 
   const removeCredentials = useCallback(
     async (id: string) => {
-      await credentialsService.remove(id)
+      await gitCredentialsService.remove(id)
       await refresh()
     },
     [refresh],

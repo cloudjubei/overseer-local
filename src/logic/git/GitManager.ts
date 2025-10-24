@@ -4,7 +4,7 @@ import { GitTools, createGitTools } from 'thefactory-tools'
 import ProjectsManager from '../projects/ProjectsManager'
 import Mutex from '../utils/Mutex'
 import BaseManager from '../BaseManager'
-import CredentialsManager from './CredentialsManager'
+import GitCredentialsManager from './GitCredentialsManager'
 import type {
   StoryResolver,
   WorkspaceReport,
@@ -37,13 +37,18 @@ export default class GitManager extends BaseManager {
   private toolsLock = new Mutex()
   private tools: Record<string, GitTools> = {}
   private projectsManager: ProjectsManager
-  private credentialsManager: CredentialsManager
+  private gitCredentialsManager: GitCredentialsManager
 
-  constructor(projectRoot: string, window: BrowserWindow, projectsManager: ProjectsManager, credentialsManager: CredentialsManager) {
+  constructor(
+    projectRoot: string,
+    window: BrowserWindow,
+    projectsManager: ProjectsManager,
+    credentialsManager: GitCredentialsManager,
+  ) {
     super(projectRoot, window)
 
     this.projectsManager = projectsManager
-    this.credentialsManager = credentialsManager
+    this.gitCredentialsManager = credentialsManager
   }
 
   async init(): Promise<void> {
@@ -172,9 +177,7 @@ export default class GitManager extends BaseManager {
     return /^features\/[0-9a-fA-F-]{36}(\.[^\s\/]+)?$/.test(name)
   }
 
-  private extractStoryFromBranch(
-    name: string,
-  ): { storyId?: string; featureId?: string } {
+  private extractStoryFromBranch(name: string): { storyId?: string; featureId?: string } {
     const m = name.match(/^features\/([0-9a-fA-F-]{36})(?:\.([^\s\/]+))?$/)
     if (!m) return {}
     const [, storyId, featureId] = m
@@ -193,7 +196,7 @@ export default class GitManager extends BaseManager {
     // @ts-ignore repo url field name from thefactory-tools' ProjectSpec
     const repoUrl = (project as any).repo_url || (project as any).repoUrl
 
-    const githubCredentials = this.credentialsManager.getDefault()
+    const githubCredentials = this.gitCredentialsManager.getDefault()
     if (!githubCredentials) {
       return
     }

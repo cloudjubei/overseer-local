@@ -12,13 +12,7 @@ export type GitHubCredentials = {
   token: string
 }
 
-/**
- * CredentialsManager
- * - Stores GitHub credentials in main process using AppStorage under 'credentials'.
- * - Exposes CRUD over IPC and a subscription channel for changes.
- * - IMPORTANT: Tokens remain in main process storage; renderer only receives values via explicit calls.
- */
-export default class CredentialsManager extends BaseManager {
+export default class GitCredentialsManager extends BaseManager {
   private storage: AppStorage
   private cache: GitHubCredentials[]
 
@@ -29,51 +23,15 @@ export default class CredentialsManager extends BaseManager {
   }
 
   async init(): Promise<void> {
-    // preload any defaults or migrations if needed
     await super.init()
   }
-
-  private __storageKey() {
-    return 'github_credentials'
-  }
-
-  private __load(): GitHubCredentials[] {
-    try {
-      const raw = this.storage.getItem(this.__storageKey())
-      const parsed = raw ? JSON.parse(raw) : []
-      return Array.isArray(parsed) ? parsed : []
-    } catch (e) {
-      return []
-    }
-  }
-
-  private __persist(next: GitHubCredentials[]): void {
-    try {
-      this.storage.setItem(this.__storageKey(), JSON.stringify(next))
-      this.cache = next
-      this._broadcast()
-    } catch (e) {
-      console.error('Failed to persist credentials:', e)
-    }
-  }
-
-  private _broadcast(): void {
-    try {
-      if (this.window && !this.window.isDestroyed()) {
-        this.window.webContents.send(IPC_HANDLER_KEYS.CREDENTIALS_SUBSCRIBE, {})
-      }
-    } catch (_) {
-      // ignore
-    }
-  }
-
   getHandlers(): Record<string, (args: any) => any> {
     const handlers: Record<string, (args: any) => any> = {}
 
-    handlers[IPC_HANDLER_KEYS.CREDENTIALS_LIST] = () => this.list()
-    handlers[IPC_HANDLER_KEYS.CREDENTIALS_ADD] = ({ input }) => this.add(input)
-    handlers[IPC_HANDLER_KEYS.CREDENTIALS_UPDATE] = ({ id, patch }) => this.update(id, patch)
-    handlers[IPC_HANDLER_KEYS.CREDENTIALS_REMOVE] = ({ id }) => this.remove(id)
+    handlers[IPC_HANDLER_KEYS.GIT_CREDENTIALS_LIST] = () => this.list()
+    handlers[IPC_HANDLER_KEYS.GIT_CREDENTIALS_ADD] = ({ input }) => this.add(input)
+    handlers[IPC_HANDLER_KEYS.GIT_CREDENTIALS_UPDATE] = ({ id, patch }) => this.update(id, patch)
+    handlers[IPC_HANDLER_KEYS.GIT_CREDENTIALS_REMOVE] = ({ id }) => this.remove(id)
 
     return handlers
   }
@@ -107,5 +65,39 @@ export default class CredentialsManager extends BaseManager {
   /** Convenience: return the first credential, used as default when no mapping is configured */
   getDefault(): GitHubCredentials | undefined {
     return this.cache[0]
+  }
+
+  private __storageKey() {
+    return 'github_credentials'
+  }
+
+  private __load(): GitHubCredentials[] {
+    try {
+      const raw = this.storage.getItem(this.__storageKey())
+      const parsed = raw ? JSON.parse(raw) : []
+      return Array.isArray(parsed) ? parsed : []
+    } catch (e) {
+      return []
+    }
+  }
+
+  private __persist(next: GitHubCredentials[]): void {
+    try {
+      this.storage.setItem(this.__storageKey(), JSON.stringify(next))
+      this.cache = next
+      this._broadcast()
+    } catch (e) {
+      console.error('Failed to persist credentials:', e)
+    }
+  }
+
+  private _broadcast(): void {
+    try {
+      if (this.window && !this.window.isDestroyed()) {
+        this.window.webContents.send(IPC_HANDLER_KEYS.GIT_CREDENTIALS_SUBSCRIBE, {})
+      }
+    } catch (_) {
+      // ignore
+    }
   }
 }

@@ -153,13 +153,11 @@ const IPC_HANDLER_KEYS = {
   GIT_BUILD_MERGE_REPORT: 'git:build-merge-report',
   GIT_APPLY_MERGE: 'git:apply-merge',
   GIT_GET_LOCAL_STATUS: 'git:get-local-status',
-
-  // Credentials (GitHub)
-  CREDENTIALS_SUBSCRIBE: 'credentials:subscribe',
-  CREDENTIALS_LIST: 'credentials:list',
-  CREDENTIALS_ADD: 'credentials:add',
-  CREDENTIALS_UPDATE: 'credentials:update',
-  CREDENTIALS_REMOVE: 'credentials:remove',
+  GIT_CREDENTIALS_SUBSCRIBE: 'git:credentials:subscribe',
+  GIT_CREDENTIALS_LIST: 'git:credentials:list',
+  GIT_CREDENTIALS_ADD: 'git:credentials:add',
+  GIT_CREDENTIALS_UPDATE: 'git:credentials:update',
+  GIT_CREDENTIALS_REMOVE: 'git:credentials:remove',
 }
 
 export default IPC_HANDLER_KEYS

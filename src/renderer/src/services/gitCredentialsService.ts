@@ -6,7 +6,7 @@ export type GitHubCredentials = {
   token: string
 }
 
-export type CredentialsService = {
+export type GitCredentialsService = {
   subscribe: (callback: () => void) => () => void
   list: () => Promise<GitHubCredentials[]>
   add: (input: Omit<GitHubCredentials, 'id'>) => Promise<GitHubCredentials>
@@ -14,4 +14,4 @@ export type CredentialsService = {
   remove: (id: string) => Promise<void>
 }
 
-export const credentialsService: CredentialsService = { ...window.credentialsService }
+export const gitCredentialsService: GitCredentialsService = { ...window.gitCredentialsService }
