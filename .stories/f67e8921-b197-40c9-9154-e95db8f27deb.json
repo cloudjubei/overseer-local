@@ -2260,8 +2260,7 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-16T17:47:54.765Z",
-      "updatedAt": "2025-10-22T12:43:51.761Z",
-      "rejection": "Now there's a different issue - the fix works. But now when the user is reading  what the assistant wrote, and a new message comes in, it takes the user down - it shouldn't because the user is still reading. So it should only do the full bottom scroll on chat open and if the user is close to the bottom and the spinner shows.\nWhen a new unread message comes in, it should not scroll either, because the user will be reading it from the top.",
+      "updatedAt": "2025-10-27T16:24:14.995Z",
       "completedAt": "2025-10-22T12:43:51.761Z"
     },
     {
