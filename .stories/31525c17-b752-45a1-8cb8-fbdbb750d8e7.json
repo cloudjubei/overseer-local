@@ -247,7 +247,7 @@
         "src/renderer/src/components/ui/icons/Icons.tsx"
       ],
       "createdAt": "2025-10-27T16:13:12.147Z",
-      "updatedAt": "2025-10-27T22:03:18.148Z",
+      "updatedAt": "2025-10-27T22:38:54.956Z",
       "rejection": "The icon @src/renderer/src/components/ui/icons/IconFastMerge.tsx MUST be updated to match the color/style of the other icons. Follow @docs/design/MONDAY_PALETTE_REFERENCE.md and @docs/design/DESIGN_SYSTEM.md  and @docs/design/COMPONENTS.md .\nRight now it's black - it needs to be vibrant and colorful like the other icons used in @src/renderer/src/components/ui/icons/Icons.tsx .",
       "blockers": []
     },
@@ -255,10 +255,13 @@
       "id": "ad99e5f3-073f-4cf8-a679-828c97bb2c97",
       "status": "-",
       "title": "Replace 'eye' button with hover tooltip for branch details in Git View",
-      "description": "In @src/renderer/src/screens/GitView.tsx, the 'eye' icon button for viewing branch details should be removed. Instead, a tooltip containing the same information should appear when a user hovers over the branch row. This will make the UI cleaner and the information more accessible.",
-      "context": [],
+      "description": "In @src/renderer/src/screens/GitView.tsx, the 'eye' icon button for viewing branch details should be removed. Instead, a tooltip containing the same information should appear when a user hovers over the branch row. This will make the UI cleaner and the information more accessible.\nIt must be always possible to click the row to open up the @src/renderer/src/screens/git/GitMergeModal.tsx .",
+      "context": [
+        "src/renderer/src/screens/git/GitMergeModal.tsx"
+      ],
       "createdAt": "2025-10-27T21:58:01.075Z",
-      "updatedAt": "2025-10-27T21:58:01.075Z"
+      "updatedAt": "2025-10-27T22:39:18.138Z",
+      "blockers": []
     },
     {
       "id": "0bd09bd2-6a09-43c7-9aff-b67cf3ee24c8",
@@ -268,24 +271,6 @@
       "context": [],
       "createdAt": "2025-10-27T21:58:01.076Z",
       "updatedAt": "2025-10-27T21:58:01.076Z"
-    },
-    {
-      "id": "6f94be27-86d0-4041-99e3-3f23f18f1523",
-      "status": "-",
-      "title": "Clean raw diff output by removing Git headers",
-      "description": "The raw diff output contains Git metadata headers (e.g., `diff --git`, `index`, `---`, `+++`, `@@ ... @@`) that are not user-friendly. These should be stripped before displaying the diff. An investigation should be done to see if this is an issue with `thefactory-tools`. If so, a feature request should be logged in `docs/GIT_BETTER_DIFFS.md` to request structured diff data or a cleaning utility from the library.",
-      "context": [],
-      "createdAt": "2025-10-27T21:58:01.077Z",
-      "updatedAt": "2025-10-27T21:58:01.077Z"
-    },
-    {
-      "id": "1df82259-4c72-4255-bc90-3d7ffa799ad4",
-      "status": "-",
-      "title": "Implement hunk-based diff viewer for file changes",
-      "description": "Mimic the UI/UX of applications like SourceTree by displaying file diffs in 'hunks'. Instead of showing the entire file, the view should only render the modified lines, accompanied by a small amount of context (e.g., 3 lines) above and below each change. When multiple modifications are close together, they should be presented as a single, continuous block to improve readability and focus.",
-      "context": [],
-      "createdAt": "2025-10-27T21:58:01.078Z",
-      "updatedAt": "2025-10-27T21:58:01.078Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -313,9 +298,7 @@
     "bfa3d487-d173-4126-9789-68bb323dac38": 22,
     "8ca56f99-3f26-4f70-8dd2-d2dcf73b75b8": 23,
     "ad99e5f3-073f-4cf8-a679-828c97bb2c97": 24,
-    "0bd09bd2-6a09-43c7-9aff-b67cf3ee24c8": 25,
-    "6f94be27-86d0-4041-99e3-3f23f18f1523": 26,
-    "1df82259-4c72-4255-bc90-3d7ffa799ad4": 27
+    "0bd09bd2-6a09-43c7-9aff-b67cf3ee24c8": 25
   },
   "createdAt": "2025-10-21T17:28:55.063Z",
   "updatedAt": "2025-10-27T09:51:40.369Z"
