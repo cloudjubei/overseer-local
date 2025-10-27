@@ -207,12 +207,13 @@
     },
     {
       "id": "0aaa0980-1b83-4fcf-ad5e-ffaf1f60bbc8",
-      "status": "-",
+      "status": "+",
       "title": "Enhance Merge Button with Icon and Tooltip",
       "description": "Update the main merge button in the Git Merge Modal. Add a tooltip that clearly states 'Fast merge (fast-forward if possible)'. The button should also display a `GitMerge` icon from the `lucide-react` library to the left of the 'Merge' text for better visual identification.",
       "context": [],
       "createdAt": "2025-10-27T16:06:12.502Z",
-      "updatedAt": "2025-10-27T16:06:12.502Z"
+      "updatedAt": "2025-10-27T16:28:08.152Z",
+      "completedAt": "2025-10-27T16:28:08.152Z"
     },
     {
       "id": "54ca5933-b89b-4392-8250-aaf479dfedc0",

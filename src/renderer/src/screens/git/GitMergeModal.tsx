@@ -14,6 +14,8 @@ import SegmentedControl from '@renderer/components/ui/SegmentedControl'
 import { factoryTestsService } from '@renderer/services/factoryTestsService'
 import { gitService } from '@renderer/services/gitService'
 import { IconEye } from '@renderer/components/ui/icons/Icons'
+import Tooltip from '@renderer/components/ui/Tooltip'
+import { GitMerge as LucideGitMerge } from 'lucide-react'
 
 export type GitMergeModalProps = {
   projectId: string
@@ -481,9 +483,14 @@ export default function GitMergeModal(props: GitMergeModalProps) {
         <Button onClick={onRequestClose} variant="secondary">
           Close
         </Button>
-        <Button onClick={onMerge} loading={merging} disabled={merging}>
-          {merging ? 'Merging…' : 'Merge'}
-        </Button>
+        <Tooltip content={'Fast merge (fast-forward if possible)'} placement="top">
+          <Button onClick={onMerge} loading={merging} disabled={merging}>
+            <span className="inline-flex items-center gap-2">
+              <LucideGitMerge className="w-4 h-4" />
+              {merging ? 'Merging…' : 'Merge'}
+            </span>
+          </Button>
+        </Tooltip>
       </div>
     </div>
   )
