@@ -254,15 +254,16 @@
     },
     {
       "id": "ad99e5f3-073f-4cf8-a679-828c97bb2c97",
-      "status": "-",
+      "status": "+",
       "title": "Replace 'eye' button with hover tooltip for branch details in Git View",
       "description": "In @src/renderer/src/screens/GitView.tsx, the 'eye' icon button for viewing branch details should be removed. Instead, a tooltip containing the same information should appear when a user hovers over the branch row. This will make the UI cleaner and the information more accessible.\nIt must be always possible to click the row to open up the @src/renderer/src/screens/git/GitMergeModal.tsx .",
       "context": [
         "src/renderer/src/screens/git/GitMergeModal.tsx"
       ],
       "createdAt": "2025-10-27T21:58:01.075Z",
-      "updatedAt": "2025-10-27T22:39:18.138Z",
-      "blockers": []
+      "updatedAt": "2025-10-27T22:44:28.283Z",
+      "blockers": [],
+      "completedAt": "2025-10-27T22:44:28.283Z"
     },
     {
       "id": "0bd09bd2-6a09-43c7-9aff-b67cf3ee24c8",

@@ -8,7 +8,6 @@ import { Button } from '../components/ui/Button'
 import Tooltip from '../components/ui/Tooltip'
 import { IconFastMerge } from '../components/ui/icons/IconFastMerge'
 import { IconDelete } from '../components/ui/icons/IconDelete'
-import { IconEye } from '../components/ui/icons/IconEye'
 import { gitService } from '@renderer/services/gitService'
 
 function PendingItem({ item, projectTitle }: { item: any; projectTitle?: string }) {
@@ -89,7 +88,7 @@ function PendingItem({ item, projectTitle }: { item: any; projectTitle?: string 
     }
   }
 
-  return (
+  const row = (
     <div
       className="flex items-center justify-between px-3 py-2 border-b border-neutral-100 dark:border-neutral-900 text-sm hover:bg-neutral-50 dark:hover:bg-neutral-900/30 cursor-pointer"
       role="button"
@@ -104,6 +103,10 @@ function PendingItem({ item, projectTitle }: { item: any; projectTitle?: string 
           featureId: item.featureId,
         })
       }
+      onMouseEnter={() => {
+        // Preload summary when hovering over the row
+        void loadSummary()
+      }}
     >
       <div className="min-w-0">
         <div className="font-medium truncate">{item.branch}</div>
@@ -119,32 +122,7 @@ function PendingItem({ item, projectTitle }: { item: any; projectTitle?: string 
       <div className="shrink-0 flex items-center gap-3">
         <div className="text-xs text-neutral-700 dark:text-neutral-300">{aheadBehind}</div>
         <div className="flex items-center gap-1.5">
-          <Tooltip
-            content={
-              <div className="whitespace-pre text-xs">
-                {summary.error ? (
-                  <div className="text-red-600 dark:text-red-400">{summary.error}</div>
-                ) : summary.text ? (
-                  summary.text
-                ) : (
-                  'Loading…'
-                )}
-              </div>
-            }
-            placement="bottom"
-          >
-            <span
-              onMouseEnter={() => {
-                // Preload summary when hovering
-                loadSummary()
-              }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <Button variant="ghost" size="icon" aria-label="View changes">
-                <IconEye className="w-4 h-4" />
-              </Button>
-            </span>
-          </Tooltip>
+          {/* Eye button removed; tooltip now appears when hovering the row */}
           <Tooltip content="fast merge" placement="bottom">
             <span onClick={(e) => e.stopPropagation()}>
               <Button
@@ -172,6 +150,27 @@ function PendingItem({ item, projectTitle }: { item: any; projectTitle?: string 
         </div>
       </div>
     </div>
+  )
+
+  return (
+    <Tooltip
+      content={
+        <div className="whitespace-pre text-xs">
+          {summary.error ? (
+            <div className="text-red-600 dark:text-red-400">{summary.error}</div>
+          ) : summary.text ? (
+            summary.text
+          ) : (
+            'Loading…'
+          )}
+        </div>
+      }
+      placement="bottom"
+      anchorAs="div"
+      disableClickToggle
+    >
+      {row}
+    </Tooltip>
   )
 }
 

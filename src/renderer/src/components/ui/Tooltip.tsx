@@ -7,6 +7,11 @@ export type TooltipProps = {
   placement?: 'top' | 'bottom' | 'left' | 'right'
   delayMs?: number
   disabled?: boolean
+  // New: allow customizing anchor element and behavior
+  anchorAs?: keyof JSX.IntrinsicElements
+  anchorClassName?: string
+  anchorStyle?: React.CSSProperties
+  disableClickToggle?: boolean
 }
 
 export default function Tooltip({
@@ -15,12 +20,16 @@ export default function Tooltip({
   placement = 'right',
   delayMs = 300,
   disabled = false,
+  anchorAs = 'span',
+  anchorClassName,
+  anchorStyle,
+  disableClickToggle = false,
 }: TooltipProps) {
   const [open, setOpen] = useState(false)
   const [position, setPosition] = useState<{ top: number; left: number } | null>(null)
   const timerRef = useRef<number | null>(null)
   const hideTimerRef = useRef<number | null>(null)
-  const anchorRef = useRef<HTMLSpanElement | null>(null)
+  const anchorRef = useRef<HTMLElement | null>(null)
   const tooltipRef = useRef<HTMLDivElement | null>(null)
   const tooltipId = useId()
 
@@ -186,26 +195,30 @@ export default function Tooltip({
     }
   }, [open])
 
+  const AnchorTag: any = anchorAs as any
+
   return (
     <>
-      <span
-        ref={anchorRef}
+      <AnchorTag
+        ref={anchorRef as any}
         onMouseEnter={() => show()}
         onMouseLeave={() => hide()}
         onFocus={() => show(true)}
         onBlur={() => hide(true)}
-        onKeyDown={(e) => {
+        onKeyDown={(e: any) => {
           if (e.key === 'Escape') hide(true)
         }}
         onClick={() => {
-          if (disabled) return
+          if (disabled || disableClickToggle) return
           setOpen((v) => !v)
         }}
         aria-describedby={open ? tooltipId : undefined}
         aria-expanded={open ? true : undefined}
+        className={anchorClassName}
+        style={anchorStyle}
       >
         {children}
-      </span>
+      </AnchorTag>
       {open &&
         !disabled &&
         position &&
