@@ -235,7 +235,7 @@
     },
     {
       "id": "8ca56f99-3f26-4f70-8dd2-d2dcf73b75b8",
-      "status": "-",
+      "status": "+",
       "title": "Enhance Merge Button with Icon and Tooltip",
       "description": "Update the fast merge button in the @src/renderer/src/screens/GitView.tsx . Add a tooltip that clearly states 'fast merge'. The button should also display an icon with an arrow originating from two dots and a tick for better visual identification.",
       "context": [
@@ -247,9 +247,10 @@
         "src/renderer/src/components/ui/icons/Icons.tsx"
       ],
       "createdAt": "2025-10-27T16:13:12.147Z",
-      "updatedAt": "2025-10-27T22:38:54.956Z",
+      "updatedAt": "2025-10-27T22:41:13.152Z",
       "rejection": "The icon @src/renderer/src/components/ui/icons/IconFastMerge.tsx MUST be updated to match the color/style of the other icons. Follow @docs/design/MONDAY_PALETTE_REFERENCE.md and @docs/design/DESIGN_SYSTEM.md  and @docs/design/COMPONENTS.md .\nRight now it's black - it needs to be vibrant and colorful like the other icons used in @src/renderer/src/components/ui/icons/Icons.tsx .",
-      "blockers": []
+      "blockers": [],
+      "completedAt": "2025-10-27T22:41:13.152Z"
     },
     {
       "id": "ad99e5f3-073f-4cf8-a679-828c97bb2c97",
