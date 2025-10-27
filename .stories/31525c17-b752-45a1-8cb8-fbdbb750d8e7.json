@@ -147,12 +147,13 @@
     },
     {
       "id": "6edc73b1-b1fa-4541-9d45-a71128a2e775",
-      "status": "-",
+      "status": "+",
       "title": "Refactor GitMergeModal to Use GitContext",
       "description": "The `GitMergeModal.tsx` component at '@src/renderer/src/screens/git/GitMergeModal.tsx' currently interacts directly with `gitService`. This should be refactored to use the `GitContext` for all Git operations and state management, aligning it with the application's architecture.",
       "context": [],
       "createdAt": "2025-10-27T14:22:25.556Z",
-      "updatedAt": "2025-10-27T14:22:25.556Z"
+      "updatedAt": "2025-10-27T14:37:33.760Z",
+      "completedAt": "2025-10-27T14:37:33.760Z"
     },
     {
       "id": "85ba3de7-7c40-4e6f-ac77-8f7f9ce2ad35",

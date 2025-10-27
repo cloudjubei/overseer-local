@@ -3,7 +3,8 @@ import { Modal } from '@renderer/components/ui/Modal'
 import Spinner from '@renderer/components/ui/Spinner'
 import { Button } from '@renderer/components/ui/Button'
 import { useProjectContext } from '@renderer/contexts/ProjectContext'
-import { MergeReport } from 'thefactory-tools'
+import { MergeReport, MergeReportFile } from 'thefactory-tools'
+import { useGit } from '@renderer/contexts/GitContext'
 
 export type GitMergeModalProps = {
   projectId: string
@@ -13,45 +14,6 @@ export type GitMergeModalProps = {
   storyId?: string
   featureId?: string
   onRequestClose: () => void
-}
-
-// Attempt to call optional renderer-provided git service methods without hard dependency
-async function tryBuildMergeReport(args: {
-  projectId: string
-  repoPath: string
-  baseRef: string
-  sources: string[]
-  includePatch?: boolean
-}): Promise<MergeReport | undefined> {
-  const anyWin: any = window as any
-  const svc = anyWin.gitService
-  if (!svc) return undefined
-  try {
-    // Prefer buildMergeReport(plan) path via getMergePlan + buildMergeReport if available
-    if (typeof svc.getMergePlan === 'function' && typeof svc.buildMergeReport === 'function') {
-      const plan = await svc.getMergePlan(args.projectId, {
-        sources: args.sources,
-        baseRef: args.baseRef,
-        includePatch: true,
-      })
-      const report = await svc.buildMergeReport(args.projectId, plan, { includePatch: true })
-      return report as MergeReport
-    }
-    // Fallback: direct helper if exposed
-    if (typeof svc.buildMergeReport === 'function') {
-      const report = await svc.buildMergeReport(args.projectId, {
-        repoPath: args.repoPath,
-        baseRef: args.baseRef,
-        sources: args.sources,
-        includePatch: true,
-      })
-      return report as MergeReport
-    }
-  } catch (e) {
-    console.warn('git merge report unavailable:', e)
-    return undefined
-  }
-  return undefined
 }
 
 function FileDiffItem({ file }: { file: MergeReportFile }) {
@@ -89,6 +51,7 @@ export default function GitMergeModal(props: GitMergeModalProps) {
   const { onRequestClose, projectId, repoPath, baseRef, branch, storyId, featureId } = props
   const { getProjectById } = useProjectContext()
   const project = getProjectById(projectId)
+  const { getMergePlanOn, buildMergeReportOn } = useGit()
 
   const [loading, setLoading] = React.useState(true)
   const [report, setReport] = React.useState<MergeReport | undefined>(undefined)
@@ -99,25 +62,28 @@ export default function GitMergeModal(props: GitMergeModalProps) {
     ;(async () => {
       setLoading(true)
       setError(undefined)
-      const rep = await tryBuildMergeReport({
-        projectId,
-        repoPath,
-        baseRef,
-        sources: [branch],
-        includePatch: true,
-      })
-      if (!mounted) return
-      setReport(rep)
-      setLoading(false)
-    })().catch((e) => {
-      if (!mounted) return
-      setError(e?.message || String(e))
-      setLoading(false)
-    })
+      try {
+        const plan = await getMergePlanOn(projectId, {
+          sources: [branch],
+          baseRef,
+          includePatch: true,
+        })
+        const rep = await buildMergeReportOn(projectId, plan, { includePatch: true })
+        if (!mounted) return
+        setReport(rep)
+      } catch (e: any) {
+        if (!mounted) return
+        console.warn('git merge report unavailable:', e)
+        setError(e?.message || String(e))
+        setReport(undefined)
+      } finally {
+        if (mounted) setLoading(false)
+      }
+    })()
     return () => {
       mounted = false
     }
-  }, [projectId, repoPath, baseRef, branch])
+  }, [projectId, repoPath, baseRef, branch, getMergePlanOn, buildMergeReportOn])
 
   const header = (
     <div className="flex items-center gap-3">

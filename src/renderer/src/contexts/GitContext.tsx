@@ -63,6 +63,17 @@ export type GitContextValue = {
     options: { baseRef: string; headRef: string; includePatch?: boolean },
   ) => Promise<DiffSummary>
   deleteBranchOn: (projectId: string, name: string) => Promise<{ ok: boolean; error?: string }>
+
+  // Newly added project-scoped helpers for planning/reporting
+  getMergePlanOn: (
+    projectId: string,
+    options: Omit<MergePlanOptions, 'repoPath'>,
+  ) => Promise<MergePlan>
+  buildMergeReportOn: (
+    projectId: string,
+    planOrOptions: MergePlan | Omit<MergePlanOptions, 'repoPath'>,
+    options?: BuildMergeReportOptions,
+  ) => Promise<MergeReport>
 }
 
 const GitContext = createContext<GitContextValue | null>(null)
@@ -132,6 +143,22 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
   )
   const deleteBranchOn = useCallback(
     (projectId: string, name: string) => gitService.deleteBranch(projectId, name),
+    [],
+  )
+
+  // newly added project-scoped helpers for planning/reporting
+  const getMergePlanOn = useCallback(
+    (projectId: string, options: Omit<MergePlanOptions, 'repoPath'>) =>
+      gitService.getMergePlan(projectId, options),
+    [],
+  )
+
+  const buildMergeReportOn = useCallback(
+    (
+      projectId: string,
+      planOrOptions: MergePlan | Omit<MergePlanOptions, 'repoPath'>,
+      options?: BuildMergeReportOptions,
+    ) => gitService.buildMergeReport(projectId, planOrOptions, options),
     [],
   )
 
@@ -238,6 +265,8 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
       applyMergeOn,
       getBranchDiffSummaryOn,
       deleteBranchOn,
+      getMergePlanOn,
+      buildMergeReportOn,
     }),
     [
       loading,
@@ -254,6 +283,8 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
       applyMergeOn,
       getBranchDiffSummaryOn,
       deleteBranchOn,
+      getMergePlanOn,
+      buildMergeReportOn,
     ],
   )
 
