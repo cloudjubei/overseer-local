@@ -43,7 +43,7 @@ function PendingItem({ item, projectTitle }: { item: any; projectTitle?: string 
 }
 
 function CurrentProjectView() {
-  const { loading, error } = useGit()
+  const { loading, error, currentProject, refresh } = useGit()
   const { activeProject } = useProjectContext()
   const title = activeProject?.title
 
