@@ -73,6 +73,7 @@ export default function ModalHost() {
           branch={modal.branch}
           storyId={modal.storyId}
           featureId={modal.featureId}
+          openConfirm={modal.openConfirm}
           onRequestClose={closeModal}
         />
       )

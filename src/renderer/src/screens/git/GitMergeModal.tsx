@@ -16,6 +16,7 @@ import { gitService } from '@renderer/services/gitService'
 import { IconFastMerge } from '@renderer/components/ui/icons/Icons'
 import { IconChevron } from '@renderer/components/ui/icons/IconChevron'
 import Tooltip from '@renderer/components/ui/Tooltip'
+import { useGit } from '@renderer/contexts/GitContext'
 
 export type GitMergeModalProps = {
   projectId: string
@@ -24,6 +25,7 @@ export type GitMergeModalProps = {
   branch: string
   storyId?: string
   featureId?: string
+  openConfirm?: boolean
   onRequestClose: () => void
 }
 
@@ -194,30 +196,13 @@ function ProgressBar({ value }: { value: number }) {
   )
 }
 
-// Local storage helpers for persistent options
-const LS_KEYS = {
-  autoPush: 'git.merge.autoPush',
-  deleteRemote: 'git.merge.deleteRemoteBranch',
-}
-function readBoolLS(key: string, fallback = false): boolean {
-  try {
-    const raw = localStorage.getItem(key)
-    if (raw === null) return fallback
-    return raw === 'true'
-  } catch {
-    return fallback
-  }
-}
-function writeBoolLS(key: string, value: boolean) {
-  try {
-    localStorage.setItem(key, value ? 'true' : 'false')
-  } catch {}
-}
-
 // ============ Main component ============
 export default function GitMergeModal(props: GitMergeModalProps) {
-  const { onRequestClose, projectId, repoPath, baseRef, branch, storyId, featureId } = props
+  const { onRequestClose, projectId, repoPath, baseRef, branch, storyId, featureId, openConfirm } = props
   const { getProjectById } = useProjectContext()
+  const { mergePreferences } = useGit()
+  const { autoPush, deleteRemote, setAutoPush, setDeleteRemote } = mergePreferences
+
   const project = getProjectById(projectId)
 
   const [loading, setLoading] = React.useState(true)
@@ -233,14 +218,8 @@ export default function GitMergeModal(props: GitMergeModalProps) {
   const [postActionRunning, setPostActionRunning] = React.useState(false)
   const [postActionError, setPostActionError] = React.useState<string | undefined>(undefined)
 
-  // Confirmation dialog state and persisted options
-  const [confirmOpen, setConfirmOpen] = React.useState(false)
-  const [autoPush, setAutoPush] = React.useState<boolean>(() => readBoolLS(LS_KEYS.autoPush, false))
-  const [deleteRemote, setDeleteRemote] = React.useState<boolean>(() =>
-    readBoolLS(LS_KEYS.deleteRemote, false),
-  )
-  React.useEffect(() => writeBoolLS(LS_KEYS.autoPush, autoPush), [autoPush])
-  React.useEffect(() => writeBoolLS(LS_KEYS.deleteRemote, deleteRemote), [deleteRemote])
+  // Confirmation dialog state (initial from prop)
+  const [confirmOpen, setConfirmOpen] = React.useState<boolean>(!!openConfirm)
 
   // Unified tab state (includes Changes)
   const [activeTab, setActiveTab] = React.useState<

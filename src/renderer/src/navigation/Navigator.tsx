@@ -29,6 +29,7 @@ export type ModalRoute =
       branch: string
       storyId?: string
       featureId?: string
+      openConfirm?: boolean
     }
 
 export type NavigatorState = {

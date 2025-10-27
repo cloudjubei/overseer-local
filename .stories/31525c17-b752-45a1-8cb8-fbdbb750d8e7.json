@@ -210,7 +210,7 @@
     },
     {
       "id": "54ca5933-b89b-4392-8250-aaf479dfedc0",
-      "status": "-",
+      "status": "+",
       "title": "Implement Pre-Merge Confirmation Dialog with Push/Delete Options",
       "description": "When a user clicks the 'Merge' button in the Git Merge Modal, display a confirmation dialog. This dialog should summarize the changes and provide two persistent options: 1) 'Automatically push to origin' and 2) 'Delete remote branch after merge'. The state of these checkboxes should be saved locally. If checked, the corresponding Git operations should be executed after a successful merge.",
       "context": [
@@ -218,9 +218,10 @@
         "src/renderer/src/contexts/GitContext.tsx"
       ],
       "createdAt": "2025-10-27T16:11:00.852Z",
-      "updatedAt": "2025-10-27T18:20:46.781Z",
+      "updatedAt": "2025-10-27T18:30:07.219Z",
       "rejection": "This dialog should also appear for the \"Fast Merge\" button in @src/renderer/src/screens/GitView.tsx .\nMore importantly tho - the saving of the preference logic should be inside @src/renderer/src/contexts/GitContext.tsx .",
-      "blockers": []
+      "blockers": [],
+      "completedAt": "2025-10-27T18:30:07.219Z"
     },
     {
       "id": "bfa3d487-d173-4126-9789-68bb323dac38",

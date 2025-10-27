@@ -26,41 +26,17 @@ function PendingItem({ item, projectTitle }: { item: any; projectTitle?: string 
 
   const onQuickMerge = async (e: React.MouseEvent) => {
     e.stopPropagation()
-    if (merging) return
-    setMerging(true)
-    try {
-      const res = await gitService.applyMerge(item.projectId, {
-        sources: [item.branch],
-        baseRef: item.baseRef,
-        allowFastForward: true,
-      })
-      if (!res?.ok || (res?.conflicts && res.conflicts.length > 0)) {
-        // Open full merge modal to resolve
-        openModal({
-          type: 'git-merge',
-          projectId: item.projectId,
-          repoPath: item.repoPath,
-          baseRef: item.baseRef,
-          branch: item.branch,
-          storyId: item.storyId,
-          featureId: item.featureId,
-        })
-      }
-    } catch (err) {
-      console.error('Quick merge failed', err)
-      // On error, open the merge modal for more context
-      openModal({
-        type: 'git-merge',
-        projectId: item.projectId,
-        repoPath: item.repoPath,
-        baseRef: item.baseRef,
-        branch: item.branch,
-        storyId: item.storyId,
-        featureId: item.featureId,
-      })
-    } finally {
-      setMerging(false)
-    }
+    // Open merge modal with confirmation dialog pre-opened
+    openModal({
+      type: 'git-merge',
+      projectId: item.projectId,
+      repoPath: item.repoPath,
+      baseRef: item.baseRef,
+      branch: item.branch,
+      storyId: item.storyId,
+      featureId: item.featureId,
+      openConfirm: true,
+    })
   }
 
   const loadSummary = async () => {

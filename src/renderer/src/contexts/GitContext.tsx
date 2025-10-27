@@ -20,12 +20,21 @@ export type ProjectGitStatus = {
   pending: PendingBranch[]
 }
 
+export type MergePreferences = {
+  autoPush: boolean
+  deleteRemote: boolean
+  setAutoPush: (v: boolean) => void
+  setDeleteRemote: (v: boolean) => void
+}
+
 export type GitContextValue = {
   loading: boolean
   error?: string
 
   currentProject: ProjectGitStatus
   allProjects: ProjectGitStatus[]
+
+  mergePreferences: MergePreferences
 }
 
 const GitContext = createContext<GitContextValue | null>(null)
@@ -33,6 +42,26 @@ const GitContext = createContext<GitContextValue | null>(null)
 const getStoryIdFromBranchName = (branchName: string): string | undefined => {
   const match = branchName.match(/^features\/([0-9a-fA-F-]+)/)
   return match ? match[1] : undefined
+}
+
+// Local storage helpers for persistent options
+const LS_KEYS = {
+  autoPush: 'git.merge.autoPush',
+  deleteRemote: 'git.merge.deleteRemoteBranch',
+}
+function readBoolLS(key: string, fallback = false): boolean {
+  try {
+    const raw = localStorage.getItem(key)
+    if (raw === null) return fallback
+    return raw === 'true'
+  } catch {
+    return fallback
+  }
+}
+function writeBoolLS(key: string, value: boolean) {
+  try {
+    localStorage.setItem(key, value ? 'true' : 'false')
+  } catch {}
 }
 
 export function GitProvider({ children }: { children: React.ReactNode }) {
@@ -45,6 +74,19 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
     pending: [],
   })
   const [allProjects, setAllProjects] = useState<ProjectGitStatus[]>([])
+
+  // Merge preferences (persisted)
+  const [autoPush, setAutoPush] = useState<boolean>(() => readBoolLS(LS_KEYS.autoPush, false))
+  const [deleteRemote, setDeleteRemote] = useState<boolean>(() =>
+    readBoolLS(LS_KEYS.deleteRemote, false),
+  )
+  useEffect(() => writeBoolLS(LS_KEYS.autoPush, autoPush), [autoPush])
+  useEffect(() => writeBoolLS(LS_KEYS.deleteRemote, deleteRemote), [deleteRemote])
+
+  const mergePreferences = useMemo<MergePreferences>(
+    () => ({ autoPush, deleteRemote, setAutoPush, setDeleteRemote }),
+    [autoPush, deleteRemote],
+  )
 
   const onMonitorUpdate = async (update: { projectId: string; state: GitBranchEvent }) => {
     console.log('GitContext onMonitorUpdate update: ', update)
@@ -134,8 +176,9 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
       error,
       currentProject,
       allProjects,
+      mergePreferences,
     }),
-    [loading, error, currentProject, allProjects],
+    [loading, error, currentProject, allProjects, mergePreferences],
   )
 
   return <GitContext.Provider value={value}>{children}</GitContext.Provider>
