@@ -1,6 +1,8 @@
 export function IconFastMerge({ className }: { className?: string }) {
   return (
     <svg
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -15,7 +17,7 @@ export function IconFastMerge({ className }: { className?: string }) {
       <circle cx="6" cy="8" r="2" />
       <circle cx="6" cy="16" r="2" />
 
-      {/* Merge curves from two dots into a single path */}
+      {/* Merge curves from two dots toward center */}
       <path d="M9 8c3 0 3 2 3 4" />
       <path d="M9 16c3 0 3-2 3-4" />
 
