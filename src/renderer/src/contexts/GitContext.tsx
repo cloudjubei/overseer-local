@@ -17,7 +17,7 @@ export type GitContextValue = {
   loading: boolean
   error?: string
 
-  getMergePlan: (args: Omit<MergePlanOptions, 'repoPath'>) => Promise<MergePlan>
+  getMergePlan: (options: Omit<MergePlanOptions, 'repoPath'>) => Promise<MergePlan>
   buildMergeReport: (
     planOrOptions: MergePlan | Omit<MergePlanOptions, 'repoPath'>,
     options?: BuildMergeReportOptions,
@@ -39,7 +39,8 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
   const [error] = useState<string | undefined>(undefined)
 
   const getMergePlan = useCallback(
-    (args: Omit<MergePlanOptions, 'repoPath'>) => gitService.getMergePlan(activeProjectId, args),
+    (options: Omit<MergePlanOptions, 'repoPath'>) =>
+      gitService.getMergePlan(activeProjectId, options),
     [activeProjectId],
   )
 
@@ -52,7 +53,8 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
   )
 
   const applyMerge = useCallback(
-    (options: Omit<ApplyMergeOptions, 'repoPath'>) => gitService.applyMerge(activeProjectId, options),
+    (options: Omit<ApplyMergeOptions, 'repoPath'>) =>
+      gitService.applyMerge(activeProjectId, options),
     [activeProjectId],
   )
 
@@ -78,7 +80,15 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
       getLocalStatus,
       getBranchDiffSummary,
     }),
-    [loading, error, getMergePlan, buildMergeReport, applyMerge, getLocalStatus, getBranchDiffSummary],
+    [
+      loading,
+      error,
+      getMergePlan,
+      buildMergeReport,
+      applyMerge,
+      getLocalStatus,
+      getBranchDiffSummary,
+    ],
   )
 
   return <GitContext.Provider value={value}>{children}</GitContext.Provider>

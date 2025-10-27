@@ -323,10 +323,14 @@ const DOCUMENT_INGESTION_API = {
 }
 
 const GIT_API = {
-  getMergePlan: (projectId, args) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_GET_MERGE_PLAN, { projectId, args }),
+  getMergePlan: (projectId, options) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_GET_MERGE_PLAN, { projectId, options }),
   buildMergeReport: (projectId, planOrOptions, options) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_BUILD_MERGE_REPORT, { projectId, planOrOptions, options }),
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_BUILD_MERGE_REPORT, {
+      projectId,
+      planOrOptions,
+      options,
+    }),
   applyMerge: (projectId, options) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_APPLY_MERGE, { projectId, options }),
   getLocalStatus: (projectId, options) =>

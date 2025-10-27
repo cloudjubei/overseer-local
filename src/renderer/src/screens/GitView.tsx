@@ -6,13 +6,7 @@ import { GitProvider, useGit } from '../contexts/GitContext'
 import { useProjectContext } from '../contexts/ProjectContext'
 import { useNavigator } from '../navigation/Navigator'
 
-function PendingItem({
-  item,
-  projectTitle,
-}: {
-  item: PendingBranchSummary
-  projectTitle?: string
-}) {
+function PendingItem({ item, projectTitle }: { item: any; projectTitle?: string }) {
   const { openModal } = useNavigator()
   const story = item.storyId ? ` • story ${item.storyId}` : ''
   const aheadBehind = `${item.ahead}↑ / ${item.behind}↓`
@@ -49,11 +43,9 @@ function PendingItem({
 }
 
 function CurrentProjectView() {
-  const { currentProject, loading, error, refresh } = useGit()
-  const { projects } = useProjectContext()
-  const title = currentProject
-    ? projects.find((p) => p.id === currentProject.projectId)?.title
-    : undefined
+  const { loading, error } = useGit()
+  const { activeProject } = useProjectContext()
+  const title = activeProject?.title
 
   return (
     <div className="flex-1 min-h-0 min-w-0 rounded-md border border-neutral-200 dark:border-neutral-800 flex flex-col">
@@ -76,12 +68,12 @@ function CurrentProjectView() {
             {error}
           </div>
         )}
-        {!loading && !error && currentProject && currentProject.pending.length === 0 && (
+        {!loading && !error && activeProject && currentProject.pending.length === 0 && (
           <div className="p-4 text-sm text-neutral-500">
             No pending feature branches ahead of base.
           </div>
         )}
-        {!loading && !error && currentProject && currentProject.pending.length > 0 && (
+        {!loading && !error && activeProject && currentProject.pending.length > 0 && (
           <div className="divide-y divide-neutral-100 dark:divide-neutral-900">
             {currentProject.pending.map((p) => (
               <PendingItem key={`${p.projectId}:${p.branch}`} item={p} projectTitle={title} />

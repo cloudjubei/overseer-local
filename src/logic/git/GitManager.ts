@@ -44,16 +44,12 @@ export default class GitManager extends BaseManager {
 
     handlers[IPC_HANDLER_KEYS.GIT_APPLY_MERGE] = ({ projectId, options }) =>
       this.applyMerge(projectId, options)
-
-    handlers[IPC_HANDLER_KEYS.GIT_GET_MERGE_PLAN] = ({ projectId, args }) =>
-      this.getMergePlan(projectId, args)
-
+    handlers[IPC_HANDLER_KEYS.GIT_GET_MERGE_PLAN] = ({ projectId, options }) =>
+      this.getMergePlan(projectId, options)
     handlers[IPC_HANDLER_KEYS.GIT_BUILD_MERGE_REPORT] = ({ projectId, planOrOptions, options }) =>
       this.buildMergeReport(projectId, planOrOptions, options)
-
     handlers[IPC_HANDLER_KEYS.GIT_GET_LOCAL_STATUS] = ({ projectId, options }) =>
       this.getLocalStatus(projectId, options)
-
     handlers[IPC_HANDLER_KEYS.GIT_GET_BRANCH_DIFF_SUMMARY] = ({ projectId, options }) =>
       this.getBranchDiffSummary(projectId, options)
 
@@ -62,11 +58,11 @@ export default class GitManager extends BaseManager {
 
   private async getMergePlan(
     projectId: string,
-    args: Omit<MergePlanOptions, 'repoPath'>,
+    options: Omit<MergePlanOptions, 'repoPath'>,
   ): Promise<MergePlan | undefined> {
     const tools = await this.__getTools(projectId)
     if (!tools) return
-    return tools.getMergePlan(args)
+    return tools.getMergePlan(options)
   }
 
   private async buildMergeReport(
