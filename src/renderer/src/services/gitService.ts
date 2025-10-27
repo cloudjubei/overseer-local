@@ -38,6 +38,7 @@ export type GitService = {
       includePatch?: boolean
     },
   ) => Promise<DiffSummary>
+  deleteBranch: (projectId: string, name: string) => Promise<{ ok: boolean; error?: string }>
 
   startMonitor: (
     projectId: string,

@@ -137,12 +137,13 @@
     },
     {
       "id": "284a207d-b6ac-421e-8199-6d02ccbe9ea6",
-      "status": "-",
+      "status": "+",
       "title": "Add Action Buttons to Branch Rows in GitView",
       "description": "Implement an actions section at the end of each branch row in the GitView. This section will contain three buttons:\n- **Quick Merge**: Merges the feature branch into its base branch using a default merge strategy.\n- **View**: On hover, a tooltip will display a summary of the changes in the branch.\n- **Delete**: Deletes the branch after a confirmation prompt.",
       "context": [],
       "createdAt": "2025-10-27T14:22:25.554Z",
-      "updatedAt": "2025-10-27T14:22:25.554Z"
+      "updatedAt": "2025-10-27T14:36:33.276Z",
+      "completedAt": "2025-10-27T14:36:33.276Z"
     },
     {
       "id": "6edc73b1-b1fa-4541-9d45-a71128a2e775",

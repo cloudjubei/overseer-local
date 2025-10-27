@@ -51,6 +51,18 @@ export type GitContextValue = {
     headRef: string
     includePatch?: boolean
   }) => Promise<DiffSummary>
+  deleteBranch: (name: string) => Promise<{ ok: boolean; error?: string }>
+
+  // Project-scoped variants for cross-project lists
+  applyMergeOn: (
+    projectId: string,
+    options: Omit<ApplyMergeOptions, 'repoPath'>,
+  ) => Promise<MergeResult>
+  getBranchDiffSummaryOn: (
+    projectId: string,
+    options: { baseRef: string; headRef: string; includePatch?: boolean },
+  ) => Promise<DiffSummary>
+  deleteBranchOn: (projectId: string, name: string) => Promise<{ ok: boolean; error?: string }>
 }
 
 const GitContext = createContext<GitContextValue | null>(null)
@@ -100,6 +112,27 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
     (options: { baseRef: string; headRef: string; includePatch?: boolean }) =>
       gitService.getBranchDiffSummary(activeProjectId, options),
     [activeProjectId],
+  )
+
+  const deleteBranch = useCallback(
+    (name: string) => gitService.deleteBranch(activeProjectId, name),
+    [activeProjectId],
+  )
+
+  // project-scoped variants for cross-project rows
+  const applyMergeOn = useCallback(
+    (projectId: string, options: Omit<ApplyMergeOptions, 'repoPath'>) =>
+      gitService.applyMerge(projectId, options),
+    [],
+  )
+  const getBranchDiffSummaryOn = useCallback(
+    (projectId: string, options: { baseRef: string; headRef: string; includePatch?: boolean }) =>
+      gitService.getBranchDiffSummary(projectId, options),
+    [],
+  )
+  const deleteBranchOn = useCallback(
+    (projectId: string, name: string) => gitService.deleteBranch(projectId, name),
+    [],
   )
 
   const onMonitorUpdate = async (update: { projectId: string; state: GitBranchEvent }) => {
@@ -167,7 +200,7 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
         )
       } catch (e) {
         console.error('GitContext error: ', e)
-        setError(e?.message || String(e))
+        setError((e as any)?.message || String(e))
       } finally {
         setLoading(false)
       }
@@ -201,6 +234,10 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
       applyMerge,
       getLocalStatus,
       getBranchDiffSummary,
+      deleteBranch,
+      applyMergeOn,
+      getBranchDiffSummaryOn,
+      deleteBranchOn,
     }),
     [
       loading,
@@ -213,6 +250,10 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
       applyMerge,
       getLocalStatus,
       getBranchDiffSummary,
+      deleteBranch,
+      applyMergeOn,
+      getBranchDiffSummaryOn,
+      deleteBranchOn,
     ],
   )
 

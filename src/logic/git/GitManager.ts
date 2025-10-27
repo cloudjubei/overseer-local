@@ -63,6 +63,8 @@ export default class GitManager extends BaseManager {
       this.getLocalStatus(projectId, options)
     handlers[IPC_HANDLER_KEYS.GIT_GET_BRANCH_DIFF_SUMMARY] = ({ projectId, options }) =>
       this.getBranchDiffSummary(projectId, options)
+    handlers[IPC_HANDLER_KEYS.GIT_DELETE_BRANCH] = ({ projectId, name }) =>
+      this.deleteBranch(projectId, name)
 
     handlers[IPC_HANDLER_KEYS.GIT_MONITOR_START] = ({ projectId, options }) =>
       this.startMonitor(projectId, options)
@@ -155,6 +157,12 @@ export default class GitManager extends BaseManager {
       return
     }
     return tools.applyMerge(options)
+  }
+
+  private async deleteBranch(projectId: string, name: string) {
+    const tools = await this.__getTools(projectId)
+    if (!tools) return { ok: false, error: 'Git tools unavailable' }
+    return tools.deleteBranch(name)
   }
 
   private async updateTool(projectId: string): Promise<GitTools | undefined> {

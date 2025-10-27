@@ -337,6 +337,8 @@ const GIT_API = {
     ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_GET_LOCAL_STATUS, { projectId, options }),
   getBranchDiffSummary: (projectId, options) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_GET_BRANCH_DIFF_SUMMARY, { projectId, options }),
+  deleteBranch: (projectId, name) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_DELETE_BRANCH, { projectId, name }),
   startMonitor: (projectId, options) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_MONITOR_START, { projectId, options }),
   stopMonitor: (projectId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_MONITOR_STOP, { projectId }),
