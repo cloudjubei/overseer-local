@@ -1,6 +1,5 @@
 import React from 'react'
 import SegmentedControl from '../components/ui/SegmentedControl'
-import { Button } from '../components/ui/Button'
 import Spinner from '../components/ui/Spinner'
 import { GitProvider, useGit } from '../contexts/GitContext'
 import { useProjectContext } from '../contexts/ProjectContext'
@@ -43,7 +42,7 @@ function PendingItem({ item, projectTitle }: { item: any; projectTitle?: string 
 }
 
 function CurrentProjectView() {
-  const { loading, error, currentProject, refresh } = useGit()
+  const { loading, error, currentProject } = useGit()
   const { activeProject } = useProjectContext()
   const title = activeProject?.title
 
@@ -51,11 +50,6 @@ function CurrentProjectView() {
     <div className="flex-1 min-h-0 min-w-0 rounded-md border border-neutral-200 dark:border-neutral-800 flex flex-col">
       <div className="px-4 py-3 border-b border-neutral-100 dark:border-neutral-900 text-sm text-neutral-600 dark:text-neutral-400 flex items-center gap-3">
         <div>Pending branches for the active project{title ? `: ${title}` : ''}.</div>
-        <div className="ml-auto">
-          <Button size="sm" onClick={() => refresh()} variant="secondary">
-            Refresh
-          </Button>
-        </div>
       </div>
       <div className="flex-1 min-h-0 overflow-auto">
         {loading && (
@@ -86,7 +80,7 @@ function CurrentProjectView() {
 }
 
 function AllProjectsView() {
-  const { allProjects, loading, error, refresh } = useGit()
+  const { allProjects, loading, error } = useGit()
   const { projects } = useProjectContext()
   const titleById = React.useMemo(() => new Map(projects.map((p) => [p.id, p.title])), [projects])
 
@@ -96,11 +90,6 @@ function AllProjectsView() {
     <div className="flex-1 min-h-0 min-w-0 rounded-md border border-neutral-200 dark:border-neutral-800 flex flex-col">
       <div className="px-4 py-3 border-b border-neutral-100 dark:border-neutral-900 text-sm text-neutral-600 dark:text-neutral-400 flex items-center gap-3">
         <div>Pending branches across all projects.</div>
-        <div className="ml-auto">
-          <Button size="sm" onClick={() => refresh()} variant="secondary">
-            Refresh
-          </Button>
-        </div>
       </div>
       <div className="flex-1 min-h-0 overflow-auto">
         {loading && (
