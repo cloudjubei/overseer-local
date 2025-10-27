@@ -17,6 +17,7 @@ import { IconFastMerge } from '@renderer/components/ui/icons/Icons'
 import { IconChevron } from '@renderer/components/ui/icons/IconChevron'
 import Tooltip from '@renderer/components/ui/Tooltip'
 import { useGit } from '@renderer/contexts/GitContext'
+import { IconFileAdded, IconFileDeleted, IconFileModified } from '@renderer/components/ui/icons/Icons'
 
 export type GitMergeModalProps = {
   projectId: string
@@ -52,23 +53,34 @@ function DiffPatch({ patch }: { patch: string }) {
   )
 }
 
+function StatusIcon({ status }: { status: MergeReportFile['status'] }) {
+  const iconClass = 'w-4 h-4'
+  if (status === 'A') return <IconFileAdded className={iconClass} />
+  if (status === 'D') return <IconFileDeleted className={iconClass} />
+  // For any other status including 'M' or 'R', default to Modified icon for now
+  return <IconFileModified className={iconClass} />
+}
+
 function FileDiffItem({ file }: { file: MergeReportFile }) {
   // All diffs start closed
   const [open, setOpen] = React.useState(false)
   const toggle = React.useCallback(() => setOpen((v) => !v), [])
   const title = open ? 'Hide changes' : 'View changes'
 
+  const showStats =
+    file.status === 'M' && (typeof file.additions === 'number' || typeof file.deletions === 'number')
+
   return (
     <div className="border rounded-md border-neutral-200 dark:border-neutral-800 overflow-hidden">
       <div className="px-3 py-2 text-xs flex items-center justify-between bg-neutral-50 dark:bg-neutral-900/40">
-        <div className="truncate font-mono pr-3 flex-1" title={file.path}>
-          {file.path}
+        <div className="truncate font-mono pr-3 flex-1 flex items-center gap-2" title={file.path}>
+          <StatusIcon status={file.status} />
+          <span className="truncate">{file.path}</span>
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <div className="text-[10px] uppercase tracking-wide text-neutral-600 dark:text-neutral-400">
-            {file.status}
-            {typeof file.additions === 'number' || typeof file.deletions === 'number' ? (
-              <span className="ml-2">
+          <div className="text-[10px] tracking-wide text-neutral-600 dark:text-neutral-400 flex items-center gap-1.5">
+            {showStats ? (
+              <span className="ml-1">
                 +{file.additions || 0}/-{file.deletions || 0}
               </span>
             ) : null}

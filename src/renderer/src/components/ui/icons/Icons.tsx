@@ -147,3 +147,8 @@ export * from './IconCementMixer'
 export * from './IconExcavator'
 export * from './IconSafetyVest'
 export * from './IconBlueprint'
+
+// New file status icons for git diffs
+export * from './IconFileAdded'
+export * from './IconFileDeleted'
+export * from './IconFileModified'
