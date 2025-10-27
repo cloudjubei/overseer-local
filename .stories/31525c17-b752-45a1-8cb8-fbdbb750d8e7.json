@@ -167,12 +167,13 @@
     },
     {
       "id": "70a7778e-a8fb-46fd-be5f-5dc1738b4881",
-      "status": "-",
+      "status": "+",
       "title": "Add Color-Coded Diffs to GitMergeModal",
       "description": "Enhance the diff viewer within `GitMergeModal.tsx`. The view should visually distinguish between code insertions and deletions by color-coding them. Insertions should be highlighted in green, and deletions in red.",
       "context": [],
       "createdAt": "2025-10-27T14:22:25.559Z",
-      "updatedAt": "2025-10-27T14:22:25.559Z"
+      "updatedAt": "2025-10-27T14:39:40.433Z",
+      "completedAt": "2025-10-27T14:39:40.433Z"
     },
     {
       "id": "2d942460-1b9d-409b-9b22-b692a7eea38a",

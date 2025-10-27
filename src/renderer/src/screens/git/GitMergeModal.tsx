@@ -16,6 +16,29 @@ export type GitMergeModalProps = {
   onRequestClose: () => void
 }
 
+function DiffPatch({ patch }: { patch: string }) {
+  const lines = React.useMemo(() => (patch || '').replace(/\r\n/g, '\n').split('\n'), [patch])
+  return (
+    <pre className="p-3 whitespace-pre-wrap">
+      <code>
+        {lines.map((line, idx) => {
+          let cls = ''
+          if (line.startsWith('+') && !line.startsWith('+++ ')) {
+            cls = 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300'
+          } else if (line.startsWith('-') && !line.startsWith('--- ')) {
+            cls = 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300'
+          }
+          return (
+            <span key={idx} className={`block px-2 py-0.5 ${cls}`}>
+              {line || ' '}
+            </span>
+          )
+        })}
+      </code>
+    </pre>
+  )
+}
+
 function FileDiffItem({ file }: { file: MergeReportFile }) {
   return (
     <div className="border rounded-md border-neutral-200 dark:border-neutral-800 overflow-hidden">
@@ -34,9 +57,7 @@ function FileDiffItem({ file }: { file: MergeReportFile }) {
         {file.binary ? (
           <div className="p-3 text-neutral-600 dark:text-neutral-400">Binary file diff not shown</div>
         ) : file.patch ? (
-          <pre className="p-3 whitespace-pre-wrap">
-            <code>{file.patch}</code>
-          </pre>
+          <DiffPatch patch={file.patch} />
         ) : (
           <div className="p-3 text-neutral-600 dark:text-neutral-400">No patch available</div>
         )}
