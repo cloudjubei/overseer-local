@@ -323,14 +323,16 @@ const DOCUMENT_INGESTION_API = {
 }
 
 const GIT_API = {
-  getMergePlan: (args) => ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_GET_MERGE_PLAN, args),
-  buildMergeReport: (planOrOptions, options) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_BUILD_MERGE_REPORT, { planOrOptions, options }),
-  applyMerge: (options) => ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_APPLY_MERGE, { options }),
-  getLocalStatus: (options) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_GET_LOCAL_STATUS, { options }),
-  getBranchDiffSummary: (options) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_GET_BRANCH_DIFF_SUMMARY, { options }),
+  getMergePlan: (projectId, args) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_GET_MERGE_PLAN, { projectId, args }),
+  buildMergeReport: (projectId, planOrOptions, options) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_BUILD_MERGE_REPORT, { projectId, planOrOptions, options }),
+  applyMerge: (projectId, options) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_APPLY_MERGE, { projectId, options }),
+  getLocalStatus: (projectId, options) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_GET_LOCAL_STATUS, { projectId, options }),
+  getBranchDiffSummary: (projectId, options) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_GET_BRANCH_DIFF_SUMMARY, { projectId, options }),
 }
 
 const GIT_CREDENTIALS_API = {

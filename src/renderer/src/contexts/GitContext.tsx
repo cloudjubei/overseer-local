@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import React, { createContext, useCallback, useContext, useMemo, useState } from 'react'
 import { gitService } from '../services/gitService'
 import { useProjectContext } from './ProjectContext'
 import {
@@ -35,36 +35,37 @@ const GitContext = createContext<GitContextValue | null>(null)
 
 export function GitProvider({ children }: { children: React.ReactNode }) {
   const { activeProjectId } = useProjectContext()
-  const [loading, setLoading] = useState<boolean>(true)
-  const [error, setError] = useState<string | undefined>(undefined)
+  const [loading] = useState<boolean>(true)
+  const [error] = useState<string | undefined>(undefined)
 
   const getMergePlan = useCallback(
-    (args: Omit<MergePlanOptions, 'repoPath'>) => gitService.getMergePlan(args),
-    [],
+    (args: Omit<MergePlanOptions, 'repoPath'>) => gitService.getMergePlan(activeProjectId, args),
+    [activeProjectId],
   )
 
   const buildMergeReport = useCallback(
     (
       planOrOptions: MergePlan | Omit<MergePlanOptions, 'repoPath'>,
       options?: BuildMergeReportOptions,
-    ) => gitService.buildMergeReport(planOrOptions as any, options),
-    [],
+    ) => gitService.buildMergeReport(activeProjectId, planOrOptions as any, options),
+    [activeProjectId],
   )
 
   const applyMerge = useCallback(
-    (options: Omit<ApplyMergeOptions, 'repoPath'>) => gitService.applyMerge(options),
-    [],
+    (options: Omit<ApplyMergeOptions, 'repoPath'>) => gitService.applyMerge(activeProjectId, options),
+    [activeProjectId],
   )
 
   const getLocalStatus = useCallback(
-    (options?: Omit<LocalStatusOptions, 'repoPath'>) => gitService.getLocalStatus(options),
-    [],
+    (options?: Omit<LocalStatusOptions, 'repoPath'>) =>
+      gitService.getLocalStatus(activeProjectId, options),
+    [activeProjectId],
   )
 
   const getBranchDiffSummary = useCallback(
     (options: { baseRef: string; headRef: string; includePatch?: boolean }) =>
-      gitService.getBranchDiffSummary(options),
-    [],
+      gitService.getBranchDiffSummary(activeProjectId, options),
+    [activeProjectId],
   )
 
   const value = useMemo<GitContextValue>(
@@ -77,15 +78,7 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
       getLocalStatus,
       getBranchDiffSummary,
     }),
-    [
-      loading,
-      error,
-      getMergePlan,
-      buildMergeReport,
-      applyMerge,
-      getLocalStatus,
-      getBranchDiffSummary,
-    ],
+    [loading, error, getMergePlan, buildMergeReport, applyMerge, getLocalStatus, getBranchDiffSummary],
   )
 
   return <GitContext.Provider value={value}>{children}</GitContext.Provider>

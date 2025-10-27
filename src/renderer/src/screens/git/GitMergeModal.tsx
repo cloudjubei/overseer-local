@@ -17,6 +17,7 @@ export type GitMergeModalProps = {
 
 // Attempt to call optional renderer-provided git service methods without hard dependency
 async function tryBuildMergeReport(args: {
+  projectId: string
   repoPath: string
   baseRef: string
   sources: string[]
@@ -28,13 +29,17 @@ async function tryBuildMergeReport(args: {
   try {
     // Prefer buildMergeReport(plan) path via getMergePlan + buildMergeReport if available
     if (typeof svc.getMergePlan === 'function' && typeof svc.buildMergeReport === 'function') {
-      const plan = await svc.getMergePlan({ sources: args.sources, baseRef: args.baseRef, includePatch: true })
-      const report = await svc.buildMergeReport(plan, { includePatch: true })
+      const plan = await svc.getMergePlan(args.projectId, {
+        sources: args.sources,
+        baseRef: args.baseRef,
+        includePatch: true,
+      })
+      const report = await svc.buildMergeReport(args.projectId, plan, { includePatch: true })
       return report as MergeReport
     }
     // Fallback: direct helper if exposed
     if (typeof svc.buildMergeReport === 'function') {
-      const report = await svc.buildMergeReport({
+      const report = await svc.buildMergeReport(args.projectId, {
         repoPath: args.repoPath,
         baseRef: args.baseRef,
         sources: args.sources,
@@ -53,9 +58,7 @@ function FileDiffItem({ file }: { file: MergeReportFile }) {
   return (
     <div className="border rounded-md border-neutral-200 dark:border-neutral-800 overflow-hidden">
       <div className="px-3 py-2 text-xs flex items-center justify-between bg-neutral-50 dark:bg-neutral-900/40">
-        <div className="truncate font-mono">
-          {file.path}
-        </div>
+        <div className="truncate font-mono">{file.path}</div>
         <div className="shrink-0 text-[10px] uppercase tracking-wide text-neutral-600 dark:text-neutral-400">
           {file.status}
           {typeof file.additions === 'number' || typeof file.deletions === 'number' ? (
@@ -90,7 +93,13 @@ export default function GitMergeModal(props: GitMergeModalProps) {
     ;(async () => {
       setLoading(true)
       setError(undefined)
-      const rep = await tryBuildMergeReport({ repoPath, baseRef, sources: [branch], includePatch: true })
+      const rep = await tryBuildMergeReport({
+        projectId,
+        repoPath,
+        baseRef,
+        sources: [branch],
+        includePatch: true,
+      })
       if (!mounted) return
       setReport(rep)
       setLoading(false)
@@ -102,7 +111,7 @@ export default function GitMergeModal(props: GitMergeModalProps) {
     return () => {
       mounted = false
     }
-  }, [repoPath, baseRef, branch])
+  }, [projectId, repoPath, baseRef, branch])
 
   const header = (
     <div className="flex items-center gap-3">
@@ -120,10 +129,14 @@ export default function GitMergeModal(props: GitMergeModalProps) {
   const footer = (
     <div className="flex items-center justify-between gap-2 w-full">
       <div className="text-xs text-neutral-600 dark:text-neutral-400">
-        {report?.totals ? `+${report.totals.insertions}/-${report.totals.deletions} · ${report.totals.filesChanged} files` : 'Totals unavailable'}
+        {report?.totals
+          ? `+${report.totals.insertions}/-${report.totals.deletions} · ${report.totals.filesChanged} files`
+          : 'Totals unavailable'}
       </div>
       <div className="flex items-center gap-2">
-        <Button onClick={onRequestClose} variant="secondary">Close</Button>
+        <Button onClick={onRequestClose} variant="secondary">
+          Close
+        </Button>
         <Button disabled title="Merge flow coming soon">Merge</Button>
       </div>
     </div>
@@ -132,7 +145,6 @@ export default function GitMergeModal(props: GitMergeModalProps) {
   return (
     <Modal isOpen={true} onClose={onRequestClose} title={header} size="xl" footer={footer}>
       <div className="flex flex-col gap-4">
-        {/* Diff and files section */}
         <div>
           <div className="text-sm font-medium mb-2">Changes</div>
           {loading && (
@@ -144,7 +156,9 @@ export default function GitMergeModal(props: GitMergeModalProps) {
             <div className="p-3 text-sm text-red-600 dark:text-red-400 whitespace-pre-wrap">{error}</div>
           )}
           {!loading && !error && (!report || report.files.length === 0) && (
-            <div className="p-3 text-sm text-neutral-600 dark:text-neutral-400">Diff preview unavailable. You can still proceed to merge.</div>
+            <div className="p-3 text-sm text-neutral-600 dark:text-neutral-400">
+              Diff preview unavailable. You can still proceed to merge.
+            </div>
           )}
           {!loading && !error && report && report.files.length > 0 && (
             <div className="flex flex-col gap-3">
@@ -155,7 +169,6 @@ export default function GitMergeModal(props: GitMergeModalProps) {
           )}
         </div>
 
-        {/* Analysis placeholders */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div className="border rounded-md p-3 border-neutral-200 dark:border-neutral-800">
             <div className="text-sm font-medium mb-1">Compilation Impact</div>

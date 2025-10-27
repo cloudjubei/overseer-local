@@ -1,6 +1,17 @@
 import type { BrowserWindow } from 'electron'
 import IPC_HANDLER_KEYS from '../../preload/ipcHandlersKeys'
-import { ApplyMergeOptions, GitTools, MergeResult, createGitTools } from 'thefactory-tools'
+import {
+  ApplyMergeOptions,
+  BuildMergeReportOptions,
+  DiffSummary,
+  GitTools,
+  LocalStatus,
+  MergePlan,
+  MergePlanOptions,
+  MergeReport,
+  MergeResult,
+  createGitTools,
+} from 'thefactory-tools'
 import ProjectsManager from '../projects/ProjectsManager'
 import Mutex from '../utils/Mutex'
 import BaseManager from '../BaseManager'
@@ -34,7 +45,66 @@ export default class GitManager extends BaseManager {
     handlers[IPC_HANDLER_KEYS.GIT_APPLY_MERGE] = ({ projectId, options }) =>
       this.applyMerge(projectId, options)
 
+    handlers[IPC_HANDLER_KEYS.GIT_GET_MERGE_PLAN] = ({ projectId, args }) =>
+      this.getMergePlan(projectId, args)
+
+    handlers[IPC_HANDLER_KEYS.GIT_BUILD_MERGE_REPORT] = ({ projectId, planOrOptions, options }) =>
+      this.buildMergeReport(projectId, planOrOptions, options)
+
+    handlers[IPC_HANDLER_KEYS.GIT_GET_LOCAL_STATUS] = ({ projectId, options }) =>
+      this.getLocalStatus(projectId, options)
+
+    handlers[IPC_HANDLER_KEYS.GIT_GET_BRANCH_DIFF_SUMMARY] = ({ projectId, options }) =>
+      this.getBranchDiffSummary(projectId, options)
+
     return handlers
+  }
+
+  private async getMergePlan(
+    projectId: string,
+    args: Omit<MergePlanOptions, 'repoPath'>,
+  ): Promise<MergePlan | undefined> {
+    const tools = await this.__getTools(projectId)
+    if (!tools) return
+    return tools.getMergePlan(args)
+  }
+
+  private async buildMergeReport(
+    projectId: string,
+    planOrOptions: MergePlan | Omit<MergePlanOptions, 'repoPath'>,
+    options?: BuildMergeReportOptions,
+  ): Promise<MergeReport | undefined> {
+    const tools = await this.__getTools(projectId)
+    if (!tools) return
+
+    // If it's a MergePlan (has files array and schemaVersion), use directly
+    const isPlan = (obj: any): obj is MergePlan => !!obj && Array.isArray((obj as any).files)
+
+    if (isPlan(planOrOptions)) {
+      return tools.buildMergeReport(planOrOptions as MergePlan, options)
+    }
+
+    // Otherwise, treat as options: compute plan first then build report
+    const plan = await tools.getMergePlan(planOrOptions as Omit<MergePlanOptions, 'repoPath'>)
+    return tools.buildMergeReport(plan, options)
+  }
+
+  private async getLocalStatus(
+    projectId: string,
+    options?: Omit<{ repoPath: string } & Parameters<GitTools['getLocalStatus']>[0], 'repoPath'>,
+  ): Promise<LocalStatus | undefined> {
+    const tools = await this.__getTools(projectId)
+    if (!tools) return
+    return tools.getLocalStatus(options)
+  }
+
+  private async getBranchDiffSummary(
+    projectId: string,
+    options: { baseRef: string; headRef: string; includePatch?: boolean },
+  ): Promise<DiffSummary | undefined> {
+    const tools = await this.__getTools(projectId)
+    if (!tools) return
+    return tools.getBranchDiffSummary(options)
   }
 
   private async applyMerge(
