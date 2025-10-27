@@ -8,7 +8,7 @@ import { Button } from '../components/ui/Button'
 import Tooltip from '../components/ui/Tooltip'
 import { IconMerge } from '../components/ui/icons/IconMerge'
 import { IconDelete } from '../components/ui/icons/IconDelete'
-import { IconBranch } from '../components/ui/icons/IconBranch'
+import { IconEye } from '../components/ui/icons/IconEye'
 import { gitService } from '@renderer/services/gitService'
 
 function PendingItem({ item, projectTitle }: { item: any; projectTitle?: string }) {
@@ -141,7 +141,7 @@ function PendingItem({ item, projectTitle }: { item: any; projectTitle?: string 
               onClick={(e) => e.stopPropagation()}
             >
               <Button variant="ghost" size="icon" aria-label="View changes">
-                <IconBranch className="w-4 h-4" />
+                <IconEye className="w-4 h-4" />
               </Button>
             </span>
           </Tooltip>

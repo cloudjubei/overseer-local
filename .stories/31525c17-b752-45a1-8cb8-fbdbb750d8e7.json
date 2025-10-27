@@ -225,7 +225,7 @@
     },
     {
       "id": "bfa3d487-d173-4126-9789-68bb323dac38",
-      "status": "-",
+      "status": "+",
       "title": "Update the View button in GitView",
       "description": "In @src/renderer/src/screens/GitView.tsx use the @src/renderer/src/components/ui/icons/IconEye.tsx as the icon for the \"view\" button.\nThe icon needs to be updated to match better in style to all the other icons.",
       "context": [
@@ -233,8 +233,9 @@
         "src/renderer/src/components/ui/icons/IconEye.tsx"
       ],
       "createdAt": "2025-10-27T16:13:12.146Z",
-      "updatedAt": "2025-10-27T17:53:45.622Z",
-      "blockers": []
+      "updatedAt": "2025-10-27T18:31:10.228Z",
+      "blockers": [],
+      "completedAt": "2025-10-27T18:31:10.228Z"
     },
     {
       "id": "8ca56f99-3f26-4f70-8dd2-d2dcf73b75b8",
