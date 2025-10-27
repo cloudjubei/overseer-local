@@ -13,6 +13,8 @@ import {
 import SegmentedControl from '@renderer/components/ui/SegmentedControl'
 import { factoryTestsService } from '@renderer/services/factoryTestsService'
 import { gitService } from '@renderer/services/gitService'
+import { IconEye, IconFastMerge } from '@renderer/components/ui/icons/Icons'
+import Tooltip from '@renderer/components/ui/Tooltip'
 
 export type GitMergeModalProps = {
   projectId: string
@@ -48,30 +50,47 @@ function DiffPatch({ patch }: { patch: string }) {
 }
 
 function FileDiffItem({ file }: { file: MergeReportFile }) {
+  const [open, setOpen] = React.useState(false)
+  const toggle = React.useCallback(() => setOpen((v) => !v), [])
+  const title = open ? 'Hide changes' : 'View changes'
+
   return (
     <div className="border rounded-md border-neutral-200 dark:border-neutral-800 overflow-hidden">
       <div className="px-3 py-2 text-xs flex items-center justify-between bg-neutral-50 dark:bg-neutral-900/40">
-        <div className="truncate font-mono">{file.path}</div>
-        <div className="shrink-0 text-[10px] uppercase tracking-wide text-neutral-600 dark:text-neutral-400">
-          {file.status}
-          {typeof file.additions === 'number' || typeof file.deletions === 'number' ? (
-            <span className="ml-2">
-              +{file.additions || 0}/-{file.deletions || 0}
-            </span>
-          ) : null}
+        <div className="truncate font-mono pr-3 flex-1" title={file.path}>{file.path}</div>
+        <div className="flex items-center gap-2 shrink-0">
+          <div className="text-[10px] uppercase tracking-wide text-neutral-600 dark:text-neutral-400">
+            {file.status}
+            {typeof file.additions === 'number' || typeof file.deletions === 'number' ? (
+              <span className="ml-2">
+                +{file.additions || 0}/-{file.deletions || 0}
+              </span>
+            ) : null}
+          </div>
+          <button
+            type="button"
+            onClick={toggle}
+            title={title}
+            aria-label={title}
+            className={`ml-2 inline-flex items-center justify-center rounded p-1 transition-colors border border-transparent hover:border-neutral-300 dark:hover:border-neutral-700 ${open ? 'bg-neutral-200/60 dark:bg-neutral-800/60' : 'bg-transparent'}`}
+          >
+            <IconEye className="w-4 h-4 text-neutral-600 dark:text-neutral-300" />
+          </button>
         </div>
       </div>
-      <div className="max-h-64 overflow-auto text-xs font-mono">
-        {file.binary ? (
-          <div className="p-3 text-neutral-600 dark:text-neutral-400">
-            Binary file diff not shown
-          </div>
-        ) : file.patch ? (
-          <DiffPatch patch={file.patch} />
-        ) : (
-          <div className="p-3 text-neutral-600 dark:text-neutral-400">No patch available</div>
-        )}
-      </div>
+      {open && (
+        <div className="max-h-64 overflow-auto text-xs font-mono">
+          {file.binary ? (
+            <div className="p-3 text-neutral-600 dark:text-neutral-400">
+              Binary file diff not shown
+            </div>
+          ) : file.patch ? (
+            <DiffPatch patch={file.patch} />
+          ) : (
+            <div className="p-3 text-neutral-600 dark:text-neutral-400">No patch available</div>
+          )}
+        </div>
+      )}
     </div>
   )
 }
@@ -170,6 +189,26 @@ function ProgressBar({ value }: { value: number }) {
   )
 }
 
+// Local storage helpers for persistent options
+const LS_KEYS = {
+  autoPush: 'git.merge.autoPush',
+  deleteRemote: 'git.merge.deleteRemoteBranch',
+}
+function readBoolLS(key: string, fallback = false): boolean {
+  try {
+    const raw = localStorage.getItem(key)
+    if (raw === null) return fallback
+    return raw === 'true'
+  } catch {
+    return fallback
+  }
+}
+function writeBoolLS(key: string, value: boolean) {
+  try {
+    localStorage.setItem(key, value ? 'true' : 'false')
+  } catch {}
+}
+
 // ============ Main component ============
 export default function GitMergeModal(props: GitMergeModalProps) {
   const { onRequestClose, projectId, repoPath, baseRef, branch, storyId, featureId } = props
@@ -184,6 +223,19 @@ export default function GitMergeModal(props: GitMergeModalProps) {
   const [merging, setMerging] = React.useState(false)
   const [mergeError, setMergeError] = React.useState<string | undefined>(undefined)
   const [mergeResult, setMergeResult] = React.useState<MergeResult | undefined>(undefined)
+
+  // Post-merge actions state
+  const [postActionRunning, setPostActionRunning] = React.useState(false)
+  const [postActionError, setPostActionError] = React.useState<string | undefined>(undefined)
+
+  // Confirmation dialog state and persisted options
+  const [confirmOpen, setConfirmOpen] = React.useState(false)
+  const [autoPush, setAutoPush] = React.useState<boolean>(() => readBoolLS(LS_KEYS.autoPush, false))
+  const [deleteRemote, setDeleteRemote] = React.useState<boolean>(() =>
+    readBoolLS(LS_KEYS.deleteRemote, false),
+  )
+  React.useEffect(() => writeBoolLS(LS_KEYS.autoPush, autoPush), [autoPush])
+  React.useEffect(() => writeBoolLS(LS_KEYS.deleteRemote, deleteRemote), [deleteRemote])
 
   // Unified tab state (includes Changes)
   const [activeTab, setActiveTab] = React.useState<
@@ -415,11 +467,12 @@ export default function GitMergeModal(props: GitMergeModalProps) {
     }
   }, [activeTab, projectId, report])
 
-  const onMerge = async () => {
-    if (merging) return
+  const doMergeWithPostActions = async () => {
+    if (merging || postActionRunning) return
     setMerging(true)
     setMergeError(undefined)
     setMergeResult(undefined)
+    setPostActionError(undefined)
     try {
       const res = await gitService.applyMerge(projectId, {
         sources: [branch],
@@ -427,10 +480,37 @@ export default function GitMergeModal(props: GitMergeModalProps) {
         allowFastForward: true,
       })
       setMergeResult(res)
-      if (res?.ok && (!res.conflicts || res.conflicts.length === 0)) {
-        // Success with no conflicts; close modal
-        onRequestClose()
-        return
+      const hasConf = !!(res?.conflicts && res.conflicts.length > 0)
+      if (res?.ok && !hasConf) {
+        let localError: string | undefined
+        // Post-merge actions if requested
+        if (autoPush || deleteRemote) {
+          setPostActionRunning(true)
+          let pushOk = true
+          if (autoPush) {
+            const pushRes = await gitService.push(projectId, { remote: 'origin', branch: baseRef })
+            if (!pushRes.ok) {
+              pushOk = false
+              localError = (pushRes.error || 'Push failed') + (pushRes.stderr ? `\n${pushRes.stderr}` : '')
+            }
+          }
+          if (deleteRemote && (!autoPush || pushOk)) {
+            const delRes = await gitService.deleteRemoteBranch(projectId, {
+              remote: 'origin',
+              branch,
+            })
+            if (!delRes.ok) {
+              localError = (delRes.error || 'Delete remote branch failed') + (delRes.stderr ? `\n${delRes.stderr}` : '')
+            }
+          }
+          setPostActionRunning(false)
+        }
+        if (localError) {
+          setPostActionError(localError)
+        } else {
+          onRequestClose()
+          return
+        }
       }
       // If not ok or conflicts exist, keep modal open and show conflict info below
     } catch (e: any) {
@@ -463,9 +543,14 @@ export default function GitMergeModal(props: GitMergeModalProps) {
         <Button onClick={onRequestClose} variant="secondary">
           Close
         </Button>
-        <Button onClick={onMerge} loading={merging} disabled={merging}>
-          {merging ? 'Merging…' : 'Merge'}
-        </Button>
+        <Tooltip content={'fast merge'} placement="top">
+          <Button onClick={() => setConfirmOpen(true)} loading={merging || postActionRunning} disabled={merging || postActionRunning}>
+            <span className="inline-flex items-center gap-2">
+              <IconFastMerge className="w-4 h-4" />
+              {merging ? 'Merging…' : postActionRunning ? 'Finalizing…' : 'Merge'}
+            </span>
+          </Button>
+        </Tooltip>
       </div>
     </div>
   )
@@ -672,44 +757,119 @@ export default function GitMergeModal(props: GitMergeModalProps) {
     }
   }
 
-  return (
-    <Modal isOpen={true} onClose={onRequestClose} title={header} size="xl" footer={footer}>
-      {/* Sticky tabs header inside scrollable content to keep it fixed while content scrolls */}
-      <div className="sticky top-0 z-10 -mx-4 px-4 py-2 bg-surface-overlay/95 backdrop-blur border-b border-border">
-        <SegmentedControl
-          ariaLabel="Merge tabs"
-          value={activeTab}
-          onChange={(v) => setActiveTab(v as any)}
-          options={[
-            { value: 'changes', label: 'Changes' },
-            { value: 'compilation', label: 'Compilation Impact' },
-            { value: 'tests', label: 'Tests Impact' },
-            { value: 'coverage', label: 'Diff Coverage' },
-          ]}
-        />
+  const confirmSummary = (
+    <div className="space-y-3">
+      <div className="text-sm text-neutral-700 dark:text-neutral-300">
+        You are about to merge <span className="font-mono">{branch}</span> into{' '}
+        <span className="font-mono">{baseRef}</span>.
       </div>
-
-      <div className="flex flex-col gap-4">
-        {mergeError && (
-          <div className="p-3 text-sm text-red-600 dark:text-red-400 whitespace-pre-wrap border border-red-200 dark:border-red-800 rounded-md">
-            {mergeError}
-          </div>
-        )}
-        {mergeResult && !mergeError && !hasConflicts && !mergeResult.ok && (
-          <div className="p-3 text-sm text-red-600 dark:text-red-400 whitespace-pre-wrap border border-red-200 dark:border-red-800 rounded-md">
-            {mergeResult.message || 'Merge failed'}
-          </div>
-        )}
-        {hasConflicts && (
-          <ConflictsPanel
-            conflicts={mergeResult!.conflicts || []}
-            baseRef={baseRef}
-            branch={branch}
+      <div className="text-xs text-neutral-600 dark:text-neutral-400">
+        {report?.totals
+          ? `Summary: +${report.totals.insertions}/-${report.totals.deletions} across ${report.totals.filesChanged} files`
+          : 'Diff totals unavailable.'}
+      </div>
+      <div className="border-t pt-3 mt-1 border-neutral-200 dark:border-neutral-800">
+        <label className="flex items-start gap-2 text-sm cursor-pointer select-none">
+          <input
+            type="checkbox"
+            className="mt-0.5"
+            checked={autoPush}
+            onChange={(e) => setAutoPush(e.target.checked)}
           />
-        )}
-
-        {renderActiveTab()}
+          <span>
+            Automatically push to origin
+            <div className="text-xs text-neutral-500">Saves setting. Pushes {baseRef} after merge.</div>
+          </span>
+        </label>
+        <label className="flex items-start gap-2 text-sm cursor-pointer select-none mt-2">
+          <input
+            type="checkbox"
+            className="mt-0.5"
+            checked={deleteRemote}
+            onChange={(e) => setDeleteRemote(e.target.checked)}
+          />
+          <span>
+            Delete remote branch after merge
+            <div className="text-xs text-neutral-500">Saves setting. Removes origin/{branch}.</div>
+          </span>
+        </label>
       </div>
-    </Modal>
+    </div>
+  )
+
+  return (
+    <>
+      <Modal isOpen={true} onClose={onRequestClose} title={header} size="xl" footer={footer}>
+        {/* Sticky tabs header inside scrollable content to keep it fixed while content scrolls */}
+        <div className="sticky top-0 z-10 -mx-4 px-4 py-2 bg-surface-overlay/95 backdrop-blur border-b border-border">
+          <SegmentedControl
+            ariaLabel="Merge tabs"
+            value={activeTab}
+            onChange={(v) => setActiveTab(v as any)}
+            options={[
+              { value: 'changes', label: 'Changes' },
+              { value: 'compilation', label: 'Compilation Impact' },
+              { value: 'tests', label: 'Tests Impact' },
+              { value: 'coverage', label: 'Diff Coverage' },
+            ]}
+          />
+        </div>
+
+        <div className="flex flex-col gap-4">
+          {mergeError && (
+            <div className="p-3 text-sm text-red-600 dark:text-red-400 whitespace-pre-wrap border border-red-200 dark:border-red-800 rounded-md">
+              {mergeError}
+            </div>
+          )}
+          {mergeResult && !mergeError && !hasConflicts && !mergeResult.ok && (
+            <div className="p-3 text-sm text-red-600 dark:text-red-400 whitespace-pre-wrap border border-red-200 dark:border-red-800 rounded-md">
+              {mergeResult.message || 'Merge failed'}
+            </div>
+          )}
+          {hasConflicts && (
+            <ConflictsPanel
+              conflicts={mergeResult!.conflicts || []}
+              baseRef={baseRef}
+              branch={branch}
+            />
+          )}
+
+          {postActionError && (
+            <div className="p-3 text-sm text-red-600 dark:text-red-400 whitespace-pre-wrap border border-red-200 dark:border-red-800 rounded-md">
+              {postActionError}
+            </div>
+          )}
+
+          {renderActiveTab()}
+        </div>
+      </Modal>
+
+      {/* Confirmation dialog */}
+      <Modal
+        isOpen={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        title={<div className="text-base font-semibold">Confirm merge</div>}
+        size="md"
+        footer={
+          <div className="flex items-center justify-end gap-2 w-full">
+            <Button onClick={() => setConfirmOpen(false)} variant="secondary">
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                setConfirmOpen(false)
+                void doMergeWithPostActions()
+              }}
+              loading={merging || postActionRunning}
+              disabled={merging || postActionRunning}
+            >
+              {merging || postActionRunning ? 'Working…' : 'Confirm & Merge'}
+            </Button>
+          </div>
+        }
+      >
+        {confirmSummary}
+      </Modal>
+    </>
   )
 }

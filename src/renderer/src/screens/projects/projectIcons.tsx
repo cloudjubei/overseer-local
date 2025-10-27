@@ -93,6 +93,7 @@ export const PROJECT_ICON_REGISTRY: Record<string, (props: any) => JSX.Element> 
   'not-allowed': Icons.IconNotAllowed,
   hourglass: Icons.IconHourglass,
   scroll: Icons.IconScroll,
+  eye: Icons.IconEye,
 
   // New programming icons
   code: Icons.IconCode,

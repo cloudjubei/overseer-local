@@ -40,6 +40,16 @@ export type GitService = {
   ) => Promise<DiffSummary>
   deleteBranch: (projectId: string, name: string) => Promise<{ ok: boolean; error?: string }>
 
+  // New ops
+  push: (
+    projectId: string,
+    args: { remote?: string; branch?: string },
+  ) => Promise<{ ok: boolean; error?: string; stdout?: string; stderr?: string }>
+  deleteRemoteBranch: (
+    projectId: string,
+    args: { remote?: string; branch: string },
+  ) => Promise<{ ok: boolean; error?: string; stdout?: string; stderr?: string }>
+
   startMonitor: (
     projectId: string,
     options: Omit<GitMonitorConfig, 'repoPath' | 'onUpdate' | 'onError'>,
