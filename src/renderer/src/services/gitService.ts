@@ -4,6 +4,7 @@ import {
   DiffSummary,
   GitBranchEvent,
   GitMonitorConfig,
+  GitOpResult,
   LocalStatus,
   LocalStatusOptions,
   MergePlan,
@@ -38,17 +39,9 @@ export type GitService = {
       includePatch?: boolean
     },
   ) => Promise<DiffSummary>
-  deleteBranch: (projectId: string, name: string) => Promise<{ ok: boolean; error?: string }>
-
-  // New ops
-  push: (
-    projectId: string,
-    args: { remote?: string; branch?: string },
-  ) => Promise<{ ok: boolean; error?: string; stdout?: string; stderr?: string }>
-  deleteRemoteBranch: (
-    projectId: string,
-    args: { remote?: string; branch: string },
-  ) => Promise<{ ok: boolean; error?: string; stdout?: string; stderr?: string }>
+  deleteBranch: (projectId: string, name: string) => Promise<GitOpResult | undefined>
+  push: (projectId: string, remote?: string, branch?: string) => Promise<GitOpResult | undefined>
+  deleteRemoteBranch: (projectId: string, name: string) => Promise<GitOpResult | undefined>
 
   startMonitor: (
     projectId: string,

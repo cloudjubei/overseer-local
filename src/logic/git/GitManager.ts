@@ -6,6 +6,7 @@ import {
   DiffSummary,
   GitMonitor,
   GitMonitorConfig,
+  GitOpResult,
   GitTools,
   LocalStatus,
   LocalStatusOptions,
@@ -68,9 +69,9 @@ export default class GitManager extends BaseManager {
 
     // Push and remote branch delete
     handlers[IPC_HANDLER_KEYS.GIT_PUSH] = ({ projectId, remote, branch }) =>
-      this.push(projectId, { remote, branch })
-    handlers[IPC_HANDLER_KEYS.GIT_DELETE_REMOTE_BRANCH] = ({ projectId, remote, branch }) =>
-      this.deleteRemoteBranch(projectId, { remote, branch })
+      this.push(projectId, remote, branch)
+    handlers[IPC_HANDLER_KEYS.GIT_DELETE_REMOTE_BRANCH] = ({ projectId, name }) =>
+      this.deleteRemoteBranch(projectId, name)
 
     handlers[IPC_HANDLER_KEYS.GIT_MONITOR_START] = ({ projectId, options }) =>
       this.startMonitor(projectId, options)
@@ -167,41 +168,28 @@ export default class GitManager extends BaseManager {
 
   private async push(
     projectId: string,
-    args: { remote?: string; branch?: string },
-  ): Promise<{ ok: boolean; error?: string; stdout?: string; stderr?: string }> {
+    remote?: string,
+    branch?: string,
+  ): Promise<GitOpResult | undefined> {
     const tools = await this.__getTools(projectId)
-    if (!tools) return { ok: false, error: 'Git tools unavailable' }
-    try {
-      const res = await tools.push(args.remote, args.branch)
-      if ((res as any)?.ok) return { ok: true, stdout: (res as any).stdout }
-      return { ok: false, error: (res as any)?.error || 'Push failed', stdout: (res as any)?.stdout, stderr: (res as any)?.stderr }
-    } catch (e: any) {
-      return { ok: false, error: e?.message || String(e) }
-    }
+    if (!tools) return
+    return await tools.push(remote, branch)
   }
 
-  private async deleteBranch(projectId: string, name: string) {
+  private async deleteBranch(projectId: string, name: string): Promise<GitOpResult | undefined> {
     const tools = await this.__getTools(projectId)
-    if (!tools) return { ok: false, error: 'Git tools unavailable' }
+    if (!tools) return
     return tools.deleteBranch(name)
   }
 
+  //TODO: deleteRemoteBranch
   private async deleteRemoteBranch(
     projectId: string,
-    args: { remote?: string; branch: string },
-  ): Promise<{ ok: boolean; error?: string; stdout?: string; stderr?: string }> {
+    name: string,
+  ): Promise<GitOpResult | undefined> {
     const tools = await this.__getTools(projectId)
-    if (!tools) return { ok: false, error: 'Git tools unavailable' }
-    try {
-      // Use refspec ':branch' to delete remote branch
-      const remote = args.remote || 'origin'
-      const refspec = `:${args.branch}`
-      const res = await tools.push(remote, refspec as any)
-      if ((res as any)?.ok) return { ok: true, stdout: (res as any).stdout }
-      return { ok: false, error: (res as any)?.error || 'Remote delete failed', stdout: (res as any)?.stdout, stderr: (res as any)?.stderr }
-    } catch (e: any) {
-      return { ok: false, error: e?.message || String(e) }
-    }
+    if (!tools) return
+    return tools.deleteBranch(name)
   }
 
   private async updateTool(projectId: string): Promise<GitTools | undefined> {

@@ -57,7 +57,9 @@ function FileDiffItem({ file }: { file: MergeReportFile }) {
   return (
     <div className="border rounded-md border-neutral-200 dark:border-neutral-800 overflow-hidden">
       <div className="px-3 py-2 text-xs flex items-center justify-between bg-neutral-50 dark:bg-neutral-900/40">
-        <div className="truncate font-mono pr-3 flex-1" title={file.path}>{file.path}</div>
+        <div className="truncate font-mono pr-3 flex-1" title={file.path}>
+          {file.path}
+        </div>
         <div className="flex items-center gap-2 shrink-0">
           <div className="text-[10px] uppercase tracking-wide text-neutral-600 dark:text-neutral-400">
             {file.status}
@@ -488,19 +490,20 @@ export default function GitMergeModal(props: GitMergeModalProps) {
           setPostActionRunning(true)
           let pushOk = true
           if (autoPush) {
-            const pushRes = await gitService.push(projectId, { remote: 'origin', branch: baseRef })
-            if (!pushRes.ok) {
+            const pushRes = await gitService.push(projectId, 'origin', baseRef)
+            if (!pushRes || !pushRes.ok) {
               pushOk = false
-              localError = (pushRes.error || 'Push failed') + (pushRes.stderr ? `\n${pushRes.stderr}` : '')
+              localError =
+                ((pushRes as any).error || 'Push failed') +
+                (pushRes?.result?.stderr ? `\n${pushRes.result.stderr}` : '')
             }
           }
           if (deleteRemote && (!autoPush || pushOk)) {
-            const delRes = await gitService.deleteRemoteBranch(projectId, {
-              remote: 'origin',
-              branch,
-            })
-            if (!delRes.ok) {
-              localError = (delRes.error || 'Delete remote branch failed') + (delRes.stderr ? `\n${delRes.stderr}` : '')
+            const delRes = await gitService.deleteRemoteBranch(projectId, branch)
+            if (!delRes || !delRes.ok) {
+              localError =
+                ((delRes as any)?.error || 'Delete remote branch failed') +
+                (delRes?.result?.stderr ? `\n${delRes.result.stderr}` : '')
             }
           }
           setPostActionRunning(false)
@@ -544,7 +547,11 @@ export default function GitMergeModal(props: GitMergeModalProps) {
           Close
         </Button>
         <Tooltip content={'fast merge'} placement="top">
-          <Button onClick={() => setConfirmOpen(true)} loading={merging || postActionRunning} disabled={merging || postActionRunning}>
+          <Button
+            onClick={() => setConfirmOpen(true)}
+            loading={merging || postActionRunning}
+            disabled={merging || postActionRunning}
+          >
             <span className="inline-flex items-center gap-2">
               <IconFastMerge className="w-4 h-4" />
               {merging ? 'Merging…' : postActionRunning ? 'Finalizing…' : 'Merge'}
@@ -778,7 +785,9 @@ export default function GitMergeModal(props: GitMergeModalProps) {
           />
           <span>
             Automatically push to origin
-            <div className="text-xs text-neutral-500">Saves setting. Pushes {baseRef} after merge.</div>
+            <div className="text-xs text-neutral-500">
+              Saves setting. Pushes {baseRef} after merge.
+            </div>
           </span>
         </label>
         <label className="flex items-start gap-2 text-sm cursor-pointer select-none mt-2">
