@@ -1,6 +1,6 @@
 {
   "id": "31525c17-b752-45a1-8cb8-fbdbb750d8e7",
-  "status": "+",
+  "status": "-",
   "title": "Create Sourcetree replacement - a popular version control management app",
   "description": "Goal Provide built-in Git workflows so users do not need external tools (e.g., SourceTree) for routine tasks: viewing repo status and branches, reviewing diffs (working tree, staged, and branch-to-base), running focused tests, merging, and resolving conflicts. Scope for this iteration - Navigation and views: - Add a Git section with two subviews: 'Current project' and 'All projects'. - Current project shows pending operations for the active repo; All projects aggregates across all known projects from ProjectContext (src/renderer/src/contexts/ProjectContext.tsx). - Pending operations definition: - A pending operation is a feature branch with commits ahead of the base branch (default base is the current branch). Feature branches follow the existing convention 'features/<storyId>' where storyId is a UUID. We may later extend to 'features/<storyId>.<featureId>' but uniqueness is already guaranteed by storyId. - Merge flow: - Clicking a pending item opens a Git Merge popup that shows context (project/story/branch), per-file diffs, and analysis placeholders: compilation impact, tests impact, and diff coverage across changed lines. These analyses start as stubs/adapters and should degrade gracefully when not available. On conflicts, the flow should transition into the conflict resolution UI. - Integration notes: - Reuse GitMonitor for status and add aggregation to compute ahead/behind and feature branches across projects. - Reuse/extend existing functions in src/logic/git-monitor/storyBranchNaming.js to resolve story IDs from branch names and expose this mapping to the renderer. - Respect current behavior where agents run from the branch they started; do not force checkouts. All operations must be safe-by-default with timeouts and clear error surfacing. Out of scope for this iteration - Remote PR management, stash workflows, and hunk-level staging (planned separately). Acceptance (high level) - Users can navigate to a Git panel, see pending branches grouped appropriately, open a merge popup with diffs and analysis placeholders, execute a merge, and resolve conflicts without leaving the app.\n\nThe main process class responsible for interfacing with `thefactory-tools` which provides all git operations is @src/logic/git/GitManager.ts . GitManager interfaces with the renderer via @src/renderer/src/services/gitService.ts and @src/preload/ipcHandlersKeys.ts and @src/preload/index.ts . And the forefront interface for all views that is making the usage of all git operations easy is @src/renderer/src/contexts/GitContext.tsx .\n\nAll the relevant types from `thefactory-tools` i.e. `GitTools` can be found in the local copy at:\n`src/logic/git/gitTypes.copy.ts`",
   "features": [
@@ -197,53 +197,55 @@
     },
     {
       "id": "d1eb355f-334e-4f85-85d6-ecaccfc35978",
-      "status": "+",
-      "title": "Implement 'View Changes' Icon in Merge Modal",
-      "description": "In the Git Merge Modal's file list, add an 'eye' icon button to each file. This button serves as the primary way to view the diff for that file. While the long-term goal is to show only incoming changes (dependent on backend updates in `docs/GIT_TOOLS_UPDATE.md`), the initial implementation will have the icon toggle the display of the existing diff view.",
-      "context": [],
+      "status": "-",
+      "title": "Chevron controls showing hiding of diff files in Merge Modal",
+      "description": "In @src/renderer/src/screens/git/GitMergeModal.tsx there should be a standard chevron icon to the right when a diff is closed and pointing down when a diff is open. All diffs start closed.",
+      "context": [
+        "src/renderer/src/screens/git/GitMergeModal.tsx"
+      ],
       "createdAt": "2025-10-27T16:06:12.501Z",
-      "updatedAt": "2025-10-27T16:26:56.708Z",
-      "completedAt": "2025-10-27T16:26:56.708Z"
-    },
-    {
-      "id": "0aaa0980-1b83-4fcf-ad5e-ffaf1f60bbc8",
-      "status": "+",
-      "title": "Enhance Merge Button with Icon and Tooltip",
-      "description": "Update the main merge button in the Git Merge Modal. Add a tooltip that clearly states 'Fast merge (fast-forward if possible)'. The button should also display a `GitMerge` icon from the `lucide-react` library to the left of the 'Merge' text for better visual identification.",
-      "context": [],
-      "createdAt": "2025-10-27T16:06:12.502Z",
-      "updatedAt": "2025-10-27T16:28:08.152Z",
-      "completedAt": "2025-10-27T16:28:08.152Z"
+      "updatedAt": "2025-10-27T17:51:35.428Z",
+      "blockers": []
     },
     {
       "id": "54ca5933-b89b-4392-8250-aaf479dfedc0",
-      "status": "+",
+      "status": "-",
       "title": "Implement Pre-Merge Confirmation Dialog with Push/Delete Options",
       "description": "When a user clicks the 'Merge' button in the Git Merge Modal, display a confirmation dialog. This dialog should summarize the changes and provide two persistent options: 1) 'Automatically push to origin' and 2) 'Delete remote branch after merge'. The state of these checkboxes should be saved locally. If checked, the corresponding Git operations should be executed after a successful merge.",
-      "context": [],
+      "context": [
+        "src/renderer/src/screens/GitView.tsx"
+      ],
       "createdAt": "2025-10-27T16:11:00.852Z",
-      "updatedAt": "2025-10-27T16:35:52.226Z",
-      "completedAt": "2025-10-27T16:35:52.226Z"
+      "updatedAt": "2025-10-27T17:54:13.488Z",
+      "rejection": "This dialog should also appear for the \"Fast Merge\" button in @src/renderer/src/screens/GitView.tsx",
+      "blockers": []
     },
     {
       "id": "bfa3d487-d173-4126-9789-68bb323dac38",
-      "status": "+",
-      "title": "Implement 'View Changes' Icon in Merge Modal",
-      "description": "In the Git Merge Modal's file list, add an 'eye' icon button to each file. This button serves as the primary way to view the diff for that file. The initial implementation will have the icon toggle the display of the existing diff view.",
-      "context": [],
+      "status": "-",
+      "title": "Update the View button in GitView",
+      "description": "In @src/renderer/src/screens/GitView.tsx use the @src/renderer/src/components/ui/icons/IconEye.tsx as the icon for the \"view\" button.\nThe icon needs to be updated to match better in style to all the other icons.",
+      "context": [
+        "src/renderer/src/screens/GitView.tsx",
+        "src/renderer/src/components/ui/icons/IconEye.tsx"
+      ],
       "createdAt": "2025-10-27T16:13:12.146Z",
-      "updatedAt": "2025-10-27T16:36:12.865Z",
-      "completedAt": "2025-10-27T16:36:12.865Z"
+      "updatedAt": "2025-10-27T17:53:45.622Z",
+      "blockers": []
     },
     {
       "id": "8ca56f99-3f26-4f70-8dd2-d2dcf73b75b8",
-      "status": "+",
+      "status": "-",
       "title": "Enhance Merge Button with Icon and Tooltip",
-      "description": "Update the main merge button in the Git Merge Modal. Add a tooltip that clearly states 'fast merge'. The button should also display an icon with an arrow originating from two dots and a tick for better visual identification.",
-      "context": [],
+      "description": "Update the fast merge button in the @src/renderer/src/screens/GitView.tsx . Add a tooltip that clearly states 'fast merge'. The button should also display an icon with an arrow originating from two dots and a tick for better visual identification.",
+      "context": [
+        "src/renderer/src/screens/GitView.tsx",
+        "src/renderer/src/components/ui/icons/IconFastMerge.tsx"
+      ],
       "createdAt": "2025-10-27T16:13:12.147Z",
-      "updatedAt": "2025-10-27T16:39:03.371Z",
-      "completedAt": "2025-10-27T16:39:03.371Z"
+      "updatedAt": "2025-10-27T17:50:24.274Z",
+      "rejection": "There is an icon @src/renderer/src/components/ui/icons/IconFastMerge.tsx but it should be updated to match the color/style of the other icons.",
+      "blockers": []
     }
   ],
   "featureIdToDisplayIndex": {
@@ -267,12 +269,10 @@
     "2d942460-1b9d-409b-9b22-b692a7eea38a": 18,
     "df27b5ca-a8b3-4a65-a05c-595db51743ff": 19,
     "d1eb355f-334e-4f85-85d6-ecaccfc35978": 20,
-    "0aaa0980-1b83-4fcf-ad5e-ffaf1f60bbc8": 21,
-    "54ca5933-b89b-4392-8250-aaf479dfedc0": 22,
-    "bfa3d487-d173-4126-9789-68bb323dac38": 23,
-    "8ca56f99-3f26-4f70-8dd2-d2dcf73b75b8": 24
+    "54ca5933-b89b-4392-8250-aaf479dfedc0": 21,
+    "bfa3d487-d173-4126-9789-68bb323dac38": 22,
+    "8ca56f99-3f26-4f70-8dd2-d2dcf73b75b8": 23
   },
   "createdAt": "2025-10-21T17:28:55.063Z",
-  "updatedAt": "2025-10-27T09:51:40.369Z",
-  "completedAt": "2025-10-27T16:39:03.371Z"
+  "updatedAt": "2025-10-27T09:51:40.369Z"
 }
