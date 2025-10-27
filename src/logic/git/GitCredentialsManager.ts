@@ -22,9 +22,6 @@ export default class GitCredentialsManager extends BaseManager {
     this.cache = this.__load()
   }
 
-  async init(): Promise<void> {
-    await super.init()
-  }
   getHandlers(): Record<string, (args: any) => any> {
     const handlers: Record<string, (args: any) => any> = {}
 
@@ -32,6 +29,7 @@ export default class GitCredentialsManager extends BaseManager {
     handlers[IPC_HANDLER_KEYS.GIT_CREDENTIALS_ADD] = ({ input }) => this.add(input)
     handlers[IPC_HANDLER_KEYS.GIT_CREDENTIALS_UPDATE] = ({ id, patch }) => this.update(id, patch)
     handlers[IPC_HANDLER_KEYS.GIT_CREDENTIALS_REMOVE] = ({ id }) => this.remove(id)
+    handlers[IPC_HANDLER_KEYS.GIT_CREDENTIALS_GET] = ({ id }) => this.get(id)
 
     return handlers
   }
@@ -62,9 +60,8 @@ export default class GitCredentialsManager extends BaseManager {
     this.__persist(all)
   }
 
-  /** Convenience: return the first credential, used as default when no mapping is configured */
-  getDefault(): GitHubCredentials | undefined {
-    return this.cache[0]
+  get(id: string): GitHubCredentials | undefined {
+    return this.cache.find((c) => c.id === id)
   }
 
   private __storageKey() {
@@ -85,19 +82,17 @@ export default class GitCredentialsManager extends BaseManager {
     try {
       this.storage.setItem(this.__storageKey(), JSON.stringify(next))
       this.cache = next
-      this._broadcast()
+      this.__broadcast()
     } catch (e) {
       console.error('Failed to persist credentials:', e)
     }
   }
 
-  private _broadcast(): void {
+  private __broadcast(): void {
     try {
       if (this.window && !this.window.isDestroyed()) {
         this.window.webContents.send(IPC_HANDLER_KEYS.GIT_CREDENTIALS_SUBSCRIBE, {})
       }
-    } catch (_) {
-      // ignore
-    }
+    } catch (_) {}
   }
 }

@@ -10,7 +10,7 @@ function PendingItem({
   item,
   projectTitle,
 }: {
-  item: import('../contexts/GitContext').PendingBranchSummary
+  item: PendingBranchSummary
   projectTitle?: string
 }) {
   const { openModal } = useNavigator()
@@ -38,7 +38,9 @@ function PendingItem({
           {projectTitle ? `${projectTitle} · ` : ''}
           base {item.baseRef}
           {story}
-          {item.totals ? ` · +${item.totals.insertions}/-${item.totals.deletions} · ${item.totals.filesChanged} files` : ''}
+          {item.totals
+            ? ` · +${item.totals.insertions}/-${item.totals.deletions} · ${item.totals.filesChanged} files`
+            : ''}
         </div>
       </div>
       <div className="shrink-0 text-xs text-neutral-700 dark:text-neutral-300">{aheadBehind}</div>
@@ -49,7 +51,9 @@ function PendingItem({
 function CurrentProjectView() {
   const { currentProject, loading, error, refresh } = useGit()
   const { projects } = useProjectContext()
-  const title = currentProject ? projects.find((p) => p.id === currentProject.projectId)?.title : undefined
+  const title = currentProject
+    ? projects.find((p) => p.id === currentProject.projectId)?.title
+    : undefined
 
   return (
     <div className="flex-1 min-h-0 min-w-0 rounded-md border border-neutral-200 dark:border-neutral-800 flex flex-col">
@@ -68,10 +72,14 @@ function CurrentProjectView() {
           </div>
         )}
         {error && !loading && (
-          <div className="p-4 text-sm text-red-600 dark:text-red-400 whitespace-pre-wrap">{error}</div>
+          <div className="p-4 text-sm text-red-600 dark:text-red-400 whitespace-pre-wrap">
+            {error}
+          </div>
         )}
         {!loading && !error && currentProject && currentProject.pending.length === 0 && (
-          <div className="p-4 text-sm text-neutral-500">No pending feature branches ahead of base.</div>
+          <div className="p-4 text-sm text-neutral-500">
+            No pending feature branches ahead of base.
+          </div>
         )}
         {!loading && !error && currentProject && currentProject.pending.length > 0 && (
           <div className="divide-y divide-neutral-100 dark:divide-neutral-900">
@@ -109,11 +117,15 @@ function AllProjectsView() {
           </div>
         )}
         {error && !loading && (
-          <div className="p-4 text-sm text-red-600 dark:text-red-400 whitespace-pre-wrap">{error}</div>
+          <div className="p-4 text-sm text-red-600 dark:text-red-400 whitespace-pre-wrap">
+            {error}
+          </div>
         )}
 
         {!loading && !error && !anyPending && (
-          <div className="p-4 text-sm text-neutral-500">No pending feature branches across projects.</div>
+          <div className="p-4 text-sm text-neutral-500">
+            No pending feature branches across projects.
+          </div>
         )}
 
         {!loading && !error && anyPending && (

@@ -4,10 +4,10 @@ import { gitCredentialsService } from '../services/gitCredentialsService'
 
 export type GitHubCredentialsContextValue = {
   credentials: GitHubCredentials[]
-  addCredentials: (c: Omit<GitHubCredentials, 'id'>) => void
-  updateCredentials: (id: string, updates: Partial<GitHubCredentials>) => void
-  removeCredentials: (id: string) => void
-  getCredentials: (id: string) => GitHubCredentials | undefined
+  addCredentials: (c: Omit<GitHubCredentials, 'id'>) => Promise<void>
+  updateCredentials: (id: string, updates: Partial<GitHubCredentials>) => Promise<void>
+  removeCredentials: (id: string) => Promise<void>
+  getCredentials: (id: string) => Promise<GitHubCredentials | undefined>
 }
 
 const GitHubCredentialsContext = createContext<GitHubCredentialsContextValue | null>(null)
@@ -57,8 +57,8 @@ export function GitHubCredentialsProvider({ children }: { children: React.ReactN
   )
 
   const getCredentials = useCallback(
-    (id: string) => {
-      return credentials.find((c) => c.id == id)
+    async (id: string) => {
+      return await gitCredentialsService.get(id)
     },
     [credentials],
   )

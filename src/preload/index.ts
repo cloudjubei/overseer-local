@@ -323,12 +323,12 @@ const DOCUMENT_INGESTION_API = {
 }
 
 const GIT_API = {
-  todo: (projectId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_TODO, { projectId }),
   getMergePlan: (args) => ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_GET_MERGE_PLAN, args),
   buildMergeReport: (planOrOptions, options) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_BUILD_MERGE_REPORT, { planOrOptions, options }),
   applyMerge: (options) => ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_APPLY_MERGE, { options }),
-  getLocalStatus: (options) => ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_GET_LOCAL_STATUS, { options }),
+  getLocalStatus: (options) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_GET_LOCAL_STATUS, { options }),
   getBranchDiffSummary: (options) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_GET_BRANCH_DIFF_SUMMARY, { options }),
 }
@@ -343,6 +343,7 @@ const GIT_CREDENTIALS_API = {
   add: (input) => ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_CREDENTIALS_ADD, { input }),
   update: (id, patch) => ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_CREDENTIALS_UPDATE, { id, patch }),
   remove: (id) => ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_CREDENTIALS_REMOVE, { id }),
+  get: (id) => ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_CREDENTIALS_GET, { id }),
 }
 
 if (process.contextIsolated) {

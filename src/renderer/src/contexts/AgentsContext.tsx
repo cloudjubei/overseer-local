@@ -120,16 +120,6 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
     update()
   }, [])
 
-  const activeCredentials = useMemo(() => {
-    if (activeProject) {
-      const githubCredentialsId = activeProject.metadata?.githubCredentialsId
-      if (githubCredentialsId) {
-        return getCredentials(githubCredentialsId)
-      }
-    }
-    return
-  }, [activeProject, getCredentials])
-
   const coerceAgentTypeForStory = async (
     agentType: AgentType,
     projectId: string,
@@ -152,6 +142,11 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
       if (!activeConfig) {
         throw new Error('NO ACTIVE LLM CONFIG')
       }
+      const githubCredentialsId = activeProject?.metadata?.githubCredentialsId
+      if (githubCredentialsId) {
+        throw new Error('NO ACTIVE GITHUB CREDENTIALS ID')
+      }
+      const activeCredentials = await getCredentials(githubCredentialsId)
       if (!activeCredentials) {
         throw new Error('NO ACTIVE GITHUB CREDENTIALS')
       }
@@ -166,7 +161,7 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
         webSearchApiKeys: appSettings.webSearchApiKeys,
       })
     },
-    [activeConfig, appSettings, activeCredentials],
+    [activeConfig, appSettings, activeProject, getCredentials, coerceAgentTypeForStory],
   )
 
   const cancelRun = useCallback(

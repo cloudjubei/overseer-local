@@ -12,6 +12,7 @@ export type GitCredentialsService = {
   add: (input: Omit<GitHubCredentials, 'id'>) => Promise<GitHubCredentials>
   update: (id: string, patch: Partial<GitHubCredentials>) => Promise<GitHubCredentials | undefined>
   remove: (id: string) => Promise<void>
+  get: (id: string) => Promise<GitHubCredentials | undefined>
 }
 
 export const gitCredentialsService: GitCredentialsService = { ...window.gitCredentialsService }
