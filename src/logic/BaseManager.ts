@@ -14,7 +14,7 @@ export default class BaseManager {
   async init(): Promise<void> {
     await this._registerIpcHandlers()
   }
-  async stopWatching(): Promise<void> {
+  async cleanup(): Promise<void> {
     return Promise.resolve()
   }
   getHandlers(): Record<string, (args: any) => any> {

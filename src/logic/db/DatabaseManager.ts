@@ -102,7 +102,7 @@ export default class DatabaseManager extends BaseManager {
     return this._status.connected
   }
 
-  async stopWatching(): Promise<void> {
+  async cleanup(): Promise<void> {
     await this.close()
   }
 

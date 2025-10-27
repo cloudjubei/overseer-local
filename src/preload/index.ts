@@ -337,6 +337,14 @@ const GIT_API = {
     ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_GET_LOCAL_STATUS, { projectId, options }),
   getBranchDiffSummary: (projectId, options) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_GET_BRANCH_DIFF_SUMMARY, { projectId, options }),
+  startMonitor: (projectId, options) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_MONITOR_START, { projectId, options }),
+  stopMonitor: (projectId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_MONITOR_STOP, { projectId }),
+  subscribeToMonitorUpdates: (callback) => {
+    const listener = (_event, payload) => callback(payload)
+    ipcRenderer.on(IPC_HANDLER_KEYS.GIT_MONITOR_UPDATE, listener)
+    return () => ipcRenderer.removeListener(IPC_HANDLER_KEYS.GIT_MONITOR_UPDATE, listener)
+  },
 }
 
 const GIT_CREDENTIALS_API = {

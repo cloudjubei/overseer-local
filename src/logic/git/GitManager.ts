@@ -4,6 +4,8 @@ import {
   ApplyMergeOptions,
   BuildMergeReportOptions,
   DiffSummary,
+  GitMonitor,
+  GitMonitorConfig,
   GitTools,
   LocalStatus,
   MergePlan,
@@ -20,6 +22,7 @@ import GitCredentialsManager from './GitCredentialsManager'
 export default class GitManager extends BaseManager {
   private toolsLock = new Mutex()
   private tools: Record<string, GitTools> = {}
+  private monitors: Record<string, GitMonitor> = {}
   private projectsManager: ProjectsManager
   private gitCredentialsManager: GitCredentialsManager
 
@@ -39,6 +42,13 @@ export default class GitManager extends BaseManager {
     await super.init()
   }
 
+  async cleanup(): Promise<void> {
+    for (const projectId in this.monitors) {
+      this.stopMonitor(projectId)
+    }
+    await super.cleanup()
+  }
+
   getHandlersAsync(): Record<string, (args: any) => Promise<any>> {
     const handlers: Record<string, (args: any) => Promise<any>> = {}
 
@@ -53,7 +63,49 @@ export default class GitManager extends BaseManager {
     handlers[IPC_HANDLER_KEYS.GIT_GET_BRANCH_DIFF_SUMMARY] = ({ projectId, options }) =>
       this.getBranchDiffSummary(projectId, options)
 
+    handlers[IPC_HANDLER_KEYS.GIT_MONITOR_START] = ({ projectId, options }) =>
+      this.startMonitor(projectId, options)
+    handlers[IPC_HANDLER_KEYS.GIT_MONITOR_STOP] = ({ projectId }) => this.stopMonitor(projectId)
+
     return handlers
+  }
+
+  private async startMonitor(
+    projectId: string,
+    options: Omit<GitMonitorConfig, 'repoPath'>,
+  ): Promise<void> {
+    const tools = await this.__getTools(projectId)
+    if (!tools) {
+      console.error(`[GitManager] Could not get tools for project ${projectId} to start monitor.`)
+      return
+    }
+
+    await this.stopMonitor(projectId)
+
+    const monitor = tools.startMonitor({
+      ...options,
+      onUpdate: (state) => {
+        if (this.window && !this.window.isDestroyed()) {
+          this.window.webContents.send(IPC_HANDLER_KEYS.GIT_MONITOR_UPDATE, {
+            projectId,
+            state,
+          })
+        }
+      },
+      onError: (err) => {
+        console.error(`[GitManager] Monitor error for project ${projectId}:`, err)
+      },
+    })
+
+    this.monitors[projectId] = monitor
+  }
+
+  private async stopMonitor(projectId: string): Promise<void> {
+    const monitor = this.monitors[projectId]
+    if (monitor) {
+      monitor.stop()
+      delete this.monitors[projectId]
+    }
   }
 
   private async getMergePlan(
@@ -73,14 +125,12 @@ export default class GitManager extends BaseManager {
     const tools = await this.__getTools(projectId)
     if (!tools) return
 
-    // If it's a MergePlan (has files array and schemaVersion), use directly
     const isPlan = (obj: any): obj is MergePlan => !!obj && Array.isArray((obj as any).files)
 
     if (isPlan(planOrOptions)) {
       return tools.buildMergeReport(planOrOptions as MergePlan, options)
     }
 
-    // Otherwise, treat as options: compute plan first then build report
     const plan = await tools.getMergePlan(planOrOptions as Omit<MergePlanOptions, 'repoPath'>)
     return tools.buildMergeReport(plan, options)
   }

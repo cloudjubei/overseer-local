@@ -106,7 +106,7 @@ export async function initManagers(projectRoot: string, mainWindow: BrowserWindo
 export function stopManagers(): void {
   for (const manager of managers) {
     try {
-      manager.stopWatching()
+      manager.cleanup()
     } catch (_) {}
   }
 }

@@ -2,6 +2,8 @@ import {
   ApplyMergeOptions,
   BuildMergeReportOptions,
   DiffSummary,
+  GitBranchEvent,
+  GitMonitorConfig,
   LocalStatus,
   LocalStatusOptions,
   MergePlan,
@@ -36,6 +38,15 @@ export type GitService = {
       includePatch?: boolean
     },
   ) => Promise<DiffSummary>
+
+  startMonitor: (
+    projectId: string,
+    options: Omit<GitMonitorConfig, 'repoPath' | 'onUpdate' | 'onError'>,
+  ) => Promise<void>
+  stopMonitor: (projectId: string) => Promise<void>
+  subscribeToMonitorUpdates: (
+    callback: (payload: { projectId: string; state: GitBranchEvent }) => void,
+  ) => () => void
 }
 
 export const gitService: GitService = {

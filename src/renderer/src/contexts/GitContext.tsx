@@ -1,10 +1,18 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 import { gitService } from '../services/gitService'
 import { useProjectContext } from './ProjectContext'
 import {
   ApplyMergeOptions,
   BuildMergeReportOptions,
   DiffSummary,
+  GitBranchEvent,
   LocalStatus,
   LocalStatusOptions,
   MergePlan,
@@ -54,10 +62,15 @@ export type GitContextValue = {
 
 const GitContext = createContext<GitContextValue | null>(null)
 
+const getStoryIdFromBranchName = (branchName: string): string | undefined => {
+  const match = branchName.match(/^features\/([0-9a-fA-F-]+)/)
+  return match ? match[1] : undefined
+}
+
 export function GitProvider({ children }: { children: React.ReactNode }) {
   const { activeProjectId, projects } = useProjectContext()
 
-  const [loading, setLoading] = useState<boolean>(false)
+  const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | undefined>(undefined)
   const [currentProject, setCurrentProject] = useState<ProjectGitStatus>({
     projectId: activeProjectId,
@@ -98,41 +111,83 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
     [activeProjectId],
   )
 
-  // Data fetcher: currently provides empty pending arrays (degrades gracefully)
-  // and validates connectivity by attempting a lightweight local status call per project when possible.
-  const refresh = useCallback(async () => {
-    setLoading(true)
-    setError(undefined)
-    try {
-      // Attempt a quick status call for the active project to surface errors early
-      try {
-        await gitService.getLocalStatus(activeProjectId, {})
-      } catch (e: any) {
-        // Do not hard fail the whole view; record the error message
-        setError(e?.message || String(e))
-      }
-
-      // Build empty pending states for all known projects (we will enrich in subsequent iterations)
-      const perProject: ProjectGitStatus[] = projects.map((p) => ({
-        projectId: p.id,
-        pending: [],
-      }))
-
-      setAllProjects(perProject)
-      const curr = perProject.find((p) => p.projectId === activeProjectId) || {
-        projectId: activeProjectId,
-        pending: [],
-      }
-      setCurrentProject(curr)
-    } finally {
-      setLoading(false)
-    }
-  }, [activeProjectId, projects])
-
-  // Refresh on mount and when active project changes
   useEffect(() => {
-    refresh().catch((e) => setError(e?.message || String(e)))
-  }, [refresh])
+    setLoading(true)
+    setAllProjects(projects.map((p) => ({ projectId: p.id, pending: [] })))
+
+    Promise.all(
+      projects.map((p) => {
+        const baseBranch = 'main' // This could be configurable in project settings later
+        return gitService.startMonitor(p.id, {
+          baseBranch,
+          branchFilter: (branch) => branch.startsWith('features/'),
+        })
+      }),
+    ).catch((e) => {
+      setError(e?.message || String(e))
+      setLoading(false)
+    })
+
+    const handleUpdate = (payload: { projectId: string; state: GitBranchEvent }) => {
+      if (loading) setLoading(false)
+      const { projectId, state: branchUpdate } = payload
+
+      setAllProjects((current) => {
+        const projectIndex = current.findIndex((p) => p.projectId === projectId)
+        if (projectIndex === -1) return current
+
+        const newAllProjects = [...current]
+        const newProjectStatus = { ...newAllProjects[projectIndex] }
+        newAllProjects[projectIndex] = newProjectStatus
+
+        const newPending = [...newProjectStatus.pending]
+        newProjectStatus.pending = newPending
+
+        const branchIdx = newPending.findIndex((b) => b.branch === branchUpdate.name)
+
+        if (branchUpdate.ahead > 0) {
+          const pendingBranch: PendingBranch = {
+            projectId,
+            branch: branchUpdate.name,
+            baseRef: 'main', // Assumes the base branch from monitor config
+            repoPath: '', // Not available on the event, handled by backend
+            ahead: branchUpdate.ahead,
+            behind: branchUpdate.behind,
+            storyId: getStoryIdFromBranchName(branchUpdate.name),
+          }
+          if (branchIdx > -1) {
+            newPending[branchIdx] = pendingBranch
+          } else {
+            newPending.push(pendingBranch)
+          }
+        } else if (branchIdx > -1) {
+          newPending.splice(branchIdx, 1)
+        }
+
+        return newAllProjects
+      })
+    }
+
+    const unsubscribe = gitService.subscribeToMonitorUpdates(handleUpdate)
+
+    return () => {
+      unsubscribe()
+      projects.forEach((p) => gitService.stopMonitor(p.id))
+    }
+  }, [projects])
+
+  useEffect(() => {
+    const curr = allProjects.find((p) => p.projectId === activeProjectId) || {
+      projectId: activeProjectId,
+      pending: [],
+    }
+    setCurrentProject(curr)
+  }, [activeProjectId, allProjects])
+
+  const refresh = useCallback(async () => {
+    // This is now a no-op as the context is live.
+    // The useEffect hook handles setup and updates automatically.
+  }, [])
 
   const value = useMemo<GitContextValue>(
     () => ({
