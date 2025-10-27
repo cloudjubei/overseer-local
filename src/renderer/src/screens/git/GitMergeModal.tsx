@@ -173,8 +173,8 @@ export default function GitMergeModal(props: GitMergeModalProps) {
   const [mergeError, setMergeError] = React.useState<string | undefined>(undefined)
   const [mergeResult, setMergeResult] = React.useState<MergeResult | undefined>(undefined)
 
-  // Analysis tab state
-  const [activeTab, setActiveTab] = React.useState<'compilation' | 'tests' | 'coverage'>('compilation')
+  // Unified tab state (includes Changes)
+  const [activeTab, setActiveTab] = React.useState<'changes' | 'compilation' | 'tests' | 'coverage'>('changes')
 
   // Compilation impact (heuristic)
   const [compilationInfo, setCompilationInfo] = React.useState<{
@@ -412,14 +412,12 @@ export default function GitMergeModal(props: GitMergeModalProps) {
   }
 
   const header = (
-    <div className="flex items-center gap-3">
-      <div className="flex flex-col">
-        <div className="text-base font-semibold">Prepare merge</div>
-        <div className="text-xs text-neutral-600 dark:text-neutral-400">
-          {project?.title || projectId} · base {baseRef} · source {branch}
-          {storyId ? ` · story ${storyId}` : ''}
-          {featureId ? ` · feature ${featureId}` : ''}
-        </div>
+    <div className="flex flex-col gap-1.5">
+      <div className="text-base font-semibold">Prepare merge</div>
+      <div className="text-xs text-neutral-600 dark:text-neutral-400">
+        {project?.title || projectId} · base {baseRef} · source {branch}
+        {storyId ? ` · story ${storyId}` : ''}
+        {featureId ? ` · feature ${featureId}` : ''}
       </div>
     </div>
   )
@@ -444,14 +442,198 @@ export default function GitMergeModal(props: GitMergeModalProps) {
 
   const hasConflicts = (mergeResult?.conflicts?.length || 0) > 0
 
-  const AnalysisTabs = (
-    <div className="flex flex-col gap-3">
-      <div className="flex items-center gap-3">
+  function renderChangesTab() {
+    return (
+      <div className="flex flex-col gap-3">
+        {loading && (
+          <div className="p-3 text-sm text-neutral-600 dark:text-neutral-400 flex items-center gap-2">
+            <Spinner size={14} label="Loading diff preview..." />
+          </div>
+        )}
+        {!loading && error && (
+          <div className="p-3 text-sm text-red-600 dark:text-red-400 whitespace-pre-wrap">{error}</div>
+        )}
+        {!loading && !error && (!report || report.files.length === 0) && (
+          <div className="p-3 text-sm text-neutral-600 dark:text-neutral-400">
+            Diff preview unavailable. You can still proceed to merge.
+          </div>
+        )}
+        {!loading && !error && report && report.files.length > 0 && (
+          <div className="flex flex-col gap-3">
+            {report.files.map((f: MergeReportFile) => (
+              <FileDiffItem key={f.path} file={f} />
+            ))}
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  function renderCompilationTab() {
+    return (
+      <div className="border rounded-md p-3 border-neutral-200 dark:border-neutral-800">
+        <div className="text-sm font-medium mb-2">Compilation Impact</div>
+        {!report && loading && (
+          <div className="text-xs text-neutral-600 dark:text-neutral-400 flex items-center gap-2">
+            <Spinner size={14} label="Analyzing..." />
+          </div>
+        )}
+        {report && compilationInfo && (
+          <div className="space-y-3">
+            <div className="text-xs text-neutral-700 dark:text-neutral-300">{compilationInfo.summary}</div>
+            <div className="max-h-48 overflow-auto divide-y divide-neutral-100 dark:divide-neutral-900">
+              {compilationInfo.details.map((d, idx) => (
+                <div key={idx} className="py-1.5 flex items-center justify-between gap-3">
+                  <div className="text-xs font-mono truncate">{d.path}</div>
+                  <div className="text-xs text-neutral-600 dark:text-neutral-400">
+                    <span
+                      className={
+                        d.risk === 'high'
+                          ? 'text-red-600 dark:text-red-400'
+                          : d.risk === 'medium'
+                          ? 'text-amber-700 dark:text-amber-300'
+                          : 'text-neutral-500'
+                      }
+                    >
+                      {d.risk.toUpperCase()}
+                    </span>
+                    <span className="ml-2">{d.reason}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="text-[11px] text-neutral-500">Heuristic only. Build adapters can refine this in future.</div>
+          </div>
+        )}
+        {!report && !loading && (
+          <div className="text-xs text-neutral-500">Report unavailable.</div>
+        )}
+      </div>
+    )
+  }
+
+  function renderTestsTab() {
+    return (
+      <div className="border rounded-md p-3 border-neutral-200 dark:border-neutral-800">
+        <div className="text-sm font-medium mb-2">Tests Impact</div>
+        {!report && loading && (
+          <div className="text-xs text-neutral-600 dark:text-neutral-400 flex items-center gap-2">
+            <Spinner size={14} label="Analyzing..." />
+          </div>
+        )}
+        {testsImpactError && (
+          <div className="text-xs text-red-600 dark:text-red-400 whitespace-pre-wrap">{testsImpactError}</div>
+        )}
+        {report && !testsImpactError && testsImpact && (
+          <div className="space-y-2">
+            <div className="text-xs text-neutral-700 dark:text-neutral-300">
+              {testsImpact.impacted.length} potential test{testsImpact.impacted.length === 1 ? '' : 's'} may be affected out of {testsImpact.totalCatalog}.
+            </div>
+            {testsImpact.impacted.length === 0 ? (
+              <div className="text-xs text-neutral-500">No likely impacted tests detected.</div>
+            ) : (
+              <div className="max-h-48 overflow-auto">
+                <ul className="list-disc pl-5 text-xs text-neutral-700 dark:text-neutral-300 space-y-1">
+                  {testsImpact.impacted.map((t, i) => (
+                    <li key={i} className="truncate" title={t}>
+                      <span className="font-mono">{t}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            <div className="text-[11px] text-neutral-500">Heuristic mapping. Open Tests view to run targeted tests.</div>
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  function renderCoverageTab() {
+    return (
+      <div className="border rounded-md p-3 border-neutral-200 dark:border-neutral-800">
+        <div className="text-sm font-medium mb-2">Diff Coverage</div>
+        {coverageError && (
+          <div className="text-xs text-amber-700 dark:text-amber-300 whitespace-pre-wrap">{coverageError}</div>
+        )}
+        {coverageLoading && (
+          <div className="text-xs text-neutral-600 dark:text-neutral-400 flex items-center gap-2">
+            <Spinner size={14} label="Computing diff coverage..." />
+          </div>
+        )}
+        {!coverageLoading && !coverageError && diffCoverage && (
+          <div className="space-y-3">
+            <div className="text-xs text-neutral-700 dark:text-neutral-300 flex items-center gap-3">
+              <div className={`text-sm font-medium ${pctColor(diffCoverage.pct)}`}>
+                {diffCoverage.pct.toFixed(1)}% covered
+              </div>
+              <div className="text-xs text-neutral-600 dark:text-neutral-400">
+                {diffCoverage.covered}/{diffCoverage.totalAdded} changed lines covered
+              </div>
+            </div>
+            <ProgressBar value={diffCoverage.pct} />
+            <div className="max-h-48 overflow-auto">
+              <table className="w-full text-xs">
+                <thead className="text-neutral-600 dark:text-neutral-400">
+                  <tr>
+                    <th className="text-left px-2 py-1">File</th>
+                    <th className="text-right px-2 py-1">Changed</th>
+                    <th className="text-right px-2 py-1">Covered</th>
+                    <th className="text-right px-2 py-1">%</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {diffCoverage.perFile.length === 0 ? (
+                    <tr>
+                      <td className="px-2 py-2 text-neutral-500" colSpan={4}>
+                        No added lines detected in patch.
+                      </td>
+                    </tr>
+                  ) : (
+                    diffCoverage.perFile.map((r, idx) => (
+                      <tr key={idx} className="border-t border-neutral-100 dark:border-neutral-900">
+                        <td className="px-2 py-1 font-mono truncate" title={r.path}>{r.path}</td>
+                        <td className="px-2 py-1 text-right">{r.added}</td>
+                        <td className="px-2 py-1 text-right">{r.covered}</td>
+                        <td className={`px-2 py-1 text-right ${pctColor(r.pct)}`}>{r.pct.toFixed(1)}%</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+            <div className="text-[11px] text-neutral-500">Based on last coverage run. Run coverage again in Tests view for up-to-date metrics.</div>
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  function renderActiveTab() {
+    switch (activeTab) {
+      case 'changes':
+        return renderChangesTab()
+      case 'compilation':
+        return renderCompilationTab()
+      case 'tests':
+        return renderTestsTab()
+      case 'coverage':
+        return renderCoverageTab()
+      default:
+        return null
+    }
+  }
+
+  return (
+    <Modal isOpen={true} onClose={onRequestClose} title={header} size="xl" footer={footer}>
+      {/* Sticky tabs header inside scrollable content to keep it fixed while content scrolls */}
+      <div className="sticky top-0 z-10 -mx-4 px-4 py-2 bg-surface-overlay/95 backdrop-blur border-b border-border">
         <SegmentedControl
-          ariaLabel="Merge analysis tabs"
+          ariaLabel="Merge tabs"
           value={activeTab}
           onChange={(v) => setActiveTab(v as any)}
           options={[
+            { value: 'changes', label: 'Changes' },
             { value: 'compilation', label: 'Compilation Impact' },
             { value: 'tests', label: 'Tests Impact' },
             { value: 'coverage', label: 'Diff Coverage' },
@@ -459,147 +641,6 @@ export default function GitMergeModal(props: GitMergeModalProps) {
         />
       </div>
 
-      {/* Compilation Impact */}
-      {activeTab === 'compilation' && (
-        <div className="border rounded-md p-3 border-neutral-200 dark:border-neutral-800">
-          <div className="text-sm font-medium mb-2">Compilation Impact</div>
-          {!report && loading && (
-            <div className="text-xs text-neutral-600 dark:text-neutral-400 flex items-center gap-2">
-              <Spinner size={14} label="Analyzing..." />
-            </div>
-          )}
-          {report && compilationInfo && (
-            <div className="space-y-3">
-              <div className="text-xs text-neutral-700 dark:text-neutral-300">{compilationInfo.summary}</div>
-              <div className="max-h-48 overflow-auto divide-y divide-neutral-100 dark:divide-neutral-900">
-                {compilationInfo.details.map((d, idx) => (
-                  <div key={idx} className="py-1.5 flex items-center justify-between gap-3">
-                    <div className="text-xs font-mono truncate">{d.path}</div>
-                    <div className="text-xs text-neutral-600 dark:text-neutral-400">
-                      <span
-                        className={
-                          d.risk === 'high'
-                            ? 'text-red-600 dark:text-red-400'
-                            : d.risk === 'medium'
-                            ? 'text-amber-700 dark:text-amber-300'
-                            : 'text-neutral-500'
-                        }
-                      >
-                        {d.risk.toUpperCase()}
-                      </span>
-                      <span className="ml-2">{d.reason}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="text-[11px] text-neutral-500">Heuristic only. Build adapters can refine this in future.</div>
-            </div>
-          )}
-          {!report && !loading && (
-            <div className="text-xs text-neutral-500">Report unavailable.</div>
-          )}
-        </div>
-      )}
-
-      {/* Tests Impact */}
-      {activeTab === 'tests' && (
-        <div className="border rounded-md p-3 border-neutral-200 dark:border-neutral-800">
-          <div className="text-sm font-medium mb-2">Tests Impact</div>
-          {!report && loading && (
-            <div className="text-xs text-neutral-600 dark:text-neutral-400 flex items-center gap-2">
-              <Spinner size={14} label="Analyzing..." />
-            </div>
-          )}
-          {testsImpactError && (
-            <div className="text-xs text-red-600 dark:text-red-400 whitespace-pre-wrap">{testsImpactError}</div>
-          )}
-          {report && !testsImpactError && testsImpact && (
-            <div className="space-y-2">
-              <div className="text-xs text-neutral-700 dark:text-neutral-300">
-                {testsImpact.impacted.length} potential test{testsImpact.impacted.length === 1 ? '' : 's'} may be affected out of {testsImpact.totalCatalog}.
-              </div>
-              {testsImpact.impacted.length === 0 ? (
-                <div className="text-xs text-neutral-500">No likely impacted tests detected.</div>
-              ) : (
-                <div className="max-h-48 overflow-auto">
-                  <ul className="list-disc pl-5 text-xs text-neutral-700 dark:text-neutral-300 space-y-1">
-                    {testsImpact.impacted.map((t, i) => (
-                      <li key={i} className="truncate" title={t}>
-                        <span className="font-mono">{t}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              <div className="text-[11px] text-neutral-500">Heuristic mapping. Open Tests view to run targeted tests.</div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Diff Coverage */}
-      {activeTab === 'coverage' && (
-        <div className="border rounded-md p-3 border-neutral-200 dark:border-neutral-800">
-          <div className="text-sm font-medium mb-2">Diff Coverage</div>
-          {coverageError && (
-            <div className="text-xs text-amber-700 dark:text-amber-300 whitespace-pre-wrap">{coverageError}</div>
-          )}
-          {coverageLoading && (
-            <div className="text-xs text-neutral-600 dark:text-neutral-400 flex items-center gap-2">
-              <Spinner size={14} label="Computing diff coverage..." />
-            </div>
-          )}
-          {!coverageLoading && !coverageError && diffCoverage && (
-            <div className="space-y-3">
-              <div className="text-xs text-neutral-700 dark:text-neutral-300 flex items-center gap-3">
-                <div className={`text-sm font-medium ${pctColor(diffCoverage.pct)}`}>
-                  {diffCoverage.pct.toFixed(1)}% covered
-                </div>
-                <div className="text-xs text-neutral-600 dark:text-neutral-400">
-                  {diffCoverage.covered}/{diffCoverage.totalAdded} changed lines covered
-                </div>
-              </div>
-              <ProgressBar value={diffCoverage.pct} />
-              <div className="max-h-48 overflow-auto">
-                <table className="w-full text-xs">
-                  <thead className="text-neutral-600 dark:text-neutral-400">
-                    <tr>
-                      <th className="text-left px-2 py-1">File</th>
-                      <th className="text-right px-2 py-1">Changed</th>
-                      <th className="text-right px-2 py-1">Covered</th>
-                      <th className="text-right px-2 py-1">%</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {diffCoverage.perFile.length === 0 ? (
-                      <tr>
-                        <td className="px-2 py-2 text-neutral-500" colSpan={4}>
-                          No added lines detected in patch.
-                        </td>
-                      </tr>
-                    ) : (
-                      diffCoverage.perFile.map((r, idx) => (
-                        <tr key={idx} className="border-t border-neutral-100 dark:border-neutral-900">
-                          <td className="px-2 py-1 font-mono truncate" title={r.path}>{r.path}</td>
-                          <td className="px-2 py-1 text-right">{r.added}</td>
-                          <td className="px-2 py-1 text-right">{r.covered}</td>
-                          <td className={`px-2 py-1 text-right ${pctColor(r.pct)}`}>{r.pct.toFixed(1)}%</td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-              <div className="text-[11px] text-neutral-500">Based on last coverage run. Run coverage again in Tests view for up-to-date metrics.</div>
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  )
-
-  return (
-    <Modal isOpen={true} onClose={onRequestClose} title={header} size="xl" footer={footer}>
       <div className="flex flex-col gap-4">
         {mergeError && (
           <div className="p-3 text-sm text-red-600 dark:text-red-400 whitespace-pre-wrap border border-red-200 dark:border-red-800 rounded-md">
@@ -615,31 +656,7 @@ export default function GitMergeModal(props: GitMergeModalProps) {
           <ConflictsPanel conflicts={mergeResult!.conflicts || []} baseRef={baseRef} branch={branch} />)
         }
 
-        <div>
-          <div className="text-sm font-medium mb-2">Changes</div>
-          {loading && (
-            <div className="p-3 text-sm text-neutral-600 dark:text-neutral-400 flex items-center gap-2">
-              <Spinner size={14} label="Loading diff preview..." />
-            </div>
-          )}
-          {!loading && error && (
-            <div className="p-3 text-sm text-red-600 dark:text-red-400 whitespace-pre-wrap">{error}</div>
-          )}
-          {!loading && !error && (!report || report.files.length === 0) && (
-            <div className="p-3 text-sm text-neutral-600 dark:text-neutral-400">
-              Diff preview unavailable. You can still proceed to merge.
-            </div>
-          )}
-          {!loading && !error && report && report.files.length > 0 && (
-            <div className="flex flex-col gap-3">
-              {report.files.map((f: MergeReportFile) => (
-                <FileDiffItem key={f.path} file={f} />
-              ))}
-            </div>
-          )}
-        </div>
-
-        {AnalysisTabs}
+        {renderActiveTab()}
       </div>
     </Modal>
   )
