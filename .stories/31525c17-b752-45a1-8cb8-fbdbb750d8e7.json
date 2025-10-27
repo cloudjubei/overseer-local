@@ -1,6 +1,6 @@
 {
   "id": "31525c17-b752-45a1-8cb8-fbdbb750d8e7",
-  "status": "+",
+  "status": "-",
   "title": "Create Sourcetree replacement - a popular version control management app",
   "description": "Goal Provide built-in Git workflows so users do not need external tools (e.g., SourceTree) for routine tasks: viewing repo status and branches, reviewing diffs (working tree, staged, and branch-to-base), running focused tests, merging, and resolving conflicts. Scope for this iteration - Navigation and views: - Add a Git section with two subviews: 'Current project' and 'All projects'. - Current project shows pending operations for the active repo; All projects aggregates across all known projects from ProjectContext (src/renderer/src/contexts/ProjectContext.tsx). - Pending operations definition: - A pending operation is a feature branch with commits ahead of the base branch (default base is the current branch). Feature branches follow the existing convention 'features/<storyId>' where storyId is a UUID. We may later extend to 'features/<storyId>.<featureId>' but uniqueness is already guaranteed by storyId. - Merge flow: - Clicking a pending item opens a Git Merge popup that shows context (project/story/branch), per-file diffs, and analysis placeholders: compilation impact, tests impact, and diff coverage across changed lines. These analyses start as stubs/adapters and should degrade gracefully when not available. On conflicts, the flow should transition into the conflict resolution UI. - Integration notes: - Reuse GitMonitor for status and add aggregation to compute ahead/behind and feature branches across projects. - Reuse/extend existing functions in src/logic/git-monitor/storyBranchNaming.js to resolve story IDs from branch names and expose this mapping to the renderer. - Respect current behavior where agents run from the branch they started; do not force checkouts. All operations must be safe-by-default with timeouts and clear error surfacing. Out of scope for this iteration - Remote PR management, stash workflows, and hunk-level staging (planned separately). Acceptance (high level) - Users can navigate to a Git panel, see pending branches grouped appropriately, open a merge popup with diffs and analysis placeholders, execute a merge, and resolve conflicts without leaving the app.\n\nThe main process class responsible for interfacing with `thefactory-tools` which provides all git operations is @src/logic/git/GitManager.ts . GitManager interfaces with the renderer via @src/renderer/src/services/gitService.ts and @src/preload/ipcHandlersKeys.ts and @src/preload/index.ts . And the forefront interface for all views that is making the usage of all git operations easy is @src/renderer/src/contexts/GitContext.tsx .\n\nAll the relevant types from `thefactory-tools` i.e. `GitTools` can be found in the local copy at:\n`src/logic/git/gitTypes.copy.ts`",
   "features": [
@@ -124,6 +124,69 @@
       "createdAt": "2025-10-27T11:12:37.255Z",
       "updatedAt": "2025-10-27T11:17:25.063Z",
       "completedAt": "2025-10-27T11:17:25.063Z"
+    },
+    {
+      "id": "af235bbc-3a5d-42ad-8eea-1d77c65caa04",
+      "status": "-",
+      "title": "Remove Refresh Button from GitView",
+      "description": "The 'Refresh' button in '@src/renderer/src/screens/GitView.tsx' is no longer necessary as the view is now updated automatically by the GitMonitor service. This feature involves removing the button and any associated logic from the component.",
+      "context": [],
+      "createdAt": "2025-10-27T14:22:25.551Z",
+      "updatedAt": "2025-10-27T14:22:25.551Z"
+    },
+    {
+      "id": "284a207d-b6ac-421e-8199-6d02ccbe9ea6",
+      "status": "-",
+      "title": "Add Action Buttons to Branch Rows in GitView",
+      "description": "Implement an actions section at the end of each branch row in the GitView. This section will contain three buttons:\n- **Quick Merge**: Merges the feature branch into its base branch using a default merge strategy.\n- **View**: On hover, a tooltip will display a summary of the changes in the branch.\n- **Delete**: Deletes the branch after a confirmation prompt.",
+      "context": [],
+      "createdAt": "2025-10-27T14:22:25.554Z",
+      "updatedAt": "2025-10-27T14:22:25.554Z"
+    },
+    {
+      "id": "6edc73b1-b1fa-4541-9d45-a71128a2e775",
+      "status": "-",
+      "title": "Refactor GitMergeModal to Use GitContext",
+      "description": "The `GitMergeModal.tsx` component at '@src/renderer/src/screens/git/GitMergeModal.tsx' currently interacts directly with `gitService`. This should be refactored to use the `GitContext` for all Git operations and state management, aligning it with the application's architecture.",
+      "context": [],
+      "createdAt": "2025-10-27T14:22:25.556Z",
+      "updatedAt": "2025-10-27T14:22:25.556Z"
+    },
+    {
+      "id": "85ba3de7-7c40-4e6f-ac77-8f7f9ce2ad35",
+      "status": "-",
+      "title": "Implement Merge Functionality in GitMergeModal",
+      "description": "Add the logic to the `GitMergeModal` to execute a merge operation. This will involve calling the appropriate function from the `GitContext`, handling the success and failure states of the merge, and transitioning to the conflict resolution UI if necessary.",
+      "context": [],
+      "createdAt": "2025-10-27T14:22:25.557Z",
+      "updatedAt": "2025-10-27T14:22:25.557Z"
+    },
+    {
+      "id": "70a7778e-a8fb-46fd-be5f-5dc1738b4881",
+      "status": "-",
+      "title": "Add Color-Coded Diffs to GitMergeModal",
+      "description": "Enhance the diff viewer within `GitMergeModal.tsx`. The view should visually distinguish between code insertions and deletions by color-coding them. Insertions should be highlighted in green, and deletions in red.",
+      "context": [],
+      "createdAt": "2025-10-27T14:22:25.559Z",
+      "updatedAt": "2025-10-27T14:22:25.559Z"
+    },
+    {
+      "id": "2d942460-1b9d-409b-9b22-b692a7eea38a",
+      "status": "-",
+      "title": "Implement Analysis Tabs in GitMergeModal",
+      "description": "The bottom section of the `GitMergeModal` currently shows placeholders ('Not available') for 'Compilation Impact', 'Tests Impact', and 'Diff Coverage'. This feature is dedicated to implementing the underlying analysis for these sections and displaying the results. Each analysis will be presented in its own tab.",
+      "context": [],
+      "createdAt": "2025-10-27T14:22:25.560Z",
+      "updatedAt": "2025-10-27T14:22:25.560Z"
+    },
+    {
+      "id": "df27b5ca-a8b3-4a65-a05c-595db51743ff",
+      "status": "-",
+      "title": "Redesign GitMergeModal Layout with Sticky Tabs",
+      "description": "Rework the layout of `GitMergeModal.tsx`. The main sections (Changes, Compilation Impact, Tests Impact, Diff Coverage) should be organized into a tabbed interface. The tab headers must remain fixed at the top of the modal, while the content of the selected tab should be scrollable.",
+      "context": [],
+      "createdAt": "2025-10-27T14:22:25.561Z",
+      "updatedAt": "2025-10-27T14:22:25.561Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -138,9 +201,15 @@
     "39bc8bed-a411-4e3b-ac83-00da808e5a5c": 9,
     "b39ea9e9-306e-459c-9a8e-c17b277e2d5a": 10,
     "4bba9a50-5e90-45a4-b69e-55cec5d9c236": 11,
-    "93aa7e98-7cb8-4426-8842-c1a2c200c5bb": 12
+    "93aa7e98-7cb8-4426-8842-c1a2c200c5bb": 12,
+    "af235bbc-3a5d-42ad-8eea-1d77c65caa04": 13,
+    "284a207d-b6ac-421e-8199-6d02ccbe9ea6": 14,
+    "6edc73b1-b1fa-4541-9d45-a71128a2e775": 15,
+    "85ba3de7-7c40-4e6f-ac77-8f7f9ce2ad35": 16,
+    "70a7778e-a8fb-46fd-be5f-5dc1738b4881": 17,
+    "2d942460-1b9d-409b-9b22-b692a7eea38a": 18,
+    "df27b5ca-a8b3-4a65-a05c-595db51743ff": 19
   },
   "createdAt": "2025-10-21T17:28:55.063Z",
-  "updatedAt": "2025-10-27T09:51:40.369Z",
-  "completedAt": "2025-10-27T11:17:25.063Z"
+  "updatedAt": "2025-10-27T09:51:40.369Z"
 }

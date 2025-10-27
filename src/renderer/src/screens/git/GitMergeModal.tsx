@@ -3,7 +3,7 @@ import { Modal } from '@renderer/components/ui/Modal'
 import Spinner from '@renderer/components/ui/Spinner'
 import { Button } from '@renderer/components/ui/Button'
 import { useProjectContext } from '@renderer/contexts/ProjectContext'
-import type { MergeReport, MergeReportFile } from '../../../../logic/git/gitTypes.copy'
+import { MergeReport } from 'thefactory-tools'
 
 export type GitMergeModalProps = {
   projectId: string
@@ -62,15 +62,21 @@ function FileDiffItem({ file }: { file: MergeReportFile }) {
         <div className="shrink-0 text-[10px] uppercase tracking-wide text-neutral-600 dark:text-neutral-400">
           {file.status}
           {typeof file.additions === 'number' || typeof file.deletions === 'number' ? (
-            <span className="ml-2">+{file.additions || 0}/-{file.deletions || 0}</span>
+            <span className="ml-2">
+              +{file.additions || 0}/-{file.deletions || 0}
+            </span>
           ) : null}
         </div>
       </div>
       <div className="max-h-64 overflow-auto text-xs font-mono">
         {file.binary ? (
-          <div className="p-3 text-neutral-600 dark:text-neutral-400">Binary file diff not shown</div>
+          <div className="p-3 text-neutral-600 dark:text-neutral-400">
+            Binary file diff not shown
+          </div>
         ) : file.patch ? (
-          <pre className="p-3 whitespace-pre-wrap"><code>{file.patch}</code></pre>
+          <pre className="p-3 whitespace-pre-wrap">
+            <code>{file.patch}</code>
+          </pre>
         ) : (
           <div className="p-3 text-neutral-600 dark:text-neutral-400">No patch available</div>
         )}
@@ -137,7 +143,9 @@ export default function GitMergeModal(props: GitMergeModalProps) {
         <Button onClick={onRequestClose} variant="secondary">
           Close
         </Button>
-        <Button disabled title="Merge flow coming soon">Merge</Button>
+        <Button disabled title="Merge flow coming soon">
+          Merge
+        </Button>
       </div>
     </div>
   )
@@ -153,7 +161,9 @@ export default function GitMergeModal(props: GitMergeModalProps) {
             </div>
           )}
           {!loading && error && (
-            <div className="p-3 text-sm text-red-600 dark:text-red-400 whitespace-pre-wrap">{error}</div>
+            <div className="p-3 text-sm text-red-600 dark:text-red-400 whitespace-pre-wrap">
+              {error}
+            </div>
           )}
           {!loading && !error && (!report || report.files.length === 0) && (
             <div className="p-3 text-sm text-neutral-600 dark:text-neutral-400">
