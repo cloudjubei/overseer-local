@@ -177,12 +177,13 @@
     },
     {
       "id": "2d942460-1b9d-409b-9b22-b692a7eea38a",
-      "status": "-",
+      "status": "+",
       "title": "Implement Analysis Tabs in GitMergeModal",
       "description": "The bottom section of the `GitMergeModal` currently shows placeholders ('Not available') for 'Compilation Impact', 'Tests Impact', and 'Diff Coverage'. This feature is dedicated to implementing the underlying analysis for these sections and displaying the results. Each analysis will be presented in its own tab.",
       "context": [],
       "createdAt": "2025-10-27T14:22:25.560Z",
-      "updatedAt": "2025-10-27T14:22:25.560Z"
+      "updatedAt": "2025-10-27T14:42:24.077Z",
+      "completedAt": "2025-10-27T14:42:24.077Z"
     },
     {
       "id": "df27b5ca-a8b3-4a65-a05c-595db51743ff",

@@ -3,8 +3,10 @@ import { Modal } from '@renderer/components/ui/Modal'
 import Spinner from '@renderer/components/ui/Spinner'
 import { Button } from '@renderer/components/ui/Button'
 import { useProjectContext } from '@renderer/contexts/ProjectContext'
-import { MergeReport, MergeReportFile, MergeResult, ConflictEntry } from 'thefactory-tools'
+import { MergeReport, MergeReportFile, MergeResult, ConflictEntry, CoverageResult } from 'thefactory-tools'
 import { useGit } from '@renderer/contexts/GitContext'
+import SegmentedControl from '@renderer/components/ui/SegmentedControl'
+import { factoryTestsService } from '@renderer/services/factoryTestsService'
 
 export type GitMergeModalProps = {
   projectId: string
@@ -99,6 +101,63 @@ function ConflictsPanel({
   )
 }
 
+// ============ Analysis helpers ============
+function normalizePath(p: string): string {
+  let out = p.replace(/\\/g, '/').replace(/^\.[/\\]/, '')
+  const m = out.match(/(?:^|.*?)(src\/.*)$/)
+  if (m && m[1]) return m[1]
+  return out.replace(/^\//, '')
+}
+
+function parseAddedLineNumbersFromPatch(patch?: string): number[] {
+  if (!patch) return []
+  const lines = patch.replace(/\r\n/g, '\n').split('\n')
+  let currentNewLine = 0
+  const added: number[] = []
+  for (const line of lines) {
+    if (line.startsWith('@@')) {
+      // Example: @@ -aStart,aCount +bStart,bCount @@
+      const m = line.match(/\+([0-9]+)(?:,([0-9]+))?\s*@@/)
+      if (m) {
+        currentNewLine = parseInt(m[1], 10) - 1 // will increment before checking content
+      }
+      continue
+    }
+    if (line.startsWith('+++ ') || line.startsWith('--- ')) {
+      continue
+    }
+    if (line.startsWith('+')) {
+      currentNewLine += 1
+      // treat any '+' line as code; keep simple heuristic
+      added.push(currentNewLine)
+    } else if (line.startsWith('-')) {
+      // removed line affects old file only; do not change new file line
+      continue
+    } else {
+      // context line
+      currentNewLine += 1
+    }
+  }
+  return added
+}
+
+function pctColor(p: number) {
+  if (p >= 90) return 'text-green-700 dark:text-green-300'
+  if (p >= 75) return 'text-amber-700 dark:text-amber-300'
+  if (p >= 50) return 'text-orange-700 dark:text-orange-300'
+  return 'text-red-700 dark:text-red-300'
+}
+
+function ProgressBar({ value }: { value: number }) {
+  const clamped = Math.max(0, Math.min(100, value))
+  return (
+    <div className="h-1.5 w-full bg-neutral-200 dark:bg-neutral-800 rounded overflow-hidden">
+      <div className={`h-full ${value >= 75 ? 'bg-green-500' : value >= 50 ? 'bg-amber-500' : 'bg-red-500'}`} style={{ width: `${clamped}%` }} />
+    </div>
+  )
+}
+
+// ============ Main component ============
 export default function GitMergeModal(props: GitMergeModalProps) {
   const { onRequestClose, projectId, repoPath, baseRef, branch, storyId, featureId } = props
   const { getProjectById } = useProjectContext()
@@ -113,6 +172,35 @@ export default function GitMergeModal(props: GitMergeModalProps) {
   const [merging, setMerging] = React.useState(false)
   const [mergeError, setMergeError] = React.useState<string | undefined>(undefined)
   const [mergeResult, setMergeResult] = React.useState<MergeResult | undefined>(undefined)
+
+  // Analysis tab state
+  const [activeTab, setActiveTab] = React.useState<'compilation' | 'tests' | 'coverage'>('compilation')
+
+  // Compilation impact (heuristic)
+  const [compilationInfo, setCompilationInfo] = React.useState<{
+    summary: string
+    details: Array<{ path: string; risk: 'low' | 'medium' | 'high'; reason: string }>
+  } | null>(null)
+
+  // Tests impact (heuristic mapping of changed files to likely tests)
+  const [testsImpact, setTestsImpact] = React.useState<{
+    impacted: string[]
+    totalCatalog: number
+  } | null>(null)
+  const [testsImpactError, setTestsImpactError] = React.useState<string | null>(null)
+
+  // Diff coverage analysis
+  const [coverageLoading, setCoverageLoading] = React.useState(false)
+  const [coverageError, setCoverageError] = React.useState<string | null>(null)
+  const [diffCoverage, setDiffCoverage] = React.useState<
+    | {
+        totalAdded: number
+        covered: number
+        pct: number
+        perFile: Array<{ path: string; added: number; covered: number; pct: number }>
+      }
+    | null
+  >(null)
 
   React.useEffect(() => {
     let mounted = true
@@ -141,6 +229,161 @@ export default function GitMergeModal(props: GitMergeModalProps) {
       mounted = false
     }
   }, [projectId, repoPath, baseRef, branch, getMergePlanOn, buildMergeReportOn])
+
+  // Build compilation impact heuristic from report
+  React.useEffect(() => {
+    if (!report) {
+      setCompilationInfo(null)
+      return
+    }
+    const details: Array<{ path: string; risk: 'low' | 'medium' | 'high'; reason: string }> = []
+    const criticalNames = ['package.json', 'tsconfig.json', 'tsconfig.base.json', 'vite.config', 'webpack.config']
+
+    for (const f of report.files) {
+      const p = f.path
+      const lower = p.toLowerCase()
+      if (criticalNames.some((name) => lower.includes(name))) {
+        details.push({ path: p, risk: 'high', reason: 'Build configuration change' })
+        continue
+      }
+      if (p.endsWith('.d.ts')) {
+        details.push({ path: p, risk: 'high', reason: 'Type definition change can cascade' })
+        continue
+      }
+      if (p.endsWith('.ts') || p.endsWith('.tsx') || p.endsWith('.js') || p.endsWith('.jsx')) {
+        // Heuristic based on additions/deletions
+        const churn = (f.additions || 0) + (f.deletions || 0)
+        const risk: 'low' | 'medium' | 'high' = churn > 200 ? 'high' : churn > 50 ? 'medium' : 'low'
+        details.push({ path: p, risk, reason: `Source change (+${f.additions || 0}/-${f.deletions || 0})` })
+        continue
+      }
+      if (p.endsWith('.json') || p.endsWith('.yaml') || p.endsWith('.yml')) {
+        details.push({ path: p, risk: 'medium', reason: 'Configuration/content change' })
+        continue
+      }
+      // default low
+      details.push({ path: p, risk: 'low', reason: 'Non-code change' })
+    }
+
+    const counts = details.reduce(
+      (acc, d) => {
+        acc[d.risk] += 1
+        return acc
+      },
+      { low: 0, medium: 0, high: 0 } as Record<'low' | 'medium' | 'high', number>,
+    )
+    const summary = `Risk estimate · High ${counts.high} · Medium ${counts.medium} · Low ${counts.low} (no compile adapter configured)`
+    setCompilationInfo({ summary, details })
+  }, [report])
+
+  // Compute tests impact when the tab is first shown or report changes
+  React.useEffect(() => {
+    let cancelled = false
+    async function run() {
+      if (activeTab !== 'tests') return
+      if (!projectId || !report) {
+        setTestsImpact(null)
+        return
+      }
+      setTestsImpactError(null)
+      try {
+        const catalog = await factoryTestsService.listTests(projectId)
+        if (cancelled) return
+        const testsList = (catalog || []).map((t: any) => String((t && (t.name || t.path || t.file || t.id)) ?? ''))
+        const testSet = new Set<string>()
+        const changed = report.files.map((f) => normalizePath(f.path))
+
+        for (const test of testsList) {
+          const tnorm = normalizePath(test)
+          const base = tnorm.split('/').pop() || tnorm
+          const stem = base.replace(/\.(spec|test)\.[a-z0-9]+$/i, '')
+          // heuristic: match if filename stem or any directory segment overlaps
+          for (const ch of changed) {
+            const chBase = ch.split('/').pop() || ch
+            const chStem = chBase.replace(/\.[a-z0-9]+$/i, '')
+            if (tnorm.includes(chStem) || ch.includes(stem)) {
+              testSet.add(test)
+              break
+            }
+          }
+        }
+        setTestsImpact({ impacted: Array.from(testSet).slice(0, 50), totalCatalog: testsList.length })
+      } catch (e: any) {
+        if (!cancelled) setTestsImpactError(e?.message || String(e))
+      }
+    }
+    run()
+    return () => {
+      cancelled = true
+    }
+  }, [activeTab, projectId, report])
+
+  // Compute diff coverage when the tab is shown
+  React.useEffect(() => {
+    let cancelled = false
+    async function compute() {
+      if (activeTab !== 'coverage') return
+      if (!projectId || !report) {
+        setDiffCoverage(null)
+        return
+      }
+      setCoverageLoading(true)
+      setCoverageError(null)
+      try {
+        const cov: CoverageResult | undefined = await factoryTestsService.getLastCoverage(projectId)
+        if (cancelled) return
+        if (!cov || !cov.files || Object.keys(cov.files).length === 0) {
+          setCoverageError('No coverage data available. Run coverage in Tests view.')
+          setDiffCoverage(null)
+          setCoverageLoading(false)
+          return
+        }
+
+        // Build map from normalized rel path -> uncovered lines set and total lines covered include pct_lines
+        const coverByRel: Record<string, { uncovered: Set<number>; pct_lines: number | null }> = {}
+        for (const [file, stats] of Object.entries<any>(cov.files || {})) {
+          const rel = normalizePath(file)
+          const uncovered = new Set<number>(Array.isArray((stats as any).uncovered_lines) ? (stats as any).uncovered_lines as number[] : [])
+          const pct = typeof (stats as any).pct_lines === 'number' ? (stats as any).pct_lines : null
+          coverByRel[rel] = { uncovered, pct_lines: pct }
+        }
+
+        let totalAdded = 0
+        let covered = 0
+        const perFile: Array<{ path: string; added: number; covered: number; pct: number }> = []
+
+        for (const f of report.files) {
+          if (f.binary) continue
+          const addedLines = parseAddedLineNumbersFromPatch(f.patch)
+          if (addedLines.length === 0) continue
+          const rel = normalizePath(f.path)
+          const cover = coverByRel[rel]
+          let fileCovered = 0
+          if (cover) {
+            for (const ln of addedLines) {
+              if (!cover.uncovered.has(ln)) fileCovered += 1
+            }
+          }
+          const fileTotal = addedLines.length
+          totalAdded += fileTotal
+          covered += fileCovered
+          const pct = fileTotal > 0 ? (fileCovered / fileTotal) * 100 : 0
+          perFile.push({ path: f.path, added: fileTotal, covered: fileCovered, pct })
+        }
+
+        const pct = totalAdded > 0 ? (covered / totalAdded) * 100 : 0
+        setDiffCoverage({ totalAdded, covered, pct, perFile })
+      } catch (e: any) {
+        if (!cancelled) setCoverageError(e?.message || String(e))
+      } finally {
+        if (!cancelled) setCoverageLoading(false)
+      }
+    }
+    compute()
+    return () => {
+      cancelled = true
+    }
+  }, [activeTab, projectId, report])
 
   const onMerge = async () => {
     if (merging) return
@@ -201,6 +444,160 @@ export default function GitMergeModal(props: GitMergeModalProps) {
 
   const hasConflicts = (mergeResult?.conflicts?.length || 0) > 0
 
+  const AnalysisTabs = (
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center gap-3">
+        <SegmentedControl
+          ariaLabel="Merge analysis tabs"
+          value={activeTab}
+          onChange={(v) => setActiveTab(v as any)}
+          options={[
+            { value: 'compilation', label: 'Compilation Impact' },
+            { value: 'tests', label: 'Tests Impact' },
+            { value: 'coverage', label: 'Diff Coverage' },
+          ]}
+        />
+      </div>
+
+      {/* Compilation Impact */}
+      {activeTab === 'compilation' && (
+        <div className="border rounded-md p-3 border-neutral-200 dark:border-neutral-800">
+          <div className="text-sm font-medium mb-2">Compilation Impact</div>
+          {!report && loading && (
+            <div className="text-xs text-neutral-600 dark:text-neutral-400 flex items-center gap-2">
+              <Spinner size={14} label="Analyzing..." />
+            </div>
+          )}
+          {report && compilationInfo && (
+            <div className="space-y-3">
+              <div className="text-xs text-neutral-700 dark:text-neutral-300">{compilationInfo.summary}</div>
+              <div className="max-h-48 overflow-auto divide-y divide-neutral-100 dark:divide-neutral-900">
+                {compilationInfo.details.map((d, idx) => (
+                  <div key={idx} className="py-1.5 flex items-center justify-between gap-3">
+                    <div className="text-xs font-mono truncate">{d.path}</div>
+                    <div className="text-xs text-neutral-600 dark:text-neutral-400">
+                      <span
+                        className={
+                          d.risk === 'high'
+                            ? 'text-red-600 dark:text-red-400'
+                            : d.risk === 'medium'
+                            ? 'text-amber-700 dark:text-amber-300'
+                            : 'text-neutral-500'
+                        }
+                      >
+                        {d.risk.toUpperCase()}
+                      </span>
+                      <span className="ml-2">{d.reason}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="text-[11px] text-neutral-500">Heuristic only. Build adapters can refine this in future.</div>
+            </div>
+          )}
+          {!report && !loading && (
+            <div className="text-xs text-neutral-500">Report unavailable.</div>
+          )}
+        </div>
+      )}
+
+      {/* Tests Impact */}
+      {activeTab === 'tests' && (
+        <div className="border rounded-md p-3 border-neutral-200 dark:border-neutral-800">
+          <div className="text-sm font-medium mb-2">Tests Impact</div>
+          {!report && loading && (
+            <div className="text-xs text-neutral-600 dark:text-neutral-400 flex items-center gap-2">
+              <Spinner size={14} label="Analyzing..." />
+            </div>
+          )}
+          {testsImpactError && (
+            <div className="text-xs text-red-600 dark:text-red-400 whitespace-pre-wrap">{testsImpactError}</div>
+          )}
+          {report && !testsImpactError && testsImpact && (
+            <div className="space-y-2">
+              <div className="text-xs text-neutral-700 dark:text-neutral-300">
+                {testsImpact.impacted.length} potential test{testsImpact.impacted.length === 1 ? '' : 's'} may be affected out of {testsImpact.totalCatalog}.
+              </div>
+              {testsImpact.impacted.length === 0 ? (
+                <div className="text-xs text-neutral-500">No likely impacted tests detected.</div>
+              ) : (
+                <div className="max-h-48 overflow-auto">
+                  <ul className="list-disc pl-5 text-xs text-neutral-700 dark:text-neutral-300 space-y-1">
+                    {testsImpact.impacted.map((t, i) => (
+                      <li key={i} className="truncate" title={t}>
+                        <span className="font-mono">{t}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              <div className="text-[11px] text-neutral-500">Heuristic mapping. Open Tests view to run targeted tests.</div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Diff Coverage */}
+      {activeTab === 'coverage' && (
+        <div className="border rounded-md p-3 border-neutral-200 dark:border-neutral-800">
+          <div className="text-sm font-medium mb-2">Diff Coverage</div>
+          {coverageError && (
+            <div className="text-xs text-amber-700 dark:text-amber-300 whitespace-pre-wrap">{coverageError}</div>
+          )}
+          {coverageLoading && (
+            <div className="text-xs text-neutral-600 dark:text-neutral-400 flex items-center gap-2">
+              <Spinner size={14} label="Computing diff coverage..." />
+            </div>
+          )}
+          {!coverageLoading && !coverageError && diffCoverage && (
+            <div className="space-y-3">
+              <div className="text-xs text-neutral-700 dark:text-neutral-300 flex items-center gap-3">
+                <div className={`text-sm font-medium ${pctColor(diffCoverage.pct)}`}>
+                  {diffCoverage.pct.toFixed(1)}% covered
+                </div>
+                <div className="text-xs text-neutral-600 dark:text-neutral-400">
+                  {diffCoverage.covered}/{diffCoverage.totalAdded} changed lines covered
+                </div>
+              </div>
+              <ProgressBar value={diffCoverage.pct} />
+              <div className="max-h-48 overflow-auto">
+                <table className="w-full text-xs">
+                  <thead className="text-neutral-600 dark:text-neutral-400">
+                    <tr>
+                      <th className="text-left px-2 py-1">File</th>
+                      <th className="text-right px-2 py-1">Changed</th>
+                      <th className="text-right px-2 py-1">Covered</th>
+                      <th className="text-right px-2 py-1">%</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {diffCoverage.perFile.length === 0 ? (
+                      <tr>
+                        <td className="px-2 py-2 text-neutral-500" colSpan={4}>
+                          No added lines detected in patch.
+                        </td>
+                      </tr>
+                    ) : (
+                      diffCoverage.perFile.map((r, idx) => (
+                        <tr key={idx} className="border-t border-neutral-100 dark:border-neutral-900">
+                          <td className="px-2 py-1 font-mono truncate" title={r.path}>{r.path}</td>
+                          <td className="px-2 py-1 text-right">{r.added}</td>
+                          <td className="px-2 py-1 text-right">{r.covered}</td>
+                          <td className={`px-2 py-1 text-right ${pctColor(r.pct)}`}>{r.pct.toFixed(1)}%</td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+              <div className="text-[11px] text-neutral-500">Based on last coverage run. Run coverage again in Tests view for up-to-date metrics.</div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+
   return (
     <Modal isOpen={true} onClose={onRequestClose} title={header} size="xl" footer={footer}>
       <div className="flex flex-col gap-4">
@@ -242,20 +639,7 @@ export default function GitMergeModal(props: GitMergeModalProps) {
           )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <div className="border rounded-md p-3 border-neutral-200 dark:border-neutral-800">
-            <div className="text-sm font-medium mb-1">Compilation Impact</div>
-            <div className="text-xs text-neutral-600 dark:text-neutral-400">Not available</div>
-          </div>
-          <div className="border rounded-md p-3 border-neutral-200 dark:border-neutral-800">
-            <div className="text-sm font-medium mb-1">Tests Impact</div>
-            <div className="text-xs text-neutral-600 dark:text-neutral-400">Not available</div>
-          </div>
-          <div className="border rounded-md p-3 border-neutral-200 dark:border-neutral-800">
-            <div className="text-sm font-medium mb-1">Diff Coverage</div>
-            <div className="text-xs text-neutral-600 dark:text-neutral-400">Not available</div>
-          </div>
-        </div>
+        {AnalysisTabs}
       </div>
     </Modal>
   )
