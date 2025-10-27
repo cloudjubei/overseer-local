@@ -13,6 +13,7 @@ import {
 import SegmentedControl from '@renderer/components/ui/SegmentedControl'
 import { factoryTestsService } from '@renderer/services/factoryTestsService'
 import { gitService } from '@renderer/services/gitService'
+import { IconEye } from '@renderer/components/ui/icons/Icons'
 
 export type GitMergeModalProps = {
   projectId: string
@@ -48,30 +49,47 @@ function DiffPatch({ patch }: { patch: string }) {
 }
 
 function FileDiffItem({ file }: { file: MergeReportFile }) {
+  const [open, setOpen] = React.useState(false)
+  const toggle = React.useCallback(() => setOpen((v) => !v), [])
+  const title = open ? 'Hide changes' : 'View changes'
+
   return (
     <div className="border rounded-md border-neutral-200 dark:border-neutral-800 overflow-hidden">
       <div className="px-3 py-2 text-xs flex items-center justify-between bg-neutral-50 dark:bg-neutral-900/40">
-        <div className="truncate font-mono">{file.path}</div>
-        <div className="shrink-0 text-[10px] uppercase tracking-wide text-neutral-600 dark:text-neutral-400">
-          {file.status}
-          {typeof file.additions === 'number' || typeof file.deletions === 'number' ? (
-            <span className="ml-2">
-              +{file.additions || 0}/-{file.deletions || 0}
-            </span>
-          ) : null}
+        <div className="truncate font-mono pr-3 flex-1" title={file.path}>{file.path}</div>
+        <div className="flex items-center gap-2 shrink-0">
+          <div className="text-[10px] uppercase tracking-wide text-neutral-600 dark:text-neutral-400">
+            {file.status}
+            {typeof file.additions === 'number' || typeof file.deletions === 'number' ? (
+              <span className="ml-2">
+                +{file.additions || 0}/-{file.deletions || 0}
+              </span>
+            ) : null}
+          </div>
+          <button
+            type="button"
+            onClick={toggle}
+            title={title}
+            aria-label={title}
+            className={`ml-2 inline-flex items-center justify-center rounded p-1 transition-colors border border-transparent hover:border-neutral-300 dark:hover:border-neutral-700 ${open ? 'bg-neutral-200/60 dark:bg-neutral-800/60' : 'bg-transparent'}`}
+          >
+            <IconEye className="w-4 h-4 text-neutral-600 dark:text-neutral-300" />
+          </button>
         </div>
       </div>
-      <div className="max-h-64 overflow-auto text-xs font-mono">
-        {file.binary ? (
-          <div className="p-3 text-neutral-600 dark:text-neutral-400">
-            Binary file diff not shown
-          </div>
-        ) : file.patch ? (
-          <DiffPatch patch={file.patch} />
-        ) : (
-          <div className="p-3 text-neutral-600 dark:text-neutral-400">No patch available</div>
-        )}
-      </div>
+      {open && (
+        <div className="max-h-64 overflow-auto text-xs font-mono">
+          {file.binary ? (
+            <div className="p-3 text-neutral-600 dark:text-neutral-400">
+              Binary file diff not shown
+            </div>
+          ) : file.patch ? (
+            <DiffPatch patch={file.patch} />
+          ) : (
+            <div className="p-3 text-neutral-600 dark:text-neutral-400">No patch available</div>
+          )}
+        </div>
+      )}
     </div>
   )
 }
