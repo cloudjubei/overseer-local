@@ -6,7 +6,7 @@ import { useProjectContext } from '../contexts/ProjectContext'
 import { useNavigator } from '../navigation/Navigator'
 import { Button } from '../components/ui/Button'
 import Tooltip from '../components/ui/Tooltip'
-import { IconMerge } from '../components/ui/icons/IconMerge'
+import { IconFastMerge } from '../components/ui/icons/IconFastMerge'
 import { IconDelete } from '../components/ui/icons/IconDelete'
 import { IconEye } from '../components/ui/icons/IconEye'
 import { gitService } from '@renderer/services/gitService'
@@ -145,16 +145,20 @@ function PendingItem({ item, projectTitle }: { item: any; projectTitle?: string 
               </Button>
             </span>
           </Tooltip>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onQuickMerge}
-            loading={merging}
-            aria-label="Quick merge"
-            title="Quick merge into base"
-          >
-            <IconMerge className="w-4 h-4" />
-          </Button>
+          <Tooltip content="fast merge" placement="bottom">
+            <span onClick={(e) => e.stopPropagation()}>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onQuickMerge}
+                loading={merging}
+                aria-label="Fast merge"
+                title="fast merge"
+              >
+                <IconFastMerge className="w-4 h-4" />
+              </Button>
+            </span>
+          </Tooltip>
           <Button
             variant="ghost"
             size="icon"
