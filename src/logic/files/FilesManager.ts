@@ -57,9 +57,9 @@ export default class FilesManager extends BaseManager {
       this.renamePath(projectId, srcRel, dstRel)
     handlers[IPC_HANDLER_KEYS.FILES_DELETE_PATH] = ({ projectId, relPath }) =>
       this.deletePath(projectId, relPath)
-    handlers[IPC_HANDLER_KEYS.FILES_SEARCH] = async ({ projectId, query, relPath }) =>
+    handlers[IPC_HANDLER_KEYS.FILES_SEARCH] = ({ projectId, query, relPath }) =>
       this.searchFiles(projectId, query, relPath)
-    handlers[IPC_HANDLER_KEYS.FILES_UPLOAD_FILE] = async ({ projectId, name, content }) =>
+    handlers[IPC_HANDLER_KEYS.FILES_UPLOAD_FILE] = ({ projectId, name, content }) =>
       this.uploadFile(projectId, name, content)
 
     return handlers

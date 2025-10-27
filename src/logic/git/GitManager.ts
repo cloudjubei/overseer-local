@@ -8,6 +8,7 @@ import {
   GitMonitorConfig,
   GitTools,
   LocalStatus,
+  LocalStatusOptions,
   MergePlan,
   MergePlanOptions,
   MergeReport,
@@ -56,8 +57,8 @@ export default class GitManager extends BaseManager {
       this.applyMerge(projectId, options)
     handlers[IPC_HANDLER_KEYS.GIT_GET_MERGE_PLAN] = ({ projectId, options }) =>
       this.getMergePlan(projectId, options)
-    handlers[IPC_HANDLER_KEYS.GIT_BUILD_MERGE_REPORT] = ({ projectId, planOrOptions, options }) =>
-      this.buildMergeReport(projectId, planOrOptions, options)
+    handlers[IPC_HANDLER_KEYS.GIT_BUILD_MERGE_REPORT] = ({ projectId, plan, options }) =>
+      this.buildMergeReport(projectId, plan, options)
     handlers[IPC_HANDLER_KEYS.GIT_GET_LOCAL_STATUS] = ({ projectId, options }) =>
       this.getLocalStatus(projectId, options)
     handlers[IPC_HANDLER_KEYS.GIT_GET_BRANCH_DIFF_SUMMARY] = ({ projectId, options }) =>
@@ -119,29 +120,21 @@ export default class GitManager extends BaseManager {
 
   private async buildMergeReport(
     projectId: string,
-    planOrOptions: MergePlan | Omit<MergePlanOptions, 'repoPath'>,
+    plan: MergePlan,
     options?: BuildMergeReportOptions,
   ): Promise<MergeReport | undefined> {
     const tools = await this.__getTools(projectId)
     if (!tools) return
-
-    const isPlan = (obj: any): obj is MergePlan => !!obj && Array.isArray((obj as any).files)
-
-    if (isPlan(planOrOptions)) {
-      return tools.buildMergeReport(planOrOptions as MergePlan, options)
-    }
-
-    const plan = await tools.getMergePlan(planOrOptions as Omit<MergePlanOptions, 'repoPath'>)
-    return tools.buildMergeReport(plan, options)
+    return await tools.buildMergeReport(plan, options)
   }
 
   private async getLocalStatus(
     projectId: string,
-    options?: Omit<{ repoPath: string } & Parameters<GitTools['getLocalStatus']>[0], 'repoPath'>,
+    options?: Omit<LocalStatusOptions, 'repoPath'>,
   ): Promise<LocalStatus | undefined> {
     const tools = await this.__getTools(projectId)
     if (!tools) return
-    return tools.getLocalStatus(options)
+    return await tools.getLocalStatus(options)
   }
 
   private async getBranchDiffSummary(
@@ -167,21 +160,25 @@ export default class GitManager extends BaseManager {
   private async updateTool(projectId: string): Promise<GitTools | undefined> {
     const projectRoot = await this.projectsManager.getProjectDir(projectId)
     if (!projectRoot) {
+      console.log('GitManager updateTool has no projectRoot: ', projectId)
       return
     }
     const project = await this.projectsManager.getProject(projectId)
     if (!project) {
+      console.log('GitManager updateTool has no project: ', projectId)
       return
     }
     const repoUrl = project.repo_url
 
     const githubCredentialsId = project.metadata?.githubCredentialsId
     if (!githubCredentialsId) {
+      console.log('GitManager updateTool has no githubCredentialsId: ', projectId)
       return
     }
 
     const githubCredentials = this.gitCredentialsManager.get(githubCredentialsId)
     if (!githubCredentials) {
+      console.log('GitManager updateTool has no githubCredentials: ', projectId)
       return
     }
 

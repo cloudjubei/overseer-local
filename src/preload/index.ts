@@ -325,10 +325,10 @@ const DOCUMENT_INGESTION_API = {
 const GIT_API = {
   getMergePlan: (projectId, options) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_GET_MERGE_PLAN, { projectId, options }),
-  buildMergeReport: (projectId, planOrOptions, options) =>
+  buildMergeReport: (projectId, plan, options) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_BUILD_MERGE_REPORT, {
       projectId,
-      planOrOptions,
+      plan,
       options,
     }),
   applyMerge: (projectId, options) =>

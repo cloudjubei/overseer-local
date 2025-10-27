@@ -1,11 +1,4 @@
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react'
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { gitService } from '../services/gitService'
 import { useProjectContext } from './ProjectContext'
 import {
@@ -70,7 +63,7 @@ const getStoryIdFromBranchName = (branchName: string): string | undefined => {
 export function GitProvider({ children }: { children: React.ReactNode }) {
   const { activeProjectId, projects } = useProjectContext()
 
-  const [loading, setLoading] = useState<boolean>(true)
+  const [loading, setLoading] = useState<boolean>(false)
   const [error, setError] = useState<string | undefined>(undefined)
   const [currentProject, setCurrentProject] = useState<ProjectGitStatus>({
     projectId: activeProjectId,
@@ -86,10 +79,8 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
   )
 
   const buildMergeReport = useCallback(
-    (
-      planOrOptions: MergePlan | Omit<MergePlanOptions, 'repoPath'>,
-      options?: BuildMergeReportOptions,
-    ) => gitService.buildMergeReport(activeProjectId, planOrOptions as any, options),
+    (plan: MergePlan, options?: BuildMergeReportOptions) =>
+      gitService.buildMergeReport(activeProjectId, plan, options),
     [activeProjectId],
   )
 
@@ -111,70 +102,79 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
     [activeProjectId],
   )
 
-  useEffect(() => {
-    setLoading(true)
-    setAllProjects(projects.map((p) => ({ projectId: p.id, pending: [] })))
+  const onMonitorUpdate = async (update: { projectId: string; state: GitBranchEvent }) => {
+    console.log('GitContext onMonitorUpdate update: ', update)
+    const { projectId, state: branchUpdate } = update
 
-    Promise.all(
-      projects.map((p) => {
-        const baseBranch = 'main' // This could be configurable in project settings later
-        return gitService.startMonitor(p.id, {
-          baseBranch,
-          branchFilter: (branch) => branch.startsWith('features/'),
-        })
-      }),
-    ).catch((e) => {
-      setError(e?.message || String(e))
-      setLoading(false)
-    })
+    setAllProjects((current) => {
+      const projectIndex = current.findIndex((p) => p.projectId === projectId)
+      if (projectIndex === -1) return current
 
-    const handleUpdate = (payload: { projectId: string; state: GitBranchEvent }) => {
-      if (loading) setLoading(false)
-      const { projectId, state: branchUpdate } = payload
+      const newAllProjects = [...current]
+      const newProjectStatus = { ...newAllProjects[projectIndex] }
+      newAllProjects[projectIndex] = newProjectStatus
 
-      setAllProjects((current) => {
-        const projectIndex = current.findIndex((p) => p.projectId === projectId)
-        if (projectIndex === -1) return current
+      const newPending = [...newProjectStatus.pending]
+      newProjectStatus.pending = newPending
 
-        const newAllProjects = [...current]
-        const newProjectStatus = { ...newAllProjects[projectIndex] }
-        newAllProjects[projectIndex] = newProjectStatus
+      const branchIdx = newPending.findIndex((b) => b.branch === branchUpdate.name)
 
-        const newPending = [...newProjectStatus.pending]
-        newProjectStatus.pending = newPending
-
-        const branchIdx = newPending.findIndex((b) => b.branch === branchUpdate.name)
-
-        if (branchUpdate.ahead > 0) {
-          const pendingBranch: PendingBranch = {
-            projectId,
-            branch: branchUpdate.name,
-            baseRef: 'main', // Assumes the base branch from monitor config
-            repoPath: '', // Not available on the event, handled by backend
-            ahead: branchUpdate.ahead,
-            behind: branchUpdate.behind,
-            storyId: getStoryIdFromBranchName(branchUpdate.name),
-          }
-          if (branchIdx > -1) {
-            newPending[branchIdx] = pendingBranch
-          } else {
-            newPending.push(pendingBranch)
-          }
-        } else if (branchIdx > -1) {
-          newPending.splice(branchIdx, 1)
+      if (branchUpdate.ahead > 0) {
+        const pendingBranch: PendingBranch = {
+          projectId,
+          branch: branchUpdate.name,
+          baseRef: 'main', // Assumes the base branch from monitor config
+          repoPath: '', // Not available on the event, handled by backend
+          ahead: branchUpdate.ahead,
+          behind: branchUpdate.behind,
+          storyId: getStoryIdFromBranchName(branchUpdate.name),
         }
+        if (branchIdx > -1) {
+          newPending[branchIdx] = pendingBranch
+        } else {
+          newPending.push(pendingBranch)
+        }
+      } else if (branchIdx > -1) {
+        newPending.splice(branchIdx, 1)
+      }
 
-        return newAllProjects
-      })
-    }
-
-    const unsubscribe = gitService.subscribeToMonitorUpdates(handleUpdate)
-
+      return newAllProjects
+    })
+  }
+  useEffect(() => {
+    const unsubscribe = gitService.subscribeToMonitorUpdates(onMonitorUpdate)
     return () => {
       unsubscribe()
-      projects.forEach((p) => gitService.stopMonitor(p.id))
     }
-  }, [projects])
+  }, [onMonitorUpdate])
+
+  useEffect(() => {
+    if (loading) return
+    setLoading(true)
+
+    setAllProjects(projects.map((p) => ({ projectId: p.id, pending: [] })))
+    console.log('Starting gitContext with projects: ', projects)
+
+    const load = async () => {
+      try {
+        await Promise.all(
+          projects.map((p) =>
+            gitService.startMonitor(p.id, {
+              baseBranch: 'main',
+              // branchFilter: (branch) => branch.startsWith('features/'), //TODO: passing this via ipc doesn't work
+            }),
+          ),
+        )
+      } catch (e) {
+        console.error('GitContext error: ', e)
+        setError(e?.message || String(e))
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    load()
+  }, [])
 
   useEffect(() => {
     const curr = allProjects.find((p) => p.projectId === activeProjectId) || {
