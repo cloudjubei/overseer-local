@@ -19,6 +19,7 @@ import { FilesProvider } from './contexts/FilesContext'
 import { StoriesProvider } from './contexts/StoriesContext'
 import { GitHubCredentialsProvider } from './contexts/GitHubCredentialsContext'
 import { ChatsProvider } from './contexts/ChatsContext'
+import { GitProvider } from './contexts/GitContext'
 
 function ServicesBootstrap() {
   const { init } = useLiveData()
@@ -42,16 +43,18 @@ function App() {
                   <ShortcutsProvider>
                     <LLMConfigProvider>
                       <GitHubCredentialsProvider>
-                        <ChatsProvider>
-                          <AgentsProvider>
-                            <ServicesBootstrap />
-                            <ShortcutsBootstrap />
-                            <NotificationClickHandler />
-                            <CommandMenu />
-                            <ShortcutsHelp />
-                            <MainApp />
-                          </AgentsProvider>
-                        </ChatsProvider>
+                        <GitProvider>
+                          <ChatsProvider>
+                            <AgentsProvider>
+                              <ServicesBootstrap />
+                              <ShortcutsBootstrap />
+                              <NotificationClickHandler />
+                              <CommandMenu />
+                              <ShortcutsHelp />
+                              <MainApp />
+                            </AgentsProvider>
+                          </ChatsProvider>
+                        </GitProvider>
                       </GitHubCredentialsProvider>
                     </LLMConfigProvider>
                   </ShortcutsProvider>

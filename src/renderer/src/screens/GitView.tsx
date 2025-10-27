@@ -70,11 +70,21 @@ function PendingItem({ item, projectTitle }: { item: any; projectTitle?: string 
         baseRef: item.baseRef,
         headRef: item.branch,
       })
-      const fileLines = diff.files.slice(0, 10).map((f) => `• ${f.path} (${f.status}${
-        f.additions || f.deletions ? ` +${f.additions || 0}/-${f.deletions || 0}` : ''
-      })`)
+      const fileLines = diff.files
+        .slice(0, 10)
+        .map(
+          (f) =>
+            `• ${f.path} (${f.status}${
+              f.additions || f.deletions ? ` +${f.additions || 0}/-${f.deletions || 0}` : ''
+            })`,
+        )
       const more = diff.files.length > 10 ? `… and ${diff.files.length - 10} more` : ''
-      const text = [`${diff.baseRef} → ${diff.headRef}`, `+${diff.insertions}/-${diff.deletions}`, ...fileLines, more]
+      const text = [
+        `${diff.baseRef} → ${diff.headRef}`,
+        `+${diff.insertions}/-${diff.deletions}`,
+        ...fileLines,
+        more,
+      ]
         .filter(Boolean)
         .join('\n')
       setSummary({ loaded: true, text })
@@ -202,10 +212,14 @@ function CurrentProjectView() {
           </div>
         )}
         {error && !loading && (
-          <div className="p-4 text-sm text-red-600 dark:text-red-400 whitespace-pre-wrap">{error}</div>
+          <div className="p-4 text-sm text-red-600 dark:text-red-400 whitespace-pre-wrap">
+            {error}
+          </div>
         )}
         {!loading && !error && activeProject && currentProject.pending.length === 0 && (
-          <div className="p-4 text-sm text-neutral-500">No pending feature branches ahead of base.</div>
+          <div className="p-4 text-sm text-neutral-500">
+            No pending feature branches ahead of base.
+          </div>
         )}
         {!loading && !error && activeProject && currentProject.pending.length > 0 && (
           <div className="divide-y divide-neutral-100 dark:divide-neutral-900">
@@ -238,11 +252,15 @@ function AllProjectsView() {
           </div>
         )}
         {error && !loading && (
-          <div className="p-4 text-sm text-red-600 dark:text-red-400 whitespace-pre-wrap">{error}</div>
+          <div className="p-4 text-sm text-red-600 dark:text-red-400 whitespace-pre-wrap">
+            {error}
+          </div>
         )}
 
         {!loading && !error && !anyPending && (
-          <div className="p-4 text-sm text-neutral-500">No pending feature branches across projects.</div>
+          <div className="p-4 text-sm text-neutral-500">
+            No pending feature branches across projects.
+          </div>
         )}
 
         {!loading && !error && anyPending && (
@@ -268,7 +286,7 @@ function AllProjectsView() {
   )
 }
 
-function GitInner() {
+export default function GitView() {
   const [tab, setTab] = React.useState<'current' | 'all'>('current')
 
   return (
@@ -300,13 +318,5 @@ function GitInner() {
         {tab === 'current' ? <CurrentProjectView /> : <AllProjectsView />}
       </div>
     </div>
-  )
-}
-
-export default function GitView() {
-  return (
-    <GitProvider>
-      <GitInner />
-    </GitProvider>
   )
 }
