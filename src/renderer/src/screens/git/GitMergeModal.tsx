@@ -3,10 +3,16 @@ import { Modal } from '@renderer/components/ui/Modal'
 import Spinner from '@renderer/components/ui/Spinner'
 import { Button } from '@renderer/components/ui/Button'
 import { useProjectContext } from '@renderer/contexts/ProjectContext'
-import { MergeReport, MergeReportFile, MergeResult, ConflictEntry, CoverageResult } from 'thefactory-tools'
-import { useGit } from '@renderer/contexts/GitContext'
+import {
+  MergeReport,
+  MergeReportFile,
+  MergeResult,
+  ConflictEntry,
+  CoverageResult,
+} from 'thefactory-tools'
 import SegmentedControl from '@renderer/components/ui/SegmentedControl'
 import { factoryTestsService } from '@renderer/services/factoryTestsService'
+import { gitService } from '@renderer/services/gitService'
 
 export type GitMergeModalProps = {
   projectId: string
@@ -57,7 +63,9 @@ function FileDiffItem({ file }: { file: MergeReportFile }) {
       </div>
       <div className="max-h-64 overflow-auto text-xs font-mono">
         {file.binary ? (
-          <div className="p-3 text-neutral-600 dark:text-neutral-400">Binary file diff not shown</div>
+          <div className="p-3 text-neutral-600 dark:text-neutral-400">
+            Binary file diff not shown
+          </div>
         ) : file.patch ? (
           <DiffPatch patch={file.patch} />
         ) : (
@@ -84,7 +92,9 @@ function ConflictsPanel({
       </div>
       <div className="p-3 text-sm">
         <div className="text-neutral-700 dark:text-neutral-300 mb-2">
-          The merge of <span className="font-mono">{branch}</span> into <span className="font-mono">{baseRef}</span> has conflicts. Resolve them in your editor, then commit the merge.
+          The merge of <span className="font-mono">{branch}</span> into{' '}
+          <span className="font-mono">{baseRef}</span> has conflicts. Resolve them in your editor,
+          then commit the merge.
         </div>
         <ul className="list-disc pl-5 text-xs text-neutral-700 dark:text-neutral-300 space-y-1">
           {conflicts.map((c) => (
@@ -152,7 +162,10 @@ function ProgressBar({ value }: { value: number }) {
   const clamped = Math.max(0, Math.min(100, value))
   return (
     <div className="h-1.5 w-full bg-neutral-200 dark:bg-neutral-800 rounded overflow-hidden">
-      <div className={`h-full ${value >= 75 ? 'bg-green-500' : value >= 50 ? 'bg-amber-500' : 'bg-red-500'}`} style={{ width: `${clamped}%` }} />
+      <div
+        className={`h-full ${value >= 75 ? 'bg-green-500' : value >= 50 ? 'bg-amber-500' : 'bg-red-500'}`}
+        style={{ width: `${clamped}%` }}
+      />
     </div>
   )
 }
@@ -162,7 +175,6 @@ export default function GitMergeModal(props: GitMergeModalProps) {
   const { onRequestClose, projectId, repoPath, baseRef, branch, storyId, featureId } = props
   const { getProjectById } = useProjectContext()
   const project = getProjectById(projectId)
-  const { getMergePlanOn, buildMergeReportOn, applyMergeOn } = useGit()
 
   const [loading, setLoading] = React.useState(true)
   const [report, setReport] = React.useState<MergeReport | undefined>(undefined)
@@ -174,7 +186,9 @@ export default function GitMergeModal(props: GitMergeModalProps) {
   const [mergeResult, setMergeResult] = React.useState<MergeResult | undefined>(undefined)
 
   // Unified tab state (includes Changes)
-  const [activeTab, setActiveTab] = React.useState<'changes' | 'compilation' | 'tests' | 'coverage'>('changes')
+  const [activeTab, setActiveTab] = React.useState<
+    'changes' | 'compilation' | 'tests' | 'coverage'
+  >('changes')
 
   // Compilation impact (heuristic)
   const [compilationInfo, setCompilationInfo] = React.useState<{
@@ -192,15 +206,12 @@ export default function GitMergeModal(props: GitMergeModalProps) {
   // Diff coverage analysis
   const [coverageLoading, setCoverageLoading] = React.useState(false)
   const [coverageError, setCoverageError] = React.useState<string | null>(null)
-  const [diffCoverage, setDiffCoverage] = React.useState<
-    | {
-        totalAdded: number
-        covered: number
-        pct: number
-        perFile: Array<{ path: string; added: number; covered: number; pct: number }>
-      }
-    | null
-  >(null)
+  const [diffCoverage, setDiffCoverage] = React.useState<{
+    totalAdded: number
+    covered: number
+    pct: number
+    perFile: Array<{ path: string; added: number; covered: number; pct: number }>
+  } | null>(null)
 
   React.useEffect(() => {
     let mounted = true
@@ -208,12 +219,12 @@ export default function GitMergeModal(props: GitMergeModalProps) {
       setLoading(true)
       setError(undefined)
       try {
-        const plan = await getMergePlanOn(projectId, {
+        const plan = await gitService.getMergePlan(projectId, {
           sources: [branch],
           baseRef,
           includePatch: true,
         })
-        const rep = await buildMergeReportOn(projectId, plan, { includePatch: true })
+        const rep = await gitService.buildMergeReport(projectId, plan, { includePatch: true })
         if (!mounted) return
         setReport(rep)
       } catch (e: any) {
@@ -228,7 +239,7 @@ export default function GitMergeModal(props: GitMergeModalProps) {
     return () => {
       mounted = false
     }
-  }, [projectId, repoPath, baseRef, branch, getMergePlanOn, buildMergeReportOn])
+  }, [projectId, repoPath, baseRef, branch])
 
   // Build compilation impact heuristic from report
   React.useEffect(() => {
@@ -237,7 +248,13 @@ export default function GitMergeModal(props: GitMergeModalProps) {
       return
     }
     const details: Array<{ path: string; risk: 'low' | 'medium' | 'high'; reason: string }> = []
-    const criticalNames = ['package.json', 'tsconfig.json', 'tsconfig.base.json', 'vite.config', 'webpack.config']
+    const criticalNames = [
+      'package.json',
+      'tsconfig.json',
+      'tsconfig.base.json',
+      'vite.config',
+      'webpack.config',
+    ]
 
     for (const f of report.files) {
       const p = f.path
@@ -254,7 +271,11 @@ export default function GitMergeModal(props: GitMergeModalProps) {
         // Heuristic based on additions/deletions
         const churn = (f.additions || 0) + (f.deletions || 0)
         const risk: 'low' | 'medium' | 'high' = churn > 200 ? 'high' : churn > 50 ? 'medium' : 'low'
-        details.push({ path: p, risk, reason: `Source change (+${f.additions || 0}/-${f.deletions || 0})` })
+        details.push({
+          path: p,
+          risk,
+          reason: `Source change (+${f.additions || 0}/-${f.deletions || 0})`,
+        })
         continue
       }
       if (p.endsWith('.json') || p.endsWith('.yaml') || p.endsWith('.yml')) {
@@ -289,7 +310,9 @@ export default function GitMergeModal(props: GitMergeModalProps) {
       try {
         const catalog = await factoryTestsService.listTests(projectId)
         if (cancelled) return
-        const testsList = (catalog || []).map((t: any) => String((t && (t.name || t.path || t.file || t.id)) ?? ''))
+        const testsList = (catalog || []).map((t: any) =>
+          String((t && (t.name || t.path || t.file || t.id)) ?? ''),
+        )
         const testSet = new Set<string>()
         const changed = report.files.map((f) => normalizePath(f.path))
 
@@ -307,7 +330,10 @@ export default function GitMergeModal(props: GitMergeModalProps) {
             }
           }
         }
-        setTestsImpact({ impacted: Array.from(testSet).slice(0, 50), totalCatalog: testsList.length })
+        setTestsImpact({
+          impacted: Array.from(testSet).slice(0, 50),
+          totalCatalog: testsList.length,
+        })
       } catch (e: any) {
         if (!cancelled) setTestsImpactError(e?.message || String(e))
       }
@@ -343,7 +369,11 @@ export default function GitMergeModal(props: GitMergeModalProps) {
         const coverByRel: Record<string, { uncovered: Set<number>; pct_lines: number | null }> = {}
         for (const [file, stats] of Object.entries<any>(cov.files || {})) {
           const rel = normalizePath(file)
-          const uncovered = new Set<number>(Array.isArray((stats as any).uncovered_lines) ? (stats as any).uncovered_lines as number[] : [])
+          const uncovered = new Set<number>(
+            Array.isArray((stats as any).uncovered_lines)
+              ? ((stats as any).uncovered_lines as number[])
+              : [],
+          )
           const pct = typeof (stats as any).pct_lines === 'number' ? (stats as any).pct_lines : null
           coverByRel[rel] = { uncovered, pct_lines: pct }
         }
@@ -391,7 +421,7 @@ export default function GitMergeModal(props: GitMergeModalProps) {
     setMergeError(undefined)
     setMergeResult(undefined)
     try {
-      const res = await applyMergeOn(projectId, {
+      const res = await gitService.applyMerge(projectId, {
         sources: [branch],
         baseRef,
         allowFastForward: true,
@@ -451,7 +481,9 @@ export default function GitMergeModal(props: GitMergeModalProps) {
           </div>
         )}
         {!loading && error && (
-          <div className="p-3 text-sm text-red-600 dark:text-red-400 whitespace-pre-wrap">{error}</div>
+          <div className="p-3 text-sm text-red-600 dark:text-red-400 whitespace-pre-wrap">
+            {error}
+          </div>
         )}
         {!loading && !error && (!report || report.files.length === 0) && (
           <div className="p-3 text-sm text-neutral-600 dark:text-neutral-400">
@@ -480,7 +512,9 @@ export default function GitMergeModal(props: GitMergeModalProps) {
         )}
         {report && compilationInfo && (
           <div className="space-y-3">
-            <div className="text-xs text-neutral-700 dark:text-neutral-300">{compilationInfo.summary}</div>
+            <div className="text-xs text-neutral-700 dark:text-neutral-300">
+              {compilationInfo.summary}
+            </div>
             <div className="max-h-48 overflow-auto divide-y divide-neutral-100 dark:divide-neutral-900">
               {compilationInfo.details.map((d, idx) => (
                 <div key={idx} className="py-1.5 flex items-center justify-between gap-3">
@@ -491,8 +525,8 @@ export default function GitMergeModal(props: GitMergeModalProps) {
                         d.risk === 'high'
                           ? 'text-red-600 dark:text-red-400'
                           : d.risk === 'medium'
-                          ? 'text-amber-700 dark:text-amber-300'
-                          : 'text-neutral-500'
+                            ? 'text-amber-700 dark:text-amber-300'
+                            : 'text-neutral-500'
                       }
                     >
                       {d.risk.toUpperCase()}
@@ -502,12 +536,12 @@ export default function GitMergeModal(props: GitMergeModalProps) {
                 </div>
               ))}
             </div>
-            <div className="text-[11px] text-neutral-500">Heuristic only. Build adapters can refine this in future.</div>
+            <div className="text-[11px] text-neutral-500">
+              Heuristic only. Build adapters can refine this in future.
+            </div>
           </div>
         )}
-        {!report && !loading && (
-          <div className="text-xs text-neutral-500">Report unavailable.</div>
-        )}
+        {!report && !loading && <div className="text-xs text-neutral-500">Report unavailable.</div>}
       </div>
     )
   }
@@ -522,12 +556,16 @@ export default function GitMergeModal(props: GitMergeModalProps) {
           </div>
         )}
         {testsImpactError && (
-          <div className="text-xs text-red-600 dark:text-red-400 whitespace-pre-wrap">{testsImpactError}</div>
+          <div className="text-xs text-red-600 dark:text-red-400 whitespace-pre-wrap">
+            {testsImpactError}
+          </div>
         )}
         {report && !testsImpactError && testsImpact && (
           <div className="space-y-2">
             <div className="text-xs text-neutral-700 dark:text-neutral-300">
-              {testsImpact.impacted.length} potential test{testsImpact.impacted.length === 1 ? '' : 's'} may be affected out of {testsImpact.totalCatalog}.
+              {testsImpact.impacted.length} potential test
+              {testsImpact.impacted.length === 1 ? '' : 's'} may be affected out of{' '}
+              {testsImpact.totalCatalog}.
             </div>
             {testsImpact.impacted.length === 0 ? (
               <div className="text-xs text-neutral-500">No likely impacted tests detected.</div>
@@ -542,7 +580,9 @@ export default function GitMergeModal(props: GitMergeModalProps) {
                 </ul>
               </div>
             )}
-            <div className="text-[11px] text-neutral-500">Heuristic mapping. Open Tests view to run targeted tests.</div>
+            <div className="text-[11px] text-neutral-500">
+              Heuristic mapping. Open Tests view to run targeted tests.
+            </div>
           </div>
         )}
       </div>
@@ -554,7 +594,9 @@ export default function GitMergeModal(props: GitMergeModalProps) {
       <div className="border rounded-md p-3 border-neutral-200 dark:border-neutral-800">
         <div className="text-sm font-medium mb-2">Diff Coverage</div>
         {coverageError && (
-          <div className="text-xs text-amber-700 dark:text-amber-300 whitespace-pre-wrap">{coverageError}</div>
+          <div className="text-xs text-amber-700 dark:text-amber-300 whitespace-pre-wrap">
+            {coverageError}
+          </div>
         )}
         {coverageLoading && (
           <div className="text-xs text-neutral-600 dark:text-neutral-400 flex items-center gap-2">
@@ -592,17 +634,23 @@ export default function GitMergeModal(props: GitMergeModalProps) {
                   ) : (
                     diffCoverage.perFile.map((r, idx) => (
                       <tr key={idx} className="border-t border-neutral-100 dark:border-neutral-900">
-                        <td className="px-2 py-1 font-mono truncate" title={r.path}>{r.path}</td>
+                        <td className="px-2 py-1 font-mono truncate" title={r.path}>
+                          {r.path}
+                        </td>
                         <td className="px-2 py-1 text-right">{r.added}</td>
                         <td className="px-2 py-1 text-right">{r.covered}</td>
-                        <td className={`px-2 py-1 text-right ${pctColor(r.pct)}`}>{r.pct.toFixed(1)}%</td>
+                        <td className={`px-2 py-1 text-right ${pctColor(r.pct)}`}>
+                          {r.pct.toFixed(1)}%
+                        </td>
                       </tr>
                     ))
                   )}
                 </tbody>
               </table>
             </div>
-            <div className="text-[11px] text-neutral-500">Based on last coverage run. Run coverage again in Tests view for up-to-date metrics.</div>
+            <div className="text-[11px] text-neutral-500">
+              Based on last coverage run. Run coverage again in Tests view for up-to-date metrics.
+            </div>
           </div>
         )}
       </div>
@@ -653,8 +701,12 @@ export default function GitMergeModal(props: GitMergeModalProps) {
           </div>
         )}
         {hasConflicts && (
-          <ConflictsPanel conflicts={mergeResult!.conflicts || []} baseRef={baseRef} branch={branch} />)
-        }
+          <ConflictsPanel
+            conflicts={mergeResult!.conflicts || []}
+            baseRef={baseRef}
+            branch={branch}
+          />
+        )}
 
         {renderActiveTab()}
       </div>

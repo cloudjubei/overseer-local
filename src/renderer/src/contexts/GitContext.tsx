@@ -1,18 +1,7 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import React, { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { gitService } from '../services/gitService'
 import { useProjectContext } from './ProjectContext'
-import {
-  ApplyMergeOptions,
-  BuildMergeReportOptions,
-  DiffSummary,
-  GitBranchEvent,
-  LocalStatus,
-  LocalStatusOptions,
-  MergePlan,
-  MergePlanOptions,
-  MergeReport,
-  MergeResult,
-} from 'thefactory-tools'
+import { GitBranchEvent } from 'thefactory-tools'
 
 export type PendingBranch = {
   projectId: string
@@ -37,43 +26,6 @@ export type GitContextValue = {
 
   currentProject: ProjectGitStatus
   allProjects: ProjectGitStatus[]
-  refresh: () => Promise<void>
-
-  getMergePlan: (options: Omit<MergePlanOptions, 'repoPath'>) => Promise<MergePlan>
-  buildMergeReport: (
-    planOrOptions: MergePlan | Omit<MergePlanOptions, 'repoPath'>,
-    options?: BuildMergeReportOptions,
-  ) => Promise<MergeReport>
-  applyMerge: (options: Omit<ApplyMergeOptions, 'repoPath'>) => Promise<MergeResult>
-  getLocalStatus: (options?: Omit<LocalStatusOptions, 'repoPath'>) => Promise<LocalStatus>
-  getBranchDiffSummary: (options: {
-    baseRef: string
-    headRef: string
-    includePatch?: boolean
-  }) => Promise<DiffSummary>
-  deleteBranch: (name: string) => Promise<{ ok: boolean; error?: string }>
-
-  // Project-scoped variants for cross-project lists
-  applyMergeOn: (
-    projectId: string,
-    options: Omit<ApplyMergeOptions, 'repoPath'>,
-  ) => Promise<MergeResult>
-  getBranchDiffSummaryOn: (
-    projectId: string,
-    options: { baseRef: string; headRef: string; includePatch?: boolean },
-  ) => Promise<DiffSummary>
-  deleteBranchOn: (projectId: string, name: string) => Promise<{ ok: boolean; error?: string }>
-
-  // Newly added project-scoped helpers for planning/reporting
-  getMergePlanOn: (
-    projectId: string,
-    options: Omit<MergePlanOptions, 'repoPath'>,
-  ) => Promise<MergePlan>
-  buildMergeReportOn: (
-    projectId: string,
-    planOrOptions: MergePlan | Omit<MergePlanOptions, 'repoPath'>,
-    options?: BuildMergeReportOptions,
-  ) => Promise<MergeReport>
 }
 
 const GitContext = createContext<GitContextValue | null>(null)
@@ -93,74 +45,6 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
     pending: [],
   })
   const [allProjects, setAllProjects] = useState<ProjectGitStatus[]>([])
-
-  // Core git operations proxied to main via preload
-  const getMergePlan = useCallback(
-    (options: Omit<MergePlanOptions, 'repoPath'>) =>
-      gitService.getMergePlan(activeProjectId, options),
-    [activeProjectId],
-  )
-
-  const buildMergeReport = useCallback(
-    (plan: MergePlan, options?: BuildMergeReportOptions) =>
-      gitService.buildMergeReport(activeProjectId, plan, options),
-    [activeProjectId],
-  )
-
-  const applyMerge = useCallback(
-    (options: Omit<ApplyMergeOptions, 'repoPath'>) =>
-      gitService.applyMerge(activeProjectId, options),
-    [activeProjectId],
-  )
-
-  const getLocalStatus = useCallback(
-    (options?: Omit<LocalStatusOptions, 'repoPath'>) =>
-      gitService.getLocalStatus(activeProjectId, options),
-    [activeProjectId],
-  )
-
-  const getBranchDiffSummary = useCallback(
-    (options: { baseRef: string; headRef: string; includePatch?: boolean }) =>
-      gitService.getBranchDiffSummary(activeProjectId, options),
-    [activeProjectId],
-  )
-
-  const deleteBranch = useCallback(
-    (name: string) => gitService.deleteBranch(activeProjectId, name),
-    [activeProjectId],
-  )
-
-  // project-scoped variants for cross-project rows
-  const applyMergeOn = useCallback(
-    (projectId: string, options: Omit<ApplyMergeOptions, 'repoPath'>) =>
-      gitService.applyMerge(projectId, options),
-    [],
-  )
-  const getBranchDiffSummaryOn = useCallback(
-    (projectId: string, options: { baseRef: string; headRef: string; includePatch?: boolean }) =>
-      gitService.getBranchDiffSummary(projectId, options),
-    [],
-  )
-  const deleteBranchOn = useCallback(
-    (projectId: string, name: string) => gitService.deleteBranch(projectId, name),
-    [],
-  )
-
-  // newly added project-scoped helpers for planning/reporting
-  const getMergePlanOn = useCallback(
-    (projectId: string, options: Omit<MergePlanOptions, 'repoPath'>) =>
-      gitService.getMergePlan(projectId, options),
-    [],
-  )
-
-  const buildMergeReportOn = useCallback(
-    (
-      projectId: string,
-      planOrOptions: MergePlan | Omit<MergePlanOptions, 'repoPath'>,
-      options?: BuildMergeReportOptions,
-    ) => gitService.buildMergeReport(projectId, planOrOptions, options),
-    [],
-  )
 
   const onMonitorUpdate = async (update: { projectId: string; state: GitBranchEvent }) => {
     console.log('GitContext onMonitorUpdate update: ', update)
@@ -234,7 +118,7 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
     }
 
     load()
-  }, [])
+  }, [projects])
 
   useEffect(() => {
     const curr = allProjects.find((p) => p.projectId === activeProjectId) || {
@@ -244,48 +128,14 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
     setCurrentProject(curr)
   }, [activeProjectId, allProjects])
 
-  const refresh = useCallback(async () => {
-    // This is now a no-op as the context is live.
-    // The useEffect hook handles setup and updates automatically.
-  }, [])
-
   const value = useMemo<GitContextValue>(
     () => ({
       loading,
       error,
       currentProject,
       allProjects,
-      refresh,
-      getMergePlan,
-      buildMergeReport,
-      applyMerge,
-      getLocalStatus,
-      getBranchDiffSummary,
-      deleteBranch,
-      applyMergeOn,
-      getBranchDiffSummaryOn,
-      deleteBranchOn,
-      getMergePlanOn,
-      buildMergeReportOn,
     }),
-    [
-      loading,
-      error,
-      currentProject,
-      allProjects,
-      refresh,
-      getMergePlan,
-      buildMergeReport,
-      applyMerge,
-      getLocalStatus,
-      getBranchDiffSummary,
-      deleteBranch,
-      applyMergeOn,
-      getBranchDiffSummaryOn,
-      deleteBranchOn,
-      getMergePlanOn,
-      buildMergeReportOn,
-    ],
+    [loading, error, currentProject, allProjects],
   )
 
   return <GitContext.Provider value={value}>{children}</GitContext.Provider>

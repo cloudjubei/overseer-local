@@ -1,7 +1,7 @@
 import React from 'react'
 import SegmentedControl from '../components/ui/SegmentedControl'
 import Spinner from '../components/ui/Spinner'
-import { GitProvider, useGit } from '../contexts/GitContext'
+import { useGit } from '../contexts/GitContext'
 import { useProjectContext } from '../contexts/ProjectContext'
 import { useNavigator } from '../navigation/Navigator'
 import { Button } from '../components/ui/Button'
@@ -9,10 +9,10 @@ import Tooltip from '../components/ui/Tooltip'
 import { IconMerge } from '../components/ui/icons/IconMerge'
 import { IconDelete } from '../components/ui/icons/IconDelete'
 import { IconBranch } from '../components/ui/icons/IconBranch'
+import { gitService } from '@renderer/services/gitService'
 
 function PendingItem({ item, projectTitle }: { item: any; projectTitle?: string }) {
   const { openModal } = useNavigator()
-  const { applyMergeOn, getBranchDiffSummaryOn, deleteBranchOn } = useGit()
   const [merging, setMerging] = React.useState(false)
   const [deleting, setDeleting] = React.useState(false)
   const [summary, setSummary] = React.useState<{
@@ -29,7 +29,7 @@ function PendingItem({ item, projectTitle }: { item: any; projectTitle?: string 
     if (merging) return
     setMerging(true)
     try {
-      const res = await applyMergeOn(item.projectId, {
+      const res = await gitService.applyMerge(item.projectId, {
         sources: [item.branch],
         baseRef: item.baseRef,
         allowFastForward: true,
@@ -66,7 +66,7 @@ function PendingItem({ item, projectTitle }: { item: any; projectTitle?: string 
   const loadSummary = async () => {
     if (summary.loaded) return
     try {
-      const diff = await getBranchDiffSummaryOn(item.projectId, {
+      const diff = await gitService.getBranchDiffSummary(item.projectId, {
         baseRef: item.baseRef,
         headRef: item.branch,
       })
@@ -100,7 +100,7 @@ function PendingItem({ item, projectTitle }: { item: any; projectTitle?: string 
     if (!ok) return
     setDeleting(true)
     try {
-      const res = await deleteBranchOn(item.projectId, item.branch)
+      const res = await gitService.deleteBranch(item.projectId, item.branch)
       if (!res?.ok) {
         alert(`Failed to delete branch: ${res?.error || 'unknown error'}`)
       }

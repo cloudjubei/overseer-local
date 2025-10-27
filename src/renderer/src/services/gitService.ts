@@ -19,7 +19,7 @@ export type GitService = {
   ) => Promise<MergePlan>
   buildMergeReport: (
     projectId: string,
-    planOrOptions: MergePlan | Omit<MergePlanOptions, 'repoPath'>,
+    plan: MergePlan,
     options?: BuildMergeReportOptions,
   ) => Promise<MergeReport>
   applyMerge: (
