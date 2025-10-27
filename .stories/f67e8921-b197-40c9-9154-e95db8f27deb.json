@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "-",
+  "status": "=",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -2469,7 +2469,7 @@
     },
     {
       "id": "be0848f1-c6cf-446f-b6ab-08042d7825c5",
-      "status": "-",
+      "status": "+",
       "title": "The tile should be 2 lines max",
       "description": "In @src/renderer/src/screens/stories/StoryDetailsView.tsx the title in the header should be constrained",
       "context": [
@@ -2477,7 +2477,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-27T11:13:20.749Z",
-      "updatedAt": "2025-10-27T11:13:20.749Z"
+      "updatedAt": "2025-10-27T11:22:22.530Z",
+      "completedAt": "2025-10-27T11:22:22.530Z"
     }
   ],
   "featureIdToDisplayIndex": {
