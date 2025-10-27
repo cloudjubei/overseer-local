@@ -13,7 +13,7 @@ export function IconChevron({ className, style }: { className?: string; style?: 
       style={style}
       aria-hidden="true"
     >
-      <polyline points="9 18 15 12 9 6" stroke="#6366F1" strokeWidth="2"></polyline>
+      <polyline points="9 18 15 12 9 6" stroke="currentColor" strokeWidth="2"></polyline>
     </svg>
   )
 }

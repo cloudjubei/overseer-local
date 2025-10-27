@@ -13,7 +13,8 @@ import {
 import SegmentedControl from '@renderer/components/ui/SegmentedControl'
 import { factoryTestsService } from '@renderer/services/factoryTestsService'
 import { gitService } from '@renderer/services/gitService'
-import { IconEye, IconFastMerge } from '@renderer/components/ui/icons/Icons'
+import { IconFastMerge } from '@renderer/components/ui/icons/Icons'
+import { IconChevron } from '@renderer/components/ui/icons/IconChevron'
 import Tooltip from '@renderer/components/ui/Tooltip'
 
 export type GitMergeModalProps = {
@@ -50,6 +51,7 @@ function DiffPatch({ patch }: { patch: string }) {
 }
 
 function FileDiffItem({ file }: { file: MergeReportFile }) {
+  // All diffs start closed
   const [open, setOpen] = React.useState(false)
   const toggle = React.useCallback(() => setOpen((v) => !v), [])
   const title = open ? 'Hide changes' : 'View changes'
@@ -74,9 +76,10 @@ function FileDiffItem({ file }: { file: MergeReportFile }) {
             onClick={toggle}
             title={title}
             aria-label={title}
+            aria-expanded={open}
             className={`ml-2 inline-flex items-center justify-center rounded p-1 transition-colors border border-transparent hover:border-neutral-300 dark:hover:border-neutral-700 ${open ? 'bg-neutral-200/60 dark:bg-neutral-800/60' : 'bg-transparent'}`}
           >
-            <IconEye className="w-4 h-4 text-neutral-600 dark:text-neutral-300" />
+            <IconChevron className={`w-4 h-4 text-neutral-600 dark:text-neutral-300 transform transition-transform ${open ? 'rotate-90' : ''}`} />
           </button>
         </div>
       </div>

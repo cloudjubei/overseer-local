@@ -197,15 +197,16 @@
     },
     {
       "id": "d1eb355f-334e-4f85-85d6-ecaccfc35978",
-      "status": "-",
+      "status": "+",
       "title": "Chevron controls showing hiding of diff files in Merge Modal",
       "description": "In @src/renderer/src/screens/git/GitMergeModal.tsx there should be a standard chevron icon to the right when a diff is closed and pointing down when a diff is open. All diffs start closed.",
       "context": [
         "src/renderer/src/screens/git/GitMergeModal.tsx"
       ],
       "createdAt": "2025-10-27T16:06:12.501Z",
-      "updatedAt": "2025-10-27T17:51:35.428Z",
-      "blockers": []
+      "updatedAt": "2025-10-27T18:25:18.655Z",
+      "blockers": [],
+      "completedAt": "2025-10-27T18:25:18.655Z"
     },
     {
       "id": "54ca5933-b89b-4392-8250-aaf479dfedc0",
