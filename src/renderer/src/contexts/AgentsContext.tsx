@@ -143,7 +143,7 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
         throw new Error('NO ACTIVE LLM CONFIG')
       }
       const githubCredentialsId = activeProject?.metadata?.githubCredentialsId
-      if (githubCredentialsId) {
+      if (!githubCredentialsId) {
         throw new Error('NO ACTIVE GITHUB CREDENTIALS ID')
       }
       const activeCredentials = await getCredentials(githubCredentialsId)
