@@ -1,6 +1,6 @@
 {
   "id": "31525c17-b752-45a1-8cb8-fbdbb750d8e7",
-  "status": "-",
+  "status": "+",
   "title": "Create Sourcetree replacement - a popular version control management app",
   "description": "Goal Provide built-in Git workflows so users do not need external tools (e.g., SourceTree) for routine tasks: viewing repo status and branches, reviewing diffs (working tree, staged, and branch-to-base), running focused tests, merging, and resolving conflicts. Scope for this iteration - Navigation and views: - Add a Git section with two subviews: 'Current project' and 'All projects'. - Current project shows pending operations for the active repo; All projects aggregates across all known projects from ProjectContext (src/renderer/src/contexts/ProjectContext.tsx). - Pending operations definition: - A pending operation is a feature branch with commits ahead of the base branch (default base is the current branch). Feature branches follow the existing convention 'features/<storyId>' where storyId is a UUID. We may later extend to 'features/<storyId>.<featureId>' but uniqueness is already guaranteed by storyId. - Merge flow: - Clicking a pending item opens a Git Merge popup that shows context (project/story/branch), per-file diffs, and analysis placeholders: compilation impact, tests impact, and diff coverage across changed lines. These analyses start as stubs/adapters and should degrade gracefully when not available. On conflicts, the flow should transition into the conflict resolution UI. - Integration notes: - Reuse GitMonitor for status and add aggregation to compute ahead/behind and feature branches across projects. - Reuse/extend existing functions in src/logic/git-monitor/storyBranchNaming.js to resolve story IDs from branch names and expose this mapping to the renderer. - Respect current behavior where agents run from the branch they started; do not force checkouts. All operations must be safe-by-default with timeouts and clear error surfacing. Out of scope for this iteration - Remote PR management, stash workflows, and hunk-level staging (planned separately). Acceptance (high level) - Users can navigate to a Git panel, see pending branches grouped appropriately, open a merge popup with diffs and analysis placeholders, execute a merge, and resolve conflicts without leaving the app.\n\nThe main process class responsible for interfacing with `thefactory-tools` which provides all git operations is @src/logic/git/GitManager.ts . GitManager interfaces with the renderer via @src/renderer/src/services/gitService.ts and @src/preload/ipcHandlersKeys.ts and @src/preload/index.ts . And the forefront interface for all views that is making the usage of all git operations easy is @src/renderer/src/contexts/GitContext.tsx .\n\nAll the relevant types from `thefactory-tools` i.e. `GitTools` can be found in the local copy at:\n`src/logic/git/gitTypes.copy.ts`",
   "features": [
@@ -117,12 +117,13 @@
     },
     {
       "id": "93aa7e98-7cb8-4426-8842-c1a2c200c5bb",
-      "status": "-",
+      "status": "+",
       "title": "Fix GitView Compilation and Implement Data Fetching in GitContext",
       "description": "`src/renderer/src/screens/GitView.tsx` has compilation errors because it expects git status data (`currentProject`, `allProjects`) and a `refresh` function from the `useGit` hook, but `GitContext` does not provide them. This feature will implement the necessary data fetching and state management logic within `GitContext.tsx`. It will fetch the git status for both the current project and all projects, manage loading/error states, and expose the data and a `refresh` function to the `GitView` component, thereby fixing the compilation errors and making the view functional.",
       "context": [],
       "createdAt": "2025-10-27T11:12:37.255Z",
-      "updatedAt": "2025-10-27T11:12:37.255Z"
+      "updatedAt": "2025-10-27T11:17:25.063Z",
+      "completedAt": "2025-10-27T11:17:25.063Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -140,5 +141,6 @@
     "93aa7e98-7cb8-4426-8842-c1a2c200c5bb": 12
   },
   "createdAt": "2025-10-21T17:28:55.063Z",
-  "updatedAt": "2025-10-27T09:51:40.369Z"
+  "updatedAt": "2025-10-27T09:51:40.369Z",
+  "completedAt": "2025-10-27T11:17:25.063Z"
 }
