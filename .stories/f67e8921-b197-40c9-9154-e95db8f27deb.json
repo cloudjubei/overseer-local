@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "?",
+  "status": "-",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -2465,6 +2465,18 @@
       "createdAt": "2025-10-22T11:21:27.351Z",
       "updatedAt": "2025-10-24T14:16:59.981Z",
       "completedAt": "2025-10-22T11:48:18.608Z"
+    },
+    {
+      "id": "be0848f1-c6cf-446f-b6ab-08042d7825c5",
+      "status": "-",
+      "title": "The tile should be 2 lines max",
+      "description": "In @src/renderer/src/screens/stories/StoryDetailsView.tsx the title in the header should be constrained",
+      "context": [
+        "src/renderer/src/screens/stories/StoryDetailsView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-27T11:13:20.749Z",
+      "updatedAt": "2025-10-27T11:13:20.749Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -2631,7 +2643,8 @@
     "67302df0-716b-46ed-aee1-828cb60373d2": 161,
     "dd9bb459-5225-4604-8d2f-6e50feaba098": 162,
     "c7a825c8-9791-4893-9b98-f89a9681e376": 163,
-    "8a6f2df4-3f7d-45da-b100-e216d46598e9": 164
+    "8a6f2df4-3f7d-45da-b100-e216d46598e9": 164,
+    "be0848f1-c6cf-446f-b6ab-08042d7825c5": 165
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
   "updatedAt": "2025-10-01T00:34:27.858Z"
