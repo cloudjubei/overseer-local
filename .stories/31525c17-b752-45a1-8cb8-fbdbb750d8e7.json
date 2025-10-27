@@ -227,12 +227,13 @@
     },
     {
       "id": "bfa3d487-d173-4126-9789-68bb323dac38",
-      "status": "-",
+      "status": "+",
       "title": "Implement 'View Changes' Icon in Merge Modal",
       "description": "In the Git Merge Modal's file list, add an 'eye' icon button to each file. This button serves as the primary way to view the diff for that file. The initial implementation will have the icon toggle the display of the existing diff view.",
       "context": [],
       "createdAt": "2025-10-27T16:13:12.146Z",
-      "updatedAt": "2025-10-27T16:13:12.146Z"
+      "updatedAt": "2025-10-27T16:36:12.865Z",
+      "completedAt": "2025-10-27T16:36:12.865Z"
     },
     {
       "id": "8ca56f99-3f26-4f70-8dd2-d2dcf73b75b8",
