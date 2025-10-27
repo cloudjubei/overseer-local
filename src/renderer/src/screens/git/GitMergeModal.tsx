@@ -3,7 +3,7 @@ import { Modal } from '@renderer/components/ui/Modal'
 import Spinner from '@renderer/components/ui/Spinner'
 import { Button } from '@renderer/components/ui/Button'
 import { useProjectContext } from '@renderer/contexts/ProjectContext'
-import { MergeReport, MergeReportFile } from 'thefactory-tools'
+import { MergeReport, MergeReportFile, MergeResult, ConflictEntry } from 'thefactory-tools'
 import { useGit } from '@renderer/contexts/GitContext'
 
 export type GitMergeModalProps = {
@@ -32,9 +32,7 @@ function FileDiffItem({ file }: { file: MergeReportFile }) {
       </div>
       <div className="max-h-64 overflow-auto text-xs font-mono">
         {file.binary ? (
-          <div className="p-3 text-neutral-600 dark:text-neutral-400">
-            Binary file diff not shown
-          </div>
+          <div className="p-3 text-neutral-600 dark:text-neutral-400">Binary file diff not shown</div>
         ) : file.patch ? (
           <pre className="p-3 whitespace-pre-wrap">
             <code>{file.patch}</code>
@@ -47,15 +45,53 @@ function FileDiffItem({ file }: { file: MergeReportFile }) {
   )
 }
 
+function ConflictsPanel({
+  conflicts,
+  baseRef,
+  branch,
+}: {
+  conflicts: ConflictEntry[]
+  baseRef: string
+  branch: string
+}) {
+  return (
+    <div className="border rounded-md border-amber-300/50 dark:border-amber-600/40 overflow-hidden">
+      <div className="px-3 py-2 text-xs font-semibold uppercase tracking-wide bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300">
+        Merge conflicts detected
+      </div>
+      <div className="p-3 text-sm">
+        <div className="text-neutral-700 dark:text-neutral-300 mb-2">
+          The merge of <span className="font-mono">{branch}</span> into <span className="font-mono">{baseRef}</span> has conflicts. Resolve them in your editor, then commit the merge.
+        </div>
+        <ul className="list-disc pl-5 text-xs text-neutral-700 dark:text-neutral-300 space-y-1">
+          {conflicts.map((c) => (
+            <li key={c.path}>
+              <span className="font-mono">{c.path}</span> — {c.type}
+            </li>
+          ))}
+        </ul>
+        <div className="mt-3 text-xs text-neutral-600 dark:text-neutral-400">
+          Tip: Use your preferred diff/merge tool to resolve, then return here or close this dialog.
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function GitMergeModal(props: GitMergeModalProps) {
   const { onRequestClose, projectId, repoPath, baseRef, branch, storyId, featureId } = props
   const { getProjectById } = useProjectContext()
   const project = getProjectById(projectId)
-  const { getMergePlanOn, buildMergeReportOn } = useGit()
+  const { getMergePlanOn, buildMergeReportOn, applyMergeOn } = useGit()
 
   const [loading, setLoading] = React.useState(true)
   const [report, setReport] = React.useState<MergeReport | undefined>(undefined)
   const [error, setError] = React.useState<string | undefined>(undefined)
+
+  // Merge execution state
+  const [merging, setMerging] = React.useState(false)
+  const [mergeError, setMergeError] = React.useState<string | undefined>(undefined)
+  const [mergeResult, setMergeResult] = React.useState<MergeResult | undefined>(undefined)
 
   React.useEffect(() => {
     let mounted = true
@@ -85,6 +121,32 @@ export default function GitMergeModal(props: GitMergeModalProps) {
     }
   }, [projectId, repoPath, baseRef, branch, getMergePlanOn, buildMergeReportOn])
 
+  const onMerge = async () => {
+    if (merging) return
+    setMerging(true)
+    setMergeError(undefined)
+    setMergeResult(undefined)
+    try {
+      const res = await applyMergeOn(projectId, {
+        sources: [branch],
+        baseRef,
+        allowFastForward: true,
+      })
+      setMergeResult(res)
+      if (res?.ok && (!res.conflicts || res.conflicts.length === 0)) {
+        // Success with no conflicts; close modal
+        onRequestClose()
+        return
+      }
+      // If not ok or conflicts exist, keep modal open and show conflict info below
+    } catch (e: any) {
+      console.error('Merge failed', e)
+      setMergeError(e?.message || String(e))
+    } finally {
+      setMerging(false)
+    }
+  }
+
   const header = (
     <div className="flex items-center gap-3">
       <div className="flex flex-col">
@@ -109,16 +171,32 @@ export default function GitMergeModal(props: GitMergeModalProps) {
         <Button onClick={onRequestClose} variant="secondary">
           Close
         </Button>
-        <Button disabled title="Merge flow coming soon">
-          Merge
+        <Button onClick={onMerge} loading={merging} disabled={merging}>
+          {merging ? 'Merging…' : 'Merge'}
         </Button>
       </div>
     </div>
   )
 
+  const hasConflicts = (mergeResult?.conflicts?.length || 0) > 0
+
   return (
     <Modal isOpen={true} onClose={onRequestClose} title={header} size="xl" footer={footer}>
       <div className="flex flex-col gap-4">
+        {mergeError && (
+          <div className="p-3 text-sm text-red-600 dark:text-red-400 whitespace-pre-wrap border border-red-200 dark:border-red-800 rounded-md">
+            {mergeError}
+          </div>
+        )}
+        {mergeResult && !mergeError && !hasConflicts && !mergeResult.ok && (
+          <div className="p-3 text-sm text-red-600 dark:text-red-400 whitespace-pre-wrap border border-red-200 dark:border-red-800 rounded-md">
+            {mergeResult.message || 'Merge failed'}
+          </div>
+        )}
+        {hasConflicts && (
+          <ConflictsPanel conflicts={mergeResult!.conflicts || []} baseRef={baseRef} branch={branch} />)
+        }
+
         <div>
           <div className="text-sm font-medium mb-2">Changes</div>
           {loading && (
@@ -127,9 +205,7 @@ export default function GitMergeModal(props: GitMergeModalProps) {
             </div>
           )}
           {!loading && error && (
-            <div className="p-3 text-sm text-red-600 dark:text-red-400 whitespace-pre-wrap">
-              {error}
-            </div>
+            <div className="p-3 text-sm text-red-600 dark:text-red-400 whitespace-pre-wrap">{error}</div>
           )}
           {!loading && !error && (!report || report.files.length === 0) && (
             <div className="p-3 text-sm text-neutral-600 dark:text-neutral-400">

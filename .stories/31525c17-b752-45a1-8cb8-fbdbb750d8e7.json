@@ -157,12 +157,13 @@
     },
     {
       "id": "85ba3de7-7c40-4e6f-ac77-8f7f9ce2ad35",
-      "status": "-",
+      "status": "+",
       "title": "Implement Merge Functionality in GitMergeModal",
       "description": "Add the logic to the `GitMergeModal` to execute a merge operation. This will involve calling the appropriate function from the `GitContext`, handling the success and failure states of the merge, and transitioning to the conflict resolution UI if necessary.",
       "context": [],
       "createdAt": "2025-10-27T14:22:25.557Z",
-      "updatedAt": "2025-10-27T14:22:25.557Z"
+      "updatedAt": "2025-10-27T14:38:47.451Z",
+      "completedAt": "2025-10-27T14:38:47.451Z"
     },
     {
       "id": "70a7778e-a8fb-46fd-be5f-5dc1738b4881",
