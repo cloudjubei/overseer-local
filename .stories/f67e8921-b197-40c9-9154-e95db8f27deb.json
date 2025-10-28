@@ -2528,6 +2528,68 @@
       "blockers": [],
       "createdAt": "2025-10-28T00:26:15.441Z",
       "updatedAt": "2025-10-28T00:26:15.441Z"
+    },
+    {
+      "id": "1784ec92-6612-4d1b-a8e9-41fb10c3557f",
+      "status": "-",
+      "title": "In GitView main branch has special buttons and is at top",
+      "description": "The current branch in @src/renderer/src/screens/GitView.tsx shouldn't have a \"FastMerge\" and \"Delete\" buttons. It should have a push button if there's pending changes that haven't been pushed to remote and a pull button if there's changes on remote that haven't been pulled.\nThis branch should also be in a separate section at the top - not mixing in with the other branches.",
+      "context": [
+        "src/renderer/src/screens/GitView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-28T12:44:29.335Z",
+      "updatedAt": "2025-10-28T12:44:29.335Z"
+    },
+    {
+      "id": "b81fe5fc-0b19-4fe7-9b41-5ae564e5e908",
+      "status": "-",
+      "title": "In GitView the status chip shouldn't show the branch name",
+      "description": "In @src/renderer/src/screens/GitView.tsx the status chips should show if it's local, remote, both - not re-displaying the branch id/name",
+      "context": [
+        "src/renderer/src/screens/GitView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-28T12:45:20.540Z",
+      "updatedAt": "2025-10-28T12:45:20.540Z"
+    },
+    {
+      "id": "41e29168-8387-44a3-8052-a80b3098088b",
+      "status": "-",
+      "title": "In GitMergeModal the diffs are not showing just incoming",
+      "description": "In @src/renderer/src/screens/git/GitMergeModal.tsx the diffs that are displayed are showing both outgoing and incoming changes against each other. But the user should only be shown the incoming changes against the current branch.\nThere should be appropriate data from `thefactory-tools` for this - all the types are in @src/logic/git/gitTypes.copy.ts . If something is missing, then describe a feature request in `docs/GIT_DIFFS.md` so that `thefactory-tools` can be updated to include it.",
+      "context": [
+        "src/renderer/src/screens/git/GitMergeModal.tsx",
+        "src/logic/git/gitTypes.copy.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-28T12:47:48.778Z",
+      "updatedAt": "2025-10-28T12:47:48.778Z"
+    },
+    {
+      "id": "6ef71ce5-6bcd-407a-b9e7-1f3e44e2a626",
+      "status": "-",
+      "title": "In GitView show story chips that when clicking take the user to that story",
+      "description": "In @src/renderer/src/screens/GitView.tsx currently just a storyId is shown - but it should be replaced with a @src/renderer/src/components/stories/DependencyBullet.tsx that when clicking will open the appropriate story.",
+      "context": [
+        "src/renderer/src/screens/GitView.tsx",
+        "src/renderer/src/components/stories/DependencyBullet.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-28T12:49:51.490Z",
+      "updatedAt": "2025-10-28T12:49:51.490Z"
+    },
+    {
+      "id": "ae8f8bd5-6062-4238-bc93-00994debfad0",
+      "status": "-",
+      "title": "Each commit that is pending in GitView is for stories and features - they should be displayed as chips",
+      "description": "Most of the commits are implementing features and have the id inside the commit message. That id should be extracted and displayed as @src/renderer/src/components/stories/DependencyBullet.tsx to show the user which features are part of this pending merge.\nThis is something that `thefactory-tools` should include in the types returned - create a `docs/GIT_FEATUREINFO.md` that describes the feature title and description so that it can be implemented on the `thefactory-tools` side and then incorporated here.",
+      "context": [
+        "src/renderer/src/components/stories/DependencyBullet.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-28T12:52:21.487Z",
+      "updatedAt": "2025-10-28T12:52:21.487Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -2699,7 +2761,12 @@
     "63d893a3-845f-4557-b2a6-d30d38a8c24a": 166,
     "98ff6ca9-38bd-4828-bcba-f555033945fe": 167,
     "724a4b85-c9cd-4d61-ab60-a455da3482f7": 168,
-    "beea43a0-839b-4f9b-8215-73a8fd39f3cb": 169
+    "beea43a0-839b-4f9b-8215-73a8fd39f3cb": 169,
+    "1784ec92-6612-4d1b-a8e9-41fb10c3557f": 170,
+    "b81fe5fc-0b19-4fe7-9b41-5ae564e5e908": 171,
+    "41e29168-8387-44a3-8052-a80b3098088b": 172,
+    "6ef71ce5-6bcd-407a-b9e7-1f3e44e2a626": 173,
+    "ae8f8bd5-6062-4238-bc93-00994debfad0": 174
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
   "updatedAt": "2025-10-01T00:34:27.858Z"
