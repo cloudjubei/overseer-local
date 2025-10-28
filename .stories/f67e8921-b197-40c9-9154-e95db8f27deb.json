@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "-",
+  "status": "=",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -2521,7 +2521,7 @@
     },
     {
       "id": "beea43a0-839b-4f9b-8215-73a8fd39f3cb",
-      "status": "-",
+      "status": "+",
       "title": "Delete chat becomes refresh chat + actual delete chat in settings",
       "description": "The current 'Delete chat' button in the header of @src/renderer/src/screens/ChatView.tsx should become \"Refresh Chat\" - so still a red button, but with a different icon inside - a new one needs to be created and added to @src/renderer/src/components/ui/icons/Icons.tsx .\nAt the very bottom of chat settings there should be a red button that says \"Delete this chat\", which will ask the user for confirmation for doing so. This should actually delete the chat for good (at this moment taking the user to the \"General\" chat which is always available).",
       "context": [
@@ -2530,7 +2530,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-28T00:26:15.441Z",
-      "updatedAt": "2025-10-28T00:26:15.441Z"
+      "updatedAt": "2025-10-28T10:51:24.372Z",
+      "completedAt": "2025-10-28T10:51:24.372Z"
     }
   ],
   "featureIdToDisplayIndex": {

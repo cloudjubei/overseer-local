@@ -13,7 +13,7 @@ import type {
 } from 'thefactory-tools'
 import ContextInfoButton from '../ui/ContextInfoButton'
 import ModelChip from '../agents/ModelChip'
-import { IconSettings, IconChevron, IconDelete, IconScroll } from '../ui/icons/Icons'
+import { IconSettings, IconChevron, IconRefresh, IconScroll } from '../ui/icons/Icons'
 import { useProjectContext } from '../../contexts/ProjectContext'
 import { useStories } from '../../contexts/StoriesContext'
 import { useAgents } from '../../contexts/AgentsContext'
@@ -21,6 +21,7 @@ import { TOOL_SCHEMAS } from 'thefactory-tools/constants'
 import { Button } from '@renderer/components/ui/Button'
 import { Modal } from '@renderer/components/ui/Modal'
 import { useChatUnread } from '@renderer/hooks/useChatUnread'
+import { useActiveProject } from '@renderer/contexts/ProjectContext'
 
 export type ChatSidebarProps = {
   context: ChatContext
@@ -53,6 +54,7 @@ export default function ChatSidebar({
     updateSettingsPrompt,
     resetSettingsPrompt,
     deleteLastMessage,
+    deleteChat,
   } = useChats()
   const { getProjectById } = useProjectContext()
   const { storiesById, featuresById } = useStories()
@@ -60,6 +62,7 @@ export default function ChatSidebar({
   const { activeChatConfig, isChatConfigured } = useLLMConfig()
   const { navigateView } = useNavigator()
   const { markReadByKey } = useChatUnread()
+  const { projectId: activeProjectId } = useActiveProject()
 
   const [chat, setChat] = useState<ChatState | undefined>(undefined)
   const [effectivePrompt, setEffectivePrompt] = useState<string>('')
@@ -301,6 +304,27 @@ export default function ChatSidebar({
     [isChatConfigured, activeChatConfig, currentSettings, resumeTools, context, effectivePrompt],
   )
 
+  const handleDeleteChat = useCallback(async () => {
+    const projectId = context.projectId || activeProjectId
+    if (!projectId) return
+    const confirmed = window.confirm('Delete this chat? This action cannot be undone.')
+    if (!confirmed) return
+    try {
+      await deleteChat(context)
+    } catch (e) {
+      console.error('Failed to delete chat', e)
+    } finally {
+      // Navigate to General chat for this project
+      const general = { type: 'PROJECT', projectId }
+      try {
+        localStorage.setItem('chat-last-selected-context', JSON.stringify(general))
+      } catch {}
+      // Trigger chat view to pick up new selection
+      window.location.hash = '#chat/general'
+      setIsSettingsOpen(false)
+    }
+  }, [context, activeProjectId, deleteChat])
+
   return (
     <section className={sectionClass}>
       <header className="relative flex-shrink-0 px-3 py-2 border-b border-[var(--border-subtle)] bg-[var(--surface-raised)] flex items-center justify-between gap-2">
@@ -330,11 +354,11 @@ export default function ChatSidebar({
           <Button
             className="btn-secondary w-[34px]"
             variant="danger"
-            aria-label="Delete chat"
-            title="Delete chat"
+            aria-label="Refresh chat"
+            title="Refresh chat"
             onClick={() => restartChat(context)}
           >
-            <IconDelete className="w-4 h-4" />
+            <IconRefresh className="w-4 h-4" />
           </Button>
           <ModelChip editable className="border-blue-500" mode="chat" />
 
@@ -524,6 +548,12 @@ export default function ChatSidebar({
                     </div>
                   </div>
                 ) : null}
+
+                <div className="pt-2 border-t border-[var(--border-subtle)]">
+                  <Button variant="danger" onClick={handleDeleteChat}>
+                    Delete this chat
+                  </Button>
+                </div>
               </div>
             </div>
           )}
