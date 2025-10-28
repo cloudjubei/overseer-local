@@ -273,11 +273,12 @@
       "id": "5240a857-d8f7-4afb-94fb-8c6b36fed3d0",
       "status": "+",
       "title": "Request Structured Diffs and Analyses in Merge Modal",
-      "description": "Update the `useEffect` hook in `GitMergeModal.tsx` that fetches the merge report. Modify the call to `gitService.buildMergeReport` to include the `includeStructuredDiff: true` and `analyses: ['compilation', 'tests', 'coverage']` options. This will enable the backend to compute and return parsed diffs and analysis reports, which will be used in subsequent features.",
+      "description": "Update the `useEffect` hook in `GitMergeModal.tsx` that fetches the merge report. Modify the call to `gitService.buildMergeReport` to include the `includeStructuredDiff: true` and `analyses: ['compilation', 'tests', 'coverage']` options. This will enable the backend to compute and return parsed diffs and analysis reports.",
       "context": [],
       "createdAt": "2025-10-28T00:14:23.703Z",
-      "updatedAt": "2025-10-28T01:31:51.948Z",
-      "completedAt": "2025-10-28T01:31:51.948Z"
+      "updatedAt": "2025-10-28T01:37:02.986Z",
+      "blockers": [],
+      "completedAt": "2025-10-28T01:37:02.986Z"
     },
     {
       "id": "791f6f40-71c1-4057-937d-771841eb0039",
