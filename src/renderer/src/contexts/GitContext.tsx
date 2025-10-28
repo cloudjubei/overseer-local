@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { gitService } from '../services/gitService'
 import { useProjectContext } from './ProjectContext'
-import { GitBranchEvent } from 'thefactory-tools'
+import { GitBranchEvent, GitUnifiedBranch } from 'thefactory-tools'
 
 export type PendingBranch = {
   projectId: string
@@ -27,12 +27,25 @@ export type MergePreferences = {
   setDeleteRemote: (v: boolean) => void
 }
 
+export type UnifiedBranchesState = {
+  loading: boolean
+  error?: string
+  branches: GitUnifiedBranch[]
+}
+
 export type GitContextValue = {
   loading: boolean
   error?: string
 
   currentProject: ProjectGitStatus
   allProjects: ProjectGitStatus[]
+
+  // Unified branches API
+  unified: {
+    byProject: Record<string, UnifiedBranchesState>
+    get: (projectId?: string) => UnifiedBranchesState
+    reload: (projectId?: string) => Promise<void>
+  }
 
   mergePreferences: MergePreferences
 }
@@ -42,6 +55,27 @@ const GitContext = createContext<GitContextValue | null>(null)
 const getStoryIdFromBranchName = (branchName: string): string | undefined => {
   const match = branchName.match(/^features\/([0-9a-fA-F-]+)/)
   return match ? match[1] : undefined
+}
+
+const parseStoryIdFromUnified = (u: GitUnifiedBranch): string | undefined => {
+  if (u.storyId) return u.storyId
+  const tryParse = (name?: string): string | undefined => {
+    if (!name) return undefined
+    const m = name.match(/(?:^|\/)features\/([0-9a-fA-F-]{8,})/)
+    return m ? m[1] : undefined
+  }
+  return tryParse(u.name) || tryParse(u.remoteName)
+}
+
+const sortUnifiedBranches = (list: GitUnifiedBranch[]) => {
+  return [...list].sort((a, b) => {
+    if (a.current && !b.current) return -1
+    if (b.current && !a.current) return 1
+    const aScore = a.isLocal && a.isRemote ? 0 : a.isLocal ? 1 : 2
+    const bScore = b.isLocal && b.isRemote ? 0 : b.isLocal ? 1 : 2
+    if (aScore !== bScore) return aScore - bScore
+    return a.name.localeCompare(b.name)
+  })
 }
 
 // Local storage helpers for persistent options
@@ -74,6 +108,9 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
     pending: [],
   })
   const [allProjects, setAllProjects] = useState<ProjectGitStatus[]>([])
+
+  // Unified branches state per project
+  const [unifiedByProject, setUnifiedByProject] = useState<Record<string, UnifiedBranchesState>>({})
 
   // Merge preferences (persisted)
   const [autoPush, setAutoPush] = useState<boolean>(() => readBoolLS(LS_KEYS.autoPush, false))
@@ -132,8 +169,9 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
     return () => {
       unsubscribe()
     }
-  }, [onMonitorUpdate])
+  }, [])
 
+  // Initialize projects and start monitors
   useEffect(() => {
     if (loading) return
     setLoading(true)
@@ -170,15 +208,79 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
     setCurrentProject(curr)
   }, [activeProjectId, allProjects])
 
+  // Unified branches loader
+  const loadUnified = React.useCallback(
+    async (projectId?: string) => {
+      const pid = projectId || activeProjectId
+      if (!pid) return
+      setUnifiedByProject((prev) => ({
+        ...prev,
+        [pid]: { ...(prev[pid] || { branches: [] }), loading: true, error: undefined },
+      }))
+      try {
+        const list = await gitService.listUnifiedBranches(pid)
+        const hydrated = list.map((b) => ({ ...b, storyId: b.storyId || parseStoryIdFromUnified(b) }))
+        const sorted = sortUnifiedBranches(hydrated)
+        setUnifiedByProject((prev) => ({
+          ...prev,
+          [pid]: { loading: false, error: undefined, branches: sorted },
+        }))
+      } catch (e) {
+        setUnifiedByProject((prev) => ({
+          ...prev,
+          [pid]: {
+            loading: false,
+            error: (e as any)?.message || 'Failed to list branches',
+            branches: [],
+          },
+        }))
+      }
+    },
+    [activeProjectId],
+  )
+
+  // Refresh unified branches whenever projects change (initial load for all)
+  useEffect(() => {
+    let cancelled = false
+    const init = async () => {
+      const initial: Record<string, UnifiedBranchesState> = {}
+      for (const p of projects) initial[p.id] = { loading: true, branches: [] }
+      setUnifiedByProject(initial)
+      // Load sequentially to avoid overloading IPC
+      for (const p of projects) {
+        if (cancelled) break
+        await loadUnified(p.id)
+      }
+    }
+    void init()
+    return () => {
+      cancelled = true
+    }
+  }, [projects, loadUnified])
+
+  const unifiedApi = useMemo(
+    () => ({
+      byProject: unifiedByProject,
+      get: (projectId?: string): UnifiedBranchesState => {
+        const pid = projectId || activeProjectId
+        if (!pid) return { loading: false, branches: [] }
+        return unifiedByProject[pid] || { loading: true, branches: [] }
+      },
+      reload: loadUnified,
+    }),
+    [unifiedByProject, activeProjectId, loadUnified],
+  )
+
   const value = useMemo<GitContextValue>(
     () => ({
       loading,
       error,
       currentProject,
       allProjects,
+      unified: unifiedApi,
       mergePreferences,
     }),
-    [loading, error, currentProject, allProjects, mergePreferences],
+    [loading, error, currentProject, allProjects, unifiedApi, mergePreferences],
   )
 
   return <GitContext.Provider value={value}>{children}</GitContext.Provider>

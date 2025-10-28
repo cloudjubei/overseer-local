@@ -9,6 +9,7 @@ import { IconFastMerge } from '../components/ui/icons/IconFastMerge'
 import { IconDelete } from '../components/ui/icons/IconDelete'
 import { gitService } from '@renderer/services/gitService'
 import { GitUnifiedBranch } from 'thefactory-tools'
+import { useGit } from '../contexts/GitContext'
 
 function statusLabel(b: GitUnifiedBranch): string {
   if (b.current) return 'current'
@@ -236,47 +237,12 @@ function UnifiedBranchItem({
   )
 }
 
-function useUnifiedBranches(projectId?: string) {
-  const [branches, setBranches] = React.useState<GitUnifiedBranch[] | null>(null)
-  const [loading, setLoading] = React.useState(false)
-  const [error, setError] = React.useState<string | undefined>(undefined)
-
-  const load = React.useCallback(async () => {
-    if (!projectId) return
-    setLoading(true)
-    setError(undefined)
-    try {
-      const list = await gitService.listUnifiedBranches(projectId)
-      // Sort: current first, then tracked, then locals, then remotes; alpha by name
-      const sorted = [...list].sort((a, b) => {
-        if (a.current && !b.current) return -1
-        if (b.current && !a.current) return 1
-        const aScore = a.isLocal && a.isRemote ? 0 : a.isLocal ? 1 : 2
-        const bScore = b.isLocal && b.isRemote ? 0 : b.isLocal ? 1 : 2
-        if (aScore !== bScore) return aScore - bScore
-        return a.name.localeCompare(b.name)
-      })
-      setBranches(sorted)
-    } catch (e) {
-      setError((e as any)?.message || 'Failed to list branches')
-      setBranches([])
-    } finally {
-      setLoading(false)
-    }
-  }, [projectId])
-
-  React.useEffect(() => {
-    void load()
-  }, [load])
-
-  return { branches, loading, error, reload: load }
-}
-
 function CurrentProjectView() {
   const { activeProject } = useProjectContext()
   const projectId = activeProject?.id
   const title = activeProject?.title
-  const { branches, loading, error } = useUnifiedBranches(projectId)
+  const { unified } = useGit()
+  const { branches, loading, error } = unified.get(projectId)
 
   return (
     <div className="flex-1 min-h-0 min-w-0 rounded-md border border-neutral-200 dark:border-neutral-800 flex flex-col">
@@ -309,43 +275,10 @@ function CurrentProjectView() {
 
 function AllProjectsView() {
   const { projects } = useProjectContext()
-  const [data, setData] = React.useState<Record<string, { loading: boolean; error?: string; branches: GitUnifiedBranch[] }>>({})
+  const { unified } = useGit()
 
-  React.useEffect(() => {
-    let cancelled = false
-    async function loadAll() {
-      const entries: Array<[string, { loading: boolean; error?: string; branches: GitUnifiedBranch[] }]> = []
-      for (const p of projects) {
-        try {
-          entries.push([p.id, { loading: true, branches: [] }])
-          const list = await gitService.listUnifiedBranches(p.id)
-          const sorted = [...list].sort((a, b) => {
-            if (a.current && !b.current) return -1
-            if (b.current && !a.current) return 1
-            const aScore = a.isLocal && a.isRemote ? 0 : a.isLocal ? 1 : 2
-            const bScore = b.isLocal && b.isRemote ? 0 : b.isLocal ? 1 : 2
-            if (aScore !== bScore) return aScore - bScore
-            return a.name.localeCompare(b.name)
-          })
-          entries.push([p.id, { loading: false, branches: sorted }])
-        } catch (e) {
-          entries.push([p.id, { loading: false, error: (e as any)?.message || 'Failed to list branches', branches: [] }])
-        }
-      }
-      if (!cancelled) {
-        const next: Record<string, { loading: boolean; error?: string; branches: GitUnifiedBranch[] }> = {}
-        for (const [id, v] of entries) next[id] = v
-        setData(next)
-      }
-    }
-    void loadAll()
-    return () => {
-      cancelled = true
-    }
-  }, [projects])
-
-  const anyLoading = projects.some((p) => data[p.id]?.loading)
-  const anyBranches = projects.some((p) => (data[p.id]?.branches?.length ?? 0) > 0)
+  const anyLoading = projects.some((p) => unified.byProject[p.id]?.loading)
+  const anyBranches = projects.some((p) => (unified.byProject[p.id]?.branches?.length ?? 0) > 0)
 
   return (
     <div className="flex-1 min-h-0 min-w-0 rounded-md border border-neutral-200 dark:border-neutral-800 flex flex-col">
@@ -364,7 +297,7 @@ function AllProjectsView() {
         )}
 
         {projects.map((proj) => {
-          const v = data[proj.id]
+          const v = unified.byProject[proj.id]
           if (!v || v.loading || (v.branches?.length ?? 0) === 0) return null
           return (
             <div key={proj.id} className="">
