@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "=",
+  "status": "-",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -2478,6 +2478,56 @@
       "createdAt": "2025-10-27T11:13:20.749Z",
       "updatedAt": "2025-10-27T11:22:22.530Z",
       "completedAt": "2025-10-27T11:22:22.530Z"
+    },
+    {
+      "id": "63d893a3-845f-4557-b2a6-d30d38a8c24a",
+      "status": "-",
+      "title": "Chat notifications",
+      "description": "In the @src/renderer/src/navigation/SidebarView.tsx we need to show notifications next to the project and next to the Chat button when there is an unread message. \nThere should be also a little dot (without a number inside) shown on the chat navigation in @src/renderer/src/screens/ChatView.tsx leading the user to the chat that has the unread message .",
+      "context": [
+        "src/renderer/src/navigation/SidebarView.tsx",
+        "src/renderer/src/screens/ChatView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-28T00:20:01.644Z",
+      "updatedAt": "2025-10-28T00:20:01.644Z"
+    },
+    {
+      "id": "98ff6ca9-38bd-4828-bcba-f555033945fe",
+      "status": "-",
+      "title": "Chat history should only show the current project's chats",
+      "description": "in @src/renderer/src/screens/ChatView.tsx it should ONLY show the chats for the given active project - never for other ones. Right now I can see other projects in History.",
+      "context": [
+        "src/renderer/src/screens/ChatView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-28T00:20:52.916Z",
+      "updatedAt": "2025-10-28T00:20:52.916Z"
+    },
+    {
+      "id": "724a4b85-c9cd-4d61-ab60-a455da3482f7",
+      "status": "-",
+      "title": "If a story/feature is missing show *DELETED* instead of id",
+      "description": "In @src/renderer/src/screens/ChatView.tsx in the sidebar - don't show the id of the story/feature that no longer exists - just inform the user that this has been deleted.",
+      "context": [
+        "src/renderer/src/screens/ChatView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-28T00:22:27.483Z",
+      "updatedAt": "2025-10-28T00:22:27.483Z"
+    },
+    {
+      "id": "beea43a0-839b-4f9b-8215-73a8fd39f3cb",
+      "status": "-",
+      "title": "Delete chat becomes refresh chat + actual delete chat in settings",
+      "description": "The current 'Delete chat' button in the header of @src/renderer/src/screens/ChatView.tsx should become \"Refresh Chat\" - so still a red button, but with a different icon inside - a new one needs to be created and added to @src/renderer/src/components/ui/icons/Icons.tsx .\nAt the very bottom of chat settings there should be a red button that says \"Delete this chat\", which will ask the user for confirmation for doing so. This should actually delete the chat for good (at this moment taking the user to the \"General\" chat which is always available).",
+      "context": [
+        "src/renderer/src/screens/ChatView.tsx",
+        "src/renderer/src/components/ui/icons/Icons.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-28T00:26:15.441Z",
+      "updatedAt": "2025-10-28T00:26:15.441Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -2645,7 +2695,11 @@
     "dd9bb459-5225-4604-8d2f-6e50feaba098": 162,
     "c7a825c8-9791-4893-9b98-f89a9681e376": 163,
     "8a6f2df4-3f7d-45da-b100-e216d46598e9": 164,
-    "be0848f1-c6cf-446f-b6ab-08042d7825c5": 165
+    "be0848f1-c6cf-446f-b6ab-08042d7825c5": 165,
+    "63d893a3-845f-4557-b2a6-d30d38a8c24a": 166,
+    "98ff6ca9-38bd-4828-bcba-f555033945fe": 167,
+    "724a4b85-c9cd-4d61-ab60-a455da3482f7": 168,
+    "beea43a0-839b-4f9b-8215-73a8fd39f3cb": 169
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
   "updatedAt": "2025-10-01T00:34:27.858Z"
