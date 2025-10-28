@@ -304,19 +304,25 @@
       "id": "59e7d2e8-be68-410f-81ed-0ebeaf994e95",
       "status": "-",
       "title": "Integrate Unified Branch Data Model in Git View",
-      "description": "Refactor the 'GitView' to handle the enhanced branch data structure from `thefactory-tools`. The view should now display a single, de-duplicated list of branches, clearly indicating their local and remote status (e.g., local only, remote only, tracked). This resolves the issue of seeing the same branch listed twice if it exists both locally and on the remote. The UI should correctly parse and display metadata like the Story ID for all branches, regardless of their origin.",
-      "context": [],
+      "description": "Refactor the 'GitView' to handle the enhanced branch data structure from `thefactory-tools`. The view should now display a single, de-duplicated list of branches, clearly indicating their local and remote status (e.g., local only, remote only, tracked). This resolves the issue of seeing the same branch listed twice if it exists both locally and on the remote. The UI should correctly parse and display metadata like the Story ID for all branches, regardless of their origin.\n\n@src/logic/git/gitTypes.copy.ts has the latest type information",
+      "context": [
+        "src/logic/git/gitTypes.copy.ts"
+      ],
       "createdAt": "2025-10-28T09:29:48.355Z",
-      "updatedAt": "2025-10-28T09:29:48.355Z"
+      "updatedAt": "2025-10-28T11:38:43.354Z",
+      "blockers": []
     },
     {
       "id": "60d81fdb-96e6-46f2-901b-dc3a441460f0",
       "status": "-",
       "title": "Implement Merge-Base Diffing in Merge Modal",
-      "description": "Modify the 'GitMergeModal' to use the new merge-base diffing API from `thefactory-tools`. When viewing changes for a pending merge, the diff should be calculated against the common ancestor of the source and target branches. This will accurately display only the incoming changes from the feature branch, eliminating the confusing 'deletions' that appear when the target branch has diverged. This aligns the diff view with standard pull request behavior.",
-      "context": [],
+      "description": "Modify the 'GitMergeModal' to use the new merge-base diffing API from `thefactory-tools`. When viewing changes for a pending merge, the diff should be calculated against the common ancestor of the source and target branches. This will accurately display only the incoming changes from the feature branch, eliminating the confusing 'deletions' that appear when the target branch has diverged. This aligns the diff view with standard pull request behavior.\n\n\n@src/logic/git/gitTypes.copy.ts  has the latest type information",
+      "context": [
+        "src/logic/git/gitTypes.copy.ts"
+      ],
       "createdAt": "2025-10-28T09:29:48.358Z",
-      "updatedAt": "2025-10-28T09:29:48.358Z"
+      "updatedAt": "2025-10-28T11:38:50.405Z",
+      "blockers": []
     }
   ],
   "featureIdToDisplayIndex": {

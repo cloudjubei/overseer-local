@@ -22,6 +22,41 @@ export type GitBranchDetails = {
 /** Scope for listing branches. */
 export type ListBranchesScope = 'local' | 'remote' | 'all'
 
+/**
+ * Unified representation of a branch across local and remote.
+ *
+ * A single entry conveys whether the branch exists locally and/or remotely,
+ * its tracking relationship, and simple divergence stats relative to upstream
+ * when applicable. Shapes are JSON-serializable and stable for remote usage.
+ */
+export type GitUnifiedBranch = {
+  /** Short branch name without refs/ prefix, e.g. 'feature/x'. */
+  name: string
+  /** Full refname for the local branch when present, e.g. 'refs/heads/feature/x'. */
+  fullName?: string
+  /** Whether a local branch exists. */
+  isLocal: boolean
+  /** Whether a remote branch exists. */
+  isRemote: boolean
+  /** Remote tracking ref short name, e.g. 'origin/feature/x', when known. */
+  remoteName?: string
+  /** The configured upstream remote (e.g., 'origin') when tracking is set. */
+  upstreamRemote?: string
+  /** The configured upstream branch short name when tracking is set. */
+  upstreamBranch?: string
+  /** Local commit SHA if local exists. */
+  localSha?: string
+  /** Remote commit SHA if remote exists (tracking or matching name on default remote). */
+  remoteSha?: string
+  /** Divergence relative to upstream (ahead/behind counts). Only set when upstream is configured. */
+  ahead?: number
+  behind?: number
+  /** Heuristic metadata extracted from branch naming, e.g., UUID-like story id suffix. */
+  storyId?: string
+  /** True when this local branch is the current checked-out branch. */
+  current?: boolean
+}
+
 export type GitTools = {
   /** Initialize the Git tools for the repository (e.g., configure remotes/credentials).
    * @example
@@ -135,6 +170,15 @@ export type GitTools = {
   deleteBranch(name: string): Promise<GitOpResult>
 
   /**
+   * Safely delete a remote branch.
+   * @param name Branch name to delete on the remote.
+   * @param remote The remote to delete from (default 'origin').
+   * @example
+   * await git.deleteRemoteBranch('feature/old-stuff', 'origin')
+   */
+  deleteRemoteBranch(name: string, remote?: string): Promise<GitOpResult>
+
+  /**
    * Rename a local branch.
    * @param oldName Current branch name.
    * @param newName New branch name.
@@ -160,6 +204,14 @@ export type GitTools = {
    * console.log(r.branches)
    */
   listBranches(scope?: ListBranchesScope): Promise<GitOpResult & { branches?: GitBranchDetails[] }>
+
+  /**
+   * List unified branches combining local and remote presence, tracking and divergence.
+   * @example
+   * const r = await git.listUnifiedBranches()
+   * console.log(r.branches)
+   */
+  listUnifiedBranches(): Promise<GitOpResult & { branches?: GitUnifiedBranch[] }>
 
   /** Get the current branch name.
    * @example
@@ -189,12 +241,25 @@ export type GitTools = {
   startMonitor: (config: Omit<GitMonitorConfig, 'repoPath'>) => GitMonitor
 
   /**
-   * Compute a file-level diff summary between a base and head ref.
+   * Compute a file-level diff summary between a base and head ref (two-dot).
    * @param args Options including baseRef, headRef and includePatch.
    * @example
    * const diff = await git.getBranchDiffSummary({ baseRef: 'main', headRef: 'feature/x', includePatch: true })
    */
   getBranchDiffSummary: (args: {
+    baseRef: string
+    headRef: string
+    includePatch?: boolean
+  }) => Promise<DiffSummary>
+
+  /**
+   * Compute a file-level diff summary of incoming changes from head into base using their merge-base.
+   * Equivalent to 'git diff base...head'. Avoids showing base-only changes as deletions.
+   * @param args Options including baseRef, headRef and includePatch.
+   * @example
+   * const diff = await git.getIncomingDiffSummary({ baseRef: 'main', headRef: 'feature/x' })
+   */
+  getIncomingDiffSummary: (args: {
     baseRef: string
     headRef: string
     includePatch?: boolean
