@@ -17,7 +17,7 @@ import { IconSettings, IconChevron, IconDelete, IconScroll } from '../ui/icons/I
 import { useProjectContext } from '../../contexts/ProjectContext'
 import { useStories } from '../../contexts/StoriesContext'
 import { useAgents } from '../../contexts/AgentsContext'
-import { TOOL_SCHEMAS } from 'thefactory-tools/constants'
+import { ToolSchemas, ALL_CHAT_AGENT_TOOLS } from 'thefactory-tools/constants'
 import { Button } from '@renderer/components/ui/Button'
 import { Modal } from '@renderer/components/ui/Modal'
 
@@ -117,21 +117,24 @@ export default function ChatSidebar({
       setTools([])
       return
     }
-    const allTools = Object.keys(TOOL_SCHEMAS)
+    const allTools = Object.keys(ToolSchemas)
 
     const availableSet = new Set(availableTools)
     const autoSet = new Set(autoCallTools)
+    const allAllowedSet = new Set(ALL_CHAT_AGENT_TOOLS)
 
-    const mapped: ToolToggle[] = allTools.map((t) => {
-      const schema = TOOL_SCHEMAS[t]
-      const toolName = schema.name
-      return {
-        name: toolName,
-        description: schema.description,
-        available: availableSet.has(toolName),
-        autoCall: autoSet.has(toolName),
-      }
-    })
+    const mapped: ToolToggle[] = allTools
+      .filter((t) => allAllowedSet.has(t))
+      .map((t) => {
+        const schema = ToolSchemas[t]
+        const toolName = schema.name
+        return {
+          name: toolName,
+          description: schema.description,
+          available: availableSet.has(toolName),
+          autoCall: autoSet.has(toolName),
+        }
+      })
     setTools(mapped)
   }, [context.projectId, currentSettings])
 

@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { AgentToolSchema } from 'thefactory-tools'
 import { factoryToolsService } from '../services/factoryToolsService'
 import { useActiveProject } from '../contexts/ProjectContext'
-import { TOOL_SCHEMAS } from 'thefactory-tools/constants'
+import { ToolSchemas } from 'thefactory-tools/constants'
 
 type GroupedTools = {
   [group: string]: AgentToolSchema[]
@@ -44,8 +44,8 @@ const ToolsScreen: React.FC = () => {
       try {
         setLoading(true)
         let groups: GroupedTools = {}
-        for (const k of Object.keys(TOOL_SCHEMAS)) {
-          const tool = TOOL_SCHEMAS[k]
+        for (const k of Object.keys(ToolSchemas)) {
+          const tool = ToolSchemas[k]
           const group = getGroupFromName(tool.name)
           if (!groups[group]) groups[group] = []
           groups[group].push(tool)

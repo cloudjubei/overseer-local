@@ -2590,6 +2590,18 @@
       "blockers": [],
       "createdAt": "2025-10-28T12:52:21.487Z",
       "updatedAt": "2025-10-28T12:52:21.487Z"
+    },
+    {
+      "id": "e5ab58da-63e1-4869-8fc0-b18016f0dba6",
+      "status": "-",
+      "title": "the chats in the history view should be ordered by last message received/sent",
+      "description": "In @src/renderer/src/screens/ChatView.tsx the history should sort the chats by 'last update' - it seems they are ordered by that on open, but after some messages trickle in - that's no longer the case.",
+      "context": [
+        "src/renderer/src/screens/ChatView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-28T20:31:02.699Z",
+      "updatedAt": "2025-10-28T20:33:22.278Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -2766,7 +2778,8 @@
     "b81fe5fc-0b19-4fe7-9b41-5ae564e5e908": 171,
     "41e29168-8387-44a3-8052-a80b3098088b": 172,
     "6ef71ce5-6bcd-407a-b9e7-1f3e44e2a626": 173,
-    "ae8f8bd5-6062-4238-bc93-00994debfad0": 174
+    "ae8f8bd5-6062-4238-bc93-00994debfad0": 174,
+    "e5ab58da-63e1-4869-8fc0-b18016f0dba6": 175
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
   "updatedAt": "2025-10-01T00:34:27.858Z"

@@ -126,7 +126,6 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
   )
 
   const onMonitorUpdate = async (update: { projectId: string; state: GitBranchEvent }) => {
-    console.log('GitContext onMonitorUpdate update: ', update)
     const { projectId, state: branchUpdate } = update
 
     setAllProjects((current) => {
@@ -177,7 +176,6 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
     setLoading(true)
 
     setAllProjects(projects.map((p) => ({ projectId: p.id, pending: [] })))
-    console.log('Starting gitContext with projects: ', projects)
 
     const load = async () => {
       try {
@@ -219,7 +217,10 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
       }))
       try {
         const list = await gitService.listUnifiedBranches(pid)
-        const hydrated = list.map((b) => ({ ...b, storyId: b.storyId || parseStoryIdFromUnified(b) }))
+        const hydrated = list.map((b) => ({
+          ...b,
+          storyId: b.storyId || parseStoryIdFromUnified(b),
+        }))
         const sorted = sortUnifiedBranches(hydrated)
         setUnifiedByProject((prev) => ({
           ...prev,

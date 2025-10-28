@@ -61,7 +61,7 @@ export default class FactoryToolsManager extends BaseManager {
     const webSearchApiKeys = appSettings?.webSearchApiKeys
     const dbConnectionString = appSettings?.database?.connectionString
 
-    const tools = createTools(
+    const tools = await createTools(
       projectId,
       projectRoot,
       // project.repo_url,
