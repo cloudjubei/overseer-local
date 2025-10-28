@@ -53,6 +53,60 @@ function DiffPatch({ patch }: { patch: string }) {
   )
 }
 
+// Line-by-line structured diff renderer using parsed hunks/lines when available
+function StructuredDiff({
+  structuredDiff,
+}: {
+  structuredDiff: NonNullable<MergeReportFile['structuredDiff']>
+}) {
+  const headerText = (h: NonNullable<MergeReportFile['structuredDiff']>[number]) => {
+    const left = `-${h.oldStart}${typeof h.oldLines === 'number' ? ',' + h.oldLines : ''}`
+    const right = `+${h.newStart}${typeof h.newLines === 'number' ? ',' + h.newLines : ''}`
+    return `@@ ${left} ${right} @@${h.header ? ' ' + h.header : ''}`
+  }
+
+  return (
+    <div className="font-mono text-xs">
+      {structuredDiff.map((hunk, hi) => (
+        <div key={hi} className="mb-3">
+          <div className="px-2 py-0.5 bg-neutral-100 dark:bg-neutral-900/60 text-neutral-700 dark:text-neutral-300">
+            {headerText(hunk)}
+          </div>
+          <div>
+            {hunk.lines.map((ln, li) => {
+              const isAdd = ln.type === 'add'
+              const isDel = ln.type === 'del'
+              const bgCls = isAdd
+                ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300'
+                : isDel
+                  ? 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300'
+                  : ''
+              const marker = isAdd ? '+' : isDel ? '-' : ' '
+              return (
+                <div
+                  key={li}
+                  className={`grid grid-cols-[56px_56px_1fr] ${bgCls}`}
+                >
+                  <div className="px-2 py-0.5 text-right select-none text-neutral-500 dark:text-neutral-400">
+                    {typeof ln.oldLine === 'number' ? ln.oldLine : ''}
+                  </div>
+                  <div className="px-2 py-0.5 text-right select-none text-neutral-500 dark:text-neutral-400">
+                    {typeof ln.newLine === 'number' ? ln.newLine : ''}
+                  </div>
+                  <div className="px-2 py-0.5 whitespace-pre-wrap">
+                    <span className="opacity-60">{marker}</span>
+                    {ln.text?.length ? ' ' + ln.text : ' '}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 function StatusIcon({ status }: { status: MergeReportFile['status'] }) {
   const iconClass = 'w-4 h-4'
   if (status === 'A') return <IconFileAdded className={iconClass} />
@@ -100,8 +154,10 @@ function FileDiffItem({ file }: { file: MergeReportFile }) {
       {open && (
         <div className="max-h-64 overflow-auto text-xs font-mono">
           {file.binary ? (
-            <div className="p-3 text-neutral-600 dark:text-neutral-400">
-              Binary file diff not shown
+            <div className="p-3 text-neutral-600 dark:text-neutral-400">Binary file diff not shown</div>
+          ) : Array.isArray(file.structuredDiff) && file.structuredDiff.length > 0 ? (
+            <div className="p-1">
+              <StructuredDiff structuredDiff={file.structuredDiff as NonNullable<MergeReportFile['structuredDiff']>} />
             </div>
           ) : file.patch ? (
             <DiffPatch patch={file.patch} />
