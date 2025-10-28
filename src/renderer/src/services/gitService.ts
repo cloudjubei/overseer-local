@@ -11,6 +11,7 @@ import {
   MergeReport,
   MergeReportOptions,
   MergeResult,
+  GitUnifiedBranch,
 } from 'thefactory-tools'
 
 export type GitService = {
@@ -51,6 +52,8 @@ export type GitService = {
   subscribeToMonitorUpdates: (
     callback: (payload: { projectId: string; state: GitBranchEvent }) => void,
   ) => () => void
+
+  listUnifiedBranches: (projectId: string) => Promise<GitUnifiedBranch[]>
 }
 
 export const gitService: GitService = {

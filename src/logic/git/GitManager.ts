@@ -15,6 +15,7 @@ import {
   MergeReport,
   MergeResult,
   createGitTools,
+  GitUnifiedBranch,
 } from 'thefactory-tools'
 import ProjectsManager from '../projects/ProjectsManager'
 import Mutex from '../utils/Mutex'
@@ -76,6 +77,10 @@ export default class GitManager extends BaseManager {
     handlers[IPC_HANDLER_KEYS.GIT_MONITOR_START] = ({ projectId, options }) =>
       this.startMonitor(projectId, options)
     handlers[IPC_HANDLER_KEYS.GIT_MONITOR_STOP] = ({ projectId }) => this.stopMonitor(projectId)
+
+    // Unified branches listing
+    handlers[IPC_HANDLER_KEYS.GIT_LIST_UNIFIED_BRANCHES] = ({ projectId }) =>
+      this.listUnifiedBranches(projectId)
 
     return handlers
   }
@@ -189,6 +194,17 @@ export default class GitManager extends BaseManager {
     const tools = await this.__getTools(projectId)
     if (!tools) return
     return tools.deleteRemoteBranch(name)
+  }
+
+  private async listUnifiedBranches(projectId: string): Promise<GitUnifiedBranch[] | undefined> {
+    const tools = await this.__getTools(projectId)
+    if (!tools) return
+    const res = await tools.listUnifiedBranches()
+    if (!res.ok) {
+      console.error(`[GitManager] listUnifiedBranches failed for project ${projectId}:`, res.error)
+      return []
+    }
+    return res.branches || []
   }
 
   private async updateTool(projectId: string): Promise<GitTools | undefined> {

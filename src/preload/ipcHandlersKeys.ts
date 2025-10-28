@@ -160,6 +160,7 @@ const IPC_HANDLER_KEYS = {
   GIT_DELETE_BRANCH: 'git:delete-branch',
   GIT_PUSH: 'git:push',
   GIT_DELETE_REMOTE_BRANCH: 'git:delete-remote-branch',
+  GIT_LIST_UNIFIED_BRANCHES: 'git:list-unified-branches',
   GIT_CREDENTIALS_SUBSCRIBE: 'git:credentials:subscribe',
   GIT_CREDENTIALS_LIST: 'git:credentials:list',
   GIT_CREDENTIALS_ADD: 'git:credentials:add',

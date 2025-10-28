@@ -310,7 +310,8 @@ const DB_API = {
     ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_DOCUMENTS_GET_BY_SRC, { projectId, src }),
   updateDocument: (id, patch) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_DOCUMENTS_UPDATE, { id, patch }),
-  deleteDocument: (id) => ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_DOCUMENTS_DELETE, { id }),
+  deleteDocument: (id) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_DOCUMENTS_DELETE, { id }),
   searchDocuments: (params) => ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_DOCUMENTS_SEARCH, { params }),
   matchDocuments: (options) => ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_DOCUMENTS_MATCH, { options }),
   clearDocuments: (projectIds) =>
@@ -351,6 +352,8 @@ const GIT_API = {
     ipcRenderer.on(IPC_HANDLER_KEYS.GIT_MONITOR_UPDATE, listener)
     return () => ipcRenderer.removeListener(IPC_HANDLER_KEYS.GIT_MONITOR_UPDATE, listener)
   },
+  listUnifiedBranches: (projectId) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_LIST_UNIFIED_BRANCHES, { projectId }),
 }
 
 const GIT_CREDENTIALS_API = {
