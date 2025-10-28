@@ -238,20 +238,20 @@ export default function GitMergeModal(props: GitMergeModalProps) {
     'changes' | 'compilation' | 'tests' | 'coverage'
   >('changes')
 
-  // Compilation impact (heuristic)
+  // Compilation impact (backend analysis or heuristic)
   const [compilationInfo, setCompilationInfo] = React.useState<{
     summary: string
     details: Array<{ path: string; risk: 'low' | 'medium' | 'high'; reason: string }>
   } | null>(null)
 
-  // Tests impact (heuristic mapping of changed files to likely tests)
+  // Tests impact (backend analysis or heuristic)
   const [testsImpact, setTestsImpact] = React.useState<{
     impacted: string[]
     totalCatalog: number
   } | null>(null)
   const [testsImpactError, setTestsImpactError] = React.useState<string | null>(null)
 
-  // Diff coverage analysis
+  // Diff coverage analysis (backend analysis or heuristic from last coverage)
   const [coverageLoading, setCoverageLoading] = React.useState(false)
   const [coverageError, setCoverageError] = React.useState<string | null>(null)
   const [diffCoverage, setDiffCoverage] = React.useState<{
@@ -293,12 +293,21 @@ export default function GitMergeModal(props: GitMergeModalProps) {
     }
   }, [projectId, repoPath, baseRef, branch])
 
-  // Build compilation impact heuristic from report
+  // Build compilation impact using backend analysis when available, otherwise fallback to heuristic
   React.useEffect(() => {
     if (!report) {
       setCompilationInfo(null)
       return
     }
+
+    // Prefer backend analysis when provided
+    const backend = report.analysis?.compilation
+    if (backend) {
+      setCompilationInfo(backend)
+      return
+    }
+
+    // Fallback heuristic
     const details: Array<{ path: string; risk: 'low' | 'medium' | 'high'; reason: string }> = []
     const criticalNames = [
       'package.json',
@@ -349,7 +358,7 @@ export default function GitMergeModal(props: GitMergeModalProps) {
     setCompilationInfo({ summary, details })
   }, [report])
 
-  // Compute tests impact when the tab is first shown or report changes
+  // Compute tests impact: use backend when available, otherwise fallback heuristic when the tab is opened
   React.useEffect(() => {
     let cancelled = false
     async function run() {
@@ -358,6 +367,18 @@ export default function GitMergeModal(props: GitMergeModalProps) {
         setTestsImpact(null)
         return
       }
+
+      // Prefer backend-provided tests analysis
+      const backend = report.analysis?.tests
+      if (backend) {
+        if (!cancelled) {
+          setTestsImpactError(null)
+          setTestsImpact(backend)
+        }
+        return
+      }
+
+      // Fallback heuristic
       setTestsImpactError(null)
       try {
         const catalog = await factoryTestsService.listTests(projectId)
@@ -396,7 +417,7 @@ export default function GitMergeModal(props: GitMergeModalProps) {
     }
   }, [activeTab, projectId, report])
 
-  // Compute diff coverage when the tab is shown
+  // Compute diff coverage: use backend when available, otherwise fallback to last coverage computation when the tab is opened
   React.useEffect(() => {
     let cancelled = false
     async function compute() {
@@ -405,6 +426,19 @@ export default function GitMergeModal(props: GitMergeModalProps) {
         setDiffCoverage(null)
         return
       }
+
+      // Prefer backend-provided coverage analysis
+      const backend = report.analysis?.coverage
+      if (backend) {
+        if (!cancelled) {
+          setCoverageError(null)
+          setCoverageLoading(false)
+          setDiffCoverage(backend)
+        }
+        return
+      }
+
+      // Fallback: compute from last known coverage
       setCoverageLoading(true)
       setCoverageError(null)
       try {
@@ -627,7 +661,7 @@ export default function GitMergeModal(props: GitMergeModalProps) {
               ))}
             </div>
             <div className="text-[11px] text-neutral-500">
-              Heuristic only. Build adapters can refine this in future.
+              Heuristic only when no backend analysis is available.
             </div>
           </div>
         )}
@@ -671,7 +705,7 @@ export default function GitMergeModal(props: GitMergeModalProps) {
               </div>
             )}
             <div className="text-[11px] text-neutral-500">
-              Heuristic mapping. Open Tests view to run targeted tests.
+              Heuristic mapping when backend analysis is unavailable. Open Tests view to run targeted tests.
             </div>
           </div>
         )}
@@ -739,7 +773,7 @@ export default function GitMergeModal(props: GitMergeModalProps) {
               </table>
             </div>
             <div className="text-[11px] text-neutral-500">
-              Based on last coverage run. Run coverage again in Tests view for up-to-date metrics.
+              Uses backend analysis when available; otherwise based on last coverage run in Tests view.
             </div>
           </div>
         )}

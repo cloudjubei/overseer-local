@@ -282,12 +282,13 @@
     },
     {
       "id": "791f6f40-71c1-4057-937d-771841eb0039",
-      "status": "-",
+      "status": "+",
       "title": "Integrate Backend Analyses into Merge Modal UI",
       "description": "Refactor the analysis sections (Compilation, Tests, Coverage) in `GitMergeModal.tsx`. Update the `useEffect` hooks to first check for the presence of `report.analysis.compilation`, `report.analysis.tests`, and `report.analysis.coverage`. If this data is available, use it to populate the UI state. Retain the existing client-side heuristic calculations as a fallback mechanism to ensure the UI remains functional if the backend analysis is unavailable.",
       "context": [],
       "createdAt": "2025-10-28T00:14:23.704Z",
-      "updatedAt": "2025-10-28T00:14:23.704Z"
+      "updatedAt": "2025-10-28T01:44:02.173Z",
+      "completedAt": "2025-10-28T01:44:02.173Z"
     },
     {
       "id": "0c46912f-d4ee-4e2f-9368-b09da8ae8ea3",
