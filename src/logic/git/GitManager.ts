@@ -182,14 +182,13 @@ export default class GitManager extends BaseManager {
     return tools.deleteBranch(name)
   }
 
-  //TODO: deleteRemoteBranch
   private async deleteRemoteBranch(
     projectId: string,
     name: string,
   ): Promise<GitOpResult | undefined> {
     const tools = await this.__getTools(projectId)
     if (!tools) return
-    return tools.deleteBranch(name)
+    return tools.deleteRemoteBranch(name)
   }
 
   private async updateTool(projectId: string): Promise<GitTools | undefined> {
