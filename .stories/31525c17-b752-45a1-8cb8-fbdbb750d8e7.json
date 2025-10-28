@@ -1,6 +1,6 @@
 {
   "id": "31525c17-b752-45a1-8cb8-fbdbb750d8e7",
-  "status": "+",
+  "status": "-",
   "title": "Create Sourcetree replacement - a popular version control management app",
   "description": "Goal Provide built-in Git workflows so users do not need external tools (e.g., SourceTree) for routine tasks: viewing repo status and branches, reviewing diffs (working tree, staged, and branch-to-base), running focused tests, merging, and resolving conflicts. Scope for this iteration - Navigation and views: - Add a Git section with two subviews: 'Current project' and 'All projects'. - Current project shows pending operations for the active repo; All projects aggregates across all known projects from ProjectContext (src/renderer/src/contexts/ProjectContext.tsx). - Pending operations definition: - A pending operation is a feature branch with commits ahead of the base branch (default base is the current branch). Feature branches follow the existing convention 'features/<storyId>' where storyId is a UUID. We may later extend to 'features/<storyId>.<featureId>' but uniqueness is already guaranteed by storyId. - Merge flow: - Clicking a pending item opens a Git Merge popup that shows context (project/story/branch), per-file diffs, and analysis placeholders: compilation impact, tests impact, and diff coverage across changed lines. These analyses start as stubs/adapters and should degrade gracefully when not available. On conflicts, the flow should transition into the conflict resolution UI. - Integration notes: - Reuse GitMonitor for status and add aggregation to compute ahead/behind and feature branches across projects. - Reuse/extend existing functions in src/logic/git-monitor/storyBranchNaming.js to resolve story IDs from branch names and expose this mapping to the renderer. - Respect current behavior where agents run from the branch they started; do not force checkouts. All operations must be safe-by-default with timeouts and clear error surfacing. Out of scope for this iteration - Remote PR management, stash workflows, and hunk-level staging (planned separately). Acceptance (high level) - Users can navigate to a Git panel, see pending branches grouped appropriately, open a merge popup with diffs and analysis placeholders, execute a merge, and resolve conflicts without leaving the app.\n\nThe main process class responsible for interfacing with `thefactory-tools` which provides all git operations is @src/logic/git/GitManager.ts . GitManager interfaces with the renderer via @src/renderer/src/services/gitService.ts and @src/preload/ipcHandlersKeys.ts and @src/preload/index.ts . And the forefront interface for all views that is making the usage of all git operations easy is @src/renderer/src/contexts/GitContext.tsx .\n\nAll the relevant types from `thefactory-tools` i.e. `GitTools` can be found in the local copy at:\n`src/logic/git/gitTypes.copy.ts`",
   "features": [
@@ -268,6 +268,33 @@
       "createdAt": "2025-10-27T21:58:01.076Z",
       "updatedAt": "2025-10-27T22:48:53.362Z",
       "completedAt": "2025-10-27T22:48:53.362Z"
+    },
+    {
+      "id": "5240a857-d8f7-4afb-94fb-8c6b36fed3d0",
+      "status": "-",
+      "title": "Request Structured Diffs and Analyses in Merge Modal",
+      "description": "Update the `useEffect` hook in `GitMergeModal.tsx` that fetches the merge report. Modify the call to `gitService.buildMergeReport` to include the `includeStructuredDiff: true` and `analyses: ['compilation', 'tests', 'coverage']` options. This will enable the backend to compute and return parsed diffs and analysis reports, which will be used in subsequent features.",
+      "context": [],
+      "createdAt": "2025-10-28T00:14:23.703Z",
+      "updatedAt": "2025-10-28T00:14:23.703Z"
+    },
+    {
+      "id": "791f6f40-71c1-4057-937d-771841eb0039",
+      "status": "-",
+      "title": "Integrate Backend Analyses into Merge Modal UI",
+      "description": "Refactor the analysis sections (Compilation, Tests, Coverage) in `GitMergeModal.tsx`. Update the `useEffect` hooks to first check for the presence of `report.analysis.compilation`, `report.analysis.tests`, and `report.analysis.coverage`. If this data is available, use it to populate the UI state. Retain the existing client-side heuristic calculations as a fallback mechanism to ensure the UI remains functional if the backend analysis is unavailable.",
+      "context": [],
+      "createdAt": "2025-10-28T00:14:23.704Z",
+      "updatedAt": "2025-10-28T00:14:23.704Z"
+    },
+    {
+      "id": "0c46912f-d4ee-4e2f-9368-b09da8ae8ea3",
+      "status": "-",
+      "title": "Render Structured Diffs in File Change View",
+      "description": "Create a new `StructuredDiff` component in `GitMergeModal.tsx` that accepts a `structuredDiff` prop (an array of `DiffHunk`). This component will render a line-by-line view of the changes, applying appropriate styling for added, deleted, and context lines based on the parsed data. Update the `FileDiffItem` component to use this new `StructuredDiff` component when `file.structuredDiff` is available on the `MergeReportFile` object, falling back to the existing raw patch rendering otherwise.",
+      "context": [],
+      "createdAt": "2025-10-28T00:14:23.705Z",
+      "updatedAt": "2025-10-28T00:14:23.705Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -295,9 +322,11 @@
     "bfa3d487-d173-4126-9789-68bb323dac38": 22,
     "8ca56f99-3f26-4f70-8dd2-d2dcf73b75b8": 23,
     "ad99e5f3-073f-4cf8-a679-828c97bb2c97": 24,
-    "0bd09bd2-6a09-43c7-9aff-b67cf3ee24c8": 25
+    "0bd09bd2-6a09-43c7-9aff-b67cf3ee24c8": 25,
+    "5240a857-d8f7-4afb-94fb-8c6b36fed3d0": 26,
+    "791f6f40-71c1-4057-937d-771841eb0039": 27,
+    "0c46912f-d4ee-4e2f-9368-b09da8ae8ea3": 28
   },
   "createdAt": "2025-10-21T17:28:55.063Z",
-  "updatedAt": "2025-10-27T09:51:40.369Z",
-  "completedAt": "2025-10-27T22:48:53.362Z"
+  "updatedAt": "2025-10-27T09:51:40.369Z"
 }
