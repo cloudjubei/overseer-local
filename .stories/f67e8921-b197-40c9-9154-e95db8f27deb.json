@@ -2508,7 +2508,7 @@
     },
     {
       "id": "724a4b85-c9cd-4d61-ab60-a455da3482f7",
-      "status": "-",
+      "status": "+",
       "title": "If a story/feature is missing show *DELETED* instead of id",
       "description": "In @src/renderer/src/screens/ChatView.tsx in the sidebar - don't show the id of the story/feature that no longer exists - just inform the user that this has been deleted.",
       "context": [
@@ -2516,7 +2516,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-28T00:22:27.483Z",
-      "updatedAt": "2025-10-28T00:22:27.483Z"
+      "updatedAt": "2025-10-28T10:45:20.962Z",
+      "completedAt": "2025-10-28T10:45:20.962Z"
     },
     {
       "id": "beea43a0-839b-4f9b-8215-73a8fd39f3cb",

@@ -131,8 +131,16 @@ export default function ChatsNavigationSidebar({
     const p = projects.find((prj) => prj.id === id)
     return p?.title || id
   }
-  const getStoryTitle = (id?: string) => (id ? storiesById[id]?.title || id : '')
-  const getFeatureTitle = (id?: string) => (id ? featuresById[id]?.title || id : '')
+  const getStoryTitle = (id?: string) => {
+    if (!id) return ''
+    const s = storiesById[id]
+    return s?.title || 'Deleted story'
+  }
+  const getFeatureTitle = (id?: string) => {
+    if (!id) return ''
+    const f = featuresById[id]
+    return f?.title || 'Deleted feature'
+  }
 
   // Enforce active project scoping for all chat lists
   const projectChats = useMemo(() => {
