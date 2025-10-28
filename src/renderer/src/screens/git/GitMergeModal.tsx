@@ -53,6 +53,60 @@ function DiffPatch({ patch }: { patch: string }) {
   )
 }
 
+// Line-by-line structured diff renderer using parsed hunks/lines when available
+function StructuredDiff({
+  structuredDiff,
+}: {
+  structuredDiff: NonNullable<MergeReportFile['structuredDiff']>
+}) {
+  const headerText = (h: NonNullable<MergeReportFile['structuredDiff']>[number]) => {
+    const left = `-${h.oldStart}${typeof h.oldLines === 'number' ? ',' + h.oldLines : ''}`
+    const right = `+${h.newStart}${typeof h.newLines === 'number' ? ',' + h.newLines : ''}`
+    return `@@ ${left} ${right} @@${h.header ? ' ' + h.header : ''}`
+  }
+
+  return (
+    <div className="font-mono text-xs">
+      {structuredDiff.map((hunk, hi) => (
+        <div key={hi} className="mb-3">
+          <div className="px-2 py-0.5 bg-neutral-100 dark:bg-neutral-900/60 text-neutral-700 dark:text-neutral-300">
+            {headerText(hunk)}
+          </div>
+          <div>
+            {hunk.lines.map((ln, li) => {
+              const isAdd = ln.type === 'add'
+              const isDel = ln.type === 'del'
+              const bgCls = isAdd
+                ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300'
+                : isDel
+                  ? 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300'
+                  : ''
+              const marker = isAdd ? '+' : isDel ? '-' : ' '
+              return (
+                <div
+                  key={li}
+                  className={`grid grid-cols-[56px_56px_1fr] ${bgCls}`}
+                >
+                  <div className="px-2 py-0.5 text-right select-none text-neutral-500 dark:text-neutral-400">
+                    {typeof ln.oldLine === 'number' ? ln.oldLine : ''}
+                  </div>
+                  <div className="px-2 py-0.5 text-right select-none text-neutral-500 dark:text-neutral-400">
+                    {typeof ln.newLine === 'number' ? ln.newLine : ''}
+                  </div>
+                  <div className="px-2 py-0.5 whitespace-pre-wrap">
+                    <span className="opacity-60">{marker}</span>
+                    {ln.text?.length ? ' ' + ln.text : ' '}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 function StatusIcon({ status }: { status: MergeReportFile['status'] }) {
   const iconClass = 'w-4 h-4'
   if (status === 'A') return <IconFileAdded className={iconClass} />
@@ -100,8 +154,10 @@ function FileDiffItem({ file }: { file: MergeReportFile }) {
       {open && (
         <div className="max-h-64 overflow-auto text-xs font-mono">
           {file.binary ? (
-            <div className="p-3 text-neutral-600 dark:text-neutral-400">
-              Binary file diff not shown
+            <div className="p-3 text-neutral-600 dark:text-neutral-400">Binary file diff not shown</div>
+          ) : Array.isArray(file.structuredDiff) && file.structuredDiff.length > 0 ? (
+            <div className="p-1">
+              <StructuredDiff structuredDiff={file.structuredDiff as NonNullable<MergeReportFile['structuredDiff']>} />
             </div>
           ) : file.patch ? (
             <DiffPatch patch={file.patch} />
@@ -238,20 +294,20 @@ export default function GitMergeModal(props: GitMergeModalProps) {
     'changes' | 'compilation' | 'tests' | 'coverage'
   >('changes')
 
-  // Compilation impact (heuristic)
+  // Compilation impact (backend analysis or heuristic)
   const [compilationInfo, setCompilationInfo] = React.useState<{
     summary: string
     details: Array<{ path: string; risk: 'low' | 'medium' | 'high'; reason: string }>
   } | null>(null)
 
-  // Tests impact (heuristic mapping of changed files to likely tests)
+  // Tests impact (backend analysis or heuristic)
   const [testsImpact, setTestsImpact] = React.useState<{
     impacted: string[]
     totalCatalog: number
   } | null>(null)
   const [testsImpactError, setTestsImpactError] = React.useState<string | null>(null)
 
-  // Diff coverage analysis
+  // Diff coverage analysis (backend analysis or heuristic from last coverage)
   const [coverageLoading, setCoverageLoading] = React.useState(false)
   const [coverageError, setCoverageError] = React.useState<string | null>(null)
   const [diffCoverage, setDiffCoverage] = React.useState<{
@@ -293,12 +349,21 @@ export default function GitMergeModal(props: GitMergeModalProps) {
     }
   }, [projectId, repoPath, baseRef, branch])
 
-  // Build compilation impact heuristic from report
+  // Build compilation impact using backend analysis when available, otherwise fallback to heuristic
   React.useEffect(() => {
     if (!report) {
       setCompilationInfo(null)
       return
     }
+
+    // Prefer backend analysis when provided
+    const backend = report.analysis?.compilation
+    if (backend) {
+      setCompilationInfo(backend)
+      return
+    }
+
+    // Fallback heuristic
     const details: Array<{ path: string; risk: 'low' | 'medium' | 'high'; reason: string }> = []
     const criticalNames = [
       'package.json',
@@ -349,7 +414,7 @@ export default function GitMergeModal(props: GitMergeModalProps) {
     setCompilationInfo({ summary, details })
   }, [report])
 
-  // Compute tests impact when the tab is first shown or report changes
+  // Compute tests impact: use backend when available, otherwise fallback heuristic when the tab is opened
   React.useEffect(() => {
     let cancelled = false
     async function run() {
@@ -358,6 +423,18 @@ export default function GitMergeModal(props: GitMergeModalProps) {
         setTestsImpact(null)
         return
       }
+
+      // Prefer backend-provided tests analysis
+      const backend = report.analysis?.tests
+      if (backend) {
+        if (!cancelled) {
+          setTestsImpactError(null)
+          setTestsImpact(backend)
+        }
+        return
+      }
+
+      // Fallback heuristic
       setTestsImpactError(null)
       try {
         const catalog = await factoryTestsService.listTests(projectId)
@@ -396,7 +473,7 @@ export default function GitMergeModal(props: GitMergeModalProps) {
     }
   }, [activeTab, projectId, report])
 
-  // Compute diff coverage when the tab is shown
+  // Compute diff coverage: use backend when available, otherwise fallback to last coverage computation when the tab is opened
   React.useEffect(() => {
     let cancelled = false
     async function compute() {
@@ -405,6 +482,19 @@ export default function GitMergeModal(props: GitMergeModalProps) {
         setDiffCoverage(null)
         return
       }
+
+      // Prefer backend-provided coverage analysis
+      const backend = report.analysis?.coverage
+      if (backend) {
+        if (!cancelled) {
+          setCoverageError(null)
+          setCoverageLoading(false)
+          setDiffCoverage(backend)
+        }
+        return
+      }
+
+      // Fallback: compute from last known coverage
       setCoverageLoading(true)
       setCoverageError(null)
       try {
@@ -627,7 +717,7 @@ export default function GitMergeModal(props: GitMergeModalProps) {
               ))}
             </div>
             <div className="text-[11px] text-neutral-500">
-              Heuristic only. Build adapters can refine this in future.
+              Heuristic only when no backend analysis is available.
             </div>
           </div>
         )}
@@ -671,7 +761,7 @@ export default function GitMergeModal(props: GitMergeModalProps) {
               </div>
             )}
             <div className="text-[11px] text-neutral-500">
-              Heuristic mapping. Open Tests view to run targeted tests.
+              Heuristic mapping when backend analysis is unavailable. Open Tests view to run targeted tests.
             </div>
           </div>
         )}
@@ -739,7 +829,7 @@ export default function GitMergeModal(props: GitMergeModalProps) {
               </table>
             </div>
             <div className="text-[11px] text-neutral-500">
-              Based on last coverage run. Run coverage again in Tests view for up-to-date metrics.
+              Uses backend analysis when available; otherwise based on last coverage run in Tests view.
             </div>
           </div>
         )}
