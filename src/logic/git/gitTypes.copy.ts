@@ -1,10 +1,8 @@
 export type GitOpResult =
-  | { ok: true; stdout?: string }
-  | { ok: false; error: string; stderr?: string; stdout?: string; code?: number }
+  | { ok: true; result: GitExecResult }
+  | { ok: false; error: string; result?: GitExecResult }
 
-// Unified git exec types
 export type GitExecResult = { code: number; stdout: string; stderr: string }
-export type GitExecOptions = { timeoutMs?: number }
 
 export type GitStatusPorcelain = {
   staged: string[]
@@ -12,38 +10,202 @@ export type GitStatusPorcelain = {
   untracked: string[]
 }
 
-export type GitBranchInfo = {
+/** Detailed information about a Git branch. */
+export type GitBranchDetails = {
   name: string
+  commitSha: string
+  /** ISO 8601 formatted commit date string. */
+  commitDate: string
   current?: boolean
 }
 
+/** Scope for listing branches. */
+export type ListBranchesScope = 'local' | 'remote' | 'all'
+
 export type GitTools = {
+  /** Initialize the Git tools for the repository (e.g., configure remotes/credentials).
+   * @example
+   * const git = createGitTools('/abs/project/root', 'https://github.com/owner/repo.git', creds)
+   * await git.init()
+   */
   init(): Promise<void>
+
+  /** Get repository status parsed into staged/unstaged/untracked sets.
+   * @example
+   * const r = await git.status()
+   * console.log(r.status?.staged)
+   */
   status(): Promise<GitOpResult & { status?: GitStatusPorcelain }>
+
+  /** List configured remotes.
+   * @example
+   * const r = await git.listRemotes()
+   * console.log(r.remotes)
+   */
   listRemotes(): Promise<GitOpResult & { remotes?: string[] }>
+
+  /**
+   * Fetch updates from a remote.
+   * @param remote Remote name (default 'origin').
+   * @example
+   * await git.fetch('origin')
+   */
   fetch(remote?: string): Promise<GitOpResult>
+
+  /**
+   * Pull from a remote/branch.
+   * @param remote Remote name (default 'origin').
+   * @param branch Branch name (default current branch).
+   * @example
+   * await git.pull('origin', 'main')
+   */
   pull(remote?: string, branch?: string): Promise<GitOpResult>
+
+  /**
+   * Push to a remote/branch.
+   * @param remote Remote name (default 'origin').
+   * @param branch Branch name (default current branch).
+   * @example
+   * await git.push('origin', 'feature/x')
+   */
   push(remote?: string, branch?: string): Promise<GitOpResult>
+
+  /**
+   * Stage changes by path.
+   * @param path Project-relative path to stage.
+   * @example
+   * await git.stage('src/index.ts')
+   */
   stage(path: string): Promise<GitOpResult>
+
+  /** Stage all changes in the working tree.
+   * @example
+   * await git.stageAll()
+   */
   stageAll(): Promise<GitOpResult>
+
+  /**
+   * Unstage changes by path.
+   * @param path Project-relative path to unstage.
+   * @example
+   * await git.reset('src/index.ts')
+   */
   reset(path: string): Promise<GitOpResult>
+
+  /**
+   * Discard local changes by checking out the given path.
+   * @param path Project-relative path to discard changes for.
+   * @example
+   * await git.discard('src/components')
+   */
   discard(path: string): Promise<GitOpResult>
+
+  /**
+   * Stage all, commit with a message, and push to upstream.
+   * @param message Commit message.
+   * @example
+   * await git.pushAll('feat: add new component')
+   */
   pushAll(message: string): Promise<void>
+
+  /**
+   * Create a new branch.
+   * @param name Branch name.
+   * @param checkoutAfter Whether to check out the new branch after creation.
+   * @example
+   * await git.createBranch('feature/new-api', true)
+   */
   createBranch(name: string, checkoutAfter?: boolean): Promise<GitOpResult>
+
+  /**
+   * Checkout an existing branch or create it when requested.
+   * @param name Branch name.
+   * @param create Whether to create the branch before checking out.
+   * @example
+   * await git.checkoutBranch('feature/new-api', false)
+   */
   checkoutBranch(name: string, create: boolean): Promise<GitOpResult>
+
+  /**
+   * Safely delete a local branch.
+   * @param name Branch name to delete.
+   * @example
+   * await git.deleteBranch('old/unused')
+   */
   deleteBranch(name: string): Promise<GitOpResult>
+
+  /**
+   * Rename a local branch.
+   * @param oldName Current branch name.
+   * @param newName New branch name.
+   * @example
+   * await git.renameBranch('feature/tmp', 'feature/final')
+   */
   renameBranch(oldName: string, newName: string): Promise<GitOpResult>
+
+  /**
+   * Set upstream tracking for the current or specified branch.
+   * @param remote Remote name (default 'origin').
+   * @param branch Branch name (default current branch).
+   * @example
+   * await git.setUpstream('origin', 'main')
+   */
   setUpstream(remote?: string, branch?: string): Promise<GitOpResult>
-  listBranches(): Promise<GitOpResult & { branches?: GitBranchInfo[] }>
-  getCurrentBranch(): Promise<GitOpResult & { branch?: string }>
+
+  /**
+   * List branches with details like commit SHA and date.
+   * @param scope The scope of branches to list (default 'local').
+   * @example
+   * const r = await git.listBranches('all')
+   * console.log(r.branches)
+   */
+  listBranches(scope?: ListBranchesScope): Promise<GitOpResult & { branches?: GitBranchDetails[] }>
+
+  /** Get the current branch name.
+   * @example
+   * const r = await git.getCurrentBranch()
+   * console.log(r.branch)
+   */
+  getCurrentBranch(): Promise<string | undefined>
+
+  /**
+   * Read and return the full content of a file at a given git ref using 'git show <ref>:<filePath>'.
+   * @param repoPath Project-relative path to the repository root injected by the factory.
+   * @param filePath Project-relative path to the file inside the repository.
+   * @param ref Any git reference (branch, tag, or commit SHA).
+   * @example
+   * const content = await git.getFileContent('src/index.ts', 'main')
+   */
+  getFileContent(filePath: string, ref: string): Promise<string>
 
   // From GitMonitorTools
+  /**
+   * Start monitoring feature branches with periodic updates.
+   * @param config Monitor configuration (repoPath is injected by the factory).
+   * @example
+   * const handle = git.startMonitor({ baseBranch: 'main', pollIntervalMs: 5000 })
+   * const unsubscribe = handle.subscribe((s) => console.log('branch state', s.name))
+   */
   startMonitor: (config: Omit<GitMonitorConfig, 'repoPath'>) => GitMonitor
+
+  /**
+   * Compute a file-level diff summary between a base and head ref.
+   * @param args Options including baseRef, headRef and includePatch.
+   * @example
+   * const diff = await git.getBranchDiffSummary({ baseRef: 'main', headRef: 'feature/x', includePatch: true })
+   */
   getBranchDiffSummary: (args: {
     baseRef: string
     headRef: string
     includePatch?: boolean
   }) => Promise<DiffSummary>
+
+  /**
+   * Resolve changes in a diff to stories/features using a resolver.
+   * @param args Options including baseRef, headRef, resolvers and optional diff.
+   * @example
+   * const res = await git.resolveChangesToStories({ baseRef: 'main', headRef: 'feature/x' })
+   */
   resolveChangesToStories: (args: {
     baseRef: string
     headRef: string
@@ -51,6 +213,12 @@ export type GitTools = {
     diff?: DiffSummary
   }) => Promise<{ groups: StoryFeatureChange[] }>
 
+  /**
+   * Build a detailed branch report suitable for clients.
+   * @param args Report options (repoPath is injected by the factory).
+   * @example
+   * const report = await git.buildBranchReport({ repoPath: '.', baseRef: 'main', headRef: 'feature/x' })
+   */
   buildBranchReport: (args: {
     repoPath: string
     baseRef: string
@@ -60,6 +228,13 @@ export type GitTools = {
     storyResolver?: StoryResolver
     metricsProvider?: MetricsProvider
   }) => Promise<BranchReport>
+
+  /**
+   * Build a workspace report across multiple branches.
+   * @param args Workspace report options (repoPath is injected by the factory).
+   * @example
+   * const ws = await git.buildWorkspaceReport({ repoPath: '.', baseRef: 'main', branches: ['feat/a', 'feat/b'] })
+   */
   buildWorkspaceReport: (args: {
     repoPath: string
     baseRef: string
@@ -71,9 +246,37 @@ export type GitTools = {
   }) => Promise<WorkspaceReport>
 
   // Review ops from GitMonitorTools
+  /**
+   * Mark files as accepted for commit selection.
+   * @param files List of project-relative file paths.
+   * @example
+   * await git.acceptFiles(['src/index.ts'])
+   */
   acceptFiles: (files: string[]) => Promise<void>
+
+  /**
+   * Mark files as rejected by comparing against a base ref.
+   * @param baseRef Base ref for comparison.
+   * @param files List of project-relative file paths.
+   * @example
+   * await git.rejectFiles('main', ['src/index.ts'])
+   */
   rejectFiles: (baseRef: string, files: string[]) => Promise<void>
+
+  /**
+   * Reset selected files back to their previous state.
+   * @param files Optional list of project-relative file paths (all when omitted).
+   * @example
+   * await git.resetFiles(['src/index.ts'])
+   */
   resetFiles: (files?: string[]) => Promise<void>
+
+  /**
+   * Commit a selection of changes with message and options.
+   * @param args Commit options including message, signoff and trailers.
+   * @example
+   * await git.commitSelection({ repoPath: '.', message: 'chore: apply selection' })
+   */
   commitSelection: (args: {
     repoPath: string
     message: string
@@ -82,13 +285,69 @@ export type GitTools = {
   }) => Promise<void>
 
   // From GitMergeTools
+  /**
+   * Compute a merge plan with optional patches.
+   * @param options Merge plan options (repoPath is injected by the factory).
+   * @example
+   * const plan = await git.getMergePlan({ sources: ['feature/x'], baseRef: 'main', includePatch: true })
+   */
   getMergePlan: (options: Omit<MergePlanOptions, 'repoPath'>) => Promise<MergePlan>
+
+  /**
+   * Apply a merge with safety checks.
+   * @param options Merge application options (repoPath is injected by the factory).
+   * @example
+   * const result = await git.applyMerge({ sources: ['feature/x'], baseRef: 'main' })
+   */
   applyMerge: (options: Omit<ApplyMergeOptions, 'repoPath'>) => Promise<MergeResult>
-  buildMergeReport: (plan: MergePlan, options?: BuildMergeReportOptions) => MergeReport
+
+  /**
+   * Build a JSON-serializable merge report from a plan.
+   * @param plan Merge plan to report.
+   * @param options Report options controlling patch inclusion and requested analyses.
+   * @example
+   * const report = git.buildMergeReport(plan, { includePatch: true, analyses: ['tests'] })
+   */
+  buildMergeReport: (plan: MergePlan, options?: MergeReportOptions) => MergeReport
+
+  /**
+   * Read the local repository status.
+   * @param options Status options (repoPath is injected by the factory).
+   * @example
+   * const status = await git.getLocalStatus()
+   */
   getLocalStatus: (options?: Omit<LocalStatusOptions, 'repoPath'>) => Promise<LocalStatus>
+
+  /**
+   * Select commits unique to sources vs a base.
+   * @param options Selection options (repoPath is injected by the factory).
+   * @example
+   * const commits = await git.selectCommits({ sources: ['feature/x'], baseRef: 'main' })
+   */
   selectCommits: (options: Omit<SelectCommitsOptions, 'repoPath'>) => Promise<CommitInfo[]>
+
+  /**
+   * Plan a cherry-pick operation.
+   * @param options Cherry-pick plan options (repoPath is injected by the factory).
+   * @example
+   * const plan = await git.planCherryPick({ commits: ['abcd1234'] })
+   */
   planCherryPick: (options: Omit<PlanCherryPickOptions, 'repoPath'>) => Promise<MergePlan>
+
+  /**
+   * Apply a cherry-pick against the working tree.
+   * @param options Cherry-pick application options (repoPath is injected by the factory).
+   * @example
+   * const res = await git.applyCherryPick({ commits: ['abcd1234'] })
+   */
   applyCherryPick: (options: Omit<ApplyCherryPickOptions, 'repoPath'>) => Promise<MergeResult>
+
+  /**
+   * Explicitly fetch remote refs.
+   * @param options Fetch options (repoPath is injected by the factory).
+   * @example
+   * const refs = await git.fetchRefs({ remote: 'origin' })
+   */
   fetchRefs: (options?: Omit<FetchRefsOptions, 'repoPath'>) => Promise<FetchRefsResult>
 }
 
@@ -119,6 +378,31 @@ export type PatchHunk = {
   newLines: number
   header?: string
   lines: string[]
+}
+
+/** A single line within a diff hunk with explicit classification. */
+export type DiffLineType = 'add' | 'del' | 'context'
+export type DiffLine = {
+  /** Kind of change represented by this line. */
+  type: DiffLineType
+  /** Line text without the leading diff marker (+, -, or space). */
+  text: string
+  /** Old-file line number for this line, when applicable. */
+  oldLine?: number
+  /** New-file line number for this line, when applicable. */
+  newLine?: number
+}
+
+/** Parsed representation of a unified diff hunk. */
+export type DiffHunk = {
+  oldStart: number
+  oldLines: number
+  newStart: number
+  newLines: number
+  /** Optional trailing header/comment included in the @@ header line. */
+  header?: string
+  /** Lines comprising this hunk with explicit add/del/context markers. */
+  lines: DiffLine[]
 }
 
 /** Per-file change entry describing how a file will change relative to base. */
@@ -239,9 +523,40 @@ export type MergeResult = {
 
 /** Options controlling patch inclusion and limits in buildMergeReport. */
 export type BuildMergeReportOptions = {
+  /** Include raw unified diff patch text in MergeReportFile.patch. */
   includePatch?: boolean
+  /** Maximum number of files to include patch bodies for. */
   maxPatchedFiles?: number
+  /** Maximum total bytes of patch text across all files. */
   maxPatchBytes?: number
+  /** When true, also include a parsed, structured representation of each file's patch as structuredDiff. */
+  includeStructuredDiff?: boolean
+}
+
+/** MergeReportOptions extends existing report controls with optional analyses. */
+export interface MergeReportOptions extends BuildMergeReportOptions {
+  /** Optional analyses to include in the merge report. */
+  analyses?: Array<'compilation' | 'tests' | 'coverage'>
+}
+
+/** Analysis: heuristic compilation impact summary. */
+export interface CompilationImpactAnalysis {
+  summary: string
+  details: Array<{ path: string; risk: 'low' | 'medium' | 'high'; reason: string }>
+}
+
+/** Analysis: impacted tests listing and total catalog size if known. */
+export interface TestsImpactAnalysis {
+  impacted: string[]
+  totalCatalog: number
+}
+
+/** Analysis: diff coverage numbers overall and per-file. */
+export interface DiffCoverageAnalysis {
+  totalAdded: number
+  covered: number
+  pct: number
+  perFile: Array<{ path: string; added: number; covered: number; pct: number }>
 }
 
 /** Per-file entry in a merge report. Mirrors FileChange with patch body treated by report limits. */
@@ -256,6 +571,8 @@ export type MergeReportFile = {
   submodule?: boolean
   patch?: string
   patchTruncated?: boolean
+  /** Optional parsed hunk/line representation of the patch for easier client rendering. */
+  structuredDiff?: DiffHunk[]
 }
 
 /** A versioned, JSON-serializable report suitable for client display. */
@@ -271,6 +588,12 @@ export type MergeReport = {
   conflicts?: ConflictEntry[]
   impactOnLocal?: ImpactOnLocal
   patchesTruncated?: boolean
+  /** Optional analyses included when requested in MergeReportOptions. */
+  analysis?: {
+    compilation?: CompilationImpactAnalysis
+    tests?: TestsImpactAnalysis
+    coverage?: DiffCoverageAnalysis
+  }
 }
 
 // =====================
