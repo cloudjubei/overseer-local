@@ -2495,7 +2495,7 @@
     },
     {
       "id": "98ff6ca9-38bd-4828-bcba-f555033945fe",
-      "status": "-",
+      "status": "+",
       "title": "Chat history should only show the current project's chats",
       "description": "in @src/renderer/src/screens/ChatView.tsx it should ONLY show the chats for the given active project - never for other ones. Right now I can see other projects in History.",
       "context": [
@@ -2503,7 +2503,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-28T00:20:52.916Z",
-      "updatedAt": "2025-10-28T00:20:52.916Z"
+      "updatedAt": "2025-10-28T10:41:43.228Z",
+      "completedAt": "2025-10-28T10:41:43.228Z"
     },
     {
       "id": "724a4b85-c9cd-4d61-ab60-a455da3482f7",

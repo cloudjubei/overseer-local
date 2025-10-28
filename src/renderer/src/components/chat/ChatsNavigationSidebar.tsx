@@ -134,9 +134,24 @@ export default function ChatsNavigationSidebar({
   const getStoryTitle = (id?: string) => (id ? storiesById[id]?.title || id : '')
   const getFeatureTitle = (id?: string) => (id ? featuresById[id]?.title || id : '')
 
+  // Enforce active project scoping for all chat lists
   const projectChats = useMemo(() => {
-    return (chatsByProjectId[activeProjectId] || []).slice()
-  }, [chatsByProjectId, activeProjectId])
+    const raw = chatsByProjectId[activeProjectId] || []
+    const filtered = raw.filter((c) => {
+      const ctx = c.chat.context as any
+      const type = ctx?.type
+      if (type === 'PROJECT' || type === 'PROJECT_TOPIC' || type === 'AGENT_RUN' || type === 'AGENT_RUN_FEATURE') {
+        return ctx.projectId === activeProjectId
+      }
+      if (type === 'STORY' || type === 'FEATURE' || type === 'STORY_TOPIC') {
+        const sid: string | undefined = ctx.storyId
+        if (!sid) return false
+        return !!project?.storyIdToDisplayIndex?.[sid]
+      }
+      return false
+    })
+    return filtered.slice()
+  }, [chatsByProjectId, activeProjectId, project])
 
   const sortedByUpdated = useMemo(() => {
     return projectChats.sort((a, b) => {

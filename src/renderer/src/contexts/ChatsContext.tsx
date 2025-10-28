@@ -111,6 +111,36 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
     }))
   }, [])
 
+  // Helper: safely update chatsByProjectId for a given chat state
+  const upsertChatsByProject = useCallback((chatState: ChatState) => {
+    const ctx = chatState.chat.context
+    const pid = (ctx as any).projectId as string | undefined
+    if (!pid) return
+    setChatsByProjectId((prev) => {
+      const existing = prev[pid] || []
+      const idx = existing.findIndex((c) => c.key === chatState.key)
+      let nextForProject: ChatState[]
+      if (idx >= 0) {
+        nextForProject = existing.map((c, i) => (i === idx ? { ...c, ...chatState } : c))
+      } else {
+        nextForProject = [...existing, chatState]
+      }
+      return { ...prev, [pid]: nextForProject }
+    })
+  }, [])
+
+  const removeFromChatsByProject = useCallback((chatState: ChatState) => {
+    const ctx = chatState.chat.context
+    const pid = (ctx as any).projectId as string | undefined
+    if (!pid) return
+    setChatsByProjectId((prev) => {
+      const existing = prev[pid] || []
+      const nextForProject = existing.filter((c) => c.key !== chatState.key)
+      if (nextForProject === existing) return prev
+      return { ...prev, [pid]: nextForProject }
+    })
+  }, [])
+
   // load all chats and settings on startup
   useEffect(() => {
     const loadAll = async () => {
@@ -153,14 +183,23 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
         const newChats = { ...prev }
         const key = getChatContextPath(chatUpdate.context)
         if (chatUpdate.type === 'delete') {
+          const existing = newChats[key]
+          if (existing) {
+            // Remove from project mapping first
+            removeFromChatsByProject(existing)
+          }
           delete newChats[key]
         } else if (chatUpdate.type === 'change') {
-          newChats[key] = {
-            ...(newChats[key] || { isLoading: false, isThinking: false }),
+          const next: ChatState = {
+            ...(newChats[key] || { key, isLoading: false, isThinking: false, chat: chatUpdate.chat! }),
             chat: chatUpdate.chat!,
           }
+          newChats[key] = next
+          upsertChatsByProject(next)
         } else {
-          newChats[key] = { key, chat: chatUpdate.chat!, isLoading: false, isThinking: false }
+          const next: ChatState = { key, chat: chatUpdate.chat!, isLoading: false, isThinking: false }
+          newChats[key] = next
+          upsertChatsByProject(next)
         }
         return newChats
       })
@@ -168,7 +207,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
     return () => {
       if (unsubscribe) unsubscribe()
     }
-  }, [])
+  }, [upsertChatsByProject, removeFromChatsByProject])
 
   const getChat = useCallback(
     async (context: ChatContext): Promise<ChatState> => {
@@ -178,9 +217,11 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       const chat = await chatsService.getChat(context)
       const chatState: ChatState = { key, chat, isLoading: false, isThinking: false }
       updateChatState(key, chatState)
+      // also ensure project mapping is updated
+      upsertChatsByProject(chatState)
       return chatState
     },
-    [chats, updateChatState],
+    [chats, updateChatState, upsertChatsByProject],
   )
 
   const sendMessage = useCallback(
@@ -216,13 +257,16 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
         },
       }
       const chatMessages = [...chatState.chat.messages, m]
-      updateChatState(key, {
+      const nextState: ChatState = {
+        ...chatState,
         chat: {
           ...chatState.chat,
           messages: chatMessages,
         },
         isThinking: true,
-      })
+      }
+      updateChatState(key, nextState)
+      upsertChatsByProject(nextState)
 
       const chatProjectId = context.projectId ?? projectId
       try {
@@ -240,7 +284,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
         updateChatState(key, { isThinking: false })
       }
     },
-    [projectId, getChat, updateChatState],
+    [projectId, getChat, updateChatState, upsertChatsByProject],
   )
 
   const resumeTools = useCallback(
@@ -258,12 +302,15 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       // DO NOT ALLOW  WHILE AGENT IS THINKING
       if (chatState.isThinking) return
 
-      updateChatState(key, {
+      const nextState: ChatState = {
+        ...chatState,
         chat: {
           ...chatState.chat,
         },
         isThinking: true,
-      })
+      }
+      updateChatState(key, nextState)
+      upsertChatsByProject(nextState)
 
       const chatProjectId = context.projectId ?? projectId
       try {
@@ -281,7 +328,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
         updateChatState(key, { isThinking: false })
       }
     },
-    [projectId, getChat, updateChatState],
+    [projectId, getChat, updateChatState, upsertChatsByProject],
   )
 
   const abortMessage = useCallback(
@@ -300,29 +347,38 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       const key = getChatContextPath(context)
       // Optimistic replace in local state
       const now = new Date().toISOString()
-      updateChatState(key, {
+      const optimistic: ChatState = {
+        key,
         chat: { context, messages: [], createdAt: now, updatedAt: now },
         isLoading: false,
         isThinking: false,
-      })
+      }
+      updateChatState(key, optimistic)
+      upsertChatsByProject(optimistic)
+
       const chat = await chatsService.createChat({ context, messages: [] })
       const state = { key, chat, isLoading: false, isThinking: false } as ChatState
       updateChatState(key, state)
+      upsertChatsByProject(state)
       return state
     },
-    [updateChatState],
+    [updateChatState, upsertChatsByProject],
   )
 
   const deleteChat = useCallback(async (context: ChatContext) => {
     const key = getChatContextPath(context)
     // Optimistic removal from local state
     setChats((prev) => {
+      const existing = prev[key]
+      if (existing) {
+        removeFromChatsByProject(existing)
+      }
       const newState = { ...prev }
       delete newState[key]
       return newState
     })
     await chatsService.deleteChat(context)
-  }, [])
+  }, [removeFromChatsByProject])
 
   const deleteLastMessage = useCallback(async (context: ChatContext) => {
     const key = getChatContextPath(context)
@@ -332,12 +388,15 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
     const trimmed = msgs.slice(0, msgs.length - 1)
 
     // Optimistic update
-    updateChatState(key, {
+    const nextState: ChatState = {
+      ...chatState,
       chat: {
         ...chatState.chat,
         messages: trimmed,
       },
-    })
+    }
+    updateChatState(key, nextState)
+    upsertChatsByProject(nextState)
 
     // Persist via updateChat - rely on backend to broadcast change
     const patch: ChatEditInput = { messages: trimmed }
@@ -348,12 +407,14 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       // Revert by refetching
       try {
         const refreshed = await chatsService.getChat(context)
+        const reverted: ChatState = { key, chat: refreshed, isLoading: false, isThinking: false }
         updateChatState(key, { chat: refreshed })
+        upsertChatsByProject(reverted)
       } catch (e2) {
         console.error('Failed to refresh chat after delete error', e2)
       }
     }
-  }, [getChat, updateChatState])
+  }, [getChat, updateChatState, upsertChatsByProject])
 
   const getSettings = useCallback(
     (context: ChatContext): ChatSettings | undefined => {
@@ -437,7 +498,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
         console.error('Failed to get settings prompt', e)
       }
     },
-    [],
+        [],
   )
 
   const value = useMemo<ChatsContextValue>(
