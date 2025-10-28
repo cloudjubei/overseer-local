@@ -20,6 +20,7 @@ import { useAgents } from '../../contexts/AgentsContext'
 import { TOOL_SCHEMAS } from 'thefactory-tools/constants'
 import { Button } from '@renderer/components/ui/Button'
 import { Modal } from '@renderer/components/ui/Modal'
+import { useChatUnread } from '@renderer/hooks/useChatUnread'
 
 export type ChatSidebarProps = {
   context: ChatContext
@@ -58,6 +59,7 @@ export default function ChatSidebar({
   const { runsHistory } = useAgents()
   const { activeChatConfig, isChatConfigured } = useLLMConfig()
   const { navigateView } = useNavigator()
+  const { markReadByKey } = useChatUnread()
 
   const [chat, setChat] = useState<ChatState | undefined>(undefined)
   const [effectivePrompt, setEffectivePrompt] = useState<string>('')
@@ -82,6 +84,13 @@ export default function ChatSidebar({
     }
     loadChat()
   }, [context, getChat])
+
+  // Mark chat as read when opened and whenever it updates
+  useEffect(() => {
+    if (!chat?.key) return
+    const readTime = chat.chat.updatedAt || chat.chat.createdAt || new Date().toISOString()
+    markReadByKey(chat.key, readTime)
+  }, [chat?.key, chat?.chat.updatedAt, chat?.chat.createdAt, markReadByKey])
 
   const isThinking = chat?.isThinking || false
 

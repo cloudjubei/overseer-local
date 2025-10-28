@@ -39,6 +39,7 @@ import { renderProjectIcon } from '@renderer/screens/projects/projectIcons'
 import { NavigationView } from '@renderer/types'
 import { hideScrollStyle } from '@renderer/utils/hideScrollStyle'
 import { useProjectsGroups } from '../contexts/ProjectsGroupsContext'
+import { useChatUnread } from '../hooks/useChatUnread'
 
 export type SidebarProps = {}
 
@@ -165,6 +166,7 @@ export default function SidebarView({}: SidebarProps) {
   const { isAppSettingsLoaded, appSettings, updateAppSettings } = useAppSettings()
   const { runsActive } = useAgents()
   const { groups } = useProjectsGroups()
+  const { unreadCountByProject } = useChatUnread()
 
   const [collapsed, setCollapsed] = useState<boolean>(appSettings.userPreferences.sidebarCollapsed)
 
@@ -198,6 +200,7 @@ export default function SidebarView({}: SidebarProps) {
 
   // Active agent runs for the current project for Agents nav badge
   const activeRunsCurrentProject = activeCountByProject.get(activeProjectId) || 0
+  const chatUnreadCurrentProject = unreadCountByProject.get(activeProjectId) || 0
 
   // Track unread notifications per project for badges in the Projects list.
   const [unreadByProject, setUnreadByProject] = useState<Map<string, number>>(new Map())
@@ -389,10 +392,11 @@ export default function SidebarView({}: SidebarProps) {
     const active = activeProjectId === p.id
     const accent = useAccentClass(p.id, isMain)
     const activeCount = activeCountByProject.get(p.id) || 0
-    const unread = unreadByProject.get(p.id) || 0
+    const unread = unreadByProject.get(p.id) || 0 // notifications (system)
+    const chatUnread = unreadCountByProject.get(p.id) || 0 // chats
     const iconKey = p.metadata?.icon || (isMain ? 'collection' : 'folder')
     const projectIcon = renderProjectIcon(iconKey)
-    const hasAnyBadge = activeCount > 0 || unread > 0
+    const hasAnyBadge = activeCount > 0 || unread > 0 || chatUnread > 0
 
     const Btn = (
       <button
@@ -425,6 +429,13 @@ export default function SidebarView({}: SidebarProps) {
                 text={`${activeCount}`}
                 tooltipLabel={`${activeCount} running agents`}
                 isInformative
+              />
+            )}
+            {chatUnread > 0 && (
+              <NotificationBadge
+                className={effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''}
+                text={`${chatUnread}`}
+                tooltipLabel={`${chatUnread} unread chats`}
               />
             )}
             {unread > 0 && (
@@ -498,7 +509,7 @@ export default function SidebarView({}: SidebarProps) {
             const isActive = currentView === item.view
             const ref = i === 0 ? firstItemRef : undefined
 
-            // Decide badge for Notifications or Agents
+            // Decide badge for Notifications, Agents, or Chat
             let badgeEl: React.ReactNode | null = null
             if (item.view === 'Notifications' && unreadCount > 0) {
               badgeEl = (
@@ -515,6 +526,14 @@ export default function SidebarView({}: SidebarProps) {
                   text={`${activeRunsCurrentProject}`}
                   tooltipLabel={`${activeRunsCurrentProject} running agents`}
                   isInformative
+                />
+              )
+            } else if (item.view === 'Chat' && chatUnreadCurrentProject > 0) {
+              badgeEl = (
+                <NotificationBadge
+                  className={effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''}
+                  text={`${chatUnreadCurrentProject}`}
+                  tooltipLabel={`${chatUnreadCurrentProject} unread chats`}
                 />
               )
             }
@@ -637,7 +656,11 @@ export default function SidebarView({}: SidebarProps) {
                 (sum, pid) => sum + (unreadByProject.get(pid) || 0),
                 0,
               )
-              const showAnyBadge = aggActive > 0 || aggUnread > 0
+              const aggChatUnread = (g.projects || []).reduce(
+                (sum, pid) => sum + (unreadCountByProject.get(pid) || 0),
+                0,
+              )
+              const showAnyBadge = aggActive > 0 || aggUnread > 0 || aggChatUnread > 0
 
               return (
                 <li key={g.id} className="nav-li">
@@ -670,6 +693,13 @@ export default function SidebarView({}: SidebarProps) {
                             text={`${aggActive}`}
                             tooltipLabel={`${aggActive} running agents in group`}
                             isInformative
+                          />
+                        )}
+                        {aggChatUnread > 0 && (
+                          <NotificationBadge
+                            className={''}
+                            text={`${aggChatUnread}`}
+                            tooltipLabel={`${aggChatUnread} unread chats in group`}
                           />
                         )}
                         {aggUnread > 0 && (
