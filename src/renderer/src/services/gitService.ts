@@ -1,6 +1,5 @@
 import {
   ApplyMergeOptions,
-  BuildMergeReportOptions,
   DiffSummary,
   GitBranchEvent,
   GitMonitorConfig,
@@ -10,6 +9,7 @@ import {
   MergePlan,
   MergePlanOptions,
   MergeReport,
+  MergeReportOptions,
   MergeResult,
 } from 'thefactory-tools'
 
@@ -21,7 +21,7 @@ export type GitService = {
   buildMergeReport: (
     projectId: string,
     plan: MergePlan,
-    options?: BuildMergeReportOptions,
+    options?: MergeReportOptions,
   ) => Promise<MergeReport>
   applyMerge: (
     projectId: string,

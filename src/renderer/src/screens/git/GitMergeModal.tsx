@@ -272,7 +272,11 @@ export default function GitMergeModal(props: GitMergeModalProps) {
           baseRef,
           includePatch: true,
         })
-        const rep = await gitService.buildMergeReport(projectId, plan, { includePatch: true })
+        const rep = await gitService.buildMergeReport(projectId, plan, {
+          includePatch: true,
+          includeStructuredDiff: true,
+          analyses: ['compilation', 'tests', 'coverage'],
+        })
         if (!mounted) return
         setReport(rep)
       } catch (e: any) {

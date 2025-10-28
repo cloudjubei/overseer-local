@@ -159,7 +159,7 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
       }
     }
 
-    load()
+    // load()
   }, [projects])
 
   useEffect(() => {
