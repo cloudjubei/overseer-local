@@ -57,6 +57,50 @@ export type GitUnifiedBranch = {
   current?: boolean
 }
 
+// =====================
+// Feature/Story metadata (FeatureInfo Contract)
+// =====================
+
+/** Canonical reference to a story and optionally a specific feature within it. */
+export type FeatureRef = {
+  /** Canonical story id (UUID or similar). */
+  storyId: string
+  /** Canonical feature id if commit is tied to a specific feature. */
+  featureId?: string
+}
+
+/** Optional enriched metadata about a story/feature for display. */
+export type FeatureInfo = FeatureRef & {
+  /** Feature or story title for display (prefer feature when featureId is set). */
+  title?: string
+  /** Short description. */
+  description?: string
+}
+
+/** Context information available to FeatureInfo resolvers. */
+export interface FeatureInfoResolverContext {
+  /** Raw commit message (subject + body when available). */
+  message?: string
+  /** Branch context where observed. */
+  branch?: string
+  /** Repository root (read-only expectation). */
+  repoRoot?: string
+}
+
+/** Function to resolve FeatureInfo for a commit. First non-null wins. */
+export type FeatureInfoResolver = (
+  commit: CommitInfo,
+  ctx: FeatureInfoResolverContext,
+) => FeatureInfo | undefined | null | Promise<FeatureInfo | undefined | null>
+
+/** Options controlling FeatureInfo extraction. */
+export interface FeatureInfoOptions {
+  /** Enable conservative fallback heuristics when custom resolvers do not resolve. Default: true. */
+  enableHeuristics?: boolean
+  /** Custom resolvers; first non-null wins. */
+  resolvers?: FeatureInfoResolver[]
+}
+
 export type GitTools = {
   /** Initialize the Git tools for the repository (e.g., configure remotes/credentials).
    * @example
@@ -241,27 +285,16 @@ export type GitTools = {
   startMonitor: (config: Omit<GitMonitorConfig, 'repoPath'>) => GitMonitor
 
   /**
-   * Compute a file-level diff summary between a base and head ref (two-dot).
-   * @param args Options including baseRef, headRef and includePatch.
+   * Compute a file-level diff summary between a base and head ref (equivalent to 'git diff base...head').
+   * When incomingOnly=true it avoids showing base-only changes as deletions, i.e. showing incoming changes only.
+   * @param args Options including baseRef, headRef, incomingOnly and includePatch.
    * @example
    * const diff = await git.getBranchDiffSummary({ baseRef: 'main', headRef: 'feature/x', includePatch: true })
    */
   getBranchDiffSummary: (args: {
     baseRef: string
     headRef: string
-    includePatch?: boolean
-  }) => Promise<DiffSummary>
-
-  /**
-   * Compute a file-level diff summary of incoming changes from head into base using their merge-base.
-   * Equivalent to 'git diff base...head'. Avoids showing base-only changes as deletions.
-   * @param args Options including baseRef, headRef and includePatch.
-   * @example
-   * const diff = await git.getIncomingDiffSummary({ baseRef: 'main', headRef: 'feature/x' })
-   */
-  getIncomingDiffSummary: (args: {
-    baseRef: string
-    headRef: string
+    incomingOnly?: boolean
     includePatch?: boolean
   }) => Promise<DiffSummary>
 
@@ -292,6 +325,7 @@ export type GitTools = {
     includeMetrics?: boolean
     storyResolver?: StoryResolver
     metricsProvider?: MetricsProvider
+    featureInfo?: FeatureInfoOptions
   }) => Promise<BranchReport>
 
   /**
@@ -308,6 +342,7 @@ export type GitTools = {
     includeMetrics?: boolean
     storyResolver?: StoryResolver
     metricsProvider?: MetricsProvider
+    featureInfo?: FeatureInfoOptions
   }) => Promise<WorkspaceReport>
 
   // Review ops from GitMonitorTools
@@ -673,6 +708,8 @@ export type CommitInfo = {
   authorName?: string
   authorEmail?: string
   authorDate?: number
+  /** Optional enriched mapping to story/feature. */
+  featureInfo?: FeatureInfo
 }
 
 /** Options for selecting commits unique to sources vs a base (e.g., for cherry-pick planning UIs). */
@@ -682,6 +719,8 @@ export type SelectCommitsOptions = {
   baseRef?: string
   includeMerges?: boolean
   maxCount?: number
+  /** FeatureInfo enrichment options; when provided, featureInfo may be attached per commit. */
+  featureInfo?: FeatureInfoOptions
 }
 
 /** Options for planning a cherry-pick. */
@@ -877,7 +916,10 @@ export type BranchReport = {
     oldPath?: string
   }>
   groups: Array<StoryFeatureChange>
+  /** Optional raw patch text when requested. */
   patch?: string
+  /** Optional per-commit list; entries may include featureInfo when enabled via options. */
+  commits?: CommitInfo[]
   metrics?: GitMetrics
   metricsError?: string | null
 }
