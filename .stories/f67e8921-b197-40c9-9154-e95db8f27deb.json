@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "-",
+  "status": "?",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -2563,7 +2563,7 @@
     },
     {
       "id": "41e29168-8387-44a3-8052-a80b3098088b",
-      "status": "-",
+      "status": "?",
       "title": "In GitMergeModal the diffs are not showing just incoming",
       "description": "In @src/renderer/src/screens/git/GitMergeModal.tsx the diffs that are displayed are showing both outgoing and incoming changes against each other. But the user should only be shown the incoming changes against the current branch.\nThere should be appropriate data from `thefactory-tools` for this - all the types are in @src/logic/git/gitTypes.copy.ts . If something is missing, then describe a feature request in `docs/GIT_DIFFS.md` so that `thefactory-tools` can be updated to include it.",
       "context": [
@@ -2572,7 +2572,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-28T12:47:48.778Z",
-      "updatedAt": "2025-10-28T12:47:48.778Z"
+      "updatedAt": "2025-10-29T01:14:58.713Z",
+      "rejection": "Blocked: Agent loop failed: {}"
     },
     {
       "id": "6ef71ce5-6bcd-407a-b9e7-1f3e44e2a626",
