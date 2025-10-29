@@ -10,6 +10,7 @@ import { IconDelete } from '../components/ui/icons/IconDelete'
 import { gitService } from '@renderer/services/gitService'
 import { GitUnifiedBranch } from 'thefactory-tools'
 import { useGit } from '../contexts/GitContext'
+import DependencyBullet from '../components/stories/DependencyBullet'
 
 function statusLabel(b: GitUnifiedBranch): string {
   if (b.current) return 'current'
@@ -217,10 +218,16 @@ function UnifiedBranchItem({
           <span className="truncate">{branch.name}</span>
           <StatusChips b={branch} />
         </div>
-        <div className="text-xs text-neutral-600 dark:text-neutral-400 truncate">
-          {projectTitle ? `${projectTitle} · ` : ''}
-          base {baseRef}
-          {storyId ? ` • story ${storyId}` : ''}
+        <div className="text-xs text-neutral-600 dark:text-neutral-400 truncate flex items-center gap-1">
+          <span className="truncate">{projectTitle ? `${projectTitle} · ` : ''}base {baseRef}</span>
+          {storyId && (
+            <>
+              <span className="text-neutral-400">•</span>
+              <span onClick={(e) => e.stopPropagation()} className="shrink-0">
+                <DependencyBullet dependency={storyId} />
+              </span>
+            </>
+          )}
         </div>
       </div>
       <div className="shrink-0 flex items-center gap-3">

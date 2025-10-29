@@ -2578,7 +2578,7 @@
     },
     {
       "id": "6ef71ce5-6bcd-407a-b9e7-1f3e44e2a626",
-      "status": "-",
+      "status": "+",
       "title": "In GitView show story chips that when clicking take the user to that story",
       "description": "In @src/renderer/src/screens/GitView.tsx currently just a storyId is shown - but it should be replaced with a @src/renderer/src/components/stories/DependencyBullet.tsx that when clicking will open the appropriate story.",
       "context": [
@@ -2587,7 +2587,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-28T12:49:51.490Z",
-      "updatedAt": "2025-10-28T12:49:51.490Z"
+      "updatedAt": "2025-10-29T09:25:30.131Z",
+      "completedAt": "2025-10-29T09:25:30.131Z"
     },
     {
       "id": "ae8f8bd5-6062-4238-bc93-00994debfad0",
