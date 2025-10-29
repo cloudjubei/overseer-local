@@ -1,6 +1,7 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
 import type { ToolCall, ToolResultType } from 'thefactory-tools'
 import Code from '../ui/Code'
+import { Modal } from '../ui/Modal'
 import { IconCheckmarkCircle, IconError, IconStop, IconNotAllowed, IconHourglass } from '../ui/icons/Icons'
 
 function StatusIcon({ resultType }: { resultType?: ToolResultType }) {
@@ -90,6 +91,8 @@ function buildUnifiedDiffIfPresent(result: any): string | undefined {
   // Some backends might wrap diff under { diff: { patch: string } }
   const nestedPatch = extract(result, ['diff.patch'])
   if (typeof nestedPatch === 'string' && nestedPatch.trim()) return nestedPatch
+  // If result itself is a diff string
+  if (typeof result === 'string' && result.includes('@@')) return result
   return undefined
 }
 
@@ -104,6 +107,10 @@ function isCompletelyNewFile(result: any, diff?: string): boolean {
     if (lower.includes('new file mode') || lower.includes('--- /dev/null')) return true
   }
   return false
+}
+
+function countHunks(diff: string): number {
+  return diff.split(/\r?\n/).filter((l) => l.startsWith('@@')).length
 }
 
 function HunkedDiff({ diff, maxHunks = 3 }: { diff: string; maxHunks?: number }) {
@@ -144,7 +151,7 @@ function NewContentOnly({ text, label }: { text?: string; label?: string }) {
   return (
     <div>
       <div className="text-xs text-[var(--text-secondary)] mb-1">{header}</div>
-      <Code language="" code={text} />
+      <Code language="text" code={text} />
     </div>
   )
 }
@@ -167,6 +174,35 @@ function ReorderList({ items, movedId }: { items: any[]; movedId?: string }) {
   )
 }
 
+function toLines(value: any): string[] {
+  if (value == null) return []
+  let str: string
+  if (typeof value === 'string') str = value
+  else {
+    try {
+      str = JSON.stringify(value, null, 2)
+    } catch {
+      str = String(value)
+    }
+  }
+  return str.split(/\r?\n/)
+}
+
+function PreLimited({ lines, maxLines }: { lines: string[]; maxLines: number }) {
+  const limited = lines.slice(0, maxLines)
+  const truncated = lines.length > maxLines
+  return (
+    <div>
+      <pre className="text-[11px] text-[var(--text-primary)] bg-[var(--surface-raised)] p-1.5 rounded-md overflow-x-auto whitespace-pre">
+        {limited.join('\n')}
+      </pre>
+      {truncated ? (
+        <div className="text-[10px] text-[var(--text-tertiary)] mt-0.5">showing first {maxLines} lines</div>
+      ) : null}
+    </div>
+  )
+}
+
 export default function ToolCallChangePopup({
   toolCall,
   result,
@@ -178,6 +214,7 @@ export default function ToolCallChangePopup({
   resultType?: ToolResultType
   durationMs?: number
 }) {
+  const [detailsOpen, setDetailsOpen] = useState(false)
   const name = toolCall?.name || 'tool'
 
   const timestamp = formatTimestamp(result?.completedAt || result?.finishedAt || result?.updatedAt)
@@ -215,21 +252,31 @@ export default function ToolCallChangePopup({
       const oldDesc = tryString(extract(result, ['before.description']) || extract(args, ['oldDescription']))
       const newDesc = tryString(extract(result, ['after.description']) || extract(args, ['newDescription', 'description']))
       const diff = tryString(extract(result, ['diff', 'patch']))
+      const showDetails = !!diff && diff.split(/\r?\n/).length > 40
       return (
         <div className="text-xs">
           {diff ? (
-            <Code language="diff" code={diff} />
+            <div>
+              <Code language="diff" code={diff} />
+              {showDetails ? (
+                <div className="mt-1">
+                  <button className="btn-link text-[11px]" onClick={() => setDetailsOpen(true)}>
+                    View details
+                  </button>
+                </div>
+              ) : null}
+            </div>
           ) : oldDesc && newDesc ? (
             <div>
               <SectionTitle>Updated description</SectionTitle>
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <div className="text-[11px] text-[var(--text-secondary)] mb-1">Before</div>
-                  <Code language="" code={oldDesc} />
+                  <Code language="text" code={oldDesc} />
                 </div>
                 <div>
                   <div className="text-[11px] text-[var(--text-secondary)] mb-1">After</div>
-                  <Code language="" code={newDesc} />
+                  <Code language="text" code={newDesc} />
                 </div>
               </div>
             </div>
@@ -245,6 +292,7 @@ export default function ToolCallChangePopup({
       const diff = buildUnifiedDiffIfPresent(result)
       const newText = tryString(extract(result, ['after.content', 'newContent', 'content']))
       const isNew = isCompletelyNewFile(result, diff)
+      const hunks = diff ? countHunks(diff) : 0
       return (
         <div className="space-y-1">
           <Row>
@@ -254,7 +302,14 @@ export default function ToolCallChangePopup({
           {isNew ? (
             <NewContentOnly text={newText} label="File completely new." />
           ) : diff ? (
-            <HunkedDiff diff={diff} />
+            <div>
+              <HunkedDiff diff={diff} />
+              {hunks > 3 ? (
+                <button className="btn-link text-[11px] mt-1" onClick={() => setDetailsOpen(true)}>
+                  View details
+                </button>
+              ) : null}
+            </div>
           ) : (
             <NewContentOnly text={newText} />
           )}
@@ -276,7 +331,7 @@ export default function ToolCallChangePopup({
           {description ? (
             <div className="mt-1">
               <SectionTitle>Description</SectionTitle>
-              <Code language="" code={description} />
+              <Code language="text" code={description} />
             </div>
           ) : null}
         </div>
@@ -293,13 +348,53 @@ export default function ToolCallChangePopup({
     }
 
     if (n === 'search_files') {
-      const query = tryString(extract(args, ['query']) || extract(result, ['query']))
+      const query = tryString(extract(args, ['query']) || extract(result, ['query'])) || ''
+      const resultsRaw = extract(result, ['results']) || extract(result, ['matches']) || extract(result, ['files']) || extract(result, ['items']) || extract(result, ['result']) || result
+
+      // Format results into lines
+      let resultLines: string[] = []
+      if (Array.isArray(resultsRaw)) {
+        resultLines = resultsRaw.map((it: any) => {
+          const path = tryString(extract(it, ['path', 'file', 'filepath', 'name']))
+          const line = tryString(extract(it, ['line', 'lineNumber']))
+          const preview = tryString(extract(it, ['preview', 'text', 'content', 'match']))
+          if (path || line || preview) {
+            return [path, line ? `:${line}` : '', preview ? `: ${preview}` : ''].join('')
+          }
+          try {
+            return typeof it === 'string' ? it : JSON.stringify(it)
+          } catch {
+            return String(it)
+          }
+        })
+      } else if (typeof resultsRaw === 'string') {
+        resultLines = resultsRaw.split(/\r?\n/)
+      } else if (resultsRaw && typeof resultsRaw === 'object') {
+        resultLines = toLines(resultsRaw)
+      }
+
+      const qLines = query.split(/\r?\n/)
+      const showDetails = resultLines.length > 10
+
       return (
-        <div className="text-xs">
+        <div className="text-xs space-y-1">
           <Row>
-            <span className="text-[var(--text-secondary)]">Query:</span>{' '}
-            <span className="font-mono">{query || '(empty query)'}</span>
+            <span className="text-[var(--text-secondary)]">Query:</span>
           </Row>
+          <PreLimited lines={qLines} maxLines={2} />
+          {resultLines.length > 0 ? (
+            <div>
+              <SectionTitle>Results</SectionTitle>
+              <PreLimited lines={resultLines} maxLines={10} />
+              {showDetails ? (
+                <button className="btn-link text-[11px] mt-1" onClick={() => setDetailsOpen(true)}>
+                  View details
+                </button>
+              ) : null}
+            </div>
+          ) : (
+            <div className="text-[11px] text-[var(--text-secondary)]">No results</div>
+          )}
         </div>
       )
     }
@@ -346,6 +441,92 @@ export default function ToolCallChangePopup({
     )
   }, [name, toolCall?.arguments, result, resultType])
 
+  // Details modal content by tool
+  const renderDetails = () => {
+    const n = String(name)
+    const args = toolCall?.arguments || {}
+
+    if (n === 'write_file') {
+      const path = tryString(extract(args, ['path']) || extract(result, ['path']))
+      const diff = buildUnifiedDiffIfPresent(result)
+      const newText = tryString(extract(result, ['after.content', 'newContent', 'content']))
+      const isNew = isCompletelyNewFile(result, diff)
+      return (
+        <div className="space-y-2">
+          <div className="text-sm"><span className="text-[var(--text-secondary)]">Path:</span> <span className="font-mono">{path}</span></div>
+          {isNew ? <Code language="text" code={newText || ''} /> : diff ? <Code language="diff" code={diff} /> : <Code language="text" code={newText || ''} />}
+        </div>
+      )
+    }
+
+    if (n === 'update_story_description' || n === 'update_feature_description') {
+      const diff = tryString(extract(result, ['diff', 'patch']))
+      const oldDesc = tryString(extract(result, ['before.description']) || extract(args, ['oldDescription']))
+      const newDesc = tryString(extract(result, ['after.description']) || extract(args, ['newDescription', 'description']))
+      if (diff) return <Code language="diff" code={diff} />
+      return (
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <SectionTitle>Before</SectionTitle>
+            <Code language="text" code={oldDesc || ''} />
+          </div>
+          <div>
+            <SectionTitle>After</SectionTitle>
+            <Code language="text" code={newDesc || ''} />
+          </div>
+        </div>
+      )
+    }
+
+    if (n === 'search_files') {
+      const query = tryString(extract(args, ['query']) || extract(result, ['query'])) || ''
+      const resultsRaw = extract(result, ['results']) || extract(result, ['matches']) || extract(result, ['files']) || extract(result, ['items']) || extract(result, ['result']) || result
+      let resultLines: string[] = []
+      if (Array.isArray(resultsRaw)) {
+        resultLines = resultsRaw.map((it: any) => {
+          const path = tryString(extract(it, ['path', 'file', 'filepath', 'name']))
+          const line = tryString(extract(it, ['line', 'lineNumber']))
+          const preview = tryString(extract(it, ['preview', 'text', 'content', 'match']))
+          if (path || line || preview) {
+            return [path, line ? `:${line}` : '', preview ? `: ${preview}` : ''].join('')
+          }
+          try {
+            return typeof it === 'string' ? it : JSON.stringify(it)
+          } catch {
+            return String(it)
+          }
+        })
+      } else if (typeof resultsRaw === 'string') {
+        resultLines = resultsRaw.split(/\r?\n/)
+      } else if (resultsRaw && typeof resultsRaw === 'object') {
+        resultLines = toLines(resultsRaw)
+      }
+
+      return (
+        <div className="space-y-2">
+          <div>
+            <SectionTitle>Query</SectionTitle>
+            <Code language="text" code={query} />
+          </div>
+          <div>
+            <SectionTitle>Results</SectionTitle>
+            <Code language="text" code={resultLines.join('\n')} />
+          </div>
+        </div>
+      )
+    }
+
+    // Default: show JSON
+    const str = (() => {
+      try {
+        return typeof result === 'string' ? result : JSON.stringify(result, null, 2)
+      } catch {
+        return String(result)
+      }
+    })()
+    return <Code language="json" code={str || ''} />
+  }
+
   return (
     <div className="min-w-[260px] max-w-[520px]">
       <div className="flex items-center justify-between gap-2 mb-1">
@@ -360,6 +541,12 @@ export default function ToolCallChangePopup({
         </div>
       </div>
       <div className="border-t border-[var(--border-subtle)] pt-1">{content}</div>
+
+      <Modal isOpen={detailsOpen} onClose={() => setDetailsOpen(false)} title={<div className="flex items-center gap-2"><span className="text-sm font-semibold">{name} details</span></div>} size="xl">
+        <div className="max-h-[70vh] overflow-auto">
+          {renderDetails()}
+        </div>
+      </Modal>
     </div>
   )
 }

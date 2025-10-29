@@ -238,7 +238,7 @@ export default function ToolCallCard({
       {!resultString && errorString && (
         <Collapsible title={<span>View error</span>}>
           <div className="p-2 max-h-72 overflow-auto bg-[var(--surface-raised)] border-t border-[var(--border-subtle)]">
-            <Code language="" code={errorString} />
+            <Code language="text" code={errorString} />
           </div>
         </Collapsible>
       )}
