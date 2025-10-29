@@ -113,7 +113,8 @@ export default function ChatSidebar({
       return (cm?.completedAt as string) || (cm?.startedAt as string) || undefined
     })()
     const updatedAt = chat?.chat.updatedAt
-    if (updatedAt && lastMsgIso) return updatedAt.localeCompare(lastMsgIso) >= 0 ? updatedAt : lastMsgIso
+    if (updatedAt && lastMsgIso)
+      return updatedAt.localeCompare(lastMsgIso) >= 0 ? updatedAt : lastMsgIso
     return updatedAt || lastMsgIso
   }, [chat?.chat.messages, chat?.chat.updatedAt])
 
@@ -549,7 +550,7 @@ export default function ChatSidebar({
                         id="numberMessagesToSend"
                         type="range"
                         min={3}
-                        max={20}
+                        max={40}
                         step={1}
                         value={completion.numberMessagesToSend ?? 3}
                         onChange={(e) =>
