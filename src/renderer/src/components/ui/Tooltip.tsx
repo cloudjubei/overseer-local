@@ -28,6 +28,7 @@ export default function Tooltip({
   anchorTabIndex,
 }: TooltipProps) {
   const [open, setOpen] = useState(false)
+  const [pinned, setPinned] = useState(false)
   const [position, setPosition] = useState<{ top: number; left: number } | null>(null)
   const timerRef = useRef<number | null>(null)
   const hideTimerRef = useRef<number | null>(null)
@@ -70,26 +71,32 @@ export default function Tooltip({
     timerRef.current = window.setTimeout(() => setOpen(true), delayMs) as any
   }
   const hide = (immediate = false) => {
+    if (pinned && !immediate) return // do not auto-hide when pinned
     clearOpenTimer()
     clearHideTimer()
     if (immediate) {
       setOpen(false)
+      setPinned(false)
       return
     }
     hideTimerRef.current = window.setTimeout(() => setOpen(false), CLOSE_DELAY) as any
   }
 
-  // Outside click / Escape to close when open via click
+  // Outside click / Escape to close when open (clears pin)
   const onDocMouseDown = (e: MouseEvent) => {
     if (!open) return
     const t = e.target as Node
     if (anchorRef.current && anchorRef.current.contains(t)) return
     if (tooltipRef.current && tooltipRef.current.contains(t)) return
+    setPinned(false)
     hide(true)
   }
   const onDocKeyDown = (e: KeyboardEvent) => {
     if (!open) return
-    if (e.key === 'Escape') hide(true)
+    if (e.key === 'Escape') {
+      setPinned(false)
+      hide(true)
+    }
   }
   const addOutsideHandlers = () => {
     document.addEventListener('mousedown', onDocMouseDown)
@@ -208,15 +215,28 @@ export default function Tooltip({
         onFocus={() => show(true)}
         onBlur={() => hide(true)}
         onKeyDown={(e: any) => {
-          if (e.key === 'Escape') hide(true)
+          if (e.key === 'Escape') {
+            setPinned(false)
+            hide(true)
+          }
           if (!disableClickToggle && (e.key === 'Enter' || e.key === ' ')) {
             e.preventDefault()
-            setOpen((v) => !v)
+            setPinned((prev) => {
+              const next = !prev
+              setOpen(next || open)
+              if (!next && !open) setOpen(false)
+              return next
+            })
           }
         }}
         onClick={() => {
           if (disabled || disableClickToggle) return
-          setOpen((v) => !v)
+          setPinned((prev) => {
+            const next = !prev
+            setOpen(next || open)
+            if (!next && !open) setOpen(false)
+            return next
+          })
         }}
         aria-describedby={open ? tooltipId : undefined}
         aria-expanded={open ? true : undefined}

@@ -7,7 +7,7 @@ import {
   IconChevron,
 } from '../ui/icons/Icons'
 import Code from '../ui/Code'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Switch } from '../ui/Switch'
 import JsonView from '../ui/JsonView'
 import { ToolCall, ToolResultType } from 'thefactory-tools'
@@ -121,7 +121,28 @@ function getResultString(result: any): string {
       out = JSON.parse(result)
     } catch {}
   }
-  return JSON.stringify(out, null, 2)
+  try {
+    return JSON.stringify(out, null, 2)
+  } catch {
+    return String(out)
+  }
+}
+
+function getErrorString(result: any): string | undefined {
+  if (!result) return undefined
+  try {
+    const msg =
+      (result?.error && (result.error.message || result.error.msg || String(result.error))) ||
+      result?.message ||
+      result?.err ||
+      (typeof result === 'string' ? result : undefined)
+    if (msg) return typeof msg === 'string' ? msg : JSON.stringify(msg, null, 2)
+  } catch {}
+  try {
+    return typeof result === 'string' ? result : JSON.stringify(result, null, 2)
+  } catch {
+    return undefined
+  }
 }
 
 export default function ToolCallCard({
@@ -137,9 +158,17 @@ export default function ToolCallCard({
   const [isCallExpanded, setIsCallExpanded] = useState(false)
 
   const resultString = resultType === 'success' ? getResultString(result) : undefined
+  const errorString = resultType === 'errored' ? getErrorString(result) : undefined
   const isRequireConfirm = resultType === 'require_confirmation'
 
-  const hasPopup = typeof result !== 'undefined'
+  const hasArgs = useMemo(() => {
+    const args = toolCall?.arguments
+    if (!args) return false
+    if (typeof args !== 'object') return true
+    return Object.keys(args).length > 0
+  }, [toolCall?.arguments])
+
+  const hasPopup = typeof result !== 'undefined' && resultType !== 'aborted'
   const anchorClassName = [
     'rounded-md border text-sm text-[var(--text-primary)] relative focus:outline-none focus:ring-2 focus:ring-blue-500/40',
     isRequireConfirm
@@ -166,20 +195,22 @@ export default function ToolCallCard({
               <span className="text-[10px] leading-none">i</span>
             </span>
           ) : null}
-          <button
-            type="button"
-            className="btn-icon"
-            onClick={(e) => {
-              e.stopPropagation()
-              setIsCallExpanded((v) => !v)
-            }}
-            aria-expanded={isCallExpanded}
-          >
-            <IconChevron
-              className="w-4 h-4 transition-transform"
-              style={{ transform: `rotate(${isCallExpanded ? 90 : 0}deg)` }}
-            />
-          </button>
+          {hasArgs ? (
+            <button
+              type="button"
+              className="btn-icon"
+              onClick={(e) => {
+                e.stopPropagation()
+                setIsCallExpanded((v) => !v)
+              }}
+              aria-expanded={isCallExpanded}
+            >
+              <IconChevron
+                className="w-4 h-4 transition-transform"
+                style={{ transform: `rotate(${isCallExpanded ? 90 : 0}deg)` }}
+              />
+            </button>
+          ) : null}
         </div>
       </div>
       <div className="flex items-center justify-between px-3 py-2">
@@ -190,7 +221,7 @@ export default function ToolCallCard({
           </span>
         )}
       </div>
-      {isCallExpanded && (
+      {isCallExpanded && hasArgs && (
         <div className="px-3 pb-2">
           <Code language="json" code={JSON.stringify(toolCall.arguments ?? {}, null, 2)} />
           {/* <JsonView value={result} /> */}
@@ -201,6 +232,13 @@ export default function ToolCallCard({
           <div className="p-2 max-h-72 overflow-auto bg-[var(--surface-raised)] border-t border-[var(--border-subtle)]">
             <Code language="json" code={resultString} />
             {/* <JsonView value={result} /> */}
+          </div>
+        </Collapsible>
+      )}
+      {!resultString && errorString && (
+        <Collapsible title={<span>View error</span>}>
+          <div className="p-2 max-h-72 overflow-auto bg-[var(--surface-raised)] border-t border-[var(--border-subtle)]">
+            <Code language="" code={errorString} />
           </div>
         </Collapsible>
       )}
