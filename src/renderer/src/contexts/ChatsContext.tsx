@@ -383,9 +383,28 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
   const deleteLastMessage = useCallback(async (context: ChatContext) => {
     const key = getChatContextPath(context)
     const chatState = await getChat(context)
+
+    // Do not allow deletion while assistant is thinking
+    if (chatState.isThinking) return
+
     const msgs = chatState.chat.messages
     if (!msgs || msgs.length === 0) return
-    const trimmed = msgs.slice(0, msgs.length - 1)
+
+    let trimCount = 1
+    const last = msgs[msgs.length - 1]
+
+    // If the last message contains tool results (stored as a message with toolResults),
+    // and the previous message is an assistant message, delete both so the assistant response
+    // and its tool results are removed together.
+    const lastHasToolResults = Array.isArray((last as any)?.toolResults) && (last as any).toolResults.length > 0
+    if (lastHasToolResults && msgs.length >= 2) {
+      const prev = msgs[msgs.length - 2]
+      if (prev?.completionMessage?.role === 'assistant') {
+        trimCount = 2
+      }
+    }
+
+    const trimmed = msgs.slice(0, msgs.length - trimCount)
 
     // Optimistic update
     const nextState: ChatState = {

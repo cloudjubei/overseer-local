@@ -459,6 +459,30 @@ export default function MessageList({
             : ''
           toggleableCount > 0 && isSystem && isLast
 
+          // Determine delete button visibility/labeling
+          const lastMsg = messagesToDisplay[messagesToDisplay.length - 1]
+          const lastIsSystemToolResults =
+            lastMsg?.completionMessage?.role === 'system' &&
+            Array.isArray(lastMsg?.toolResults) &&
+            (lastMsg?.toolResults?.length ?? 0) > 0
+
+          const isAssistantBeforeSystemToolResults =
+            isAssistant &&
+            index === messagesToDisplay.length - 2 &&
+            lastIsSystemToolResults
+
+          const isDeletableSystemLast = isSystem && isLast && !isShowingToolResults
+
+          const shouldShowDelete = !!onDeleteLastMessage && (
+            (isLast && (isUser || isAssistant)) ||
+            isAssistantBeforeSystemToolResults ||
+            isDeletableSystemLast
+          )
+
+          const deleteTitle = isAssistantBeforeSystemToolResults
+            ? 'Delete last assistant message and tool results'
+            : 'Delete last message'
+
           return (
             <div key={index}>
               {showCutoff && (
@@ -490,16 +514,16 @@ export default function MessageList({
                   >
                     {isUser ? 'You' : isSystem ? <IconToolbox /> : 'AI'}
                   </div>
-                  {isLast && (isUser || isAssistant) && onDeleteLastMessage ? (
+                  {shouldShowDelete ? (
                     <button
                       type="button"
-                      title="Delete last message"
-                      aria-label="Delete last message"
+                      title={deleteTitle}
+                      aria-label={deleteTitle}
                       className={[
                         'mt-1 transition-opacity opacity-0 group-hover:opacity-100',
                         'btn-secondary btn-icon w-6 h-6',
                       ].join(' ')}
-                      onClick={() => onDeleteLastMessage()}
+                      onClick={() => onDeleteLastMessage && onDeleteLastMessage()}
                       disabled={isThinking}
                     >
                       <IconDelete className="w-3.5 h-3.5" />
