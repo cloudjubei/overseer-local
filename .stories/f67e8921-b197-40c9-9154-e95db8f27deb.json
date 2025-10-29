@@ -2679,7 +2679,7 @@
     },
     {
       "id": "3bfbcd7e-2016-401a-b1d7-466ccb53d7c0",
-      "status": "-",
+      "status": "+",
       "title": "the create new feature popup needs updating",
       "description": "Here are the improvements:\n1) if @src/renderer/src/screens/stories/FeatureCreateView.tsx is triggered from a story - then the current story should be selected\n2) the selected story needs to be in a regular font like the rest of the inputs - right now its faded (gray)\n3) when tapping out of the story selection dropdown - close it and leave the currently selected story\n4) when a project that isn't main is invoked - then select the latest story (cos that project won't have \"ui improvements\")\n5) if a project has no stories - show a toast saying that the user should first create a story to start creating features.",
       "context": [
@@ -2687,7 +2687,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-29T10:43:41.842Z",
-      "updatedAt": "2025-10-29T10:43:41.842Z"
+      "updatedAt": "2025-10-29T11:54:38.453Z",
+      "completedAt": "2025-10-29T11:54:38.453Z"
     }
   ],
   "featureIdToDisplayIndex": {

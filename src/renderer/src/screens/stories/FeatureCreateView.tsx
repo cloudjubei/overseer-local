@@ -3,7 +3,7 @@ import FeatureForm, { FeatureFormValues } from '@renderer/components/stories/Fea
 import { useToast } from '@renderer/components/ui/Toast'
 import { AlertDialog, Modal } from '@renderer/components/ui/Modal'
 import { useStories } from '@renderer/contexts/StoriesContext'
-import { useActiveProject } from '@renderer/contexts/ProjectContext'
+import { MAIN_PROJECT, useActiveProject } from '@renderer/contexts/ProjectContext'
 import { ChatContext } from 'thefactory-tools'
 import { ChatSidebarModalPanel } from '@renderer/components/chat'
 
@@ -33,13 +33,41 @@ export default function FeatureCreateView({
   const [storyQuery, setStoryQuery] = useState('')
   const storyInputRef = useRef<HTMLInputElement | null>(null)
   const [openStoryList, setOpenStoryList] = useState(false)
+  const storySelectorRef = useRef<HTMLDivElement | null>(null)
 
+  // Show a toast if the active project has no stories
+  const [emptyToastShown, setEmptyToastShown] = useState(false)
   useEffect(() => {
-    // If no preselected story and we have exactly one story in project, preselect it for convenience
-    if (!selectedStoryId && projectId) {
-      const ids = storyIdsByProject[projectId] || []
-      if (ids.length === 1) setSelectedStoryId(ids[0])
+    // Reset toast guard on project change
+    setEmptyToastShown(false)
+  }, [projectId])
+  useEffect(() => {
+    if (!projectId) return
+    const ids = storyIdsByProject[projectId] || []
+    if (ids.length === 0 && !emptyToastShown) {
+      toast({
+        title: 'No stories in this project',
+        description: 'Create a story first to add features.',
+        variant: 'warning',
+      })
+      setEmptyToastShown(true)
     }
+  }, [projectId, storyIdsByProject, emptyToastShown, toast])
+
+  // Default selection rules
+  useEffect(() => {
+    if (selectedStoryId || !projectId) return
+    const ids = storyIdsByProject[projectId] || []
+    if (ids.length === 0) return
+
+    // If not main project, preselect the latest story (last in list)
+    if (projectId !== MAIN_PROJECT) {
+      setSelectedStoryId(ids[ids.length - 1])
+      return
+    }
+
+    // For main project, keep previous behavior: preselect only when exactly one story
+    if (ids.length === 1) setSelectedStoryId(ids[0])
   }, [projectId, storyIdsByProject, selectedStoryId])
 
   const projectStories = useMemo(() => {
@@ -100,9 +128,27 @@ export default function FeatureCreateView({
     [projectId, selectedStoryId, storyId],
   )
 
+  // Click-outside to close the story dropdown and keep current selection
+  useEffect(() => {
+    const onDocMouseDown = (e: MouseEvent) => {
+      if (!storySelectorRef.current) return
+      if (!storySelectorRef.current.contains(e.target as Node)) {
+        setOpenStoryList(false)
+        setStoryQuery('') // revert input display to selected story
+      }
+    }
+    document.addEventListener('mousedown', onDocMouseDown)
+    return () => document.removeEventListener('mousedown', onDocMouseDown)
+  }, [])
+
+  const selectedStoryTitle = selectedStoryId
+    ? storiesById[selectedStoryId]?.title || '(untitled story)'
+    : ''
+  const inputValue = storyQuery !== '' ? storyQuery : selectedStoryTitle
+
   // Simple combobox-style dropdown for Story selection with search
   const storySelector = (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col gap-1" ref={storySelectorRef}>
       <label htmlFor="feature-story" className="text-xs" style={{ color: 'var(--text-secondary)' }}>
         Story
       </label>
@@ -111,12 +157,34 @@ export default function FeatureCreateView({
           id="feature-story"
           ref={storyInputRef}
           type="text"
-          placeholder={selectedStoryId ? storiesById[selectedStoryId]?.title || 'Selected story' : 'Search story...'}
-          value={storyQuery}
-          onFocus={() => setOpenStoryList(true)}
+          placeholder={!selectedStoryId ? 'Search story...' : ''}
+          value={inputValue}
+          onFocus={() => {
+            // Start searching fresh and open the list
+            setStoryQuery('')
+            setOpenStoryList(true)
+          }}
           onChange={(e) => {
             setStoryQuery(e.target.value)
             setOpenStoryList(true)
+          }}
+          onBlur={() => {
+            // Close on blur if focus left the selector entirely (keyboard tab-out)
+            requestAnimationFrame(() => {
+              if (!storySelectorRef.current) return
+              if (!storySelectorRef.current.contains(document.activeElement)) {
+                setOpenStoryList(false)
+                setStoryQuery('')
+              }
+            })
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') {
+              e.stopPropagation()
+              setOpenStoryList(false)
+              setStoryQuery('')
+              ;(e.currentTarget as HTMLInputElement).blur()
+            }
           }}
           className="w-full rounded-md border px-3 py-2 text-sm"
           style={{ background: 'var(--surface-raised)', borderColor: 'var(--border-default)', color: 'var(--text-primary)' }}
