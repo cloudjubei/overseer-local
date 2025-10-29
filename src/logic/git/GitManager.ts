@@ -155,7 +155,7 @@ export default class GitManager extends BaseManager {
 
   private async getBranchDiffSummary(
     projectId: string,
-    options: { baseRef: string; headRef: string; includePatch?: boolean },
+    options: { baseRef: string; headRef: string; incomingOnly?: boolean; includePatch?: boolean },
   ): Promise<DiffSummary | undefined> {
     const tools = await this.__getTools(projectId)
     if (!tools) return

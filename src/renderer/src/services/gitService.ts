@@ -37,6 +37,7 @@ export type GitService = {
     options: {
       baseRef: string
       headRef: string
+      incomingOnly?: boolean
       includePatch?: boolean
     },
   ) => Promise<DiffSummary>
