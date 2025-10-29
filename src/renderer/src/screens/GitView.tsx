@@ -13,9 +13,9 @@ import { useGit } from '../contexts/GitContext'
 
 function statusLabel(b: GitUnifiedBranch): string {
   if (b.current) return 'current'
-  if (b.isLocal && b.isRemote) return 'tracked'
-  if (b.isLocal && !b.isRemote) return 'local only'
-  if (!b.isLocal && b.isRemote) return 'remote only'
+  if (b.isLocal && b.isRemote) return 'both'
+  if (b.isLocal && !b.isRemote) return 'local'
+  if (!b.isLocal && b.isRemote) return 'remote'
   return 'unknown'
 }
 
@@ -54,11 +54,6 @@ function StatusChips({ b }: { b: GitUnifiedBranch }) {
       >
         {label}
       </span>
-      {b.upstreamRemote && b.upstreamBranch && (
-        <span className="px-1.5 py-0.5 rounded border bg-neutral-50 border-neutral-200 text-neutral-600 dark:bg-neutral-900/30 dark:border-neutral-800 dark:text-neutral-300">
-          {`${b.upstreamRemote}/${b.upstreamBranch}`}
-        </span>
-      )}
     </div>
   )
 }

@@ -2550,7 +2550,7 @@
     },
     {
       "id": "b81fe5fc-0b19-4fe7-9b41-5ae564e5e908",
-      "status": "-",
+      "status": "+",
       "title": "In GitView the status chip shouldn't show the branch name",
       "description": "In @src/renderer/src/screens/GitView.tsx the status chips should show if it's local, remote, both - not re-displaying the branch id/name",
       "context": [
@@ -2558,7 +2558,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-28T12:45:20.540Z",
-      "updatedAt": "2025-10-28T12:45:20.540Z"
+      "updatedAt": "2025-10-29T01:06:28.117Z",
+      "completedAt": "2025-10-29T01:06:28.117Z"
     },
     {
       "id": "41e29168-8387-44a3-8052-a80b3098088b",
