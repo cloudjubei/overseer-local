@@ -46,7 +46,7 @@ const ToolsScreen: React.FC = () => {
         let groups: GroupedTools = {}
         for (const k of Object.keys(ToolSchemas)) {
           const tool = ToolSchemas[k]
-          const group = getGroupFromName(tool.name)
+          const group = tool.category ?? getGroupFromName(tool.name)
           if (!groups[group]) groups[group] = []
           groups[group].push(tool)
         }
