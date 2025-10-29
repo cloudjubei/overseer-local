@@ -2712,6 +2712,103 @@
       "blockers": [],
       "createdAt": "2025-10-29T15:15:23.655Z",
       "updatedAt": "2025-10-29T15:15:23.655Z"
+    },
+    {
+      "id": "4c176bb4-549e-4a6c-a59d-f8690c4819b5",
+      "status": "-",
+      "title": "the typewriter effect in chat swallows some first letters",
+      "description": "whenever the typewriter effect kicks in it always omits the first or second letter in @src/renderer/src/components/chat/ChatSidebar.tsx when displaying a message in @src/renderer/src/components/chat/MessageList.tsx",
+      "context": [
+        "src/renderer/src/components/chat/ChatSidebar.tsx",
+        "src/renderer/src/components/chat/MessageList.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-29T16:24:36.140Z",
+      "updatedAt": "2025-10-29T16:24:36.140Z"
+    },
+    {
+      "id": "720ef1b6-1461-4ea9-8417-ce6955ba566e",
+      "status": "-",
+      "title": "each message should show the timestamp in a human friendly way",
+      "description": "In @src/renderer/src/components/chat/MessageList.tsx all messages should show these at the top. For users it's at the top left, and for assistants or system messages it's at the top right.\nThis should be a very small piece of text.\nIf the message was 'today' then just show the time. If it was on a different day also show the date.",
+      "context": [
+        "src/renderer/src/components/chat/MessageList.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-29T16:30:28.066Z",
+      "updatedAt": "2025-10-29T16:30:28.066Z"
+    },
+    {
+      "id": "eb960fe5-b811-4119-8aa9-e9d420b54024",
+      "status": "-",
+      "title": "The `finish_feature` popup when hovering the tool message needs updating",
+      "description": "in @src/renderer/src/components/chat/ToolCallChangePopup.tsx when it's `finish_feature` we shouldn't show the time nor the feature id in the 'header' - the summary card covers all the info needed.",
+      "context": [
+        "src/renderer/src/components/chat/ToolCallChangePopup.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-29T16:31:26.593Z",
+      "updatedAt": "2025-10-29T16:31:26.593Z"
+    },
+    {
+      "id": "ad71c0b9-e555-4653-a600-af5efd1db0f1",
+      "status": "-",
+      "title": "`search_files` should say '+ X more at the bottom'",
+      "description": "In @src/renderer/src/components/chat/ToolCallChangePopup.tsx for the `search_files` tool if there are truncated results, there should be a one line message saying how many were ommitted.",
+      "context": [
+        "src/renderer/src/components/chat/ToolCallChangePopup.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-29T16:32:34.177Z",
+      "updatedAt": "2025-10-29T16:32:34.177Z"
+    },
+    {
+      "id": "e086f202-7b49-4317-bf1c-9ac4ab60a520",
+      "status": "-",
+      "title": "the `write_file` popup needs updating",
+      "description": "in @src/renderer/src/components/chat/ToolCallChangePopup.tsx for the `write_file` tool call - with a result it can show Path(unknown) even though the path is included in the tool call args under 'name' .\nWithout the tool result, the popup never shows the diff (we never got it) - this needs to be computed so it can be displayed.",
+      "context": [
+        "src/renderer/src/components/chat/ToolCallChangePopup.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-29T16:34:09.408Z",
+      "updatedAt": "2025-10-29T16:34:09.408Z"
+    },
+    {
+      "id": "16745e78-fa85-4d82-986a-1a5c3f8630c1",
+      "status": "-",
+      "title": "Chat sidebar spinner + unread dot with project aggregation",
+      "description": "Goal: Show ongoing chats (spinner) and new messages in the sidebar for both the chat list and the projects list area in SidebarView, with aggregation at the project level.\n\nBehavior:\n- Chat row: While an assistant response is streaming, display a small spinner in place of the unread badge. If there are unread messages for that chat, show a tiny red dot at the spinner’s top-right corner (spinner has precedence over number badges during streaming).\n- Project row aggregation (in SidebarView): If any chat within the project is streaming, show a small spinner on the project tile. If any chat within the project has unread messages, aggregate the unread count and display it. When both streaming and unread exist, show spinner with a small red dot at top-right. When not streaming, show the numeric unread badge only. Counts cap at 99+.\n- No hover preview.\n- Unread is already tracked per chat; leverage existing unread state and last-seen logic.\n- Spinner clears within ~500ms of stream end to avoid flicker.\n\nImplementation notes:\n- Use existing UI primitives: Spinner and DotBadge. Introduce a spinner-with-dot composition for the red unread dot overlay.\n- Ensure the new logic coexists cleanly with the already completed 'Chat notifications' feature.\n- Respect collapsed sidebar visuals; badges/spinners should remain legible and positioned consistently.\n\nContext:\n- @src/renderer/src/navigation/SidebarView.tsx\n- @src/renderer/src/components/ui/CollapsibleSidebar.tsx\n- @src/renderer/src/components/ui/Spinner.tsx\n- @src/renderer/src/components/ui/DotBadge.tsx\n- @src/renderer/src/components/chat/ChatSidebar.tsx\n- @src/renderer/src/services/chatsService.ts\n\nAcceptance criteria:\n- When a chat is actively streaming, its chat row shows a spinner instead of a numeric unread badge. If unread exists, a small red dot appears on the spinner’s top-right.\n- At the project level in SidebarView, if any chat is streaming, a spinner shows on the project tile. If any chat has unread messages, an aggregated unread indicator shows. If both, spinner shows with a small red dot. Counts cap at '99+'.\n- No hover preview is shown. Unread and streaming states update in near-real-time.\n- Spinner and badge positions align and remain accessible/legible in both expanded and collapsed sidebar modes.\n- No regressions to existing chat notification badges elsewhere (e.g., Chat nav entry).",
+      "context": [],
+      "createdAt": "2025-10-29T16:42:29.014Z",
+      "updatedAt": "2025-10-29T16:42:29.014Z"
+    },
+    {
+      "id": "9dc96025-d7ee-4798-aeab-0ffac36c54c7",
+      "status": "-",
+      "title": "Git change badges in Sidebar (green) via GitContext",
+      "description": "Goal: Show Git notifications whenever there is a branch with feature changes as a green badge, consistent with existing badge styling.\n\nBehavior:\n- Placement: Show a green badge next to the 'Git' nav entry in SidebarView, following the same visual/placement pattern as existing chat badges.\n- Count: Aggregate branches with feature changes into a numeric badge (cap at 99+). If zero, no badge is shown.\n- Live updates: Badge updates as GitContext changes based on the git monitor.\n\nImplementation notes:\n- Use @src/renderer/src/contexts/GitContext.tsx as the authoritative source. It should already surface branch status based on the git monitor.\n- Define 'feature changes' using the data provided by GitContext (e.g., branches that include story/feature modifications), without re-implementing diff logic in the UI.\n- Use the same DotBadge component with a green/success styling token consistent with the design system.\n\nContext:\n- @src/renderer/src/navigation/SidebarView.tsx\n- @src/renderer/src/contexts/GitContext.tsx\n- @src/renderer/src/components/ui/DotBadge.tsx\n- @src/renderer/src/services/gitService.ts\n- @src/logic/git/gitTypes.copy.ts\n\nAcceptance criteria:\n- When one or more branches have feature changes (as exposed by GitContext), a green numeric badge appears next to the 'Git' item in SidebarView, capped at '99+'.\n- The badge updates automatically as GitContext state changes; removing/merging changes clears or reduces the count correspondingly.\n- Styling and placement match existing sidebar badges (padding, size, alignment).",
+      "context": [],
+      "createdAt": "2025-10-29T16:42:29.031Z",
+      "updatedAt": "2025-10-29T16:42:29.031Z"
+    },
+    {
+      "id": "5d593b43-f456-4b1e-97e6-cb53476197e8",
+      "status": "-",
+      "title": "Push notifications for Git and Chat (parity with agents)",
+      "description": "Goal: Provide push notifications for Git and Chat using the exact same logic and UX we already use for agent run notifications.\n\nBehavior:\n- Chat: When a new assistant message arrives (under the same conditions currently used for agent notifications), send a native OS notification. Clicking the notification opens ChatView focused on the correct chat.\n- Git: When a branch with feature changes appears or updates (per GitContext/monitor events, under the same conditions as agent notifications), send a native OS notification. Clicking the notification opens GitView focused on that branch/diff context.\n- Deep linking follows the same patterns as agents; reuse existing navigation/deep-link helpers.\n\nImplementation notes:\n- Reuse existing notification pipeline used for agents in notificationsService and notifications manager. Mirror conditions and throttling/rate-limiting semantics already present for agent notifications.\n- No new settings pane work for now; follow the exact pathways and toggles agents use today.\n\nContext:\n- @src/renderer/src/services/notificationsService.ts\n- @src/notifications/manager.js\n- @src/renderer/src/services/chatsService.ts\n- @src/renderer/src/services/gitService.ts\n- @src/renderer/src/contexts/GitContext.tsx\n- @src/renderer/src/screens/ChatView.tsx\n- @src/renderer/src/screens/GitView.tsx\n\nAcceptance criteria:\n- New chat message triggers an OS push notification under the same conditions as agent notifications. Clicking it takes the user directly to the relevant chat in ChatView.\n- Git branch feature-change event triggers an OS push notification under the same conditions as agent notifications. Clicking it takes the user to GitView focused on the relevant branch.\n- No additional settings are necessary; behavior mirrors agent notification toggles and logic exactly.\n- Notifications are properly debounced/rate limited if the agent pipeline already enforces this (parity).",
+      "context": [],
+      "createdAt": "2025-10-29T16:42:29.048Z",
+      "updatedAt": "2025-10-29T16:42:29.048Z"
+    },
+    {
+      "id": "38e1f4bc-07fa-42cc-990d-da75a62151a6",
+      "status": "-",
+      "title": "Distinct sounds per notification type (agent, chat, git)",
+      "description": "Goal: Play distinct sounds per notification/badge type. For now, reuse the agent-run notification logic and add new sound assets for chat and git. No new settings work yet.\n\nBehavior:\n- Notification types and sounds:\n  - Agent events: existing sound (or migrate to a named asset if needed)\n  - Chat new message: new distinct sound\n  - Git feature-change: new distinct sound\n- Sounds play via the same code path used by agent notifications today and only when a notification is triggered (parity with agents). No additional settings UI in this phase.\n\nImplementation notes:\n- Add new placeholder audio assets under a dedicated folder (e.g., @src/renderer/src/assets/sounds/agent.mp3, chat.mp3, git.mp3) and wire a simple type-to-sound mapping in notificationsService.\n- Preload sounds to minimize lag and debounce to avoid overwhelming audio on bursts (follow any existing debounce in agent notifications if present).\n- Ensure sounds do not overlap excessively (simple last-sound cutoff or short cooldown is acceptable for this phase).\n\nContext:\n- @src/renderer/src/services/notificationsService.ts\n- @src/renderer/src/services/settingsService.ts (only if needed for current agent parity)\n- @src/renderer/src/screens/SettingsView.tsx (no UI changes planned yet; reference for parity)\n- @src/renderer/src/assets/sounds/ (new assets folder)\n\nAcceptance criteria:\n- Triggering an agent notification plays the agent sound; triggering a chat notification plays the chat sound; triggering a git notification plays the git sound.\n- Sounds are audibly distinct across the three types.\n- Sounds play through the same logic as agent notifications (no bespoke pathways), and respect any existing mutes/rate limits already applied to agent notifications.\n- No new settings are introduced in this phase.",
+      "context": [],
+      "createdAt": "2025-10-29T16:42:29.050Z",
+      "updatedAt": "2025-10-29T16:42:29.050Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -2897,7 +2994,16 @@
     "0a96daaf-26a2-4dcd-995a-77be216824d6": 180,
     "3bfbcd7e-2016-401a-b1d7-466ccb53d7c0": 181,
     "0a224aec-8933-4c9a-8910-33048809e451": 182,
-    "380133df-e68d-433c-a208-fa1c59915b93": 183
+    "380133df-e68d-433c-a208-fa1c59915b93": 183,
+    "4c176bb4-549e-4a6c-a59d-f8690c4819b5": 184,
+    "720ef1b6-1461-4ea9-8417-ce6955ba566e": 185,
+    "eb960fe5-b811-4119-8aa9-e9d420b54024": 186,
+    "ad71c0b9-e555-4653-a600-af5efd1db0f1": 187,
+    "e086f202-7b49-4317-bf1c-9ac4ab60a520": 188,
+    "16745e78-fa85-4d82-986a-1a5c3f8630c1": 189,
+    "9dc96025-d7ee-4798-aeab-0ffac36c54c7": 190,
+    "5d593b43-f456-4b1e-97e6-cb53476197e8": 191,
+    "38e1f4bc-07fa-42cc-990d-da75a62151a6": 192
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
   "updatedAt": "2025-10-01T00:34:27.858Z"
