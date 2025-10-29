@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "-",
+  "status": "?",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -2783,12 +2783,13 @@
     },
     {
       "id": "16745e78-fa85-4d82-986a-1a5c3f8630c1",
-      "status": "-",
+      "status": "?",
       "title": "Chat sidebar spinner + unread dot with project aggregation",
       "description": "Goal: Show ongoing chats (spinner) and new messages in the sidebar for both the chat list and the projects list area in SidebarView, with aggregation at the project level.\n\nBehavior:\n- Chat row: While an assistant response is streaming, display a small spinner in place of the unread badge. If there are unread messages for that chat, show a tiny red dot at the spinner’s top-right corner (spinner has precedence over number badges during streaming).\n- Project row aggregation (in SidebarView): If any chat within the project is streaming, show a small spinner on the project tile. If any chat within the project has unread messages, aggregate the unread count and display it. When both streaming and unread exist, show spinner with a small red dot at top-right. When not streaming, show the numeric unread badge only. Counts cap at 99+.\n- No hover preview.\n- Unread is already tracked per chat; leverage existing unread state and last-seen logic.\n- Spinner clears within ~500ms of stream end to avoid flicker.\n\nImplementation notes:\n- Use existing UI primitives: Spinner and DotBadge. Introduce a spinner-with-dot composition for the red unread dot overlay.\n- Ensure the new logic coexists cleanly with the already completed 'Chat notifications' feature.\n- Respect collapsed sidebar visuals; badges/spinners should remain legible and positioned consistently.\n\nContext:\n- @src/renderer/src/navigation/SidebarView.tsx\n- @src/renderer/src/components/ui/CollapsibleSidebar.tsx\n- @src/renderer/src/components/ui/Spinner.tsx\n- @src/renderer/src/components/ui/DotBadge.tsx\n- @src/renderer/src/components/chat/ChatSidebar.tsx\n- @src/renderer/src/services/chatsService.ts\n\nAcceptance criteria:\n- When a chat is actively streaming, its chat row shows a spinner instead of a numeric unread badge. If unread exists, a small red dot appears on the spinner’s top-right.\n- At the project level in SidebarView, if any chat is streaming, a spinner shows on the project tile. If any chat has unread messages, an aggregated unread indicator shows. If both, spinner shows with a small red dot. Counts cap at '99+'.\n- No hover preview is shown. Unread and streaming states update in near-real-time.\n- Spinner and badge positions align and remain accessible/legible in both expanded and collapsed sidebar modes.\n- No regressions to existing chat notification badges elsewhere (e.g., Chat nav entry).",
       "context": [],
       "createdAt": "2025-10-29T16:42:29.014Z",
-      "updatedAt": "2025-10-29T16:42:29.014Z"
+      "updatedAt": "2025-10-29T17:53:17.182Z",
+      "rejection": "Blocked: Agent loop failed: {}"
     },
     {
       "id": "9dc96025-d7ee-4798-aeab-0ffac36c54c7",
