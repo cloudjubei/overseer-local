@@ -1,7 +1,13 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import type { ToolCall, ToolResultType } from 'thefactory-tools'
 import Code from '../ui/Code'
-import { IconCheckmarkCircle, IconError, IconStop, IconNotAllowed, IconHourglass } from '../ui/icons/Icons'
+import {
+  IconCheckmarkCircle,
+  IconError,
+  IconStop,
+  IconNotAllowed,
+  IconHourglass,
+} from '../ui/icons/Icons'
 import { StructuredUnifiedDiff } from './tool-popups/diffUtils'
 import FeatureSummaryCard from '../stories/FeatureSummaryCard'
 import { filesService } from '../../services/filesService'
@@ -24,7 +30,9 @@ function StatusIcon({ resultType }: { resultType?: ToolResultType }) {
 }
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
-  return <div className="text-[11px] font-semibold text-[var(--text-secondary)] mb-1">{children}</div>
+  return (
+    <div className="text-[11px] font-semibold text-[var(--text-secondary)] mb-1">{children}</div>
+  )
 }
 
 function Row({ children, className }: { children: React.ReactNode; className?: string }) {
@@ -59,7 +67,9 @@ function InlineOldNew({ oldVal, newVal }: { oldVal?: string; newVal?: string }) 
       <span className="text-[var(--text-secondary)]">Title:</span>{' '}
       {oldVal ? <span className="line-through text-red-600/80 mr-1">{oldVal}</span> : null}
       {oldVal ? <span className="mx-1">→</span> : null}
-      {newVal ? <span className="font-semibold text-green-600 dark:text-green-400">{newVal}</span> : null}
+      {newVal ? (
+        <span className="font-semibold text-green-600 dark:text-green-400">{newVal}</span>
+      ) : null}
     </div>
   )
 }
@@ -129,7 +139,10 @@ function ReorderList({ items, movedId }: { items: any[]; movedId?: string }) {
         const title = it?.title || id
         const moved = movedId && (it?.id === movedId || id === movedId)
         return (
-          <li key={id} className={moved ? 'bg-yellow-200/40 dark:bg-yellow-800/30 rounded px-1' : ''}>
+          <li
+            key={id}
+            className={moved ? 'bg-yellow-200/40 dark:bg-yellow-800/30 rounded px-1' : ''}
+          >
             <span className="text-[11px] text-[var(--text-secondary)] mr-1">{idx + 1}.</span>
             <span className="font-medium">{title}</span>
           </li>
@@ -171,14 +184,20 @@ function PreLimited({
         {limited.join('\n')}
       </pre>
       {truncated && renderTruncationMessage ? (
-        <div className="text-[11px] text-[var(--text-secondary)] mt-1">{renderTruncationMessage(omitted)}</div>
+        <div className="text-[11px] text-[var(--text-secondary)] mt-1">
+          {renderTruncationMessage(omitted)}
+        </div>
       ) : null}
     </div>
   )
 }
 
 // Simple unified diff builder to fallback when the write_file result did not include a patch
-function buildSimpleUnifiedDiff(path: string, beforeText?: string, afterText?: string): string | undefined {
+function buildSimpleUnifiedDiff(
+  path: string,
+  beforeText?: string,
+  afterText?: string,
+): string | undefined {
   if (!path || typeof afterText !== 'string') return undefined
   const before = typeof beforeText === 'string' ? beforeText : ''
   if (before === afterText) return undefined
@@ -210,9 +229,16 @@ export default function ToolCallChangePopup({
 
   function errorContentOnly(): React.ReactNode {
     const msg = tryString(
-      extract(result, ['error.message']) || extract(result, ['message']) || extract(result, ['error']),
+      extract(result, ['error.message']) ||
+        extract(result, ['message']) ||
+        extract(result, ['error']),
     )
-    const label = resultType === 'errored' ? 'Tool failed' : resultType === 'aborted' ? 'Tool aborted' : 'Tool status'
+    const label =
+      resultType === 'errored'
+        ? 'Tool failed'
+        : resultType === 'aborted'
+          ? 'Tool aborted'
+          : 'Tool status'
     return (
       <div className="text-[11px] rounded border border-red-600/40 bg-red-500/10 text-red-700 dark:text-red-300 px-2 py-1">
         <span className="font-semibold mr-1">{label}.</span>
@@ -253,7 +279,9 @@ export default function ToolCallChangePopup({
       }
       if (!writeFilePath || !writeFileNewText) return
       try {
-        const beforeText = projectId ? await filesService.readFile(projectId, writeFilePath, 'utf8') : undefined
+        const beforeText = projectId
+          ? await filesService.readFile(projectId, writeFilePath, 'utf8')
+          : undefined
         if (cancelled) return
         setComputedIsNewFile(!beforeText)
         const diff = buildSimpleUnifiedDiff(writeFilePath, beforeText, writeFileNewText)
@@ -283,8 +311,12 @@ export default function ToolCallChangePopup({
     }
 
     if (n === 'update_story_description' || n === 'update_feature_description') {
-      const oldDesc = tryString(extract(result, ['before.description']) || extract(args, ['oldDescription']))
-      const newDesc = tryString(extract(result, ['after.description']) || extract(args, ['newDescription', 'description']))
+      const oldDesc = tryString(
+        extract(result, ['before.description']) || extract(args, ['oldDescription']),
+      )
+      const newDesc = tryString(
+        extract(result, ['after.description']) || extract(args, ['newDescription', 'description']),
+      )
       const diff = tryString(extract(result, ['diff', 'patch']))
       return (
         <div className="text-xs">
@@ -338,7 +370,9 @@ export default function ToolCallChangePopup({
     if (n === 'create_feature' || n === 'create_story') {
       const title = tryString(extract(result, ['title']) || extract(args, ['title']))
       const description = tryString(
-        extract(result, ['description']) || extract(args, ['description']) || extract(result, ['content']),
+        extract(result, ['description']) ||
+          extract(args, ['description']) ||
+          extract(result, ['content']),
       )
       return (
         <div>
@@ -362,11 +396,21 @@ export default function ToolCallChangePopup({
       if (feature && typeof feature === 'object') {
         return <FeatureSummaryCard feature={feature} />
       }
-      return <div className="text-xs text-[var(--text-secondary)]">No feature details available.</div>
+      return (
+        <div className="text-xs text-[var(--text-secondary)]">No feature details available.</div>
+      )
     }
 
-    if (n === 'reorder_feature' || n === 'reorder_story' || n === 'reorder_features' || n === 'reorder_stories') {
-      const order = (extract(result, ['order']) || extract(result, ['features']) || extract(result, ['stories']) || extract(args, ['order'])) as any[] | undefined
+    if (
+      n === 'reorder_feature' ||
+      n === 'reorder_story' ||
+      n === 'reorder_features' ||
+      n === 'reorder_stories'
+    ) {
+      const order = (extract(result, ['order']) ||
+        extract(result, ['features']) ||
+        extract(result, ['stories']) ||
+        extract(args, ['order'])) as any[] | undefined
       const movedId = tryString(extract(args, ['movedId']) || extract(result, ['movedId']))
       if (order && Array.isArray(order) && order.length > 0) {
         return <ReorderList items={order} movedId={movedId} />
@@ -376,7 +420,13 @@ export default function ToolCallChangePopup({
 
     if (n === 'search_files') {
       const query = tryString(extract(args, ['query']) || extract(result, ['query'])) || ''
-      const resultsRaw = extract(result, ['results']) || extract(result, ['matches']) || extract(result, ['files']) || extract(result, ['items']) || extract(result, ['result']) || result
+      const resultsRaw =
+        extract(result, ['results']) ||
+        extract(result, ['matches']) ||
+        extract(result, ['files']) ||
+        extract(result, ['items']) ||
+        extract(result, ['result']) ||
+        result
 
       let resultLines: string[] = []
       if (Array.isArray(resultsRaw)) {
@@ -413,7 +463,7 @@ export default function ToolCallChangePopup({
               <PreLimited
                 lines={resultLines}
                 maxLines={10}
-                renderTruncationMessage={(omitted) => <>+ {omitted} more at the bottom</>}
+                renderTruncationMessage={(omitted) => <>+ {omitted} more</>}
               />
             </div>
           ) : (
@@ -428,15 +478,23 @@ export default function ToolCallChangePopup({
       const passed = extract(stats, ['passed', 'pass', 'passes']) || 0
       const failed = extract(stats, ['failed', 'failures', 'fails']) || 0
       const skipped = extract(stats, ['skipped', 'pending', 'todo']) || 0
-      const total = extract(stats, ['total']) || (Number(passed) + Number(failed) + Number(skipped)) || undefined
-      const duration = extract(result, ['durationMs']) || extract(stats, ['durationMs', 'duration']) || undefined
+      const total =
+        extract(stats, ['total']) || Number(passed) + Number(failed) + Number(skipped) || undefined
+      const duration =
+        extract(result, ['durationMs']) || extract(stats, ['durationMs', 'duration']) || undefined
       return (
         <div className="text-xs">
           <div className="flex items-center gap-2">
-            <span className="text-green-700 dark:text-green-300 font-medium">{Number(passed)} passed</span>
-            <span className="text-red-700 dark:text-red-300 font-medium">{Number(failed)} failed</span>
+            <span className="text-green-700 dark:text-green-300 font-medium">
+              {Number(passed)} passed
+            </span>
+            <span className="text-red-700 dark:text-red-300 font-medium">
+              {Number(failed)} failed
+            </span>
             {typeof skipped === 'number' ? (
-              <span className="text-neutral-600 dark:text-neutral-400">{Number(skipped)} skipped</span>
+              <span className="text-neutral-600 dark:text-neutral-400">
+                {Number(skipped)} skipped
+              </span>
             ) : null}
             {typeof total === 'number' ? (
               <span className="text-neutral-600 dark:text-neutral-400">{Number(total)} total</span>
@@ -461,7 +519,17 @@ export default function ToolCallChangePopup({
         <Code language="json" code={str || '(no result)'} />
       </div>
     )
-  }, [name, toolCall?.arguments, result, resultType, writeFilePath, writeFileNewText, writeFileResultDiff, computedDiff, computedIsNewFile])
+  }, [
+    name,
+    toolCall?.arguments,
+    result,
+    resultType,
+    writeFilePath,
+    writeFileNewText,
+    writeFileResultDiff,
+    computedDiff,
+    computedIsNewFile,
+  ])
 
   const hideHeaderMeta = String(name) === 'finish_feature'
 
