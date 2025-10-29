@@ -2688,6 +2688,18 @@
       "createdAt": "2025-10-29T10:43:41.842Z",
       "updatedAt": "2025-10-29T11:54:38.453Z",
       "completedAt": "2025-10-29T11:54:38.453Z"
+    },
+    {
+      "id": "0a224aec-8933-4c9a-8910-33048809e451",
+      "status": "-",
+      "title": "when getting an error in chat show a retry button",
+      "description": "In @src/renderer/src/components/chat/ChatSidebar.tsx when getting an error the only thing the user can do right now is to write a message to retry - we should have a retry button next to the message, that will remove the last message and proceed as if it never happened.\nThe error message should have an (i) button in the top right to display the error that occurred.",
+      "context": [
+        "src/renderer/src/components/chat/ChatSidebar.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-29T15:05:58.043Z",
+      "updatedAt": "2025-10-29T15:05:58.043Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -2871,7 +2883,8 @@
     "0559292b-fad1-4585-b319-37c653e68bd8": 178,
     "8ba96fe8-c07a-44e5-a2b0-2fab5c056c78": 179,
     "0a96daaf-26a2-4dcd-995a-77be216824d6": 180,
-    "3bfbcd7e-2016-401a-b1d7-466ccb53d7c0": 181
+    "3bfbcd7e-2016-401a-b1d7-466ccb53d7c0": 181,
+    "0a224aec-8933-4c9a-8910-33048809e451": 182
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
   "updatedAt": "2025-10-01T00:34:27.858Z"
