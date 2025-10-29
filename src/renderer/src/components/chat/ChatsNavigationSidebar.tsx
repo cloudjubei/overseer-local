@@ -124,7 +124,7 @@ export default function ChatsNavigationSidebar({
   const { projectId: activeProjectId, project } = useActiveProject()
   const { projects } = useProjectContext()
   const { storiesById, featuresById } = useStories()
-  const { chatsByProjectId, getChat } = useChats()
+  const { chatsByProjectId } = useChats()
   const { unreadKeys, getUnreadCountForKey } = useChatUnread()
 
   const getProjectTitle = (id?: string) => {
@@ -226,9 +226,7 @@ export default function ChatsNavigationSidebar({
   )
 
   const ensureOpen = async (ctx: ChatContext) => {
-    try {
-      await getChat(ctx)
-    } catch (_) {}
+    // Do not prefetch/create chats here to avoid accidentally recreating deleted chats
     onSelectContext(ctx)
   }
 

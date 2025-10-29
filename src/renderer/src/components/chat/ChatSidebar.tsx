@@ -13,7 +13,7 @@ import type {
 } from 'thefactory-tools'
 import ContextInfoButton from '../ui/ContextInfoButton'
 import ModelChip from '../agents/ModelChip'
-import { IconSettings, IconChevron, IconRefresh, IconScroll } from '../ui/icons/Icons'
+import { IconSettings, IconChevron, IconScroll, IconRefreshChat } from '../ui/icons/Icons'
 import { useProjectContext } from '../../contexts/ProjectContext'
 import { useStories } from '../../contexts/StoriesContext'
 import { useAgents } from '../../contexts/AgentsContext'
@@ -80,10 +80,18 @@ export default function ChatSidebar({
     [context, updateCompletionSettings, currentSettings?.completionSettings],
   )
 
+  const isDeletingRef = useRef(false)
+
   useEffect(() => {
     const loadChat = async () => {
-      const c = await getChat(context)
-      setChat(c)
+      if (isDeletingRef.current) return
+      try {
+        const c = await getChat(context)
+        setChat(c)
+      } catch (e) {
+        // If chat does not exist, avoid recreating; simply no-op
+        console.warn('Chat load failed (possibly deleted)', e)
+      }
     }
     loadChat()
   }, [context, getChat])
@@ -337,23 +345,29 @@ export default function ChatSidebar({
   const handleDeleteChat = useCallback(async () => {
     const projectId = context.projectId || activeProjectId
     if (!projectId) return
+
+    if (context.type === 'PROJECT') {
+      window.alert('The General chat cannot be deleted.')
+      return
+    }
+
     const confirmed = window.confirm('Delete this chat? This action cannot be undone.')
     if (!confirmed) return
 
-    // Navigate to General chat for this project
-    const general = { type: 'PROJECT', projectId }
-    try {
-      localStorage.setItem('chat-last-selected-context', JSON.stringify(general))
-    } catch {}
-    // Trigger chat view to pick up new selection
-    window.location.hash = '#chat/general'
-
+    isDeletingRef.current = true
     try {
       await deleteChat(context)
     } catch (e) {
       console.error('Failed to delete chat', e)
     } finally {
+      // Navigate to General chat for this project
+      const general = { type: 'PROJECT', projectId } as ChatContext
+      try {
+        localStorage.setItem('chat-last-selected-context', JSON.stringify(general))
+      } catch {}
+      window.location.hash = ''
       setIsSettingsOpen(false)
+      isDeletingRef.current = false
     }
   }, [context, activeProjectId, deleteChat])
 
@@ -390,7 +404,7 @@ export default function ChatSidebar({
             title="Refresh chat"
             onClick={() => restartChat(context)}
           >
-            <IconRefresh className="w-4 h-4" />
+            <IconRefreshChat className="w-4 h-4" />
           </Button>
           <ModelChip editable className="border-blue-500" mode="chat" />
 

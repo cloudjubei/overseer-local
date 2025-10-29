@@ -64,6 +64,7 @@ export * from './IconNotAllowed'
 export * from './IconHourglass'
 export * from './IconScroll'
 export * from './IconRefresh'
+export * from './IconRefreshChat'
 
 // New programming icons
 export * from './IconCode'
