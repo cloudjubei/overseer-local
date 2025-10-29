@@ -2481,7 +2481,7 @@
     },
     {
       "id": "63d893a3-845f-4557-b2a6-d30d38a8c24a",
-      "status": "+",
+      "status": "-",
       "title": "Chat notifications",
       "description": "In the @src/renderer/src/navigation/SidebarView.tsx we need to show notifications next to the project and next to the Chat button when there is an unread message. \nThere should be also a little dot (without a number inside) shown on the chat navigation in @src/renderer/src/screens/ChatView.tsx leading the user to the chat that has the unread message .",
       "context": [
@@ -2490,9 +2490,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-28T00:20:01.644Z",
-      "updatedAt": "2025-10-29T09:15:00.080Z",
-      "rejection": "when clicking a chat and scrolling down (to read messages) doesn't make the badges disappear - it seems the inner sidebar in @src/renderer/src/screens/ChatView.tsx isn't reactive to the read/unread changes.",
-      "completedAt": "2025-10-29T09:15:00.080Z"
+      "updatedAt": "2025-10-29T10:13:24.778Z",
+      "rejection": "I open a chat from the chat history that has a (1) unread message and no matter how much scrolling I do in the view - the message never seems to get counted as read. Even when going into a different view and back, the display still shows the (1) unread message. So the trigger for marking messages as read seems wrong."
     },
     {
       "id": "98ff6ca9-38bd-4828-bcba-f555033945fe",
@@ -2522,19 +2521,17 @@
     },
     {
       "id": "beea43a0-839b-4f9b-8215-73a8fd39f3cb",
-      "status": "+",
+      "status": "-",
       "title": "Delete chat becomes refresh chat + actual delete chat in settings",
       "description": "The current 'Delete chat' button in the header of @src/renderer/src/screens/ChatView.tsx should become \"Refresh Chat\" - so still a red button, but with a different icon inside - a new one needs to be created and added to @src/renderer/src/components/ui/icons/Icons.tsx .\nAt the very bottom of chat settings there should be a red button that says \"Delete this chat\", which will ask the user for confirmation for doing so. This should actually delete the chat for good (at this moment taking the user to the \"General\" chat which is always available).",
       "context": [
         "src/renderer/src/screens/ChatView.tsx",
-        "src/renderer/src/components/ui/icons/Icons.tsx",
-        "src/renderer/src/contexts/ChatsContext.tsx"
+        "src/renderer/src/components/ui/icons/Icons.tsx"
       ],
       "blockers": [],
       "createdAt": "2025-10-28T00:26:15.441Z",
-      "updatedAt": "2025-10-29T09:23:49.970Z",
-      "rejection": "Somehow deleting a chat makes the same exact chat appear empty at the top of the history list - i.e. it doesn't get deleted.\nWhat's also bad is that now the screen changes to \"Home\" rather than stay in chat.\nThere must be a trigger in @src/renderer/src/contexts/ChatsContext.tsx that somehow also triggers @src/renderer/src/screens/ChatView.tsx and re-creates the new chat.",
-      "completedAt": "2025-10-29T09:23:49.970Z"
+      "updatedAt": "2025-10-29T10:11:34.128Z",
+      "rejection": "Right now if the chat is empty - it will get deleted. But if the chat contained some messages - it will simply surface to the top of the history list and still show.\nThere must be a caching discrepancy."
     },
     {
       "id": "1784ec92-6612-4d1b-a8e9-41fb10c3557f",
@@ -2587,12 +2584,12 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-28T12:49:51.490Z",
-      "updatedAt": "2025-10-29T09:25:30.131Z",
+      "updatedAt": "2025-10-29T10:15:08.485Z",
       "completedAt": "2025-10-29T09:25:30.131Z"
     },
     {
       "id": "ae8f8bd5-6062-4238-bc93-00994debfad0",
-      "status": "+",
+      "status": "?",
       "title": "Each commit that is pending in GitView is for stories and features - they should be displayed as chips",
       "description": "Most of the commits are implementing features and have the id inside the commit message. That id should be extracted and displayed as @src/renderer/src/components/stories/DependencyBullet.tsx to show the user which features are part of this pending merge.\nThis is something that `thefactory-tools` should include in the types returned - create a `docs/GIT_FEATUREINFO.md` that describes the feature title and description so that it can be implemented on the `thefactory-tools` side and then incorporated here.",
       "context": [
@@ -2600,8 +2597,7 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-28T12:52:21.487Z",
-      "updatedAt": "2025-10-29T09:37:13.894Z",
-      "completedAt": "2025-10-29T09:37:13.894Z"
+      "updatedAt": "2025-10-29T10:14:04.385Z"
     },
     {
       "id": "e5ab58da-63e1-4869-8fc0-b18016f0dba6",

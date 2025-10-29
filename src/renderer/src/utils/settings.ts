@@ -14,7 +14,6 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
       newStory: 'Mod+N',
       help: 'Mod+/',
       addUiFeature: 'Mod+Shift+F',
-      newFeature: 'Mod+Shift+N',
     },
   },
   notificationSystemSettings: {
