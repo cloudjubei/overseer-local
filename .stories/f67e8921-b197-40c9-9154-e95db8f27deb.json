@@ -2582,11 +2582,16 @@
       "description": "Most of the commits are implementing features and have the id inside the commit message. That id should be extracted and displayed as @src/renderer/src/components/stories/DependencyBullet.tsx to show the user which features are part of this pending merge.\n\nThe `thefactory-tools` now exposes all the necessary values for this - check @src/logic/git/gitTypes.copy.ts to see.",
       "context": [
         "src/renderer/src/components/stories/DependencyBullet.tsx",
-        "src/logic/git/gitTypes.copy.ts"
+        "src/logic/git/gitTypes.copy.ts",
+        "src/renderer/src/contexts/GitContext.tsx",
+        "src/logic/git/GitManager.ts",
+        "src/renderer/src/services/gitService.ts",
+        "src/preload/ipcHandlersKeys.ts"
       ],
       "blockers": [],
       "createdAt": "2025-10-28T12:52:21.487Z",
-      "updatedAt": "2025-10-29T15:55:20.156Z"
+      "updatedAt": "2025-10-29T22:57:59.653Z",
+      "rejection": "This is not implemented - it needs to get the correct data via @src/renderer/src/contexts/GitContext.tsx , through @src/renderer/src/services/gitService.ts & @src/preload/ipcHandlersKeys.ts , @src/logic/git/GitManager.ts ."
     },
     {
       "id": "e5ab58da-63e1-4869-8fc0-b18016f0dba6",
@@ -2695,11 +2700,15 @@
       "title": "when getting an error in chat show a retry button",
       "description": "In @src/renderer/src/components/chat/ChatSidebar.tsx when getting an error the only thing the user can do right now is to write a message to retry - we should have a retry button next to the message, that will remove the last message and proceed as if it never happened.\nThe error message should have an (i) button in the top right to display the error that occurred.",
       "context": [
-        "src/renderer/src/components/chat/ChatSidebar.tsx"
+        "src/renderer/src/components/chat/ChatSidebar.tsx",
+        "src/renderer/src/contexts/ChatsContext.tsx",
+        "src/renderer/src/services/chatsService.ts",
+        "src/logic/chat/ChatsManager.ts"
       ],
       "blockers": [],
       "createdAt": "2025-10-29T15:05:58.043Z",
-      "updatedAt": "2025-10-29T16:44:18.551Z"
+      "updatedAt": "2025-10-29T22:58:41.095Z",
+      "rejection": "This needs to call the appropriate function via @src/renderer/src/contexts/ChatsContext.tsx , @src/renderer/src/services/chatsService.ts and @src/logic/chat/ChatsManager.ts ."
     },
     {
       "id": "380133df-e68d-433c-a208-fa1c59915b93",
@@ -2724,7 +2733,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-29T16:24:36.140Z",
-      "updatedAt": "2025-10-29T16:24:36.140Z"
+      "updatedAt": "2025-10-29T22:59:17.346Z",
+      "rejection": "This is still happening - if it's an issue with the library used - we should use a different library or write our own."
     },
     {
       "id": "720ef1b6-1461-4ea9-8417-ce6955ba566e",
