@@ -59,13 +59,15 @@ export function parseUnifiedDiff(patch: string): ParsedHunk[] {
 }
 
 export function StructuredUnifiedDiff({ patch, maxHunks = 3 }: { patch: string; maxHunks?: number }) {
+  const [expanded, setExpanded] = React.useState(false)
   const hunks = React.useMemo(() => parseUnifiedDiff(patch), [patch])
-  const visible = hunks.slice(0, maxHunks)
+  const visible = expanded ? hunks : hunks.slice(0, maxHunks)
   const headerText = (h: ParsedHunk) => {
     const left = `-${h.oldStart}${typeof h.oldLines === 'number' ? ',' + h.oldLines : ''}`
     const right = `+${h.newStart}${typeof h.newLines === 'number' ? ',' + h.newLines : ''}`
     return `@@ ${left} ${right} @@${h.header ? ' ' + h.header : ''}`
   }
+  const canExpand = hunks.length > maxHunks
   return (
     <div className="font-mono text-[11px]">
       {visible.map((hunk, hi) => (
@@ -103,8 +105,20 @@ export function StructuredUnifiedDiff({ patch, maxHunks = 3 }: { patch: string; 
           </div>
         </div>
       ))}
-      {hunks.length > maxHunks ? (
-        <div className="text-[10px] text-[var(--text-tertiary)] mt-1">large diff truncated</div>
+      {canExpand ? (
+        <div className="mt-1">
+          <button
+            type="button"
+            className="text-[10px] text-blue-600 hover:underline"
+            aria-expanded={expanded}
+            onClick={(e) => {
+              e.stopPropagation()
+              setExpanded((v) => !v)
+            }}
+          >
+            {expanded ? 'Collapse changes' : 'View more changes'}
+          </button>
+        </div>
       ) : null}
     </div>
   )

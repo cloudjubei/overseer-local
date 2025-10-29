@@ -2,7 +2,8 @@ import React, { useMemo } from 'react'
 import type { ToolCall, ToolResultType } from 'thefactory-tools'
 import Code from '../ui/Code'
 import { IconCheckmarkCircle, IconError, IconStop, IconNotAllowed, IconHourglass } from '../ui/icons/Icons'
-import { StructuredUnifiedDiff, parseUnifiedDiff } from './tool-popups/diffUtils'
+import { StructuredUnifiedDiff } from './tool-popups/diffUtils'
+import FeatureSummaryCard from '../stories/FeatureSummaryCard'
 
 function StatusIcon({ resultType }: { resultType?: ToolResultType }) {
   const size = 'w-3.5 h-3.5'
@@ -158,9 +159,7 @@ function PreLimited({ lines, maxLines }: { lines: string[]; maxLines: number }) 
       <pre className="text-[11px] text-[var(--text-primary)] bg-[var(--surface-raised)] p-1.5 rounded-md overflow-x-auto whitespace-pre">
         {limited.join('\n')}
       </pre>
-      {truncated ? (
-        <div className="text-[10px] text-[var(--text-tertiary)] mt-0.5">showing first {maxLines} lines</div>
-      ) : null}
+      {truncated ? null : null}
     </div>
   )
 }
@@ -242,7 +241,6 @@ export default function ToolCallChangePopup({
       const diff = buildUnifiedDiffIfPresent(result)
       const newText = tryString(extract(result, ['after.content', 'newContent', 'content']))
       const isNew = isCompletelyNewFile(result, diff)
-      const hunksCount = diff ? parseUnifiedDiff(diff).length : 0
       return (
         <div className="space-y-1">
           <Row>
@@ -254,9 +252,6 @@ export default function ToolCallChangePopup({
           ) : diff ? (
             <div>
               <StructuredUnifiedDiff patch={diff} />
-              {hunksCount > 3 ? (
-                <div className="text-[10px] text-[var(--text-tertiary)] mt-1">large diff truncated</div>
-              ) : null}
             </div>
           ) : (
             <NewContentOnly text={newText} />
@@ -284,6 +279,15 @@ export default function ToolCallChangePopup({
           ) : null}
         </div>
       )
+    }
+
+    if (n === 'finish_feature') {
+      // Show only a concise FeatureSummaryCard and nothing else
+      const feature = extract(result, ['feature']) || result
+      if (feature && typeof feature === 'object') {
+        return <FeatureSummaryCard feature={feature} />
+      }
+      return <div className="text-xs text-[var(--text-secondary)]">No feature details available.</div>
     }
 
     if (n === 'reorder_feature' || n === 'reorder_story' || n === 'reorder_features' || n === 'reorder_stories') {
@@ -321,7 +325,6 @@ export default function ToolCallChangePopup({
       }
 
       const qLines = query.split(/\r?\n/)
-      const showDetails = resultLines.length > 10
 
       return (
         <div className="text-xs space-y-1">
@@ -333,9 +336,6 @@ export default function ToolCallChangePopup({
             <div>
               <SectionTitle>Results</SectionTitle>
               <PreLimited lines={resultLines} maxLines={10} />
-              {showDetails ? (
-                <div className="text-[10px] text-[var(--text-tertiary)] mt-1">large result truncated</div>
-              ) : null}
             </div>
           ) : (
             <div className="text-[11px] text-[var(--text-secondary)]">No results</div>
@@ -385,7 +385,7 @@ export default function ToolCallChangePopup({
   }, [name, toolCall?.arguments, result, resultType])
 
   return (
-    <div className="min-w-[260px] max-w-[50vw] max-h-[50vh] overflow-auto">
+    <div className="min-w-[260px] max-w-[42vw] max-h-[48vh] overflow-auto">
       <div className="flex items-center justify-between gap-2 mb-1">
         <div className="flex items-center gap-2 min-w-0">
           <StatusIcon resultType={resultType} />
