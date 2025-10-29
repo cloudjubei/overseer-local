@@ -40,6 +40,8 @@ import { NavigationView } from '@renderer/types'
 import { hideScrollStyle } from '@renderer/utils/hideScrollStyle'
 import { useProjectsGroups } from '../contexts/ProjectsGroupsContext'
 import { useChatUnread } from '../hooks/useChatUnread'
+import { useChatThinking } from '../hooks/useChatThinking'
+import SpinnerWithDot from '../components/ui/SpinnerWithDot'
 
 export type SidebarProps = {}
 
@@ -167,6 +169,7 @@ export default function SidebarView({}: SidebarProps) {
   const { runsActive } = useAgents()
   const { groups } = useProjectsGroups()
   const { unreadCountByProject } = useChatUnread()
+  const { thinkingCountByProject, anyThinkingForProject } = useChatThinking(500)
 
   const [collapsed, setCollapsed] = useState<boolean>(appSettings.userPreferences.sidebarCollapsed)
 
@@ -201,6 +204,7 @@ export default function SidebarView({}: SidebarProps) {
   // Active agent runs for the current project for Agents nav badge
   const activeRunsCurrentProject = activeCountByProject.get(activeProjectId) || 0
   const chatUnreadCurrentProject = unreadCountByProject.get(activeProjectId) || 0
+  const chatThinkingCurrentProject = anyThinkingForProject(activeProjectId)
 
   // Track unread notifications per project for badges in the Projects list.
   const [unreadByProject, setUnreadByProject] = useState<Map<string, number>>(new Map())
@@ -387,6 +391,8 @@ export default function SidebarView({}: SidebarProps) {
     [projects, groupedProjectIds],
   )
 
+  const cap99 = (n: number) => (n > 99 ? '99+' : `${n}`)
+
   const renderProjectItem = (p: ProjectSpec) => {
     const isMain = p.id === MAIN_PROJECT
     const active = activeProjectId === p.id
@@ -394,9 +400,10 @@ export default function SidebarView({}: SidebarProps) {
     const activeCount = activeCountByProject.get(p.id) || 0
     const unread = unreadByProject.get(p.id) || 0 // notifications (system)
     const chatUnread = unreadCountByProject.get(p.id) || 0 // chats
+    const chatThinking = (thinkingCountByProject.get(p.id) || 0) > 0
     const iconKey = p.metadata?.icon || (isMain ? 'collection' : 'folder')
     const projectIcon = renderProjectIcon(iconKey)
-    const hasAnyBadge = activeCount > 0 || unread > 0 || chatUnread > 0
+    const hasAnyBadge = activeCount > 0 || unread > 0 || chatUnread > 0 || chatThinking
 
     const Btn = (
       <button
@@ -431,13 +438,20 @@ export default function SidebarView({}: SidebarProps) {
                 isInformative
               />
             )}
-            {chatUnread > 0 && (
+            {chatThinking ? (
+              <SpinnerWithDot
+                size={effectiveCollapsed ? 14 : 16}
+                showDot={chatUnread > 0}
+                className={effectiveCollapsed ? '' : ''}
+                dotTitle={chatUnread > 0 ? `${chatUnread} unread chats` : undefined}
+              />
+            ) : chatUnread > 0 ? (
               <NotificationBadge
                 className={effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''}
-                text={`${chatUnread}`}
+                text={cap99(chatUnread)}
                 tooltipLabel={`${chatUnread} unread chats`}
               />
-            )}
+            ) : null}
             {unread > 0 && (
               <NotificationBadge
                 className={effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''}
@@ -528,14 +542,28 @@ export default function SidebarView({}: SidebarProps) {
                   isInformative
                 />
               )
-            } else if (item.view === 'Chat' && chatUnreadCurrentProject > 0) {
-              badgeEl = (
-                <NotificationBadge
-                  className={effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''}
-                  text={`${chatUnreadCurrentProject}`}
-                  tooltipLabel={`${chatUnreadCurrentProject} unread chats`}
-                />
-              )
+            } else if (item.view === 'Chat') {
+              if (chatThinkingCurrentProject) {
+                badgeEl = (
+                  <SpinnerWithDot
+                    size={effectiveCollapsed ? 14 : 16}
+                    showDot={chatUnreadCurrentProject > 0}
+                    dotTitle={
+                      chatUnreadCurrentProject > 0
+                        ? `${chatUnreadCurrentProject} unread chats`
+                        : undefined
+                    }
+                  />
+                )
+              } else if (chatUnreadCurrentProject > 0) {
+                badgeEl = (
+                  <NotificationBadge
+                    className={effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''}
+                    text={cap99(chatUnreadCurrentProject)}
+                    tooltipLabel={`${chatUnreadCurrentProject} unread chats`}
+                  />
+                )
+              }
             }
 
             const Btn = (
@@ -660,7 +688,11 @@ export default function SidebarView({}: SidebarProps) {
                 (sum, pid) => sum + (unreadCountByProject.get(pid) || 0),
                 0,
               )
-              const showAnyBadge = aggActive > 0 || aggUnread > 0 || aggChatUnread > 0
+              const aggThinking = (g.projects || []).reduce(
+                (sum, pid) => sum + (thinkingCountByProject.get(pid) || 0),
+                0,
+              )
+              const showAnyBadge = aggActive > 0 || aggUnread > 0 || aggChatUnread > 0 || aggThinking > 0
 
               return (
                 <li key={g.id} className="nav-li">
@@ -695,13 +727,19 @@ export default function SidebarView({}: SidebarProps) {
                             isInformative
                           />
                         )}
-                        {aggChatUnread > 0 && (
+                        {aggThinking > 0 ? (
+                          <SpinnerWithDot
+                            size={16}
+                            showDot={aggChatUnread > 0}
+                            dotTitle={aggChatUnread > 0 ? `${aggChatUnread} unread chats in group` : undefined}
+                          />
+                        ) : aggChatUnread > 0 ? (
                           <NotificationBadge
                             className={''}
-                            text={`${aggChatUnread}`}
+                            text={cap99(aggChatUnread)}
                             tooltipLabel={`${aggChatUnread} unread chats in group`}
                           />
-                        )}
+                        ) : null}
                         {aggUnread > 0 && (
                           <NotificationBadge
                             className={''}
