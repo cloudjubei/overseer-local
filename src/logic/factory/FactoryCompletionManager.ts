@@ -78,6 +78,14 @@ export default class FactoryCompletionManager extends BaseManager {
         config,
       )
 
+    handlers[IPC_HANDLER_KEYS.COMPLETION_TOOLS_RETRY] = async ({
+      projectId,
+      chatContext,
+      systemPrompt,
+      settings,
+      config,
+    }) => this.retryCompletionTools(projectId, chatContext, systemPrompt, settings, config)
+
     handlers[IPC_HANDLER_KEYS.COMPLETION_ABORT] = async ({ chatContext }) =>
       this.abortCompletion(chatContext)
 
@@ -229,6 +237,27 @@ export default class FactoryCompletionManager extends BaseManager {
     )
   }
 
+  async retryCompletionTools(
+    projectId: string,
+    chatContext: ChatContext,
+    systemPrompt: string,
+    settings: CompletionSettings,
+    config: LLMConfig,
+  ): Promise<CompletionResponseTurns> {
+    const chat = await this.chatsManager.getChat(chatContext)
+    if (!chat) throw new Error('CHAT NOT FOUND')
+
+    return await this.runCompletionTools(
+      projectId,
+      chatContext,
+      chat,
+      systemPrompt,
+      settings,
+      config,
+      this.createAbortSignal(chatContext),
+    )
+  }
+
   async runCompletionTools(
     projectId: string,
     chatContext: ChatContext,
@@ -261,7 +290,6 @@ export default class FactoryCompletionManager extends BaseManager {
       response: CompletionResponse,
       agentResponse?: AgentResponse,
     ): Promise<void> => {
-      // console.log('responseReceivedCallback turn: ', turn, ' response: ', response)
       let m: ChatMessage = {
         completionMessage: { ...response, content: agentResponse?.message ?? response.content },
         toolCalls: agentResponse?.toolCalls,

@@ -2699,11 +2699,11 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-29T15:05:58.043Z",
-      "updatedAt": "2025-10-29T15:05:58.043Z"
+      "updatedAt": "2025-10-29T16:44:18.551Z"
     },
     {
       "id": "380133df-e68d-433c-a208-fa1c59915b93",
-      "status": "-",
+      "status": "=",
       "title": "when the user posts a message to chat automatically scroll to the very bottom",
       "description": "In @src/renderer/src/components/chat/ChatSidebar.tsx",
       "context": [
@@ -2711,7 +2711,7 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-29T15:15:23.655Z",
-      "updatedAt": "2025-10-29T15:15:23.655Z"
+      "updatedAt": "2025-10-29T16:44:32.600Z"
     },
     {
       "id": "4c176bb4-549e-4a6c-a59d-f8690c4819b5",

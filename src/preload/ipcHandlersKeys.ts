@@ -39,6 +39,7 @@ const IPC_HANDLER_KEYS = {
   // Completion
   COMPLETION_TOOLS_SEND: 'completion:tools-send',
   COMPLETION_TOOLS_RESUME: 'completion:tools-resume',
+  COMPLETION_TOOLS_RETRY: 'completion:tools-retry',
   COMPLETION_SEND: 'completion:send',
   COMPLETION_ABORT: 'complation:abort',
 
@@ -136,8 +137,8 @@ const IPC_HANDLER_KEYS = {
   DB_ENTITIES_MATCH: 'db:entities-match',
   DB_ENTITIES_CLEAR: 'db:entities-clear',
   DB_DOCUMENTS_ADD: 'db:documents-add',
-  DB_DOCUMENTS_GET_BY_ID: 'db:documents-get-by-id',
-  DB_DOCUMENTS_GET_BY_SRC: 'db:documents-get-by-src',
+  DB_DOCUMENTS_GET_BY_ID: 'db:documents:get-by-id',
+  DB_DOCUMENTS_GET_BY_SRC: 'db:documents:get-by-src',
   DB_DOCUMENTS_UPDATE: 'db:documents-update',
   DB_DOCUMENTS_DELETE: 'db:documents-delete',
   DB_DOCUMENTS_SEARCH: 'db:documents-search',
