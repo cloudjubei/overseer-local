@@ -162,13 +162,21 @@ export default function ChatsNavigationSidebar({
     return filtered.slice()
   }, [chatsByProjectId, activeProjectId, project])
 
+  // Hash of timestamps for the active project's chats to trigger re-sorting when they change
+  const chatsTimeHash = useMemo(() => {
+    const list = chatsByProjectId[activeProjectId] || []
+    return list.map((c) => `${c.key}:${c.chat.updatedAt || c.chat.createdAt || ''}`).join('|')
+  }, [chatsByProjectId, activeProjectId])
+
   const sortedByUpdated = useMemo(() => {
-    return projectChats.sort((a, b) => {
+    const arr = projectChats.slice()
+    arr.sort((a, b) => {
       const au = a.chat.updatedAt || a.chat.createdAt || ''
       const bu = b.chat.updatedAt || b.chat.createdAt || ''
       return bu.localeCompare(au)
     })
-  }, [projectChats])
+    return arr
+  }, [projectChats, chatsTimeHash])
 
   const [open, setOpen] = useState<OpenState>(() => {
     try {
