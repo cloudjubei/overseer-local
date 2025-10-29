@@ -2651,6 +2651,18 @@
       "blockers": [],
       "createdAt": "2025-10-29T09:12:13.859Z",
       "updatedAt": "2025-10-29T09:12:13.859Z"
+    },
+    {
+      "id": "8ba96fe8-c07a-44e5-a2b0-2fab5c056c78",
+      "status": "-",
+      "title": "Deleting the last chat message must also work for assistant messages",
+      "description": "In @src/renderer/src/components/chat/ChatSidebar.tsx  we currently only allow to delete the last user message if it's the last. We should allow deleting ANY last message (as long as the assistant isn't working), and simply for the assistant we must also delete the corresponding tool results if there are any. The delete button needs to show on the last assistant message so to clarify that the tool results will also delete.",
+      "context": [
+        "src/renderer/src/components/chat/ChatSidebar.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-29T10:02:54.119Z",
+      "updatedAt": "2025-10-29T10:02:54.119Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -2832,7 +2844,8 @@
     "fcf25987-8aaa-4454-8b39-1f7abf3774ef": 176,
     "84a438a8-912f-41f2-b1b4-5d4661ffbe3c": 177,
     "ea6227a4-4b63-41ad-a334-79102a5f5619": 178,
-    "0559292b-fad1-4585-b319-37c653e68bd8": 179
+    "0559292b-fad1-4585-b319-37c653e68bd8": 179,
+    "8ba96fe8-c07a-44e5-a2b0-2fab5c056c78": 180
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
   "updatedAt": "2025-10-01T00:34:27.858Z"
