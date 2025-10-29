@@ -2592,7 +2592,7 @@
     },
     {
       "id": "ae8f8bd5-6062-4238-bc93-00994debfad0",
-      "status": "-",
+      "status": "+",
       "title": "Each commit that is pending in GitView is for stories and features - they should be displayed as chips",
       "description": "Most of the commits are implementing features and have the id inside the commit message. That id should be extracted and displayed as @src/renderer/src/components/stories/DependencyBullet.tsx to show the user which features are part of this pending merge.\nThis is something that `thefactory-tools` should include in the types returned - create a `docs/GIT_FEATUREINFO.md` that describes the feature title and description so that it can be implemented on the `thefactory-tools` side and then incorporated here.",
       "context": [
@@ -2600,7 +2600,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-28T12:52:21.487Z",
-      "updatedAt": "2025-10-28T12:52:21.487Z"
+      "updatedAt": "2025-10-29T09:37:13.894Z",
+      "completedAt": "2025-10-29T09:37:13.894Z"
     },
     {
       "id": "e5ab58da-63e1-4869-8fc0-b18016f0dba6",

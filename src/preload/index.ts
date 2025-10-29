@@ -298,7 +298,8 @@ const DB_API = {
   getEntity: (id) => ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_ENTITIES_GET, { id }),
   updateEntity: (id, patch) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_ENTITIES_UPDATE, { id, patch }),
-  deleteEntity: (id) => ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_ENTITIES_DELETE, { id }),
+  deleteEntity: (id) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_ENTITIES_DELETE, { id }),
   searchEntities: (params) => ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_ENTITIES_SEARCH, { params }),
   matchEntities: (criteria, options) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_ENTITIES_MATCH, { criteria, options }),
@@ -354,6 +355,8 @@ const GIT_API = {
   },
   listUnifiedBranches: (projectId) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_LIST_UNIFIED_BRANCHES, { projectId }),
+  selectCommits: (projectId, options) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_SELECT_COMMITS, { projectId, options }),
 }
 
 const GIT_CREDENTIALS_API = {

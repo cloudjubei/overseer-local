@@ -8,7 +8,7 @@ import Tooltip from '../components/ui/Tooltip'
 import { IconFastMerge } from '../components/ui/icons/IconFastMerge'
 import { IconDelete } from '../components/ui/icons/IconDelete'
 import { gitService } from '@renderer/services/gitService'
-import { GitUnifiedBranch } from 'thefactory-tools'
+import { GitUnifiedBranch, CommitInfo } from 'thefactory-tools'
 import { useGit } from '../contexts/GitContext'
 import DependencyBullet from '../components/stories/DependencyBullet'
 
@@ -59,6 +59,20 @@ function StatusChips({ b }: { b: GitUnifiedBranch }) {
   )
 }
 
+function extractFeatureRefsFromCommitSummary(summary: string): { storyId?: string; featureId?: string } {
+  // Prefer featureId pattern: <uuid>.<index>
+  const featMatch = summary.match(/\b([0-9a-fA-F-]{8,})\.(\d+)\b/)
+  if (featMatch) {
+    const storyId = featMatch[1]
+    const featureId = `${featMatch[1]}.${featMatch[2]}`
+    return { storyId, featureId }
+  }
+  // Fallback: bare story uuid-like
+  const storyMatch = summary.match(/\b([0-9a-fA-F-]{8,})\b/)
+  if (storyMatch) return { storyId: storyMatch[1] }
+  return {}
+}
+
 function UnifiedBranchItem({
   projectId,
   projectTitle,
@@ -82,6 +96,9 @@ function UnifiedBranchItem({
   const [pushing, setPushing] = React.useState(false)
   const [pulling, setPulling] = React.useState(false)
 
+  const [featureDeps, setFeatureDeps] = React.useState<string[] | null>(null)
+  const [featureDepsError, setFeatureDepsError] = React.useState<string | null>(null)
+
   const storyId = getStoryId(branch)
 
   const canQuickMerge = branch.isLocal || !!branch.remoteName
@@ -101,10 +118,14 @@ function UnifiedBranchItem({
     })
   }
 
+  const headRef = React.useMemo(
+    () => (branch.isLocal ? branch.name : branch.remoteName || branch.name),
+    [branch.isLocal, branch.name, branch.remoteName],
+  )
+
   const loadSummary = async () => {
     if (summary.loaded) return
     try {
-      const headRef = branch.isLocal ? branch.name : branch.remoteName || branch.name
       const diff = await gitService.getBranchDiffSummary(projectId, { baseRef, headRef })
       const fileLines = diff.files
         .slice(0, 10)
@@ -126,6 +147,36 @@ function UnifiedBranchItem({
       setSummary({ loaded: true, text })
     } catch (e) {
       setSummary({ loaded: true, error: (e as any)?.message || 'Could not load summary' })
+    }
+  }
+
+  const loadCommitFeatures = async () => {
+    if (featureDeps !== null || featureDepsError) return
+    try {
+      const commits: CommitInfo[] = await gitService.selectCommits(projectId, {
+        sources: [headRef],
+        baseRef,
+        includeMerges: false,
+        maxCount: 250,
+      })
+      const depSet = new Set<string>()
+      for (const c of commits || []) {
+        const info = (c as any).featureInfo as
+          | { storyId?: string; featureId?: string; title?: string; description?: string }
+          | undefined
+        if (info?.featureId) depSet.add(info.featureId)
+        else if (info?.storyId) depSet.add(info.storyId)
+        else {
+          const parsed = extractFeatureRefsFromCommitSummary(c.summary || '')
+          if (parsed.featureId) depSet.add(parsed.featureId)
+          else if (parsed.storyId) depSet.add(parsed.storyId)
+        }
+      }
+      setFeatureDeps(Array.from(depSet))
+      setFeatureDepsError(null)
+    } catch (e: any) {
+      setFeatureDeps([])
+      setFeatureDepsError(e?.message || 'Failed to load commits')
     }
   }
 
@@ -211,6 +262,7 @@ function UnifiedBranchItem({
       onClick={onQuickMerge}
       onMouseEnter={() => {
         void loadSummary()
+        void loadCommitFeatures()
       }}
     >
       <div className="min-w-0">
@@ -226,6 +278,21 @@ function UnifiedBranchItem({
               <span onClick={(e) => e.stopPropagation()} className="shrink-0">
                 <DependencyBullet dependency={storyId} />
               </span>
+            </>
+          )}
+          {featureDeps && featureDeps.length > 0 && (
+            <>
+              <span className="text-neutral-400">•</span>
+              <div className="flex items-center gap-1 overflow-hidden">
+                {featureDeps.slice(0, 6).map((dep) => (
+                  <span key={dep} onClick={(e) => e.stopPropagation()} className="shrink-0">
+                    <DependencyBullet dependency={dep} />
+                  </span>
+                ))}
+                {featureDeps.length > 6 && (
+                  <span className="text-neutral-500">+{featureDeps.length - 6} more</span>
+                )}
+              </div>
             </>
           )}
         </div>
