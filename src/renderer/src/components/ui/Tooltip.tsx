@@ -12,6 +12,7 @@ export type TooltipProps = {
   anchorClassName?: string
   anchorStyle?: React.CSSProperties
   disableClickToggle?: boolean
+  anchorTabIndex?: number
 }
 
 export default function Tooltip({
@@ -24,6 +25,7 @@ export default function Tooltip({
   anchorClassName,
   anchorStyle,
   disableClickToggle = false,
+  anchorTabIndex,
 }: TooltipProps) {
   const [open, setOpen] = useState(false)
   const [position, setPosition] = useState<{ top: number; left: number } | null>(null)
@@ -207,6 +209,10 @@ export default function Tooltip({
         onBlur={() => hide(true)}
         onKeyDown={(e: any) => {
           if (e.key === 'Escape') hide(true)
+          if (!disableClickToggle && (e.key === 'Enter' || e.key === ' ')) {
+            e.preventDefault()
+            setOpen((v) => !v)
+          }
         }}
         onClick={() => {
           if (disabled || disableClickToggle) return
@@ -216,6 +222,7 @@ export default function Tooltip({
         aria-expanded={open ? true : undefined}
         className={anchorClassName}
         style={anchorStyle}
+        tabIndex={anchorTabIndex}
       >
         {children}
       </AnchorTag>

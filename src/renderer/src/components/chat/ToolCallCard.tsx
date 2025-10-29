@@ -11,6 +11,8 @@ import { useState } from 'react'
 import { Switch } from '../ui/Switch'
 import JsonView from '../ui/JsonView'
 import { ToolCall, ToolResultType } from 'thefactory-tools'
+import Tooltip from '../ui/Tooltip'
+import ToolCallChangePopup from './ToolCallChangePopup'
 
 export type ToolCallCardProps = {
   index: number
@@ -51,7 +53,10 @@ function Collapsible({
     >
       <button
         className="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-[var(--surface-raised)]"
-        onClick={() => setOpen((v) => !v)}
+        onClick={(e) => {
+          e.stopPropagation()
+          setOpen((v) => !v)
+        }}
       >
         <span className="text-xs font-medium truncate pr-2">{title}</span>
         <span className="text-xs text-[var(--text-secondary)]">{open ? '\u2212' : '+'}</span>
@@ -134,15 +139,16 @@ export default function ToolCallCard({
   const resultString = resultType === 'success' ? getResultString(result) : undefined
   const isRequireConfirm = resultType === 'require_confirmation'
 
-  return (
-    <div
-      className={[
-        'rounded-md border text-sm text-[var(--text-primary)] relative',
-        isRequireConfirm
-          ? 'bg-teal-500/20 border-teal-600 dark:border-teal-700 dark:bg-teal-800/60'
-          : 'border-[var(--border-subtle)] bg-[var(--surface-overlay)]',
-      ].join(' ')}
-    >
+  const hasPopup = typeof result !== 'undefined'
+  const anchorClassName = [
+    'rounded-md border text-sm text-[var(--text-primary)] relative focus:outline-none focus:ring-2 focus:ring-blue-500/40',
+    isRequireConfirm
+      ? 'bg-teal-500/20 border-teal-600 dark:border-teal-700 dark:bg-teal-800/60'
+      : 'border-[var(--border-subtle)] bg-[var(--surface-overlay)]',
+  ].join(' ')
+
+  const content = (
+    <>
       <div className="flex items-center justify-between px-3 pt-2">
         <div className="flex items-center gap-2">
           <StatusIcon resultType={resultType} />
@@ -150,10 +156,23 @@ export default function ToolCallCard({
           {(durationMs ?? 0) > 0 && <span className="font-light text-xs ">{durationMs}ms</span>}
         </div>
         <div className="flex items-center gap-2">
+          {/* Mobile hint icon */}
+          {hasPopup ? (
+            <span
+              className="sm:hidden inline-flex items-center justify-center w-4 h-4 rounded-full border border-blue-500 text-blue-600"
+              aria-hidden="true"
+              title="View change summary"
+            >
+              <span className="text-[10px] leading-none">i</span>
+            </span>
+          ) : null}
           <button
             type="button"
             className="btn-icon"
-            onClick={() => setIsCallExpanded((v) => !v)}
+            onClick={(e) => {
+              e.stopPropagation()
+              setIsCallExpanded((v) => !v)
+            }}
             aria-expanded={isCallExpanded}
           >
             <IconChevron
@@ -166,7 +185,9 @@ export default function ToolCallCard({
       <div className="flex items-center justify-between px-3 py-2">
         <StatusPill resultType={resultType} />
         {selectable && onToggleSelect && (
-          <Switch checked={selected == true} onCheckedChange={onToggleSelect} label="" />
+          <span onClick={(e) => e.stopPropagation()}>
+            <Switch checked={selected == true} onCheckedChange={onToggleSelect} label="" />
+          </span>
         )}
       </div>
       {isCallExpanded && (
@@ -183,6 +204,30 @@ export default function ToolCallCard({
           </div>
         </Collapsible>
       )}
-    </div>
+    </>
+  )
+
+  if (!hasPopup) {
+    return <div className={anchorClassName}>{content}</div>
+  }
+
+  return (
+    <Tooltip
+      content={
+        <ToolCallChangePopup
+          toolCall={toolCall}
+          result={result}
+          resultType={resultType}
+          durationMs={durationMs}
+        />
+      }
+      placement="right"
+      delayMs={150}
+      anchorAs="div"
+      anchorClassName={anchorClassName}
+      anchorTabIndex={0}
+    >
+      {content}
+    </Tooltip>
   )
 }
