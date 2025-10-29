@@ -113,22 +113,38 @@ export default function ChatSidebar({
     const cm = (last as any)?.completionMessage
     const iso = (cm?.completedAt as string) || (cm?.startedAt as string) || new Date().toISOString()
     markReadByKey(key, iso)
-  }, [chat?.key, chat?.chat.messages, markReadByKey])
+  }, [chat?.key, chat?.chat?.messages, markReadByKey])
+
+  // Ensure that after the chat loads or updates, if the user is at bottom, we mark the latest as read.
+  // This covers the case where MessageList triggers read before the chat is loaded, and on new incoming messages
+  // while the user is already scrolled to the bottom.
+  useEffect(() => {
+    if (!chat?.key) return
+    if (!atBottomRef.current) return
+    // Use a microtask to avoid clobbering during initial render
+    Promise.resolve().then(() => markLatestAsRead())
+  }, [chat?.key, chat?.chat?.updatedAt, chat?.chat?.messages?.length, markLatestAsRead])
 
   // When the user scrolls to bottom, mark as read
-  const handleAtBottomChange = useCallback((isBottom: boolean) => {
-    setAtBottom(isBottom)
-    if (isBottom) {
-      markLatestAsRead()
-    }
-  }, [markLatestAsRead])
+  const handleAtBottomChange = useCallback(
+    (isBottom: boolean) => {
+      setAtBottom(isBottom)
+      if (isBottom) {
+        markLatestAsRead()
+      }
+    },
+    [markLatestAsRead],
+  )
 
   // When we detect the latest has been viewed (e.g., new message arrives while at bottom)
-  const handleReadLatest = useCallback((iso?: string) => {
-    const key = chat?.key
-    if (!key) return
-    markReadByKey(key, iso || new Date().toISOString())
-  }, [chat?.key, markReadByKey])
+  const handleReadLatest = useCallback(
+    (iso?: string) => {
+      const key = chat?.key
+      if (!key) return
+      markReadByKey(key, iso || new Date().toISOString())
+    },
+    [chat?.key, markReadByKey],
+  )
 
   const isThinking = chat?.isThinking || false
 
