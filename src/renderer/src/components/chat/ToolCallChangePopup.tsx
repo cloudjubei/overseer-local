@@ -1,8 +1,8 @@
-import React, { useMemo, useState } from 'react'
+import React, { useMemo } from 'react'
 import type { ToolCall, ToolResultType } from 'thefactory-tools'
 import Code from '../ui/Code'
-import { Modal } from '../ui/Modal'
 import { IconCheckmarkCircle, IconError, IconStop, IconNotAllowed, IconHourglass } from '../ui/icons/Icons'
+import { StructuredUnifiedDiff, parseUnifiedDiff } from './tool-popups/diffUtils'
 
 function StatusIcon({ resultType }: { resultType?: ToolResultType }) {
   const size = 'w-3.5 h-3.5'
@@ -88,10 +88,8 @@ function buildUnifiedDiffIfPresent(result: any): string | undefined {
     extract(result, ['result.patch']) ||
     extract(result, ['result.diff'])
   if (typeof raw === 'string' && raw.trim()) return raw
-  // Some backends might wrap diff under { diff: { patch: string } }
   const nestedPatch = extract(result, ['diff.patch'])
   if (typeof nestedPatch === 'string' && nestedPatch.trim()) return nestedPatch
-  // If result itself is a diff string
   if (typeof result === 'string' && result.includes('@@')) return result
   return undefined
 }
@@ -107,42 +105,6 @@ function isCompletelyNewFile(result: any, diff?: string): boolean {
     if (lower.includes('new file mode') || lower.includes('--- /dev/null')) return true
   }
   return false
-}
-
-function countHunks(diff: string): number {
-  return diff.split(/\r?\n/).filter((l) => l.startsWith('@@')).length
-}
-
-function HunkedDiff({ diff, maxHunks = 3 }: { diff: string; maxHunks?: number }) {
-  const [expanded, setExpanded] = React.useState(false)
-  const hunks = useMemo(() => {
-    const lines = diff.split(/\r?\n/)
-    const groups: string[] = []
-    let current: string[] = []
-    for (const ln of lines) {
-      if (ln.startsWith('@@')) {
-        if (current.length) groups.push(current.join('\n'))
-        current = [ln]
-      } else {
-        current.push(ln)
-      }
-    }
-    if (current.length) groups.push(current.join('\n'))
-    return groups
-  }, [diff])
-
-  const visible = expanded ? hunks : hunks.slice(0, maxHunks)
-
-  return (
-    <div>
-      <Code language="diff" code={visible.join('\n\n')} />
-      {hunks.length > maxHunks && (
-        <button className="btn-link text-[11px] mt-1" onClick={() => setExpanded((v) => !v)}>
-          {expanded ? 'Show less' : `View more (${hunks.length - maxHunks} more hunks)`}
-        </button>
-      )}
-    </div>
-  )
 }
 
 function NewContentOnly({ text, label }: { text?: string; label?: string }) {
@@ -214,7 +176,6 @@ export default function ToolCallChangePopup({
   resultType?: ToolResultType
   durationMs?: number
 }) {
-  const [detailsOpen, setDetailsOpen] = useState(false)
   const name = toolCall?.name || 'tool'
 
   const timestamp = formatTimestamp(result?.completedAt || result?.finishedAt || result?.updatedAt)
@@ -237,7 +198,6 @@ export default function ToolCallChangePopup({
     const args = toolCall?.arguments || {}
     const n = String(name)
 
-    // If errored: show only error state, nothing else.
     if (resultType === 'errored') {
       return errorContentOnly()
     }
@@ -252,20 +212,10 @@ export default function ToolCallChangePopup({
       const oldDesc = tryString(extract(result, ['before.description']) || extract(args, ['oldDescription']))
       const newDesc = tryString(extract(result, ['after.description']) || extract(args, ['newDescription', 'description']))
       const diff = tryString(extract(result, ['diff', 'patch']))
-      const showDetails = !!diff && diff.split(/\r?\n/).length > 40
       return (
         <div className="text-xs">
           {diff ? (
-            <div>
-              <Code language="diff" code={diff} />
-              {showDetails ? (
-                <div className="mt-1">
-                  <button className="btn-link text-[11px]" onClick={() => setDetailsOpen(true)}>
-                    View details
-                  </button>
-                </div>
-              ) : null}
-            </div>
+            <Code language="diff" code={diff} />
           ) : oldDesc && newDesc ? (
             <div>
               <SectionTitle>Updated description</SectionTitle>
@@ -292,7 +242,7 @@ export default function ToolCallChangePopup({
       const diff = buildUnifiedDiffIfPresent(result)
       const newText = tryString(extract(result, ['after.content', 'newContent', 'content']))
       const isNew = isCompletelyNewFile(result, diff)
-      const hunks = diff ? countHunks(diff) : 0
+      const hunksCount = diff ? parseUnifiedDiff(diff).length : 0
       return (
         <div className="space-y-1">
           <Row>
@@ -303,11 +253,9 @@ export default function ToolCallChangePopup({
             <NewContentOnly text={newText} label="File completely new." />
           ) : diff ? (
             <div>
-              <HunkedDiff diff={diff} />
-              {hunks > 3 ? (
-                <button className="btn-link text-[11px] mt-1" onClick={() => setDetailsOpen(true)}>
-                  View details
-                </button>
+              <StructuredUnifiedDiff patch={diff} />
+              {hunksCount > 3 ? (
+                <div className="text-[10px] text-[var(--text-tertiary)] mt-1">large diff truncated</div>
               ) : null}
             </div>
           ) : (
@@ -351,7 +299,6 @@ export default function ToolCallChangePopup({
       const query = tryString(extract(args, ['query']) || extract(result, ['query'])) || ''
       const resultsRaw = extract(result, ['results']) || extract(result, ['matches']) || extract(result, ['files']) || extract(result, ['items']) || extract(result, ['result']) || result
 
-      // Format results into lines
       let resultLines: string[] = []
       if (Array.isArray(resultsRaw)) {
         resultLines = resultsRaw.map((it: any) => {
@@ -387,9 +334,7 @@ export default function ToolCallChangePopup({
               <SectionTitle>Results</SectionTitle>
               <PreLimited lines={resultLines} maxLines={10} />
               {showDetails ? (
-                <button className="btn-link text-[11px] mt-1" onClick={() => setDetailsOpen(true)}>
-                  View details
-                </button>
+                <div className="text-[10px] text-[var(--text-tertiary)] mt-1">large result truncated</div>
               ) : null}
             </div>
           ) : (
@@ -400,7 +345,6 @@ export default function ToolCallChangePopup({
     }
 
     if (n === 'run_test' || n === 'run_tests') {
-      // Summarize results similarly to Tests view: show counts and duration only
       const stats = extract(result, ['summary']) || extract(result, ['stats']) || result || {}
       const passed = extract(stats, ['passed', 'pass', 'passes']) || 0
       const failed = extract(stats, ['failed', 'failures', 'fails']) || 0
@@ -426,7 +370,6 @@ export default function ToolCallChangePopup({
       )
     }
 
-    // Default: show JSON result preview limited
     const str = (() => {
       try {
         return typeof result === 'string' ? result : JSON.stringify(result, null, 2)
@@ -441,94 +384,8 @@ export default function ToolCallChangePopup({
     )
   }, [name, toolCall?.arguments, result, resultType])
 
-  // Details modal content by tool
-  const renderDetails = () => {
-    const n = String(name)
-    const args = toolCall?.arguments || {}
-
-    if (n === 'write_file') {
-      const path = tryString(extract(args, ['path']) || extract(result, ['path']))
-      const diff = buildUnifiedDiffIfPresent(result)
-      const newText = tryString(extract(result, ['after.content', 'newContent', 'content']))
-      const isNew = isCompletelyNewFile(result, diff)
-      return (
-        <div className="space-y-2">
-          <div className="text-sm"><span className="text-[var(--text-secondary)]">Path:</span> <span className="font-mono">{path}</span></div>
-          {isNew ? <Code language="text" code={newText || ''} /> : diff ? <Code language="diff" code={diff} /> : <Code language="text" code={newText || ''} />}
-        </div>
-      )
-    }
-
-    if (n === 'update_story_description' || n === 'update_feature_description') {
-      const diff = tryString(extract(result, ['diff', 'patch']))
-      const oldDesc = tryString(extract(result, ['before.description']) || extract(args, ['oldDescription']))
-      const newDesc = tryString(extract(result, ['after.description']) || extract(args, ['newDescription', 'description']))
-      if (diff) return <Code language="diff" code={diff} />
-      return (
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <SectionTitle>Before</SectionTitle>
-            <Code language="text" code={oldDesc || ''} />
-          </div>
-          <div>
-            <SectionTitle>After</SectionTitle>
-            <Code language="text" code={newDesc || ''} />
-          </div>
-        </div>
-      )
-    }
-
-    if (n === 'search_files') {
-      const query = tryString(extract(args, ['query']) || extract(result, ['query'])) || ''
-      const resultsRaw = extract(result, ['results']) || extract(result, ['matches']) || extract(result, ['files']) || extract(result, ['items']) || extract(result, ['result']) || result
-      let resultLines: string[] = []
-      if (Array.isArray(resultsRaw)) {
-        resultLines = resultsRaw.map((it: any) => {
-          const path = tryString(extract(it, ['path', 'file', 'filepath', 'name']))
-          const line = tryString(extract(it, ['line', 'lineNumber']))
-          const preview = tryString(extract(it, ['preview', 'text', 'content', 'match']))
-          if (path || line || preview) {
-            return [path, line ? `:${line}` : '', preview ? `: ${preview}` : ''].join('')
-          }
-          try {
-            return typeof it === 'string' ? it : JSON.stringify(it)
-          } catch {
-            return String(it)
-          }
-        })
-      } else if (typeof resultsRaw === 'string') {
-        resultLines = resultsRaw.split(/\r?\n/)
-      } else if (resultsRaw && typeof resultsRaw === 'object') {
-        resultLines = toLines(resultsRaw)
-      }
-
-      return (
-        <div className="space-y-2">
-          <div>
-            <SectionTitle>Query</SectionTitle>
-            <Code language="text" code={query} />
-          </div>
-          <div>
-            <SectionTitle>Results</SectionTitle>
-            <Code language="text" code={resultLines.join('\n')} />
-          </div>
-        </div>
-      )
-    }
-
-    // Default: show JSON
-    const str = (() => {
-      try {
-        return typeof result === 'string' ? result : JSON.stringify(result, null, 2)
-      } catch {
-        return String(result)
-      }
-    })()
-    return <Code language="json" code={str || ''} />
-  }
-
   return (
-    <div className="min-w-[260px] max-w-[520px]">
+    <div className="min-w-[260px] max-w-[50vw] max-h-[50vh] overflow-auto">
       <div className="flex items-center justify-between gap-2 mb-1">
         <div className="flex items-center gap-2 min-w-0">
           <StatusIcon resultType={resultType} />
@@ -541,12 +398,6 @@ export default function ToolCallChangePopup({
         </div>
       </div>
       <div className="border-t border-[var(--border-subtle)] pt-1">{content}</div>
-
-      <Modal isOpen={detailsOpen} onClose={() => setDetailsOpen(false)} title={<div className="flex items-center gap-2"><span className="text-sm font-semibold">{name} details</span></div>} size="xl">
-        <div className="max-h-[70vh] overflow-auto">
-          {renderDetails()}
-        </div>
-      </Modal>
     </div>
   )
 }
