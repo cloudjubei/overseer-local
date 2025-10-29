@@ -1,9 +1,11 @@
-import React, { useMemo } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import type { ToolCall, ToolResultType } from 'thefactory-tools'
 import Code from '../ui/Code'
 import { IconCheckmarkCircle, IconError, IconStop, IconNotAllowed, IconHourglass } from '../ui/icons/Icons'
 import { StructuredUnifiedDiff } from './tool-popups/diffUtils'
 import FeatureSummaryCard from '../stories/FeatureSummaryCard'
+import { filesService } from '../../services/filesService'
+import { useActiveProject } from '../../contexts/ProjectContext'
 
 function StatusIcon({ resultType }: { resultType?: ToolResultType }) {
   const size = 'w-3.5 h-3.5'
@@ -151,17 +153,42 @@ function toLines(value: any): string[] {
   return str.split(/\r?\n/)
 }
 
-function PreLimited({ lines, maxLines }: { lines: string[]; maxLines: number }) {
+function PreLimited({
+  lines,
+  maxLines,
+  renderTruncationMessage,
+}: {
+  lines: string[]
+  maxLines: number
+  renderTruncationMessage?: (omitted: number) => React.ReactNode
+}) {
   const limited = lines.slice(0, maxLines)
   const truncated = lines.length > maxLines
+  const omitted = truncated ? lines.length - maxLines : 0
   return (
     <div>
       <pre className="text-[11px] text-[var(--text-primary)] bg-[var(--surface-raised)] p-1.5 rounded-md overflow-x-auto whitespace-pre">
         {limited.join('\n')}
       </pre>
-      {truncated ? null : null}
+      {truncated && renderTruncationMessage ? (
+        <div className="text-[11px] text-[var(--text-secondary)] mt-1">{renderTruncationMessage(omitted)}</div>
+      ) : null}
     </div>
   )
+}
+
+// Simple unified diff builder to fallback when the write_file result did not include a patch
+function buildSimpleUnifiedDiff(path: string, beforeText?: string, afterText?: string): string | undefined {
+  if (!path || typeof afterText !== 'string') return undefined
+  const before = typeof beforeText === 'string' ? beforeText : ''
+  if (before === afterText) return undefined
+  const beforeLines = before.split(/\r?\n/)
+  const afterLines = afterText.split(/\r?\n/)
+  const header = [`--- a/${path}`, `+++ b/${path}`]
+  const hunk = [`@@ -1,${Math.max(1, beforeLines.length)} +1,${Math.max(1, afterLines.length)} @@`]
+  const removed = beforeLines.map((l) => `-${l}`)
+  const added = afterLines.map((l) => `+${l}`)
+  return [...header, ...hunk, ...removed, ...added].join('\n')
 }
 
 export default function ToolCallChangePopup({
@@ -176,6 +203,7 @@ export default function ToolCallChangePopup({
   durationMs?: number
 }) {
   const name = toolCall?.name || 'tool'
+  const { projectId } = useActiveProject()
 
   const timestamp = formatTimestamp(result?.completedAt || result?.finishedAt || result?.updatedAt)
   const opId = tryString(result?.id || toolCall?.id || result?.operationId)
@@ -192,6 +220,53 @@ export default function ToolCallChangePopup({
       </div>
     )
   }
+
+  // Pre-compute values for write_file so we can synthesize a diff if missing
+  const args = toolCall?.arguments || {}
+  const toolName = String(name)
+  const writeFilePath: string | undefined =
+    tryString(
+      extract(args, ['path']) ||
+        extract(args, ['name']) ||
+        extract(args, ['relPath']) ||
+        extract(result, ['path']),
+    ) || undefined
+  const writeFileNewText: string | undefined =
+    tryString(
+      extract(result, ['after.content', 'newContent', 'content']) ||
+        extract(args, ['content']) ||
+        extract(args, ['text']) ||
+        extract(args, ['data']),
+    ) || undefined
+  const writeFileResultDiff = buildUnifiedDiffIfPresent(result)
+  const [computedDiff, setComputedDiff] = useState<string | undefined>(undefined)
+  const [computedIsNewFile, setComputedIsNewFile] = useState<boolean>(false)
+
+  useEffect(() => {
+    let cancelled = false
+    async function run() {
+      if (toolName !== 'write_file') return
+      if (writeFileResultDiff) {
+        setComputedDiff(undefined)
+        setComputedIsNewFile(false)
+        return
+      }
+      if (!writeFilePath || !writeFileNewText) return
+      try {
+        const beforeText = projectId ? await filesService.readFile(projectId, writeFilePath, 'utf8') : undefined
+        if (cancelled) return
+        setComputedIsNewFile(!beforeText)
+        const diff = buildSimpleUnifiedDiff(writeFilePath, beforeText, writeFileNewText)
+        setComputedDiff(diff)
+      } catch {
+        // ignore errors reading file
+      }
+    }
+    run()
+    return () => {
+      cancelled = true
+    }
+  }, [toolName, writeFilePath, writeFileNewText, writeFileResultDiff, projectId])
 
   const content = useMemo(() => {
     const args = toolCall?.arguments || {}
@@ -237,10 +312,10 @@ export default function ToolCallChangePopup({
     }
 
     if (n === 'write_file') {
-      const path = tryString(extract(args, ['path']) || extract(result, ['path']))
-      const diff = buildUnifiedDiffIfPresent(result)
-      const newText = tryString(extract(result, ['after.content', 'newContent', 'content']))
-      const isNew = isCompletelyNewFile(result, diff)
+      const path = writeFilePath
+      const diff = writeFileResultDiff || computedDiff
+      const newText = writeFileNewText
+      const isNew = isCompletelyNewFile(result, writeFileResultDiff) || computedIsNewFile
       return (
         <div className="space-y-1">
           <Row>
@@ -335,7 +410,11 @@ export default function ToolCallChangePopup({
           {resultLines.length > 0 ? (
             <div>
               <SectionTitle>Results</SectionTitle>
-              <PreLimited lines={resultLines} maxLines={10} />
+              <PreLimited
+                lines={resultLines}
+                maxLines={10}
+                renderTruncationMessage={(omitted) => <>+ {omitted} more at the bottom</>}
+              />
             </div>
           ) : (
             <div className="text-[11px] text-[var(--text-secondary)]">No results</div>
@@ -382,7 +461,9 @@ export default function ToolCallChangePopup({
         <Code language="json" code={str || '(no result)'} />
       </div>
     )
-  }, [name, toolCall?.arguments, result, resultType])
+  }, [name, toolCall?.arguments, result, resultType, writeFilePath, writeFileNewText, writeFileResultDiff, computedDiff, computedIsNewFile])
+
+  const hideHeaderMeta = String(name) === 'finish_feature'
 
   return (
     <div className="min-w-[260px] max-w-[42vw] max-h-[48vh] overflow-auto">
@@ -391,11 +472,13 @@ export default function ToolCallChangePopup({
           <StatusIcon resultType={resultType} />
           <div className="truncate text-xs font-semibold">{name}</div>
         </div>
-        <div className="text-[10px] text-[var(--text-tertiary)] whitespace-nowrap">
-          {durationMs ? <span className="mr-2">{durationMs}ms</span> : null}
-          {timestamp ? <span className="mr-2">{timestamp}</span> : null}
-          {opId ? <span className="font-mono">{opId}</span> : null}
-        </div>
+        {!hideHeaderMeta ? (
+          <div className="text-[10px] text-[var(--text-tertiary)] whitespace-nowrap">
+            {durationMs ? <span className="mr-2">{durationMs}ms</span> : null}
+            {timestamp ? <span className="mr-2">{timestamp}</span> : null}
+            {opId ? <span className="font-mono">{opId}</span> : null}
+          </div>
+        ) : null}
       </div>
       <div className="border-t border-[var(--border-subtle)] pt-1">{content}</div>
     </div>

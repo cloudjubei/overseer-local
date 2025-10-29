@@ -2577,7 +2577,7 @@
     },
     {
       "id": "ae8f8bd5-6062-4238-bc93-00994debfad0",
-      "status": "-",
+      "status": "+",
       "title": "Each commit that is pending in GitView is for stories and features - they should be displayed as chips",
       "description": "Most of the commits are implementing features and have the id inside the commit message. That id should be extracted and displayed as @src/renderer/src/components/stories/DependencyBullet.tsx to show the user which features are part of this pending merge.\n\nThe `thefactory-tools` now exposes all the necessary values for this - check @src/logic/git/gitTypes.copy.ts to see.",
       "context": [
@@ -2696,7 +2696,7 @@
     },
     {
       "id": "0a224aec-8933-4c9a-8910-33048809e451",
-      "status": "-",
+      "status": "+",
       "title": "when getting an error in chat show a retry button",
       "description": "In @src/renderer/src/components/chat/ChatSidebar.tsx when getting an error the only thing the user can do right now is to write a message to retry - we should have a retry button next to the message, that will remove the last message and proceed as if it never happened.\nThe error message should have an (i) button in the top right to display the error that occurred.",
       "context": [
@@ -2724,7 +2724,7 @@
     },
     {
       "id": "4c176bb4-549e-4a6c-a59d-f8690c4819b5",
-      "status": "-",
+      "status": "+",
       "title": "the typewriter effect in chat swallows some first letters",
       "description": "whenever the typewriter effect kicks in it always omits the first or second letter in @src/renderer/src/components/chat/ChatSidebar.tsx when displaying a message in @src/renderer/src/components/chat/MessageList.tsx",
       "context": [
@@ -2738,7 +2738,7 @@
     },
     {
       "id": "720ef1b6-1461-4ea9-8417-ce6955ba566e",
-      "status": "-",
+      "status": "+",
       "title": "each message should show the timestamp in a human friendly way",
       "description": "In @src/renderer/src/components/chat/MessageList.tsx all messages should show these at the top. For users it's at the top left, and for assistants or system messages it's at the top right.\nThis should be a very small piece of text.\nIf the message was 'today' then just show the time. If it was on a different day also show the date.",
       "context": [
@@ -2746,11 +2746,12 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-29T16:30:28.066Z",
-      "updatedAt": "2025-10-29T16:30:28.066Z"
+      "updatedAt": "2025-10-29T17:37:17.935Z",
+      "completedAt": "2025-10-29T17:37:17.935Z"
     },
     {
       "id": "eb960fe5-b811-4119-8aa9-e9d420b54024",
-      "status": "-",
+      "status": "+",
       "title": "The `finish_feature` popup when hovering the tool message needs updating",
       "description": "in @src/renderer/src/components/chat/ToolCallChangePopup.tsx when it's `finish_feature` we shouldn't show the time nor the feature id in the 'header' - the summary card covers all the info needed.",
       "context": [
@@ -2758,11 +2759,12 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-29T16:31:26.593Z",
-      "updatedAt": "2025-10-29T16:31:26.593Z"
+      "updatedAt": "2025-10-29T17:39:59.421Z",
+      "completedAt": "2025-10-29T17:39:59.421Z"
     },
     {
       "id": "ad71c0b9-e555-4653-a600-af5efd1db0f1",
-      "status": "-",
+      "status": "+",
       "title": "`search_files` should say '+ X more at the bottom'",
       "description": "In @src/renderer/src/components/chat/ToolCallChangePopup.tsx for the `search_files` tool if there are truncated results, there should be a one line message saying how many were ommitted.",
       "context": [
@@ -2770,11 +2772,12 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-29T16:32:34.177Z",
-      "updatedAt": "2025-10-29T16:32:34.177Z"
+      "updatedAt": "2025-10-29T17:42:55.772Z",
+      "completedAt": "2025-10-29T17:42:55.772Z"
     },
     {
       "id": "e086f202-7b49-4317-bf1c-9ac4ab60a520",
-      "status": "-",
+      "status": "+",
       "title": "the `write_file` popup needs updating",
       "description": "in @src/renderer/src/components/chat/ToolCallChangePopup.tsx for the `write_file` tool call - with a result it can show Path(unknown) even though the path is included in the tool call args under 'name' .\nWithout the tool result, the popup never shows the diff (we never got it) - this needs to be computed so it can be displayed.",
       "context": [
@@ -2782,7 +2785,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-29T16:34:09.408Z",
-      "updatedAt": "2025-10-29T16:34:09.408Z"
+      "updatedAt": "2025-10-29T17:50:05.033Z",
+      "completedAt": "2025-10-29T17:50:05.033Z"
     },
     {
       "id": "16745e78-fa85-4d82-986a-1a5c3f8630c1",
@@ -2819,6 +2823,18 @@
       "context": [],
       "createdAt": "2025-10-29T16:42:29.050Z",
       "updatedAt": "2025-10-29T16:42:29.050Z"
+    },
+    {
+      "id": "dfa8e00c-f58c-4ae6-ba13-3dff5dc4f961",
+      "status": "-",
+      "title": "the llm model name should be positioned on the left",
+      "description": "in @src/renderer/src/components/chat/MessageList.tsx ,\nright now there's the date/time label on the right of the assistant message and the model name displays below it. The model name should display at the same level as the timestamp but on the opposite end (i.e. on the left).",
+      "context": [
+        "src/renderer/src/components/chat/MessageList.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-29T23:05:20.696Z",
+      "updatedAt": "2025-10-29T23:05:20.696Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -3013,7 +3029,8 @@
     "16745e78-fa85-4d82-986a-1a5c3f8630c1": 189,
     "9dc96025-d7ee-4798-aeab-0ffac36c54c7": 190,
     "5d593b43-f456-4b1e-97e6-cb53476197e8": 191,
-    "38e1f4bc-07fa-42cc-990d-da75a62151a6": 192
+    "38e1f4bc-07fa-42cc-990d-da75a62151a6": 192,
+    "dfa8e00c-f58c-4ae6-ba13-3dff5dc4f961": 193
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
   "updatedAt": "2025-10-01T00:34:27.858Z"

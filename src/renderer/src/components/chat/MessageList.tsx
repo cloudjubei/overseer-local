@@ -29,6 +29,46 @@ function lastMessageIso(messages: ChatMessage[]): string | undefined {
   return undefined
 }
 
+// Best-effort extraction of an ISO timestamp for a single message
+function messageIso(message: ChatMessage): string | undefined {
+  const cm = (message as any)?.completionMessage
+  if (cm?.completedAt) return cm.completedAt as string
+  if (cm?.startedAt) return cm.startedAt as string
+  const createdAt = (message as any)?.createdAt
+  if (typeof createdAt === 'string') return createdAt
+  return undefined
+}
+
+function isSameLocalDay(a: Date, b: Date): boolean {
+  return (
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate()
+  )
+}
+
+function formatFriendlyTimestamp(iso: string): string {
+  const d = new Date(iso)
+  if (isNaN(d.getTime())) return ''
+  const now = new Date()
+  if (isSameLocalDay(d, now)) {
+    return new Intl.DateTimeFormat(undefined, {
+      hour: 'numeric',
+      minute: '2-digit',
+    }).format(d)
+  }
+  const opts: Intl.DateTimeFormatOptions = {
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  }
+  if (d.getFullYear() !== now.getFullYear()) {
+    opts.year = 'numeric'
+  }
+  return new Intl.DateTimeFormat(undefined, opts).format(d)
+}
+
 export default function MessageList({
   chatId,
   messages,
@@ -389,19 +429,30 @@ export default function MessageList({
     >
       {systemPromptMessage && (
         <div className="flex justify-center">
-          <div
-            className={[
-              'overflow-y-auto max-w-full px-3 py-2 rounded-2xl break-words shadow border',
-              'bg-[var(--surface-overlay)] text-[var(--text-primary)] border-[var(--border-subtle)]',
-              'chat-bubble',
-            ].join(' ')}
-            style={{
-              maxHeight: systemMaxHeight ? `${systemMaxHeight}px` : undefined,
-              minHeight: '3.5em',
-            }}
-            aria-label="System prompt"
-          >
-            <Markdown text={systemPromptMessage.completionMessage.content} />
+          <div className="inline-flex flex-col items-end max-w-full">
+            {(() => {
+              const iso = messageIso(systemPromptMessage)
+              const ts = iso ? formatFriendlyTimestamp(iso) : ''
+              return ts ? (
+                <div className="text-[10px] leading-4 text-[var(--text-secondary)] mb-1 opacity-80 select-none">
+                  {ts}
+                </div>
+              ) : null
+            })()}
+            <div
+              className={[
+                'overflow-y-auto max-w-full px-3 py-2 rounded-2xl break-words shadow border',
+                'bg-[var(--surface-overlay)] text-[var(--text-primary)] border-[var(--border-subtle)]',
+                'chat-bubble',
+              ].join(' ')}
+              style={{
+                maxHeight: systemMaxHeight ? `${systemMaxHeight}px` : undefined,
+                minHeight: '3.5em',
+              }}
+              aria-label="System prompt"
+            >
+              <Markdown text={systemPromptMessage.completionMessage.content} />
+            </div>
           </div>
         </div>
       )}
@@ -487,17 +538,15 @@ export default function MessageList({
             (lastMsg?.toolResults?.length ?? 0) > 0
 
           const isAssistantBeforeSystemToolResults =
-            isAssistant &&
-            index === messagesToDisplay.length - 2 &&
-            lastIsSystemToolResults
+            isAssistant && index === messagesToDisplay.length - 2 && lastIsSystemToolResults
 
           const isDeletableSystemLast = isSystem && isLast && !isShowingToolResults
 
-          const shouldShowDelete = !!onDeleteLastMessage && (
-            (isLast && (isUser || isAssistant)) ||
-            isAssistantBeforeSystemToolResults ||
-            isDeletableSystemLast
-          )
+          const shouldShowDelete =
+            !!onDeleteLastMessage &&
+            ((isLast && (isUser || isAssistant)) ||
+              isAssistantBeforeSystemToolResults ||
+              isDeletableSystemLast)
 
           const deleteTitle = isAssistantBeforeSystemToolResults
             ? 'Delete last assistant message and tool results'
@@ -557,47 +606,66 @@ export default function MessageList({
                     isUser ? 'items-end' : isSystem ? 'w-full' : 'items-start',
                   ].join(' ')}
                 >
-                  {msg.showModel && msg.model && (
-                    <div className="text-[11px] text-[var(--text-secondary)] mb-1 inline-flex items-center gap-1 border border-[var(--border-subtle)] bg-[var(--surface-overlay)] rounded-full px-2 py-[2px]">
-                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-[var(--accent-primary)]" />
-                      {msg.model.model}
-                    </div>
-                  )}
+                  <div
+                    className={['inline-flex flex-col', isUser ? 'items-start' : 'items-end'].join(
+                      ' ',
+                    )}
+                  >
+                    {(() => {
+                      const iso = messageIso(msg)
+                      const ts = iso ? formatFriendlyTimestamp(iso) : ''
+                      return ts ? (
+                        <div className="text-[10px] leading-4 text-[var(--text-secondary)] mb-1 opacity-80 select-none">
+                          {ts}
+                        </div>
+                      ) : null
+                    })()}
 
-                  {msg.completionMessage.content || (isSystem && toggleableCount > 0) ? (
-                    <div
-                      className={[
-                        'overflow-hidden max-w-full px-3 py-2 rounded-2xl whitespace-pre-wrap break-words shadow',
-                        isUser
-                          ? 'bg-[var(--accent-primary)] text-[var(--text-inverted)] rounded-br-md'
-                          : isSystem
-                            ? toggleableCount > 0
-                              ? 'border bg-teal-500/20 border-teal-600 dark:border-teal-700 dark:bg-teal-800/60'
-                              : 'border bg-[var(--surface-overlay)] text-[var(--text-primary)] border-[var(--border-subtle)]'
-                            : 'bg-[var(--surface-raised)] text-[var(--text-primary)] border border-[var(--border-subtle)] rounded-bl-md',
-                        msg.isFirstInGroup ? '' : isUser ? 'rounded-tr-md' : 'rounded-tl-md',
-                        'chat-bubble',
-                        isNewUserBubble ? 'chat-bubble--user-pop-enter' : '',
-                      ].join(' ')}
-                    >
-                      {isUser ? (
-                        <RichText text={msg.completionMessage.content} />
-                      ) : index === animateAssistantIdx ? (
-                        <TypewriterText text={msg.completionMessage.content} renderer="markdown" />
-                      ) : isSystem ? (
-                        toggleableCount > 0 ? (
-                          <div className="text-sm">
-                            The assistant wants to run tools. Please grant permission for the tools
-                            you want to allow.
-                          </div>
+                    {msg.showModel && msg.model && (
+                      <div className="text-[11px] text-[var(--text-secondary)] mb-1 inline-flex items-center gap-1 border border-[var(--border-subtle)] bg-[var(--surface-overlay)] rounded-full px-2 py-[2px]">
+                        <span className="inline-block w-1.5 h-1.5 rounded-full bg-[var(--accent-primary)]" />
+                        {msg.model.model}
+                      </div>
+                    )}
+
+                    {msg.completionMessage.content || (isSystem && toggleableCount > 0) ? (
+                      <div
+                        className={[
+                          'overflow-hidden max-w-full px-3 py-2 rounded-2xl whitespace-pre-wrap break-words shadow',
+                          isUser
+                            ? 'bg-[var(--accent-primary)] text-[var(--text-inverted)] rounded-br-md'
+                            : isSystem
+                              ? toggleableCount > 0
+                                ? 'border bg-teal-500/20 border-teal-600 dark:border-teal-700 dark:bg-teal-800/60'
+                                : 'border bg-[var(--surface-overlay)] text-[var(--text-primary)] border-[var(--border-subtle)]'
+                              : 'bg-[var(--surface-raised)] text-[var(--text-primary)] border border-[var(--border-subtle)] rounded-bl-md',
+                          msg.isFirstInGroup ? '' : isUser ? 'rounded-tr-md' : 'rounded-tl-md',
+                          'chat-bubble',
+                          isNewUserBubble ? 'chat-bubble--user-pop-enter' : '',
+                        ].join(' ')}
+                      >
+                        {isUser ? (
+                          <RichText text={msg.completionMessage.content} />
+                        ) : index === animateAssistantIdx ? (
+                          <TypewriterText
+                            text={msg.completionMessage.content}
+                            renderer="markdown"
+                          />
+                        ) : isSystem ? (
+                          toggleableCount > 0 ? (
+                            <div className="text-sm">
+                              The assistant wants to run tools. Please grant permission for the
+                              tools you want to allow.
+                            </div>
+                          ) : (
+                            <Markdown text={msg.completionMessage.content} />
+                          )
                         ) : (
                           <Markdown text={msg.completionMessage.content} />
-                        )
-                      ) : (
-                        <Markdown text={msg.completionMessage.content} />
-                      )}
-                    </div>
-                  ) : null}
+                        )}
+                      </div>
+                    ) : null}
+                  </div>
 
                   {isShowingToolCalls && (
                     <div className="mt-2 w-full space-y-2">
