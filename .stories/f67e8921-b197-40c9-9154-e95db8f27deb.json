@@ -2800,12 +2800,13 @@
     },
     {
       "id": "9dc96025-d7ee-4798-aeab-0ffac36c54c7",
-      "status": "-",
+      "status": "+",
       "title": "Git change badges in Sidebar (green) via GitContext",
       "description": "Goal: Show Git notifications whenever there is a branch with feature changes as a green badge, consistent with existing badge styling.\n\nBehavior:\n- Placement: Show a green badge next to the 'Git' nav entry in SidebarView, following the same visual/placement pattern as existing chat badges.\n- Count: Aggregate branches with feature changes into a numeric badge (cap at 99+). If zero, no badge is shown.\n- Live updates: Badge updates as GitContext changes based on the git monitor.\n\nImplementation notes:\n- Use @src/renderer/src/contexts/GitContext.tsx as the authoritative source. It should already surface branch status based on the git monitor.\n- Define 'feature changes' using the data provided by GitContext (e.g., branches that include story/feature modifications), without re-implementing diff logic in the UI.\n- Use the same DotBadge component with a green/success styling token consistent with the design system.\n\nContext:\n- @src/renderer/src/navigation/SidebarView.tsx\n- @src/renderer/src/contexts/GitContext.tsx\n- @src/renderer/src/components/ui/DotBadge.tsx\n- @src/renderer/src/services/gitService.ts\n- @src/logic/git/gitTypes.copy.ts\n\nAcceptance criteria:\n- When one or more branches have feature changes (as exposed by GitContext), a green numeric badge appears next to the 'Git' item in SidebarView, capped at '99+'.\n- The badge updates automatically as GitContext state changes; removing/merging changes clears or reduces the count correspondingly.\n- Styling and placement match existing sidebar badges (padding, size, alignment).",
       "context": [],
       "createdAt": "2025-10-29T16:42:29.031Z",
-      "updatedAt": "2025-10-29T16:42:29.031Z"
+      "updatedAt": "2025-10-29T23:37:27.757Z",
+      "completedAt": "2025-10-29T23:37:27.757Z"
     },
     {
       "id": "5d593b43-f456-4b1e-97e6-cb53476197e8",
