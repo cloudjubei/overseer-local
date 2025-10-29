@@ -2744,7 +2744,7 @@
     },
     {
       "id": "eb960fe5-b811-4119-8aa9-e9d420b54024",
-      "status": "-",
+      "status": "+",
       "title": "The `finish_feature` popup when hovering the tool message needs updating",
       "description": "in @src/renderer/src/components/chat/ToolCallChangePopup.tsx when it's `finish_feature` we shouldn't show the time nor the feature id in the 'header' - the summary card covers all the info needed.",
       "context": [
@@ -2752,7 +2752,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-29T16:31:26.593Z",
-      "updatedAt": "2025-10-29T16:31:26.593Z"
+      "updatedAt": "2025-10-29T17:39:59.421Z",
+      "completedAt": "2025-10-29T17:39:59.421Z"
     },
     {
       "id": "ad71c0b9-e555-4653-a600-af5efd1db0f1",

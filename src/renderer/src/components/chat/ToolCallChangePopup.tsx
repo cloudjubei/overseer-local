@@ -384,6 +384,8 @@ export default function ToolCallChangePopup({
     )
   }, [name, toolCall?.arguments, result, resultType])
 
+  const hideHeaderMeta = String(name) === 'finish_feature'
+
   return (
     <div className="min-w-[260px] max-w-[42vw] max-h-[48vh] overflow-auto">
       <div className="flex items-center justify-between gap-2 mb-1">
@@ -391,11 +393,13 @@ export default function ToolCallChangePopup({
           <StatusIcon resultType={resultType} />
           <div className="truncate text-xs font-semibold">{name}</div>
         </div>
-        <div className="text-[10px] text-[var(--text-tertiary)] whitespace-nowrap">
-          {durationMs ? <span className="mr-2">{durationMs}ms</span> : null}
-          {timestamp ? <span className="mr-2">{timestamp}</span> : null}
-          {opId ? <span className="font-mono">{opId}</span> : null}
-        </div>
+        {!hideHeaderMeta ? (
+          <div className="text-[10px] text-[var(--text-tertiary)] whitespace-nowrap">
+            {durationMs ? <span className="mr-2">{durationMs}ms</span> : null}
+            {timestamp ? <span className="mr-2">{timestamp}</span> : null}
+            {opId ? <span className="font-mono">{opId}</span> : null}
+          </div>
+        ) : null}
       </div>
       <div className="border-t border-[var(--border-subtle)] pt-1">{content}</div>
     </div>
