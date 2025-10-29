@@ -225,7 +225,7 @@ export default function ToolCallChangePopup({
   const { projectId } = useActiveProject()
 
   const timestamp = formatTimestamp(result?.completedAt || result?.finishedAt || result?.updatedAt)
-  const opId = tryString(result?.id || toolCall?.id || result?.operationId)
+  const opId = tryString(result?.id || toolCall?.name || result?.operationId)
 
   function errorContentOnly(): React.ReactNode {
     const msg = tryString(
