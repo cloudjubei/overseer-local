@@ -103,17 +103,26 @@ export default function ChatSidebar({
     atBottomRef.current = atBottom
   }, [atBottom])
 
+  // Helper: compute the freshest known ISO timestamp for the chat for read receipts
+  const computeLatestIso = useCallback((): string | undefined => {
+    const msgs = chat?.chat.messages || []
+    const lastMsg = msgs.length ? msgs[msgs.length - 1] : undefined
+    const lastMsgIso = (() => {
+      if (!lastMsg) return undefined
+      const cm = (lastMsg as any)?.completionMessage
+      return (cm?.completedAt as string) || (cm?.startedAt as string) || undefined
+    })()
+    const updatedAt = chat?.chat.updatedAt
+    if (updatedAt && lastMsgIso) return updatedAt.localeCompare(lastMsgIso) >= 0 ? updatedAt : lastMsgIso
+    return updatedAt || lastMsgIso
+  }, [chat?.chat.messages, chat?.chat.updatedAt])
+
   const markLatestAsRead = useCallback(() => {
     const key = chat?.key
     if (!key) return
-    const msgs = chat?.chat.messages || []
-    if (!msgs.length) return
-    // Determine latest message timestamp
-    const last = msgs[msgs.length - 1]
-    const cm = (last as any)?.completionMessage
-    const iso = (cm?.completedAt as string) || (cm?.startedAt as string) || new Date().toISOString()
+    const iso = computeLatestIso() || new Date().toISOString()
     markReadByKey(key, iso)
-  }, [chat?.key, chat?.chat?.messages, markReadByKey])
+  }, [chat?.key, computeLatestIso, markReadByKey])
 
   // Ensure that after the chat loads or updates, if the user is at bottom, we mark the latest as read.
   // This covers the case where MessageList triggers read before the chat is loaded, and on new incoming messages
@@ -141,9 +150,15 @@ export default function ChatSidebar({
     (iso?: string) => {
       const key = chat?.key
       if (!key) return
-      markReadByKey(key, iso || new Date().toISOString())
+      // Prefer the freshest between provided iso, chat.updatedAt, and last message
+      const freshest = (() => {
+        const computed = computeLatestIso()
+        if (computed && iso) return computed.localeCompare(iso) >= 0 ? computed : iso
+        return computed || iso || new Date().toISOString()
+      })()
+      markReadByKey(key, freshest)
     },
-    [chat?.key, markReadByKey],
+    [chat?.key, computeLatestIso, markReadByKey],
   )
 
   const isThinking = chat?.isThinking || false

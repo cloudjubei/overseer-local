@@ -2469,7 +2469,7 @@
     },
     {
       "id": "63d893a3-845f-4557-b2a6-d30d38a8c24a",
-      "status": "-",
+      "status": "+",
       "title": "Chat notifications",
       "description": "In the @src/renderer/src/navigation/SidebarView.tsx we need to show notifications next to the project and next to the Chat button when there is an unread message. \nThere should be also a little dot (without a number inside) shown on the chat navigation in @src/renderer/src/screens/ChatView.tsx leading the user to the chat that has the unread message .",
       "context": [
@@ -2478,8 +2478,9 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-28T00:20:01.644Z",
-      "updatedAt": "2025-10-29T10:13:24.778Z",
-      "rejection": "I open a chat from the chat history that has a (1) unread message and no matter how much scrolling I do in the view - the message never seems to get counted as read. Even when going into a different view and back, the display still shows the (1) unread message. So the trigger for marking messages as read seems wrong."
+      "updatedAt": "2025-10-29T10:52:02.237Z",
+      "rejection": "I open a chat from the chat history that has a (1) unread message and no matter how much scrolling I do in the view - the message never seems to get counted as read. Even when going into a different view and back, the display still shows the (1) unread message. So the trigger for marking messages as read seems wrong.",
+      "completedAt": "2025-10-29T10:52:02.237Z"
     },
     {
       "id": "98ff6ca9-38bd-4828-bcba-f555033945fe",
