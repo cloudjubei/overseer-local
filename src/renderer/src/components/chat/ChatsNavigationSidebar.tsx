@@ -8,6 +8,8 @@ import { useChatUnread } from '@renderer/hooks/useChatUnread'
 import DotBadge from '@renderer/components/ui/DotBadge'
 import { getChatContextPath } from 'thefactory-tools/utils'
 import NotificationBadge from '@renderer/components/stories/NotificationBadge'
+import { useChatThinking } from '@renderer/hooks/useChatThinking'
+import SpinnerWithDot from '@renderer/components/ui/SpinnerWithDot'
 
 function prettyTopicName(topic?: string): string {
   if (!topic) return 'Topic'
@@ -126,6 +128,7 @@ export default function ChatsNavigationSidebar({
   const { storiesById, featuresById } = useStories()
   const { chatsByProjectId } = useChats()
   const { unreadKeys, getUnreadCountForKey } = useChatUnread()
+  const { isThinkingKey } = useChatThinking(500)
 
   const getProjectTitle = (id?: string) => {
     if (!id) return ''
@@ -375,6 +378,8 @@ export default function ChatsNavigationSidebar({
     const key = getChatContextPath(ctx)
     const isUnread = unreadKeys.has(key)
     const unreadCount = isUnread ? getUnreadCountForKey(key) : 0
+    const isThinking = isThinkingKey(key)
+    const cap99 = (n: number) => (n > 99 ? '99+' : `${n}`)
     return (
       <button
         className={[
@@ -388,10 +393,12 @@ export default function ChatsNavigationSidebar({
       >
         <div className="flex items-center justify-between gap-2 min-w-0">
           <div className="text-[12px] font-medium text-[var(--text-primary)] truncate">{label}</div>
-          {isUnread && unreadCount > 0 ? (
+          {isThinking ? (
+            <SpinnerWithDot size={14} showDot={isUnread} dotTitle={isUnread ? 'Unread messages' : undefined} />
+          ) : isUnread && unreadCount > 0 ? (
             <NotificationBadge
               className={'h-[16px] min-w-[16px] px-1 text-[10px]'}
-              text={`${unreadCount}`}
+              text={cap99(unreadCount)}
               tooltipLabel={`${unreadCount} unread messages`}
             />
           ) : isUnread ? (
@@ -467,11 +474,22 @@ export default function ChatsNavigationSidebar({
                     const key = getChatContextPath(generalContext)
                     const isUnread = unreadKeys.has(key)
                     const unreadCount = isUnread ? getUnreadCountForKey(key) : 0
+                    const isThinking = isThinkingKey(key)
+                    const cap99 = (n: number) => (n > 99 ? '99+' : `${n}`)
+                    if (isThinking) {
+                      return (
+                        <SpinnerWithDot
+                          size={14}
+                          showDot={isUnread}
+                          dotTitle={isUnread ? 'Unread messages' : undefined}
+                        />
+                      )
+                    }
                     if (isUnread && unreadCount > 0)
                       return (
                         <NotificationBadge
                           className={'h-[16px] min-w-[16px] px-1 text-[10px]'}
-                          text={`${unreadCount}`}
+                          text={cap99(unreadCount)}
                           tooltipLabel={`${unreadCount} unread messages`}
                         />
                       )
@@ -650,7 +668,7 @@ export default function ChatsNavigationSidebar({
                         )}
                       </div>
                     )
-                  })
+                  })}
                 )}
               </div>
             )}
@@ -699,6 +717,8 @@ export default function ChatsNavigationSidebar({
                 })
                 const isUnread = unreadKeys.has(c.key)
                 const unreadCount = isUnread ? getUnreadCountForKey(c.key) : 0
+                const isThinking = isThinkingKey(c.key)
+                const cap99 = (n: number) => (n > 99 ? '99+' : `${n}`)
                 return (
                   <button
                     key={c.key}
@@ -715,10 +735,12 @@ export default function ChatsNavigationSidebar({
                       <div className="text-[12px] font-medium text-[var(--text-primary)] truncate">
                         {label}
                       </div>
-                      {isUnread && unreadCount > 0 ? (
+                      {isThinking ? (
+                        <SpinnerWithDot size={14} showDot={isUnread} dotTitle={isUnread ? 'Unread messages' : undefined} />
+                      ) : isUnread && unreadCount > 0 ? (
                         <NotificationBadge
                           className={'h-[16px] min-w-[16px] px-1 text-[10px]'}
-                          text={`${unreadCount}`}
+                          text={cap99(unreadCount)}
                           tooltipLabel={`${unreadCount} unread messages`}
                         />
                       ) : isUnread ? (
