@@ -2618,13 +2618,14 @@
     },
     {
       "id": "fcf25987-8aaa-4454-8b39-1f7abf3774ef",
-      "status": "-",
+      "status": "+",
       "title": "ctrl/command+shift+n should open a new special create feature modal",
       "description": "the difference is that it should have a dropdown for selecting the story that this feature will belong to.\nIn fact - the \"UI Improvements\" feature that gets created via cmd+shift+f should open this exact popup but with the \"UI Improvements\" story pre-selected.\nWhen clicking the dropdown it should also allow to search to make it easier to find the relevant story.",
       "context": [],
       "blockers": [],
       "createdAt": "2025-10-29T00:49:23.964Z",
-      "updatedAt": "2025-10-29T00:49:23.964Z"
+      "updatedAt": "2025-10-29T09:47:12.334Z",
+      "completedAt": "2025-10-29T09:47:12.334Z"
     },
     {
       "id": "84a438a8-912f-41f2-b1b4-5d4661ffbe3c",
