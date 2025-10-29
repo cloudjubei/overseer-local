@@ -2478,8 +2478,7 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-28T00:20:01.644Z",
-      "updatedAt": "2025-10-29T10:52:02.237Z",
-      "rejection": "I open a chat from the chat history that has a (1) unread message and no matter how much scrolling I do in the view - the message never seems to get counted as read. Even when going into a different view and back, the display still shows the (1) unread message. So the trigger for marking messages as read seems wrong.",
+      "updatedAt": "2025-10-29T11:23:25.650Z",
       "completedAt": "2025-10-29T10:52:02.237Z"
     },
     {
@@ -2510,7 +2509,7 @@
     },
     {
       "id": "beea43a0-839b-4f9b-8215-73a8fd39f3cb",
-      "status": "?",
+      "status": "-",
       "title": "Delete chat becomes refresh chat + actual delete chat in settings",
       "description": "The current 'Delete chat' button in the header of @src/renderer/src/screens/ChatView.tsx should become \"Refresh Chat\" - so still a red button, but with a different icon inside - a new one needs to be created and added to @src/renderer/src/components/ui/icons/Icons.tsx .\nAt the very bottom of chat settings there should be a red button that says \"Delete this chat\", which will ask the user for confirmation for doing so. This should actually delete the chat for good (at this moment taking the user to the \"General\" chat which is always available).",
       "context": [
@@ -2519,8 +2518,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-28T00:26:15.441Z",
-      "updatedAt": "2025-10-29T10:53:01.614Z",
-      "rejection": "Blocked: Agent loop failed: {}"
+      "updatedAt": "2025-10-29T11:22:16.104Z",
+      "rejection": "This doesn't work if a chat has messages - then the chat gets shifted to the top of the history list and is still there."
     },
     {
       "id": "1784ec92-6612-4d1b-a8e9-41fb10c3557f",
@@ -2550,7 +2549,7 @@
     },
     {
       "id": "41e29168-8387-44a3-8052-a80b3098088b",
-      "status": "?",
+      "status": "+",
       "title": "In GitMergeModal the diffs are not showing just incoming",
       "description": "In @src/renderer/src/screens/git/GitMergeModal.tsx the diffs that are displayed are showing both outgoing and incoming changes against each other. But the user should only be shown the incoming changes against the current branch.\nThere should be appropriate data from `thefactory-tools` for this - all the types are in @src/logic/git/gitTypes.copy.ts . If something is missing, then describe a feature request in `docs/GIT_DIFFS.md` so that `thefactory-tools` can be updated to include it.",
       "context": [
@@ -2559,8 +2558,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-28T12:47:48.778Z",
-      "updatedAt": "2025-10-29T01:14:58.713Z",
-      "rejection": "Blocked: Agent loop failed: {}"
+      "updatedAt": "2025-10-29T11:22:24.154Z",
+      "completedAt": "2025-10-29T11:22:24.154Z"
     },
     {
       "id": "6ef71ce5-6bcd-407a-b9e7-1f3e44e2a626",
@@ -2614,15 +2613,14 @@
     },
     {
       "id": "84a438a8-912f-41f2-b1b4-5d4661ffbe3c",
-      "status": "+",
+      "status": "-",
       "title": "Chat tool call change popups",
       "description": "Goal: When viewing tool call cards in chat, hovering (or focusing) on a card shows a contextual popup summarizing the change(s) that the tool produced. Clicking the card toggles a pinned view.\n\nTriggers & behavior:\n- Hover: show a popup next to the tool call card with a concise summary.\n- Click: pin/unpin the popup to remain visible.\n- Keyboard: focus on the card shows the popup; Esc closes; Enter toggles pin.\n- Mobile: tap once to show, tap outside to dismiss; a small 'i' icon appears on small screens.\n\nTool-specific displays:\n- update_story_title: show 'Title: old → new' with highlights.\n- update_story_description: inline or side-by-side diff emphasizing added and removed text.\n- update_feature_title: 'Title: old → new' with highlights.\n- update_feature_description: inline or side-by-side diff of description.\n- write_file: show the path and a unified diff of changes; collapse large hunks with a 'view more' affordance.\n- create_feature: show the new feature's title and description in a clean summary card.\n- create_story: show the new story's title and description in a clean summary card.\n- reorder_feature: show the resulting feature order list with indices; highlight moved items.\n- reorder_story: show the resulting story order list with indices; highlight moved items.\n\nUX details:\n- The popup title includes the tool name and a status icon.\n- Show timestamps and a compact identifier for the operation if available.\n- Provide a 'view details' action to expand into a larger modal for long diffs.\n- For diffs, prefer a readable unified diff with syntax highlighting for code when possible.\n\nEdge cases:\n- If prior content is unavailable, show 'new content only' and a note that diff is unavailable.\n- For very large files, show only the first N changed hunks with an expandable control.\n- If the tool failed or partially executed, show an error state in the popup.\n\nAccessibility:\n- Fully keyboard navigable; meets color contrast guidelines for highlights.\n- ARIA roles for popovers and labels for action buttons.\n\nAcceptance criteria:\n- Hovering or focusing on a tool call card shows a popup within 150ms with the tool-specific summary.\n- update_* and create_* tools display the exact new values; descriptions show textual diffs for updates and full text for creates.\n- write_file shows a unified diff for changed files, including path and line numbers.\n- reorder_* popups display the final order with indices, clearly marking moved items.\n- Popups are responsive and accessible, with keyboard and mobile behaviors working as described.\n- Large content gracefully collapses with an option to expand.",
       "context": [],
       "createdAt": "2025-10-29T00:55:40.474Z",
-      "updatedAt": "2025-10-29T11:06:02.551Z",
-      "rejection": "here are the things that are still missing/wrong for this feature:\n// if a tool call has no arguments - like `run_tests` (it gets {}) - don't show the arguments i.e. don't show the chevron to extend the card\n    // if tool was aborted - don't show the callout\n    // if tool was errored - only show the error in the callout - nothing else. Furthermore, the expanded card HAS to show the error as \"View error\" (normally there's View result - this changes for the error case).\n    // don't show the `View details` link in the callout - the user can expand the card to see those.\n    // `search_files` should show the query\n    // `write_file` should say \"File completely new.\" for a completely new file, but otherwise should show the diff (right now it doesn't at all - we need to have diff parsing logic for this - we already do this in @gitmergemodal)\n    // `run_test` should show the summary for the run - not the whole output. We show it similarly in @testsview\n    // `run_tests` should be similar to above.\n    // `create_feature` crashes the app",
-      "blockers": [],
-      "completedAt": "2025-10-29T11:06:02.551Z"
+      "updatedAt": "2025-10-29T11:22:45.810Z",
+      "rejection": "`search_files` should show the query (should be max 2 lines + horizontally scrollable), and then should show the results (max 10 lines and also horizontally scrollable)\n`write_file` doesn't show the diff correctly at all\n  `create_feature` still crashes the app - i think it's related to this error:\n  An error occurred in the <Code> component.\n(anonymous)\t@\tToolCallChangePopup.tsx:279\nToolCallChangePopup\t@\tToolCallChangePopup.tsx:199\n<ToolCallChangePopup>\t\t\nToolCallCard\t@\tToolCallCard.tsx:255",
+      "blockers": []
     },
     {
       "id": "ea6227a4-4b63-41ad-a334-79102a5f5619",
@@ -2633,8 +2631,7 @@
         "src/renderer/src/components/stories/DependencyBullet.tsx"
       ],
       "createdAt": "2025-10-29T00:58:11.800Z",
-      "updatedAt": "2025-10-29T11:11:46.494Z",
-      "rejection": "Currently the callout gets shown to the right of the view - not anchored to the button at all.\nThe resulting tooltips from the @src/renderer/src/components/stories/DependencyBullet.tsx also get shown wrong.",
+      "updatedAt": "2025-10-29T11:23:14.172Z",
       "blockers": [],
       "completedAt": "2025-10-29T11:11:46.494Z"
     },
