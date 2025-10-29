@@ -376,12 +376,19 @@ export default function ChatSidebar({
     } catch (e) {
       console.error('Failed to delete chat', e)
     } finally {
-      // Navigate to General chat for this project
+      // Navigate to General chat for this project without leaving Chat view
       const general = { type: 'PROJECT', projectId } as ChatContext
       try {
         localStorage.setItem('chat-last-selected-context', JSON.stringify(general))
       } catch {}
-      window.location.hash = ''
+      // Set hash to chat route root so ChatView stays active; it will default to project General
+      if (!window.location.hash.startsWith('#chat')) {
+        window.location.hash = '#chat'
+      } else {
+        // If already on chat route, trigger selection by updating hash to same route
+        // This can be a no-op; ChatView will pick up last-selected context
+        window.dispatchEvent(new HashChangeEvent('hashchange'))
+      }
       setIsSettingsOpen(false)
       isDeletingRef.current = false
     }
