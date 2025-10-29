@@ -152,7 +152,12 @@ export default function ChatsNavigationSidebar({
     const filtered = raw.filter((c) => {
       const ctx = c.chat.context as any
       const type = ctx?.type
-      if (type === 'PROJECT' || type === 'PROJECT_TOPIC' || type === 'AGENT_RUN' || type === 'AGENT_RUN_FEATURE') {
+      if (
+        type === 'PROJECT' ||
+        type === 'PROJECT_TOPIC' ||
+        type === 'AGENT_RUN' ||
+        type === 'AGENT_RUN_FEATURE'
+      ) {
         return ctx.projectId === activeProjectId
       }
       if (type === 'STORY' || type === 'FEATURE' || type === 'STORY_TOPIC') {
@@ -296,7 +301,13 @@ export default function ChatsNavigationSidebar({
           const ftitle = getFeatureTitle(fid)
           let f = group.features[fid]
           if (!f) {
-            f = { featureId: fid, featureTitle: ftitle, featureChat: undefined, runs: [], updatedAt }
+            f = {
+              featureId: fid,
+              featureTitle: ftitle,
+              featureChat: undefined,
+              runs: [],
+              updatedAt,
+            }
             group.features[fid] = f
           }
           f.updatedAt = f.updatedAt.localeCompare(updatedAt) < 0 ? updatedAt : f.updatedAt
@@ -362,7 +373,10 @@ export default function ChatsNavigationSidebar({
           <span className="flex-none">
             <IconChevron
               className="w-4 h-4"
-              style={{ transform: isOpen ? 'rotate(90deg)' : 'none', transition: 'transform 0.15s ease' }}
+              style={{
+                transform: isOpen ? 'rotate(90deg)' : 'none',
+                transition: 'transform 0.15s ease',
+              }}
             />
           </span>
         )}
@@ -394,7 +408,11 @@ export default function ChatsNavigationSidebar({
         <div className="flex items-center justify-between gap-2 min-w-0">
           <div className="text-[12px] font-medium text-[var(--text-primary)] truncate">{label}</div>
           {isThinking ? (
-            <SpinnerWithDot size={14} showDot={isUnread} dotTitle={isUnread ? 'Unread messages' : undefined} />
+            <SpinnerWithDot
+              size={14}
+              showDot={isUnread}
+              dotTitle={isUnread ? 'Unread messages' : undefined}
+            />
           ) : isUnread && unreadCount > 0 ? (
             <NotificationBadge
               className={'h-[16px] min-w-[16px] px-1 text-[10px]'}
@@ -429,7 +447,10 @@ export default function ChatsNavigationSidebar({
           <span className="flex-none">
             <IconChevron
               className="w-4 h-4"
-              style={{ transform: isOpen ? 'rotate(90deg)' : 'none', transition: 'transform 0.15s ease' }}
+              style={{
+                transform: isOpen ? 'rotate(90deg)' : 'none',
+                transition: 'transform 0.15s ease',
+              }}
             />
           </span>
           <span className="truncate">{storyTitle}</span>
@@ -540,7 +561,10 @@ export default function ChatsNavigationSidebar({
 
                             {g.topics.length > 0 && (
                               <div className="space-y-1">
-                                <SectionHeader title="Topics" openKey={`story:${g.storyId}:topics`} />
+                                <SectionHeader
+                                  title="Topics"
+                                  openKey={`story:${g.storyId}:topics`}
+                                />
                                 {open[`story:${g.storyId}:topics`] && (
                                   <div
                                     id={`story:${g.storyId}:topics-section`}
@@ -668,7 +692,7 @@ export default function ChatsNavigationSidebar({
                         )}
                       </div>
                     )
-                  })}
+                  })
                 )}
               </div>
             )}
@@ -736,7 +760,11 @@ export default function ChatsNavigationSidebar({
                         {label}
                       </div>
                       {isThinking ? (
-                        <SpinnerWithDot size={14} showDot={isUnread} dotTitle={isUnread ? 'Unread messages' : undefined} />
+                        <SpinnerWithDot
+                          size={14}
+                          showDot={isUnread}
+                          dotTitle={isUnread ? 'Unread messages' : undefined}
+                        />
                       ) : isUnread && unreadCount > 0 ? (
                         <NotificationBadge
                           className={'h-[16px] min-w-[16px] px-1 text-[10px]'}

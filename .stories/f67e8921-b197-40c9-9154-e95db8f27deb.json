@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "?",
+  "status": "-",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -2577,7 +2577,7 @@
     },
     {
       "id": "ae8f8bd5-6062-4238-bc93-00994debfad0",
-      "status": "+",
+      "status": "-",
       "title": "Each commit that is pending in GitView is for stories and features - they should be displayed as chips",
       "description": "Most of the commits are implementing features and have the id inside the commit message. That id should be extracted and displayed as @src/renderer/src/components/stories/DependencyBullet.tsx to show the user which features are part of this pending merge.\n\nThe `thefactory-tools` now exposes all the necessary values for this - check @src/logic/git/gitTypes.copy.ts to see.",
       "context": [
@@ -2590,7 +2590,7 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-28T12:52:21.487Z",
-      "updatedAt": "2025-10-29T22:57:59.653Z",
+      "updatedAt": "2025-10-29T23:50:05.623Z",
       "rejection": "This is not implemented - it needs to get the correct data via @src/renderer/src/contexts/GitContext.tsx , through @src/renderer/src/services/gitService.ts & @src/preload/ipcHandlersKeys.ts , @src/logic/git/GitManager.ts ."
     },
     {
@@ -2696,7 +2696,7 @@
     },
     {
       "id": "0a224aec-8933-4c9a-8910-33048809e451",
-      "status": "+",
+      "status": "-",
       "title": "when getting an error in chat show a retry button",
       "description": "In @src/renderer/src/components/chat/ChatSidebar.tsx when getting an error the only thing the user can do right now is to write a message to retry - we should have a retry button next to the message, that will remove the last message and proceed as if it never happened.\nThe error message should have an (i) button in the top right to display the error that occurred.",
       "context": [
@@ -2707,7 +2707,7 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-29T15:05:58.043Z",
-      "updatedAt": "2025-10-29T22:58:41.095Z",
+      "updatedAt": "2025-10-29T23:50:07.858Z",
       "rejection": "This needs to call the appropriate function via @src/renderer/src/contexts/ChatsContext.tsx , @src/renderer/src/services/chatsService.ts and @src/logic/chat/ChatsManager.ts ."
     },
     {
@@ -2724,7 +2724,7 @@
     },
     {
       "id": "4c176bb4-549e-4a6c-a59d-f8690c4819b5",
-      "status": "+",
+      "status": "-",
       "title": "the typewriter effect in chat swallows some first letters",
       "description": "whenever the typewriter effect kicks in it always omits the first or second letter in @src/renderer/src/components/chat/ChatSidebar.tsx when displaying a message in @src/renderer/src/components/chat/MessageList.tsx",
       "context": [
@@ -2733,7 +2733,7 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-29T16:24:36.140Z",
-      "updatedAt": "2025-10-29T22:59:17.346Z",
+      "updatedAt": "2025-10-29T23:50:10.861Z",
       "rejection": "This is still happening - if it's an issue with the library used - we should use a different library or write our own."
     },
     {
@@ -2810,13 +2810,13 @@
     },
     {
       "id": "5d593b43-f456-4b1e-97e6-cb53476197e8",
-      "status": "?",
+      "status": "-",
       "title": "Push notifications for Git and Chat (parity with agents)",
       "description": "Goal: Provide push notifications for Git and Chat using the exact same logic and UX we already use for agent run notifications.\n\nBehavior:\n- Chat: When a new assistant message arrives (under the same conditions currently used for agent notifications), send a native OS notification. Clicking the notification opens ChatView focused on the correct chat.\n- Git: When a branch with feature changes appears or updates (per GitContext/monitor events, under the same conditions as agent notifications), send a native OS notification. Clicking the notification opens GitView focused on that branch/diff context.\n- Deep linking follows the same patterns as agents; reuse existing navigation/deep-link helpers.\n\nImplementation notes:\n- Reuse existing notification pipeline used for agents in notificationsService and notifications manager. Mirror conditions and throttling/rate-limiting semantics already present for agent notifications.\n- No new settings pane work for now; follow the exact pathways and toggles agents use today.\n\nContext:\n- @src/renderer/src/services/notificationsService.ts\n- @src/notifications/manager.js\n- @src/renderer/src/services/chatsService.ts\n- @src/renderer/src/services/gitService.ts\n- @src/renderer/src/contexts/GitContext.tsx\n- @src/renderer/src/screens/ChatView.tsx\n- @src/renderer/src/screens/GitView.tsx\n\nAcceptance criteria:\n- New chat message triggers an OS push notification under the same conditions as agent notifications. Clicking it takes the user directly to the relevant chat in ChatView.\n- Git branch feature-change event triggers an OS push notification under the same conditions as agent notifications. Clicking it takes the user to GitView focused on the relevant branch.\n- No additional settings are necessary; behavior mirrors agent notification toggles and logic exactly.\n- Notifications are properly debounced/rate limited if the agent pipeline already enforces this (parity).",
       "context": [],
       "createdAt": "2025-10-29T16:42:29.048Z",
-      "updatedAt": "2025-10-29T23:37:46.571Z",
-      "rejection": "Blocked: Workspace is empty; cannot find source files to implement notifications. list_contents('/') returned no entries. Repository must be provided or mounted."
+      "updatedAt": "2025-10-29T23:50:16.735Z",
+      "blockers": []
     },
     {
       "id": "38e1f4bc-07fa-42cc-990d-da75a62151a6",
