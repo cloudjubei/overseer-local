@@ -18,6 +18,17 @@ interface EnhancedMessage extends ChatMessage {
   isFirstInGroup?: boolean
 }
 
+function lastMessageIso(messages: ChatMessage[]): string | undefined {
+  if (!messages || messages.length === 0) return undefined
+  const last = messages[messages.length - 1]
+  const cm = (last as any).completionMessage
+  if (cm?.completedAt) return cm.completedAt as string
+  if (cm?.startedAt) return cm.startedAt as string
+  const createdAt = (last as any).createdAt
+  if (typeof createdAt === 'string') return createdAt
+  return undefined
+}
+
 export default function MessageList({
   chatId,
   messages,
@@ -25,6 +36,8 @@ export default function MessageList({
   onResumeTools,
   numberMessagesToSend,
   onDeleteLastMessage,
+  onAtBottomChange,
+  onReadLatest,
 }: {
   chatId?: string
   messages: ChatMessage[]
@@ -32,6 +45,8 @@ export default function MessageList({
   onResumeTools?: (toolIds: string[]) => void
   numberMessagesToSend?: number
   onDeleteLastMessage?: () => void
+  onAtBottomChange?: (atBottom: boolean) => void
+  onReadLatest?: (iso?: string) => void
 }) {
   const { filesByPath } = useFiles()
 
@@ -186,13 +201,19 @@ export default function MessageList({
     if (!c) return
     c.scrollTo({ top: c.scrollHeight, behavior })
     isAtBottomRef.current = true
+    onAtBottomChange?.(true)
   }
 
   const handleScroll: React.UIEventHandler<HTMLDivElement> = (e) => {
     const el = e.currentTarget
     const threshold = 10
     const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - threshold
-    isAtBottomRef.current = atBottom
+    if (atBottom !== isAtBottomRef.current) {
+      isAtBottomRef.current = atBottom
+      onAtBottomChange?.(atBottom)
+      // If the user just reached bottom, consider the latest as read
+      if (atBottom) onReadLatest?.(lastMessageIso(messages))
+    }
   }
 
   // On chat switch, ensure we start at the bottom (covers cases where spinner is visible on open)
@@ -202,6 +223,8 @@ export default function MessageList({
       forceScrollToBottom('auto')
       // Clear the switch flag after initial adjustment
       justSwitchedChatRef.current = false
+      // On opening, if we're at bottom and there are messages, mark them as read
+      if (isAtBottomRef.current) onReadLatest?.(lastMessageIso(messages))
     })
   }, [chatId])
 
@@ -220,6 +243,8 @@ export default function MessageList({
       requestAnimationFrame(() => {
         forceScrollToBottom('auto')
         animationChatChangedRef.current = false
+        // After snapping, mark latest as read since we're at bottom
+        if (isAtBottomRef.current) onReadLatest?.(lastMessageIso(messages))
       })
       return
     }
@@ -228,6 +253,7 @@ export default function MessageList({
     if (isThinking && computeIsNearBottom()) {
       requestAnimationFrame(() => {
         forceScrollToBottom('auto')
+        if (isAtBottomRef.current) onReadLatest?.(lastMessageIso(messages))
       })
       return
     }
@@ -246,6 +272,8 @@ export default function MessageList({
       }
       if (targetTop < 0) targetTop = 0
       c.scrollTo({ top: targetTop, behavior: 'smooth' })
+      // Since we keep the user at bottom, mark as read
+      onReadLatest?.(lastMessageIso(messages))
     })
   }, [messages, isThinking])
 
@@ -254,6 +282,7 @@ export default function MessageList({
     if (!isThinking) return
     if (computeIsNearBottom()) {
       forceScrollToBottom('auto')
+      onReadLatest?.(lastMessageIso(messages))
     }
   }, [isThinking])
 
@@ -265,6 +294,7 @@ export default function MessageList({
     const mo = new MutationObserver(() => {
       if (isAtBottomRef.current) {
         forceScrollToBottom('auto')
+        onReadLatest?.(lastMessageIso(messages))
       }
     })
     mo.observe(container, { childList: true, subtree: true, characterData: true })
@@ -272,6 +302,7 @@ export default function MessageList({
     const onResize = () => {
       if (isAtBottomRef.current) {
         forceScrollToBottom('auto')
+        onReadLatest?.(lastMessageIso(messages))
       }
     }
     window.addEventListener('resize', onResize)

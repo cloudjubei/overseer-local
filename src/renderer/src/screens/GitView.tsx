@@ -13,9 +13,9 @@ import { useGit } from '../contexts/GitContext'
 
 function statusLabel(b: GitUnifiedBranch): string {
   if (b.current) return 'current'
-  if (b.isLocal && b.isRemote) return 'tracked'
-  if (b.isLocal && !b.isRemote) return 'local only'
-  if (!b.isLocal && b.isRemote) return 'remote only'
+  if (b.isLocal && b.isRemote) return 'both'
+  if (b.isLocal && !b.isRemote) return 'local'
+  if (!b.isLocal && b.isRemote) return 'remote'
   return 'unknown'
 }
 
@@ -54,11 +54,6 @@ function StatusChips({ b }: { b: GitUnifiedBranch }) {
       >
         {label}
       </span>
-      {b.upstreamRemote && b.upstreamBranch && (
-        <span className="px-1.5 py-0.5 rounded border bg-neutral-50 border-neutral-200 text-neutral-600 dark:bg-neutral-900/30 dark:border-neutral-800 dark:text-neutral-300">
-          {`${b.upstreamRemote}/${b.upstreamBranch}`}
-        </span>
-      )}
     </div>
   )
 }
@@ -68,17 +63,23 @@ function UnifiedBranchItem({
   projectTitle,
   baseRef = 'main',
   branch,
+  mode = 'default',
+  onAfterAction,
 }: {
   projectId: string
   projectTitle?: string
   baseRef?: string
   branch: GitUnifiedBranch
+  mode?: 'default' | 'current'
+  onAfterAction?: () => void
 }) {
   const { openModal } = useNavigator()
   const [deleting, setDeleting] = React.useState(false)
   const [summary, setSummary] = React.useState<{ loaded: boolean; error?: string; text?: string }>(
     { loaded: false },
   )
+  const [pushing, setPushing] = React.useState(false)
+  const [pulling, setPulling] = React.useState(false)
 
   const storyId = getStoryId(branch)
 
@@ -88,7 +89,7 @@ function UnifiedBranchItem({
 
   const onQuickMerge = async (e: React.MouseEvent) => {
     e.stopPropagation()
-    if (!canQuickMerge) return
+    if (!canQuickMerge || mode === 'current') return
     openModal({
       type: 'git-merge',
       projectId,
@@ -150,12 +151,61 @@ function UnifiedBranchItem({
       alert('Delete branch failed')
     } finally {
       setDeleting(false)
+      onAfterAction?.()
     }
   }
 
+  const remoteAndBranch = React.useMemo(() => {
+    const remote = branch.upstreamRemote || 'origin'
+    const remoteBranch = branch.upstreamBranch || branch.name
+    return { remote, remoteBranch }
+  }, [branch.upstreamRemote, branch.upstreamBranch, branch.name])
+
+  const onPush = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (pushing) return
+    setPushing(true)
+    try {
+      const res = await gitService.push(projectId, remoteAndBranch.remote, remoteAndBranch.remoteBranch)
+      if (!res?.ok) alert(`Push failed: ${res?.error || 'unknown error'}`)
+    } catch (err) {
+      console.error('Push failed', err)
+      alert('Push failed')
+    } finally {
+      setPushing(false)
+      onAfterAction?.()
+    }
+  }
+
+  const onPull = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (pulling) return
+    setPulling(true)
+    try {
+      const res = await gitService.pull(projectId, remoteAndBranch.remote, remoteAndBranch.remoteBranch)
+      if (!res?.ok) alert(`Pull failed: ${res?.error || 'unknown error'}`)
+    } catch (err) {
+      console.error('Pull failed', err)
+      alert('Pull failed')
+    } finally {
+      setPulling(false)
+      onAfterAction?.()
+    }
+  }
+
+  const ahead = branch.ahead ?? 0
+  const behind = branch.behind ?? 0
+  const showPush = mode === 'current' && ahead > 0
+  const showPull = mode === 'current' && behind > 0
+
   const row = (
     <div
-      className="flex items-center justify-between px-3 py-2 border-b border-neutral-100 dark:border-neutral-900 text-sm hover:bg-neutral-50 dark:hover:bg-neutral-900/30 cursor-pointer"
+      className={
+        'flex items-center justify-between px-3 py-2 border-b border-neutral-100 dark:border-neutral-900 text-sm ' +
+        (mode === 'current'
+          ? 'bg-neutral-50/60 dark:bg-neutral-900/30'
+          : 'hover:bg-neutral-50 dark:hover:bg-neutral-900/30')
+      }
       role="button"
       onClick={onQuickMerge}
       onMouseEnter={() => {
@@ -176,40 +226,79 @@ function UnifiedBranchItem({
       <div className="shrink-0 flex items-center gap-3">
         <AheadBehind b={branch} />
         <div className="flex items-center gap-1.5">
-          <Tooltip content={canQuickMerge ? 'fast merge' : 'unavailable'} placement="bottom">
-            <span onClick={(e) => e.stopPropagation()}>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onQuickMerge}
-                disabled={!canQuickMerge}
-                aria-label="Fast merge"
-                title="fast merge"
+          {mode === 'current' ? (
+            <>
+              {showPull && (
+                <Tooltip content={'pull from remote'} placement="bottom">
+                  <span onClick={(e) => e.stopPropagation()}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={onPull}
+                      loading={pulling}
+                      aria-label="Pull"
+                      title="Pull from remote"
+                    >
+                      Pull
+                    </Button>
+                  </span>
+                </Tooltip>
+              )}
+              {showPush && (
+                <Tooltip content={'push to remote'} placement="bottom">
+                  <span onClick={(e) => e.stopPropagation()}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={onPush}
+                      loading={pushing}
+                      aria-label="Push"
+                      title="Push to remote"
+                    >
+                      Push
+                    </Button>
+                  </span>
+                </Tooltip>
+              )}
+            </>
+          ) : (
+            <>
+              <Tooltip content={canQuickMerge ? 'fast merge' : 'unavailable'} placement="bottom">
+                <span onClick={(e) => e.stopPropagation()}>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={onQuickMerge}
+                    disabled={!canQuickMerge}
+                    aria-label="Fast merge"
+                    title="fast merge"
+                  >
+                    <IconFastMerge className="w-4 h-4" />
+                  </Button>
+                </span>
+              </Tooltip>
+              <Tooltip
+                content={
+                  canDeleteLocal ? 'delete local branch' : canDeleteRemote ? 'delete remote branch' : 'cannot delete'
+                }
+                placement="bottom"
               >
-                <IconFastMerge className="w-4 h-4" />
-              </Button>
-            </span>
-          </Tooltip>
-          <Tooltip
-            content={
-              canDeleteLocal ? 'delete local branch' : canDeleteRemote ? 'delete remote branch' : 'cannot delete'
-            }
-            placement="bottom"
-          >
-            <span onClick={(e) => e.stopPropagation()}>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onDelete}
-                disabled={!canDeleteLocal && !canDeleteRemote}
-                loading={deleting}
-                aria-label="Delete branch"
-                title="Delete branch"
-              >
-                <IconDelete className="w-4 h-4" />
-              </Button>
-            </span>
-          </Tooltip>
+                <span onClick={(e) => e.stopPropagation()}>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={onDelete}
+                    disabled={!canDeleteLocal && !canDeleteRemote}
+                    loading={deleting}
+                    aria-label="Delete branch"
+                    title="Delete branch"
+                  >
+                    <IconDelete className="w-4 h-4" />
+                  </Button>
+                </span>
+              </Tooltip>
+            </>
+          )}
         </div>
       </div>
     </div>
@@ -244,6 +333,13 @@ function CurrentProjectView() {
   const { unified } = useGit()
   const { branches, loading, error } = unified.get(projectId)
 
+  const current = React.useMemo(() => branches?.find((b) => b.current), [branches])
+  const others = React.useMemo(() => (branches || []).filter((b) => !b.current), [branches])
+
+  const reload = React.useCallback(() => {
+    void unified.reload(projectId)
+  }, [unified, projectId])
+
   return (
     <div className="flex-1 min-h-0 min-w-0 rounded-md border border-neutral-200 dark:border-neutral-800 flex flex-col">
       <div className="px-4 py-3 border-b border-neutral-100 dark:border-neutral-900 text-sm text-neutral-600 dark:text-neutral-400 flex items-center gap-3">
@@ -263,8 +359,26 @@ function CurrentProjectView() {
         )}
         {!loading && !error && branches && branches.length > 0 && (
           <div className="divide-y divide-neutral-100 dark:divide-neutral-900">
-            {branches.map((b) => (
-              <UnifiedBranchItem key={`${projectId}:${b.name}`} projectId={projectId!} branch={b} projectTitle={title} />
+            {current && (
+              <div className="">
+                <div className="px-3 py-2 text-xs font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400 bg-neutral-50 dark:bg-neutral-900/40">
+                  Current branch
+                </div>
+                <UnifiedBranchItem
+                  key={`${projectId}:${current.name}`}
+                  projectId={projectId!}
+                  branch={current}
+                  projectTitle={title}
+                  mode="current"
+                  onAfterAction={reload}
+                />
+              </div>
+            )}
+            <div className="px-3 py-2 text-xs font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400 bg-neutral-50 dark:bg-neutral-900/40">
+              Other branches
+            </div>
+            {others.map((b) => (
+              <UnifiedBranchItem key={`${projectId}:${b.name}`} projectId={projectId!} branch={b} projectTitle={title} onAfterAction={reload} />
             ))}
           </div>
         )}
@@ -299,13 +413,26 @@ function AllProjectsView() {
         {projects.map((proj) => {
           const v = unified.byProject[proj.id]
           if (!v || v.loading || (v.branches?.length ?? 0) === 0) return null
+          const curr = v.branches.find((b) => b.current)
+          const rest = v.branches.filter((b) => !b.current)
           return (
             <div key={proj.id} className="">
               <div className="px-3 py-2 text-xs font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400 bg-neutral-50 dark:bg-neutral-900/40">
                 {proj.title || proj.id}
               </div>
               <div className="divide-y divide-neutral-100 dark:divide-neutral-900">
-                {v.branches.map((b) => (
+                {curr && (
+                  <>
+                    <div className="px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400 bg-neutral-50 dark:bg-neutral-900/40">
+                      Current branch
+                    </div>
+                    <UnifiedBranchItem key={`${proj.id}:${curr.name}`} projectId={proj.id} branch={curr} mode="current" onAfterAction={() => unified.reload(proj.id)} />
+                    <div className="px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400 bg-neutral-50 dark:bg-neutral-900/40">
+                      Other branches
+                    </div>
+                  </>
+                )}
+                {rest.map((b) => (
                   <UnifiedBranchItem key={`${proj.id}:${b.name}`} projectId={proj.id} branch={b} />
                 ))}
               </div>

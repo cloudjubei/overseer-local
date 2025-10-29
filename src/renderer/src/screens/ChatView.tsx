@@ -19,6 +19,8 @@ import CollapsibleSidebar from '../components/ui/CollapsibleSidebar'
 import { chatsService } from '@renderer/services/chatsService'
 import ChatsNavigationSidebar from '@renderer/components/chat/ChatsNavigationSidebar'
 import SegmentedControl from '@renderer/components/ui/SegmentedControl'
+import { useChatUnread } from '@renderer/hooks/useChatUnread'
+import DotBadge from '@renderer/components/ui/DotBadge'
 
 function prettyTopicName(topic?: string): string {
   if (!topic) return 'Topic'
@@ -111,6 +113,7 @@ export default function ChatView() {
   const { storiesById, featuresById } = useStories()
   const { getChat } = useChats()
   const { runsHistory } = useAgents()
+  const { hasUnreadForProject } = useChatUnread()
 
   // Helpers for titles
   const getProjectTitle = (id?: string) => {
@@ -210,9 +213,9 @@ export default function ChatView() {
     maybeSeed()
   }, [selectedContext, runsHistory, getChat])
 
-  // Header action: Categories | History switch
-  const headerAction = useMemo(
-    () => (
+  // Header action: Categories | History switch with unread dot hint if any unread in project
+  const headerAction = useMemo(() => {
+    const seg = (
       <SegmentedControl
         ariaLabel={'Toggle chat list mode'}
         options={[
@@ -223,9 +226,15 @@ export default function ChatView() {
         onChange={(v) => setMode(v as 'categories' | 'history')}
         size='sm'
       />
-    ),
-    [mode],
-  )
+    )
+    const showDot = hasUnreadForProject(activeProjectId)
+    return (
+      <div className='flex items-center gap-2'>
+        {seg}
+        {showDot && <DotBadge title={'Unread chats in this project'} />}
+      </div>
+    )
+  }, [mode, activeProjectId, hasUnreadForProject])
 
   const collapsedLabel = mode === 'categories' ? 'CATEGORIES' : 'HISTORY'
 

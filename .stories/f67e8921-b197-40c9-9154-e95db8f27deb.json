@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "-",
+  "status": "?",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -2481,7 +2481,7 @@
     },
     {
       "id": "63d893a3-845f-4557-b2a6-d30d38a8c24a",
-      "status": "-",
+      "status": "+",
       "title": "Chat notifications",
       "description": "In the @src/renderer/src/navigation/SidebarView.tsx we need to show notifications next to the project and next to the Chat button when there is an unread message. \nThere should be also a little dot (without a number inside) shown on the chat navigation in @src/renderer/src/screens/ChatView.tsx leading the user to the chat that has the unread message .",
       "context": [
@@ -2490,8 +2490,9 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-28T00:20:01.644Z",
-      "updatedAt": "2025-10-29T00:37:19.793Z",
-      "rejection": "A few issues:\n1) when clicking a chat and scrolling down (to read messages) doesn't make the badges disappear\n2) when the user is in a given chat and is reading messages as they come - notifications still show (they shouldn't as the user is up to date)\n3) the badge on each chat tile in the sidebar in @src/renderer/src/screens/ChatView.tsx should show the number of messages unread"
+      "updatedAt": "2025-10-29T00:53:47.519Z",
+      "rejection": "A few issues:\n1) when clicking a chat and scrolling down (to read messages) doesn't make the badges disappear\n2) when the user is in a given chat and is reading messages as they come - notifications still show (they shouldn't as the user is up to date)\n3) the badge on each chat tile in the sidebar in @src/renderer/src/screens/ChatView.tsx should show the number of messages unread",
+      "completedAt": "2025-10-29T00:53:47.519Z"
     },
     {
       "id": "98ff6ca9-38bd-4828-bcba-f555033945fe",
@@ -2521,7 +2522,7 @@
     },
     {
       "id": "beea43a0-839b-4f9b-8215-73a8fd39f3cb",
-      "status": "-",
+      "status": "+",
       "title": "Delete chat becomes refresh chat + actual delete chat in settings",
       "description": "The current 'Delete chat' button in the header of @src/renderer/src/screens/ChatView.tsx should become \"Refresh Chat\" - so still a red button, but with a different icon inside - a new one needs to be created and added to @src/renderer/src/components/ui/icons/Icons.tsx .\nAt the very bottom of chat settings there should be a red button that says \"Delete this chat\", which will ask the user for confirmation for doing so. This should actually delete the chat for good (at this moment taking the user to the \"General\" chat which is always available).",
       "context": [
@@ -2530,12 +2531,13 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-28T00:26:15.441Z",
-      "updatedAt": "2025-10-29T00:39:26.036Z",
-      "rejection": "Somehow deleting a chat makes the same exact chat appear empty at the top of the history list - i.e. it doesn't get deleted."
+      "updatedAt": "2025-10-29T00:59:48.062Z",
+      "rejection": "Somehow deleting a chat makes the same exact chat appear empty at the top of the history list - i.e. it doesn't get deleted.",
+      "completedAt": "2025-10-29T00:59:48.062Z"
     },
     {
       "id": "1784ec92-6612-4d1b-a8e9-41fb10c3557f",
-      "status": "-",
+      "status": "+",
       "title": "In GitView main branch has special buttons and is at top",
       "description": "The current branch in @src/renderer/src/screens/GitView.tsx shouldn't have a \"FastMerge\" and \"Delete\" buttons. It should have a push button if there's pending changes that haven't been pushed to remote and a pull button if there's changes on remote that haven't been pulled.\nThis branch should also be in a separate section at the top - not mixing in with the other branches.",
       "context": [
@@ -2543,11 +2545,12 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-28T12:44:29.335Z",
-      "updatedAt": "2025-10-28T12:44:29.335Z"
+      "updatedAt": "2025-10-29T01:05:28.984Z",
+      "completedAt": "2025-10-29T01:05:28.984Z"
     },
     {
       "id": "b81fe5fc-0b19-4fe7-9b41-5ae564e5e908",
-      "status": "-",
+      "status": "+",
       "title": "In GitView the status chip shouldn't show the branch name",
       "description": "In @src/renderer/src/screens/GitView.tsx the status chips should show if it's local, remote, both - not re-displaying the branch id/name",
       "context": [
@@ -2555,11 +2558,12 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-28T12:45:20.540Z",
-      "updatedAt": "2025-10-28T12:45:20.540Z"
+      "updatedAt": "2025-10-29T01:06:28.117Z",
+      "completedAt": "2025-10-29T01:06:28.117Z"
     },
     {
       "id": "41e29168-8387-44a3-8052-a80b3098088b",
-      "status": "-",
+      "status": "?",
       "title": "In GitMergeModal the diffs are not showing just incoming",
       "description": "In @src/renderer/src/screens/git/GitMergeModal.tsx the diffs that are displayed are showing both outgoing and incoming changes against each other. But the user should only be shown the incoming changes against the current branch.\nThere should be appropriate data from `thefactory-tools` for this - all the types are in @src/logic/git/gitTypes.copy.ts . If something is missing, then describe a feature request in `docs/GIT_DIFFS.md` so that `thefactory-tools` can be updated to include it.",
       "context": [
@@ -2568,7 +2572,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-28T12:47:48.778Z",
-      "updatedAt": "2025-10-28T12:47:48.778Z"
+      "updatedAt": "2025-10-29T01:14:58.713Z",
+      "rejection": "Blocked: Agent loop failed: {}"
     },
     {
       "id": "6ef71ce5-6bcd-407a-b9e7-1f3e44e2a626",

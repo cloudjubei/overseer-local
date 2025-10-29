@@ -68,9 +68,11 @@ export default class GitManager extends BaseManager {
     handlers[IPC_HANDLER_KEYS.GIT_DELETE_BRANCH] = ({ projectId, name }) =>
       this.deleteBranch(projectId, name)
 
-    // Push and remote branch delete
+    // Push, pull and remote branch delete
     handlers[IPC_HANDLER_KEYS.GIT_PUSH] = ({ projectId, remote, branch }) =>
       this.push(projectId, remote, branch)
+    handlers[IPC_HANDLER_KEYS.GIT_PULL] = ({ projectId, remote, branch }) =>
+      this.pull(projectId, remote, branch)
     handlers[IPC_HANDLER_KEYS.GIT_DELETE_REMOTE_BRANCH] = ({ projectId, name }) =>
       this.deleteRemoteBranch(projectId, name)
 
@@ -179,6 +181,16 @@ export default class GitManager extends BaseManager {
     const tools = await this.__getTools(projectId)
     if (!tools) return
     return await tools.push(remote, branch)
+  }
+
+  private async pull(
+    projectId: string,
+    remote?: string,
+    branch?: string,
+  ): Promise<GitOpResult | undefined> {
+    const tools = await this.__getTools(projectId)
+    if (!tools) return
+    return await tools.pull(remote, branch)
   }
 
   private async deleteBranch(projectId: string, name: string): Promise<GitOpResult | undefined> {
