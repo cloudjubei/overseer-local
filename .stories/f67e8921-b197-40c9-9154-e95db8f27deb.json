@@ -2770,7 +2770,7 @@
     },
     {
       "id": "e086f202-7b49-4317-bf1c-9ac4ab60a520",
-      "status": "-",
+      "status": "+",
       "title": "the `write_file` popup needs updating",
       "description": "in @src/renderer/src/components/chat/ToolCallChangePopup.tsx for the `write_file` tool call - with a result it can show Path(unknown) even though the path is included in the tool call args under 'name' .\nWithout the tool result, the popup never shows the diff (we never got it) - this needs to be computed so it can be displayed.",
       "context": [
@@ -2778,7 +2778,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-29T16:34:09.408Z",
-      "updatedAt": "2025-10-29T16:34:09.408Z"
+      "updatedAt": "2025-10-29T17:50:05.033Z",
+      "completedAt": "2025-10-29T17:50:05.033Z"
     },
     {
       "id": "16745e78-fa85-4d82-986a-1a5c3f8630c1",
