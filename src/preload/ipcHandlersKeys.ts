@@ -159,6 +159,7 @@ const IPC_HANDLER_KEYS = {
   GIT_MONITOR_UPDATE: 'git:monitor:monitor',
   GIT_DELETE_BRANCH: 'git:delete-branch',
   GIT_PUSH: 'git:push',
+  GIT_PULL: 'git:pull',
   GIT_DELETE_REMOTE_BRANCH: 'git:delete-remote-branch',
   GIT_LIST_UNIFIED_BRANCHES: 'git:list-unified-branches',
   GIT_CREDENTIALS_SUBSCRIBE: 'git:credentials:subscribe',

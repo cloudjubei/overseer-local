@@ -2537,7 +2537,7 @@
     },
     {
       "id": "1784ec92-6612-4d1b-a8e9-41fb10c3557f",
-      "status": "-",
+      "status": "+",
       "title": "In GitView main branch has special buttons and is at top",
       "description": "The current branch in @src/renderer/src/screens/GitView.tsx shouldn't have a \"FastMerge\" and \"Delete\" buttons. It should have a push button if there's pending changes that haven't been pushed to remote and a pull button if there's changes on remote that haven't been pulled.\nThis branch should also be in a separate section at the top - not mixing in with the other branches.",
       "context": [
@@ -2545,7 +2545,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-28T12:44:29.335Z",
-      "updatedAt": "2025-10-28T12:44:29.335Z"
+      "updatedAt": "2025-10-29T01:05:28.984Z",
+      "completedAt": "2025-10-29T01:05:28.984Z"
     },
     {
       "id": "b81fe5fc-0b19-4fe7-9b41-5ae564e5e908",
