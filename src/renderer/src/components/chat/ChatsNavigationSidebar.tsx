@@ -7,6 +7,7 @@ import { IconChevron } from '@renderer/components/ui/icons/Icons'
 import { useChatUnread } from '@renderer/hooks/useChatUnread'
 import DotBadge from '@renderer/components/ui/DotBadge'
 import { getChatContextPath } from 'thefactory-tools/utils'
+import NotificationBadge from '@renderer/components/stories/NotificationBadge'
 
 function prettyTopicName(topic?: string): string {
   if (!topic) return 'Topic'
@@ -124,7 +125,7 @@ export default function ChatsNavigationSidebar({
   const { projects } = useProjectContext()
   const { storiesById, featuresById } = useStories()
   const { chatsByProjectId, getChat } = useChats()
-  const { unreadKeys } = useChatUnread()
+  const { unreadKeys, getUnreadCountForKey } = useChatUnread()
 
   const getProjectTitle = (id?: string) => {
     if (!id) return ''
@@ -367,6 +368,7 @@ export default function ChatsNavigationSidebar({
   }> = ({ ctx, label }) => {
     const key = getChatContextPath(ctx)
     const isUnread = unreadKeys.has(key)
+    const unreadCount = isUnread ? getUnreadCountForKey(key) : 0
     return (
       <button
         className={[
@@ -380,7 +382,15 @@ export default function ChatsNavigationSidebar({
       >
         <div className="flex items-center justify-between gap-2 min-w-0">
           <div className="text-[12px] font-medium text-[var(--text-primary)] truncate">{label}</div>
-          {isUnread && <DotBadge title={'Unread messages'} />}
+          {isUnread && unreadCount > 0 ? (
+            <NotificationBadge
+              className={'h-[16px] min-w-[16px] px-1 text-[10px]'}
+              text={`${unreadCount}`}
+              tooltipLabel={`${unreadCount} unread messages`}
+            />
+          ) : isUnread ? (
+            <DotBadge title={'Unread messages'} />
+          ) : null}
         </div>
       </button>
     )
@@ -447,9 +457,21 @@ export default function ChatsNavigationSidebar({
                       getFeatureTitle,
                     })}
                   </div>
-                  {unreadKeys.has(getChatContextPath(generalContext)) && (
-                    <DotBadge title={'Unread messages'} />
-                  )}
+                  {(() => {
+                    const key = getChatContextPath(generalContext)
+                    const isUnread = unreadKeys.has(key)
+                    const unreadCount = isUnread ? getUnreadCountForKey(key) : 0
+                    if (isUnread && unreadCount > 0)
+                      return (
+                        <NotificationBadge
+                          className={'h-[16px] min-w-[16px] px-1 text-[10px]'}
+                          text={`${unreadCount}`}
+                          tooltipLabel={`${unreadCount} unread messages`}
+                        />
+                      )
+                    if (isUnread) return <DotBadge title={'Unread messages'} />
+                    return null
+                  })()}
                 </div>
                 <div className="text-[11px] text-[var(--text-secondary)] truncate">
                   Single chat for this project
@@ -670,6 +692,7 @@ export default function ChatsNavigationSidebar({
                   getFeatureTitle,
                 })
                 const isUnread = unreadKeys.has(c.key)
+                const unreadCount = isUnread ? getUnreadCountForKey(c.key) : 0
                 return (
                   <button
                     key={c.key}
@@ -686,7 +709,15 @@ export default function ChatsNavigationSidebar({
                       <div className="text-[12px] font-medium text-[var(--text-primary)] truncate">
                         {label}
                       </div>
-                      {isUnread && <DotBadge title={'Unread messages'} />}
+                      {isUnread && unreadCount > 0 ? (
+                        <NotificationBadge
+                          className={'h-[16px] min-w-[16px] px-1 text-[10px]'}
+                          text={`${unreadCount}`}
+                          tooltipLabel={`${unreadCount} unread messages`}
+                        />
+                      ) : isUnread ? (
+                        <DotBadge title={'Unread messages'} />
+                      ) : null}
                     </div>
                     <div className="text-[10px] text-[var(--text-tertiary)] truncate">
                       Updated {c.chat.updatedAt || c.chat.createdAt || ''}

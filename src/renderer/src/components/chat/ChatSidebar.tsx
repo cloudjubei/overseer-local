@@ -88,12 +88,39 @@ export default function ChatSidebar({
     loadChat()
   }, [context, getChat])
 
-  // Mark chat as read when opened and whenever it updates
+  // Track whether the user is at the bottom to decide read state
+  const atBottomRef = useRef<boolean>(true)
+  const [atBottom, setAtBottom] = useState<boolean>(true)
   useEffect(() => {
-    if (!chat?.key) return
-    const readTime = chat.chat.updatedAt || chat.chat.createdAt || new Date().toISOString()
-    markReadByKey(chat.key, readTime)
-  }, [chat?.key, chat?.chat.updatedAt, chat?.chat.createdAt, markReadByKey])
+    atBottomRef.current = atBottom
+  }, [atBottom])
+
+  const markLatestAsRead = useCallback(() => {
+    const key = chat?.key
+    if (!key) return
+    const msgs = chat?.chat.messages || []
+    if (!msgs.length) return
+    // Determine latest message timestamp
+    const last = msgs[msgs.length - 1]
+    const cm = (last as any)?.completionMessage
+    const iso = (cm?.completedAt as string) || (cm?.startedAt as string) || new Date().toISOString()
+    markReadByKey(key, iso)
+  }, [chat?.key, chat?.chat.messages, markReadByKey])
+
+  // When the user scrolls to bottom, mark as read
+  const handleAtBottomChange = useCallback((isBottom: boolean) => {
+    setAtBottom(isBottom)
+    if (isBottom) {
+      markLatestAsRead()
+    }
+  }, [markLatestAsRead])
+
+  // When we detect the latest has been viewed (e.g., new message arrives while at bottom)
+  const handleReadLatest = useCallback((iso?: string) => {
+    const key = chat?.key
+    if (!key) return
+    markReadByKey(key, iso || new Date().toISOString())
+  }, [chat?.key, markReadByKey])
 
   const isThinking = chat?.isThinking || false
 
@@ -591,6 +618,8 @@ export default function ChatSidebar({
           onResumeTools={handleResumeTools}
           numberMessagesToSend={completion?.numberMessagesToSend}
           onDeleteLastMessage={() => deleteLastMessage(context)}
+          onAtBottomChange={handleAtBottomChange}
+          onReadLatest={handleReadLatest}
         />
       </div>
 
