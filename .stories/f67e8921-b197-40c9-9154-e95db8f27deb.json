@@ -2626,16 +2626,17 @@
     },
     {
       "id": "ea6227a4-4b63-41ad-a334-79102a5f5619",
-      "status": "-",
+      "status": "+",
       "title": "ChatView info callout with navigable story/feature chips",
       "description": "Goal: Improve the info button in @src/renderer/src/screens/ChatView.tsx so that clicking it opens a callout showing contextual, clickable story/feature chips via @src/renderer/src/components/stories/DependencyBullet.tsx.\n\nTrigger & behavior:\n- Click on the info button toggles the callout open/closed.\n- Clicking outside the callout (or pressing Esc) closes it.\n- The callout auto-closes on route/project change and when ChatView unmounts.\n- Replace any hover tooltip with this click-activated callout.\n\nContent rules:\n- If the current chat has an associated story, render a DependencyBullet for the story.\n- If the current chat has associated feature(s), render a DependencyBullet for each feature.\n- If an associated story/feature no longer exists, display the deleted state used elsewhere (e.g., *DELETED*), consistent with ChatView.\n- Chips are interactive: clicking navigates to the destination using DependencyBullet default navigation behavior.\n\nUX details:\n- Position the callout anchored to the info button with an arrow; keep within viewport bounds.\n- Lazy-mount contents only when opened; unmount on close.\n- Maintain z-index above the header and chat scroll container.\n\nAccessibility:\n- The info button uses aria-haspopup='dialog' and aria-expanded to reflect state; aria-controls points to the callout id.\n- The callout uses role='dialog' with an aria-label (e.g., 'Chat context'). Esc closes. Focus remains on the button; tabbing into the callout supports chip interaction.\n\nAcceptance criteria:\n- Clicking the info button opens the callout within 150ms; clicking it again, pressing Esc, or clicking outside closes it.\n- When a story/feature context exists, corresponding DependencyBullet chips render and navigate correctly on click.\n- When context is missing, no chips are shown; deleted items display as deleted-state chips.\n- Callout closes on route/project change and on ChatView unmount without errors.\n- Meets ARIA requirements as described and works with keyboard and mouse.",
       "context": [
         "src/renderer/src/components/stories/DependencyBullet.tsx"
       ],
       "createdAt": "2025-10-29T00:58:11.800Z",
-      "updatedAt": "2025-10-29T10:18:49.964Z",
+      "updatedAt": "2025-10-29T11:11:46.494Z",
       "rejection": "Currently the callout gets shown to the right of the view - not anchored to the button at all.\nThe resulting tooltips from the @src/renderer/src/components/stories/DependencyBullet.tsx also get shown wrong.",
-      "blockers": []
+      "blockers": [],
+      "completedAt": "2025-10-29T11:11:46.494Z"
     },
     {
       "id": "0559292b-fad1-4585-b319-37c653e68bd8",

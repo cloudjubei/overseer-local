@@ -13,6 +13,8 @@ export type TooltipProps = {
   anchorStyle?: React.CSSProperties
   disableClickToggle?: boolean
   anchorTabIndex?: number
+  // New: allow overriding the tooltip portal z-index so it can layer above overlays
+  zIndex?: number
 }
 
 export default function Tooltip({
@@ -26,6 +28,7 @@ export default function Tooltip({
   anchorStyle,
   disableClickToggle = false,
   anchorTabIndex,
+  zIndex,
 }: TooltipProps) {
   const [open, setOpen] = useState(false)
   const [pinned, setPinned] = useState(false)
@@ -257,7 +260,7 @@ export default function Tooltip({
             ref={tooltipRef}
             onMouseEnter={() => show(true)}
             onMouseLeave={() => hide()}
-            style={{ position: 'absolute', top: position.top, left: position.left }}
+            style={{ position: 'absolute', top: position.top, left: position.left, zIndex: zIndex }}
           >
             <div className="ui-tooltip__content">{content}</div>
           </div>,

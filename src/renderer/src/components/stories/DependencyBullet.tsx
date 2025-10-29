@@ -113,7 +113,7 @@ const DependencyBullet: React.FC<DependencyBulletProps> = ({
   }
 
   return (
-    <Tooltip content={content}>
+    <Tooltip content={content} zIndex={2000}>
       <span
         className={`${className} chip  ${isError ? '' : isFeatureDependency ? 'feature' : 'story'} ${isError ? 'chip--missing' : isOutbound ? 'chip--blocks' : 'chip--ok'}`}
         title={`${display}${isOutbound ? ' (requires this)' : ''}`}
