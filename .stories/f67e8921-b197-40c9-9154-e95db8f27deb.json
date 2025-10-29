@@ -2731,7 +2731,7 @@
     },
     {
       "id": "720ef1b6-1461-4ea9-8417-ce6955ba566e",
-      "status": "-",
+      "status": "+",
       "title": "each message should show the timestamp in a human friendly way",
       "description": "In @src/renderer/src/components/chat/MessageList.tsx all messages should show these at the top. For users it's at the top left, and for assistants or system messages it's at the top right.\nThis should be a very small piece of text.\nIf the message was 'today' then just show the time. If it was on a different day also show the date.",
       "context": [
@@ -2739,7 +2739,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-29T16:30:28.066Z",
-      "updatedAt": "2025-10-29T16:30:28.066Z"
+      "updatedAt": "2025-10-29T17:37:17.935Z",
+      "completedAt": "2025-10-29T17:37:17.935Z"
     },
     {
       "id": "eb960fe5-b811-4119-8aa9-e9d420b54024",
