@@ -88,8 +88,7 @@ function UnifiedBranchItem({
   const canDeleteLocal = branch.isLocal
   const canDeleteRemote = branch.isRemote && !branch.isLocal
 
-  const onQuickMerge = async (e: React.MouseEvent) => {
-    e.stopPropagation()
+  const openMergeModal = (opts: { openConfirm: boolean }) => {
     if (!canQuickMerge || mode === 'current') return
     openModal({
       type: 'git-merge',
@@ -98,7 +97,18 @@ function UnifiedBranchItem({
       baseRef,
       branch: branch.isLocal ? branch.name : branch.remoteName || branch.name,
       storyId,
+      openConfirm: opts.openConfirm,
     })
+  }
+
+  const onRowClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    openMergeModal({ openConfirm: false })
+  }
+
+  const onFastMergeClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    openMergeModal({ openConfirm: true })
   }
 
   const loadSummary = async () => {
@@ -208,7 +218,7 @@ function UnifiedBranchItem({
           : 'hover:bg-neutral-50 dark:hover:bg-neutral-900/30')
       }
       role="button"
-      onClick={onQuickMerge}
+      onClick={onRowClick}
       onMouseEnter={() => {
         void loadSummary()
       }}
@@ -279,7 +289,7 @@ function UnifiedBranchItem({
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={onQuickMerge}
+                    onClick={onFastMergeClick}
                     disabled={!canQuickMerge}
                     aria-label="Fast merge"
                     title="fast merge"

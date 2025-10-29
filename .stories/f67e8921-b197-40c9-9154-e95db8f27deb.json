@@ -2639,7 +2639,7 @@
     },
     {
       "id": "0559292b-fad1-4585-b319-37c653e68bd8",
-      "status": "-",
+      "status": "+",
       "title": "the \"fast merge\" button improvement",
       "description": "the \"fast merge\" button in @src/renderer/src/screens/GitView.tsx  should do the same as the confirmation \"fast merge\" in @src/renderer/src/screens/git/GitMergeModal.tsx - i.e. it should show the confirmation dialog and then proceed.",
       "context": [
@@ -2648,7 +2648,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-29T09:12:13.859Z",
-      "updatedAt": "2025-10-29T09:12:13.859Z"
+      "updatedAt": "2025-10-29T11:42:27.188Z",
+      "completedAt": "2025-10-29T11:42:27.188Z"
     },
     {
       "id": "8ba96fe8-c07a-44e5-a2b0-2fab5c056c78",
