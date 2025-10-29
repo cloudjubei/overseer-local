@@ -306,13 +306,11 @@
       "title": "Integrate Unified Branch Data Model in Git View",
       "description": "Refactor the 'GitView' to handle the enhanced branch data structure from `thefactory-tools`. The view should now display a single, de-duplicated list of branches, clearly indicating their local and remote status (e.g., local only, remote only, tracked). This resolves the issue of seeing the same branch listed twice if it exists both locally and on the remote. The UI should correctly parse and display metadata like the Story ID for all branches, regardless of their origin.\n\n@src/logic/git/gitTypes.copy.ts has the latest type information",
       "context": [
-        "src/logic/git/gitTypes.copy.ts",
-        "src/renderer/src/contexts/GitContext.tsx"
+        "src/logic/git/gitTypes.copy.ts"
       ],
       "createdAt": "2025-10-28T09:29:48.355Z",
-      "updatedAt": "2025-10-28T12:35:00.862Z",
+      "updatedAt": "2025-10-29T00:24:18.819Z",
       "blockers": [],
-      "rejection": "the `useUnifiedBranches` logic should be part of @src/renderer/src/contexts/GitContext.tsx",
       "completedAt": "2025-10-28T12:35:00.862Z"
     },
     {
