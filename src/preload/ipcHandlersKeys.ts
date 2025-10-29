@@ -154,7 +154,6 @@ const IPC_HANDLER_KEYS = {
   GIT_APPLY_MERGE: 'git:apply-merge',
   GIT_GET_LOCAL_STATUS: 'git:get-local-status',
   GIT_GET_BRANCH_DIFF_SUMMARY: 'git:get-branch-diff-summary',
-  GIT_GET_INCOMING_DIFF_SUMMARY: 'git:get-incoming-diff-summary',
   GIT_MONITOR_START: 'git:monitor:start',
   GIT_MONITOR_STOP: 'git:monitor:stop',
   GIT_MONITOR_UPDATE: 'git:monitor:monitor',
