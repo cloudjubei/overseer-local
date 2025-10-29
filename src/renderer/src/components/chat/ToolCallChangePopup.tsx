@@ -151,15 +151,26 @@ function toLines(value: any): string[] {
   return str.split(/\r?\n/)
 }
 
-function PreLimited({ lines, maxLines }: { lines: string[]; maxLines: number }) {
+function PreLimited({
+  lines,
+  maxLines,
+  renderTruncationMessage,
+}: {
+  lines: string[]
+  maxLines: number
+  renderTruncationMessage?: (omitted: number) => React.ReactNode
+}) {
   const limited = lines.slice(0, maxLines)
   const truncated = lines.length > maxLines
+  const omitted = truncated ? lines.length - maxLines : 0
   return (
     <div>
       <pre className="text-[11px] text-[var(--text-primary)] bg-[var(--surface-raised)] p-1.5 rounded-md overflow-x-auto whitespace-pre">
         {limited.join('\n')}
       </pre>
-      {truncated ? null : null}
+      {truncated && renderTruncationMessage ? (
+        <div className="text-[11px] text-[var(--text-secondary)] mt-1">{renderTruncationMessage(omitted)}</div>
+      ) : null}
     </div>
   )
 }
@@ -335,7 +346,11 @@ export default function ToolCallChangePopup({
           {resultLines.length > 0 ? (
             <div>
               <SectionTitle>Results</SectionTitle>
-              <PreLimited lines={resultLines} maxLines={10} />
+              <PreLimited
+                lines={resultLines}
+                maxLines={10}
+                renderTruncationMessage={(omitted) => <>+ {omitted} more at the bottom</>}
+              />
             </div>
           ) : (
             <div className="text-[11px] text-[var(--text-secondary)]">No results</div>

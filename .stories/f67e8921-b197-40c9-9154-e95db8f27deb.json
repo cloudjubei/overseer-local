@@ -2757,7 +2757,7 @@
     },
     {
       "id": "ad71c0b9-e555-4653-a600-af5efd1db0f1",
-      "status": "-",
+      "status": "+",
       "title": "`search_files` should say '+ X more at the bottom'",
       "description": "In @src/renderer/src/components/chat/ToolCallChangePopup.tsx for the `search_files` tool if there are truncated results, there should be a one line message saying how many were ommitted.",
       "context": [
@@ -2765,7 +2765,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-29T16:32:34.177Z",
-      "updatedAt": "2025-10-29T16:32:34.177Z"
+      "updatedAt": "2025-10-29T17:42:55.772Z",
+      "completedAt": "2025-10-29T17:42:55.772Z"
     },
     {
       "id": "e086f202-7b49-4317-bf1c-9ac4ab60a520",
