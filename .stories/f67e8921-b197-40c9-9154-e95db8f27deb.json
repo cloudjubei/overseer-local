@@ -2666,7 +2666,7 @@
     },
     {
       "id": "0a96daaf-26a2-4dcd-995a-77be216824d6",
-      "status": "-",
+      "status": "+",
       "title": "File suggestions get clipped/cropped",
       "description": "The @src/renderer/src/components/ui/FileMentionsTextarea.tsx when showing the file suggestions can go completely outside the view and get clipped/cropped.\nTo make sure this doesn't happen - the suggestions should show within the left right borders of the parent (i.e. they shouldn't move as the user is typing). The y location is great.",
       "context": [
@@ -2674,7 +2674,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-29T10:21:07.274Z",
-      "updatedAt": "2025-10-29T10:21:07.274Z"
+      "updatedAt": "2025-10-29T11:50:56.637Z",
+      "completedAt": "2025-10-29T11:50:56.637Z"
     },
     {
       "id": "3bfbcd7e-2016-401a-b1d7-466ccb53d7c0",

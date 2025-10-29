@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from 'react'
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useFilesAutocomplete } from '../../hooks/useFilesAutocomplete'
 import { useReferencesAutocomplete } from '../../hooks/useReferencesAutocomplete'
 import { useFiles } from '../../contexts/FilesContext'
@@ -40,6 +40,7 @@ export default function FileMentionsTextarea({
   const innerRef = useRef<HTMLTextAreaElement | null>(null)
   const textareaRef = inputRef ?? innerRef
   const mirrorRef = useRef<HTMLDivElement | null>(null)
+  const containerRef = useRef<HTMLDivElement | null>(null)
 
   const filesList = useMemo(() => files.map((f) => f.relativePath!), [files])
 
@@ -67,6 +68,131 @@ export default function FileMentionsTextarea({
     textareaRef,
     mirrorRef,
   })
+
+  const [filesDropdownLeft, setFilesDropdownLeft] = useState<number | null>(null)
+  const [filesDropdownMaxWidth, setFilesDropdownMaxWidth] = useState<number | null>(null)
+  const filesDropdownRef = useRef<HTMLDivElement | null>(null)
+
+  const [refsDropdownLeft, setRefsDropdownLeft] = useState<number | null>(null)
+  const [refsDropdownMaxWidth, setRefsDropdownMaxWidth] = useState<number | null>(null)
+  const refsDropdownRef = useRef<HTMLDivElement | null>(null)
+
+  const PADDING = 8 // keep a little gap from the parent borders
+  const clamp = (v: number, min: number, max: number) => Math.max(min, Math.min(max, v))
+
+  // Compute stable left and maxWidth when opening files suggestions
+  useEffect(() => {
+    if (!isFilesOpen || !filesPosition) {
+      setFilesDropdownLeft(null)
+      setFilesDropdownMaxWidth(null)
+      return
+    }
+    const parent = containerRef.current?.getBoundingClientRect()
+    if (!parent) return
+
+    const estWidth = 260 // fallback until real width measured
+    const left = clamp(
+      filesPosition.left,
+      parent.left + PADDING,
+      parent.right - estWidth - PADDING,
+    )
+    setFilesDropdownLeft(left)
+    setFilesDropdownMaxWidth(Math.max(0, parent.width - PADDING * 2))
+  }, [isFilesOpen, filesPosition])
+
+  // After render, measure real width and refine left so it stays within parent; keep left stable while open
+  useLayoutEffect(() => {
+    if (!isFilesOpen) return
+    const parent = containerRef.current?.getBoundingClientRect()
+    const node = filesDropdownRef.current
+    if (!parent || !node) return
+
+    const realWidth = node.offsetWidth || 260
+    const newLeft = clamp(
+      (filesDropdownLeft ?? parent.left + PADDING),
+      parent.left + PADDING,
+      parent.right - realWidth - PADDING,
+    )
+    if (newLeft !== filesDropdownLeft) setFilesDropdownLeft(newLeft)
+    const newMax = Math.max(0, parent.width - PADDING * 2)
+    if (newMax !== filesDropdownMaxWidth) setFilesDropdownMaxWidth(newMax)
+  }, [isFilesOpen, fileMatches.length])
+
+  // Recompute on window resize for files dropdown
+  useEffect(() => {
+    if (!isFilesOpen) return
+    const onResize = () => {
+      const parent = containerRef.current?.getBoundingClientRect()
+      const node = filesDropdownRef.current
+      if (!parent) return
+      const width = node?.offsetWidth || 260
+      const newLeft = clamp(
+        filesDropdownLeft ?? parent.left + PADDING,
+        parent.left + PADDING,
+        parent.right - width - PADDING,
+      )
+      setFilesDropdownLeft(newLeft)
+      setFilesDropdownMaxWidth(Math.max(0, parent.width - PADDING * 2))
+    }
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [isFilesOpen, filesDropdownLeft])
+
+  // Compute stable left and maxWidth when opening refs suggestions
+  useEffect(() => {
+    if (!isRefsOpen || !refsPosition) {
+      setRefsDropdownLeft(null)
+      setRefsDropdownMaxWidth(null)
+      return
+    }
+    const parent = containerRef.current?.getBoundingClientRect()
+    if (!parent) return
+
+    const estWidth = 260
+    const left = clamp(
+      refsPosition.left,
+      parent.left + PADDING,
+      parent.right - estWidth - PADDING,
+    )
+    setRefsDropdownLeft(left)
+    setRefsDropdownMaxWidth(Math.max(0, parent.width - PADDING * 2))
+  }, [isRefsOpen, refsPosition])
+
+  useLayoutEffect(() => {
+    if (!isRefsOpen) return
+    const parent = containerRef.current?.getBoundingClientRect()
+    const node = refsDropdownRef.current
+    if (!parent || !node) return
+
+    const realWidth = node.offsetWidth || 260
+    const newLeft = clamp(
+      (refsDropdownLeft ?? parent.left + PADDING),
+      parent.left + PADDING,
+      parent.right - realWidth - PADDING,
+    )
+    if (newLeft !== refsDropdownLeft) setRefsDropdownLeft(newLeft)
+    const newMax = Math.max(0, parent.width - PADDING * 2)
+    if (newMax !== refsDropdownMaxWidth) setRefsDropdownMaxWidth(newMax)
+  }, [isRefsOpen, refMatches.length])
+
+  useEffect(() => {
+    if (!isRefsOpen) return
+    const onResize = () => {
+      const parent = containerRef.current?.getBoundingClientRect()
+      const node = refsDropdownRef.current
+      if (!parent) return
+      const width = node?.offsetWidth || 260
+      const newLeft = clamp(
+        refsDropdownLeft ?? parent.left + PADDING,
+        parent.left + PADDING,
+        parent.right - width - PADDING,
+      )
+      setRefsDropdownLeft(newLeft)
+      setRefsDropdownMaxWidth(Math.max(0, parent.width - PADDING * 2))
+    }
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [isRefsOpen, refsDropdownLeft])
 
   const handleFileSelect = (path: string) => {
     onFileSelectInternal(path)
@@ -99,7 +225,7 @@ export default function FileMentionsTextarea({
   }
 
   return (
-    <div className="relative">
+    <div className="relative" ref={containerRef}>
       <div
         ref={mirrorRef}
         aria-hidden="true"
@@ -121,11 +247,13 @@ export default function FileMentionsTextarea({
 
       {isFilesOpen && filesPosition && (
         <div
-          className="fixed z-[var(--z-dropdown,1000)] min-w={[260]}px max-h-[220px] overflow-auto rounded-md border border-[var(--border-default)] bg-[var(--surface-overlay)] shadow-[var(--shadow-3)] p-1"
+          ref={filesDropdownRef}
+          className="fixed z-[var(--z-dropdown,1000)] min-w-[260px] max-h-[220px] overflow-auto rounded-md border border-[var(--border-default)] bg-[var(--surface-overlay)] shadow-[var(--shadow-3)] p-1"
           style={{
-            left: `${filesPosition.left}px`,
+            left: `${(filesDropdownLeft ?? filesPosition.left)}px`,
             top: `${filesPosition.top}px`,
             transform: 'translateY(-100%)',
+            maxWidth: filesDropdownMaxWidth ? `${filesDropdownMaxWidth}px` : undefined,
           }}
           role="listbox"
           aria-label="Files suggestions"
@@ -145,11 +273,13 @@ export default function FileMentionsTextarea({
 
       {isRefsOpen && refsPosition && (
         <div
+          ref={refsDropdownRef}
           className="fixed z-[var(--z-dropdown,1000)] min-w-[260px] max-h-[220px] overflow-auto rounded-md border border-[var(--border-default)] bg-[var(--surface-overlay)] shadow-[var(--shadow-3)]"
           style={{
-            left: `${refsPosition.left}px`,
+            left: `${(refsDropdownLeft ?? refsPosition.left)}px`,
             top: `${refsPosition.top}px`,
             transform: 'translateY(-100%)',
+            maxWidth: refsDropdownMaxWidth ? `${refsDropdownMaxWidth}px` : undefined,
           }}
           role="listbox"
           aria-label="References suggestions"
