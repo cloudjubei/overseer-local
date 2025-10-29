@@ -11,7 +11,7 @@ export type ModalRoute =
   | { type: 'story-edit'; storyId: string }
   | {
       type: 'feature-create'
-      storyId: string
+      storyId?: string
       initialValues?: Partial<FeatureFormValues>
       focusDescription?: boolean
     }

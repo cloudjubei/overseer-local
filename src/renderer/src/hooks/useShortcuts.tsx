@@ -190,11 +190,19 @@ export function ShortcutsBootstrap() {
       description: 'Add feature to UI Improvements',
       scope: 'global',
     })
+    const unregisterNewFeature = register({
+      id: 'new-feature',
+      comboKeys: combos.newFeature,
+      handler: () => nav.openModal({ type: 'feature-create' }),
+      description: 'New feature',
+      scope: 'global',
+    })
     return () => {
       unregisterNew()
       unregisterAddUiFeature()
+      unregisterNewFeature()
     }
-  }, [register, nav, combos.newStory, combos.addUiFeature])
+  }, [register, nav, combos.newStory, combos.addUiFeature, combos.newFeature])
 
   useEffect(() => {
     const onHash = () => {}

@@ -8,6 +8,7 @@ export type ShortcutsConfig = {
   newStory: string // e.g., 'Mod+N'
   help: string // e.g., 'Mod+/'
   addUiFeature: string // e.g., 'Mod+Shift+F'
+  newFeature: string // e.g., 'Mod+Shift+N'
 }
 
 export interface AppSettings {

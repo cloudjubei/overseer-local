@@ -113,22 +113,38 @@ export default function ChatSidebar({
     const cm = (last as any)?.completionMessage
     const iso = (cm?.completedAt as string) || (cm?.startedAt as string) || new Date().toISOString()
     markReadByKey(key, iso)
-  }, [chat?.key, chat?.chat.messages, markReadByKey])
+  }, [chat?.key, chat?.chat?.messages, markReadByKey])
+
+  // Ensure that after the chat loads or updates, if the user is at bottom, we mark the latest as read.
+  // This covers the case where MessageList triggers read before the chat is loaded, and on new incoming messages
+  // while the user is already scrolled to the bottom.
+  useEffect(() => {
+    if (!chat?.key) return
+    if (!atBottomRef.current) return
+    // Use a microtask to avoid clobbering during initial render
+    Promise.resolve().then(() => markLatestAsRead())
+  }, [chat?.key, chat?.chat?.updatedAt, chat?.chat?.messages?.length, markLatestAsRead])
 
   // When the user scrolls to bottom, mark as read
-  const handleAtBottomChange = useCallback((isBottom: boolean) => {
-    setAtBottom(isBottom)
-    if (isBottom) {
-      markLatestAsRead()
-    }
-  }, [markLatestAsRead])
+  const handleAtBottomChange = useCallback(
+    (isBottom: boolean) => {
+      setAtBottom(isBottom)
+      if (isBottom) {
+        markLatestAsRead()
+      }
+    },
+    [markLatestAsRead],
+  )
 
   // When we detect the latest has been viewed (e.g., new message arrives while at bottom)
-  const handleReadLatest = useCallback((iso?: string) => {
-    const key = chat?.key
-    if (!key) return
-    markReadByKey(key, iso || new Date().toISOString())
-  }, [chat?.key, markReadByKey])
+  const handleReadLatest = useCallback(
+    (iso?: string) => {
+      const key = chat?.key
+      if (!key) return
+      markReadByKey(key, iso || new Date().toISOString())
+    },
+    [chat?.key, markReadByKey],
+  )
 
   const isThinking = chat?.isThinking || false
 
@@ -360,12 +376,19 @@ export default function ChatSidebar({
     } catch (e) {
       console.error('Failed to delete chat', e)
     } finally {
-      // Navigate to General chat for this project
+      // Navigate to General chat for this project without leaving Chat view
       const general = { type: 'PROJECT', projectId } as ChatContext
       try {
         localStorage.setItem('chat-last-selected-context', JSON.stringify(general))
       } catch {}
-      window.location.hash = ''
+      // Set hash to chat route root so ChatView stays active; it will default to project General
+      if (!window.location.hash.startsWith('#chat')) {
+        window.location.hash = '#chat'
+      } else {
+        // If already on chat route, trigger selection by updating hash to same route
+        // This can be a no-op; ChatView will pick up last-selected context
+        window.dispatchEvent(new HashChangeEvent('hashchange'))
+      }
       setIsSettingsOpen(false)
       isDeletingRef.current = false
     }

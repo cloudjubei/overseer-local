@@ -2481,7 +2481,7 @@
     },
     {
       "id": "63d893a3-845f-4557-b2a6-d30d38a8c24a",
-      "status": "-",
+      "status": "+",
       "title": "Chat notifications",
       "description": "In the @src/renderer/src/navigation/SidebarView.tsx we need to show notifications next to the project and next to the Chat button when there is an unread message. \nThere should be also a little dot (without a number inside) shown on the chat navigation in @src/renderer/src/screens/ChatView.tsx leading the user to the chat that has the unread message .",
       "context": [
@@ -2490,8 +2490,9 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-28T00:20:01.644Z",
-      "updatedAt": "2025-10-29T09:04:53.916Z",
-      "rejection": "when clicking a chat and scrolling down (to read messages) doesn't make the badges disappear - it seems the inner sidebar in @src/renderer/src/screens/ChatView.tsx isn't reactive to the read/unread changes."
+      "updatedAt": "2025-10-29T09:15:00.080Z",
+      "rejection": "when clicking a chat and scrolling down (to read messages) doesn't make the badges disappear - it seems the inner sidebar in @src/renderer/src/screens/ChatView.tsx isn't reactive to the read/unread changes.",
+      "completedAt": "2025-10-29T09:15:00.080Z"
     },
     {
       "id": "98ff6ca9-38bd-4828-bcba-f555033945fe",
@@ -2521,7 +2522,7 @@
     },
     {
       "id": "beea43a0-839b-4f9b-8215-73a8fd39f3cb",
-      "status": "-",
+      "status": "+",
       "title": "Delete chat becomes refresh chat + actual delete chat in settings",
       "description": "The current 'Delete chat' button in the header of @src/renderer/src/screens/ChatView.tsx should become \"Refresh Chat\" - so still a red button, but with a different icon inside - a new one needs to be created and added to @src/renderer/src/components/ui/icons/Icons.tsx .\nAt the very bottom of chat settings there should be a red button that says \"Delete this chat\", which will ask the user for confirmation for doing so. This should actually delete the chat for good (at this moment taking the user to the \"General\" chat which is always available).",
       "context": [
@@ -2531,8 +2532,9 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-28T00:26:15.441Z",
-      "updatedAt": "2025-10-29T09:06:10.692Z",
-      "rejection": "Somehow deleting a chat makes the same exact chat appear empty at the top of the history list - i.e. it doesn't get deleted.\nWhat's also bad is that now the screen changes to \"Home\" rather than stay in chat.\nThere must be a trigger in @src/renderer/src/contexts/ChatsContext.tsx that somehow also triggers @src/renderer/src/screens/ChatView.tsx and re-creates the new chat."
+      "updatedAt": "2025-10-29T09:23:49.970Z",
+      "rejection": "Somehow deleting a chat makes the same exact chat appear empty at the top of the history list - i.e. it doesn't get deleted.\nWhat's also bad is that now the screen changes to \"Home\" rather than stay in chat.\nThere must be a trigger in @src/renderer/src/contexts/ChatsContext.tsx that somehow also triggers @src/renderer/src/screens/ChatView.tsx and re-creates the new chat.",
+      "completedAt": "2025-10-29T09:23:49.970Z"
     },
     {
       "id": "1784ec92-6612-4d1b-a8e9-41fb10c3557f",
@@ -2585,11 +2587,12 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-28T12:49:51.490Z",
-      "updatedAt": "2025-10-28T12:49:51.490Z"
+      "updatedAt": "2025-10-29T09:25:30.131Z",
+      "completedAt": "2025-10-29T09:25:30.131Z"
     },
     {
       "id": "ae8f8bd5-6062-4238-bc93-00994debfad0",
-      "status": "-",
+      "status": "+",
       "title": "Each commit that is pending in GitView is for stories and features - they should be displayed as chips",
       "description": "Most of the commits are implementing features and have the id inside the commit message. That id should be extracted and displayed as @src/renderer/src/components/stories/DependencyBullet.tsx to show the user which features are part of this pending merge.\nThis is something that `thefactory-tools` should include in the types returned - create a `docs/GIT_FEATUREINFO.md` that describes the feature title and description so that it can be implemented on the `thefactory-tools` side and then incorporated here.",
       "context": [
@@ -2597,11 +2600,12 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-28T12:52:21.487Z",
-      "updatedAt": "2025-10-28T12:52:21.487Z"
+      "updatedAt": "2025-10-29T09:37:13.894Z",
+      "completedAt": "2025-10-29T09:37:13.894Z"
     },
     {
       "id": "e5ab58da-63e1-4869-8fc0-b18016f0dba6",
-      "status": "-",
+      "status": "+",
       "title": "the chats in the history view should be ordered by last message received/sent",
       "description": "In @src/renderer/src/screens/ChatView.tsx the history should sort the chats by 'last update' - it seems they are ordered by that on open, but after some messages trickle in - that's no longer the case.",
       "context": [
@@ -2609,30 +2613,33 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-28T20:31:02.699Z",
-      "updatedAt": "2025-10-28T20:33:22.278Z"
+      "updatedAt": "2025-10-29T09:42:38.430Z",
+      "completedAt": "2025-10-29T09:42:38.430Z"
     },
     {
       "id": "fcf25987-8aaa-4454-8b39-1f7abf3774ef",
-      "status": "-",
+      "status": "+",
       "title": "ctrl/command+shift+n should open a new special create feature modal",
       "description": "the difference is that it should have a dropdown for selecting the story that this feature will belong to.\nIn fact - the \"UI Improvements\" feature that gets created via cmd+shift+f should open this exact popup but with the \"UI Improvements\" story pre-selected.\nWhen clicking the dropdown it should also allow to search to make it easier to find the relevant story.",
       "context": [],
       "blockers": [],
       "createdAt": "2025-10-29T00:49:23.964Z",
-      "updatedAt": "2025-10-29T00:49:23.964Z"
+      "updatedAt": "2025-10-29T09:47:12.334Z",
+      "completedAt": "2025-10-29T09:47:12.334Z"
     },
     {
       "id": "84a438a8-912f-41f2-b1b4-5d4661ffbe3c",
-      "status": "-",
+      "status": "+",
       "title": "Chat tool call change popups",
       "description": "Goal: When viewing tool call cards in chat, hovering (or focusing) on a card shows a contextual popup summarizing the change(s) that the tool produced. Clicking the card toggles a pinned view.\n\nTriggers & behavior:\n- Hover: show a popup next to the tool call card with a concise summary.\n- Click: pin/unpin the popup to remain visible.\n- Keyboard: focus on the card shows the popup; Esc closes; Enter toggles pin.\n- Mobile: tap once to show, tap outside to dismiss; a small 'i' icon appears on small screens.\n\nTool-specific displays:\n- update_story_title: show 'Title: old → new' with highlights.\n- update_story_description: inline or side-by-side diff emphasizing added and removed text.\n- update_feature_title: 'Title: old → new' with highlights.\n- update_feature_description: inline or side-by-side diff of description.\n- write_file: show the path and a unified diff of changes; collapse large hunks with a 'view more' affordance.\n- create_feature: show the new feature's title and description in a clean summary card.\n- create_story: show the new story's title and description in a clean summary card.\n- reorder_feature: show the resulting feature order list with indices; highlight moved items.\n- reorder_story: show the resulting story order list with indices; highlight moved items.\n\nUX details:\n- The popup title includes the tool name and a status icon.\n- Show timestamps and a compact identifier for the operation if available.\n- Provide a 'view details' action to expand into a larger modal for long diffs.\n- For diffs, prefer a readable unified diff with syntax highlighting for code when possible.\n\nEdge cases:\n- If prior content is unavailable, show 'new content only' and a note that diff is unavailable.\n- For very large files, show only the first N changed hunks with an expandable control.\n- If the tool failed or partially executed, show an error state in the popup.\n\nAccessibility:\n- Fully keyboard navigable; meets color contrast guidelines for highlights.\n- ARIA roles for popovers and labels for action buttons.\n\nAcceptance criteria:\n- Hovering or focusing on a tool call card shows a popup within 150ms with the tool-specific summary.\n- update_* and create_* tools display the exact new values; descriptions show textual diffs for updates and full text for creates.\n- write_file shows a unified diff for changed files, including path and line numbers.\n- reorder_* popups display the final order with indices, clearly marking moved items.\n- Popups are responsive and accessible, with keyboard and mobile behaviors working as described.\n- Large content gracefully collapses with an option to expand.",
       "context": [],
       "createdAt": "2025-10-29T00:55:40.474Z",
-      "updatedAt": "2025-10-29T00:55:40.474Z"
+      "updatedAt": "2025-10-29T09:57:37.658Z",
+      "completedAt": "2025-10-29T09:57:37.658Z"
     },
     {
       "id": "ea6227a4-4b63-41ad-a334-79102a5f5619",
-      "status": "-",
+      "status": "+",
       "title": "ChatView info callout with navigable story/feature chips",
       "description": "Goal: Improve the info button in @src/renderer/src/screens/ChatView.tsx so that clicking it opens a callout showing contextual, clickable story/feature chips via @src/renderer/src/components/stories/DependencyBullet.tsx.\n\nTrigger & behavior:\n- Click on the info button toggles the callout open/closed.\n- Clicking outside the callout (or pressing Esc) closes it.\n- The callout auto-closes on route/project change and when ChatView unmounts.\n- Replace any hover tooltip with this click-activated callout.\n\nContent rules:\n- If the current chat has an associated story, render a DependencyBullet for the story.\n- If the current chat has associated feature(s), render a DependencyBullet for each feature.\n- If an associated story/feature no longer exists, display the deleted state used elsewhere (e.g., *DELETED*), consistent with ChatView.\n- Chips are interactive: clicking navigates to the destination using DependencyBullet default navigation behavior.\n\nUX details:\n- Position the callout anchored to the info button with an arrow; keep within viewport bounds.\n- Lazy-mount contents only when opened; unmount on close.\n- Maintain z-index above the header and chat scroll container.\n\nAccessibility:\n- The info button uses aria-haspopup='dialog' and aria-expanded to reflect state; aria-controls points to the callout id.\n- The callout uses role='dialog' with an aria-label (e.g., 'Chat context'). Esc closes. Focus remains on the button; tabbing into the callout supports chip interaction.\n\nAcceptance criteria:\n- Clicking the info button opens the callout within 150ms; clicking it again, pressing Esc, or clicking outside closes it.\n- When a story/feature context exists, corresponding DependencyBullet chips render and navigate correctly on click.\n- When context is missing, no chips are shown; deleted items display as deleted-state chips.\n- Callout closes on route/project change and on ChatView unmount without errors.\n- Meets ARIA requirements as described and works with keyboard and mouse.",
       "context": [],
