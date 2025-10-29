@@ -2490,11 +2490,12 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-28T00:20:01.644Z",
-      "updatedAt": "2025-10-28T00:20:01.644Z"
+      "updatedAt": "2025-10-29T00:37:19.793Z",
+      "rejection": "A few issues:\n1) when clicking a chat and scrolling down (to read messages) doesn't make the badges disappear\n2) when the user is in a given chat and is reading messages as they come - notifications still show (they shouldn't as the user is up to date)\n3) the badge on each chat tile in the sidebar in @src/renderer/src/screens/ChatView.tsx should show the number of messages unread"
     },
     {
       "id": "98ff6ca9-38bd-4828-bcba-f555033945fe",
-      "status": "-",
+      "status": "+",
       "title": "Chat history should only show the current project's chats",
       "description": "in @src/renderer/src/screens/ChatView.tsx it should ONLY show the chats for the given active project - never for other ones. Right now I can see other projects in History.",
       "context": [
@@ -2502,11 +2503,12 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-28T00:20:52.916Z",
-      "updatedAt": "2025-10-28T00:20:52.916Z"
+      "updatedAt": "2025-10-28T10:41:43.228Z",
+      "completedAt": "2025-10-28T10:41:43.228Z"
     },
     {
       "id": "724a4b85-c9cd-4d61-ab60-a455da3482f7",
-      "status": "-",
+      "status": "+",
       "title": "If a story/feature is missing show *DELETED* instead of id",
       "description": "In @src/renderer/src/screens/ChatView.tsx in the sidebar - don't show the id of the story/feature that no longer exists - just inform the user that this has been deleted.",
       "context": [
@@ -2514,11 +2516,12 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-28T00:22:27.483Z",
-      "updatedAt": "2025-10-28T00:22:27.483Z"
+      "updatedAt": "2025-10-28T10:45:20.962Z",
+      "completedAt": "2025-10-28T10:45:20.962Z"
     },
     {
       "id": "beea43a0-839b-4f9b-8215-73a8fd39f3cb",
-      "status": "-",
+      "status": "+",
       "title": "Delete chat becomes refresh chat + actual delete chat in settings",
       "description": "The current 'Delete chat' button in the header of @src/renderer/src/screens/ChatView.tsx should become \"Refresh Chat\" - so still a red button, but with a different icon inside - a new one needs to be created and added to @src/renderer/src/components/ui/icons/Icons.tsx .\nAt the very bottom of chat settings there should be a red button that says \"Delete this chat\", which will ask the user for confirmation for doing so. This should actually delete the chat for good (at this moment taking the user to the \"General\" chat which is always available).",
       "context": [

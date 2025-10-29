@@ -4,6 +4,9 @@ import { useStories } from '@renderer/contexts/StoriesContext'
 import { useChats } from '@renderer/contexts/ChatsContext'
 import type { ChatContext } from 'thefactory-tools'
 import { IconChevron } from '@renderer/components/ui/icons/Icons'
+import { useChatUnread } from '@renderer/hooks/useChatUnread'
+import DotBadge from '@renderer/components/ui/DotBadge'
+import { getChatContextPath } from 'thefactory-tools/utils'
 
 function prettyTopicName(topic?: string): string {
   if (!topic) return 'Topic'
@@ -121,18 +124,42 @@ export default function ChatsNavigationSidebar({
   const { projects } = useProjectContext()
   const { storiesById, featuresById } = useStories()
   const { chatsByProjectId, getChat } = useChats()
+  const { unreadKeys } = useChatUnread()
 
   const getProjectTitle = (id?: string) => {
     if (!id) return ''
     const p = projects.find((prj) => prj.id === id)
     return p?.title || id
   }
-  const getStoryTitle = (id?: string) => (id ? storiesById[id]?.title || id : '')
-  const getFeatureTitle = (id?: string) => (id ? featuresById[id]?.title || id : '')
+  const getStoryTitle = (id?: string) => {
+    if (!id) return ''
+    const s = storiesById[id]
+    return s?.title || 'Deleted story'
+  }
+  const getFeatureTitle = (id?: string) => {
+    if (!id) return ''
+    const f = featuresById[id]
+    return f?.title || 'Deleted feature'
+  }
 
+  // Enforce active project scoping for all chat lists
   const projectChats = useMemo(() => {
-    return (chatsByProjectId[activeProjectId] || []).slice()
-  }, [chatsByProjectId, activeProjectId])
+    const raw = chatsByProjectId[activeProjectId] || []
+    const filtered = raw.filter((c) => {
+      const ctx = c.chat.context as any
+      const type = ctx?.type
+      if (type === 'PROJECT' || type === 'PROJECT_TOPIC' || type === 'AGENT_RUN' || type === 'AGENT_RUN_FEATURE') {
+        return ctx.projectId === activeProjectId
+      }
+      if (type === 'STORY' || type === 'FEATURE' || type === 'STORY_TOPIC') {
+        const sid: string | undefined = ctx.storyId
+        if (!sid) return false
+        return !!project?.storyIdToDisplayIndex?.[sid]
+      }
+      return false
+    })
+    return filtered.slice()
+  }, [chatsByProjectId, activeProjectId, project])
 
   const sortedByUpdated = useMemo(() => {
     return projectChats.sort((a, b) => {
@@ -337,20 +364,27 @@ export default function ChatsNavigationSidebar({
   const ChatButton: React.FC<{
     ctx: ChatContext
     label: string
-  }> = ({ ctx, label }) => (
-    <button
-      className={[
-        'w-full text-left rounded-md px-3 py-2 border shadow-sm transition-colors',
-        isActive(ctx)
-          ? 'border-blue-500 bg-[color-mix(in_srgb,var(--accent-primary)_12%,transparent)]'
-          : 'border-[var(--border-subtle)] bg-[var(--surface-raised)] hover:border-[var(--border-default)]',
-      ].join(' ')}
-      onClick={() => ensureOpen(ctx)}
-      title={label}
-    >
-      <div className="text-[12px] font-medium text-[var(--text-primary)] truncate">{label}</div>
-    </button>
-  )
+  }> = ({ ctx, label }) => {
+    const key = getChatContextPath(ctx)
+    const isUnread = unreadKeys.has(key)
+    return (
+      <button
+        className={[
+          'w-full text-left rounded-md px-3 py-2 border shadow-sm transition-colors',
+          isActive(ctx)
+            ? 'border-blue-500 bg-[color-mix(in_srgb,var(--accent-primary)_12%,transparent)]'
+            : 'border-[var(--border-subtle)] bg-[var(--surface-raised)] hover:border-[var(--border-default)]',
+        ].join(' ')}
+        onClick={() => ensureOpen(ctx)}
+        title={label}
+      >
+        <div className="flex items-center justify-between gap-2 min-w-0">
+          <div className="text-[12px] font-medium text-[var(--text-primary)] truncate">{label}</div>
+          {isUnread && <DotBadge title={'Unread messages'} />}
+        </div>
+      </button>
+    )
+  }
 
   const StoryHeaderButton: React.FC<{
     storyId: string
@@ -405,12 +439,17 @@ export default function ChatsNavigationSidebar({
                   getFeatureTitle,
                 })}
               >
-                <div className="text-[12px] font-semibold text-[var(--text-primary)] truncate">
-                  {titleForContext(generalContext, {
-                    getProjectTitle,
-                    getStoryTitle,
-                    getFeatureTitle,
-                  })}
+                <div className="flex items-center justify-between gap-2 min-w-0">
+                  <div className="text-[12px] font-semibold text-[var(--text-primary)] truncate">
+                    {titleForContext(generalContext, {
+                      getProjectTitle,
+                      getStoryTitle,
+                      getFeatureTitle,
+                    })}
+                  </div>
+                  {unreadKeys.has(getChatContextPath(generalContext)) && (
+                    <DotBadge title={'Unread messages'} />
+                  )}
                 </div>
                 <div className="text-[11px] text-[var(--text-secondary)] truncate">
                   Single chat for this project
@@ -630,6 +669,7 @@ export default function ChatsNavigationSidebar({
                   getStoryTitle,
                   getFeatureTitle,
                 })
+                const isUnread = unreadKeys.has(c.key)
                 return (
                   <button
                     key={c.key}
@@ -642,8 +682,11 @@ export default function ChatsNavigationSidebar({
                     onClick={() => onSelectContext(ctx)}
                     title={label}
                   >
-                    <div className="text-[12px] font-medium text-[var(--text-primary)] truncate">
-                      {label}
+                    <div className="flex items-center justify-between gap-2 min-w-0">
+                      <div className="text-[12px] font-medium text-[var(--text-primary)] truncate">
+                        {label}
+                      </div>
+                      {isUnread && <DotBadge title={'Unread messages'} />}
                     </div>
                     <div className="text-[10px] text-[var(--text-tertiary)] truncate">
                       Updated {c.chat.updatedAt || c.chat.createdAt || ''}
