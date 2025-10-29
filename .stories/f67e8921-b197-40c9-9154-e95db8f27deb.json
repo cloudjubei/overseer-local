@@ -2691,7 +2691,7 @@
     },
     {
       "id": "0a224aec-8933-4c9a-8910-33048809e451",
-      "status": "-",
+      "status": "+",
       "title": "when getting an error in chat show a retry button",
       "description": "In @src/renderer/src/components/chat/ChatSidebar.tsx when getting an error the only thing the user can do right now is to write a message to retry - we should have a retry button next to the message, that will remove the last message and proceed as if it never happened.\nThe error message should have an (i) button in the top right to display the error that occurred.",
       "context": [
@@ -2699,7 +2699,20 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-29T15:05:58.043Z",
-      "updatedAt": "2025-10-29T15:05:58.043Z"
+      "updatedAt": "2025-10-29T16:10:14.682Z",
+      "completedAt": "2025-10-29T16:10:14.682Z"
+    },
+    {
+      "id": "380133df-e68d-433c-a208-fa1c59915b93",
+      "status": "-",
+      "title": "when the user posts a message to chat automatically scroll to the very bottom",
+      "description": "In @src/renderer/src/components/chat/ChatSidebar.tsx",
+      "context": [
+        "src/renderer/src/components/chat/ChatSidebar.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-29T15:15:23.655Z",
+      "updatedAt": "2025-10-29T15:15:23.655Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -2884,7 +2897,8 @@
     "8ba96fe8-c07a-44e5-a2b0-2fab5c056c78": 179,
     "0a96daaf-26a2-4dcd-995a-77be216824d6": 180,
     "3bfbcd7e-2016-401a-b1d7-466ccb53d7c0": 181,
-    "0a224aec-8933-4c9a-8910-33048809e451": 182
+    "0a224aec-8933-4c9a-8910-33048809e451": 182,
+    "380133df-e68d-433c-a208-fa1c59915b93": 183
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
   "updatedAt": "2025-10-01T00:34:27.858Z"
