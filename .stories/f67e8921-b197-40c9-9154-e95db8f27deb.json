@@ -2704,7 +2704,7 @@
     },
     {
       "id": "380133df-e68d-433c-a208-fa1c59915b93",
-      "status": "-",
+      "status": "+",
       "title": "when the user posts a message to chat automatically scroll to the very bottom",
       "description": "In @src/renderer/src/components/chat/ChatSidebar.tsx",
       "context": [
@@ -2712,7 +2712,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-29T15:15:23.655Z",
-      "updatedAt": "2025-10-29T15:15:23.655Z"
+      "updatedAt": "2025-10-29T16:21:04.986Z",
+      "completedAt": "2025-10-29T16:21:04.986Z"
     }
   ],
   "featureIdToDisplayIndex": {

@@ -165,12 +165,16 @@ export default function ChatSidebar({
   const isThinking = chat?.isThinking || false
 
   const [draftPrompt, setDraftPrompt] = useState<string>('')
+  // Scroll control: bump this to ask MessageList to force-scroll to bottom
+  const [scrollSignal, setScrollSignal] = useState<number>(0)
 
   const handleSend = useCallback(
     async (message: string, attachments: string[]) => {
       if (!isChatConfigured || !activeChatConfig || !currentSettings) return
       tryResumeAudioContext()
       playSendSound()
+      // When the user posts a message, force the MessageList to scroll to the very bottom
+      setScrollSignal((s) => s + 1)
       await sendMessage(
         context,
         message,
@@ -673,6 +677,7 @@ export default function ChatSidebar({
           onDeleteLastMessage={() => deleteLastMessage(context)}
           onAtBottomChange={handleAtBottomChange}
           onReadLatest={handleReadLatest}
+          scrollToBottomSignal={scrollSignal}
         />
       </div>
 

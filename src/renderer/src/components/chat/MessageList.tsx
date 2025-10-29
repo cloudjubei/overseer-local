@@ -38,6 +38,7 @@ export default function MessageList({
   onDeleteLastMessage,
   onAtBottomChange,
   onReadLatest,
+  scrollToBottomSignal,
 }: {
   chatId?: string
   messages: ChatMessage[]
@@ -47,6 +48,7 @@ export default function MessageList({
   onDeleteLastMessage?: () => void
   onAtBottomChange?: (atBottom: boolean) => void
   onReadLatest?: (iso?: string) => void
+  scrollToBottomSignal?: number
 }) {
   const { filesByPath } = useFiles()
 
@@ -276,6 +278,24 @@ export default function MessageList({
       onReadLatest?.(lastMessageIso(messages))
     })
   }, [messages, isThinking])
+
+  // External signal to force scroll to bottom (e.g., when user sends a message)
+  const prevSignalRef = useRef<number | undefined>(undefined)
+  useEffect(() => {
+    if (typeof scrollToBottomSignal === 'undefined') return
+    if (prevSignalRef.current === undefined) {
+      // Initialize without action on first mount
+      prevSignalRef.current = scrollToBottomSignal
+      return
+    }
+    if (scrollToBottomSignal !== prevSignalRef.current) {
+      prevSignalRef.current = scrollToBottomSignal
+      requestAnimationFrame(() => {
+        forceScrollToBottom('smooth')
+        onReadLatest?.(lastMessageIso(messages))
+      })
+    }
+  }, [scrollToBottomSignal, messages, onReadLatest])
 
   // When entering thinking state, ensure we are fully at the bottom only if user is near bottom
   useLayoutEffect(() => {
