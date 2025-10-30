@@ -2726,7 +2726,7 @@
     },
     {
       "id": "4c176bb4-549e-4a6c-a59d-f8690c4819b5",
-      "status": "-",
+      "status": "+",
       "title": "the typewriter effect in chat swallows some first letters",
       "description": "whenever the typewriter effect kicks in it always omits the first or second letter in @src/renderer/src/components/chat/ChatSidebar.tsx when displaying a message in @src/renderer/src/components/chat/MessageList.tsx",
       "context": [
@@ -2735,8 +2735,9 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-29T16:24:36.140Z",
-      "updatedAt": "2025-10-29T23:50:10.861Z",
-      "rejection": "This is still happening - if it's an issue with the library used - we should use a different library or write our own."
+      "updatedAt": "2025-10-30T00:14:46.566Z",
+      "rejection": "This is still happening - if it's an issue with the library used - we should use a different library or write our own.",
+      "completedAt": "2025-10-30T00:14:46.566Z"
     },
     {
       "id": "720ef1b6-1461-4ea9-8417-ce6955ba566e",
