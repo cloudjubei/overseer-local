@@ -2696,7 +2696,7 @@
     },
     {
       "id": "0a224aec-8933-4c9a-8910-33048809e451",
-      "status": "-",
+      "status": "+",
       "title": "when getting an error in chat show a retry button",
       "description": "In @src/renderer/src/components/chat/ChatSidebar.tsx when getting an error the only thing the user can do right now is to write a message to retry - we should have a retry button next to the message, that will remove the last message and proceed as if it never happened.\nThe error message should have an (i) button in the top right to display the error that occurred.\n\nUpdate @src/renderer/src/contexts/ChatsContext.tsx and @src/renderer/src/services/completionService.ts and @src/logic/factory/FactoryCompletionManager.ts to have an appropriate retry method.",
       "context": [
@@ -2708,8 +2708,9 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-29T15:05:58.043Z",
-      "updatedAt": "2025-10-30T21:02:31.621Z",
-      "rejection": "The retry button should be to the right of the whole message (outside of it) and it should be the @src/renderer/src/components/ui/icons/IconRetry.tsx .\nAlso, there are currently two (i) buttons/icons showing. We want to keep the left one and it will show the expanded error information. Right now we are showing a title and subtitle, so the clicking of the (i) button should show the subtitle + any extra info.\""
+      "updatedAt": "2025-10-30T21:47:18.549Z",
+      "rejection": "The retry button should be to the right of the whole message (outside of it) and it should be the @src/renderer/src/components/ui/icons/IconRetry.tsx .\nAlso, there are currently two (i) buttons/icons showing. We want to keep the left one and it will show the expanded error information. Right now we are showing a title and subtitle, so the clicking of the (i) button should show the subtitle + any extra info.\"",
+      "completedAt": "2025-10-30T21:47:18.549Z"
     },
     {
       "id": "380133df-e68d-433c-a208-fa1c59915b93",

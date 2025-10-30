@@ -7,7 +7,7 @@ interface ErrorBubbleProps {
   disabled?: boolean
 }
 
-const ErrorBubble: React.FC<ErrorBubbleProps> = ({ error, onRetry, disabled }) => {
+const ErrorBubble: React.FC<ErrorBubbleProps> = ({ error /* onRetry removed from UI */, disabled }) => {
   const [showDetails, setShowDetails] = useState(false)
 
   const message: string = (error && (error.message || error.reason || error.code)) || 'Unknown error'
@@ -20,7 +20,7 @@ const ErrorBubble: React.FC<ErrorBubbleProps> = ({ error, onRetry, disabled }) =
           <div className="flex items-start justify-between gap-2">
             <div className="flex-1 min-w-0">
               <p className="font-bold">An error occurred</p>
-              <p className="text-sm break-words break-all">{String(message)}</p>
+              {/* Subtitle/message is hidden until details are expanded */}
             </div>
             <div className="flex items-center gap-2">
               <button
@@ -37,6 +37,8 @@ const ErrorBubble: React.FC<ErrorBubbleProps> = ({ error, onRetry, disabled }) =
 
           {showDetails ? (
             <div className="mt-2 text-xs bg-white/70 border border-red-300 text-red-900 rounded p-2 overflow-auto max-h-52">
+              {/* Show the subtitle/message plus any extra info */}
+              <div className="mb-2 break-words break-all">{String(message)}</div>
               <pre className="whitespace-pre-wrap break-all">{(() => {
                 try {
                   return JSON.stringify(error, null, 2)
@@ -47,20 +49,7 @@ const ErrorBubble: React.FC<ErrorBubbleProps> = ({ error, onRetry, disabled }) =
             </div>
           ) : null}
 
-          {onRetry ? (
-            <div className="mt-3">
-              <button
-                type="button"
-                className="btn"
-                onClick={() => onRetry?.()}
-                disabled={!!disabled}
-                title={disabled ? 'Please wait...' : 'Retry the last action'}
-                aria-label="Retry the last action"
-              >
-                Retry
-              </button>
-            </div>
-          ) : null}
+          {/* Retry button removed from inside the bubble per design; retry is handled outside */}
         </div>
       </div>
     </div>

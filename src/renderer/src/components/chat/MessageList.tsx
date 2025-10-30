@@ -12,6 +12,7 @@ import { ChatMessage, ToolCall, ToolResult, ToolResultType } from 'thefactory-to
 import { inferFileType } from 'thefactory-tools/utils'
 import { IconToolbox, IconDelete } from '../ui/icons/Icons'
 import { Switch } from '../ui/Switch'
+import { IconRetry } from '../ui/icons/IconRetry'
 
 interface EnhancedMessage extends ChatMessage {
   showModel?: boolean
@@ -484,17 +485,33 @@ export default function MessageList({
         {messagesToDisplay.map((msg, index) => {
           if (msg.error) {
             const isLast = index === messagesToDisplay.length - 1
+            const showRetry = !!onRetry && isLast
             return (
-              <div key={index} className="flex items-start gap-2 flex-row">
+              <div key={index} className="flex items-start gap-2">
+                {/* Left avatar */}
                 <div
                   className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-semibold bg-[color-mix(in_srgb,var(--accent-primary)_14%,transparent)] text-[var(--text-primary)] border border-[var(--border-subtle)]"
                   aria-hidden="true"
                 >
                   AI
                 </div>
-                <div className="max-w-[72%] min-w-[80px] flex flex-col items-start w-full">
-                  <ErrorBubble error={msg.error} onRetry={isLast ? onRetry : undefined} disabled={isThinking} />
+                {/* Error bubble takes remaining width */}
+                <div className="flex-1 max-w-[72%] min-w-[80px] flex flex-col items-start w-full">
+                  <ErrorBubble error={msg.error} disabled={isThinking} />
                 </div>
+                {/* Retry button to the right of the whole message */}
+                {showRetry ? (
+                  <button
+                    type="button"
+                    className="btn-secondary btn-icon self-start"
+                    onClick={() => onRetry?.()}
+                    disabled={isThinking}
+                    title={isThinking ? 'Please wait...' : 'Retry the last action'}
+                    aria-label="Retry the last action"
+                  >
+                    <IconRetry className="w-5 h-5" />
+                  </button>
+                ) : null}
               </div>
             )
           }
