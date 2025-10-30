@@ -489,8 +489,31 @@ export default function ToolCallChangePopup({
         extract(stats, ['total']) || Number(passed) + Number(failed) + Number(skipped) || undefined
       const duration =
         extract(result, ['durationMs']) || extract(stats, ['durationMs', 'duration']) || undefined
+
+      // Try to extract the test file path/name. Prefer tool call args, then result fallbacks.
+      const testFile =
+        tryString(
+          extract(args, ['path']) ||
+            extract(args, ['file']) ||
+            extract(args, ['name']) ||
+            extract(result, ['path']) ||
+            extract(result, ['file']) ||
+            extract(result, ['name']) ||
+            extract(result, ['testFile']) ||
+            extract(result, ['specFile']) ||
+            extract(stats, ['file']) ||
+            extract(result, ['summary.file']) ||
+            extract(result, ['stats.file']),
+        ) || undefined
+
       return (
-        <div className="text-xs">
+        <div className="text-xs space-y-1">
+          {n === 'run_test' && (
+            <Row>
+              <span className="text-[var(--text-secondary)]">File:</span>{' '}
+              <span className="font-mono text-[11px]">{testFile || '(unknown)'}</span>
+            </Row>
+          )}
           <div className="flex items-center gap-2">
             <span className="text-green-700 dark:text-green-300 font-medium">
               {Number(passed)} passed
