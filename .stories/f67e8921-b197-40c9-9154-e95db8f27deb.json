@@ -2696,7 +2696,7 @@
     },
     {
       "id": "0a224aec-8933-4c9a-8910-33048809e451",
-      "status": "+",
+      "status": "-",
       "title": "when getting an error in chat show a retry button",
       "description": "In @src/renderer/src/components/chat/ChatSidebar.tsx when getting an error the only thing the user can do right now is to write a message to retry - we should have a retry button next to the message, that will remove the last message and proceed as if it never happened.\nThe error message should have an (i) button in the top right to display the error that occurred.\n\nUpdate @src/renderer/src/contexts/ChatsContext.tsx and @src/renderer/src/services/completionService.ts and @src/logic/factory/FactoryCompletionManager.ts to have an appropriate retry method.",
       "context": [
@@ -2708,7 +2708,7 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-29T15:05:58.043Z",
-      "updatedAt": "2025-10-30T12:20:15.093Z",
+      "updatedAt": "2025-10-30T12:22:18.640Z",
       "rejection": "Visual updates:\n- the retry button should be to the right of the whole message (outside of it) and it should be an icon (to be added to @src/renderer/src/components/ui/icons/Icons.tsx ) that shows an incomplete circle with an arrow pointing at the end (this is a fairly standard refresh/restart symbol).\n- there are currently two (i) buttons/icons showing. We want to keep the left one and it will show the expanded error information. Right now we are showing a title and subtitle, so the clicking of the (i) button should show the subtitle + any extra info."
     },
     {
@@ -2828,14 +2828,13 @@
     },
     {
       "id": "38e1f4bc-07fa-42cc-990d-da75a62151a6",
-      "status": "?",
+      "status": "-",
       "title": "Distinct sounds per notification type (agent, chat, git)",
       "description": "Goal: Play distinct sounds per notification/badge type. For now, reuse the agent-run notification logic and add new sound assets for chat and git. No new settings work yet.\n\nBehavior:\n- Notification types and sounds:\n  - Agent events: existing sound (or migrate to a named asset if needed)\n  - Chat new message: new distinct sound\n  - Git feature-change: new distinct sound\n- Sounds play via the same code path used by agent notifications today and only when a notification is triggered (parity with agents). No additional settings UI in this phase.\n\nImplementation notes:\n- Add new placeholder audio assets under a dedicated folder (e.g., @src/renderer/src/assets/sounds/agent.mp3, chat.mp3, git.mp3) and wire a simple type-to-sound mapping in notificationsService.\n- Preload sounds to minimize lag and debounce to avoid overwhelming audio on bursts (follow any existing debounce in agent notifications if present).\n- Ensure sounds do not overlap excessively (simple last-sound cutoff or short cooldown is acceptable for this phase).\n\nContext:\n- @src/renderer/src/services/notificationsService.ts\n- @src/renderer/src/services/settingsService.ts (only if needed for current agent parity)\n- @src/renderer/src/screens/SettingsView.tsx (no UI changes planned yet; reference for parity)\n- @src/renderer/src/assets/sounds/ (new assets folder)\n\nAcceptance criteria:\n- Triggering an agent notification plays the agent sound; triggering a chat notification plays the chat sound; triggering a git notification plays the git sound.\n- Sounds are audibly distinct across the three types.\n- Sounds play through the same logic as agent notifications (no bespoke pathways), and respect any existing mutes/rate limits already applied to agent notifications.\n- No new settings are introduced in this phase.",
       "context": [],
       "createdAt": "2025-10-29T16:42:29.050Z",
-      "updatedAt": "2025-10-30T12:17:19.757Z",
-      "blockers": [],
-      "rejection": "Blocked: Agent loop failed: {}"
+      "updatedAt": "2025-10-30T12:22:24.953Z",
+      "blockers": []
     },
     {
       "id": "dfa8e00c-f58c-4ae6-ba13-3dff5dc4f961",
@@ -3065,11 +3064,11 @@
     "16745e78-fa85-4d82-986a-1a5c3f8630c1": 188,
     "9dc96025-d7ee-4798-aeab-0ffac36c54c7": 189,
     "5d593b43-f456-4b1e-97e6-cb53476197e8": 190,
-    "38e1f4bc-07fa-42cc-990d-da75a62151a6": 191,
-    "dfa8e00c-f58c-4ae6-ba13-3dff5dc4f961": 192,
-    "aad2f8db-1ad1-4529-b824-a4403aee54cc": 193,
-    "ae8f8bd5-6062-4238-bc93-00994debfad0": 194,
-    "6ef2cf47-0c7e-4f4a-a7c9-af483afeb452": 195
+    "dfa8e00c-f58c-4ae6-ba13-3dff5dc4f961": 191,
+    "aad2f8db-1ad1-4529-b824-a4403aee54cc": 192,
+    "6ef2cf47-0c7e-4f4a-a7c9-af483afeb452": 193,
+    "38e1f4bc-07fa-42cc-990d-da75a62151a6": 194,
+    "ae8f8bd5-6062-4238-bc93-00994debfad0": 195
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
   "updatedAt": "2025-10-01T00:34:27.858Z"
