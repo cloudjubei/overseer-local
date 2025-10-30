@@ -201,19 +201,33 @@ function UnifiedBranchItem({
     }
   }
 
-  // Load incoming-only totals for current branch when upstream is configured and there are incoming commits
+  // Load incoming-only totals for current branch when upstream or a remote ref exists
   React.useEffect(() => {
     if (mode !== 'current') return
+
     const upstreamConfigured = !!branch.upstreamRemote && !!branch.upstreamBranch
-    if (!upstreamConfigured) return
-    if ((branch.behind ?? 0) <= 0) return
+    const hasRemoteName = !!branch.remoteName
+    const canTry = upstreamConfigured || hasRemoteName
+    if (!canTry) return
+
+    // Prefer configured upstream, otherwise fall back to the discovered remote ref
+    const remoteRef = upstreamConfigured
+      ? `${branch.upstreamRemote}/${branch.upstreamBranch}`
+      : (branch.remoteName as string)
+
+    // If we can determine equality by sha, skip the request
+    const localSha = branch.localSha
+    const remoteSha = branch.remoteSha
+    if (localSha && remoteSha && localSha === remoteSha) return
+
     if (incoming.loading || incoming.totals || incoming.error) return
+
     const run = async () => {
       try {
         setIncoming((s) => ({ ...s, loading: true }))
         const diff = await gitService.getBranchDiffSummary(projectId, {
           baseRef: branch.name,
-          headRef: `${branch.upstreamRemote}/${branch.upstreamBranch}`,
+          headRef: remoteRef,
           incomingOnly: true,
           includePatch: false,
         })
@@ -223,7 +237,16 @@ function UnifiedBranchItem({
       }
     }
     void run()
-  }, [mode, branch.upstreamRemote, branch.upstreamBranch, branch.name, branch.behind, projectId])
+  }, [
+    mode,
+    projectId,
+    branch.name,
+    branch.upstreamRemote,
+    branch.upstreamBranch,
+    branch.remoteName,
+    branch.localSha,
+    branch.remoteSha,
+  ])
 
   const onDelete = async (e: React.MouseEvent) => {
     e.stopPropagation()
