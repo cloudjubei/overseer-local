@@ -2801,9 +2801,10 @@
         "src/renderer/src/screens/ChatView.tsx"
       ],
       "createdAt": "2025-10-29T16:42:29.014Z",
-      "updatedAt": "2025-10-30T12:15:52.068Z",
+      "updatedAt": "2025-10-30T13:33:45.401Z",
       "rejection": "This is showing but we need a few tiny improvements:\n- only show the spinner in @src/renderer/src/navigation/SidebarView.tsx under Projects for all NON-CURRENT projects. For the current project we already see it next to the Chat section.\n- only show the aggregate spinner + notifications on a projects group if it's collapsed\n- inside @src/renderer/src/screens/ChatView.tsx when the user stops the current assistant the spinner still keeps showing for that chat in History (in the sidebar inside ChatView), but it shouldn't",
-      "blockers": []
+      "blockers": [],
+      "completedAt": "2025-10-30T13:33:45.401Z"
     },
     {
       "id": "9dc96025-d7ee-4798-aeab-0ffac36c54c7",

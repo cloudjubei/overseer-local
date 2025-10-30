@@ -438,7 +438,7 @@ export default function SidebarView({}: SidebarProps) {
                 isInformative
               />
             )}
-            {chatThinking ? (
+            {chatThinking && !active ? (
               <SpinnerWithDot
                 size={effectiveCollapsed ? 14 : 16}
                 showDot={chatUnread > 0}
@@ -717,7 +717,7 @@ export default function SidebarView({}: SidebarProps) {
                     </span>
                     <span className="nav-item__label flex-1 text-left">{g.title}</span>
 
-                    {showAnyBadge && (
+                    {showAnyBadge && !isOpen && (
                       <span className="nav-item__badges" aria-hidden>
                         {aggActive > 0 && (
                           <NotificationBadge
