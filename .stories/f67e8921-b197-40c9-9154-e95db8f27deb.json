@@ -2712,7 +2712,7 @@
     },
     {
       "id": "380133df-e68d-433c-a208-fa1c59915b93",
-      "status": "-",
+      "status": "+",
       "title": "when the user posts a message to chat automatically scroll to the very bottom",
       "description": "In @src/renderer/src/components/chat/ChatSidebar.tsx when a user adds a new message and it appears in @src/renderer/src/components/chat/MessageList.tsx it doesn't get fully shown (i.e. the chat doesn't scroll to the bottom) - it should.",
       "context": [
@@ -2721,7 +2721,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-29T15:15:23.655Z",
-      "updatedAt": "2025-10-29T23:57:29.823Z"
+      "updatedAt": "2025-10-30T11:01:44.207Z",
+      "completedAt": "2025-10-30T11:01:44.207Z"
     },
     {
       "id": "4c176bb4-549e-4a6c-a59d-f8690c4819b5",

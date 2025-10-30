@@ -300,6 +300,16 @@ export default function MessageList({
       return
     }
 
+    // If the last new message is from the user, always force-scroll to the very bottom
+    const lastNow = messages[messages.length - 1]
+    if (lastNow && lastNow.completionMessage.role === 'user') {
+      requestAnimationFrame(() => {
+        forceScrollToBottom('smooth')
+        if (isAtBottomRef.current) onReadLatest?.(lastMessageIso(messages))
+      })
+      return
+    }
+
     // Only partially scroll when user is at bottom
     if (!isAtBottomRef.current) return
 
@@ -725,7 +735,7 @@ export default function MessageList({
                       {toggleableCount > 0 && isSystem && isLast ? (
                         <div className="pt-1 flex items-center justify-between">
                           {toggleableCount > 1 ? (
-                            <div className="flex items-center gap-2 text-[12px] text-[var(--text-secondary)]">
+                            <div className="flex items-center gap-2 text:[12px] text-[var(--text-secondary)]">
                               <span>Toggle all</span>
                               <Switch
                                 checked={allSelected}
