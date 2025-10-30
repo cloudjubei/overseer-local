@@ -247,10 +247,21 @@ export default class FactoryCompletionManager extends BaseManager {
     const chat = await this.chatsManager.getChat(chatContext)
     if (!chat) throw new Error('CHAT NOT FOUND')
 
+    // Required behavior: delete the last assistant message and retry with the remaining history
+    let messages = [...(chat.messages || [])]
+    if (messages.length > 0) {
+      const last = messages[messages.length - 1]
+      if (last?.completionMessage?.role === 'assistant') {
+        messages = messages.slice(0, messages.length - 1)
+      }
+    }
+
+    const newChat = await this.chatsManager.saveChat({ ...chat, messages })
+
     return await this.runCompletionTools(
       projectId,
       chatContext,
-      chat,
+      newChat,
       systemPrompt,
       settings,
       config,

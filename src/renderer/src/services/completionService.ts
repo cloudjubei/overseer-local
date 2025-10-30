@@ -31,7 +31,15 @@ export type CompletionService = {
     config: LLMConfig,
   ): Promise<CompletionResponseTurns>
 
+  retryCompletionTools(
+    projectId: string,
+    chatContext: ChatContext,
+    systemPrompt: string,
+    settings: CompletionSettings,
+    config: LLMConfig,
+  ): Promise<CompletionResponseTurns>
+
   abortCompletion(chatContext: ChatContext): Promise<void>
 }
 
-export const completionService: CompletionService = { ...window.completionService }
+export const completionService: CompletionService = { ...window.completionService } 
