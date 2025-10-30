@@ -10,9 +10,8 @@ import { playReceiveSound } from '../../assets/sounds'
 import Markdown from '../ui/Markdown'
 import { ChatMessage, ToolCall, ToolResult, ToolResultType } from 'thefactory-tools'
 import { inferFileType } from 'thefactory-tools/utils'
-import { IconToolbox, IconDelete } from '../ui/icons/Icons'
+import { IconToolbox, IconDelete, IconRefresh } from '../ui/icons/Icons'
 import { Switch } from '../ui/Switch'
-import { IconRetry } from '../ui/icons/IconRetry'
 
 interface EnhancedMessage extends ChatMessage {
   showModel?: boolean
@@ -495,21 +494,18 @@ export default function MessageList({
                 >
                   AI
                 </div>
-                {/* Error bubble takes remaining width */}
                 <div className="flex-1 max-w-[72%] min-w-[80px] flex flex-col items-start w-full">
-                  <ErrorBubble error={msg.error} disabled={isThinking} />
+                  <ErrorBubble error={msg.error} />
                 </div>
-                {/* Retry button to the right of the whole message */}
                 {showRetry ? (
                   <button
-                    type="button"
-                    className="btn-secondary btn-icon self-start"
                     onClick={() => onRetry?.()}
                     disabled={isThinking}
-                    title={isThinking ? 'Please wait...' : 'Retry the last action'}
+                    className="btn-icon"
                     aria-label="Retry the last action"
+                    title={isThinking ? 'Please wait...' : 'Retry the last action'}
                   >
-                    <IconRetry className="w-5 h-5" />
+                    <IconRefresh className="w-5 h-5 mt-4" />
                   </button>
                 ) : null}
               </div>
