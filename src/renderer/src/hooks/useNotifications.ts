@@ -37,7 +37,7 @@ export function useNotifications() {
     updateCurrentProjectNotifications()
   }, [activeProject?.id, updateCurrentProjectNotifications])
 
-  // When a notification is opened/clicked, navigate to the Agents view and focus the run
+  // When a notification is opened/clicked, navigate with deep-link support
   useEffect(() => {
     const off =
       notificationsService.onOpenNotification((metadata) => {
@@ -45,6 +45,11 @@ export function useNotifications() {
           const runId = metadata.runId
           if (runId) {
             window.location.hash = `agents/run/${runId}`
+            return
+          }
+          if (metadata?.actionUrl && typeof metadata.actionUrl === 'string') {
+            window.location.hash = metadata.actionUrl
+            return
           }
         } catch (_) {
           // no-op
@@ -111,7 +116,13 @@ export function NotificationClickHandler() {
         } else if (metadata.documentPath) {
           nav.navigateView('Files')
         } else if (metadata.actionUrl) {
-          // Handle custom URL if needed
+          try {
+            if (typeof metadata.actionUrl === 'string') {
+              window.location.hash = metadata.actionUrl
+            }
+          } catch (_) {
+            // ignore
+          }
         }
       },
     )

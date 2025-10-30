@@ -2813,13 +2813,14 @@
     },
     {
       "id": "5d593b43-f456-4b1e-97e6-cb53476197e8",
-      "status": "-",
+      "status": "+",
       "title": "Push notifications for Git and Chat (parity with agents)",
       "description": "Goal: Provide push notifications for Git and Chat using the exact same logic and UX we already use for agent run notifications.\n\nBehavior:\n- Chat: When a new assistant message arrives (under the same conditions currently used for agent notifications), send a native OS notification. Clicking the notification opens ChatView focused on the correct chat.\n- Git: When a branch with feature changes appears or updates (per GitContext/monitor events, under the same conditions as agent notifications), send a native OS notification. Clicking the notification opens GitView focused on that branch/diff context.\n- Deep linking follows the same patterns as agents; reuse existing navigation/deep-link helpers.\n\nImplementation notes:\n- Reuse existing notification pipeline used for agents in notificationsService and notifications manager. Mirror conditions and throttling/rate-limiting semantics already present for agent notifications.\n- No new settings pane work for now; follow the exact pathways and toggles agents use today.\n\nContext:\n- @src/renderer/src/services/notificationsService.ts\n- @src/notifications/manager.js\n- @src/renderer/src/services/chatsService.ts\n- @src/renderer/src/services/gitService.ts\n- @src/renderer/src/contexts/GitContext.tsx\n- @src/renderer/src/screens/ChatView.tsx\n- @src/renderer/src/screens/GitView.tsx\n\nAcceptance criteria:\n- New chat message triggers an OS push notification under the same conditions as agent notifications. Clicking it takes the user directly to the relevant chat in ChatView.\n- Git branch feature-change event triggers an OS push notification under the same conditions as agent notifications. Clicking it takes the user to GitView focused on the relevant branch.\n- No additional settings are necessary; behavior mirrors agent notification toggles and logic exactly.\n- Notifications are properly debounced/rate limited if the agent pipeline already enforces this (parity).",
       "context": [],
       "createdAt": "2025-10-29T16:42:29.048Z",
-      "updatedAt": "2025-10-29T23:50:16.735Z",
-      "blockers": []
+      "updatedAt": "2025-10-30T00:35:51.425Z",
+      "blockers": [],
+      "completedAt": "2025-10-30T00:35:51.425Z"
     },
     {
       "id": "38e1f4bc-07fa-42cc-990d-da75a62151a6",
