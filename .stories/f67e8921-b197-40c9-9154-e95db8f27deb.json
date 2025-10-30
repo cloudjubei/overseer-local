@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "-",
+  "status": "?",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -2852,7 +2852,7 @@
     },
     {
       "id": "aad2f8db-1ad1-4529-b824-a4403aee54cc",
-      "status": "-",
+      "status": "?",
       "title": "the `create_feature` popup should show the feature title",
       "description": "currently in @src/renderer/src/components/chat/ToolCallChangePopup.tsx it only shows the description for `create_feature` - the `title` field should show above it.",
       "context": [
@@ -2860,7 +2860,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-30T00:03:33.927Z",
-      "updatedAt": "2025-10-30T00:03:33.927Z"
+      "updatedAt": "2025-10-30T14:05:08.854Z",
+      "rejection": "Blocked: Agent loop failed: {}"
     },
     {
       "id": "6ef2cf47-0c7e-4f4a-a7c9-af483afeb452",
