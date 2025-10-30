@@ -2582,16 +2582,11 @@
       "description": "Most of the commits are implementing features and have the id inside the commit message. That id should be extracted and displayed as @src/renderer/src/components/stories/DependencyBullet.tsx to show the user which features are part of this pending merge.\n\nThe `thefactory-tools` now exposes all the necessary values for this - check @src/logic/git/gitTypes.copy.ts to see.",
       "context": [
         "src/renderer/src/components/stories/DependencyBullet.tsx",
-        "src/logic/git/gitTypes.copy.ts",
-        "src/renderer/src/contexts/GitContext.tsx",
-        "src/logic/git/GitManager.ts",
-        "src/renderer/src/services/gitService.ts",
-        "src/preload/ipcHandlersKeys.ts"
+        "src/logic/git/gitTypes.copy.ts"
       ],
       "blockers": [],
       "createdAt": "2025-10-28T12:52:21.487Z",
-      "updatedAt": "2025-10-30T21:52:47.194Z",
-      "rejection": "This is not implemented - it needs to get the correct data via @src/renderer/src/contexts/GitContext.tsx , through @src/renderer/src/services/gitService.ts & @src/preload/ipcHandlersKeys.ts , @src/logic/git/GitManager.ts .",
+      "updatedAt": "2025-10-30T23:12:11.965Z",
       "completedAt": "2025-10-30T21:52:47.194Z"
     },
     {
@@ -2704,13 +2699,11 @@
         "src/renderer/src/components/chat/ChatSidebar.tsx",
         "src/renderer/src/contexts/ChatsContext.tsx",
         "src/renderer/src/services/completionService.ts",
-        "src/logic/factory/FactoryCompletionManager.ts",
-        "src/renderer/src/components/ui/icons/IconRetry.tsx"
+        "src/logic/factory/FactoryCompletionManager.ts"
       ],
       "blockers": [],
       "createdAt": "2025-10-29T15:05:58.043Z",
-      "updatedAt": "2025-10-30T21:47:18.549Z",
-      "rejection": "The retry button should be to the right of the whole message (outside of it) and it should be the @src/renderer/src/components/ui/icons/IconRetry.tsx .\nAlso, there are currently two (i) buttons/icons showing. We want to keep the left one and it will show the expanded error information. Right now we are showing a title and subtitle, so the clicking of the (i) button should show the subtitle + any extra info.\"",
+      "updatedAt": "2025-10-30T23:11:53.813Z",
       "completedAt": "2025-10-30T21:47:18.549Z"
     },
     {
@@ -2799,12 +2792,10 @@
       "title": "Chat sidebar spinner + unread dot with project aggregation",
       "description": "Goal: Show ongoing chats (spinner) and new messages in the sidebar for both the chat list and the projects list area in SidebarView, with aggregation at the project level.\n\nBehavior:\n- Chat row: While an assistant response is streaming, display a small spinner in place of the unread badge. If there are unread messages for that chat, show a tiny red dot at the spinner’s top-right corner (spinner has precedence over number badges during streaming).\n- Project row aggregation (in SidebarView): If any chat within the project is streaming, show a small spinner on the project tile. If any chat within the project has unread messages, aggregate the unread count and display it. When both streaming and unread exist, show spinner with a small red dot at top-right. When not streaming, show the numeric unread badge only. Counts cap at 99+.\n- No hover preview.\n- Unread is already tracked per chat; leverage existing unread state and last-seen logic.\n- Spinner clears within ~500ms of stream end to avoid flicker.\n\nImplementation notes:\n- Use existing UI primitives: Spinner and DotBadge. Introduce a spinner-with-dot composition for the red unread dot overlay.\n- Ensure the new logic coexists cleanly with the already completed 'Chat notifications' feature.\n- Respect collapsed sidebar visuals; badges/spinners should remain legible and positioned consistently.\n\nContext:\n- @src/renderer/src/navigation/SidebarView.tsx\n- @src/renderer/src/components/ui/CollapsibleSidebar.tsx\n- @src/renderer/src/components/ui/Spinner.tsx\n- @src/renderer/src/components/ui/DotBadge.tsx\n- @src/renderer/src/components/chat/ChatSidebar.tsx\n- @src/renderer/src/services/chatsService.ts\n\nAcceptance criteria:\n- When a chat is actively streaming, its chat row shows a spinner instead of a numeric unread badge. If unread exists, a small red dot appears on the spinner’s top-right.\n- At the project level in SidebarView, if any chat is streaming, a spinner shows on the project tile. If any chat has unread messages, an aggregated unread indicator shows. If both, spinner shows with a small red dot. Counts cap at '99+'.\n- No hover preview is shown. Unread and streaming states update in near-real-time.\n- Spinner and badge positions align and remain accessible/legible in both expanded and collapsed sidebar modes.\n- No regressions to existing chat notification badges elsewhere (e.g., Chat nav entry).",
       "context": [
-        "src/renderer/src/navigation/SidebarView.tsx",
-        "src/renderer/src/screens/ChatView.tsx"
+        "src/renderer/src/navigation/SidebarView.tsx"
       ],
       "createdAt": "2025-10-29T16:42:29.014Z",
-      "updatedAt": "2025-10-30T14:49:21.119Z",
-      "rejection": "In @src/renderer/src/screens/ChatView.tsx when the user stops the current assistant the spinner still keeps showing for that chat in History (in the sidebar inside ChatView), but it shouldn't",
+      "updatedAt": "2025-10-30T23:12:07.251Z",
       "blockers": [],
       "completedAt": "2025-10-30T14:49:21.119Z"
     },
