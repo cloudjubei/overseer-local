@@ -627,6 +627,27 @@ export default function MessageList({
                     {(() => {
                       const iso = messageIso(msg)
                       const ts = iso ? formatFriendlyTimestamp(iso) : ''
+
+                      if (isAssistant) {
+                        return (
+                          <div className="w-full flex justify-between items-baseline">
+                            {msg.showModel && msg.model ? (
+                              <div className="text-[11px] text-[var(--text-secondary)] mb-1 inline-flex items-center gap-1 border border-[var(--border-subtle)] bg-[var(--surface-overlay)] rounded-full px-2 py-[2px]">
+                                <span className="inline-block w-1.5 h-1.5 rounded-full bg-[var(--accent-primary)]" />
+                                {msg.model.model}
+                              </div>
+                            ) : (
+                              <div />
+                            )}
+                            {ts ? (
+                              <div className="text-[10px] leading-4 text-[var(--text-secondary)] mb-1 opacity-80 select-none">
+                                {ts}
+                              </div>
+                            ) : null}
+                          </div>
+                        )
+                      }
+
                       return ts ? (
                         <div className="text-[10px] leading-4 text-[var(--text-secondary)] mb-1 opacity-80 select-none">
                           {ts}
@@ -634,7 +655,7 @@ export default function MessageList({
                       ) : null
                     })()}
 
-                    {msg.showModel && msg.model && (
+                    {!isAssistant && msg.showModel && msg.model && (
                       <div className="text-[11px] text-[var(--text-secondary)] mb-1 inline-flex items-center gap-1 border border-[var(--border-subtle)] bg-[var(--surface-overlay)] rounded-full px-2 py-[2px]">
                         <span className="inline-block w-1.5 h-1.5 rounded-full bg-[var(--accent-primary)]" />
                         {msg.model.model}
