@@ -368,11 +368,18 @@ export default function ToolCallChangePopup({
     }
 
     if (n === 'create_feature' || n === 'create_story') {
-      const title = tryString(extract(result, ['title']) || extract(args, ['title']))
+      const title = tryString(
+        extract(result, ['title']) ||
+          extract(args, ['title']) ||
+          extract(result, ['feature.title']) ||
+          extract(result, ['story.title']),
+      )
       const description = tryString(
         extract(result, ['description']) ||
           extract(args, ['description']) ||
-          extract(result, ['content']),
+          extract(result, ['content']) ||
+          extract(result, ['feature.description']) ||
+          extract(result, ['story.description']),
       )
       return (
         <div>
