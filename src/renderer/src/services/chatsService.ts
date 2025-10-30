@@ -20,6 +20,7 @@ export type ChatsService = {
   getChat: (context: ChatContext) => Promise<Chat>
   updateChat: (context: ChatContext, input: ChatEditInput) => Promise<Chat | undefined>
   deleteChat: (context: ChatContext) => Promise<void>
+  deleteLastMessage: (context: ChatContext) => Promise<Chat | undefined>
 
   getChatSettings: () => Promise<ChatsSettings>
   resetChatSettings: (chatContext: ChatContext) => Promise<ChatsSettings>

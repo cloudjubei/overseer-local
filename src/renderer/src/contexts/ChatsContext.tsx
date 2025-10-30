@@ -10,7 +10,6 @@ import type {
   ChatContextArguments,
   CompletionMessage,
   CompletionSettings,
-  ChatEditInput,
 } from 'thefactory-tools'
 import { getChatContextPath } from 'thefactory-tools/utils'
 import { chatsService } from '../services/chatsService'
@@ -519,51 +518,16 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
     // Do not allow deletion while assistant is thinking
     if (chatState.isThinking) return
 
-    const msgs = chatState.chat.messages
-    if (!msgs || msgs.length === 0) return
-
-    let trimCount = 1
-    const last = msgs[msgs.length - 1]
-
-    // If the last message contains tool results (stored as a message with toolResults),
-    // and the previous message is an assistant message, delete both so the assistant response
-    // and its tool results are removed together.
-    const lastHasToolResults = Array.isArray((last as any)?.toolResults) && (last as any).toolResults.length > 0
-    if (lastHasToolResults && msgs.length >= 2) {
-      const prev = msgs[msgs.length - 2]
-      if (prev?.completionMessage?.role === 'assistant') {
-        trimCount = 2
-      }
-    }
-
-    const trimmed = msgs.slice(0, msgs.length - trimCount)
-
-    // Optimistic update
-    const nextState: ChatState = {
-      ...chatState,
-      chat: {
-        ...chatState.chat,
-        messages: trimmed,
-      },
-    }
-    updateChatState(key, nextState)
-    upsertChatsByProject(nextState)
-
-    // Persist via updateChat - rely on backend to broadcast change
-    const patch: ChatEditInput = { messages: trimmed }
     try {
-      await chatsService.updateChat(context, patch)
+      const updated = await chatsService.deleteLastMessage(context)
+      if (updated) {
+        const nextState: ChatState = { ...chatState, chat: updated }
+        updateChatState(key, nextState)
+        upsertChatsByProject(nextState)
+      }
     } catch (e) {
       console.error('Failed to delete last message', e)
-      // Revert by refetching
-      try {
-        const refreshed = await chatsService.getChat(context)
-        const reverted: ChatState = { key, chat: refreshed, isLoading: false, isThinking: false }
-        updateChatState(key, { chat: refreshed })
-        upsertChatsByProject(reverted)
-      } catch (e2) {
-        console.error('Failed to refresh chat after delete error', e2)
-      }
+      // No state mutation here; rely on subscription to reconcile
     }
   }, [getChat, updateChatState, upsertChatsByProject])
 

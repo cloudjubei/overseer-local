@@ -97,6 +97,14 @@ const COMPLETION_API = {
       settings,
       config,
     }),
+  retryCompletionTools: (projectId, chatContext, systemPrompt, settings, config) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.COMPLETION_TOOLS_RETRY, {
+      projectId,
+      chatContext,
+      systemPrompt,
+      settings,
+      config,
+    }),
 
   abortCompletion: (chatContext) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.COMPLETION_ABORT, {
@@ -117,6 +125,8 @@ const CHATS_API = {
   updateChat: (chatContext, patch) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_UPDATE, { chatContext, patch }),
   deleteChat: (chatContext) => ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_DELETE, { chatContext }),
+  deleteLastMessage: (chatContext) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_DELETE_LAST_MESSAGE, { chatContext }),
 
   getChatSettings: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_GET_SETTINGS),
   resetChatSettings: (chatContext) =>
