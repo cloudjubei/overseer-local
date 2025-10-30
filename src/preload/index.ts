@@ -354,6 +354,8 @@ const GIT_API = {
   },
   listUnifiedBranches: (projectId) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_LIST_UNIFIED_BRANCHES, { projectId }),
+  selectCommits: (projectId, options) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_SELECT_COMMITS, { projectId, options }),
 }
 
 const GIT_CREDENTIALS_API = {

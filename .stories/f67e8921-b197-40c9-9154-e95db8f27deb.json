@@ -2577,7 +2577,7 @@
     },
     {
       "id": "ae8f8bd5-6062-4238-bc93-00994debfad0",
-      "status": "-",
+      "status": "+",
       "title": "Each commit that is pending in GitView is for stories and features - they should be displayed as chips",
       "description": "Most of the commits are implementing features and have the id inside the commit message. That id should be extracted and displayed as @src/renderer/src/components/stories/DependencyBullet.tsx to show the user which features are part of this pending merge.\n\nThe `thefactory-tools` now exposes all the necessary values for this - check @src/logic/git/gitTypes.copy.ts to see.",
       "context": [
@@ -2590,8 +2590,9 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-28T12:52:21.487Z",
-      "updatedAt": "2025-10-29T23:50:05.623Z",
-      "rejection": "This is not implemented - it needs to get the correct data via @src/renderer/src/contexts/GitContext.tsx , through @src/renderer/src/services/gitService.ts & @src/preload/ipcHandlersKeys.ts , @src/logic/git/GitManager.ts ."
+      "updatedAt": "2025-10-30T00:07:22.144Z",
+      "rejection": "This is not implemented - it needs to get the correct data via @src/renderer/src/contexts/GitContext.tsx , through @src/renderer/src/services/gitService.ts & @src/preload/ipcHandlersKeys.ts , @src/logic/git/GitManager.ts .",
+      "completedAt": "2025-10-30T00:07:22.144Z"
     },
     {
       "id": "e5ab58da-63e1-4869-8fc0-b18016f0dba6",
@@ -2696,7 +2697,7 @@
     },
     {
       "id": "0a224aec-8933-4c9a-8910-33048809e451",
-      "status": "-",
+      "status": "+",
       "title": "when getting an error in chat show a retry button",
       "description": "In @src/renderer/src/components/chat/ChatSidebar.tsx when getting an error the only thing the user can do right now is to write a message to retry - we should have a retry button next to the message, that will remove the last message and proceed as if it never happened.\nThe error message should have an (i) button in the top right to display the error that occurred.",
       "context": [
@@ -2725,7 +2726,7 @@
     },
     {
       "id": "4c176bb4-549e-4a6c-a59d-f8690c4819b5",
-      "status": "-",
+      "status": "+",
       "title": "the typewriter effect in chat swallows some first letters",
       "description": "whenever the typewriter effect kicks in it always omits the first or second letter in @src/renderer/src/components/chat/ChatSidebar.tsx when displaying a message in @src/renderer/src/components/chat/MessageList.tsx",
       "context": [
@@ -2734,8 +2735,9 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-29T16:24:36.140Z",
-      "updatedAt": "2025-10-29T23:50:10.861Z",
-      "rejection": "This is still happening - if it's an issue with the library used - we should use a different library or write our own."
+      "updatedAt": "2025-10-30T00:14:46.566Z",
+      "rejection": "This is still happening - if it's an issue with the library used - we should use a different library or write our own.",
+      "completedAt": "2025-10-30T00:14:46.566Z"
     },
     {
       "id": "720ef1b6-1461-4ea9-8417-ce6955ba566e",
@@ -2814,26 +2816,28 @@
     },
     {
       "id": "5d593b43-f456-4b1e-97e6-cb53476197e8",
-      "status": "-",
+      "status": "+",
       "title": "Push notifications for Git and Chat (parity with agents)",
       "description": "Goal: Provide push notifications for Git and Chat using the exact same logic and UX we already use for agent run notifications.\n\nBehavior:\n- Chat: When a new assistant message arrives (under the same conditions currently used for agent notifications), send a native OS notification. Clicking the notification opens ChatView focused on the correct chat.\n- Git: When a branch with feature changes appears or updates (per GitContext/monitor events, under the same conditions as agent notifications), send a native OS notification. Clicking the notification opens GitView focused on that branch/diff context.\n- Deep linking follows the same patterns as agents; reuse existing navigation/deep-link helpers.\n\nImplementation notes:\n- Reuse existing notification pipeline used for agents in notificationsService and notifications manager. Mirror conditions and throttling/rate-limiting semantics already present for agent notifications.\n- No new settings pane work for now; follow the exact pathways and toggles agents use today.\n\nContext:\n- @src/renderer/src/services/notificationsService.ts\n- @src/notifications/manager.js\n- @src/renderer/src/services/chatsService.ts\n- @src/renderer/src/services/gitService.ts\n- @src/renderer/src/contexts/GitContext.tsx\n- @src/renderer/src/screens/ChatView.tsx\n- @src/renderer/src/screens/GitView.tsx\n\nAcceptance criteria:\n- New chat message triggers an OS push notification under the same conditions as agent notifications. Clicking it takes the user directly to the relevant chat in ChatView.\n- Git branch feature-change event triggers an OS push notification under the same conditions as agent notifications. Clicking it takes the user to GitView focused on the relevant branch.\n- No additional settings are necessary; behavior mirrors agent notification toggles and logic exactly.\n- Notifications are properly debounced/rate limited if the agent pipeline already enforces this (parity).",
       "context": [],
       "createdAt": "2025-10-29T16:42:29.048Z",
-      "updatedAt": "2025-10-29T23:50:16.735Z",
-      "blockers": []
+      "updatedAt": "2025-10-30T00:35:51.425Z",
+      "blockers": [],
+      "completedAt": "2025-10-30T00:35:51.425Z"
     },
     {
       "id": "38e1f4bc-07fa-42cc-990d-da75a62151a6",
-      "status": "-",
+      "status": "?",
       "title": "Distinct sounds per notification type (agent, chat, git)",
       "description": "Goal: Play distinct sounds per notification/badge type. For now, reuse the agent-run notification logic and add new sound assets for chat and git. No new settings work yet.\n\nBehavior:\n- Notification types and sounds:\n  - Agent events: existing sound (or migrate to a named asset if needed)\n  - Chat new message: new distinct sound\n  - Git feature-change: new distinct sound\n- Sounds play via the same code path used by agent notifications today and only when a notification is triggered (parity with agents). No additional settings UI in this phase.\n\nImplementation notes:\n- Add new placeholder audio assets under a dedicated folder (e.g., @src/renderer/src/assets/sounds/agent.mp3, chat.mp3, git.mp3) and wire a simple type-to-sound mapping in notificationsService.\n- Preload sounds to minimize lag and debounce to avoid overwhelming audio on bursts (follow any existing debounce in agent notifications if present).\n- Ensure sounds do not overlap excessively (simple last-sound cutoff or short cooldown is acceptable for this phase).\n\nContext:\n- @src/renderer/src/services/notificationsService.ts\n- @src/renderer/src/services/settingsService.ts (only if needed for current agent parity)\n- @src/renderer/src/screens/SettingsView.tsx (no UI changes planned yet; reference for parity)\n- @src/renderer/src/assets/sounds/ (new assets folder)\n\nAcceptance criteria:\n- Triggering an agent notification plays the agent sound; triggering a chat notification plays the chat sound; triggering a git notification plays the git sound.\n- Sounds are audibly distinct across the three types.\n- Sounds play through the same logic as agent notifications (no bespoke pathways), and respect any existing mutes/rate limits already applied to agent notifications.\n- No new settings are introduced in this phase.",
       "context": [],
       "createdAt": "2025-10-29T16:42:29.050Z",
-      "updatedAt": "2025-10-29T16:42:29.050Z"
+      "updatedAt": "2025-10-30T00:37:03.178Z",
+      "rejection": "Blocked: Repository is empty; cannot find existing notificationsService/settingsService or any renderer code to integrate per-type sounds. Implementing requires wiring into current notification triggers to ensure parity with agent notifications. I added docs/FILE_ORGANISATION.md documenting expected structure and assets location, but need the actual codebase or approval to scaffold a minimal notifications service, assets, and sound mapping."
     },
     {
       "id": "dfa8e00c-f58c-4ae6-ba13-3dff5dc4f961",
-      "status": "-",
+      "status": "?",
       "title": "the llm model name should be positioned on the left",
       "description": "in @src/renderer/src/components/chat/MessageList.tsx ,\nright now there's the date/time label on the right of the assistant message and the model name displays below it. The model name should display at the same level as the timestamp but on the opposite end (i.e. on the left).",
       "context": [

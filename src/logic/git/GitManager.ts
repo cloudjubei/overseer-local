@@ -86,7 +86,7 @@ export default class GitManager extends BaseManager {
     handlers[IPC_HANDLER_KEYS.GIT_LIST_UNIFIED_BRANCHES] = ({ projectId }) =>
       this.listUnifiedBranches(projectId)
 
-    // Commit selection for ahead/behind computation across refs
+    // Select commits (with optional FeatureInfo enrichment)
     handlers[IPC_HANDLER_KEYS.GIT_SELECT_COMMITS] = ({ projectId, options }) =>
       this.selectCommits(projectId, options)
 

@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import type {
   LLMConfig,
   ChatContext,
@@ -17,6 +17,7 @@ import { chatsService } from '../services/chatsService'
 import { projectsService } from '../services/projectsService'
 import { useActiveProject } from './ProjectContext'
 import { completionService } from '@renderer/services/completionService'
+import { notificationsService } from '@renderer/services/notificationsService'
 
 export type ChatState = {
   key: string
@@ -100,6 +101,8 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
   const [chats, setChats] = useState<Record<string, ChatState>>({})
   const [chatsByProjectId, setChatsByProjectId] = useState<Record<string, ChatState[]>>({})
   const [allChatSettings, setAllChatSettings] = useState<ChatsSettings | undefined>(undefined)
+  // Track last assistant message index notified per chat key to avoid duplicates
+  const lastAssistantNotifiedRef = useRef<Record<string, number>>({})
 
   const updateChatState = useCallback((key: string, updates: Partial<ChatState>) => {
     setChats((prev) => ({
@@ -196,6 +199,90 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
           }
           newChats[key] = next
           upsertChatsByProject(next)
+
+          // Fire OS notification for new assistant messages (debounced per chat)
+          try {
+            const msgs = chatUpdate.chat?.messages || []
+            // find last assistant message index
+            let lastAssistantIdx = -1
+            for (let i = msgs.length - 1; i >= 0; i--) {
+              const role = (msgs[i] as any)?.completionMessage?.role
+              if (role === 'assistant') {
+                lastAssistantIdx = i
+                break
+              }
+            }
+            if (lastAssistantIdx >= 0) {
+              const prevIdx = lastAssistantNotifiedRef.current[key] ?? -1
+              if (lastAssistantIdx > prevIdx) {
+                lastAssistantNotifiedRef.current[key] = lastAssistantIdx
+
+                // Build notification content
+                const ctx: any = chatUpdate.context as any
+                let title = 'New assistant message'
+                switch (ctx.type) {
+                  case 'PROJECT':
+                    title = 'Project chat update'
+                    break
+                  case 'STORY':
+                    title = 'Story chat update'
+                    break
+                  case 'FEATURE':
+                    title = 'Feature chat update'
+                    break
+                  case 'PROJECT_TOPIC':
+                  case 'STORY_TOPIC':
+                    title = 'Topic chat update'
+                    break
+                  case 'AGENT_RUN':
+                  case 'AGENT_RUN_FEATURE':
+                    title = 'Agent run chat update'
+                    break
+                }
+                const raw = String((msgs[lastAssistantIdx] as any)?.completionMessage?.content || '')
+                const snippet = raw.replace(/\s+/g, ' ').slice(0, 120)
+                const message = snippet || 'Assistant responded'
+
+                // Deep link to specific chat context
+                const enc = encodeURIComponent
+                const actionUrl = (() => {
+                  switch (ctx.type) {
+                    case 'PROJECT':
+                      return `#chat/project/${enc(ctx.projectId)}`
+                    case 'STORY':
+                      return `#chat/story/${enc(ctx.storyId)}`
+                    case 'FEATURE':
+                      return `#chat/feature/${enc(ctx.storyId)}/${enc(ctx.featureId)}`
+                    case 'PROJECT_TOPIC':
+                      return `#chat/project-topic/${enc(ctx.projectId)}/${enc(ctx.projectTopic)}`
+                    case 'STORY_TOPIC':
+                      return `#chat/story-topic/${enc(ctx.storyId)}/${enc(ctx.storyTopic)}`
+                    case 'AGENT_RUN':
+                      return `#chat/agent-run/${enc(ctx.projectId)}/${enc(ctx.storyId)}/${enc(ctx.agentRunId)}`
+                    case 'AGENT_RUN_FEATURE':
+                      return `#chat/agent-run-feature/${enc(ctx.projectId)}/${enc(ctx.storyId)}/${enc(ctx.featureId)}/${enc(ctx.agentRunId)}`
+                    default:
+                      return '#chat'
+                  }
+                })()
+
+                const pid = ctx.projectId || projectId
+                if (pid) {
+                  void notificationsService
+                    .create(pid, {
+                      type: 'info',
+                      category: 'chat',
+                      title,
+                      message,
+                      metadata: { actionUrl },
+                    })
+                    .catch(() => {})
+                }
+              }
+            }
+          } catch (_) {
+            // no-op
+          }
         } else {
           const next: ChatState = { key, chat: chatUpdate.chat!, isLoading: false, isThinking: false }
           newChats[key] = next
@@ -207,7 +294,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
     return () => {
       if (unsubscribe) unsubscribe()
     }
-  }, [upsertChatsByProject, removeFromChatsByProject])
+  }, [upsertChatsByProject, removeFromChatsByProject, projectId])
 
   const getChat = useCallback(
     async (context: ChatContext): Promise<ChatState> => {
