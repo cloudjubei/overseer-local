@@ -2834,7 +2834,7 @@
     },
     {
       "id": "dfa8e00c-f58c-4ae6-ba13-3dff5dc4f961",
-      "status": "-",
+      "status": "?",
       "title": "the llm model name should be positioned on the left",
       "description": "in @src/renderer/src/components/chat/MessageList.tsx ,\nright now there's the date/time label on the right of the assistant message and the model name displays below it. The model name should display at the same level as the timestamp but on the opposite end (i.e. on the left).",
       "context": [
@@ -2842,7 +2842,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-29T23:05:20.696Z",
-      "updatedAt": "2025-10-29T23:05:20.696Z"
+      "updatedAt": "2025-10-30T00:44:23.868Z",
+      "rejection": "Blocked: Agent loop failed: {}"
     }
   ],
   "featureIdToDisplayIndex": {
