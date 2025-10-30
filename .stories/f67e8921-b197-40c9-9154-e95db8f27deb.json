@@ -2577,7 +2577,7 @@
     },
     {
       "id": "ae8f8bd5-6062-4238-bc93-00994debfad0",
-      "status": "-",
+      "status": "+",
       "title": "Each commit that is pending in GitView is for stories and features - they should be displayed as chips",
       "description": "Most of the commits are implementing features and have the id inside the commit message. That id should be extracted and displayed as @src/renderer/src/components/stories/DependencyBullet.tsx to show the user which features are part of this pending merge.\n\nThe `thefactory-tools` now exposes all the necessary values for this - check @src/logic/git/gitTypes.copy.ts to see.",
       "context": [
@@ -2590,8 +2590,9 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-28T12:52:21.487Z",
-      "updatedAt": "2025-10-29T23:50:05.623Z",
-      "rejection": "This is not implemented - it needs to get the correct data via @src/renderer/src/contexts/GitContext.tsx , through @src/renderer/src/services/gitService.ts & @src/preload/ipcHandlersKeys.ts , @src/logic/git/GitManager.ts ."
+      "updatedAt": "2025-10-30T00:07:22.144Z",
+      "rejection": "This is not implemented - it needs to get the correct data via @src/renderer/src/contexts/GitContext.tsx , through @src/renderer/src/services/gitService.ts & @src/preload/ipcHandlersKeys.ts , @src/logic/git/GitManager.ts .",
+      "completedAt": "2025-10-30T00:07:22.144Z"
     },
     {
       "id": "e5ab58da-63e1-4869-8fc0-b18016f0dba6",

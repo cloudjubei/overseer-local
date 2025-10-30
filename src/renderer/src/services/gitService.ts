@@ -12,6 +12,8 @@ import {
   MergeReportOptions,
   MergeResult,
   GitUnifiedBranch,
+  CommitInfo,
+  SelectCommitsOptions,
 } from 'thefactory-tools'
 
 export type GitService = {
@@ -56,6 +58,10 @@ export type GitService = {
   ) => () => void
 
   listUnifiedBranches: (projectId: string) => Promise<GitUnifiedBranch[]>
+  selectCommits: (
+    projectId: string,
+    options: Omit<SelectCommitsOptions, 'repoPath'>,
+  ) => Promise<CommitInfo[]>
 }
 
 export const gitService: GitService = {

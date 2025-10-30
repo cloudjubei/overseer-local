@@ -16,6 +16,7 @@ import {
   MergeResult,
   createGitTools,
   GitUnifiedBranch,
+  CommitInfo,
 } from 'thefactory-tools'
 import ProjectsManager from '../projects/ProjectsManager'
 import Mutex from '../utils/Mutex'
@@ -83,6 +84,10 @@ export default class GitManager extends BaseManager {
     // Unified branches listing
     handlers[IPC_HANDLER_KEYS.GIT_LIST_UNIFIED_BRANCHES] = ({ projectId }) =>
       this.listUnifiedBranches(projectId)
+
+    // Select commits (with optional FeatureInfo enrichment)
+    handlers[IPC_HANDLER_KEYS.GIT_SELECT_COMMITS] = ({ projectId, options }) =>
+      this.selectCommits(projectId, options)
 
     return handlers
   }
@@ -217,6 +222,24 @@ export default class GitManager extends BaseManager {
       return []
     }
     return res.branches || []
+  }
+
+  private async selectCommits(
+    projectId: string,
+    options: Parameters<GitTools['selectCommits']>[0],
+  ): Promise<CommitInfo[] | undefined> {
+    const tools = await this.__getTools(projectId)
+    if (!tools) return
+    try {
+      const opts = {
+        ...options,
+        featureInfo: options.featureInfo ?? { enableHeuristics: true },
+      }
+      return await tools.selectCommits(opts)
+    } catch (e) {
+      console.error(`[GitManager] selectCommits failed for project ${projectId}:`, e)
+      return []
+    }
   }
 
   private async updateTool(projectId: string): Promise<GitTools | undefined> {
