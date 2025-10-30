@@ -2698,13 +2698,16 @@
       "id": "0a224aec-8933-4c9a-8910-33048809e451",
       "status": "-",
       "title": "when getting an error in chat show a retry button",
-      "description": "In @src/renderer/src/components/chat/ChatSidebar.tsx when getting an error the only thing the user can do right now is to write a message to retry - we should have a retry button next to the message, that will remove the last message and proceed as if it never happened.\nThe error message should have an (i) button in the top right to display the error that occurred.",
+      "description": "In @src/renderer/src/components/chat/ChatSidebar.tsx when getting an error the only thing the user can do right now is to write a message to retry - we should have a retry button next to the message, that will remove the last message and proceed as if it never happened.\nThe error message should have an (i) button in the top right to display the error that occurred.\n\nUpdate @src/renderer/src/contexts/ChatsContext.tsx and @src/renderer/src/services/completionService.ts and @src/logic/factory/FactoryCompletionManager.ts to have an appropriate retry method.",
       "context": [
-        "src/renderer/src/components/chat/ChatSidebar.tsx"
+        "src/renderer/src/components/chat/ChatSidebar.tsx",
+        "src/renderer/src/contexts/ChatsContext.tsx",
+        "src/renderer/src/services/completionService.ts",
+        "src/logic/factory/FactoryCompletionManager.ts"
       ],
       "blockers": [],
       "createdAt": "2025-10-29T15:05:58.043Z",
-      "updatedAt": "2025-10-30T11:15:31.585Z",
+      "updatedAt": "2025-10-30T11:17:33.148Z",
       "rejection": "Simply delete the last assistant message and send the rest to the completionTools - this is the required behaviour."
     },
     {
