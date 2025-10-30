@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "-",
+  "status": "?",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -2696,7 +2696,7 @@
     },
     {
       "id": "0a224aec-8933-4c9a-8910-33048809e451",
-      "status": "-",
+      "status": "?",
       "title": "when getting an error in chat show a retry button",
       "description": "In @src/renderer/src/components/chat/ChatSidebar.tsx when getting an error the only thing the user can do right now is to write a message to retry - we should have a retry button next to the message, that will remove the last message and proceed as if it never happened.\nThe error message should have an (i) button in the top right to display the error that occurred.\n\nUpdate @src/renderer/src/contexts/ChatsContext.tsx and @src/renderer/src/services/completionService.ts and @src/logic/factory/FactoryCompletionManager.ts to have an appropriate retry method.",
       "context": [
@@ -2708,8 +2708,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-29T15:05:58.043Z",
-      "updatedAt": "2025-10-30T12:22:18.640Z",
-      "rejection": "Visual updates:\n- the retry button should be to the right of the whole message (outside of it) and it should be an icon (to be added to @src/renderer/src/components/ui/icons/Icons.tsx ) that shows an incomplete circle with an arrow pointing at the end (this is a fairly standard refresh/restart symbol).\n- there are currently two (i) buttons/icons showing. We want to keep the left one and it will show the expanded error information. Right now we are showing a title and subtitle, so the clicking of the (i) button should show the subtitle + any extra info."
+      "updatedAt": "2025-10-30T14:57:21.483Z",
+      "rejection": "Blocked: Agent loop failed: {}"
     },
     {
       "id": "380133df-e68d-433c-a208-fa1c59915b93",
