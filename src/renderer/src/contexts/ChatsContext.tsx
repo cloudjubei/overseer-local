@@ -109,16 +109,6 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
   // Track last assistant message index notified per chat key to avoid duplicates
   const lastAssistantNotifiedRef = useRef<Record<string, number>>({})
 
-  const updateChatState = useCallback((key: string, updates: Partial<ChatState>) => {
-    setChats((prev) => ({
-      ...prev,
-      [key]: {
-        ...(prev[key] || { isLoading: false, isThinking: false }),
-        ...updates,
-      },
-    }))
-  }, [])
-
   // Helper: safely update chatsByProjectId for a given chat state
   const upsertChatsByProject = useCallback((chatState: ChatState) => {
     const ctx = chatState.chat.context
@@ -148,6 +138,29 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       return { ...prev, [pid]: nextForProject }
     })
   }, [])
+
+  const updateChatState = useCallback(
+    (key: string, updates: Partial<ChatState>) => {
+      setChats((prev) => {
+        const current = prev[key]
+        const base: ChatState = current || {
+          key,
+          // Fallback: if we do not have a chat yet, we cannot upsert project map safely.
+          // Callers that create chats should pass 'chat' in updates.
+          chat: (updates as any).chat,
+          isLoading: false,
+          isThinking: false,
+        }
+        const next: ChatState = { ...base, ...updates }
+        // Keep project mapping in sync (so hooks like useChatThinking reflect immediate state)
+        if (next.chat) {
+          upsertChatsByProject(next)
+        }
+        return { ...prev, [key]: next }
+      })
+    },
+    [upsertChatsByProject],
+  )
 
   // load all chats and settings on startup
   useEffect(() => {
@@ -310,10 +323,10 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       const chatState: ChatState = { key, chat, isLoading: false, isThinking: false }
       updateChatState(key, chatState)
       // also ensure project mapping is updated
-      upsertChatsByProject(chatState)
+      // upsert happens inside updateChatState
       return chatState
     },
-    [chats, updateChatState, upsertChatsByProject],
+    [chats, updateChatState],
   )
 
   const sendMessage = useCallback(
@@ -358,7 +371,6 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
         isThinking: true,
       }
       updateChatState(key, nextState)
-      upsertChatsByProject(nextState)
 
       const chatProjectId = context.projectId ?? projectId
       try {
@@ -376,7 +388,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
         updateChatState(key, { isThinking: false })
       }
     },
-    [projectId, getChat, updateChatState, upsertChatsByProject],
+    [projectId, getChat, updateChatState],
   )
 
   const resumeTools = useCallback(
@@ -402,7 +414,6 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
         isThinking: true,
       }
       updateChatState(key, nextState)
-      upsertChatsByProject(nextState)
 
       const chatProjectId = context.projectId ?? projectId
       try {
@@ -420,7 +431,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
         updateChatState(key, { isThinking: false })
       }
     },
-    [projectId, getChat, updateChatState, upsertChatsByProject],
+    [projectId, getChat, updateChatState],
   )
 
   const retryCompletion = useCallback(
@@ -442,7 +453,6 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
         isThinking: true,
       }
       updateChatState(key, nextState)
-      upsertChatsByProject(nextState)
 
       const chatProjectId = context.projectId ?? projectId
       try {
@@ -459,7 +469,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
         updateChatState(key, { isThinking: false })
       }
     },
-    [projectId, getChat, updateChatState, upsertChatsByProject],
+    [projectId, getChat, updateChatState],
   )
 
   const abortMessage = useCallback(
@@ -485,15 +495,13 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
         isThinking: false,
       }
       updateChatState(key, optimistic)
-      upsertChatsByProject(optimistic)
 
       const chat = await chatsService.createChat({ context, messages: [] })
       const state = { key, chat, isLoading: false, isThinking: false } as ChatState
       updateChatState(key, state)
-      upsertChatsByProject(state)
       return state
     },
-    [updateChatState, upsertChatsByProject],
+    [updateChatState],
   )
 
   const deleteChat = useCallback(async (context: ChatContext) => {
@@ -523,13 +531,12 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       if (updated) {
         const nextState: ChatState = { ...chatState, chat: updated }
         updateChatState(key, nextState)
-        upsertChatsByProject(nextState)
       }
     } catch (e) {
       console.error('Failed to delete last message', e)
       // No state mutation here; rely on subscription to reconcile
     }
-  }, [getChat, updateChatState, upsertChatsByProject])
+  }, [getChat, updateChatState])
 
   const getSettings = useCallback(
     (context: ChatContext): ChatSettings | undefined => {
