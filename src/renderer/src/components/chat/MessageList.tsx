@@ -79,6 +79,7 @@ export default function MessageList({
   onAtBottomChange,
   onReadLatest,
   scrollToBottomSignal,
+  onRetry,
 }: {
   chatId?: string
   messages: ChatMessage[]
@@ -89,6 +90,7 @@ export default function MessageList({
   onAtBottomChange?: (atBottom: boolean) => void
   onReadLatest?: (iso?: string) => void
   scrollToBottomSignal?: number
+  onRetry?: () => void
 }) {
   const { filesByPath } = useFiles()
 
@@ -481,6 +483,7 @@ export default function MessageList({
       <div className="mx-auto max-w-[960px] space-y-3">
         {messagesToDisplay.map((msg, index) => {
           if (msg.error) {
+            const isLast = index === messagesToDisplay.length - 1
             return (
               <div key={index} className="flex items-start gap-2 flex-row">
                 <div
@@ -489,8 +492,8 @@ export default function MessageList({
                 >
                   AI
                 </div>
-                <div className="max-w-[72%] min-w-[80px] flex flex-col items-start">
-                  <ErrorBubble error={msg.error} />
+                <div className="max-w-[72%] min-w-[80px] flex flex-col items-start w-full">
+                  <ErrorBubble error={msg.error} onRetry={isLast ? onRetry : undefined} disabled={isThinking} />
                 </div>
               </div>
             )

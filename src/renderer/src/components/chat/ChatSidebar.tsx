@@ -45,6 +45,7 @@ export default function ChatSidebar({
     restartChat,
     sendMessage,
     resumeTools,
+    retryCompletion,
     abortMessage,
     getSettings,
     resetSettings,
@@ -678,6 +679,12 @@ export default function ChatSidebar({
           onAtBottomChange={handleAtBottomChange}
           onReadLatest={handleReadLatest}
           scrollToBottomSignal={scrollSignal}
+          onRetry={
+            isChatConfigured && activeChatConfig && currentSettings
+              ? () =>
+                  retryCompletion(context, effectivePrompt, currentSettings, activeChatConfig)
+              : undefined
+          }
         />
       </div>
 

@@ -45,6 +45,12 @@ export type ChatsContextValue = {
     settings: ChatSettings,
     config: LLMConfig,
   ) => Promise<void>
+  retryCompletion: (
+    context: ChatContext,
+    prompt: string,
+    settings: ChatSettings,
+    config: LLMConfig,
+  ) => Promise<void>
 
   abortMessage: (context: ChatContext) => Promise<void>
 
@@ -418,6 +424,45 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
     [projectId, getChat, updateChatState, upsertChatsByProject],
   )
 
+  const retryCompletion = useCallback(
+    async (
+      context: ChatContext,
+      prompt: string,
+      settings: ChatSettings,
+      config: LLMConfig,
+    ) => {
+      const key = getChatContextPath(context)
+      const chatState = await getChat(context)
+      if (chatState.isThinking) return
+
+      const nextState: ChatState = {
+        ...chatState,
+        chat: {
+          ...chatState.chat,
+        },
+        isThinking: true,
+      }
+      updateChatState(key, nextState)
+      upsertChatsByProject(nextState)
+
+      const chatProjectId = context.projectId ?? projectId
+      try {
+        await completionService.retryCompletionTools(
+          chatProjectId,
+          context,
+          prompt,
+          settings.completionSettings,
+          config,
+        )
+      } catch (e) {
+        console.error('completionService.retryCompletionTools:', e)
+      } finally {
+        updateChatState(key, { isThinking: false })
+      }
+    },
+    [projectId, getChat, updateChatState, upsertChatsByProject],
+  )
+
   const abortMessage = useCallback(
     async (context: ChatContext) => {
       try {
@@ -613,6 +658,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       chatsByProjectId,
       sendMessage,
       resumeTools,
+      retryCompletion,
       abortMessage,
       getChat,
       restartChat,
@@ -632,6 +678,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       chatsByProjectId,
       sendMessage,
       resumeTools,
+      retryCompletion,
       abortMessage,
       getChat,
       restartChat,
