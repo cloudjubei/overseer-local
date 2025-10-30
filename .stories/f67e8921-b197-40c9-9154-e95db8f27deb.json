@@ -2830,13 +2830,14 @@
     },
     {
       "id": "38e1f4bc-07fa-42cc-990d-da75a62151a6",
-      "status": "-",
+      "status": "+",
       "title": "Distinct sounds per notification type (agent, chat, git)",
       "description": "Goal: Play distinct sounds per notification/badge type. For now, reuse the agent-run notification logic and add new sound assets for chat and git. No new settings work yet.\n\nBehavior:\n- Notification types and sounds:\n  - Agent events: existing sound (or migrate to a named asset if needed)\n  - Chat new message: new distinct sound\n  - Git feature-change: new distinct sound\n- Sounds play via the same code path used by agent notifications today and only when a notification is triggered (parity with agents). No additional settings UI in this phase.\n\nImplementation notes:\n- Add new placeholder audio assets under a dedicated folder (e.g., @src/renderer/src/assets/sounds/agent.mp3, chat.mp3, git.mp3) and wire a simple type-to-sound mapping in notificationsService.\n- Preload sounds to minimize lag and debounce to avoid overwhelming audio on bursts (follow any existing debounce in agent notifications if present).\n- Ensure sounds do not overlap excessively (simple last-sound cutoff or short cooldown is acceptable for this phase).\n\nContext:\n- @src/renderer/src/services/notificationsService.ts\n- @src/renderer/src/services/settingsService.ts (only if needed for current agent parity)\n- @src/renderer/src/screens/SettingsView.tsx (no UI changes planned yet; reference for parity)\n- @src/renderer/src/assets/sounds/ (new assets folder)\n\nAcceptance criteria:\n- Triggering an agent notification plays the agent sound; triggering a chat notification plays the chat sound; triggering a git notification plays the git sound.\n- Sounds are audibly distinct across the three types.\n- Sounds play through the same logic as agent notifications (no bespoke pathways), and respect any existing mutes/rate limits already applied to agent notifications.\n- No new settings are introduced in this phase.",
       "context": [],
       "createdAt": "2025-10-29T16:42:29.050Z",
-      "updatedAt": "2025-10-30T12:22:24.953Z",
-      "blockers": []
+      "updatedAt": "2025-10-30T21:49:39.945Z",
+      "blockers": [],
+      "completedAt": "2025-10-30T21:49:39.945Z"
     },
     {
       "id": "dfa8e00c-f58c-4ae6-ba13-3dff5dc4f961",

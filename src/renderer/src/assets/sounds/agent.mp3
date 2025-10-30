@@ -1,0 +1,1 @@
+Placeholder binary content for agent notification sound. Real audio can replace this file. The app falls back to WebAudio tones if playback fails.
