@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "-",
+  "status": "?",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -2696,7 +2696,7 @@
     },
     {
       "id": "0a224aec-8933-4c9a-8910-33048809e451",
-      "status": "-",
+      "status": "?",
       "title": "when getting an error in chat show a retry button",
       "description": "In @src/renderer/src/components/chat/ChatSidebar.tsx when getting an error the only thing the user can do right now is to write a message to retry - we should have a retry button next to the message, that will remove the last message and proceed as if it never happened.\nThe error message should have an (i) button in the top right to display the error that occurred.",
       "context": [
@@ -2707,8 +2707,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-29T15:05:58.043Z",
-      "updatedAt": "2025-10-30T10:55:17.469Z",
-      "rejection": "This needs to call the appropriate function via @src/renderer/src/contexts/ChatsContext.tsx , @src/renderer/src/services/chatsService.ts and @src/logic/chat/ChatsManager.ts ."
+      "updatedAt": "2025-10-30T11:11:04.983Z",
+      "rejection": "Blocked: Agent loop failed: {}"
     },
     {
       "id": "380133df-e68d-433c-a208-fa1c59915b93",
