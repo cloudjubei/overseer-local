@@ -88,6 +88,13 @@ function UnifiedBranchItem({
   const canDeleteLocal = branch.isLocal
   const canDeleteRemote = branch.isRemote && !branch.isLocal
 
+  // Respect protected branches (main/master)
+  const isProtectedBranch = (name?: string) => {
+    if (!name) return false
+    const short = name.replace(/^[^\/]+\//, '')
+    return short === 'main' || short === 'master'
+  }
+
   const openMergeModal = (opts: { openConfirm: boolean }) => {
     if (!canQuickMerge || mode === 'current') return
     openModal({
@@ -143,19 +150,43 @@ function UnifiedBranchItem({
     e.stopPropagation()
     if (deleting) return
     const displayName = branch.name
-    const ok = window.confirm(`Delete branch '${displayName}'? This cannot be undone.`)
-    if (!ok) return
+    const remoteShort = (branch.remoteName || branch.name).replace(/^[^\/]+\//, '')
+
+    // Protect main/master
+    if (isProtectedBranch(displayName) || isProtectedBranch(remoteShort)) {
+      alert('Protected branch cannot be deleted (main/master).')
+      return
+    }
+
+    let deleteRemoteAlso = false
+    if (branch.isLocal && branch.isRemote) {
+      const okLocal = window.confirm(`Delete local branch '${displayName}'? This cannot be undone.`)
+      if (!okLocal) return
+      deleteRemoteAlso = window.confirm(`Also delete remote 'origin/${remoteShort}'?`)
+    } else if (branch.isLocal) {
+      const ok = window.confirm(`Delete local branch '${displayName}'? This cannot be undone.`)
+      if (!ok) return
+    } else if (branch.isRemote) {
+      const ok = window.confirm(`Delete remote branch 'origin/${remoteShort}'? This cannot be undone.`)
+      if (!ok) return
+    } else {
+      alert('This branch cannot be deleted from here.')
+      return
+    }
+
     setDeleting(true)
     try {
-      if (canDeleteLocal) {
-        const res = await gitService.deleteBranch(projectId, branch.name)
-        if (!res?.ok) alert(`Failed to delete branch: ${res?.error || 'unknown error'}`)
-      } else if (canDeleteRemote) {
-        const short = branch.remoteName?.replace(/^[^/]+\//, '') || branch.name
-        const res = await gitService.deleteRemoteBranch(projectId, short)
-        if (!res?.ok) alert(`Failed to delete remote branch: ${res?.error || 'unknown error'}`)
-      } else {
-        alert('This branch cannot be deleted from here.')
+      // Delete local first when present
+      if (branch.isLocal) {
+        const resLocal = await gitService.deleteBranch(projectId, branch.name)
+        if (!resLocal?.ok) alert(`Failed to delete local branch: ${resLocal?.error || 'unknown error'}`)
+      }
+
+      // Delete remote if remote-only or user opted to also delete
+      if (branch.isRemote && (!branch.isLocal || deleteRemoteAlso)) {
+        const short = (branch.remoteName || branch.name).replace(/^[^\/]+\//, '')
+        const resRemote = await gitService.deleteRemoteBranch(projectId, short)
+        if (!resRemote?.ok) alert(`Failed to delete remote branch: ${resRemote?.error || 'unknown error'}`)
       }
     } catch (err) {
       console.error('Delete branch failed', err)

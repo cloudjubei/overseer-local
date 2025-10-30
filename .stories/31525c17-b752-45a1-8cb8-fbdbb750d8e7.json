@@ -338,12 +338,13 @@
     },
     {
       "id": "ec98a5a1-4bcc-45f5-be19-eb73d5b06268",
-      "status": "-",
+      "status": "+",
       "title": "Prompt to delete remote when deleting a branch that exists both locally and remotely (GitView)",
       "description": "Files: src/renderer/src/screens/GitView.tsx\n\nContext:\n- UnifiedBranchItem.onDelete only deletes local or remote depending on state. It does not offer the option to also delete the remote when both exist.\n\nImplementation notes:\n- When branch.isLocal && branch.isRemote, present a confirmation that allows deleting local and optionally also deleting the remote ref origin/<name>.\n- Use branch.remoteName to compute the short name: const short = (branch.remoteName || branch.name).replace(/^[^\\/]+\\//, '')\n- Sequence: delete local first, then (if chosen) delete remote. Surface any errors independently.\n- Respect protected branches (see Feature: Protect main/master from deletion).\n\nAcceptance:\n- For a branch present locally and remotely, clicking delete prompts to delete local and optionally remote. Choosing both deletes both with separate error handling.\n- For local-only branches, prompt and delete local only.\n- For remote-only branches, prompt and delete remote only.",
       "context": [],
       "createdAt": "2025-10-30T00:20:42.291Z",
-      "updatedAt": "2025-10-30T00:20:42.291Z"
+      "updatedAt": "2025-10-30T00:28:56.703Z",
+      "completedAt": "2025-10-30T00:28:56.703Z"
     },
     {
       "id": "bae6b72c-4b52-45ba-98c8-bdb04da4670a",
