@@ -73,7 +73,7 @@ function AheadBehind({
   )
 }
 
-function StatusChips({ b }: { b: GitUnifiedBranch }) {
+function StatusChips({ b, showEqual }: { b: GitUnifiedBranch; showEqual?: boolean }) {
   const label = statusLabel(b)
   return (
     <div className='flex items-center gap-1 text-[10px] uppercase tracking-wide'>
@@ -91,6 +91,11 @@ function StatusChips({ b }: { b: GitUnifiedBranch }) {
       >
         {label}
       </span>
+      {showEqual ? (
+        <span className='px-1.5 py-0.5 rounded border bg-neutral-100/60 border-neutral-300 text-neutral-700 dark:bg-neutral-900/20 dark:border-neutral-700 dark:text-neutral-300'>
+          (EQUAL)
+        </span>
+      ) : null}
     </div>
   )
 }
@@ -102,6 +107,7 @@ function UnifiedBranchItem({
   branch,
   mode = 'default',
   onAfterAction,
+  equalToCurrent,
 }: {
   projectId: string
   projectTitle?: string
@@ -109,6 +115,7 @@ function UnifiedBranchItem({
   branch: GitUnifiedBranch
   mode?: 'default' | 'current'
   onAfterAction?: () => void
+  equalToCurrent?: boolean
 }) {
   const { openModal } = useNavigator()
   const [deleting, setDeleting] = React.useState(false)
@@ -329,7 +336,7 @@ function UnifiedBranchItem({
       <div className='min-w-0'>
         <div className='font-medium truncate flex items-center gap-2'>
           <span className='truncate'>{branch.name}</span>
-          <StatusChips b={branch} />
+          <StatusChips b={branch} showEqual={mode !== 'current' && !!equalToCurrent} />
         </div>
         <div className='text-xs text-neutral-600 dark:text-neutral-400 truncate'>
           {projectTitle ? `${projectTitle} · ` : ''}
@@ -464,6 +471,19 @@ function CurrentProjectView() {
     void unified.reload(projectId)
   }, [unified, projectId])
 
+  const isEqualToCurrent = React.useCallback(
+    (b: GitUnifiedBranch): boolean => {
+      if (!current) return false
+      const currSha = current.localSha
+      if (!currSha) return false
+      // Equal if either local or remote sha of the row matches current local sha
+      if (b.localSha && b.localSha === currSha) return true
+      if (b.remoteSha && b.remoteSha === currSha) return true
+      return false
+    },
+    [current],
+  )
+
   return (
     <div className='flex-1 min-h-0 min-w-0 rounded-md border border-neutral-200 dark:border-neutral-800 flex flex-col'>
       <div className='px-4 py-3 border-b border-neutral-100 dark:border-neutral-900 text-sm text-neutral-600 dark:text-neutral-400 flex items-center gap-3'>
@@ -502,7 +522,14 @@ function CurrentProjectView() {
               Other branches
             </div>
             {others.map((b) => (
-              <UnifiedBranchItem key={`${projectId}:${b.name}`} projectId={projectId!} branch={b} projectTitle={title} onAfterAction={reload} />
+              <UnifiedBranchItem
+                key={`${projectId}:${b.name}`}
+                projectId={projectId!}
+                branch={b}
+                projectTitle={title}
+                onAfterAction={reload}
+                equalToCurrent={isEqualToCurrent(b)}
+              />
             ))}
           </div>
         )}
@@ -539,6 +566,16 @@ function AllProjectsView() {
           if (!v || v.loading || (v.branches?.length ?? 0) === 0) return null
           const curr = v.branches.find((b) => b.current)
           const rest = v.branches.filter((b) => !b.current)
+
+          const isEqualToCurrent = (b: GitUnifiedBranch): boolean => {
+            if (!curr) return false
+            const currSha = curr.localSha
+            if (!currSha) return false
+            if (b.localSha && b.localSha === currSha) return true
+            if (b.remoteSha && b.remoteSha === currSha) return true
+            return false
+          }
+
           return (
             <div key={proj.id} className=''>
               <div className='px-3 py-2 text-xs font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400 bg-neutral-50 dark:bg-neutral-900/40'>
@@ -557,7 +594,7 @@ function AllProjectsView() {
                   </>
                 )}
                 {rest.map((b) => (
-                  <UnifiedBranchItem key={`${proj.id}:${b.name}`} projectId={proj.id} branch={b} />
+                  <UnifiedBranchItem key={`${proj.id}:${b.name}`} projectId={proj.id} branch={b} equalToCurrent={isEqualToCurrent(b)} />
                 ))}
               </div>
             </div>

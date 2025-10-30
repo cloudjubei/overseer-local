@@ -348,14 +348,15 @@
     },
     {
       "id": "bae6b72c-4b52-45ba-98c8-bdb04da4670a",
-      "status": "-",
+      "status": "+",
       "title": "Ahead/behind visual update and incoming stats on rows",
       "description": "Files: src/renderer/src/screens/GitView.tsx\n\nContext:\n- AheadBehind currently shows neutral text; rows do not surface per-row file stats except in tooltip.\n\nImplementation notes:\n- Update AheadBehind to color-code counts: ahead (↑) in green, behind (↓) in red; hide section when both are zero.\n- For mode === 'current': compute incoming-only diffs vs upstream and expose +insertions/-deletions inline next to the arrows.\n  - Use gitService.getBranchDiffSummary with baseRef = local branch, headRef = `${branch.upstreamRemote || 'origin'}/${branch.upstreamBranch || branch.name}`, incomingOnly: true, includePatch: false.\n  - Fallback: if no upstream is configured, do not show incoming stats.\n- For non-current rows: keep existing baseRef → headRef summary but also show +insertions/-deletions inline when summary has loaded.\n\nAcceptance:\n- Rows display X↑ in green and Y↓ in red when non-zero.\n- Current branch row shows incoming file-level totals +ins/-del when remote has commits to pull.\n- Tooltip continues to show per-file breakdown; inline summary surfaces totals for quick scan.\n- Row shows (EQUAL) as a chip if the branch is the same as current",
       "context": [],
       "createdAt": "2025-10-30T00:20:42.292Z",
-      "updatedAt": "2025-10-30T10:05:06.276Z",
+      "updatedAt": "2025-10-30T11:26:43.427Z",
       "rejection": "This is not visible.\nWhat's more - we don't show the Equal chip.",
-      "blockers": []
+      "blockers": [],
+      "completedAt": "2025-10-30T11:26:43.427Z"
     },
     {
       "id": "717444ff-e3cd-41cf-9cc2-605ef38e0ce3",
