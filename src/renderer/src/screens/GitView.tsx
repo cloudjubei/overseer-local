@@ -118,6 +118,7 @@ function UnifiedBranchItem({
   equalToCurrent?: boolean
 }) {
   const { openModal } = useNavigator()
+  const { pending } = useGit()
   const [deleting, setDeleting] = React.useState(false)
   const [summary, setSummary] = React.useState<{
     loaded: boolean
@@ -142,9 +143,11 @@ function UnifiedBranchItem({
   // Respect protected branches (main/master)
   const isProtectedBranch = (name?: string) => {
     if (!name) return false
-    const short = name.replace(/^[^/]+\//, '')
+    const short = name.replace(/^[^\/]+\//, '')
     return short === 'main' || short === 'master'
   }
+
+  const headRef = React.useMemo(() => (branch.isLocal ? branch.name : branch.remoteName || branch.name), [branch.isLocal, branch.name, branch.remoteName])
 
   const openMergeModal = (opts: { openConfirm: boolean }) => {
     if (!canQuickMerge || mode === 'current') return
@@ -172,7 +175,6 @@ function UnifiedBranchItem({
   const loadSummary = async () => {
     if (summary.loaded) return
     try {
-      const headRef = branch.isLocal ? branch.name : branch.remoteName || branch.name
       const diff = await gitService.getBranchDiffSummary(projectId, { baseRef, headRef })
       const fileLines = diff.files
         .slice(0, 10)
@@ -252,7 +254,7 @@ function UnifiedBranchItem({
     e.stopPropagation()
     if (deleting) return
     const displayName = branch.name
-    const remoteShort = (branch.remoteName || branch.name).replace(/^[^/]+\//, '')
+    const remoteShort = (branch.remoteName || branch.name).replace(/^[^\/]+\//, '')
 
     // Protect main/master
     if (isProtectedBranch(displayName) || isProtectedBranch(remoteShort)) {
@@ -286,7 +288,7 @@ function UnifiedBranchItem({
 
       // Delete remote if remote-only or user opted to also delete
       if (branch.isRemote && (!branch.isLocal || deleteRemoteAlso)) {
-        const short = (branch.remoteName || branch.name).replace(/^[^/]+\//, '')
+        const short = (branch.remoteName || branch.name).replace(/^[^\/]+\//, '')
         const resRemote = await gitService.deleteRemoteBranch(projectId, short)
         if (!resRemote?.ok) alert(`Failed to delete remote branch: ${resRemote?.error || 'unknown error'}`)
       }
@@ -342,6 +344,16 @@ function UnifiedBranchItem({
   const showPush = mode === 'current' && ahead > 0
   const showPull = mode === 'current' && behind > 0
 
+  // Resolve pending feature/story refs for this base/head
+  const pendingRefs = pending.get(projectId, baseRef, headRef)
+
+  const onMouseEnterRow = () => {
+    void loadSummary()
+    if (!pendingRefs.loading && !pendingRefs.entries?.length) {
+      void pending.load(projectId, baseRef, headRef)
+    }
+  }
+
   const row = (
     <div
       className={
@@ -352,9 +364,7 @@ function UnifiedBranchItem({
       }
       role='button'
       onClick={onRowClick}
-      onMouseEnter={() => {
-        void loadSummary()
-      }}
+      onMouseEnter={onMouseEnterRow}
     >
       <div className='min-w-0'>
         <div className='font-medium truncate flex items-center gap-2'>
@@ -364,12 +374,21 @@ function UnifiedBranchItem({
         <div className='text-xs text-neutral-600 dark:text-neutral-400 truncate'>
           {projectTitle ? `${projectTitle} · ` : ''}
           base {baseRef}
-          {storyId ? (
+          {(pendingRefs.entries && pendingRefs.entries.length > 0) || storyId ? (
             <span className='inline-flex items-center gap-1'>
               {' '}
               •
-              <span onClick={(e) => e.stopPropagation()}>
-                <DependencyBullet dependency={storyId} />
+              <span onClick={(e) => e.stopPropagation()} className='inline-flex items-center gap-1 flex-wrap'>
+                {pendingRefs.entries && pendingRefs.entries.length > 0 ? (
+                  pendingRefs.entries.map((e, idx) => (
+                    <DependencyBullet
+                      key={`${e.storyId}:${e.featureId || 'story'}:${idx}`}
+                      dependency={e.featureId || e.storyId}
+                    />
+                  ))
+                ) : storyId ? (
+                  <DependencyBullet dependency={storyId} />
+                ) : null}
               </span>
             </span>
           ) : (

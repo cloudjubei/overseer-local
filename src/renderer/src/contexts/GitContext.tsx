@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { gitService } from '../services/gitService'
 import { useProjectContext } from './ProjectContext'
-import { GitBranchEvent, GitUnifiedBranch } from 'thefactory-tools'
+import { CommitInfo, GitBranchEvent, GitUnifiedBranch } from 'thefactory-tools'
 
 export type PendingBranch = {
   projectId: string
@@ -33,6 +33,13 @@ export type UnifiedBranchesState = {
   branches: GitUnifiedBranch[]
 }
 
+export type PendingFeatureRefsState = {
+  loading: boolean
+  error?: string
+  entries: Array<{ storyId: string; featureId?: string }>
+  commits?: CommitInfo[]
+}
+
 export type GitContextValue = {
   loading: boolean
   error?: string
@@ -45,6 +52,13 @@ export type GitContextValue = {
     byProject: Record<string, UnifiedBranchesState>
     get: (projectId?: string) => UnifiedBranchesState
     reload: (projectId?: string) => Promise<void>
+  }
+
+  // Pending features resolved from commits between baseRef -> headRef
+  pending: {
+    byProject: Record<string, Record<string, PendingFeatureRefsState>>
+    get: (projectId: string | undefined, baseRef: string, headRef: string) => PendingFeatureRefsState
+    load: (projectId: string | undefined, baseRef: string, headRef: string) => Promise<void>
   }
 
   mergePreferences: MergePreferences
@@ -111,6 +125,11 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
 
   // Unified branches state per project
   const [unifiedByProject, setUnifiedByProject] = useState<Record<string, UnifiedBranchesState>>({})
+
+  // Pending features by project -> headRefKey (baseRef|headRef)
+  const [pendingByProject, setPendingByProject] = useState<
+    Record<string, Record<string, PendingFeatureRefsState>>
+  >({})
 
   // Merge preferences (persisted)
   const [autoPush, setAutoPush] = useState<boolean>(() => readBoolLS(LS_KEYS.autoPush, false))
@@ -240,6 +259,69 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
     [activeProjectId],
   )
 
+  // Pending features loader
+  const loadPending = React.useCallback(
+    async (projectId: string | undefined, baseRef: string, headRef: string) => {
+      const pid = projectId || activeProjectId
+      if (!pid || !headRef || !baseRef) return
+      const key = `${baseRef}|${headRef}`
+
+      // Set loading state
+      setPendingByProject((prev) => ({
+        ...prev,
+        [pid]: {
+          ...(prev[pid] || {}),
+          [key]: { ...(prev[pid]?.[key] || { entries: [] }), loading: true, error: undefined },
+        },
+      }))
+
+      try {
+        const commits = await gitService.selectCommits(pid, {
+          sources: [headRef],
+          baseRef,
+          includeMerges: false,
+          featureInfo: { enableHeuristics: true },
+          maxCount: 200,
+        })
+        // Build unique feature/story pairs from commits
+        const uniq = new Map<string, { storyId: string; featureId?: string }>()
+        for (const c of commits) {
+          const info = c.featureInfo
+          const storyId = info?.storyId
+          if (!storyId) continue
+          const featureId = info?.featureId
+          const dep = featureId || storyId
+          if (!uniq.has(dep)) uniq.set(dep, { storyId, featureId })
+        }
+        setPendingByProject((prev) => ({
+          ...prev,
+          [pid]: {
+            ...(prev[pid] || {}),
+            [key]: {
+              loading: false,
+              error: undefined,
+              entries: Array.from(uniq.values()),
+              commits,
+            },
+          },
+        }))
+      } catch (e) {
+        setPendingByProject((prev) => ({
+          ...prev,
+          [pid]: {
+            ...(prev[pid] || {}),
+            [key]: {
+              loading: false,
+              error: (e as any)?.message || 'Failed to load pending commits',
+              entries: [],
+            },
+          },
+        }))
+      }
+    },
+    [activeProjectId],
+  )
+
   // Refresh unified branches whenever projects change (initial load for all)
   useEffect(() => {
     let cancelled = false
@@ -272,6 +354,20 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
     [unifiedByProject, activeProjectId, loadUnified],
   )
 
+  const pendingApi = useMemo(
+    () => ({
+      byProject: pendingByProject,
+      get: (projectId: string | undefined, baseRef: string, headRef: string): PendingFeatureRefsState => {
+        const pid = projectId || activeProjectId
+        if (!pid) return { loading: false, entries: [] }
+        const key = `${baseRef}|${headRef}`
+        return pendingByProject[pid]?.[key] || { loading: false, entries: [] }
+      },
+      load: loadPending,
+    }),
+    [pendingByProject, activeProjectId, loadPending],
+  )
+
   const value = useMemo<GitContextValue>(
     () => ({
       loading,
@@ -279,9 +375,10 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
       currentProject,
       allProjects,
       unified: unifiedApi,
+      pending: pendingApi,
       mergePreferences,
     }),
-    [loading, error, currentProject, allProjects, unifiedApi, mergePreferences],
+    [loading, error, currentProject, allProjects, unifiedApi, pendingApi, mergePreferences],
   )
 
   return <GitContext.Provider value={value}>{children}</GitContext.Provider>
