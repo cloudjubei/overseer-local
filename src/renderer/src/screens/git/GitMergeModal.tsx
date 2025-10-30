@@ -587,7 +587,9 @@ export default function GitMergeModal(props: GitMergeModalProps) {
             }
           }
           if (deleteRemote && (!autoPush || pushOk)) {
-            const delRes = await gitService.deleteRemoteBranch(projectId, branch)
+            // Ensure we pass a short branch name (without remote prefix like 'origin/')
+            const shortBranch = branch.replace(/^[^\/]+\//, '')
+            const delRes = await gitService.deleteRemoteBranch(projectId, shortBranch)
             if (!delRes || !delRes.ok) {
               localError =
                 ((delRes as any)?.error || 'Delete remote branch failed') +

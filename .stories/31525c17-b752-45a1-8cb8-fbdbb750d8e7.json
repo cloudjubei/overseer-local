@@ -328,12 +328,13 @@
     },
     {
       "id": "70da62da-7742-4bd4-b7a9-b82b1750e58e",
-      "status": "-",
+      "status": "+",
       "title": "Fix remote branch deletion after merge in GitMergeModal",
       "description": "Files: src/renderer/src/screens/git/GitMergeModal.tsx\n\nContext:\n- doMergeWithPostActions currently calls gitService.deleteRemoteBranch(projectId, branch). When the modal is opened from a remote-only branch (e.g., origin/features/<id>), the call uses the remote-qualified name and fails.\n\nImplementation notes:\n- Before calling deleteRemoteBranch, derive short branch name by stripping the remote prefix (e.g., origin/):\n  - const short = branch.replace(/^[^\\/]+\\//, '')\n  - await gitService.deleteRemoteBranch(projectId, short)\n- Preserve error surfacing including stderr where available.\n\nAcceptance:\n- Given a remote-only branch origin/features/<id>, when merge succeeds and the option Delete remote branch after merge is enabled, the remote branch is deleted without error.\n- Given a local+remote branch features/<id>, when merge succeeds and Delete remote branch after merge is enabled, the remote branch is deleted without error.\n- If deletion fails, the modal shows a clear error message including stderr when available.",
       "context": [],
       "createdAt": "2025-10-30T00:20:42.289Z",
-      "updatedAt": "2025-10-30T00:20:42.289Z"
+      "updatedAt": "2025-10-30T00:24:54.196Z",
+      "completedAt": "2025-10-30T00:24:54.196Z"
     },
     {
       "id": "ec98a5a1-4bcc-45f5-be19-eb73d5b06268",
