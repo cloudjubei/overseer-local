@@ -244,19 +244,9 @@ export default class FactoryCompletionManager extends BaseManager {
     settings: CompletionSettings,
     config: LLMConfig,
   ): Promise<CompletionResponseTurns> {
-    const chat = await this.chatsManager.getChat(chatContext)
-    if (!chat) throw new Error('CHAT NOT FOUND')
-
-    // Required behavior: delete the last assistant message and retry with the remaining history
-    let messages = [...(chat.messages || [])]
-    if (messages.length > 0) {
-      const last = messages[messages.length - 1]
-      if (last?.completionMessage?.role === 'assistant') {
-        messages = messages.slice(0, messages.length - 1)
-      }
-    }
-
-    const newChat = await this.chatsManager.saveChat({ ...chat, messages })
+    // Centralized delete of the last relevant message using ChatsManager
+    const newChat = await this.chatsManager.deleteLastMessage(chatContext)
+    if (!newChat) throw new Error('CHAT NOT FOUND')
 
     return await this.runCompletionTools(
       projectId,

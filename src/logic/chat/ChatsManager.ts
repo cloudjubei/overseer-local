@@ -45,6 +45,8 @@ export default class ChatsManager extends BaseManager {
       this.updateChat(chatContext, patch)
     handlers[IPC_HANDLER_KEYS.CHATS_DELETE] = async ({ chatContext }) =>
       this.deleteChat(chatContext)
+    handlers[IPC_HANDLER_KEYS.CHATS_DELETE_LAST_MESSAGE] = async ({ chatContext }) =>
+      this.deleteLastMessage(chatContext)
 
     handlers[IPC_HANDLER_KEYS.CHATS_GET_SETTINGS] = async () => this.getSettings()
     handlers[IPC_HANDLER_KEYS.CHATS_RESET_SETTINGS] = async ({ chatContext }) =>
@@ -88,6 +90,25 @@ export default class ChatsManager extends BaseManager {
     messages: ChatMessage[],
   ): Promise<Chat | undefined> {
     return await this.tools.addChatMessages(chatContext, messages)
+  }
+
+  async deleteLastMessage(chatContext: ChatContext): Promise<Chat | undefined> {
+    const chat = await this.getChat(chatContext)
+    const msgs = chat.messages || []
+    if (msgs.length === 0) return chat
+
+    let trimCount = 1
+    const last = msgs[msgs.length - 1]
+    const lastHasToolResults = Array.isArray((last as any)?.toolResults) && (last as any).toolResults.length > 0
+    if (lastHasToolResults && msgs.length >= 2) {
+      const prev = msgs[msgs.length - 2]
+      if (prev?.completionMessage?.role === 'assistant') {
+        trimCount = 2
+      }
+    }
+    const trimmed = msgs.slice(0, msgs.length - trimCount)
+    const newChat: Chat = { ...chat, messages: trimmed }
+    return await this.saveChat(newChat)
   }
 
   getSettings(): ChatsSettings {

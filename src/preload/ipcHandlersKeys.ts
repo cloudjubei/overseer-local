@@ -25,6 +25,7 @@ const IPC_HANDLER_KEYS = {
   CHATS_CREATE: 'chats:create',
   CHATS_UPDATE: 'chats:update',
   CHATS_DELETE: 'chats:delete',
+  CHATS_DELETE_LAST_MESSAGE: 'chats:delete-last-message',
 
   CHATS_GET_SETTINGS: 'chats:get-settings',
   CHATS_RESET_SETTINGS: 'chats:reset-settings',
@@ -100,11 +101,11 @@ const IPC_HANDLER_KEYS = {
   FACTORY_RUNS_SUBSCRIBE: 'factory:runs:subscribe',
   FACTORY_RUNS_START: 'factory:runs:start',
   FACTORY_RUNS_CANCEL: 'factory:runs:cancel',
-  FACTORY_RUNS_RATE: 'factory:runs:rate',
   FACTORY_RUNS_LIST_ACTIVE: 'factory:runs:list-active',
   FACTORY_RUNS_LIST_HISTORY: 'factory:runs:list-history',
   FACTORY_RUNS_GET: 'factory:runs:get',
   FACTORY_RUNS_DELETE_HISTORY: 'factory:runs:delete-history',
+  FACTORY_RUNS_RATE: 'factory:runs:rate',
 
   // Factory pricing
   FACTORY_PRICING_LIST: 'factory:pricing:list',
@@ -155,9 +156,6 @@ const IPC_HANDLER_KEYS = {
   GIT_APPLY_MERGE: 'git:apply-merge',
   GIT_GET_LOCAL_STATUS: 'git:get-local-status',
   GIT_GET_BRANCH_DIFF_SUMMARY: 'git:get-branch-diff-summary',
-  GIT_MONITOR_START: 'git:monitor:start',
-  GIT_MONITOR_STOP: 'git:monitor:stop',
-  GIT_MONITOR_UPDATE: 'git:monitor:monitor',
   GIT_DELETE_BRANCH: 'git:delete-branch',
   GIT_PUSH: 'git:push',
   GIT_PULL: 'git:pull',

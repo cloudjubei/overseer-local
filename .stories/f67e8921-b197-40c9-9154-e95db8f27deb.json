@@ -2696,7 +2696,7 @@
     },
     {
       "id": "0a224aec-8933-4c9a-8910-33048809e451",
-      "status": "-",
+      "status": "+",
       "title": "when getting an error in chat show a retry button",
       "description": "In @src/renderer/src/components/chat/ChatSidebar.tsx when getting an error the only thing the user can do right now is to write a message to retry - we should have a retry button next to the message, that will remove the last message and proceed as if it never happened.\nThe error message should have an (i) button in the top right to display the error that occurred.\n\nUpdate @src/renderer/src/contexts/ChatsContext.tsx and @src/renderer/src/services/completionService.ts and @src/logic/factory/FactoryCompletionManager.ts to have an appropriate retry method.",
       "context": [
@@ -2708,8 +2708,9 @@
       ],
       "blockers": [],
       "createdAt": "2025-10-29T15:05:58.043Z",
-      "updatedAt": "2025-10-30T11:46:45.121Z",
-      "rejection": "ok so this is implemented but we need a refactor.\nIn @src/renderer/src/contexts/ChatsContext.tsx there's `deleteLastMessage` - there should be a function to do that in @src/logic/chat/ChatsManager.ts that @src/renderer/src/contexts/ChatsContext.tsx should use, and @src/logic/factory/FactoryCompletionManager.ts also in `retryCompletionTools` ."
+      "updatedAt": "2025-10-30T12:07:20.792Z",
+      "rejection": "ok so this is implemented but we need a refactor.\nIn @src/renderer/src/contexts/ChatsContext.tsx there's `deleteLastMessage` - there should be a function to do that in @src/logic/chat/ChatsManager.ts that @src/renderer/src/contexts/ChatsContext.tsx should use, and @src/logic/factory/FactoryCompletionManager.ts also in `retryCompletionTools` .",
+      "completedAt": "2025-10-30T12:07:20.792Z"
     },
     {
       "id": "380133df-e68d-433c-a208-fa1c59915b93",
