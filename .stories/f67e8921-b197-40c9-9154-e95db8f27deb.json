@@ -2858,6 +2858,18 @@
       "blockers": [],
       "createdAt": "2025-10-30T00:03:33.927Z",
       "updatedAt": "2025-10-30T00:03:33.927Z"
+    },
+    {
+      "id": "6ef2cf47-0c7e-4f4a-a7c9-af483afeb452",
+      "status": "-",
+      "title": "The `run_test` popup should show the name of the test file",
+      "description": "in @src/renderer/src/components/chat/ToolCallChangePopup.tsx for the `run_test` tool - we need to show the name of the test file above the passed/failed tests.",
+      "context": [
+        "src/renderer/src/components/chat/ToolCallChangePopup.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-30T12:04:34.260Z",
+      "updatedAt": "2025-10-30T12:04:34.260Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -3054,7 +3066,8 @@
     "38e1f4bc-07fa-42cc-990d-da75a62151a6": 191,
     "dfa8e00c-f58c-4ae6-ba13-3dff5dc4f961": 192,
     "aad2f8db-1ad1-4529-b824-a4403aee54cc": 193,
-    "ae8f8bd5-6062-4238-bc93-00994debfad0": 194
+    "ae8f8bd5-6062-4238-bc93-00994debfad0": 194,
+    "6ef2cf47-0c7e-4f4a-a7c9-af483afeb452": 195
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
   "updatedAt": "2025-10-01T00:34:27.858Z"
