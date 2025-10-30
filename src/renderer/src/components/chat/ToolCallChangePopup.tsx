@@ -368,25 +368,16 @@ export default function ToolCallChangePopup({
     }
 
     if (n === 'create_feature' || n === 'create_story') {
-      const title = tryString(
-        extract(result, ['title']) ||
-          extract(args, ['title']) ||
-          extract(result, ['feature.title']) ||
-          extract(result, ['story.title']),
-      )
-      const description = tryString(
-        extract(result, ['description']) ||
-          extract(args, ['description']) ||
-          extract(result, ['content']) ||
-          extract(result, ['feature.description']) ||
-          extract(result, ['story.description']),
-      )
+      const title = tryString(extract(args, ['title']))
+      const description = tryString(extract(args, ['description']))
       return (
         <div>
-          <Row>
-            <span className="text-[var(--text-secondary)]">Title:</span>{' '}
-            <span className="font-semibold">{title || '(untitled)'}</span>
-          </Row>
+          {title ? (
+            <div className="mt-1">
+              <SectionTitle>Title</SectionTitle>
+              <span className="font-semibold">{title}</span>
+            </div>
+          ) : null}
           {description ? (
             <div className="mt-1">
               <SectionTitle>Description</SectionTitle>
@@ -481,30 +472,14 @@ export default function ToolCallChangePopup({
     }
 
     if (n === 'run_test' || n === 'run_tests') {
-      const stats = extract(result, ['summary']) || extract(result, ['stats']) || result || {}
-      const passed = extract(stats, ['passed', 'pass', 'passes']) || 0
-      const failed = extract(stats, ['failed', 'failures', 'fails']) || 0
-      const skipped = extract(stats, ['skipped', 'pending', 'todo']) || 0
-      const total =
-        extract(stats, ['total']) || Number(passed) + Number(failed) + Number(skipped) || undefined
-      const duration =
-        extract(result, ['durationMs']) || extract(stats, ['durationMs', 'duration']) || undefined
+      const stats = extract(result, ['summary']) || {}
+      const passed = extract(stats, ['passed']) || 0
+      const failed = extract(stats, ['failed']) || 0
+      const skipped = extract(stats, ['skipped']) || 0
+      const total = extract(stats, ['total']) || 0
+      const duration = extract(stats, ['durationMs']) || 0
 
-      // Try to extract the test file path/name. Prefer tool call args, then result fallbacks.
-      const testFile =
-        tryString(
-          extract(args, ['path']) ||
-            extract(args, ['file']) ||
-            extract(args, ['name']) ||
-            extract(result, ['path']) ||
-            extract(result, ['file']) ||
-            extract(result, ['name']) ||
-            extract(result, ['testFile']) ||
-            extract(result, ['specFile']) ||
-            extract(stats, ['file']) ||
-            extract(result, ['summary.file']) ||
-            extract(result, ['stats.file']),
-        ) || undefined
+      const testFile = tryString(extract(args, ['path']))
 
       return (
         <div className="text-xs space-y-1">
