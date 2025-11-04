@@ -9,7 +9,6 @@ import {
 import Code from '../ui/Code'
 import { useMemo, useState } from 'react'
 import { Switch } from '../ui/Switch'
-import JsonView from '../ui/JsonView'
 import { ToolCall, ToolResultType } from 'thefactory-tools'
 import Tooltip from '../ui/Tooltip'
 import ToolCallChangePopup from './ToolCallChangePopup'

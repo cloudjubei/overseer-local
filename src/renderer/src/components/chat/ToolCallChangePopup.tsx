@@ -224,9 +224,6 @@ export default function ToolCallChangePopup({
   const name = toolCall?.name || 'tool'
   const { projectId } = useActiveProject()
 
-  const timestamp = formatTimestamp(result?.completedAt || result?.finishedAt || result?.updatedAt)
-  const opId = tryString(result?.id || toolCall?.name || result?.operationId)
-
   function errorContentOnly(): React.ReactNode {
     const msg = tryString(
       extract(result, ['error.message']) ||
@@ -304,6 +301,20 @@ export default function ToolCallChangePopup({
       return errorContentOnly()
     }
 
+    if (n === 'read_paths') {
+      const files: string[] = extract(args, ['paths']) ?? []
+
+      return (
+        <div className="text-xs space-y-1">
+          {files.map((file) => (
+            <Row>
+              <span className="font-mono text-[11px]">{file || '(unknown)'}</span>
+            </Row>
+          ))}
+        </div>
+      )
+    }
+
     if (n === 'update_story_title' || n === 'update_feature_title') {
       const oldVal = tryString(extract(result, ['before.title']) || extract(args, ['oldTitle']))
       const newVal = tryString(extract(result, ['after.title']) || extract(args, ['newTitle']))
@@ -343,7 +354,7 @@ export default function ToolCallChangePopup({
       )
     }
 
-    if (n === 'write_file') {
+    if (n === 'write_file' || n === 'write_diff_to_file') {
       const path = writeFilePath
       const diff = writeFileResultDiff || computedDiff
       const newText = writeFileNewText
@@ -471,7 +482,7 @@ export default function ToolCallChangePopup({
       )
     }
 
-    if (n === 'run_test' || n === 'run_tests') {
+    if (n === 'run_tests') {
       const stats = extract(result, ['summary']) || {}
       const passed = extract(stats, ['passed']) || 0
       const failed = extract(stats, ['failed']) || 0
@@ -479,16 +490,15 @@ export default function ToolCallChangePopup({
       const total = extract(stats, ['total']) || 0
       const duration = extract(stats, ['durationMs']) || 0
 
-      const testFile = tryString(extract(args, ['path']))
+      const testFiles: string[] = extract(args, ['paths']) ?? []
 
       return (
         <div className="text-xs space-y-1">
-          {n === 'run_test' && (
+          {testFiles.map((testFile) => (
             <Row>
-              <span className="text-[var(--text-secondary)]">File:</span>{' '}
               <span className="font-mono text-[11px]">{testFile || '(unknown)'}</span>
             </Row>
-          )}
+          ))}
           <div className="flex items-center gap-2">
             <span className="text-green-700 dark:text-green-300 font-medium">
               {Number(passed)} passed
@@ -536,8 +546,6 @@ export default function ToolCallChangePopup({
     computedIsNewFile,
   ])
 
-  const hideHeaderMeta = String(name) === 'finish_feature'
-
   return (
     <div className="min-w-[260px] max-w-[42vw] max-h-[48vh] overflow-auto">
       <div className="flex items-center justify-between gap-2 mb-1">
@@ -545,13 +553,9 @@ export default function ToolCallChangePopup({
           <StatusIcon resultType={resultType} />
           <div className="truncate text-xs font-semibold">{name}</div>
         </div>
-        {!hideHeaderMeta ? (
-          <div className="text-[10px] text-[var(--text-tertiary)] whitespace-nowrap">
-            {durationMs ? <span className="mr-2">{durationMs}ms</span> : null}
-            {timestamp ? <span className="mr-2">{timestamp}</span> : null}
-            {opId ? <span className="font-mono">{opId}</span> : null}
-          </div>
-        ) : null}
+        <div className="text-[10px] text-[var(--text-tertiary)] whitespace-nowrap">
+          {durationMs ? <span className="mr-2">{durationMs}ms</span> : null}
+        </div>
       </div>
       <div className="border-t border-[var(--border-subtle)] pt-1">{content}</div>
     </div>
