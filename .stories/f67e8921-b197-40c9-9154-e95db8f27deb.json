@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "+",
+  "status": "-",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -2869,6 +2869,18 @@
       "createdAt": "2025-10-30T12:04:34.260Z",
       "updatedAt": "2025-10-30T14:43:08.664Z",
       "completedAt": "2025-10-30T14:43:08.664Z"
+    },
+    {
+      "id": "6829118d-a87e-4423-85d5-97dd40fc0291",
+      "status": "-",
+      "title": "If there are no other branches - don't display the section",
+      "description": "In @src/renderer/src/screens/GitView.tsx",
+      "context": [
+        "src/renderer/src/screens/GitView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-11-04T19:18:17.503Z",
+      "updatedAt": "2025-11-04T19:18:17.503Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -3066,9 +3078,9 @@
     "16745e78-fa85-4d82-986a-1a5c3f8630c1": 192,
     "0a224aec-8933-4c9a-8910-33048809e451": 193,
     "38e1f4bc-07fa-42cc-990d-da75a62151a6": 194,
-    "ae8f8bd5-6062-4238-bc93-00994debfad0": 195
+    "ae8f8bd5-6062-4238-bc93-00994debfad0": 195,
+    "6829118d-a87e-4423-85d5-97dd40fc0291": 196
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
-  "updatedAt": "2025-10-01T00:34:27.858Z",
-  "completedAt": "2025-10-30T21:52:47.194Z"
+  "updatedAt": "2025-10-01T00:34:27.858Z"
 }

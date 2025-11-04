@@ -44,8 +44,6 @@ const ErrorBubble: React.FC<ErrorBubbleProps> = ({ error }) => {
               </pre>
             </div>
           ) : null}
-
-          {/* Retry button removed from inside the bubble per design; retry is handled outside */}
         </div>
       </div>
     </div>
