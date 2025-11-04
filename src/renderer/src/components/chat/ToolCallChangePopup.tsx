@@ -39,17 +39,6 @@ function Row({ children, className }: { children: React.ReactNode; className?: s
   return <div className={['text-xs leading-relaxed', className || ''].join(' ')}>{children}</div>
 }
 
-function formatTimestamp(ts?: any): string | undefined {
-  if (!ts) return undefined
-  try {
-    const d = typeof ts === 'string' ? new Date(ts) : new Date(Number(ts))
-    if (Number.isNaN(d.getTime())) return undefined
-    return d.toLocaleString()
-  } catch {
-    return undefined
-  }
-}
-
 function tryString(v: any): string | undefined {
   if (v == null) return undefined
   try {
@@ -268,7 +257,7 @@ export default function ToolCallChangePopup({
   useEffect(() => {
     let cancelled = false
     async function run() {
-      if (toolName !== 'write_file') return
+      if (toolName !== 'writeFile') return
       if (writeFileResultDiff) {
         setComputedDiff(undefined)
         setComputedIsNewFile(false)
@@ -301,7 +290,7 @@ export default function ToolCallChangePopup({
       return errorContentOnly()
     }
 
-    if (n === 'read_paths') {
+    if (n === 'readPaths') {
       const files: string[] = extract(args, ['paths']) ?? []
 
       return (
@@ -315,13 +304,13 @@ export default function ToolCallChangePopup({
       )
     }
 
-    if (n === 'update_story_title' || n === 'update_feature_title') {
+    if (n === 'updateStoryTitle' || n === 'updateFeatureTitle') {
       const oldVal = tryString(extract(result, ['before.title']) || extract(args, ['oldTitle']))
       const newVal = tryString(extract(result, ['after.title']) || extract(args, ['newTitle']))
       return <InlineOldNew oldVal={oldVal} newVal={newVal} />
     }
 
-    if (n === 'update_story_description' || n === 'update_feature_description') {
+    if (n === 'updateStoryDescription' || n === 'updateFeatureDescription') {
       const oldDesc = tryString(
         extract(result, ['before.description']) || extract(args, ['oldDescription']),
       )
@@ -354,7 +343,7 @@ export default function ToolCallChangePopup({
       )
     }
 
-    if (n === 'write_file' || n === 'write_diff_to_file') {
+    if (n === 'writeFile' || n === 'writeDiffToFile') {
       const path = writeFilePath
       const diff = writeFileResultDiff || computedDiff
       const newText = writeFileNewText
@@ -378,7 +367,7 @@ export default function ToolCallChangePopup({
       )
     }
 
-    if (n === 'create_feature' || n === 'create_story') {
+    if (n === 'createFeature' || n === 'createStory') {
       const title = tryString(extract(args, ['title']))
       const description = tryString(extract(args, ['description']))
       return (
@@ -399,7 +388,7 @@ export default function ToolCallChangePopup({
       )
     }
 
-    if (n === 'finish_feature') {
+    if (n === 'finishFeature') {
       // Show only a concise FeatureSummaryCard and nothing else
       const feature = extract(result, ['feature']) || result
       if (feature && typeof feature === 'object') {
@@ -410,12 +399,7 @@ export default function ToolCallChangePopup({
       )
     }
 
-    if (
-      n === 'reorder_feature' ||
-      n === 'reorder_story' ||
-      n === 'reorder_features' ||
-      n === 'reorder_stories'
-    ) {
+    if (n === 'reorderFeature' || n === 'reorderStory') {
       const order = (extract(result, ['order']) ||
         extract(result, ['features']) ||
         extract(result, ['stories']) ||
@@ -427,7 +411,7 @@ export default function ToolCallChangePopup({
       return <div className="text-xs text-[var(--text-secondary)]">Final order unavailable.</div>
     }
 
-    if (n === 'search_files') {
+    if (n === 'searchFiles') {
       const query = tryString(extract(args, ['query']) || extract(result, ['query'])) || ''
       const resultsRaw =
         extract(result, ['results']) ||
@@ -482,7 +466,7 @@ export default function ToolCallChangePopup({
       )
     }
 
-    if (n === 'run_tests') {
+    if (n === 'runTests') {
       const stats = extract(result, ['summary']) || {}
       const passed = extract(stats, ['passed']) || 0
       const failed = extract(stats, ['failed']) || 0
