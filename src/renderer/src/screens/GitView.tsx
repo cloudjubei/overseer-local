@@ -595,19 +595,23 @@ function CurrentProjectView() {
                 />
               </div>
             )}
-            <div className="px-3 py-2 text-xs font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400 bg-neutral-50 dark:bg-neutral-900/40">
-              Other branches
-            </div>
-            {others.map((b) => (
-              <UnifiedBranchItem
-                key={`${projectId}:${b.name}`}
-                projectId={projectId!}
-                branch={b}
-                projectTitle={title}
-                onAfterAction={reload}
-                equalToCurrent={isEqualToCurrent(b)}
-              />
-            ))}
+            {others.length > 0 && (
+              <>
+                <div className="px-3 py-2 text-xs font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400 bg-neutral-50 dark:bg-neutral-900/40">
+                  Other branches
+                </div>
+                {others.map((b) => (
+                  <UnifiedBranchItem
+                    key={`${projectId}:${b.name}`}
+                    projectId={projectId!}
+                    branch={b}
+                    projectTitle={title}
+                    onAfterAction={reload}
+                    equalToCurrent={isEqualToCurrent(b)}
+                  />
+                ))}
+              </>
+            )}
           </div>
         )}
       </div>
@@ -671,9 +675,11 @@ function AllProjectsView() {
                       mode="current"
                       onAfterAction={() => unified.reload(proj.id)}
                     />
-                    <div className="px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400 bg-neutral-50 dark:bg-neutral-900/40">
-                      Other branches
-                    </div>
+                    {rest.length > 0 && (
+                      <div className="px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400 bg-neutral-50 dark:bg-neutral-900/40">
+                        Other branches
+                      </div>
+                    )}
                   </>
                 )}
                 {rest.map((b) => (
