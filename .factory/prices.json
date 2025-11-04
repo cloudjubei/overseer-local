@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-10-28T12:36:38.910Z",
+  "updatedAt": "2025-11-04T19:16:07.217Z",
   "prices": [
     {
       "provider": "openai",
@@ -10499,6 +10499,34 @@
       "model": "vertex_ai/mistralai/mistral-medium-3@001",
       "inputPerMTokensUSD": 0.39999999999999997,
       "outputPerMTokensUSD": 2,
+      "currency": "USD"
+    },
+    {
+      "provider": "vertex_ai-language-models",
+      "model": "gemini-live-2.5-flash-preview-native-audio-09-2025",
+      "inputPerMTokensUSD": 0.3,
+      "outputPerMTokensUSD": 2,
+      "currency": "USD"
+    },
+    {
+      "provider": "gemini",
+      "model": "gemini/gemini-live-2.5-flash-preview-native-audio-09-2025",
+      "inputPerMTokensUSD": 0.3,
+      "outputPerMTokensUSD": 2,
+      "currency": "USD"
+    },
+    {
+      "provider": "gemini",
+      "model": "gemini/gemini-embedding-001",
+      "inputPerMTokensUSD": 0.15,
+      "outputPerMTokensUSD": 0,
+      "currency": "USD"
+    },
+    {
+      "provider": "vercel_ai_gateway",
+      "model": "vercel_ai_gateway/zai/glm-4.6",
+      "inputPerMTokensUSD": 0.44999999999999996,
+      "outputPerMTokensUSD": 1.7999999999999998,
       "currency": "USD"
     }
   ]
