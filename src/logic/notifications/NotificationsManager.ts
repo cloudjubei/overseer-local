@@ -1,4 +1,4 @@
-import { Notification } from 'electron'
+import { Notification, app } from 'electron'
 import type { BrowserWindow } from 'electron'
 import IPC_HANDLER_KEYS from '../../preload/ipcHandlersKeys'
 import NotificationsStorage from './NotificationsStorage'
@@ -20,12 +20,17 @@ export default class NotificationsManager extends BaseManager {
     await this.__getStorage('main')
 
     await super.init()
+    // Ensure dock/app badge reflects persisted unread notifications on startup
+    this._updateAppBadgeCount()
   }
 
   private __getStorage(projectId: string): NotificationsStorage {
     if (!this.storages[projectId]) {
       const storage = new NotificationsStorage(projectId)
-      storage.subscribe(() => this._broadcast(projectId))
+      storage.subscribe(() => {
+        this._broadcast(projectId)
+        this._updateAppBadgeCount()
+      })
       this.storages[projectId] = storage
     }
     return this.storages[projectId]
@@ -38,6 +43,39 @@ export default class NotificationsManager extends BaseManager {
       }
     } catch (e) {
       // ignore
+    }
+  }
+
+  private _updateAppBadgeCount(): void {
+    try {
+      const storages = Object.values(this.storages || {})
+      const unreadTotal = storages.reduce((acc, s: any) => {
+        try {
+          if (typeof s.getUnreadCount === 'function') return acc + s.getUnreadCount()
+          if (typeof s.getUnread === 'function') return acc + s.getUnread().length
+          return acc
+        } catch {
+          return acc
+        }
+      }, 0)
+
+      try {
+        if (typeof (app as any).setBadgeCount === 'function') {
+          app.setBadgeCount(unreadTotal)
+        }
+      } catch {}
+
+      if (
+        process.platform === 'darwin' &&
+        (app as any).dock &&
+        typeof (app as any).dock.setBadge === 'function'
+      ) {
+        try {
+          ;(app as any).dock.setBadge(unreadTotal > 0 ? String(unreadTotal) : '')
+        } catch {}
+      }
+    } catch {
+      // ignore badge errors
     }
   }
 
@@ -63,9 +101,9 @@ export default class NotificationsManager extends BaseManager {
 
   private _getPrefsForProject(projectId: string): any {
     try {
-      const app = this.settingsManager.getAppSettings?.()
+      const appSettings = this.settingsManager.getAppSettings?.()
       const project = this.settingsManager.getProjectSettings?.(projectId)
-      const sys = app?.notificationSystemSettings || {
+      const sys = appSettings?.notificationSystemSettings || {
         osNotificationsEnabled: false,
         soundsEnabled: false,
         displayDuration: 5,
@@ -139,6 +177,7 @@ export default class NotificationsManager extends BaseManager {
     const created = storage.create(input)
     // Best-effort OS notification based on preferences
     this._maybeShowOsNotification(projectId, created)
+    // Badge will update via subscription; no extra call needed
     return created
   }
 
@@ -153,13 +192,16 @@ export default class NotificationsManager extends BaseManager {
   markAllNotificationsAsRead(projectId: string): void {
     const storage = this.__getStorage(projectId)
     storage.markAllAsRead()
+    // Badge updates via subscription
   }
   markNotificationAsRead(projectId: string, id: string): void {
     const storage = this.__getStorage(projectId)
     storage.markAsRead(id)
+    // Badge updates via subscription
   }
   deleteAllNotifications(projectId: string): void {
     const storage = this.__getStorage(projectId)
     storage.deleteAll()
+    // Badge updates via subscription
   }
 }
