@@ -102,6 +102,36 @@ function StatusChips({ b, showEqual }: { b: GitUnifiedBranch; showEqual?: boolea
   )
 }
 
+function DeltaChip({ label, ahead = 0, behind = 0 }: { label: string; ahead?: number; behind?: number }) {
+  const parts: React.ReactNode[] = []
+  if (ahead > 0) {
+    parts.push(
+      <span key="ahead" className="text-emerald-600 dark:text-emerald-400">
+        {ahead}↑
+      </span>,
+    )
+  }
+  if (behind > 0) {
+    if (parts.length > 0)
+      parts.push(
+        <span key="sep" className="text-neutral-600 dark:text-neutral-400">
+          {' '}/{' '}
+        </span>,
+      )
+    parts.push(
+      <span key="behind" className="text-red-600 dark:text-red-400">
+        {behind}↓
+      </span>,
+    )
+  }
+  return (
+    <span className="px-1.5 py-0.5 rounded border bg-neutral-50/80 dark:bg-neutral-900/20 border-neutral-200 dark:border-neutral-800 text-[10px] uppercase tracking-wide text-neutral-700 dark:text-neutral-300 inline-flex items-center gap-1">
+      <span className="opacity-80">Δ {label}</span>
+      {parts.length > 0 ? <span className="inline-flex items-center">{parts}</span> : <span className="opacity-60">0</span>}
+    </span>
+  )
+}
+
 function UnifiedBranchItem({
   projectId,
   baseRef = 'main',
@@ -120,7 +150,7 @@ function UnifiedBranchItem({
   currentName?: string
 }) {
   const { openModal } = useNavigator()
-  const { pending } = useGit()
+  const { pending, unified } = useGit()
   const { resolveDependency } = useStories()
   const [deleting, setDeleting] = React.useState(false)
   const [summary, setSummary] = React.useState<{
@@ -170,6 +200,9 @@ function UnifiedBranchItem({
     () => (branch.isLocal ? branch.name : branch.remoteName || branch.name),
     [branch.isLocal, branch.name, branch.remoteName],
   )
+
+  const relToCurrent = unified.byProject[projectId]?.relToCurrent || {}
+  const currentDelta = headRef ? relToCurrent[headRef] : undefined
 
   const openMergeModal = (opts: { openConfirm: boolean }) => {
     if (!canQuickMerge) return
@@ -469,6 +502,11 @@ function UnifiedBranchItem({
         <div className="font-medium truncate flex items-center gap-2">
           <span className="truncate">{branch.name}</span>
           <StatusChips b={branch} showEqual={mode !== 'current' && !!equalToCurrent} />
+          {/* Divergence chips */}
+          {mode !== 'current' && (
+            <DeltaChip label="Current" ahead={currentDelta?.ahead || 0} behind={currentDelta?.behind || 0} />
+          )}
+          <DeltaChip label="Remote" ahead={branch.ahead || 0} behind={branch.behind || 0} />
         </div>
         <div className="text-xs text-neutral-600 dark:text-neutral-400 truncate">
           {resolvablePendingEntries.length > 0 || resolvableStoryId ? (

@@ -402,7 +402,7 @@
     },
     {
       "id": "46a65cb3-4b56-4448-97f8-4f9a0975a413",
-      "status": "-",
+      "status": "+",
       "title": "getting branch summaries after loading branches",
       "description": "In @src/renderer/src/contexts/GitContext.tsx there's a TODO on line 250.\nFor each branch (that isn't the current) we need to have this branch diff summary computed so that information about the divergence between current and that branch can be shown.\nThis means that for each branch in @src/renderer/src/screens/GitView.tsx we want to show its status against its upstream (this is already provided via `listUnifiedBranches` ) and its status against the current branch (this is the new functionality that can be gotten via `getBranchDiffSummary` ). \nFor the two displays, there should be a chip that should say \"Δ Current ↑X ↓Y\" and  \"Δ Remote ↑A ↓B\" where X/Y and A/B should show how many commits ahead/behind it is.\nThe actual file summary is still shown in the hover popup in @src/renderer/src/screens/GitView.tsx .\nFor the arrows (↑↓) - make sure we use the same green/red arrows as currently the `AheadBehind` component does.",
       "context": [
@@ -411,7 +411,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-11-05T11:55:48.399Z",
-      "updatedAt": "2025-11-05T11:55:48.399Z"
+      "updatedAt": "2025-11-05T12:42:37.298Z",
+      "completedAt": "2025-11-05T12:42:37.298Z"
     }
   ],
   "featureIdToDisplayIndex": {

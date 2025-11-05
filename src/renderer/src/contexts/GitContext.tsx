@@ -31,6 +31,8 @@ export type UnifiedBranchesState = {
   loading: boolean
   error?: string
   branches: GitUnifiedBranch[]
+  // Divergence of each branch against the current branch (by effective headRef key)
+  relToCurrent?: Record<string, { ahead: number; behind: number }>
 }
 
 export type PendingFeatureRefsState = {
@@ -247,8 +249,41 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
       }))
       try {
         const list = await gitService.listUnifiedBranches(pid)
-        //TODO: for each branch that is not base we need to load
-        // await gitService.getBranchDiffSummary(pid, { baseRef, headRef, incomingOnly: true })
+
+        // Compute divergence vs current branch (ahead/behind commit counts)
+        const current = list.find((b) => b.current)
+        const currentName = current?.name
+        const relToCurrent: Record<string, { ahead: number; behind: number }> = {}
+        if (currentName) {
+          for (const b of list) {
+            if (b.current) continue
+            const headRef = b.isLocal ? b.name : b.remoteName || b.name
+            if (!headRef || headRef === currentName) continue
+            try {
+              const [aheadCommits, behindCommits] = await Promise.all([
+                gitService.selectCommits(pid, {
+                  sources: [headRef],
+                  baseRef: currentName,
+                  includeMerges: false,
+                  maxCount: 1000,
+                }),
+                gitService.selectCommits(pid, {
+                  sources: [currentName],
+                  baseRef: headRef,
+                  includeMerges: false,
+                  maxCount: 1000,
+                }),
+              ])
+              relToCurrent[headRef] = {
+                ahead: aheadCommits?.length || 0,
+                behind: behindCommits?.length || 0,
+              }
+            } catch (e) {
+              // Degrade gracefully for this branch
+              relToCurrent[headRef] = { ahead: 0, behind: 0 }
+            }
+          }
+        }
 
         const hydrated = list.map((b) => ({
           ...b,
@@ -257,7 +292,7 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
         const sorted = sortUnifiedBranches(hydrated)
         setUnifiedByProject((prev) => ({
           ...prev,
-          [pid]: { loading: false, error: undefined, branches: sorted },
+          [pid]: { loading: false, error: undefined, branches: sorted, relToCurrent },
         }))
       } catch (e) {
         setUnifiedByProject((prev) => ({
@@ -266,6 +301,7 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
             loading: false,
             error: (e as any)?.message || 'Failed to list branches',
             branches: [],
+            relToCurrent: {},
           },
         }))
       }
@@ -341,7 +377,7 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
     let cancelled = false
     const init = async () => {
       const initial: Record<string, UnifiedBranchesState> = {}
-      for (const p of projects) initial[p.id] = { loading: true, branches: [] }
+      for (const p of projects) initial[p.id] = { loading: true, branches: [], relToCurrent: {} }
       setUnifiedByProject(initial)
       // Load sequentially to avoid overloading IPC
       for (const p of projects) {
@@ -361,7 +397,7 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
       get: (projectId?: string): UnifiedBranchesState => {
         const pid = projectId || activeProjectId
         if (!pid) return { loading: false, branches: [] }
-        return unifiedByProject[pid] || { loading: true, branches: [] }
+        return unifiedByProject[pid] || { loading: true, branches: [], relToCurrent: {} }
       },
       reload: loadUnified,
     }),
