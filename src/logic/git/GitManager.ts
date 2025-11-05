@@ -1,23 +1,23 @@
 import type { BrowserWindow } from 'electron'
 import IPC_HANDLER_KEYS from '../../preload/ipcHandlersKeys'
 import {
-  ApplyMergeOptions,
-  BuildMergeReportOptions,
-  DiffSummary,
+  GitApplyMergeOptions,
+  GitBuildMergeReportOptions,
+  GitDiffSummary,
   GitMonitor,
   GitMonitorConfig,
   GitOpResult,
   GitTools,
-  LocalStatus,
-  LocalStatusOptions,
-  MergePlan,
-  MergePlanOptions,
-  MergeReport,
-  MergeResult,
+  GitLocalStatus,
+  GitLocalStatusOptions,
+  GitMergePlan,
+  GitMergePlanOptions,
+  GitMergeReport,
+  GitMergeResult,
   createGitTools,
   GitUnifiedBranch,
-  CommitInfo,
-  SelectCommitsOptions,
+  GitCommitInfo,
+  GitSelectCommitsOptions,
 } from 'thefactory-tools'
 import ProjectsManager from '../projects/ProjectsManager'
 import Mutex from '../utils/Mutex'
@@ -133,8 +133,8 @@ export default class GitManager extends BaseManager {
 
   private async getMergePlan(
     projectId: string,
-    options: Omit<MergePlanOptions, 'repoPath'>,
-  ): Promise<MergePlan | undefined> {
+    options: Omit<GitMergePlanOptions, 'repoPath'>,
+  ): Promise<GitMergePlan | undefined> {
     const tools = await this.__getTools(projectId)
     if (!tools) return
     return tools.getMergePlan(options)
@@ -142,9 +142,9 @@ export default class GitManager extends BaseManager {
 
   private async buildMergeReport(
     projectId: string,
-    plan: MergePlan,
-    options?: BuildMergeReportOptions,
-  ): Promise<MergeReport | undefined> {
+    plan: GitMergePlan,
+    options?: GitBuildMergeReportOptions,
+  ): Promise<GitMergeReport | undefined> {
     const tools = await this.__getTools(projectId)
     if (!tools) return
     return await tools.buildMergeReport(plan, options)
@@ -152,8 +152,8 @@ export default class GitManager extends BaseManager {
 
   private async getLocalStatus(
     projectId: string,
-    options?: Omit<LocalStatusOptions, 'repoPath'>,
-  ): Promise<LocalStatus | undefined> {
+    options?: Omit<GitLocalStatusOptions, 'repoPath'>,
+  ): Promise<GitLocalStatus | undefined> {
     const tools = await this.__getTools(projectId)
     if (!tools) return
     return await tools.getLocalStatus(options)
@@ -162,7 +162,7 @@ export default class GitManager extends BaseManager {
   private async getBranchDiffSummary(
     projectId: string,
     options: { baseRef: string; headRef: string; incomingOnly?: boolean; includePatch?: boolean },
-  ): Promise<DiffSummary | undefined> {
+  ): Promise<GitDiffSummary | undefined> {
     const tools = await this.__getTools(projectId)
     if (!tools) return
     return tools.getBranchDiffSummary(options)
@@ -170,8 +170,8 @@ export default class GitManager extends BaseManager {
 
   private async applyMerge(
     projectId: string,
-    options: Omit<ApplyMergeOptions, 'repoPath'>,
-  ): Promise<MergeResult | undefined> {
+    options: Omit<GitApplyMergeOptions, 'repoPath'>,
+  ): Promise<GitMergeResult | undefined> {
     const tools = await this.__getTools(projectId)
     if (!tools) {
       return
@@ -227,8 +227,8 @@ export default class GitManager extends BaseManager {
 
   private async selectCommits(
     projectId: string,
-    options: Omit<SelectCommitsOptions, 'repoPath'>,
-  ): Promise<CommitInfo[] | undefined> {
+    options: Omit<GitSelectCommitsOptions, 'repoPath'>,
+  ): Promise<GitCommitInfo[] | undefined> {
     const tools = await this.__getTools(projectId)
     if (!tools) return
     return tools.selectCommits(options)

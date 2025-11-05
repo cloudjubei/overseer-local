@@ -1,39 +1,39 @@
 import {
-  ApplyMergeOptions,
-  DiffSummary,
+  GitApplyMergeOptions,
+  GitDiffSummary,
   GitBranchEvent,
   GitMonitorConfig,
   GitOpResult,
-  LocalStatus,
-  LocalStatusOptions,
-  MergePlan,
-  MergePlanOptions,
-  MergeReport,
-  MergeReportOptions,
-  MergeResult,
+  GitLocalStatus,
+  GitLocalStatusOptions,
+  GitMergePlan,
+  GitMergePlanOptions,
+  GitMergeReport,
+  GitMergeReportOptions,
+  GitMergeResult,
   GitUnifiedBranch,
-  CommitInfo,
-  SelectCommitsOptions,
+  GitCommitInfo,
+  GitSelectCommitsOptions,
 } from 'thefactory-tools'
 
 export type GitService = {
   getMergePlan: (
     projectId: string,
-    options: Omit<MergePlanOptions, 'repoPath'>,
-  ) => Promise<MergePlan>
+    options: Omit<GitMergePlanOptions, 'repoPath'>,
+  ) => Promise<GitMergePlan>
   buildMergeReport: (
     projectId: string,
-    plan: MergePlan,
-    options?: MergeReportOptions,
-  ) => Promise<MergeReport>
+    plan: GitMergePlan,
+    options?: GitMergeReportOptions,
+  ) => Promise<GitMergeReport>
   applyMerge: (
     projectId: string,
-    options: Omit<ApplyMergeOptions, 'repoPath'>,
-  ) => Promise<MergeResult>
+    options: Omit<GitApplyMergeOptions, 'repoPath'>,
+  ) => Promise<GitMergeResult>
   getLocalStatus: (
     projectId: string,
-    options?: Omit<LocalStatusOptions, 'repoPath'>,
-  ) => Promise<LocalStatus>
+    options?: Omit<GitLocalStatusOptions, 'repoPath'>,
+  ) => Promise<GitLocalStatus>
   getBranchDiffSummary: (
     projectId: string,
     options: {
@@ -42,7 +42,7 @@ export type GitService = {
       incomingOnly?: boolean
       includePatch?: boolean
     },
-  ) => Promise<DiffSummary>
+  ) => Promise<GitDiffSummary>
   deleteBranch: (projectId: string, name: string) => Promise<GitOpResult | undefined>
   push: (projectId: string, remote?: string, branch?: string) => Promise<GitOpResult | undefined>
   pull: (projectId: string, remote?: string, branch?: string) => Promise<GitOpResult | undefined>
@@ -60,8 +60,8 @@ export type GitService = {
   listUnifiedBranches: (projectId: string) => Promise<GitUnifiedBranch[]>
   selectCommits: (
     projectId: string,
-    options: Omit<SelectCommitsOptions, 'repoPath'>,
-  ) => Promise<CommitInfo[]>
+    options: Omit<GitSelectCommitsOptions, 'repoPath'>,
+  ) => Promise<GitCommitInfo[]>
 }
 
 export const gitService: GitService = {

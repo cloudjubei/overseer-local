@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { gitService } from '../services/gitService'
 import { useProjectContext } from './ProjectContext'
-import { CommitInfo, GitBranchEvent, GitUnifiedBranch } from 'thefactory-tools'
+import { GitCommitInfo, GitBranchEvent, GitUnifiedBranch } from 'thefactory-tools'
 
 export type PendingBranch = {
   projectId: string
@@ -37,7 +37,7 @@ export type PendingFeatureRefsState = {
   loading: boolean
   error?: string
   entries: Array<{ storyId: string; featureId?: string }>
-  commits?: CommitInfo[]
+  commits?: GitCommitInfo[]
 }
 
 export type GitContextValue = {
@@ -57,7 +57,11 @@ export type GitContextValue = {
   // Pending features resolved from commits between baseRef -> headRef
   pending: {
     byProject: Record<string, Record<string, PendingFeatureRefsState>>
-    get: (projectId: string | undefined, baseRef: string, headRef: string) => PendingFeatureRefsState
+    get: (
+      projectId: string | undefined,
+      baseRef: string,
+      headRef: string,
+    ) => PendingFeatureRefsState
     load: (projectId: string | undefined, baseRef: string, headRef: string) => Promise<void>
   }
 
@@ -357,7 +361,11 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
   const pendingApi = useMemo(
     () => ({
       byProject: pendingByProject,
-      get: (projectId: string | undefined, baseRef: string, headRef: string): PendingFeatureRefsState => {
+      get: (
+        projectId: string | undefined,
+        baseRef: string,
+        headRef: string,
+      ): PendingFeatureRefsState => {
         const pid = projectId || activeProjectId
         if (!pid) return { loading: false, entries: [] }
         const key = `${baseRef}|${headRef}`

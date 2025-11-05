@@ -4,10 +4,10 @@ import Spinner from '@renderer/components/ui/Spinner'
 import { Button } from '@renderer/components/ui/Button'
 import { useProjectContext } from '@renderer/contexts/ProjectContext'
 import {
-  MergeReport,
-  MergeReportFile,
-  MergeResult,
-  ConflictEntry,
+  GitMergeReport,
+  GitMergeReportFile,
+  GitMergeResult,
+  GitConflictEntry,
   CoverageResult,
 } from 'thefactory-tools'
 import SegmentedControl from '@renderer/components/ui/SegmentedControl'
@@ -17,7 +17,11 @@ import { IconFastMerge } from '@renderer/components/ui/icons/Icons'
 import { IconChevron } from '@renderer/components/ui/icons/IconChevron'
 import Tooltip from '@renderer/components/ui/Tooltip'
 import { useGit } from '@renderer/contexts/GitContext'
-import { IconFileAdded, IconFileDeleted, IconFileModified } from '@renderer/components/ui/icons/Icons'
+import {
+  IconFileAdded,
+  IconFileDeleted,
+  IconFileModified,
+} from '@renderer/components/ui/icons/Icons'
 
 export type GitMergeModalProps = {
   projectId: string
@@ -57,9 +61,9 @@ function DiffPatch({ patch }: { patch: string }) {
 function StructuredDiff({
   structuredDiff,
 }: {
-  structuredDiff: NonNullable<MergeReportFile['structuredDiff']>
+  structuredDiff: NonNullable<GitMergeReportFile['structuredDiff']>
 }) {
-  const headerText = (h: NonNullable<MergeReportFile['structuredDiff']>[number]) => {
+  const headerText = (h: NonNullable<GitMergeReportFile['structuredDiff']>[number]) => {
     const left = `-${h.oldStart}${typeof h.oldLines === 'number' ? ',' + h.oldLines : ''}`
     const right = `+${h.newStart}${typeof h.newLines === 'number' ? ',' + h.newLines : ''}`
     return `@@ ${left} ${right} @@${h.header ? ' ' + h.header : ''}`
@@ -83,10 +87,7 @@ function StructuredDiff({
                   : ''
               const marker = isAdd ? '+' : isDel ? '-' : ' '
               return (
-                <div
-                  key={li}
-                  className={`grid grid-cols-[56px_56px_1fr] ${bgCls}`}
-                >
+                <div key={li} className={`grid grid-cols-[56px_56px_1fr] ${bgCls}`}>
                   <div className="px-2 py-0.5 text-right select-none text-neutral-500 dark:text-neutral-400">
                     {typeof ln.oldLine === 'number' ? ln.oldLine : ''}
                   </div>
@@ -107,7 +108,7 @@ function StructuredDiff({
   )
 }
 
-function StatusIcon({ status }: { status: MergeReportFile['status'] }) {
+function StatusIcon({ status }: { status: GitMergeReportFile['status'] }) {
   const iconClass = 'w-4 h-4'
   if (status === 'A') return <IconFileAdded className={iconClass} />
   if (status === 'D') return <IconFileDeleted className={iconClass} />
@@ -115,14 +116,15 @@ function StatusIcon({ status }: { status: MergeReportFile['status'] }) {
   return <IconFileModified className={iconClass} />
 }
 
-function FileDiffItem({ file }: { file: MergeReportFile }) {
+function FileDiffItem({ file }: { file: GitMergeReportFile }) {
   // All diffs start closed
   const [open, setOpen] = React.useState(false)
   const toggle = React.useCallback(() => setOpen((v) => !v), [])
   const title = open ? 'Hide changes' : 'View changes'
 
   const showStats =
-    file.status === 'M' && (typeof file.additions === 'number' || typeof file.deletions === 'number')
+    file.status === 'M' &&
+    (typeof file.additions === 'number' || typeof file.deletions === 'number')
 
   return (
     <div className="border rounded-md border-neutral-200 dark:border-neutral-800 overflow-hidden">
@@ -147,17 +149,25 @@ function FileDiffItem({ file }: { file: MergeReportFile }) {
             aria-expanded={open}
             className={`ml-2 inline-flex items-center justify-center rounded p-1 transition-colors border border-transparent hover:border-neutral-300 dark:hover:border-neutral-700 ${open ? 'bg-neutral-200/60 dark:bg-neutral-800/60' : 'bg-transparent'}`}
           >
-            <IconChevron className={`w-4 h-4 text-neutral-600 dark:text-neutral-300 transform transition-transform ${open ? 'rotate-90' : ''}`} />
+            <IconChevron
+              className={`w-4 h-4 text-neutral-600 dark:text-neutral-300 transform transition-transform ${open ? 'rotate-90' : ''}`}
+            />
           </button>
         </div>
       </div>
       {open && (
         <div className="max-h-64 overflow-auto text-xs font-mono">
           {file.binary ? (
-            <div className="p-3 text-neutral-600 dark:text-neutral-400">Binary file diff not shown</div>
+            <div className="p-3 text-neutral-600 dark:text-neutral-400">
+              Binary file diff not shown
+            </div>
           ) : Array.isArray(file.structuredDiff) && file.structuredDiff.length > 0 ? (
             <div className="p-1">
-              <StructuredDiff structuredDiff={file.structuredDiff as NonNullable<MergeReportFile['structuredDiff']>} />
+              <StructuredDiff
+                structuredDiff={
+                  file.structuredDiff as NonNullable<GitMergeReportFile['structuredDiff']>
+                }
+              />
             </div>
           ) : file.patch ? (
             <DiffPatch patch={file.patch} />
@@ -175,7 +185,7 @@ function ConflictsPanel({
   baseRef,
   branch,
 }: {
-  conflicts: ConflictEntry[]
+  conflicts: GitConflictEntry[]
   baseRef: string
   branch: string
 }) {
@@ -266,7 +276,8 @@ function ProgressBar({ value }: { value: number }) {
 
 // ============ Main component ============
 export default function GitMergeModal(props: GitMergeModalProps) {
-  const { onRequestClose, projectId, repoPath, baseRef, branch, storyId, featureId, openConfirm } = props
+  const { onRequestClose, projectId, repoPath, baseRef, branch, storyId, featureId, openConfirm } =
+    props
   const { getProjectById } = useProjectContext()
   const { mergePreferences } = useGit()
   const { autoPush, deleteRemote, setAutoPush, setDeleteRemote } = mergePreferences
@@ -274,13 +285,13 @@ export default function GitMergeModal(props: GitMergeModalProps) {
   const project = getProjectById(projectId)
 
   const [loading, setLoading] = React.useState(true)
-  const [report, setReport] = React.useState<MergeReport | undefined>(undefined)
+  const [report, setReport] = React.useState<GitMergeReport | undefined>(undefined)
   const [error, setError] = React.useState<string | undefined>(undefined)
 
   // Merge execution state
   const [merging, setMerging] = React.useState(false)
   const [mergeError, setMergeError] = React.useState<string | undefined>(undefined)
-  const [mergeResult, setMergeResult] = React.useState<MergeResult | undefined>(undefined)
+  const [mergeResult, setMergeResult] = React.useState<GitMergeResult | undefined>(undefined)
 
   // Post-merge actions state
   const [postActionRunning, setPostActionRunning] = React.useState(false)
@@ -674,7 +685,7 @@ export default function GitMergeModal(props: GitMergeModalProps) {
         )}
         {!loading && !error && report && report.files.length > 0 && (
           <div className="flex flex-col gap-3">
-            {report.files.map((f: MergeReportFile) => (
+            {report.files.map((f: GitMergeReportFile) => (
               <FileDiffItem key={f.path} file={f} />
             ))}
           </div>
@@ -763,7 +774,8 @@ export default function GitMergeModal(props: GitMergeModalProps) {
               </div>
             )}
             <div className="text-[11px] text-neutral-500">
-              Heuristic mapping when backend analysis is unavailable. Open Tests view to run targeted tests.
+              Heuristic mapping when backend analysis is unavailable. Open Tests view to run
+              targeted tests.
             </div>
           </div>
         )}
@@ -831,7 +843,8 @@ export default function GitMergeModal(props: GitMergeModalProps) {
               </table>
             </div>
             <div className="text-[11px] text-neutral-500">
-              Uses backend analysis when available; otherwise based on last coverage run in Tests view.
+              Uses backend analysis when available; otherwise based on last coverage run in Tests
+              view.
             </div>
           </div>
         )}

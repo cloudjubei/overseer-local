@@ -466,7 +466,7 @@ export default function ToolCallChangePopup({
       )
     }
 
-    if (n === 'runTests') {
+    if (n === 'runTests' || n === 'runAllTests') {
       const stats = extract(result, ['summary']) || {}
       const passed = extract(stats, ['passed']) || 0
       const failed = extract(stats, ['failed']) || 0
