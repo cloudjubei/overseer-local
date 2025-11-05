@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "-",
+  "status": "+",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -2978,7 +2978,7 @@
     },
     {
       "id": "e7dfd19e-3d61-41d0-b21b-28b462d1d8f1",
-      "status": "-",
+      "status": "+",
       "title": "keep writeFile same width",
       "description": "in @src/renderer/src/components/chat/ToolCallChangePopup.tsx for the `writeFile` tool, when clicking `View more changes` the popup can grow in width, which creates a horizontal scrollbar.\nThe popup should ALWAYS have a horizontal scrollbar to make sure that each line doesn't bleed over multiple lines.\nMake sure that the backgrounds etc inside scale properly, as now when clicking the `View more changes` they remain stuck to the previous width (whereas the text overflows).",
       "context": [
@@ -2986,7 +2986,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-11-05T11:47:57.841Z",
-      "updatedAt": "2025-11-05T11:47:57.841Z"
+      "updatedAt": "2025-11-05T14:08:11.035Z",
+      "completedAt": "2025-11-05T14:08:11.035Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -3196,5 +3197,6 @@
     "e7dfd19e-3d61-41d0-b21b-28b462d1d8f1": 204
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
-  "updatedAt": "2025-11-05T00:22:06.741Z"
+  "updatedAt": "2025-11-05T00:22:06.741Z",
+  "completedAt": "2025-11-05T14:08:11.035Z"
 }
