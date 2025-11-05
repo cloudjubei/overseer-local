@@ -163,6 +163,11 @@ function UnifiedBranchItem({
     return short === 'main' || short === 'master'
   }
 
+  // Compute protection status for this branch (local and/or remote short names)
+  const localShortName = (branch.name || '').replace(/^[^\/]+\//, '')
+  const remoteShortName = (branch.remoteName || branch.name || '').replace(/^[^\/]+\//, '')
+  const isProtected = isProtectedBranch(localShortName) || isProtectedBranch(remoteShortName)
+
   const headRef = React.useMemo(
     () => (branch.isLocal ? branch.name : branch.remoteName || branch.name),
     [branch.isLocal, branch.name, branch.remoteName],
@@ -545,11 +550,13 @@ function UnifiedBranchItem({
               </Tooltip>
               <Tooltip
                 content={
-                  canDeleteLocal
-                    ? 'delete local branch'
-                    : canDeleteRemote
-                      ? 'delete remote branch'
-                      : 'cannot delete'
+                  isProtected
+                    ? 'protected branch'
+                    : canDeleteLocal
+                      ? 'delete local branch'
+                      : canDeleteRemote
+                        ? 'delete remote branch'
+                        : 'cannot delete'
                 }
                 placement='bottom'
               >
@@ -558,7 +565,7 @@ function UnifiedBranchItem({
                     variant='ghost'
                     size='icon'
                     onClick={onDelete}
-                    disabled={!canDeleteLocal && !canDeleteRemote}
+                    disabled={isProtected || (!canDeleteLocal && !canDeleteRemote)}
                     loading={deleting}
                     aria-label='Delete branch'
                     title='Delete branch'
