@@ -184,9 +184,18 @@ export default class FactoryCompletionManager extends BaseManager {
     }
 
     let newLastMessage = { ...lastMessage }
-    newLastMessage.toolResults = lastMessage.toolResults.map((t) =>
-      mapToolResults[t.result] ? mapToolResults[t.result] : t,
-    )
+    newLastMessage.toolResults = lastMessage.toolResults.map((t) => {
+      if (t.type === 'require_confirmation') {
+        // If this tool required confirmation and was selected, replace with actual result
+        if (toolsCheck.has(t.result)) {
+          return mapToolResults[t.result] ? mapToolResults[t.result] : t
+        }
+        // Not selected: mark as aborted while preserving call/metadata
+        return { ...t, type: 'aborted' as any }
+      }
+      // For all other tool results, keep them as-is
+      return t
+    })
 
     const newMessages = [...chat.messages]
     newMessages[newMessages.length - 1] = newLastMessage

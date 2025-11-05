@@ -15,6 +15,7 @@ import {
   GitCommitInfo,
   GitSelectCommitsOptions,
 } from 'thefactory-tools'
+import type { GitOpResult } from 'thefactory-tools'
 
 export type GitService = {
   getMergePlan: (
@@ -62,6 +63,7 @@ export type GitService = {
     projectId: string,
     options: Omit<GitSelectCommitsOptions, 'repoPath'>,
   ) => Promise<GitCommitInfo[]>
+  checkout: (projectId: string, name: string) => Promise<GitOpResult | undefined>
 }
 
 export const gitService: GitService = {
