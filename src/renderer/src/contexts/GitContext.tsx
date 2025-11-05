@@ -75,8 +75,9 @@ export type GitContextValue = {
 
 const GitContext = createContext<GitContextValue | null>(null)
 
+const FEATURE_REGEX = /(?:^|\/)features\/([0-9a-fA-F-]{8,})/
 const getStoryIdFromBranchName = (branchName: string): string | undefined => {
-  const match = branchName.match(/^features\/([0-9a-fA-F-]+)/)
+  const match = branchName.match(FEATURE_REGEX)
   return match ? match[1] : undefined
 }
 
@@ -84,7 +85,7 @@ const parseStoryIdFromUnified = (u: GitUnifiedBranch): string | undefined => {
   if (u.storyId) return u.storyId
   const tryParse = (name?: string): string | undefined => {
     if (!name) return undefined
-    const m = name.match(/(?:^|\/)features\/([0-9a-fA-F-]{8,})/)
+    const m = name.match(FEATURE_REGEX)
     return m ? m[1] : undefined
   }
   return tryParse(u.name) || tryParse(u.remoteName)
@@ -135,6 +136,10 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
   // Unified branches state per project
   const [unifiedByProject, setUnifiedByProject] = useState<Record<string, UnifiedBranchesState>>({})
 
+  // Track monitor base per project and which monitors have started
+  const [monitorBaseByProject, setMonitorBaseByProject] = useState<Record<string, string | undefined>>({})
+  const [monitorsStarted, setMonitorsStarted] = useState<Record<string, boolean>>({})
+
   // Pending features by project -> headRefKey (baseRef|headRef)
   const [pendingByProject, setPendingByProject] = useState<
     Record<string, Record<string, PendingFeatureRefsState>>
@@ -167,30 +172,36 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
       const newPending = [...newProjectStatus.pending]
       newProjectStatus.pending = newPending
 
-      const branchIdx = newPending.findIndex((b) => b.branch === branchUpdate.name)
-
-      // Only consider feature branches that are ahead and not behind their base
       const storyId = getStoryIdFromBranchName(branchUpdate.name)
       const isFeature = !!storyId
       const isUpdated = branchUpdate.ahead > 0 && branchUpdate.behind === 0
+
+      // Prefer dedupe by storyId to avoid double counting local/remote variants
+      const byStoryIdx = storyId
+        ? newPending.findIndex((b) => b.storyId === storyId)
+        : -1
+      const byBranchIdx = newPending.findIndex((b) => b.branch === branchUpdate.name)
+      const existingIdx = byStoryIdx >= 0 ? byStoryIdx : byBranchIdx
 
       if (isFeature && isUpdated) {
         const pendingBranch: PendingBranch = {
           projectId,
           branch: branchUpdate.name,
-          baseRef: 'main', // Assumes the base branch from monitor config
-          repoPath: '', // Not available on the event, handled by backend
+          baseRef: monitorBaseByProject[projectId] ||
+            unifiedByProject[projectId]?.branches?.find((b) => b.current)?.name ||
+            'HEAD',
+          repoPath: '',
           ahead: branchUpdate.ahead,
           behind: branchUpdate.behind,
           storyId,
         }
-        if (branchIdx > -1) {
-          newPending[branchIdx] = pendingBranch
+        if (existingIdx > -1) {
+          newPending[existingIdx] = pendingBranch
         } else {
           newPending.push(pendingBranch)
         }
-      } else if (branchIdx > -1) {
-        newPending.splice(branchIdx, 1)
+      } else if (existingIdx > -1) {
+        newPending.splice(existingIdx, 1)
       }
 
       return newAllProjects
@@ -201,9 +212,9 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
     return () => {
       unsubscribe()
     }
-  }, [])
+  }, [monitorBaseByProject, unifiedByProject])
 
-  // Initialize projects and start monitors
+  // Initialize project containers and seed unified loading
   useEffect(() => {
     if (loading) return
     setLoading(true)
@@ -212,13 +223,10 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
 
     const load = async () => {
       try {
-        await Promise.all(
-          projects.map((p) =>
-            gitService.startMonitor(p.id, {
-              baseBranch: 'main',
-            }),
-          ),
-        )
+        // Kick off unified loads; monitors will start after current branch is known
+        for (const p of projects) {
+          await loadUnified(p.id)
+        }
       } catch (e) {
         console.error('GitContext error: ', e)
         setError((e as any)?.message || String(e))
@@ -227,8 +235,52 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
       }
     }
 
-    load()
+    void load()
   }, [projects])
+
+  // Start monitors when we know the current branch for each project
+  useEffect(() => {
+    const start = async () => {
+      for (const p of projects) {
+        const pid = p.id
+        if (monitorsStarted[pid]) continue
+        const currentName = unifiedByProject[pid]?.branches?.find((b) => b.current)?.name
+        if (!currentName) continue
+        try {
+          await gitService.startMonitor(pid, { baseBranch: currentName })
+          setMonitorsStarted((prev) => ({ ...prev, [pid]: true }))
+          setMonitorBaseByProject((prev) => ({ ...prev, [pid]: currentName }))
+        } catch (e) {
+          console.warn('Failed to start monitor', pid, e)
+        }
+      }
+    }
+    void start()
+  }, [projects.map((p) => p.id).join('|'), unifiedByProject, monitorsStarted])
+
+  // If the base (current branch) changes, restart monitor to track the new base
+  useEffect(() => {
+    const maybeRestart = async () => {
+      for (const p of projects) {
+        const pid = p.id
+        if (!monitorsStarted[pid]) continue
+        const currentName = unifiedByProject[pid]?.branches?.find((b) => b.current)?.name
+        const prevBase = monitorBaseByProject[pid]
+        if (currentName && prevBase && currentName !== prevBase) {
+          try {
+            await gitService.stopMonitor(pid)
+          } catch {}
+          try {
+            await gitService.startMonitor(pid, { baseBranch: currentName })
+            setMonitorBaseByProject((prev) => ({ ...prev, [pid]: currentName }))
+          } catch (e) {
+            console.warn('Failed to restart monitor', pid, e)
+          }
+        }
+      }
+    }
+    void maybeRestart()
+  }, [projects.map((p) => p.id).join('|'), unifiedByProject, monitorsStarted, monitorBaseByProject])
 
   useEffect(() => {
     const curr = allProjects.find((p) => p.projectId === activeProjectId) || {
@@ -293,6 +345,41 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
           ...prev,
           [pid]: { loading: false, error: undefined, branches: sorted, relToCurrent },
         }))
+
+        // Seed pending/updated branches for the badge from this initial snapshot using relToCurrent
+        setAllProjects((curr) => {
+          const next = [...curr]
+          const idx = next.findIndex((p) => p.projectId === pid)
+          const ensure: ProjectGitStatus = idx >= 0 ? { ...next[idx] } : { projectId: pid, pending: [] }
+          const baseRef = currentName || 'HEAD'
+          const pending: PendingBranch[] = []
+          for (const b of sorted) {
+            if (b.current) continue
+            const headRef = b.isLocal ? b.name : b.remoteName || b.name
+            if (!headRef) continue
+            const delta = relToCurrent[headRef] || { ahead: 0, behind: 0 }
+            const storyId = parseStoryIdFromUnified(b)
+            // Count only feature branches ahead and not behind
+            if (storyId && delta.ahead > 0 && delta.behind === 0) {
+              // Deduplicate by storyId
+              if (!pending.find((p) => p.storyId === storyId)) {
+                pending.push({
+                  projectId: pid,
+                  repoPath: '',
+                  baseRef,
+                  branch: headRef,
+                  storyId,
+                  ahead: delta.ahead,
+                  behind: delta.behind,
+                })
+              }
+            }
+          }
+          ensure.pending = pending
+          if (idx >= 0) next[idx] = ensure
+          else next.push(ensure)
+          return next
+        })
       } catch (e) {
         setUnifiedByProject((prev) => ({
           ...prev,
