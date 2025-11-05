@@ -2912,7 +2912,7 @@
     },
     {
       "id": "1d14164a-85c8-489a-a41c-b2103c227c45",
-      "status": "-",
+      "status": "+",
       "title": "Not all branches are feature/story related",
       "description": "In @src/renderer/src/screens/GitView.tsx if a branch has no story id or a story cannot be resolved from a given id, then don't show any story info - treat it as non-story related.",
       "context": [
@@ -2920,7 +2920,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-11-05T00:30:43.231Z",
-      "updatedAt": "2025-11-05T00:30:43.231Z"
+      "updatedAt": "2025-11-05T00:57:05.028Z",
+      "completedAt": "2025-11-05T00:57:05.028Z"
     },
     {
       "id": "bb551aac-d29c-4b27-bcc4-84634db7d41c",
