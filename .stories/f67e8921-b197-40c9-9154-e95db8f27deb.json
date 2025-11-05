@@ -2885,7 +2885,7 @@
     },
     {
       "id": "aad70d9c-e986-4150-b898-3d97fb8ebca6",
-      "status": "-",
+      "status": "+",
       "title": "After doing a fast-merge branch doesn't disappear",
       "description": "In @src/renderer/src/screens/GitView.tsx when doing the fast-merge via @src/renderer/src/screens/git/GitMergeModal.tsx , the option for `Delete remote branch after merge` was ticked in the alert and yet, after the merge the branch still shows.\nWhen hovering over it there's an error showing too:\n\"Cannot read properties of undefined (reading 'files')\"",
       "context": [
@@ -2894,7 +2894,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-11-05T00:01:13.581Z",
-      "updatedAt": "2025-11-05T00:01:33.954Z"
+      "updatedAt": "2025-11-05T00:06:40.030Z",
+      "completedAt": "2025-11-05T00:06:40.030Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -3097,5 +3098,6 @@
     "aad70d9c-e986-4150-b898-3d97fb8ebca6": 197
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
-  "updatedAt": "2025-10-01T00:34:27.858Z"
+  "updatedAt": "2025-10-01T00:34:27.858Z",
+  "completedAt": "2025-11-05T00:06:40.030Z"
 }

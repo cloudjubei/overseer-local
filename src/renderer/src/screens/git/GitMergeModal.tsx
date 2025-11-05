@@ -279,7 +279,7 @@ export default function GitMergeModal(props: GitMergeModalProps) {
   const { onRequestClose, projectId, repoPath, baseRef, branch, storyId, featureId, openConfirm } =
     props
   const { getProjectById } = useProjectContext()
-  const { mergePreferences } = useGit()
+  const { mergePreferences, unified } = useGit()
   const { autoPush, deleteRemote, setAutoPush, setDeleteRemote } = mergePreferences
 
   const project = getProjectById(projectId)
@@ -608,6 +608,12 @@ export default function GitMergeModal(props: GitMergeModalProps) {
             }
           }
           setPostActionRunning(false)
+        }
+        // Refresh unified branches after a successful merge (regardless of post-action outcome)
+        try {
+          void unified.reload(projectId)
+        } catch (e) {
+          // non-fatal
         }
         if (localError) {
           setPostActionError(localError)
