@@ -451,7 +451,7 @@
     },
     {
       "id": "2efcd766-e423-4f70-ad84-77c35a6c1f44",
-      "status": "-",
+      "status": "+",
       "title": "update the icons for the file statuses",
       "description": "currently the file status icons, i.e. @src/renderer/src/components/ui/icons/IconFileAdded.tsx , @src/renderer/src/components/ui/icons/IconFileDeleted.tsx , @src/renderer/src/components/ui/icons/IconFileModified.tsx are unreadable because the status circle is tiny compared to the file underneath. There should be no file and the status icon should fill the whole canvas.",
       "context": [
@@ -461,7 +461,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-11-05T22:16:01.525Z",
-      "updatedAt": "2025-11-05T22:16:01.525Z"
+      "updatedAt": "2025-11-05T23:26:53.533Z",
+      "completedAt": "2025-11-05T23:26:53.533Z"
     },
     {
       "id": "8c824dc4-24d7-4d6b-81b6-133bcd933506",
