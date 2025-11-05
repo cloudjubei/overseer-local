@@ -2941,14 +2941,14 @@
       "id": "96900adf-6346-4780-a5dd-7202f8eb9a5d",
       "status": "-",
       "title": "when coming back to chat - first open the least recently opened chat",
-      "description": "In @src/renderer/src/screens/ChatView.tsx - it needs to work when going from chat to any other screen (and then back), and when switching projects but staying inside @src/renderer/src/screens/ChatView.tsx .\nIt also needs to select the chat so that it's obvious which one it is (i.e. it has to become highlighted - blue as it does now when clicking a chat).\nIt also needs to scroll to the last message (if it's unread, then to the top of it so the user can start reading the beginning - or to the very bottom otherwise, i.e. when read).",
+      "description": "In @src/renderer/src/screens/ChatView.tsx - it needs to work when going from chat to any other screen (and then back), and when switching projects but staying inside @src/renderer/src/screens/ChatView.tsx .\nIt also needs to select the chat so that it's obvious which one it is (i.e. it has to become highlighted - blue as it does now when clicking a chat).\nIt also needs to scroll to the last message (if it's unread, then to the top of it so the user can start reading the beginning - or to the very bottom otherwise, i.e. when read).\nCurrently the opening behaviour even interferes with deleting a chat (cos it has to switch to a new one - i.e. project chat if nothing is available as that one is always available) - because it immediately recreates the chat after it gets deleted - this shouldn't happen.",
       "context": [
         "src/renderer/src/screens/ChatView.tsx",
         "src/renderer/src/contexts/ChatsContext.tsx"
       ],
       "blockers": [],
       "createdAt": "2025-11-05T08:32:59.874Z",
-      "updatedAt": "2025-11-05T22:06:42.149Z",
+      "updatedAt": "2025-11-05T22:33:55.309Z",
       "rejection": "This is not working at all. Spend some time reviewing the code and @src/renderer/src/contexts/ChatsContext.tsx and produce a quality fix."
     },
     {
