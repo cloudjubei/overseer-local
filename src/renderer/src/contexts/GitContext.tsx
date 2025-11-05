@@ -214,7 +214,6 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
           projects.map((p) =>
             gitService.startMonitor(p.id, {
               baseBranch: 'main',
-              // branchFilter: (branch) => branch.startsWith('features/'), //TODO: passing this via ipc doesn't work
             }),
           ),
         )
@@ -248,6 +247,9 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
       }))
       try {
         const list = await gitService.listUnifiedBranches(pid)
+        //TODO: for each branch that is not base we need to load
+        // await gitService.getBranchDiffSummary(pid, { baseRef, headRef, incomingOnly: true })
+
         const hydrated = list.map((b) => ({
           ...b,
           storyId: b.storyId || parseStoryIdFromUnified(b),

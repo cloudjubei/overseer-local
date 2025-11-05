@@ -104,7 +104,6 @@ function StatusChips({ b, showEqual }: { b: GitUnifiedBranch; showEqual?: boolea
 
 function UnifiedBranchItem({
   projectId,
-  projectTitle,
   baseRef = 'main',
   branch,
   mode = 'default',
@@ -113,7 +112,6 @@ function UnifiedBranchItem({
   currentName,
 }: {
   projectId: string
-  projectTitle?: string
   baseRef?: string
   branch: GitUnifiedBranch
   mode?: 'default' | 'current'
@@ -139,7 +137,6 @@ function UnifiedBranchItem({
     totals?: { insertions: number; deletions: number }
   }>({ loading: false })
 
-  // Detect when this row is the base branch while the current branch is different
   const isBaseBranchRowBehindCurrent = React.useMemo(() => {
     if (mode === 'current') return false
     if (!currentName) return false
@@ -154,18 +151,17 @@ function UnifiedBranchItem({
 
   const storyId = getStoryId(branch)
 
-  const canQuickMerge = branch.isLocal || !!branch.remoteName
+  const canQuickMerge =
+    branch.isLocal || !!branch.remoteName || mode === 'current' || isBaseBranchRowBehindCurrent
   const canDeleteLocal = branch.isLocal
   const canDeleteRemote = branch.isRemote && !branch.isLocal
 
-  // Respect protected branches (main/master)
   const isProtectedBranch = (name?: string) => {
     if (!name) return false
     const short = name.replace(/^[^\/]+\//, '')
     return short === 'main' || short === 'master'
   }
 
-  // Compute protection status for this branch (local and/or remote short names)
   const localShortName = (branch.name || '').replace(/^[^\/]+\//, '')
   const remoteShortName = (branch.remoteName || branch.name || '').replace(/^[^\/]+\//, '')
   const isProtected = isProtectedBranch(localShortName) || isProtectedBranch(remoteShortName)
@@ -176,7 +172,7 @@ function UnifiedBranchItem({
   )
 
   const openMergeModal = (opts: { openConfirm: boolean }) => {
-    if (!canQuickMerge || mode === 'current' || isBaseBranchRowBehindCurrent) return
+    if (!canQuickMerge) return
     openModal({
       type: 'git-merge',
       projectId,
@@ -190,7 +186,6 @@ function UnifiedBranchItem({
 
   const onRowClick = (e: React.MouseEvent) => {
     e.stopPropagation()
-    if (isBaseBranchRowBehindCurrent) return
     openMergeModal({ openConfirm: false })
   }
 
@@ -234,7 +229,6 @@ function UnifiedBranchItem({
     }
   }
 
-  // Load incoming-only totals for current branch when upstream or a remote ref exists
   React.useEffect(() => {
     if (mode !== 'current') return
 
@@ -287,7 +281,6 @@ function UnifiedBranchItem({
     branch.remoteSha,
   ])
 
-  // Compute 'behind of current' when this row is the base branch while a different current exists
   React.useEffect(() => {
     if (!isBaseBranchRowBehindCurrent) return
     if (behindOfCurrent.loading || behindOfCurrent.count !== undefined || behindOfCurrent.error)
@@ -325,7 +318,6 @@ function UnifiedBranchItem({
     const displayName = branch.name
     const remoteShort = (branch.remoteName || branch.name).replace(/^[^\/]+\//, '')
 
-    // Protect main/master
     if (isProtectedBranch(displayName) || isProtectedBranch(remoteShort)) {
       alert('Protected branch cannot be deleted (main/master).')
       return
@@ -420,13 +412,13 @@ function UnifiedBranchItem({
     }
   }
 
-  // Adjust ahead/behind display: for base row behind current, show computed behind
-  const ahead = isBaseBranchRowBehindCurrent ? 0 : (branch.ahead ?? 0)
-  const behind = isBaseBranchRowBehindCurrent ? (behindOfCurrent.count ?? 0) : (branch.behind ?? 0)
+  console.log('branch: ', branch)
+
+  const ahead = branch.ahead ?? 0
+  const behind = branch.behind ?? 0
   const showPush = mode === 'current' && ahead > 0
   const showPull = mode === 'current' && behind > 0
 
-  // Resolve pending feature/story refs for this base/head
   const pendingRefs = pending.get(projectId, baseRef, headRef)
 
   const onMouseEnterRow = () => {
@@ -436,7 +428,6 @@ function UnifiedBranchItem({
     }
   }
 
-  // Only show story info when resolvable
   const resolvablePendingEntries = React.useMemo(() => {
     const entries = pendingRefs.entries || []
     return entries.filter((e) => {
@@ -451,6 +442,16 @@ function UnifiedBranchItem({
     const r = resolveDependency(storyId)
     return 'code' in (r as any) ? undefined : storyId
   }, [storyId, resolveDependency])
+
+  React.useEffect(() => {
+    setSummary({ loaded: false })
+  }, [baseRef, headRef])
+
+  React.useEffect(() => {
+    if (mode !== 'current' && !summary.loaded) {
+      void loadSummary()
+    }
+  })
 
   const row = (
     <div
@@ -470,12 +471,8 @@ function UnifiedBranchItem({
           <StatusChips b={branch} showEqual={mode !== 'current' && !!equalToCurrent} />
         </div>
         <div className="text-xs text-neutral-600 dark:text-neutral-400 truncate">
-          {projectTitle ? `${projectTitle} · ` : ''}
-          base {baseRef}
-          {(resolvablePendingEntries.length > 0) || resolvableStoryId ? (
-            <span className='inline-flex items-center gap-1'>
-              {' '}
-              •
+          {resolvablePendingEntries.length > 0 || resolvableStoryId ? (
+            <span className="inline-flex items-center gap-1">
               <span
                 onClick={(e) => e.stopPropagation()}
                 className="inline-flex items-center gap-1 flex-wrap"
@@ -682,7 +679,6 @@ function CurrentProjectView() {
                   key={`${projectId}:${current.name}`}
                   projectId={projectId!}
                   branch={current}
-                  projectTitle={title}
                   mode="current"
                   onAfterAction={reload}
                 />
@@ -698,10 +694,10 @@ function CurrentProjectView() {
                     key={`${projectId}:${b.name}`}
                     projectId={projectId!}
                     branch={b}
-                    projectTitle={title}
                     onAfterAction={reload}
                     equalToCurrent={isEqualToCurrent(b)}
                     currentName={current?.name}
+                    baseRef={current?.name || 'main'}
                   />
                 ))}
               </>
@@ -783,6 +779,7 @@ function AllProjectsView() {
                     branch={b}
                     equalToCurrent={isEqualToCurrent(b)}
                     currentName={curr?.name}
+                    baseRef={curr?.name || 'main'}
                   />
                 ))}
               </div>

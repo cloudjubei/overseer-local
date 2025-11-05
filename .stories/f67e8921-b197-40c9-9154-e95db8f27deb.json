@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "+",
+  "status": "-",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -2936,6 +2936,18 @@
       "createdAt": "2025-11-05T00:33:00.503Z",
       "updatedAt": "2025-11-05T00:57:54.587Z",
       "completedAt": "2025-11-05T00:57:54.587Z"
+    },
+    {
+      "id": "96900adf-6346-4780-a5dd-7202f8eb9a5d",
+      "status": "-",
+      "title": "when coming back to chat - first open the least recently opened chat",
+      "description": "In @src/renderer/src/screens/ChatView.tsx",
+      "context": [
+        "src/renderer/src/screens/ChatView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-11-05T08:32:59.874Z",
+      "updatedAt": "2025-11-05T08:32:59.874Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -3138,9 +3150,9 @@
     "aad70d9c-e986-4150-b898-3d97fb8ebca6": 197,
     "b201fd32-d554-49e2-b3f8-1560a3e99787": 198,
     "1d14164a-85c8-489a-a41c-b2103c227c45": 199,
-    "bb551aac-d29c-4b27-bcc4-84634db7d41c": 200
+    "bb551aac-d29c-4b27-bcc4-84634db7d41c": 200,
+    "96900adf-6346-4780-a5dd-7202f8eb9a5d": 201
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
-  "updatedAt": "2025-11-05T00:22:06.741Z",
-  "completedAt": "2025-11-05T00:57:54.587Z"
+  "updatedAt": "2025-11-05T00:22:06.741Z"
 }
