@@ -1,5 +1,7 @@
 import React from 'react'
 
+// Note: This component aims to never wrap diff lines; use horizontal scroll instead.
+
 export type ParsedHunk = {
   header?: string
   oldStart: number
@@ -69,42 +71,45 @@ export function StructuredUnifiedDiff({ patch, maxHunks = 3 }: { patch: string; 
   }
   const canExpand = hunks.length > maxHunks
   return (
-    <div className="font-mono text-[11px]">
-      {visible.map((hunk, hi) => (
-        <div key={hi} className="mb-3">
-          <div className="px-2 py-0.5 bg-neutral-100 dark:bg-neutral-900/60 text-neutral-700 dark:text-neutral-300">
-            {headerText(hunk)}
+    <div className="font-mono text-[11px] overflow-x-auto">
+      {/* Inner block grows to content width so backgrounds match the scrolled width */}
+      <div className="inline-block min-w-max">
+        {visible.map((hunk, hi) => (
+          <div key={hi} className="mb-3">
+            <div className="px-2 py-0.5 bg-neutral-100 dark:bg-neutral-900/60 text-neutral-700 dark:text-neutral-300 w-full">
+              {headerText(hunk)}
+            </div>
+            <div>
+              {hunk.lines
+                .filter((ln) => ln.type !== 'meta')
+                .map((ln, li) => {
+                  const isAdd = ln.type === 'add'
+                  const isDel = ln.type === 'del'
+                  const bgCls = isAdd
+                    ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300'
+                    : isDel
+                      ? 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300'
+                      : ''
+                  const marker = isAdd ? '+' : isDel ? '-' : ' '
+                  return (
+                    <div key={li} className={`grid grid-cols-[56px_56px_auto] w-full ${bgCls}`}>
+                      <div className="px-2 py-0.5 text-right select-none text-neutral-500 dark:text-neutral-400 tabular-nums">
+                        {typeof (ln as any).oldLine === 'number' ? (ln as any).oldLine : ''}
+                      </div>
+                      <div className="px-2 py-0.5 text-right select-none text-neutral-500 dark:text-neutral-400 tabular-nums">
+                        {typeof (ln as any).newLine === 'number' ? (ln as any).newLine : ''}
+                      </div>
+                      <div className="px-2 py-0.5 whitespace-pre">
+                        <span className="opacity-60">{marker}</span>
+                        {(ln as any).text?.length ? ' ' + (ln as any).text : ' '}
+                      </div>
+                    </div>
+                  )
+                })}
+            </div>
           </div>
-          <div>
-            {hunk.lines
-              .filter((ln) => ln.type !== 'meta')
-              .map((ln, li) => {
-                const isAdd = ln.type === 'add'
-                const isDel = ln.type === 'del'
-                const bgCls = isAdd
-                  ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300'
-                  : isDel
-                    ? 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300'
-                    : ''
-                const marker = isAdd ? '+' : isDel ? '-' : ' '
-                return (
-                  <div key={li} className={`grid grid-cols-[56px_56px_1fr] ${bgCls}`}>
-                    <div className="px-2 py-0.5 text-right select-none text-neutral-500 dark:text-neutral-400">
-                      {typeof (ln as any).oldLine === 'number' ? (ln as any).oldLine : ''}
-                    </div>
-                    <div className="px-2 py-0.5 text-right select-none text-neutral-500 dark:text-neutral-400">
-                      {typeof (ln as any).newLine === 'number' ? (ln as any).newLine : ''}
-                    </div>
-                    <div className="px-2 py-0.5 whitespace-pre-wrap">
-                      <span className="opacity-60">{marker}</span>
-                      {(ln as any).text?.length ? ' ' + (ln as any).text : ' '}
-                    </div>
-                  </div>
-                )
-              })}
-          </div>
-        </div>
-      ))}
+        ))}
+      </div>
       {canExpand ? (
         <div className="mt-1">
           <button
