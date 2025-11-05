@@ -439,7 +439,7 @@
       "id": "afdb5f6a-978d-44b4-9995-03f69feb1b01",
       "status": "-",
       "title": "Add a commit button if there are pending changes",
-      "description": "In @src/renderer/src/screens/GitView.tsx for any branch that has changes pending (staged or not) show a commit button that will open a commit review modal showing a similar view as the @src/renderer/src/screens/git/GitMergeModal.tsx but showing the new pending changes for all files. It should work exactly the same as SourceTree - showing a split view with Staged/Unstaged files on the left and then the file diff on the right (for whichever file is selected). Then the user can either drag files from staged<->unstaged, or tick them (there's a checkbox to the left of the name). \nThere should also be a RESET and REMOVE button that will show on hover for each file (reset discards all the changes and remove deletes the file).\nThe user must be able to drag the vertical divider between the staged/unstaged and file diff view (similarly to how we have it in @src/renderer/src/components/chat/ChatSidebar.tsx ) but show the drag handle on hover.",
+      "description": "In @src/renderer/src/screens/GitView.tsx for any branch that has changes pending (staged or not) show a commit button that will open a commit review modal showing a similar view as the @src/renderer/src/screens/git/GitMergeModal.tsx but showing the new pending changes for all files. It should work exactly the same as SourceTree - showing a split view with Staged/Unstaged files on the left and then the file diff on the right (for whichever file is selected). Then the user can either drag files from staged<->unstaged, or tick them (there's a checkbox to the left of the name). \nThere should also be a RESET and REMOVE button that will show on hover for each file (reset discards all the changes and remove deletes the file).\nThe user must be able to drag the vertical divider between the staged/unstaged and file diff view (similarly to how we have it in @src/renderer/src/components/chat/ChatSidebar.tsx ) but show the drag handle on hover.\n\nAfter the user confirms the staging/unstaging and there is at least 1 staged file allow them to click proceed, which shows a final alert where the user should put the commit message.\nit should also show a tickbox to push immediately to origin.",
       "context": [
         "src/renderer/src/screens/GitView.tsx",
         "src/renderer/src/screens/git/GitMergeModal.tsx",
@@ -447,7 +447,7 @@
       ],
       "blockers": [],
       "createdAt": "2025-11-05T22:14:51.710Z",
-      "updatedAt": "2025-11-05T22:14:51.710Z"
+      "updatedAt": "2025-11-05T22:35:48.570Z"
     },
     {
       "id": "2efcd766-e423-4f70-ad84-77c35a6c1f44",
