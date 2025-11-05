@@ -42,7 +42,8 @@ export default function FileMentionsTextarea({
   const mirrorRef = useRef<HTMLDivElement | null>(null)
   const containerRef = useRef<HTMLDivElement | null>(null)
 
-  const filesList = useMemo(() => files.map((f) => f.relativePath!), [files])
+  // Guard against undefined 'files' during initial loads or heavy operations
+  const filesList = useMemo(() => (files ?? []).map((f) => f.relativePath!), [files])
 
   const {
     isOpen: isFilesOpen,
