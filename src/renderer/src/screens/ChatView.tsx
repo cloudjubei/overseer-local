@@ -112,7 +112,7 @@ export default function ChatView() {
   const { projectId: activeProjectId } = useActiveProject()
   const { projects } = useProjectContext()
   const { storiesById, featuresById } = useStories()
-  const { getChat, chats } = useChats()
+  const { getChat, chats, chatsByProjectId } = useChats()
   const { runsHistory } = useAgents()
   const { hasUnreadForProject } = useChatUnread()
 
@@ -147,6 +147,27 @@ export default function ChatView() {
 
   // Persist/restore last selected chat
   useEffect(() => {
+    const loadLeastRecentlyOpened = (): ChatContext | undefined => {
+      try {
+        const projId = activeProjectId
+        if (!projId) return undefined
+        const list = chatsByProjectId[projId] || []
+        if (!list.length) return undefined
+        const raw = localStorage.getItem(`chat-last-opened:${projId}`)
+        const map: Record<string, string> = raw ? JSON.parse(raw) : {}
+        let pick: { key: string; ts: string; ctx: ChatContext } | undefined
+        for (const c of list) {
+          const ts = map[c.key] || '' // missing timestamp => least recently opened
+          if (!pick || ts.localeCompare(pick.ts) < 0) {
+            pick = { key: c.key, ts, ctx: c.chat.context }
+          }
+        }
+        return pick?.ctx
+      } catch {
+        return undefined
+      }
+    }
+
     const applyFromHash = async (h: string) => {
       const ctx = parseChatRouteFromHash(h)
       if (ctx) {
@@ -154,25 +175,23 @@ export default function ChatView() {
         setSelectedContext(ctx)
         return
       }
-      // Restore last used chat for this project if available
-      const raw = localStorage.getItem('chat-last-selected-context')
-      if (raw) {
-        try {
-          const last: ChatContext = JSON.parse(raw)
-          if (last && (last as any).projectId === activeProjectId) {
-            setSelectedContext(last)
-            return
-          }
-        } catch {}
+      // Prefer least recently opened chat for this project
+      const lruCtx = loadLeastRecentlyOpened()
+      if (lruCtx) {
+        setSelectedContext(lruCtx)
+        return
       }
-      // Default to General chat for active project
+      // Fallback to General chat for active project
       setSelectedContext({ type: 'PROJECT', projectId: activeProjectId })
     }
-    applyFromHash(window.location.hash)
-    const onHash = () => applyFromHash(window.location.hash)
+    // If a selection already exists, do nothing
+    if (!selectedContext) {
+      void applyFromHash(window.location.hash)
+    }
+    const onHash = () => void applyFromHash(window.location.hash)
     window.addEventListener('hashchange', onHash)
     return () => window.removeEventListener('hashchange', onHash)
-  }, [getChat, activeProjectId])
+  }, [getChat, activeProjectId, chatsByProjectId, selectedContext])
 
   useEffect(() => {
     if (selectedContext) {
@@ -181,6 +200,21 @@ export default function ChatView() {
       } catch {}
     }
   }, [selectedContext])
+
+  // Track last 'opened' timestamp per chat key in the active project
+  useEffect(() => {
+    if (!selectedContext || !activeProjectId) return
+    try {
+      const key = getChatContextPath(selectedContext)
+      const storageKey = `chat-last-opened:${activeProjectId}`
+      const raw = localStorage.getItem(storageKey)
+      const map: Record<string, string> = raw ? JSON.parse(raw) : {}
+      map[key] = new Date().toISOString()
+      localStorage.setItem(storageKey, JSON.stringify(map))
+    } catch {
+      // ignore storage errors
+    }
+  }, [selectedContext, activeProjectId])
 
   // Seed from agent run history when switching to a run context
   useEffect(() => {
