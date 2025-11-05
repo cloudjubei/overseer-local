@@ -277,16 +277,16 @@ const FACTORY_TESTS_API = {
     return () => ipcRenderer.removeListener(IPC_HANDLER_KEYS.FACTORY_TESTS_SUBSCRIBE, listener)
   },
   listTests: (projectId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TESTS_LIST, { projectId }),
-  runTest: (projectId, path) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TESTS_RUN_TEST, { projectId, path }),
-  runTests: (projectId) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TESTS_RUN_TESTS, { projectId }),
+  runTests: (projectId, paths) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TESTS_RUN_TESTS, { projectId, paths }),
+  runAllTests: (projectId) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TESTS_RUN_ALL_TESTS, { projectId }),
   runTestsE2E: (projectId, command) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TESTS_RUN_TESTS_E2E, { projectId, command }),
-  runCoverage: (projectId, path) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TESTS_RUN_COVERAGE, { projectId, path }),
-  runCoverages: (projectId) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TESTS_RUN_COVERAGES, { projectId }),
+  runCoverages: (projectId, paths) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TESTS_RUN_COVERAGES, { projectId, paths }),
+  runAllCoverages: (projectId) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TESTS_RUN_ALL_COVERAGES, { projectId }),
   getLastResult: (projectId) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TESTS_GET_LAST_RESULT, { projectId }),
   getLastResultE2E: (projectId) =>
@@ -320,8 +320,7 @@ const DB_API = {
     ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_DOCUMENTS_GET_BY_SRC, { projectId, src }),
   updateDocument: (id, patch) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_DOCUMENTS_UPDATE, { id, patch }),
-  deleteDocument: (id) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_DOCUMENTS_DELETE, { id }),
+  deleteDocument: (id) => ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_DOCUMENTS_DELETE, { id }),
   searchDocuments: (params) => ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_DOCUMENTS_SEARCH, { params }),
   matchDocuments: (options) => ipcRenderer.invoke(IPC_HANDLER_KEYS.DB_DOCUMENTS_MATCH, { options }),
   clearDocuments: (projectIds) =>

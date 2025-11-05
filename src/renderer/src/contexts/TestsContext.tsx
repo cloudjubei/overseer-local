@@ -22,9 +22,9 @@ export type TestsContextValue = {
   testsCatalog: TestsCatalogItem[]
   refreshTestsCatalog: () => Promise<void>
 
-  runTests: () => Promise<void>
+  runAllTests: () => Promise<void>
   runTestsE2E: (command?: string) => Promise<void>
-  runCoverages: () => Promise<void>
+  runAllCoverages: () => Promise<void>
   resetTests: () => void
   resetTestsE2E: () => void
   resetCoverage: () => void
@@ -125,13 +125,13 @@ export function TestsProvider({ children }: { children: React.ReactNode }) {
     setCoverageError(null)
   }, [])
 
-  const runTests = useCallback(async () => {
+  const runAllTests = useCallback(async () => {
     if (!projectId) return
     setIsRunningTests(true)
     setTestsError(null)
     setResults(undefined)
     try {
-      const res = await factoryTestsService.runTests(projectId)
+      const res = await factoryTestsService.runAllTests(projectId)
       setResults(res)
     } catch (e: any) {
       setTestsError(e?.message || String(e))
@@ -158,13 +158,13 @@ export function TestsProvider({ children }: { children: React.ReactNode }) {
     [projectId],
   )
 
-  const runCoverages = useCallback(async () => {
+  const runAllCoverages = useCallback(async () => {
     if (!projectId) return
     setIsRunningCoverage(true)
     setCoverageError(null)
     setCoverage(undefined)
     try {
-      const res = await factoryTestsService.runCoverages(projectId)
+      const res = await factoryTestsService.runAllCoverages(projectId)
       setCoverage(res)
     } catch (e: any) {
       setCoverageError(e?.message || String(e))
@@ -187,9 +187,9 @@ export function TestsProvider({ children }: { children: React.ReactNode }) {
       coverageError,
       testsCatalog,
       refreshTestsCatalog,
-      runTests,
+      runAllTests,
       runTestsE2E,
-      runCoverages,
+      runAllCoverages,
       resetTests,
       resetTestsE2E,
       resetCoverage,
@@ -207,9 +207,9 @@ export function TestsProvider({ children }: { children: React.ReactNode }) {
       coverageError,
       testsCatalog,
       refreshTestsCatalog,
-      runTests,
+      runAllTests,
       runTestsE2E,
-      runCoverages,
+      runAllCoverages,
       resetTests,
       resetTestsE2E,
       resetCoverage,

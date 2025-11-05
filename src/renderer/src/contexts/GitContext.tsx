@@ -49,7 +49,7 @@ export type GitContextValue = {
   currentProject: ProjectGitStatus
   allProjects: ProjectGitStatus[]
 
-  // Aggregated count of branches ahead of the current branch across all projects
+  // Aggregated count of branches ahead of the current branch across all projects (UNREAD)
   gitUpdatedBranchesCount: number
 
   // Unified branches API
@@ -71,6 +71,15 @@ export type GitContextValue = {
   }
 
   mergePreferences: MergePreferences
+
+  // Unread helpers for branches
+  isBranchUnread: (projectId: string, baseRef: string, branch: GitUnifiedBranch) => boolean
+  markBranchSeen: (
+    projectId: string,
+    baseRef: string,
+    branch: GitUnifiedBranch,
+    headSha?: string,
+  ) => void
 }
 
 const GitContext = createContext<GitContextValue | null>(null)
@@ -120,6 +129,35 @@ function writeBoolLS(key: string, value: boolean) {
   try {
     localStorage.setItem(key, value ? 'true' : 'false')
   } catch {}
+}
+
+// LocalStorage for per-branch last-seen head sha keyed by project|base|head
+const GIT_LS_PREFIX = 'git:last-seen:'
+const GIT_EVT_KEY = 'git-last-seen-changed'
+function keyForLastSeen(projectId: string, baseRef: string, headRef: string): string {
+  return `${GIT_LS_PREFIX}${projectId}|${baseRef}|${headRef}`
+}
+function readLastSeen(projectId: string, baseRef: string, headRef: string): string | undefined {
+  try {
+    return localStorage.getItem(keyForLastSeen(projectId, baseRef, headRef)) || undefined
+  } catch {
+    return undefined
+  }
+}
+function writeLastSeen(projectId: string, baseRef: string, headRef: string, sha: string) {
+  try {
+    localStorage.setItem(keyForLastSeen(projectId, baseRef, headRef), sha)
+    const ev = new CustomEvent(GIT_EVT_KEY, { detail: { projectId, baseRef, headRef, sha } })
+    window.dispatchEvent(ev)
+  } catch {}
+}
+
+// Resolve effective head ref and sha for a unified branch
+function getHeadRef(b: GitUnifiedBranch): string | undefined {
+  return b.isLocal ? b.name : b.remoteName || b.name
+}
+function getHeadSha(b: GitUnifiedBranch): string | undefined {
+  return b.isLocal ? b.localSha || b.remoteSha || undefined : b.remoteSha || b.localSha || undefined
 }
 
 export function GitProvider({ children }: { children: React.ReactNode }) {
@@ -387,6 +425,21 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
     [activeProjectId],
   )
 
+  // Version bump for last-seen changes to recompute unread-related selectors
+  const [seenVersion, setSeenVersion] = useState(0)
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key && e.key.startsWith(GIT_LS_PREFIX)) setSeenVersion((v) => v + 1)
+    }
+    const onLocal = () => setSeenVersion((v) => v + 1)
+    window.addEventListener('storage', onStorage)
+    window.addEventListener(GIT_EVT_KEY, onLocal as EventListener)
+    return () => {
+      window.removeEventListener('storage', onStorage)
+      window.removeEventListener(GIT_EVT_KEY, onLocal as EventListener)
+    }
+  }, [])
+
   // Refresh unified branches whenever projects change (initial load for all)
   useEffect(() => {
     let cancelled = false
@@ -437,7 +490,7 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
     [pendingByProject, activeProjectId, loadPending],
   )
 
-  // Compute sidebar badge count from unified.relToCurrent: count branches with ahead > 0
+  // Compute sidebar badge count from unified.relToCurrent: count branches with ahead > 0 and unread
   const gitUpdatedBranchesCountComputed = useMemo(() => {
     let total = 0
     for (const [pid, st] of Object.entries(unifiedByProject)) {
@@ -446,14 +499,46 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
       const rel = st.relToCurrent || {}
       for (const b of st.branches) {
         if (b.current) continue
-        const headRef = b.isLocal ? b.name : b.remoteName || b.name
+        const headRef = getHeadRef(b)
         if (!headRef || headRef === currName) continue
         const delta = rel[headRef]
-        if (delta && (delta.ahead || 0) > 0) total += 1
+        if (delta && (delta.ahead || 0) > 0) {
+          const headSha = getHeadSha(b)
+          const lastSeen = pid && currName && headRef ? readLastSeen(pid, currName, headRef) : undefined
+          if (!headSha || !lastSeen || lastSeen !== headSha) total += 1
+        }
       }
     }
     return total
-  }, [unifiedByProject])
+  }, [unifiedByProject, seenVersion])
+
+  const isBranchUnread = React.useCallback(
+    (projectId: string, baseRef: string, branch: GitUnifiedBranch): boolean => {
+      const st = unifiedByProject[projectId]
+      if (!st) return false
+      const rel = st.relToCurrent || {}
+      const headRef = getHeadRef(branch)
+      if (!headRef) return false
+      const delta = rel[headRef]
+      if (!delta || (delta.ahead || 0) <= 0) return false
+      const sha = getHeadSha(branch)
+      if (!sha) return true
+      const lastSeen = readLastSeen(projectId, baseRef, headRef)
+      return lastSeen !== sha
+    },
+    [unifiedByProject, seenVersion],
+  )
+
+  const markBranchSeen = React.useCallback(
+    (projectId: string, baseRef: string, branch: GitUnifiedBranch, headSha?: string) => {
+      const headRef = getHeadRef(branch)
+      const sha = headSha || getHeadSha(branch)
+      if (!projectId || !baseRef || !headRef || !sha) return
+      writeLastSeen(projectId, baseRef, headRef, sha)
+      setSeenVersion((v) => v + 1)
+    },
+    [],
+  )
 
   const value = useMemo<GitContextValue>(
     () => ({
@@ -465,6 +550,8 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
       unified: unifiedApi,
       pending: pendingApi,
       mergePreferences,
+      isBranchUnread,
+      markBranchSeen,
     }),
     [
       loading,
@@ -475,6 +562,8 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
       unifiedApi,
       pendingApi,
       mergePreferences,
+      isBranchUnread,
+      markBranchSeen,
     ],
   )
 

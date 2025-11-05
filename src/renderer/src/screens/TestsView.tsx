@@ -29,9 +29,9 @@ function TestsInner() {
     testsError,
     testsErrorE2E,
     coverageError,
-    runTests,
+    runAllTests,
     runTestsE2E,
-    runCoverages,
+    runAllCoverages,
     testsCatalog,
     isLoadingCatalog,
   } = useTests()
@@ -107,7 +107,7 @@ function TestsInner() {
   const isCoverage = activeTab === 'coverage'
 
   const actionButton = isResults ? (
-    <Button onClick={() => runTests()} loading={isRunningTests} variant="primary" size="lg">
+    <Button onClick={() => runAllTests()} loading={isRunningTests} variant="primary" size="lg">
       Run Tests
     </Button>
   ) : isE2E ? (
@@ -120,7 +120,12 @@ function TestsInner() {
       Run E2E Tests
     </Button>
   ) : (
-    <Button onClick={() => runCoverages()} loading={isRunningCoverage} variant="primary" size="lg">
+    <Button
+      onClick={() => runAllCoverages()}
+      loading={isRunningCoverage}
+      variant="primary"
+      size="lg"
+    >
       Run Coverage
     </Button>
   )

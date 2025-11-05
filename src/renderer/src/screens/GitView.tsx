@@ -171,7 +171,7 @@ function UnifiedBranchItem({
   onSwitch?: (branchName: string) => Promise<void> | void
 }) {
   const { openModal } = useNavigator()
-  const { pending, unified } = useGit()
+  const { pending, unified, isBranchUnread, markBranchSeen } = useGit()
   const { resolveDependency } = useStories()
   const [deleting, setDeleting] = React.useState(false)
   const [summary, setSummary] = React.useState<{
@@ -192,6 +192,15 @@ function UnifiedBranchItem({
   const headRef = React.useMemo(
     () => (branch.isLocal ? branch.name : branch.remoteName || branch.name),
     [branch.isLocal, branch.name, branch.remoteName],
+  )
+  const headSha = React.useMemo(
+    () => (branch.isLocal ? branch.localSha || branch.remoteSha : branch.remoteSha || branch.localSha),
+    [branch.isLocal, branch.localSha, branch.remoteSha],
+  )
+
+  const unread = React.useMemo(
+    () => isBranchUnread(projectId, baseRef, branch),
+    [isBranchUnread, projectId, baseRef, branch],
   )
 
   const relToCurrent = unified.byProject[projectId]?.relToCurrent || {}
@@ -454,6 +463,9 @@ function UnifiedBranchItem({
     if (!pendingRefs.loading && !pendingRefs.entries?.length) {
       void pending.load(projectId, baseRef, headRef)
     }
+    if (unread && headSha) {
+      markBranchSeen(projectId, baseRef, branch, headSha)
+    }
   }
 
   const resolvablePendingEntries = React.useMemo(() => {
@@ -492,17 +504,25 @@ function UnifiedBranchItem({
       role="button"
       onClick={onRowClick}
       onMouseEnter={onMouseEnterRow}
+      onFocus={() => {
+        if (unread && headSha) {
+          markBranchSeen(projectId, baseRef, branch, headSha)
+        }
+      }}
     >
       <div className="min-w-0">
         <div className="font-medium truncate flex items-center gap-2">
+          {unread ? (
+            <span
+              className="w-1.5 h-1.5 inline-block rounded-full bg-emerald-500"
+              aria-label="Unread updates"
+              title="Unread updates"
+            />
+          ) : null}
           <span className="truncate">{branch.name}</span>
           <StatusChips b={branch} showEqual={mode !== 'current' && !!equalToCurrent} />
           {mode !== 'current' && (
-            <DeltaChip
-              label="Current"
-              ahead={currentDelta?.ahead || 0}
-              behind={currentDelta?.behind || 0}
-            />
+            <DeltaChip label="Current" ahead={currentDelta?.ahead || 0} behind={currentDelta?.behind || 0} />
           )}
           <DeltaChip label="Remote" ahead={branch.ahead || 0} behind={branch.behind || 0} />
         </div>

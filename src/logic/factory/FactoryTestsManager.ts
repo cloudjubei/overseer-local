@@ -31,16 +31,16 @@ export default class FactoryTestsManager extends BaseManager {
 
     handlers[IPC_HANDLER_KEYS.FACTORY_TESTS_LIST] = async ({ projectId }) =>
       this.listTests(projectId)
-    handlers[IPC_HANDLER_KEYS.FACTORY_TESTS_RUN_TEST] = async ({ projectId, path }) =>
-      this.runTest(projectId, path)
-    handlers[IPC_HANDLER_KEYS.FACTORY_TESTS_RUN_TESTS] = async ({ projectId }) =>
-      this.runTests(projectId)
+    handlers[IPC_HANDLER_KEYS.FACTORY_TESTS_RUN_TESTS] = async ({ projectId, paths }) =>
+      this.runTests(projectId, paths)
+    handlers[IPC_HANDLER_KEYS.FACTORY_TESTS_RUN_ALL_TESTS] = async ({ projectId }) =>
+      this.runAllTests(projectId)
     handlers[IPC_HANDLER_KEYS.FACTORY_TESTS_RUN_TESTS_E2E] = async ({ projectId, command }) =>
       this.runTestsE2E(projectId, command)
-    handlers[IPC_HANDLER_KEYS.FACTORY_TESTS_RUN_COVERAGE] = async ({ projectId, path }) =>
-      this.runTestCoverage(projectId, path)
-    handlers[IPC_HANDLER_KEYS.FACTORY_TESTS_RUN_COVERAGES] = async ({ projectId }) =>
-      this.runTestsCoverage(projectId)
+    handlers[IPC_HANDLER_KEYS.FACTORY_TESTS_RUN_COVERAGES] = async ({ projectId, paths }) =>
+      this.runTestsCoverage(projectId, paths)
+    handlers[IPC_HANDLER_KEYS.FACTORY_TESTS_RUN_ALL_COVERAGES] = async ({ projectId }) =>
+      this.runAllTestsCoverage(projectId)
     handlers[IPC_HANDLER_KEYS.FACTORY_TESTS_GET_LAST_RESULT] = async ({ projectId }) =>
       this.getLastResult(projectId)
     handlers[IPC_HANDLER_KEYS.FACTORY_TESTS_GET_LAST_RESULT_E2E] = async ({ projectId }) =>
@@ -56,26 +56,26 @@ export default class FactoryTestsManager extends BaseManager {
     return (await tools?.listTests()) ?? []
   }
 
-  async runTest(projectId: string, path: string): Promise<TestResult | undefined> {
+  async runTests(projectId: string, paths: string[]): Promise<TestsResult | undefined> {
     const tools = await this.__getTools(projectId)
-    return await tools?.runTest(path)
+    return await tools?.runTests(paths)
   }
-  async runTests(projectId: string): Promise<TestsResult | undefined> {
+  async runAllTests(projectId: string): Promise<TestsResult | undefined> {
     const tools = await this.__getTools(projectId)
-    return await tools?.runTests()
+    return await tools?.runAllTests()
   }
   async runTestsE2E(projectId: string, command?: string): Promise<TestsResult | undefined> {
     const tools = await this.__getTools(projectId)
     return await tools?.runE2ETests(command)
   }
 
-  async runTestCoverage(projectId: string, path: string): Promise<CoverageResult | undefined> {
+  async runTestsCoverage(projectId: string, paths: string[]): Promise<CoverageResult | undefined> {
     const tools = await this.__getTools(projectId)
-    return await tools?.runTestCoverage(path)
+    return await tools?.runTestsCoverage(paths)
   }
-  async runTestsCoverage(projectId: string): Promise<CoverageResult | undefined> {
+  async runAllTestsCoverage(projectId: string): Promise<CoverageResult | undefined> {
     const tools = await this.__getTools(projectId)
-    return await tools?.runTestsCoverage()
+    return await tools?.runAllTestsCoverage()
   }
 
   async getLastResult(projectId: string) {
