@@ -555,7 +555,7 @@ export default function ChatSidebar({
                         id="numberMessagesToSend"
                         type="range"
                         min={3}
-                        max={40}
+                        max={50}
                         step={1}
                         value={completion.numberMessagesToSend ?? 3}
                         onChange={(e) =>
@@ -681,8 +681,7 @@ export default function ChatSidebar({
           scrollToBottomSignal={scrollSignal}
           onRetry={
             isChatConfigured && activeChatConfig && currentSettings
-              ? () =>
-                  retryCompletion(context, effectivePrompt, currentSettings, activeChatConfig)
+              ? () => retryCompletion(context, effectivePrompt, currentSettings, activeChatConfig)
               : undefined
           }
         />
