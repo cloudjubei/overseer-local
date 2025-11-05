@@ -479,7 +479,7 @@ function UnifiedBranchItem({
   const row = (
     <div
       className={
-        'flex items-center justify-between px-3 py-2 border-b border-neutral-100 dark:border-neutral-900 text-sm ' +
+        'group flex items-center justify-between px-3 py-2 border-b border-neutral-100 dark:border-neutral-900 text-sm ' +
         (mode === 'current'
           ? 'bg-neutral-50/60 dark:bg-neutral-900/30'
           : 'hover:bg-neutral-50 dark:hover:bg-neutral-900/30')
@@ -531,7 +531,7 @@ function UnifiedBranchItem({
           behind={behind}
           totals={mode === 'current' ? incoming.totals : summary.totals}
         />
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 pointer-events-none group-hover:pointer-events-auto group-focus-within:pointer-events-auto transition-opacity">
           {mode === 'current' ? (
             <>
               {showPull && (

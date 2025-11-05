@@ -422,7 +422,7 @@
     },
     {
       "id": "ca8eec49-6c42-4e2f-860d-606b056baf4f",
-      "status": "-",
+      "status": "+",
       "title": "only show action buttons on row hover",
       "description": "in @src/renderer/src/screens/GitView.tsx  for each branch row",
       "context": [
@@ -430,7 +430,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-11-05T15:02:13.962Z",
-      "updatedAt": "2025-11-05T15:02:13.962Z"
+      "updatedAt": "2025-11-05T15:03:59.536Z",
+      "completedAt": "2025-11-05T15:03:59.536Z"
     }
   ],
   "featureIdToDisplayIndex": {
