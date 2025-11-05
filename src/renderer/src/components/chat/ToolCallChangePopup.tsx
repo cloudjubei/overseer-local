@@ -386,6 +386,30 @@ export default function ToolCallChangePopup({
       )
     }
 
+    if (n === 'deletePath') {
+      const delPath = tryString(extract(args, ['path']) || extract(result, ['path']))
+      // If a result is present, show it (commonly indicates not found or a message)
+      const resStr = (() => {
+        if (result == null) return undefined
+        try {
+          return typeof result === 'string' ? result : JSON.stringify(result, null, 2)
+        } catch {
+          return String(result)
+        }
+      })()
+      return (
+        <div className="text-xs space-y-1">
+          <Row>
+            <span className="text-[var(--text-secondary)]">Path:</span>{' '}
+            <span className="font-mono text-[11px]">{delPath || '(unknown)'}</span>
+          </Row>
+          {resStr ? (
+            <div><SectionTitle>Result</SectionTitle><Code language="text" code={resStr} /></div>
+          ) : null}
+        </div>
+      )
+    }
+
     if (n === 'createFeature' || n === 'createStory') {
       const title = tryString(extract(args, ['title']))
       const description = tryString(extract(args, ['description']))
