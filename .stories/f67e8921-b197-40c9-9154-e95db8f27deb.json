@@ -2948,6 +2948,42 @@
       "blockers": [],
       "createdAt": "2025-11-05T08:32:59.874Z",
       "updatedAt": "2025-11-05T08:32:59.874Z"
+    },
+    {
+      "id": "9a74d29d-8267-4fae-99c1-aa34c2ab45a5",
+      "status": "-",
+      "title": "the renamePath tool needs to show the change",
+      "description": "in @src/renderer/src/components/chat/ToolCallChangePopup.tsx for the `renamePath` show that `src` changes into `dst` (these are both arguments).",
+      "context": [
+        "src/renderer/src/components/chat/ToolCallChangePopup.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-11-05T11:34:07.150Z",
+      "updatedAt": "2025-11-05T11:34:07.150Z"
+    },
+    {
+      "id": "a7a3b52c-c22a-40d1-b443-ac0dfa1036cf",
+      "status": "-",
+      "title": "deletePath shows the `path` that is deleted",
+      "description": "In @src/renderer/src/components/chat/ToolCallChangePopup.tsx when `deletePath` is the tool, the arg `path` holds the path to be deleted. It needs to be shown and if the File is not found (i.e. there is a result) then that needs to show too",
+      "context": [
+        "src/renderer/src/components/chat/ToolCallChangePopup.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-11-05T11:42:50.134Z",
+      "updatedAt": "2025-11-05T11:42:50.134Z"
+    },
+    {
+      "id": "e7dfd19e-3d61-41d0-b21b-28b462d1d8f1",
+      "status": "-",
+      "title": "keep writeFile same width",
+      "description": "in @src/renderer/src/components/chat/ToolCallChangePopup.tsx for the `writeFile` tool, when clicking `View more changes` the popup can grow in width, which creates a horizontal scrollbar.\nThe popup should ALWAYS have a horizontal scrollbar to make sure that each line doesn't bleed over multiple lines.\nMake sure that the backgrounds etc inside scale properly, as now when clicking the `View more changes` they remain stuck to the previous width (whereas the text overflows).",
+      "context": [
+        "src/renderer/src/components/chat/ToolCallChangePopup.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-11-05T11:47:57.841Z",
+      "updatedAt": "2025-11-05T11:47:57.841Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -3151,7 +3187,10 @@
     "b201fd32-d554-49e2-b3f8-1560a3e99787": 198,
     "1d14164a-85c8-489a-a41c-b2103c227c45": 199,
     "bb551aac-d29c-4b27-bcc4-84634db7d41c": 200,
-    "96900adf-6346-4780-a5dd-7202f8eb9a5d": 201
+    "96900adf-6346-4780-a5dd-7202f8eb9a5d": 201,
+    "9a74d29d-8267-4fae-99c1-aa34c2ab45a5": 202,
+    "a7a3b52c-c22a-40d1-b443-ac0dfa1036cf": 203,
+    "e7dfd19e-3d61-41d0-b21b-28b462d1d8f1": 204
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
   "updatedAt": "2025-11-05T00:22:06.741Z"

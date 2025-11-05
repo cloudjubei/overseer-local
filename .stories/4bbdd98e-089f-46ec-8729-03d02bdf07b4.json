@@ -1,6 +1,6 @@
 {
   "id": "4bbdd98e-089f-46ec-8729-03d02bdf07b4",
-  "status": "+",
+  "status": "-",
   "title": "Improve chat",
   "description": "We need to make chat more user friendly and easy to use.\n- The main chat window should be of constant size and the messages should be horizontally scrollable and extend vertically as far as they need.\n- While waiting for a response there's a spinner showing the agent thinking.\n- We need to show how long the agent took to respond.\n- We get the full message content, but we want it to appear as if it was streamed in (written on the ago), create an appropriate animation\n- if the user is at the bottom of the chat window, then if there's a new message, only scroll a little bit so that the user can start reading and not chase the newly appearing text.\n- The message the user sends needs to appear instantly with a nice popping animation.\n- There needs to be a sound for sending a message and receiving a message.\n- The input needs to be reworked to be more like the FeatureForm, it should allow fast lookup of files and references to stories and features (when hitting @ for files and # for stories/features).\n- Whenever a file is references via @ in the text (whether the input box or in a message, it should be displayed with a nice chip. In the input box, if the caret is at the end of the chip and the user presses backspace - the view transforms into text, deletes the last character and goes back into showing file lookup. The equivalent thing should also happen for story/feature references.\n- if there's an error in the chat, show an appropriate error bubble\n- whenever the agent invokes tool calls, show it via a custom view that will allow inspection of the tool call (arguments and results and time taken)\n\nThe main Chat view component is:\nsrc/renderer/screens/ChatView.tsx",
   "features": [
@@ -185,6 +185,18 @@
       "createdAt": "2025-09-24T17:51:13.116Z",
       "updatedAt": "2025-09-24T18:52:41.839Z",
       "completedAt": "2025-09-24T18:52:41.839Z"
+    },
+    {
+      "id": "76ef0444-6837-40a7-b35f-1f81afb780df",
+      "status": "-",
+      "title": "If a message is too wide the message view goes beyond the chat window",
+      "description": "In @src/renderer/src/components/chat/MessageList.tsx if there's wide text (especially wide code) then the message view becomes too wide.\nWhat should happen is that if there's such parts/items they should have a horizontal scrollbar within the message view itself.",
+      "context": [
+        "src/renderer/src/components/chat/MessageList.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-11-05T11:23:25.418Z",
+      "updatedAt": "2025-11-05T11:23:25.418Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -201,9 +213,9 @@
     "c21bb932-1f29-49f8-ae61-44bf83bba8b5": 11,
     "3ae0afee-4d33-4133-a87e-11a1c0124846": 12,
     "321d97e3-4263-44d3-b9a6-5594d5caa276": 13,
-    "95bd507b-3644-4c61-aaba-2d8781514767": 14
+    "95bd507b-3644-4c61-aaba-2d8781514767": 14,
+    "76ef0444-6837-40a7-b35f-1f81afb780df": 15
   },
   "createdAt": "2025-09-22T23:49:45.348Z",
-  "updatedAt": "2025-09-23T10:29:27.711Z",
-  "completedAt": "2025-09-24T18:55:16.568Z"
+  "updatedAt": "2025-09-23T10:29:27.711Z"
 }

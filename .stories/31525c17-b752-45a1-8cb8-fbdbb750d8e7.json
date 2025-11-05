@@ -399,6 +399,19 @@
       "updatedAt": "2025-11-05T01:01:00.765Z",
       "rejection": "Notifications are showing in @src/renderer/src/navigation/SidebarView.tsx but nowhere in @src/renderer/src/screens/GitView.tsx . They need to create a trail for a user to follow just like the chat ones do leading the user to an appropriate chat in @src/renderer/src/screens/ChatView.tsx .",
       "blockers": []
+    },
+    {
+      "id": "46a65cb3-4b56-4448-97f8-4f9a0975a413",
+      "status": "-",
+      "title": "getting branch summaries after loading branches",
+      "description": "In @src/renderer/src/contexts/GitContext.tsx there's a TODO on line 250.\nFor each branch (that isn't the current) we need to have this branch diff summary computed so that information about the divergence between current and that branch can be shown.\nThis means that for each branch in @src/renderer/src/screens/GitView.tsx we want to show its status against its upstream (this is already provided via `listUnifiedBranches` ) and its status against the current branch (this is the new functionality that can be gotten via `getBranchDiffSummary` ). \nFor the two displays, there should be a chip that should say \"Δ Current ↑X ↓Y\" and  \"Δ Remote ↑A ↓B\" where X/Y and A/B should show how many commits ahead/behind it is.\nThe actual file summary is still shown in the hover popup in @src/renderer/src/screens/GitView.tsx .\nFor the arrows (↑↓) - make sure we use the same green/red arrows as currently the `AheadBehind` component does.",
+      "context": [
+        "src/renderer/src/contexts/GitContext.tsx",
+        "src/renderer/src/screens/GitView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-11-05T11:55:48.399Z",
+      "updatedAt": "2025-11-05T11:55:48.399Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -437,7 +450,8 @@
     "bae6b72c-4b52-45ba-98c8-bdb04da4670a": 33,
     "717444ff-e3cd-41cf-9cc2-605ef38e0ce3": 34,
     "e3bfa56f-432c-44a4-bd04-a3e7d1af926a": 35,
-    "36ef0b80-71f0-4964-a283-1526d7cacd56": 36
+    "36ef0b80-71f0-4964-a283-1526d7cacd56": 36,
+    "46a65cb3-4b56-4448-97f8-4f9a0975a413": 37
   },
   "createdAt": "2025-10-21T17:28:55.063Z",
   "updatedAt": "2025-10-27T09:51:40.369Z"
