@@ -11,6 +11,7 @@ import { gitService } from '@renderer/services/gitService'
 import { GitUnifiedBranch } from 'thefactory-tools'
 import { useGit } from '../contexts/GitContext'
 import DependencyBullet from '../components/stories/DependencyBullet'
+import { useStories } from '../contexts/StoriesContext'
 
 function statusLabel(b: GitUnifiedBranch): string {
   if (b.current) return 'current'
@@ -122,6 +123,7 @@ function UnifiedBranchItem({
 }) {
   const { openModal } = useNavigator()
   const { pending } = useGit()
+  const { resolveDependency } = useStories()
   const [deleting, setDeleting] = React.useState(false)
   const [summary, setSummary] = React.useState<{
     loaded: boolean
@@ -434,6 +436,22 @@ function UnifiedBranchItem({
     }
   }
 
+  // Only show story info when resolvable
+  const resolvablePendingEntries = React.useMemo(() => {
+    const entries = pendingRefs.entries || []
+    return entries.filter((e) => {
+      const dep = e.featureId || e.storyId
+      const r = resolveDependency(dep)
+      return !('code' in (r as any))
+    })
+  }, [pendingRefs.entries, resolveDependency])
+
+  const resolvableStoryId = React.useMemo(() => {
+    if (!storyId) return undefined
+    const r = resolveDependency(storyId)
+    return 'code' in (r as any) ? undefined : storyId
+  }, [storyId, resolveDependency])
+
   const row = (
     <div
       className={
@@ -454,23 +472,23 @@ function UnifiedBranchItem({
         <div className="text-xs text-neutral-600 dark:text-neutral-400 truncate">
           {projectTitle ? `${projectTitle} · ` : ''}
           base {baseRef}
-          {(pendingRefs.entries && pendingRefs.entries.length > 0) || storyId ? (
-            <span className="inline-flex items-center gap-1">
+          {(resolvablePendingEntries.length > 0) || resolvableStoryId ? (
+            <span className='inline-flex items-center gap-1'>
               {' '}
               •
               <span
                 onClick={(e) => e.stopPropagation()}
                 className="inline-flex items-center gap-1 flex-wrap"
               >
-                {pendingRefs.entries && pendingRefs.entries.length > 0 ? (
-                  pendingRefs.entries.map((e, idx) => (
+                {resolvablePendingEntries.length > 0 ? (
+                  resolvablePendingEntries.map((e, idx) => (
                     <DependencyBullet
                       key={`${e.storyId}:${e.featureId || 'story'}:${idx}`}
                       dependency={e.featureId || e.storyId}
                     />
                   ))
-                ) : storyId ? (
-                  <DependencyBullet dependency={storyId} />
+                ) : resolvableStoryId ? (
+                  <DependencyBullet dependency={resolvableStoryId} />
                 ) : null}
               </span>
             </span>

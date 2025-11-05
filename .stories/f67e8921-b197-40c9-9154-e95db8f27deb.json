@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "-",
+  "status": "+",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -2899,7 +2899,7 @@
     },
     {
       "id": "b201fd32-d554-49e2-b3f8-1560a3e99787",
-      "status": "-",
+      "status": "+",
       "title": "Merge conflicts detected",
       "description": "In @src/renderer/src/screens/GitView.tsx when there are merge conflicts - we should offer the user to resolve them within the app.\nwe need to have a new git merge view that will allow resolving such issues.",
       "context": [
@@ -2907,11 +2907,12 @@
       ],
       "blockers": [],
       "createdAt": "2025-11-05T00:25:34.116Z",
-      "updatedAt": "2025-11-05T00:25:34.116Z"
+      "updatedAt": "2025-11-05T00:54:51.918Z",
+      "completedAt": "2025-11-05T00:54:51.918Z"
     },
     {
       "id": "1d14164a-85c8-489a-a41c-b2103c227c45",
-      "status": "-",
+      "status": "+",
       "title": "Not all branches are feature/story related",
       "description": "In @src/renderer/src/screens/GitView.tsx if a branch has no story id or a story cannot be resolved from a given id, then don't show any story info - treat it as non-story related.",
       "context": [
@@ -2919,11 +2920,12 @@
       ],
       "blockers": [],
       "createdAt": "2025-11-05T00:30:43.231Z",
-      "updatedAt": "2025-11-05T00:30:43.231Z"
+      "updatedAt": "2025-11-05T00:57:05.028Z",
+      "completedAt": "2025-11-05T00:57:05.028Z"
     },
     {
       "id": "bb551aac-d29c-4b27-bcc4-84634db7d41c",
-      "status": "-",
+      "status": "+",
       "title": "when in chat and running `runAllTests` which produces a lot of files info the app crashes",
       "description": "In @src/renderer/src/components/chat/ChatSidebar.tsx and waiting for the tool result to show in @src/renderer/src/components/chat/MessageList.tsx .\nThe only thing I can see in the console is this error, but i'm not sure it's related:\n\nFileMentionsTextarea.tsx:45 Uncaught TypeError: Cannot read properties of undefined (reading 'map')\n    at FileMentionsTextarea.tsx:45:41\n    at updateMemo (react-dom_client.js?v=624470c6:5070:21)\n    at Object.useMemo (react-dom_client.js?v=624470c6:16763:20)\n    at exports.useMemo (chunk-BQYK6RGN.js?v=624470c6:918:36)\n    at FileMentionsTextarea (FileMentionsTextarea.tsx:45:21)",
       "context": [
@@ -2932,7 +2934,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-11-05T00:33:00.503Z",
-      "updatedAt": "2025-11-05T00:33:00.503Z"
+      "updatedAt": "2025-11-05T00:57:54.587Z",
+      "completedAt": "2025-11-05T00:57:54.587Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -3138,5 +3141,6 @@
     "bb551aac-d29c-4b27-bcc4-84634db7d41c": 200
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
-  "updatedAt": "2025-11-05T00:22:06.741Z"
+  "updatedAt": "2025-11-05T00:22:06.741Z",
+  "completedAt": "2025-11-05T00:57:54.587Z"
 }
