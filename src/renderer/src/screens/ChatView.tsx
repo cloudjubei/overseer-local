@@ -70,17 +70,50 @@ function titleForContext(
 
 // Support deep-linking to specific chat contexts under the chat route
 // Formats:
+// - #chat/project/<projectId>
+// - #chat/story/<storyId>
+// - #chat/feature/<storyId>/<featureId>
+// - #chat/project-topic/<projectId>/<topic>
+// - #chat/story-topic/<storyId>/<topic>
 // - #chat/agent-run/<projectId>/<storyId>/<agentRunId>
 // - #chat/agent-run-feature/<projectId>/<storyId>/<featureId>/<agentRunId>
 function parseChatRouteFromHash(hashRaw: string): ChatContext | undefined {
   const raw = (hashRaw || '').replace(/^#/, '')
   if (!raw.startsWith('chat')) return undefined
-  const withoutPrefix = raw.slice('chat'.length) // possibly like '/agent-run/...'
+  const withoutPrefix = raw.slice('chat'.length)
   const parts = withoutPrefix.split('/').filter(Boolean)
   if (parts.length === 0) return undefined
 
   try {
     const seg = parts[0]
+    if (seg === 'project' && parts.length >= 2) {
+      const projectId = decodeURIComponent(parts[1])
+      const ctx: ChatContextProject = { type: 'PROJECT', projectId }
+      return ctx
+    }
+    if (seg === 'story' && parts.length >= 2) {
+      const storyId = decodeURIComponent(parts[1])
+      const ctx: ChatContextStory = { type: 'STORY', storyId }
+      return ctx
+    }
+    if (seg === 'feature' && parts.length >= 3) {
+      const storyId = decodeURIComponent(parts[1])
+      const featureId = decodeURIComponent(parts[2])
+      const ctx: ChatContextFeature = { type: 'FEATURE', storyId, featureId }
+      return ctx
+    }
+    if (seg === 'project-topic' && parts.length >= 3) {
+      const projectId = decodeURIComponent(parts[1])
+      const projectTopic = decodeURIComponent(parts[2])
+      const ctx: ChatContextProjectTopic = { type: 'PROJECT_TOPIC', projectId, projectTopic }
+      return ctx
+    }
+    if (seg === 'story-topic' && parts.length >= 3) {
+      const storyId = decodeURIComponent(parts[1])
+      const storyTopic = decodeURIComponent(parts[2])
+      const ctx: ChatContextStoryTopic = { type: 'STORY_TOPIC', storyId, storyTopic }
+      return ctx
+    }
     if (seg === 'agent-run' && parts.length >= 4) {
       const projectId = decodeURIComponent(parts[1])
       const storyId = decodeURIComponent(parts[2])
@@ -145,8 +178,10 @@ export default function ChatView() {
     localStorage.setItem('chat-sidebar-mode', mode)
   }, [mode])
 
-  // Persist/restore last selected chat
+  // Initial selection: honor deep-link; else open least recently opened chat after project chats load; else fall back to project chat
   useEffect(() => {
+    const hasLoadedProjectChats = !!(activeProjectId && Object.prototype.hasOwnProperty.call(chatsByProjectId, activeProjectId))
+
     const loadLeastRecentlyOpened = (): ChatContext | undefined => {
       try {
         const projId = activeProjectId
@@ -168,27 +203,35 @@ export default function ChatView() {
       }
     }
 
-    const applyFromHash = async (h: string) => {
-      const ctx = parseChatRouteFromHash(h)
-      if (ctx) {
-        try { await getChat(ctx) } catch {}
-        setSelectedContext(ctx)
+    const apply = async () => {
+      // Always respect deep-link if present
+      const hashCtx = parseChatRouteFromHash(window.location.hash)
+      if (hashCtx) {
+        try { await getChat(hashCtx) } catch {}
+        setSelectedContext(hashCtx)
         return
       }
+
+      // If user already has a selection, do nothing (unless deep-link above)
+      if (selectedContext) return
+
+      // Wait until chats for this project have loaded to pick LRU
+      if (!hasLoadedProjectChats) return
+
       // Prefer least recently opened chat for this project
       const lruCtx = loadLeastRecentlyOpened()
       if (lruCtx) {
         setSelectedContext(lruCtx)
         return
       }
+
       // Fallback to General chat for active project
-      setSelectedContext({ type: 'PROJECT', projectId: activeProjectId })
+      if (activeProjectId) setSelectedContext({ type: 'PROJECT', projectId: activeProjectId })
     }
-    // If a selection already exists, do nothing
-    if (!selectedContext) {
-      void applyFromHash(window.location.hash)
-    }
-    const onHash = () => void applyFromHash(window.location.hash)
+
+    void apply()
+
+    const onHash = () => void apply()
     window.addEventListener('hashchange', onHash)
     return () => window.removeEventListener('hashchange', onHash)
   }, [getChat, activeProjectId, chatsByProjectId, selectedContext])
@@ -249,7 +292,7 @@ export default function ChatView() {
         console.warn('Failed to seed agent run chat from history', e)
       }
     }
-    maybeSeed()
+    void maybeSeed()
   }, [selectedContext, runsHistory, chats])
 
   // Header action: Categories | History switch with unread dot hint if any unread in project

@@ -2939,7 +2939,7 @@
     },
     {
       "id": "96900adf-6346-4780-a5dd-7202f8eb9a5d",
-      "status": "-",
+      "status": "+",
       "title": "when coming back to chat - first open the least recently opened chat",
       "description": "In @src/renderer/src/screens/ChatView.tsx",
       "context": [
@@ -2948,8 +2948,9 @@
       ],
       "blockers": [],
       "createdAt": "2025-11-05T08:32:59.874Z",
-      "updatedAt": "2025-11-05T15:25:58.804Z",
-      "rejection": "This is not working at all. Spend some time reviewing the code and @src/renderer/src/contexts/ChatsContext.tsx and produce a quality fix."
+      "updatedAt": "2025-11-05T20:10:32.786Z",
+      "rejection": "This is not working at all. Spend some time reviewing the code and @src/renderer/src/contexts/ChatsContext.tsx and produce a quality fix.",
+      "completedAt": "2025-11-05T20:10:32.786Z"
     },
     {
       "id": "9a74d29d-8267-4fae-99c1-aa34c2ab45a5",
