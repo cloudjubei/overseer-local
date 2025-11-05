@@ -3,6 +3,8 @@ import { useAppSettings } from '../contexts/AppSettingsContext'
 import { dbService } from '../services/dbService'
 import { filesService } from '../services/filesService'
 import { documentIngestionService } from '../services/documentIngestionService'
+import { useProjectContext } from '../contexts/ProjectContext'
+import { gitService } from '../services/gitService'
 
 interface LoadingScreenProps {
   onLoaded: () => void
@@ -10,14 +12,16 @@ interface LoadingScreenProps {
 
 const LoadingScreen: React.FC<LoadingScreenProps> = ({ onLoaded }) => {
   const { isAppSettingsLoaded, appSettings } = useAppSettings()
+  const { projects } = useProjectContext()
   const [statusText, setStatusText] = useState<string>('Loading your settings…')
   const [isDBSetup, setIsDBSetup] = useState(false)
   const [isIngestionComplete, setIsIngestionComplete] = useState(false)
+  const [isGitReady, setIsGitReady] = useState(false)
   const doneRef = useRef(false)
 
   const isReadyToExit = useMemo(() => {
-    return isAppSettingsLoaded && isDBSetup && isIngestionComplete
-  }, [isAppSettingsLoaded, isDBSetup, isIngestionComplete])
+    return isAppSettingsLoaded && isDBSetup && isIngestionComplete && isGitReady
+  }, [isAppSettingsLoaded, isDBSetup, isIngestionComplete, isGitReady])
 
   const startDatabaseAndIngestion = async (connectionString?: string) => {
     // Connect to DB (if connection string provided)
@@ -28,25 +32,51 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ onLoaded }) => {
         // proceed without DB
         setIsDBSetup(true)
         setStatusText('Database unavailable. Continuing…')
-        setIsIngestionComplete(true)
-        return
+      } else {
+        await filesService.updateAllTools()
+        setIsDBSetup(true)
       }
-      await filesService.updateAllTools()
+    } else {
+      setIsDBSetup(true)
     }
-
-    setIsDBSetup(true)
 
     // Trigger ingestion of all projects and wait for completion
     try {
       setStatusText('Indexing project files…')
       await documentIngestionService.ingestAllProjects()
       setIsIngestionComplete(true)
-      setStatusText('Ready')
+      setStatusText('Preparing Git monitors…')
     } catch (e) {
       // If ingestion fails, continue boot to not block the app
       console.warn('[LoadingScreen] Ingestion failed:', (e as any)?.message || e)
       setIsIngestionComplete(true)
-      setStatusText('Indexing failed. You can continue using the app.')
+      setStatusText('Indexing failed. Preparing Git monitors…')
+    }
+
+    // Initialize Git tools per project and start monitors with current branch as base
+    try {
+      const projectIds = projects.map((p) => p.id)
+      // For each project, discover current branch via unified list, then start monitor on that base
+      await Promise.all(
+        projectIds.map(async (pid) => {
+          try {
+            const unified = await gitService.listUnifiedBranches(pid)
+            const current = unified.find((b) => b.current)
+            const base = current?.name || 'main'
+            await gitService.startMonitor(pid, { baseBranch: base })
+          } catch (err) {
+            console.warn('[LoadingScreen] Git init failed for project', pid, err)
+            // Do not throw; continue initializing others
+          }
+        }),
+      )
+      setIsGitReady(true)
+      setStatusText('Ready')
+    } catch (e) {
+      // Should not happen due to per-project guards, but ensure we unblock
+      console.warn('[LoadingScreen] Git initialization failed:', (e as any)?.message || e)
+      setIsGitReady(true)
+      setStatusText('Ready')
     }
   }
 

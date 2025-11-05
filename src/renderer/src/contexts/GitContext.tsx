@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { gitService } from '../services/gitService'
 import { useProjectContext } from './ProjectContext'
 import { GitCommitInfo, GitBranchEvent, GitUnifiedBranch } from 'thefactory-tools'
@@ -49,7 +49,7 @@ export type GitContextValue = {
   currentProject: ProjectGitStatus
   allProjects: ProjectGitStatus[]
 
-  // Aggregated count of updated feature branches across all projects
+  // Aggregated count of branches ahead of the current branch across all projects
   gitUpdatedBranchesCount: number
 
   // Unified branches API
@@ -75,9 +75,9 @@ export type GitContextValue = {
 
 const GitContext = createContext<GitContextValue | null>(null)
 
-const FEATURE_REGEX = /(?:^|\/)features\/([0-9a-fA-F-]{8,})/
+// Permissive matcher: supports refs like 'origin/features/<id>' or 'refs/heads/features/<id>'
 const getStoryIdFromBranchName = (branchName: string): string | undefined => {
-  const match = branchName.match(FEATURE_REGEX)
+  const match = branchName.match(/(?:^|\/)features\/([0-9a-fA-F-]{8,})/)
   return match ? match[1] : undefined
 }
 
@@ -85,7 +85,7 @@ const parseStoryIdFromUnified = (u: GitUnifiedBranch): string | undefined => {
   if (u.storyId) return u.storyId
   const tryParse = (name?: string): string | undefined => {
     if (!name) return undefined
-    const m = name.match(FEATURE_REGEX)
+    const m = name.match(/(?:^|\/)features\/([0-9a-fA-F-]{8,})/)
     return m ? m[1] : undefined
   }
   return tryParse(u.name) || tryParse(u.remoteName)
@@ -136,10 +136,6 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
   // Unified branches state per project
   const [unifiedByProject, setUnifiedByProject] = useState<Record<string, UnifiedBranchesState>>({})
 
-  // Track monitor base per project and which monitors have started
-  const [monitorBaseByProject, setMonitorBaseByProject] = useState<Record<string, string | undefined>>({})
-  const [monitorsStarted, setMonitorsStarted] = useState<Record<string, boolean>>({})
-
   // Pending features by project -> headRefKey (baseRef|headRef)
   const [pendingByProject, setPendingByProject] = useState<
     Record<string, Record<string, PendingFeatureRefsState>>
@@ -158,6 +154,9 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
     [autoPush, deleteRemote],
   )
 
+  // Debounce timers per project for unified.reload on monitor updates
+  const reloadTimersRef = useRef<Record<string, number | ReturnType<typeof setTimeout>>>({})
+
   const onMonitorUpdate = async (update: { projectId: string; state: GitBranchEvent }) => {
     const { projectId, state: branchUpdate } = update
 
@@ -172,115 +171,80 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
       const newPending = [...newProjectStatus.pending]
       newProjectStatus.pending = newPending
 
+      const branchIdx = newPending.findIndex((b) => b.branch === branchUpdate.name)
+
+      // Only consider feature branches that are ahead (remote-qualified names supported)
       const storyId = getStoryIdFromBranchName(branchUpdate.name)
       const isFeature = !!storyId
-      const isUpdated = branchUpdate.ahead > 0 && branchUpdate.behind === 0
+      const isUpdated = branchUpdate.ahead > 0 // behind does not matter for badge logic now
 
-      // Prefer dedupe by storyId to avoid double counting local/remote variants
-      const byStoryIdx = storyId
-        ? newPending.findIndex((b) => b.storyId === storyId)
-        : -1
-      const byBranchIdx = newPending.findIndex((b) => b.branch === branchUpdate.name)
-      const existingIdx = byStoryIdx >= 0 ? byStoryIdx : byBranchIdx
+      // Reflect the actual current base branch if known from unified state; fallback to 'main'
+      const currentBase = unifiedByProject[projectId]?.branches?.find((b) => b.current)?.name
 
       if (isFeature && isUpdated) {
         const pendingBranch: PendingBranch = {
           projectId,
           branch: branchUpdate.name,
-          baseRef: monitorBaseByProject[projectId] ||
-            unifiedByProject[projectId]?.branches?.find((b) => b.current)?.name ||
-            'HEAD',
-          repoPath: '',
+          baseRef: currentBase || 'main',
+          repoPath: '', // Not available on the event, handled by backend
           ahead: branchUpdate.ahead,
           behind: branchUpdate.behind,
           storyId,
         }
-        if (existingIdx > -1) {
-          newPending[existingIdx] = pendingBranch
+        if (branchIdx > -1) {
+          newPending[branchIdx] = pendingBranch
         } else {
           newPending.push(pendingBranch)
         }
-      } else if (existingIdx > -1) {
-        newPending.splice(existingIdx, 1)
+      } else if (branchIdx > -1) {
+        newPending.splice(branchIdx, 1)
       }
 
       return newAllProjects
     })
+
+    // Debounce unified reload for this project so UI badge/deltas stay fresh
+    try {
+      const existing = reloadTimersRef.current[projectId]
+      if (typeof existing === 'number') {
+        clearTimeout(existing as number)
+      } else if (existing) {
+        // NodeJS.Timer fallback (should not happen in renderer)
+        // @ts-ignore
+        clearTimeout(existing)
+      }
+      // Schedule a lightweight unified reload shortly after the event burst
+      const t = setTimeout(() => {
+        void loadUnified(projectId)
+        // cleanup
+        delete reloadTimersRef.current[projectId]
+      }, 400)
+      // In browsers, setTimeout returns a number; in Node it can be a Timer
+      // We store it as any-compatible value
+      // @ts-ignore
+      reloadTimersRef.current[projectId] = t as any
+    } catch {}
   }
   useEffect(() => {
     const unsubscribe = gitService.subscribeToMonitorUpdates(onMonitorUpdate)
     return () => {
       unsubscribe()
-    }
-  }, [monitorBaseByProject, unifiedByProject])
-
-  // Initialize project containers and seed unified loading
-  useEffect(() => {
-    if (loading) return
-    setLoading(true)
-
-    setAllProjects(projects.map((p) => ({ projectId: p.id, pending: [] })))
-
-    const load = async () => {
+      // Clear any outstanding reload timers on unmount
       try {
-        // Kick off unified loads; monitors will start after current branch is known
-        for (const p of projects) {
-          await loadUnified(p.id)
+        const timers = Object.values(reloadTimersRef.current)
+        for (const tm of timers) {
+          if (typeof tm === 'number') clearTimeout(tm as number)
+          // @ts-ignore - clearTimeout can accept Timer in Node typings
+          else if (tm) clearTimeout(tm)
         }
-      } catch (e) {
-        console.error('GitContext error: ', e)
-        setError((e as any)?.message || String(e))
-      } finally {
-        setLoading(false)
-      }
+      } catch {}
     }
+  }, [])
 
-    void load()
+  // Keep a simple list of projects for currentProject/allProjects usage
+  useEffect(() => {
+    setAllProjects(projects.map((p) => ({ projectId: p.id, pending: [] })))
   }, [projects])
-
-  // Start monitors when we know the current branch for each project
-  useEffect(() => {
-    const start = async () => {
-      for (const p of projects) {
-        const pid = p.id
-        if (monitorsStarted[pid]) continue
-        const currentName = unifiedByProject[pid]?.branches?.find((b) => b.current)?.name
-        if (!currentName) continue
-        try {
-          await gitService.startMonitor(pid, { baseBranch: currentName })
-          setMonitorsStarted((prev) => ({ ...prev, [pid]: true }))
-          setMonitorBaseByProject((prev) => ({ ...prev, [pid]: currentName }))
-        } catch (e) {
-          console.warn('Failed to start monitor', pid, e)
-        }
-      }
-    }
-    void start()
-  }, [projects.map((p) => p.id).join('|'), unifiedByProject, monitorsStarted])
-
-  // If the base (current branch) changes, restart monitor to track the new base
-  useEffect(() => {
-    const maybeRestart = async () => {
-      for (const p of projects) {
-        const pid = p.id
-        if (!monitorsStarted[pid]) continue
-        const currentName = unifiedByProject[pid]?.branches?.find((b) => b.current)?.name
-        const prevBase = monitorBaseByProject[pid]
-        if (currentName && prevBase && currentName !== prevBase) {
-          try {
-            await gitService.stopMonitor(pid)
-          } catch {}
-          try {
-            await gitService.startMonitor(pid, { baseBranch: currentName })
-            setMonitorBaseByProject((prev) => ({ ...prev, [pid]: currentName }))
-          } catch (e) {
-            console.warn('Failed to restart monitor', pid, e)
-          }
-        }
-      }
-    }
-    void maybeRestart()
-  }, [projects.map((p) => p.id).join('|'), unifiedByProject, monitorsStarted, monitorBaseByProject])
 
   useEffect(() => {
     const curr = allProjects.find((p) => p.projectId === activeProjectId) || {
@@ -345,41 +309,6 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
           ...prev,
           [pid]: { loading: false, error: undefined, branches: sorted, relToCurrent },
         }))
-
-        // Seed pending/updated branches for the badge from this initial snapshot using relToCurrent
-        setAllProjects((curr) => {
-          const next = [...curr]
-          const idx = next.findIndex((p) => p.projectId === pid)
-          const ensure: ProjectGitStatus = idx >= 0 ? { ...next[idx] } : { projectId: pid, pending: [] }
-          const baseRef = currentName || 'HEAD'
-          const pending: PendingBranch[] = []
-          for (const b of sorted) {
-            if (b.current) continue
-            const headRef = b.isLocal ? b.name : b.remoteName || b.name
-            if (!headRef) continue
-            const delta = relToCurrent[headRef] || { ahead: 0, behind: 0 }
-            const storyId = parseStoryIdFromUnified(b)
-            // Count only feature branches ahead and not behind
-            if (storyId && delta.ahead > 0 && delta.behind === 0) {
-              // Deduplicate by storyId
-              if (!pending.find((p) => p.storyId === storyId)) {
-                pending.push({
-                  projectId: pid,
-                  repoPath: '',
-                  baseRef,
-                  branch: headRef,
-                  storyId,
-                  ahead: delta.ahead,
-                  behind: delta.behind,
-                })
-              }
-            }
-          }
-          ensure.pending = pending
-          if (idx >= 0) next[idx] = ensure
-          else next.push(ensure)
-          return next
-        })
       } catch (e) {
         setUnifiedByProject((prev) => ({
           ...prev,
@@ -508,18 +437,45 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
     [pendingByProject, activeProjectId, loadPending],
   )
 
+  // Compute sidebar badge count from unified.relToCurrent: count branches with ahead > 0
+  const gitUpdatedBranchesCountComputed = useMemo(() => {
+    let total = 0
+    for (const [pid, st] of Object.entries(unifiedByProject)) {
+      if (!st || !st.branches || st.branches.length === 0) continue
+      const currName = st.branches.find((b) => b.current)?.name
+      const rel = st.relToCurrent || {}
+      for (const b of st.branches) {
+        if (b.current) continue
+        const headRef = b.isLocal ? b.name : b.remoteName || b.name
+        if (!headRef || headRef === currName) continue
+        const delta = rel[headRef]
+        if (delta && (delta.ahead || 0) > 0) total += 1
+      }
+    }
+    return total
+  }, [unifiedByProject])
+
   const value = useMemo<GitContextValue>(
     () => ({
       loading,
       error,
       currentProject,
       allProjects,
-      gitUpdatedBranchesCount: allProjects.reduce((acc, p) => acc + p.pending.length, 0),
+      gitUpdatedBranchesCount: gitUpdatedBranchesCountComputed,
       unified: unifiedApi,
       pending: pendingApi,
       mergePreferences,
     }),
-    [loading, error, currentProject, allProjects, unifiedApi, pendingApi, mergePreferences],
+    [
+      loading,
+      error,
+      currentProject,
+      allProjects,
+      gitUpdatedBranchesCountComputed,
+      unifiedApi,
+      pendingApi,
+      mergePreferences,
+    ],
   )
 
   return <GitContext.Provider value={value}>{children}</GitContext.Provider>

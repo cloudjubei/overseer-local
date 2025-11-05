@@ -540,7 +540,7 @@ export default function SidebarView({}: SidebarProps) {
                 <NotificationBadge
                   className={effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''}
                   text={`${gitUpdatedBranchesCount}`}
-                  tooltipLabel={`${gitUpdatedBranchesCount} updated feature ${gitUpdatedBranchesCount === 1 ? 'branch' : 'branches'}`}
+                  tooltipLabel={`${gitUpdatedBranchesCount} updated ${gitUpdatedBranchesCount === 1 ? 'branch' : 'branches'}`}
                   color="green"
                 />
               )
