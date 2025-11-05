@@ -52,6 +52,10 @@ export type GitContextValue = {
   // Aggregated count of branches ahead of the current branch across all projects (UNREAD)
   gitUpdatedBranchesCount: number
 
+  // Per-project unread updated branches count map and accessor
+  updatedBranchesCountByProject: Record<string, number>
+  getProjectUpdatedBranchesCount: (projectId?: string) => number
+
   // Unified branches API
   unified: {
     byProject: Record<string, UnifiedBranchesState>
@@ -490,7 +494,7 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
     [pendingByProject, activeProjectId, loadPending],
   )
 
-  // Compute sidebar badge count from unified.relToCurrent: count branches with ahead > 0 and unread
+  // Compute total sidebar badge count from unified.relToCurrent across all projects
   const gitUpdatedBranchesCountComputed = useMemo(() => {
     let total = 0
     for (const [pid, st] of Object.entries(unifiedByProject)) {
@@ -511,6 +515,41 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
     }
     return total
   }, [unifiedByProject, seenVersion])
+
+  // Per-project unread updated branches counts
+  const updatedBranchesCountByProject = useMemo<Record<string, number>>(() => {
+    const result: Record<string, number> = {}
+    for (const [pid, st] of Object.entries(unifiedByProject)) {
+      let count = 0
+      if (!st || !st.branches || st.branches.length === 0) {
+        result[pid] = 0
+        continue
+      }
+      const currName = st.branches.find((b) => b.current)?.name
+      const rel = st.relToCurrent || {}
+      for (const b of st.branches) {
+        if (b.current) continue
+        const headRef = getHeadRef(b)
+        if (!headRef || headRef === currName) continue
+        const delta = rel[headRef]
+        if (!delta || (delta.ahead || 0) <= 0) continue
+        const headSha = getHeadSha(b)
+        const lastSeen = pid && currName && headRef ? readLastSeen(pid, currName, headRef) : undefined
+        if (!headSha || !lastSeen || lastSeen !== headSha) count += 1
+      }
+      result[pid] = count
+    }
+    return result
+  }, [unifiedByProject, seenVersion])
+
+  const getProjectUpdatedBranchesCount = React.useCallback(
+    (projectId?: string): number => {
+      const pid = projectId || activeProjectId
+      if (!pid) return 0
+      return updatedBranchesCountByProject[pid] ?? 0
+    },
+    [updatedBranchesCountByProject, activeProjectId],
+  )
 
   const isBranchUnread = React.useCallback(
     (projectId: string, baseRef: string, branch: GitUnifiedBranch): boolean => {
@@ -547,6 +586,8 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
       currentProject,
       allProjects,
       gitUpdatedBranchesCount: gitUpdatedBranchesCountComputed,
+      updatedBranchesCountByProject,
+      getProjectUpdatedBranchesCount,
       unified: unifiedApi,
       pending: pendingApi,
       mergePreferences,
@@ -559,6 +600,8 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
       currentProject,
       allProjects,
       gitUpdatedBranchesCountComputed,
+      updatedBranchesCountByProject,
+      getProjectUpdatedBranchesCount,
       unifiedApi,
       pendingApi,
       mergePreferences,

@@ -465,12 +465,13 @@
     },
     {
       "id": "8c824dc4-24d7-4d6b-81b6-133bcd933506",
-      "status": "-",
+      "status": "+",
       "title": "Sidebar Git badges per project: active-only top badge and per-project list indicators",
       "description": "Goal: Adjust Git unread badges to be project-aware in the Sidebar.\n\nTop Git nav badge (SidebarView):\n- Shows unread updated branches count only for the active project (current project), not all projects.\n- Tooltip: '<n> updated branch/branches'. Hidden when 0.\n\nProjects list badges (SidebarView bottom list):\n- For each project entry, render a green badge showing that project’s unread updated branches count.\n- Follow the same rendering rules/pattern as chat and agent badges; hide when 0.\n- Tooltip: '<n> updated branch/branches'.\n\nData and context changes:\n- Extend GitContext to expose:\n  - updatedBranchesCountByProject: Record<string, number>\n  - getProjectUpdatedBranchesCount(projectId?): number\n- Counts reflect unread updates as defined by the existing unread model (ahead > 0 vs current branch and last‑seen != head sha), scoped per project.\n\nSync behavior:\n- Badge values seed from the initial unified snapshot and update via monitor-driven unified refreshes.\n- Base branch changes automatically recompute unread state per project.\n\nConstraints:\n- Read-only UI change. No checkouts/merges triggered. Errors are non-blocking.\n\nAcceptance criteria:\n- Top Git badge reflects only the active project’s unread count.\n- Each project row in the Sidebar shows its own unread count badge; hidden when 0.\n- Counts remain accurate across base changes and monitor updates.",
       "context": [],
       "createdAt": "2025-11-05T22:34:04.837Z",
-      "updatedAt": "2025-11-05T22:34:04.837Z"
+      "updatedAt": "2025-11-05T23:26:15.666Z",
+      "completedAt": "2025-11-05T23:26:15.666Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -513,9 +514,9 @@
     "ca8eec49-6c42-4e2f-860d-606b056baf4f": 37,
     "36ef0b80-71f0-4964-a283-1526d7cacd56": 38,
     "d43c4450-a3cd-43dd-a248-aa75f5c69233": 39,
-    "afdb5f6a-978d-44b4-9995-03f69feb1b01": 40,
+    "8c824dc4-24d7-4d6b-81b6-133bcd933506": 40,
     "2efcd766-e423-4f70-ad84-77c35a6c1f44": 41,
-    "8c824dc4-24d7-4d6b-81b6-133bcd933506": 42
+    "afdb5f6a-978d-44b4-9995-03f69feb1b01": 42
   },
   "createdAt": "2025-10-21T17:28:55.063Z",
   "updatedAt": "2025-10-27T09:51:40.369Z"

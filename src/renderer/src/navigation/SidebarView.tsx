@@ -171,7 +171,7 @@ export default function SidebarView({}: SidebarProps) {
   const { groups } = useProjectsGroups()
   const { unreadCountByProject } = useChatUnread()
   const { thinkingCountByProject, anyThinkingForProject } = useChatThinking(500)
-  const { gitUpdatedBranchesCount } = useGit()
+  const { getProjectUpdatedBranchesCount } = useGit()
 
   const [collapsed, setCollapsed] = useState<boolean>(appSettings.userPreferences.sidebarCollapsed)
 
@@ -207,6 +207,7 @@ export default function SidebarView({}: SidebarProps) {
   const activeRunsCurrentProject = activeCountByProject.get(activeProjectId) || 0
   const chatUnreadCurrentProject = unreadCountByProject.get(activeProjectId) || 0
   const chatThinkingCurrentProject = anyThinkingForProject(activeProjectId)
+  const gitUnreadCurrentProject = getProjectUpdatedBranchesCount(activeProjectId)
 
   // Track unread notifications per project for badges in the Projects list.
   const [unreadByProject, setUnreadByProject] = useState<Map<string, number>>(new Map())
@@ -403,9 +404,10 @@ export default function SidebarView({}: SidebarProps) {
     const unread = unreadByProject.get(p.id) || 0 // notifications (system)
     const chatUnread = unreadCountByProject.get(p.id) || 0 // chats
     const chatThinking = (thinkingCountByProject.get(p.id) || 0) > 0
+    const gitUnread = getProjectUpdatedBranchesCount(p.id)
     const iconKey = p.metadata?.icon || (isMain ? 'collection' : 'folder')
     const projectIcon = renderProjectIcon(iconKey)
-    const hasAnyBadge = activeCount > 0 || unread > 0 || chatUnread > 0 || chatThinking
+    const hasAnyBadge = activeCount > 0 || unread > 0 || chatUnread > 0 || chatThinking || gitUnread > 0
 
     const Btn = (
       <button
@@ -459,6 +461,14 @@ export default function SidebarView({}: SidebarProps) {
                 className={effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''}
                 text={`${unread}`}
                 tooltipLabel={`${unread} unread notifications`}
+              />
+            )}
+            {gitUnread > 0 && (
+              <NotificationBadge
+                className={effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''}
+                text={`${gitUnread}`}
+                tooltipLabel={`${gitUnread} updated ${gitUnread === 1 ? 'branch' : 'branches'}`}
+                color="green"
               />
             )}
           </span>
@@ -535,12 +545,12 @@ export default function SidebarView({}: SidebarProps) {
                   tooltipLabel={`${unreadCount} unread notifications`}
                 />
               )
-            } else if (item.view === 'Git' && gitUpdatedBranchesCount > 0) {
+            } else if (item.view === 'Git' && gitUnreadCurrentProject > 0) {
               badgeEl = (
                 <NotificationBadge
                   className={effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''}
-                  text={`${gitUpdatedBranchesCount}`}
-                  tooltipLabel={`${gitUpdatedBranchesCount} updated ${gitUpdatedBranchesCount === 1 ? 'branch' : 'branches'}`}
+                  text={`${gitUnreadCurrentProject}`}
+                  tooltipLabel={`${gitUnreadCurrentProject} updated ${gitUnreadCurrentProject === 1 ? 'branch' : 'branches'}`}
                   color="green"
                 />
               )
