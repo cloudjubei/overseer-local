@@ -22,6 +22,7 @@ import {
   IconFileDeleted,
   IconFileModified,
 } from '@renderer/components/ui/icons/Icons'
+import MergeConflictResolver from '@renderer/screens/git/MergeConflictResolver'
 
 export type GitMergeModalProps = {
   projectId: string
@@ -300,10 +301,13 @@ export default function GitMergeModal(props: GitMergeModalProps) {
   // Confirmation dialog state (initial from prop)
   const [confirmOpen, setConfirmOpen] = React.useState<boolean>(!!openConfirm)
 
-  // Unified tab state (includes Changes)
+  // Unified tab state (includes Changes + Resolve)
   const [activeTab, setActiveTab] = React.useState<
-    'changes' | 'compilation' | 'tests' | 'coverage'
+    'changes' | 'compilation' | 'tests' | 'coverage' | 'resolve'
   >('changes')
+
+  // Derived: whether current merge result contains conflicts
+  const hasConflicts = (mergeResult?.conflicts?.length || 0) > 0
 
   // Compilation impact (backend analysis or heuristic)
   const [compilationInfo, setCompilationInfo] = React.useState<{
@@ -359,6 +363,11 @@ export default function GitMergeModal(props: GitMergeModalProps) {
       mounted = false
     }
   }, [projectId, repoPath, baseRef, branch])
+
+  // Bring user to Resolve tab if conflicts are present after running a merge
+  React.useEffect(() => {
+    if (hasConflicts) setActiveTab('resolve')
+  }, [hasConflicts])
 
   // Build compilation impact using backend analysis when available, otherwise fallback to heuristic
   React.useEffect(() => {
@@ -669,8 +678,6 @@ export default function GitMergeModal(props: GitMergeModalProps) {
     </div>
   )
 
-  const hasConflicts = (mergeResult?.conflicts?.length || 0) > 0
-
   function renderChangesTab() {
     return (
       <div className="flex flex-col gap-3">
@@ -868,6 +875,23 @@ export default function GitMergeModal(props: GitMergeModalProps) {
         return renderTestsTab()
       case 'coverage':
         return renderCoverageTab()
+      case 'resolve':
+        return (
+          <div className="space-y-3">
+            <div className="text-sm text-neutral-700 dark:text-neutral-300">
+              Resolve merge conflicts directly in the app. Save each file after resolving hunks.
+            </div>
+            {hasConflicts && mergeResult?.conflicts ? (
+              <MergeConflictResolver projectId={projectId} conflicts={mergeResult.conflicts} />
+            ) : (
+              <div className="text-sm text-neutral-600 dark:text-neutral-400">No conflicts to resolve.</div>
+            )}
+            <div className="text-[11px] text-neutral-500">
+              Note: staging and committing the merge is not yet automated here. After saving all
+              files and resolving conflicts, complete the merge commit using your git tool.
+            </div>
+          </div>
+        )
       default:
         return null
     }
@@ -926,6 +950,7 @@ export default function GitMergeModal(props: GitMergeModalProps) {
             onChange={(v) => setActiveTab(v as any)}
             options={[
               { value: 'changes', label: 'Changes' },
+              ...(hasConflicts ? ([{ value: 'resolve', label: 'Resolve conflicts' }] as any) : ([] as any)),
               { value: 'compilation', label: 'Compilation Impact' },
               { value: 'tests', label: 'Tests Impact' },
               { value: 'coverage', label: 'Diff Coverage' },
@@ -944,7 +969,7 @@ export default function GitMergeModal(props: GitMergeModalProps) {
               {mergeResult.message || 'Merge failed'}
             </div>
           )}
-          {hasConflicts && (
+          {hasConflicts && activeTab !== 'resolve' && (
             <ConflictsPanel
               conflicts={mergeResult!.conflicts || []}
               baseRef={baseRef}

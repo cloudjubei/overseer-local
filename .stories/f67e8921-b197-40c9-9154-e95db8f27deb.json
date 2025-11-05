@@ -2899,7 +2899,7 @@
     },
     {
       "id": "b201fd32-d554-49e2-b3f8-1560a3e99787",
-      "status": "-",
+      "status": "+",
       "title": "Merge conflicts detected",
       "description": "In @src/renderer/src/screens/GitView.tsx when there are merge conflicts - we should offer the user to resolve them within the app.\nwe need to have a new git merge view that will allow resolving such issues.",
       "context": [
@@ -2907,7 +2907,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-11-05T00:25:34.116Z",
-      "updatedAt": "2025-11-05T00:25:34.116Z"
+      "updatedAt": "2025-11-05T00:54:51.918Z",
+      "completedAt": "2025-11-05T00:54:51.918Z"
     },
     {
       "id": "1d14164a-85c8-489a-a41c-b2103c227c45",
