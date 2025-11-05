@@ -1,7 +1,7 @@
 {
   "id": "thefactory-db",
   "title": "TheFactory DB",
-  "description": "TODO",
+  "description": "A project responsible for storing and retrieving (searching) data entities and documents using various methods.",
   "path": "../../thefactory-db",
   "repo_url": "https://github.com/cloudjubei/thefactory-db",
   "requirements": [],
@@ -18,7 +18,7 @@
     "d37e5f1f-63a0-486d-a0c6-28642f72d243": 6
   },
   "createdAt": "2025-09-14T19:03:30.461Z",
-  "updatedAt": "2025-10-24T15:23:05.665Z",
+  "updatedAt": "2025-11-05T16:07:10.665Z",
   "codeInfo": {
     "language": "typescript",
     "framework": "node",
