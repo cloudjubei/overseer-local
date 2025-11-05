@@ -419,6 +419,18 @@
       "context": [],
       "createdAt": "2025-11-05T14:58:25.851Z",
       "updatedAt": "2025-11-05T14:58:25.851Z"
+    },
+    {
+      "id": "ca8eec49-6c42-4e2f-860d-606b056baf4f",
+      "status": "-",
+      "title": "only show action buttons on row hover",
+      "description": "in @src/renderer/src/screens/GitView.tsx  for each branch row",
+      "context": [
+        "src/renderer/src/screens/GitView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-11-05T15:02:13.962Z",
+      "updatedAt": "2025-11-05T15:02:13.962Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -458,8 +470,9 @@
     "717444ff-e3cd-41cf-9cc2-605ef38e0ce3": 34,
     "e3bfa56f-432c-44a4-bd04-a3e7d1af926a": 35,
     "46a65cb3-4b56-4448-97f8-4f9a0975a413": 36,
-    "36ef0b80-71f0-4964-a283-1526d7cacd56": 37,
-    "d43c4450-a3cd-43dd-a248-aa75f5c69233": 38
+    "ca8eec49-6c42-4e2f-860d-606b056baf4f": 37,
+    "36ef0b80-71f0-4964-a283-1526d7cacd56": 38,
+    "d43c4450-a3cd-43dd-a248-aa75f5c69233": 39
   },
   "createdAt": "2025-10-21T17:28:55.063Z",
   "updatedAt": "2025-10-27T09:51:40.369Z"
