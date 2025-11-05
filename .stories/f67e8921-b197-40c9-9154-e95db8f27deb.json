@@ -2992,7 +2992,7 @@
     },
     {
       "id": "7afbce8e-a17a-4d16-9ae2-1ff5589ff36c",
-      "status": "-",
+      "status": "+",
       "title": "in chat when resuming some tools, the tools that were not run must be marked as 'aborted'",
       "description": "this needs to go from @src/renderer/src/components/chat/MessageList.tsx all the way to @src/logic/factory/FactoryCompletionManager.ts where `resumeCompletionTools` is called - there the chat needs to save the not chosen tools as 'aborted'",
       "context": [
