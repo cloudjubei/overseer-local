@@ -155,6 +155,9 @@ function UnifiedBranchItem({
   onAfterAction,
   equalToCurrent,
   currentName,
+  showSwitch,
+  canSwitch,
+  onSwitch,
 }: {
   projectId: string
   baseRef?: string
@@ -163,6 +166,9 @@ function UnifiedBranchItem({
   onAfterAction?: () => void
   equalToCurrent?: boolean
   currentName?: string
+  showSwitch?: boolean
+  canSwitch?: boolean
+  onSwitch?: (branchName: string) => Promise<void> | void
 }) {
   const { openModal } = useNavigator()
   const { pending, unified } = useGit()
@@ -584,6 +590,30 @@ function UnifiedBranchItem({
                   </span>
                 </Tooltip>
               )}
+              {showSwitch && (
+                <Tooltip
+                  content={canSwitch ? 'switch to this branch' : 'working tree not clean'}
+                  placement="bottom"
+                >
+                  <span onClick={(e) => e.stopPropagation()}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={async () => {
+                        if (!canSwitch) return
+                        try {
+                          await onSwitch?.(branch.name)
+                        } catch (e) {}
+                      }}
+                      disabled={!canSwitch}
+                      aria-label="Switch to this branch"
+                      title="Switch to this branch"
+                    >
+                      Switch
+                    </Button>
+                  </span>
+                </Tooltip>
+              )}
               <Tooltip
                 content={
                   isProtected
@@ -646,6 +676,8 @@ function CurrentProjectView() {
   const title = activeProject?.title
   const { unified } = useGit()
   const { branches, loading, error } = unified.get(projectId)
+  const [isClean, setIsClean] = React.useState<boolean | undefined>(undefined)
+  const [checkingClean, setCheckingClean] = React.useState(false)
 
   const current = React.useMemo(() => branches?.find((b) => b.current), [branches])
   const others = React.useMemo(() => (branches || []).filter((b) => !b.current), [branches])
@@ -653,6 +685,38 @@ function CurrentProjectView() {
   const reload = React.useCallback(() => {
     void unified.reload(projectId)
   }, [unified, projectId])
+
+  const loadCleanStatus = React.useCallback(async () => {
+    if (!projectId) return
+    setCheckingClean(true)
+    try {
+      const s = await gitService.getLocalStatus(projectId)
+      const any = (v: any) => {
+        if (!v) return false
+        if (Array.isArray(v)) return v.length > 0
+        if (typeof v === 'object') return Object.keys(v).length > 0
+        if (typeof v === 'number') return v > 0
+        return !!v
+      }
+      const dirty = [
+        (s as any).isClean === false,
+        any((s as any).unstaged),
+        any((s as any).staged),
+        any((s as any).conflicts),
+        any((s as any).changed),
+        any((s as any).untracked),
+      ].some(Boolean)
+      setIsClean(!dirty)
+    } catch (e) {
+      setIsClean(undefined)
+    } finally {
+      setCheckingClean(false)
+    }
+  }, [projectId])
+
+  React.useEffect(() => {
+    void loadCleanStatus()
+  }, [projectId, loadCleanStatus])
 
   const isEqualToCurrent = React.useCallback(
     (b: GitUnifiedBranch): boolean => {
@@ -717,6 +781,24 @@ function CurrentProjectView() {
                     equalToCurrent={isEqualToCurrent(b)}
                     currentName={current?.name}
                     baseRef={current?.name || 'main'}
+                    showSwitch
+                    canSwitch={isClean === true}
+                    onSwitch={async (name) => {
+                      if (!projectId) return
+                      // Re-check cleanliness just before switching
+                      await loadCleanStatus()
+                      if (isClean === false) {
+                        alert('Working tree not clean. Commit or discard changes before switching.')
+                        return
+                      }
+                      const res = await gitService.checkout(projectId, name)
+                      if (!res?.ok) {
+                        alert(`Switch failed: ${res?.error || 'unknown error'}`)
+                      } else {
+                        await unified.reload(projectId)
+                        await loadCleanStatus()
+                      }
+                    }}
                   />
                 ))}
               </>
