@@ -47,6 +47,9 @@ export type GitContextValue = {
   currentProject: ProjectGitStatus
   allProjects: ProjectGitStatus[]
 
+  // Aggregated count of updated feature branches across all projects
+  gitUpdatedBranchesCount: number
+
   // Unified branches API
   unified: {
     byProject: Record<string, UnifiedBranchesState>
@@ -164,7 +167,12 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
 
       const branchIdx = newPending.findIndex((b) => b.branch === branchUpdate.name)
 
-      if (branchUpdate.ahead > 0) {
+      // Only consider feature branches that are ahead and not behind their base
+      const storyId = getStoryIdFromBranchName(branchUpdate.name)
+      const isFeature = !!storyId
+      const isUpdated = branchUpdate.ahead > 0 && branchUpdate.behind === 0
+
+      if (isFeature && isUpdated) {
         const pendingBranch: PendingBranch = {
           projectId,
           branch: branchUpdate.name,
@@ -172,7 +180,7 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
           repoPath: '', // Not available on the event, handled by backend
           ahead: branchUpdate.ahead,
           behind: branchUpdate.behind,
-          storyId: getStoryIdFromBranchName(branchUpdate.name),
+          storyId,
         }
         if (branchIdx > -1) {
           newPending[branchIdx] = pendingBranch
@@ -382,6 +390,7 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
       error,
       currentProject,
       allProjects,
+      gitUpdatedBranchesCount: allProjects.reduce((acc, p) => acc + p.pending.length, 0),
       unified: unifiedApi,
       pending: pendingApi,
       mergePreferences,

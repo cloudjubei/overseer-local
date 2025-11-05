@@ -384,6 +384,16 @@
       "updatedAt": "2025-11-05T00:08:49.255Z",
       "blockers": [],
       "completedAt": "2025-11-05T00:08:49.255Z"
+    },
+    {
+      "id": "36ef0b80-71f0-4964-a283-1526d7cacd56",
+      "status": "+",
+      "title": "Sidebar Git notifications: green badge for updated feature branches",
+      "description": "Add a green notification badge to the Git button in @src/renderer/src/navigation/SidebarView.tsx that mirrors the existing agent-run notifications pattern.\n\n- Badge behavior: displays the count of story/feature branches with updates that are unmerged and non-behind across all known projects.\n- Branch identification: branches following 'features/<storyId>' using existing storyBranchNaming utilities.\n- Count definition: branches with ahead > 0 and behind == 0 relative to their base (default base is the current branch).\n- Data source: reuse GitMonitor via GitManager → gitService to obtain ahead/behind for feature branches per repo; aggregate across ProjectContext repos.\n- Renderer: extend GitContext to compute and expose 'gitUpdatedBranchesCount', updating as GitMonitor refreshes; errors should be surfaced non-blockingly.\n- UI: update SidebarView to render a green badge for the Git nav item when count > 0; use a distinct green color token/class if not already present.\n- Constraints: read-only; no automatic checkouts; safe-by-default with timeouts.\n- Acceptance: when there are unmerged, non-behind feature branches ahead of base in any project, the Git button shows a green badge with the correct count; otherwise the badge is hidden.",
+      "context": [],
+      "createdAt": "2025-11-05T00:48:55.631Z",
+      "updatedAt": "2025-11-05T00:52:48.802Z",
+      "completedAt": "2025-11-05T00:52:48.802Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -421,9 +431,10 @@
     "ec98a5a1-4bcc-45f5-be19-eb73d5b06268": 32,
     "bae6b72c-4b52-45ba-98c8-bdb04da4670a": 33,
     "717444ff-e3cd-41cf-9cc2-605ef38e0ce3": 34,
-    "e3bfa56f-432c-44a4-bd04-a3e7d1af926a": 35
+    "e3bfa56f-432c-44a4-bd04-a3e7d1af926a": 35,
+    "36ef0b80-71f0-4964-a283-1526d7cacd56": 36
   },
   "createdAt": "2025-10-21T17:28:55.063Z",
   "updatedAt": "2025-10-27T09:51:40.369Z",
-  "completedAt": "2025-11-05T00:08:49.255Z"
+  "completedAt": "2025-11-05T00:52:48.802Z"
 }

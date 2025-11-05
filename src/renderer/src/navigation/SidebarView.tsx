@@ -42,6 +42,7 @@ import { useProjectsGroups } from '../contexts/ProjectsGroupsContext'
 import { useChatUnread } from '../hooks/useChatUnread'
 import { useChatThinking } from '../hooks/useChatThinking'
 import SpinnerWithDot from '../components/ui/SpinnerWithDot'
+import { useGit } from '../contexts/GitContext'
 
 export type SidebarProps = {}
 
@@ -170,6 +171,7 @@ export default function SidebarView({}: SidebarProps) {
   const { groups } = useProjectsGroups()
   const { unreadCountByProject } = useChatUnread()
   const { thinkingCountByProject, anyThinkingForProject } = useChatThinking(500)
+  const { gitUpdatedBranchesCount } = useGit()
 
   const [collapsed, setCollapsed] = useState<boolean>(appSettings.userPreferences.sidebarCollapsed)
 
@@ -523,7 +525,7 @@ export default function SidebarView({}: SidebarProps) {
             const isActive = currentView === item.view
             const ref = i === 0 ? firstItemRef : undefined
 
-            // Decide badge for Notifications, Agents, or Chat
+            // Decide badge for Notifications, Git, Agents, or Chat
             let badgeEl: React.ReactNode | null = null
             if (item.view === 'Notifications' && unreadCount > 0) {
               badgeEl = (
@@ -531,6 +533,15 @@ export default function SidebarView({}: SidebarProps) {
                   className={effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''}
                   text={`${unreadCount}`}
                   tooltipLabel={`${unreadCount} unread notifications`}
+                />
+              )
+            } else if (item.view === 'Git' && gitUpdatedBranchesCount > 0) {
+              badgeEl = (
+                <NotificationBadge
+                  className={effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''}
+                  text={`${gitUpdatedBranchesCount}`}
+                  tooltipLabel={`${gitUpdatedBranchesCount} updated feature ${gitUpdatedBranchesCount === 1 ? 'branch' : 'branches'}`}
+                  color="green"
                 />
               )
             } else if (item.view === 'Agents' && activeRunsCurrentProject > 0) {
