@@ -466,7 +466,6 @@ function UnifiedBranchItem({
   }, [storyId, resolveDependency])
 
   React.useEffect(() => {
-    console.log('updating baseRef: ', baseRef)
     setSummary({ loaded: false, hasChanges: false })
   }, [baseRef, headRef])
 
