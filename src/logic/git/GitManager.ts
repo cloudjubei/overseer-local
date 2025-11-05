@@ -87,7 +87,6 @@ export default class GitManager extends BaseManager {
     handlers[IPC_HANDLER_KEYS.GIT_SELECT_COMMITS] = ({ projectId, options }) =>
       this.selectCommits(projectId, options)
 
-    // Safe checkout (switch branch)
     handlers[IPC_HANDLER_KEYS.GIT_CHECKOUT] = ({ projectId, name }) =>
       this.checkout(projectId, name)
 
@@ -237,51 +236,22 @@ export default class GitManager extends BaseManager {
 
   private async checkout(projectId: string, name: string): Promise<GitOpResult | undefined> {
     const tools = await this.__getTools(projectId)
-    if (!tools) return { ok: false, error: 'Git tools not initialized' } as any
+    if (!tools) return
 
-    // Pre-check working tree cleanliness (no unstaged/staged/conflicts)
     try {
-      const status = await tools.getLocalStatus?.({})
-      const dirty = (() => {
-        if (!status) return false
-        const any = (v: any) => {
-          if (!v) return false
-          if (Array.isArray(v)) return v.length > 0
-          if (typeof v === 'object') return Object.keys(v).length > 0
-          if (typeof v === 'number') return v > 0
-          return !!v
-        }
-        const flags = [
-          (status as any).isClean === false,
-          any((status as any).unstaged),
-          any((status as any).staged),
-          any((status as any).conflicts),
-          any((status as any).changed),
-          any((status as any).untracked),
-        ]
-        return flags.some(Boolean)
-      })()
+      const status = await tools.getLocalStatus()
+      const dirty =
+        status.staged.length > 0 || status.unstaged.length > 0 || status.untracked.length > 0
       if (dirty) {
         return {
           ok: false,
           error: 'Working tree not clean. Commit or discard changes before switching.',
-        } as any
+        }
       }
     } catch (e) {
-      return { ok: false, error: (e as any)?.message || 'Failed to read local status' } as any
+      return { ok: false, error: (e as any)?.message || 'Failed to read local status' }
     }
-
-    try {
-      const fn = (tools as any).checkout
-      if (typeof fn !== 'function') {
-        return { ok: false, error: 'Checkout not supported by git tools' } as any
-      }
-      const res = await fn(name)
-      if (res?.ok === false) return res
-      return res || ({ ok: true } as any)
-    } catch (e) {
-      return { ok: false, error: (e as any)?.message || 'Checkout failed' } as any
-    }
+    return tools.checkoutBranch(name, false)
   }
 
   private async updateTool(projectId: string): Promise<GitTools | undefined> {
