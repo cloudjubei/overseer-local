@@ -180,6 +180,9 @@ function UnifiedBranchItem({
     if (summary.loaded) return
     try {
       const diff = await gitService.getBranchDiffSummary(projectId, { baseRef, headRef })
+      if (!diff || !Array.isArray((diff as any).files)) {
+        throw new Error('Diff summary unavailable')
+      }
       const fileLines = diff.files
         .slice(0, 10)
         .map(
