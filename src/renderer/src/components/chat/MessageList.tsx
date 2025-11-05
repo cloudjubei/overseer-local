@@ -720,7 +720,6 @@ export default function MessageList({
                         return (
                           <ToolCallCard
                             key={`tool-${index}-${i}`}
-                            index={i}
                             toolCall={call}
                             selectable={false}
                             disabled={true}
@@ -746,7 +745,6 @@ export default function MessageList({
                         return (
                           <ToolCallCard
                             key={`tool-${index}-${i}`}
-                            index={i}
                             toolCall={result.call}
                             result={result.result}
                             resultType={effectiveResultType}

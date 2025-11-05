@@ -12,6 +12,7 @@ import { StructuredUnifiedDiff } from './tool-popups/diffUtils'
 import FeatureSummaryCard from '../stories/FeatureSummaryCard'
 import { filesService } from '../../services/filesService'
 import { useActiveProject } from '../../contexts/ProjectContext'
+import { useStories } from '@renderer/contexts/StoriesContext'
 
 function StatusIcon({ resultType }: { resultType?: ToolResultType }) {
   const size = 'w-3.5 h-3.5'
@@ -212,6 +213,7 @@ export default function ToolCallChangePopup({
 }) {
   const name = toolCall?.name || 'tool'
   const { projectId } = useActiveProject()
+  const { storiesById, featuresById } = useStories()
 
   function errorContentOnly(): React.ReactNode {
     const msg = tryString(
@@ -304,20 +306,27 @@ export default function ToolCallChangePopup({
       )
     }
 
-    if (n === 'updateStoryTitle' || n === 'updateFeatureTitle') {
-      const oldVal = tryString(extract(result, ['before.title']) || extract(args, ['oldTitle']))
-      const newVal = tryString(extract(result, ['after.title']) || extract(args, ['newTitle']))
+    if (n === 'updateStoryTitle') {
+      const oldVal = result ? undefined : storiesById[args.storyId]?.title
+      const newVal = tryString(extract(args, ['title']))
+      return <InlineOldNew oldVal={oldVal} newVal={newVal} />
+    }
+    if (n === 'updateFeatureTitle') {
+      console.log('result: ', result)
+      const oldVal = result ? undefined : featuresById[args.featureId]?.title
+      const newVal = tryString(extract(args, ['title']))
       return <InlineOldNew oldVal={oldVal} newVal={newVal} />
     }
 
     if (n === 'updateStoryDescription' || n === 'updateFeatureDescription') {
-      const oldDesc = tryString(
-        extract(result, ['before.description']) || extract(args, ['oldDescription']),
-      )
-      const newDesc = tryString(
-        extract(result, ['after.description']) || extract(args, ['newDescription', 'description']),
-      )
-      const diff = tryString(extract(result, ['diff', 'patch']))
+      const oldDesc = result
+        ? undefined
+        : n === 'updateFeatureDescription'
+          ? featuresById[args.featureId]?.description
+          : storiesById[args.storyId]?.description
+      const newDesc = tryString(extract(args, ['description']))
+      const diff = undefined //TODO: make diff work well then use only it
+      // oldDesc && newDesc ? buildSimpleUnifiedDiff('feature', oldDesc, newDesc) : undefined
       return (
         <div className="text-xs">
           {diff ? (

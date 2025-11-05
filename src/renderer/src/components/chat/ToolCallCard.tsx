@@ -14,7 +14,6 @@ import Tooltip from '../ui/Tooltip'
 import ToolCallChangePopup from './ToolCallChangePopup'
 
 export type ToolCallCardProps = {
-  index: number
   toolCall: ToolCall
   result?: any
   resultType?: ToolResultType
@@ -23,14 +22,6 @@ export type ToolCallCardProps = {
   selected?: boolean
   onToggleSelect?: () => void
   disabled?: boolean
-}
-function isLargeJson(value: any) {
-  try {
-    const s = typeof value === 'string' ? value : JSON.stringify(value)
-    return s.length > 600
-  } catch {
-    return false
-  }
 }
 function Collapsible({
   title,
@@ -145,7 +136,6 @@ function getErrorString(result: any): string | undefined {
 }
 
 export default function ToolCallCard({
-  index,
   toolCall,
   result,
   resultType,
@@ -253,7 +243,7 @@ export default function ToolCallCard({
       content={
         <ToolCallChangePopup
           toolCall={toolCall}
-          result={result}
+          result={!isRequireConfirm ? result : undefined}
           resultType={resultType}
           durationMs={durationMs}
         />
