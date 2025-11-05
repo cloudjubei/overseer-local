@@ -1,6 +1,6 @@
 {
   "id": "31525c17-b752-45a1-8cb8-fbdbb750d8e7",
-  "status": "-",
+  "status": "+",
   "title": "Create Sourcetree replacement - a popular version control management app",
   "description": "Goal Provide built-in Git workflows so users do not need external tools (e.g., SourceTree) for routine tasks: viewing repo status and branches, reviewing diffs (working tree, staged, and branch-to-base), running focused tests, merging, and resolving conflicts. Scope for this iteration - Navigation and views: - Add a Git section with two subviews: 'Current project' and 'All projects'. - Current project shows pending operations for the active repo; All projects aggregates across all known projects from ProjectContext (src/renderer/src/contexts/ProjectContext.tsx). - Pending operations definition: - A pending operation is a feature branch with commits ahead of the base branch (default base is the current branch). Feature branches follow the existing convention 'features/<storyId>' where storyId is a UUID. We may later extend to 'features/<storyId>.<featureId>' but uniqueness is already guaranteed by storyId. - Merge flow: - Clicking a pending item opens a Git Merge popup that shows context (project/story/branch), per-file diffs, and analysis placeholders: compilation impact, tests impact, and diff coverage across changed lines. These analyses start as stubs/adapters and should degrade gracefully when not available. On conflicts, the flow should transition into the conflict resolution UI. - Integration notes: - Reuse GitMonitor for status and add aggregation to compute ahead/behind and feature branches across projects. - Reuse/extend existing functions in src/logic/git-monitor/storyBranchNaming.js to resolve story IDs from branch names and expose this mapping to the renderer. - Respect current behavior where agents run from the branch they started; do not force checkouts. All operations must be safe-by-default with timeouts and clear error surfacing. Out of scope for this iteration - Remote PR management, stash workflows, and hunk-level staging (planned separately). Acceptance (high level) - Users can navigate to a Git panel, see pending branches grouped appropriately, open a merge popup with diffs and analysis placeholders, execute a merge, and resolve conflicts without leaving the app.\n\nThe main process class responsible for interfacing with `thefactory-tools` which provides all git operations is @src/logic/git/GitManager.ts . GitManager interfaces with the renderer via @src/renderer/src/services/gitService.ts and @src/preload/ipcHandlersKeys.ts and @src/preload/index.ts . And the forefront interface for all views that is making the usage of all git operations easy is @src/renderer/src/contexts/GitContext.tsx .\n\nAll the relevant types from `thefactory-tools` i.e. `GitTools` can be found in the local copy at:\n`src/logic/git/gitTypes.copy.ts`",
   "features": [
@@ -414,12 +414,13 @@
     },
     {
       "id": "d43c4450-a3cd-43dd-a248-aa75f5c69233",
-      "status": "-",
+      "status": "+",
       "title": "Switch branch button: update current base and retarget Git monitors",
       "description": "Goal Provide an explicit 'Switch branch' control to change the repo’s current branch safely from GitView; after a successful switch, monitors should track divergence relative to the new current base branch.\n\n- Location:\n  - Current project view: for each non-current branch row (in 'Other branches'), add a 'Switch' action.\n  - Optionally surface a 'Switch' action in the 'Current branch' header to open a branch picker.\n- Behavior:\n  - Pre-checks: only allow switch when the working tree is clean (no unstaged/staged changes). If not clean, show a warning/disabled state. No stash/partial staging in this iteration.\n  - Action: perform a safe checkout to the target branch (no forced checkout). Respect current behavior where agents run from the branch they started; the switch must not implicitly alter agent execution contexts.\n  - Monitor retarget: after checkout, update the monitor to use the new current branch as base. Provide an easy programmatic path (e.g., 'switchMonitorBase(projectId, baseBranch)'); if not supported natively, restart the monitor with the new base.\n- Initialization: during LoadingScreen (per project), initialize git tools and start monitors with the repo’s current branch as the base.\n- UI/State updates: refresh unified branches and re-compute 'relToCurrent' and the sidebar green badge. Pending entries must store the actual base at event time.\n- Data/IPC: extend gitService/GitManager with a safe 'checkout' operation and a 'switch monitor base' operation or equivalent restart. Use timeouts and clear error surfacing; no destructive operations.\n- Constraints: safe-by-default, no automatic stash or force. No PR/remote management in this iteration.\n- Acceptance:\n  - User can switch to a different branch from GitView when the working tree is clean.\n  - After switching, the monitors immediately reflect the new base, unified view updates, and the sidebar badge count recalculates accordingly.\n  - On startup, monitors track the actual current branch.",
       "context": [],
       "createdAt": "2025-11-05T14:58:25.851Z",
-      "updatedAt": "2025-11-05T14:58:25.851Z"
+      "updatedAt": "2025-11-05T15:30:17.532Z",
+      "completedAt": "2025-11-05T15:30:17.532Z"
     },
     {
       "id": "ca8eec49-6c42-4e2f-860d-606b056baf4f",
@@ -477,5 +478,6 @@
     "d43c4450-a3cd-43dd-a248-aa75f5c69233": 39
   },
   "createdAt": "2025-10-21T17:28:55.063Z",
-  "updatedAt": "2025-10-27T09:51:40.369Z"
+  "updatedAt": "2025-10-27T09:51:40.369Z",
+  "completedAt": "2025-11-05T15:30:17.532Z"
 }

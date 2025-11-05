@@ -357,6 +357,8 @@ const GIT_API = {
   startMonitor: (projectId, options) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_MONITOR_START, { projectId, options }),
   stopMonitor: (projectId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_MONITOR_STOP, { projectId }),
+  checkout: (projectId, name) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_CHECKOUT, { projectId, name }),
   subscribeToMonitorUpdates: (callback) => {
     const listener = (_event, payload) => callback(payload)
     ipcRenderer.on(IPC_HANDLER_KEYS.GIT_MONITOR_UPDATE, listener)
