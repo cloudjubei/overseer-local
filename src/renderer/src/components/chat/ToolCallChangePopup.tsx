@@ -304,6 +304,25 @@ export default function ToolCallChangePopup({
       )
     }
 
+    if (n === 'renamePath') {
+      const srcPath = tryString(extract(args, ['src'])) || tryString(extract(result, ['src']))
+      const dstPath = tryString(extract(args, ['dst'])) || tryString(extract(result, ['dst']))
+      return (
+        <div className="text-xs">
+          <span className="text-[var(--text-secondary)]">Path:</span>{' '}
+          {srcPath ? (
+            <span className="font-mono text-[11px] line-through text-red-600/80 mr-1">{srcPath}</span>
+          ) : null}
+          {srcPath ? <span className="mx-1">→</span> : null}
+          {dstPath ? (
+            <span className="font-mono text-[11px] font-semibold text-green-600 dark:text-green-400">
+              {dstPath}
+            </span>
+          ) : null}
+        </div>
+      )
+    }
+
     if (n === 'updateStoryTitle' || n === 'updateFeatureTitle') {
       const oldVal = tryString(extract(result, ['before.title']) || extract(args, ['oldTitle']))
       const newVal = tryString(extract(result, ['after.title']) || extract(args, ['newTitle']))
