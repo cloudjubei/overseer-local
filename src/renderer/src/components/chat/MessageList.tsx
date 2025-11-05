@@ -453,7 +453,7 @@ export default function MessageList({
             })()}
             <div
               className={[
-                'overflow-y-auto max-w-full px-3 py-2 rounded-2xl break-words shadow border',
+                'overflow-y-auto overflow-x-auto max-w-full px-3 py-2 rounded-2xl break-words shadow border',
                 'bg-[var(--surface-overlay)] text-[var(--text-primary)] border-[var(--border-subtle)]',
                 'chat-bubble',
               ].join(' ')}
@@ -678,7 +678,7 @@ export default function MessageList({
                     {msg.completionMessage.content || (isSystem && toggleableCount > 0) ? (
                       <div
                         className={[
-                          'overflow-hidden max-w-full px-3 py-2 rounded-2xl whitespace-pre-wrap break-words shadow',
+                          'overflow-x-auto max-w-full px-3 py-2 rounded-2xl whitespace-pre-wrap break-words shadow',
                           isUser
                             ? 'bg-[var(--accent-primary)] text-[var(--text-inverted)] rounded-br-md'
                             : isSystem
@@ -862,7 +862,7 @@ export default function MessageList({
               AI
             </div>
             <div className="max-w-[72%] min-w-[80px] flex flex-col items-start">
-              <div className="overflow-hidden max-w-full px-3 py-2 rounded-2xl whitespace-pre-wrap break-words break-all shadow bg-[var(--surface-raised)] text-[var(--text-primary)] border border-[var(--border-subtle)] rounded-bl-md">
+              <div className="overflow-x-auto max-w-full px-3 py-2 rounded-2xl whitespace-pre-wrap break-words break-all shadow bg-[var(--surface-raised)] text-[var(--text-primary)] border border-[var(--border-subtle)] rounded-bl-md">
                 <Spinner />
               </div>
             </div>
