@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "+",
+  "status": "-",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -2988,6 +2988,19 @@
       "createdAt": "2025-11-05T11:47:57.841Z",
       "updatedAt": "2025-11-05T14:08:11.035Z",
       "completedAt": "2025-11-05T14:08:11.035Z"
+    },
+    {
+      "id": "7afbce8e-a17a-4d16-9ae2-1ff5589ff36c",
+      "status": "-",
+      "title": "in chat when resuming some tools, the tools that were not run must be marked as 'aborted'",
+      "description": "this needs to go from @src/renderer/src/components/chat/MessageList.tsx all the way to @src/logic/factory/FactoryCompletionManager.ts where `resumeCompletionTools` is called - there the chat needs to save the not chosen tools as 'aborted'",
+      "context": [
+        "src/renderer/src/components/chat/MessageList.tsx",
+        "src/logic/factory/FactoryCompletionManager.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-11-05T15:07:06.118Z",
+      "updatedAt": "2025-11-05T15:07:06.118Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -3194,9 +3207,9 @@
     "96900adf-6346-4780-a5dd-7202f8eb9a5d": 201,
     "9a74d29d-8267-4fae-99c1-aa34c2ab45a5": 202,
     "a7a3b52c-c22a-40d1-b443-ac0dfa1036cf": 203,
-    "e7dfd19e-3d61-41d0-b21b-28b462d1d8f1": 204
+    "e7dfd19e-3d61-41d0-b21b-28b462d1d8f1": 204,
+    "7afbce8e-a17a-4d16-9ae2-1ff5589ff36c": 205
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
-  "updatedAt": "2025-11-05T00:22:06.741Z",
-  "completedAt": "2025-11-05T14:08:11.035Z"
+  "updatedAt": "2025-11-05T00:22:06.741Z"
 }

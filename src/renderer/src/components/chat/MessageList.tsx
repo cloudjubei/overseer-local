@@ -628,15 +628,11 @@ export default function MessageList({
 
                 <div
                   className={[
-                    'max-w-[85%] min-w-0 flex flex-col',
+                    'max-w-[85%] min-w-0',
                     isUser ? 'items-end' : isSystem ? 'w-full' : 'items-start',
                   ].join(' ')}
                 >
-                  <div
-                    className={['inline-flex flex-col', isUser ? 'items-start' : 'items-end'].join(
-                      ' ',
-                    )}
-                  >
+                  <div className={['flex-col', isUser ? 'items-start' : 'items-end'].join(' ')}>
                     {(() => {
                       const iso = messageIso(msg)
                       const ts = iso ? formatFriendlyTimestamp(iso) : ''

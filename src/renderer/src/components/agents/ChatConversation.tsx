@@ -11,25 +11,7 @@ import type {
 } from 'thefactory-tools'
 import { formatHmsCompact } from '../../utils/time'
 import Code from '../ui/Code'
-import JsonView from '../ui/JsonView'
 import { IconChat } from '../ui/icons/Icons'
-
-function JsonPreview({ value, maxChars = 200 }: { value: any; maxChars?: number }) {
-  const str = typeof value === 'string' ? value : JSON.stringify(value, null, 2)
-  if (str.length <= maxChars)
-    return <pre className="text-xs whitespace-pre-wrap break-words">{str}</pre>
-  const [open, setOpen] = useState(false)
-  return (
-    <div>
-      <pre className="text-xs whitespace-pre-wrap break-words">
-        {open ? str : str.slice(0, maxChars) + '\u2026'}
-      </pre>
-      <button className="btn-link text-xs mt-1" onClick={() => setOpen((v) => !v)}>
-        {open ? 'Show less' : 'Show more'}
-      </button>
-    </div>
-  )
-}
 
 function Collapsible({
   title,
