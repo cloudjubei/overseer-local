@@ -12,6 +12,7 @@ import { GitUnifiedBranch } from 'thefactory-tools'
 import { useGit } from '../contexts/GitContext'
 import DependencyBullet from '../components/stories/DependencyBullet'
 import { useStories } from '../contexts/StoriesContext'
+import NotificationBadge from '../components/stories/NotificationBadge'
 
 function statusLabel(b: GitUnifiedBranch): string {
   if (b.current) return 'current'
@@ -794,19 +795,154 @@ function AllProjectsView() {
   )
 }
 
+// Row component for the Updates view (updated feature branches)
+function UpdatedPendingRow({
+  item,
+  projectTitle,
+}: {
+  item: {
+    projectId: string
+    repoPath: string
+    baseRef: string
+    branch: string
+    storyId?: string
+    featureId?: string
+    ahead: number
+    behind: number
+  }
+  projectTitle?: string
+}) {
+  const { openModal } = useNavigator()
+  const openMerge = (openConfirm: boolean) => {
+    openModal({
+      type: 'git-merge',
+      projectId: item.projectId,
+      repoPath: '',
+      baseRef: item.baseRef || 'main',
+      branch: item.branch,
+      storyId: item.storyId,
+      openConfirm,
+    })
+  }
+  return (
+    <div
+      className="flex items-center justify-between px-3 py-2 hover:bg-neutral-50 dark:hover:bg-neutral-900/30"
+      role="button"
+      onClick={() => openMerge(false)}
+    >
+      <div className="min-w-0">
+        <div className="font-medium truncate flex items-center gap-2">
+          <span className="truncate">{item.branch}</span>
+          <span className="text-xs text-emerald-700 dark:text-emerald-400">{item.ahead}↑</span>
+        </div>
+        <div className="text-xs text-neutral-600 dark:text-neutral-400 truncate">
+          {projectTitle ? `${projectTitle} · ` : ''}
+          base {item.baseRef || 'main'}
+        </div>
+      </div>
+      <div className="shrink-0">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={(e) => {
+            e.stopPropagation()
+            openMerge(true)
+          }}
+          title="Open merge"
+        >
+          Merge
+        </Button>
+      </div>
+    </div>
+  )
+}
+
+// Updates view aggregating updated feature branches across projects
+function UpdatesView() {
+  const { allProjects } = useGit()
+  const { projects } = useProjectContext()
+  const projectTitleById = React.useMemo(() => {
+    const m = new Map<string, string>()
+    for (const p of projects) m.set(p.id, p.title || p.id)
+    return m
+  }, [projects])
+
+  const items = allProjects.flatMap((p) => (p.pending || []).map((b) => ({ ...b, projectId: p.projectId })))
+
+  return (
+    <div className="flex-1 min-h-0 min-w-0 rounded-md border border-neutral-200 dark:border-neutral-800 flex flex-col">
+      <div className="px-4 py-3 border-b border-neutral-100 dark:border-neutral-900 text-sm text-neutral-600 dark:text-neutral-400 flex items-center gap-3">
+        <div>Updated feature branches across all projects.</div>
+      </div>
+      <div className="flex-1 min-h-0 overflow-auto">
+        {items.length === 0 ? (
+          <div className="p-4 text-sm text-neutral-500">No updated feature branches.</div>
+        ) : (
+          <div className="divide-y divide-neutral-100 dark:divide-neutral-900">
+            {items.map((it) => (
+              <UpdatedPendingRow
+                key={`${it.projectId}:${it.branch}`}
+                item={it}
+                projectTitle={projectTitleById.get(it.projectId)}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 export default function GitView() {
-  const [tab, setTab] = React.useState<'current' | 'all'>('current')
+  const [tab, setTab] = React.useState<'updates' | 'current' | 'all'>('current')
+  const { gitUpdatedBranchesCount } = useGit()
+
+  // Deep-link: '#git/updates' to jump to updates tab
+  React.useEffect(() => {
+    const applyFromHash = (hashRaw: string) => {
+      const raw = (hashRaw || '').replace(/^#/, '')
+      if (raw.startsWith('git')) {
+        const parts = raw.slice('git'.length).split('/').filter(Boolean)
+        if (parts[0] === 'updates') setTab('updates')
+      }
+    }
+    applyFromHash(window.location.hash)
+    const onHash = () => applyFromHash(window.location.hash)
+    window.addEventListener('hashchange', onHash)
+    return () => window.removeEventListener('hashchange', onHash)
+  }, [])
 
   return (
     <div className="flex flex-col flex-1 min-h-0 min-w-0 w-full overflow-hidden">
       <div className="px-4 py-3 border-b border-neutral-200 dark:border-neutral-800">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <div className="text-lg font-semibold">Git</div>
+            <div className="text-lg font-semibold flex items-center gap-2">
+              <span>Git</span>
+              {gitUpdatedBranchesCount > 0 && (
+                <NotificationBadge
+                  text={`${gitUpdatedBranchesCount}`}
+                  tooltipLabel={`${gitUpdatedBranchesCount} updated feature ${gitUpdatedBranchesCount === 1 ? 'branch' : 'branches'}`}
+                  color="green"
+                />
+              )}
+            </div>
             <div className="text-sm text-neutral-600 dark:text-neutral-400">
               View branches with local/remote status and prepare merges
             </div>
           </div>
+          {gitUpdatedBranchesCount > 0 && (
+            <div className="shrink-0">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => setTab('updates')}
+                title="Show updated feature branches"
+              >
+                View updates
+              </Button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -815,15 +951,16 @@ export default function GitView() {
           <SegmentedControl
             ariaLabel="Git view tabs"
             value={tab}
-            onChange={(v) => setTab(v as 'current' | 'all')}
+            onChange={(v) => setTab(v as 'updates' | 'current' | 'all')}
             options={[
+              { value: 'updates', label: 'Updates' },
               { value: 'current', label: 'Current project' },
               { value: 'all', label: 'All projects' },
             ]}
           />
         </div>
 
-        {tab === 'current' ? <CurrentProjectView /> : <AllProjectsView />}
+        {tab === 'updates' ? <UpdatesView /> : tab === 'current' ? <CurrentProjectView /> : <AllProjectsView />}
       </div>
     </div>
   )
