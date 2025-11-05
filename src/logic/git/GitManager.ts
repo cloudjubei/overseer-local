@@ -70,7 +70,6 @@ export default class GitManager extends BaseManager {
     handlers[IPC_HANDLER_KEYS.GIT_DELETE_BRANCH] = ({ projectId, name }) =>
       this.deleteBranch(projectId, name)
 
-    // Push, pull and remote branch delete
     handlers[IPC_HANDLER_KEYS.GIT_PUSH] = ({ projectId, remote, branch }) =>
       this.push(projectId, remote, branch)
     handlers[IPC_HANDLER_KEYS.GIT_PULL] = ({ projectId, remote, branch }) =>
@@ -82,11 +81,9 @@ export default class GitManager extends BaseManager {
       this.startMonitor(projectId, options)
     handlers[IPC_HANDLER_KEYS.GIT_MONITOR_STOP] = ({ projectId }) => this.stopMonitor(projectId)
 
-    // Unified branches listing
     handlers[IPC_HANDLER_KEYS.GIT_LIST_UNIFIED_BRANCHES] = ({ projectId }) =>
       this.listUnifiedBranches(projectId)
 
-    // Select commits (with optional FeatureInfo enrichment)
     handlers[IPC_HANDLER_KEYS.GIT_SELECT_COMMITS] = ({ projectId, options }) =>
       this.selectCommits(projectId, options)
 
