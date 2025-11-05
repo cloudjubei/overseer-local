@@ -102,7 +102,17 @@ function StatusChips({ b, showEqual }: { b: GitUnifiedBranch; showEqual?: boolea
   )
 }
 
-function DeltaChip({ label, ahead = 0, behind = 0 }: { label: string; ahead?: number; behind?: number }) {
+function DeltaChip({
+  label,
+  ahead = 0,
+  behind = 0,
+}: {
+  label: string
+  ahead?: number
+  behind?: number
+}) {
+  if (!ahead && !behind) return <></>
+
   const parts: React.ReactNode[] = []
   if (ahead > 0) {
     parts.push(
@@ -115,7 +125,8 @@ function DeltaChip({ label, ahead = 0, behind = 0 }: { label: string; ahead?: nu
     if (parts.length > 0)
       parts.push(
         <span key="sep" className="text-neutral-600 dark:text-neutral-400">
-          {' '}/{' '}
+          {' '}
+          /{' '}
         </span>,
       )
     parts.push(
@@ -127,7 +138,11 @@ function DeltaChip({ label, ahead = 0, behind = 0 }: { label: string; ahead?: nu
   return (
     <span className="px-1.5 py-0.5 rounded border bg-neutral-50/80 dark:bg-neutral-900/20 border-neutral-200 dark:border-neutral-800 text-[10px] uppercase tracking-wide text-neutral-700 dark:text-neutral-300 inline-flex items-center gap-1">
       <span className="opacity-80">Δ {label}</span>
-      {parts.length > 0 ? <span className="inline-flex items-center">{parts}</span> : <span className="opacity-60">0</span>}
+      {parts.length > 0 ? (
+        <span className="inline-flex items-center">{parts}</span>
+      ) : (
+        <span className="opacity-60">0</span>
+      )}
     </span>
   )
 }
@@ -155,10 +170,11 @@ function UnifiedBranchItem({
   const [deleting, setDeleting] = React.useState(false)
   const [summary, setSummary] = React.useState<{
     loaded: boolean
+    hasChanges: boolean
     error?: string
     text?: string
     totals?: { insertions: number; deletions: number }
-  }>({ loaded: false })
+  }>({ loaded: false, hasChanges: false })
   const [pushing, setPushing] = React.useState(false)
   const [pulling, setPulling] = React.useState(false)
   const [incoming, setIncoming] = React.useState<{
@@ -167,22 +183,22 @@ function UnifiedBranchItem({
     totals?: { insertions: number; deletions: number }
   }>({ loading: false })
 
-  const isBaseBranchRowBehindCurrent = React.useMemo(() => {
-    if (mode === 'current') return false
-    if (!currentName) return false
-    return branch.name === baseRef && currentName !== baseRef
-  }, [mode, currentName, branch.name, baseRef])
+  const headRef = React.useMemo(
+    () => (branch.isLocal ? branch.name : branch.remoteName || branch.name),
+    [branch.isLocal, branch.name, branch.remoteName],
+  )
 
-  const [behindOfCurrent, setBehindOfCurrent] = React.useState<{
-    loading: boolean
-    error?: string
-    count?: number
-  }>({ loading: false })
+  const relToCurrent = unified.byProject[projectId]?.relToCurrent || {}
+  const currentDelta = headRef ? relToCurrent[headRef] : undefined
+
+  const isBaseBranchRowBehindCurrent = React.useMemo(() => {
+    return currentDelta !== undefined && currentDelta.ahead == 0 && currentDelta.behind > 0
+  }, [currentDelta])
 
   const storyId = getStoryId(branch)
 
   const canQuickMerge =
-    branch.isLocal || !!branch.remoteName || mode === 'current' || isBaseBranchRowBehindCurrent
+    (branch.isLocal || !!branch.remoteName) && mode !== 'current' && !isBaseBranchRowBehindCurrent
   const canDeleteLocal = branch.isLocal
   const canDeleteRemote = branch.isRemote && !branch.isLocal
 
@@ -195,14 +211,6 @@ function UnifiedBranchItem({
   const localShortName = (branch.name || '').replace(/^[^\/]+\//, '')
   const remoteShortName = (branch.remoteName || branch.name || '').replace(/^[^\/]+\//, '')
   const isProtected = isProtectedBranch(localShortName) || isProtectedBranch(remoteShortName)
-
-  const headRef = React.useMemo(
-    () => (branch.isLocal ? branch.name : branch.remoteName || branch.name),
-    [branch.isLocal, branch.name, branch.remoteName],
-  )
-
-  const relToCurrent = unified.byProject[projectId]?.relToCurrent || {}
-  const currentDelta = headRef ? relToCurrent[headRef] : undefined
 
   const openMergeModal = (opts: { openConfirm: boolean }) => {
     if (!canQuickMerge) return
@@ -229,6 +237,15 @@ function UnifiedBranchItem({
 
   const loadSummary = async () => {
     if (summary.loaded) return
+    if (baseRef === headRef) {
+      setSummary({
+        loaded: true,
+        hasChanges: false,
+        text: '',
+        totals: { insertions: 0, deletions: 0 },
+      })
+      return
+    }
     try {
       const diff = await gitService.getBranchDiffSummary(projectId, {
         baseRef,
@@ -254,11 +271,16 @@ function UnifiedBranchItem({
         .join('\n')
       setSummary({
         loaded: true,
+        hasChanges: diff.insertions > 0 || diff.deletions > 0,
         text,
         totals: { insertions: diff.insertions, deletions: diff.deletions },
       })
     } catch (e) {
-      setSummary({ loaded: true, error: (e as any)?.message || 'Could not load summary' })
+      setSummary({
+        loaded: true,
+        hasChanges: true,
+        error: (e as any)?.message || 'Could not load summary',
+      })
     }
   }
 
@@ -312,37 +334,6 @@ function UnifiedBranchItem({
     branch.remoteName,
     branch.localSha,
     branch.remoteSha,
-  ])
-
-  React.useEffect(() => {
-    if (!isBaseBranchRowBehindCurrent) return
-    if (behindOfCurrent.loading || behindOfCurrent.count !== undefined || behindOfCurrent.error)
-      return
-    const run = async () => {
-      try {
-        setBehindOfCurrent({ loading: true })
-        const commits = await gitService.selectCommits(projectId, {
-          sources: [currentName as string],
-          baseRef: branch.name,
-          maxCount: 500,
-        })
-        setBehindOfCurrent({ loading: false, count: commits?.length || 0 })
-      } catch (e) {
-        setBehindOfCurrent({
-          loading: false,
-          error: (e as any)?.message || 'Failed to compute behind-of-current',
-        })
-      }
-    }
-    void run()
-  }, [
-    isBaseBranchRowBehindCurrent,
-    behindOfCurrent.loading,
-    behindOfCurrent.count,
-    behindOfCurrent.error,
-    projectId,
-    currentName,
-    branch.name,
   ])
 
   const onDelete = async (e: React.MouseEvent) => {
@@ -445,8 +436,6 @@ function UnifiedBranchItem({
     }
   }
 
-  console.log('branch: ', branch)
-
   const ahead = branch.ahead ?? 0
   const behind = branch.behind ?? 0
   const showPush = mode === 'current' && ahead > 0
@@ -477,7 +466,8 @@ function UnifiedBranchItem({
   }, [storyId, resolveDependency])
 
   React.useEffect(() => {
-    setSummary({ loaded: false })
+    console.log('updating baseRef: ', baseRef)
+    setSummary({ loaded: false, hasChanges: false })
   }, [baseRef, headRef])
 
   React.useEffect(() => {
@@ -502,9 +492,12 @@ function UnifiedBranchItem({
         <div className="font-medium truncate flex items-center gap-2">
           <span className="truncate">{branch.name}</span>
           <StatusChips b={branch} showEqual={mode !== 'current' && !!equalToCurrent} />
-          {/* Divergence chips */}
           {mode !== 'current' && (
-            <DeltaChip label="Current" ahead={currentDelta?.ahead || 0} behind={currentDelta?.behind || 0} />
+            <DeltaChip
+              label="Current"
+              ahead={currentDelta?.ahead || 0}
+              behind={currentDelta?.behind || 0}
+            />
           )}
           <DeltaChip label="Remote" ahead={branch.ahead || 0} behind={branch.behind || 0} />
         </div>
@@ -574,37 +567,24 @@ function UnifiedBranchItem({
                 </Tooltip>
               )}
             </>
-          ) : isBaseBranchRowBehindCurrent ? (
-            <Tooltip
-              content={
-                behindOfCurrent.loading
-                  ? 'Checking relationship to current...'
-                  : 'Base branch is behind current and cannot be fast-merged here.'
-              }
-              placement="bottom"
-            >
-              <span className="text-xs text-neutral-500 dark:text-neutral-400">
-                {behindOfCurrent.count !== undefined
-                  ? `${behindOfCurrent.count} commits behind current`
-                  : 'Behind current'}
-              </span>
-            </Tooltip>
           ) : (
             <>
-              <Tooltip content={canQuickMerge ? 'fast merge' : 'unavailable'} placement="bottom">
-                <span onClick={(e) => e.stopPropagation()}>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={onFastMergeClick}
-                    disabled={!canQuickMerge}
-                    aria-label="Fast merge"
-                    title="fast merge"
-                  >
-                    <IconFastMerge className="w-4 h-4" />
-                  </Button>
-                </span>
-              </Tooltip>
+              {!isBaseBranchRowBehindCurrent && (
+                <Tooltip content={canQuickMerge ? 'fast merge' : 'unavailable'} placement="bottom">
+                  <span onClick={(e) => e.stopPropagation()}>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={onFastMergeClick}
+                      disabled={!canQuickMerge}
+                      aria-label="Fast merge"
+                      title="fast merge"
+                    >
+                      <IconFastMerge className="w-4 h-4" />
+                    </Button>
+                  </span>
+                </Tooltip>
+              )}
               <Tooltip
                 content={
                   isProtected
@@ -653,6 +633,7 @@ function UnifiedBranchItem({
       }
       placement="bottom"
       anchorAs="div"
+      disabled={summary.loaded && !summary.hasChanges}
       disableClickToggle
     >
       {row}
@@ -719,6 +700,7 @@ function CurrentProjectView() {
                   branch={current}
                   mode="current"
                   onAfterAction={reload}
+                  baseRef={current.name}
                 />
               </div>
             )}
@@ -802,6 +784,7 @@ function AllProjectsView() {
                       branch={curr}
                       mode="current"
                       onAfterAction={() => unified.reload(proj.id)}
+                      baseRef={curr.name}
                     />
                     {rest.length > 0 && (
                       <div className="px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400 bg-neutral-50 dark:bg-neutral-900/40">

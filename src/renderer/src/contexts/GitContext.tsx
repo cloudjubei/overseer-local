@@ -250,7 +250,6 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
       try {
         const list = await gitService.listUnifiedBranches(pid)
 
-        // Compute divergence vs current branch (ahead/behind commit counts)
         const current = list.find((b) => b.current)
         const currentName = current?.name
         const relToCurrent: Record<string, { ahead: number; behind: number }> = {}
