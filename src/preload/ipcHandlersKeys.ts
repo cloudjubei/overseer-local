@@ -170,7 +170,6 @@ const IPC_HANDLER_KEYS = {
   GIT_STAGE_PATHS: 'git:stage-paths',
   GIT_UNSTAGE_PATHS: 'git:unstage-paths',
   GIT_RESET_PATHS: 'git:reset-paths',
-  GIT_REMOVE_PATHS: 'git:remove-paths',
   GIT_COMMIT: 'git:commit',
   GIT_CREDENTIALS_SUBSCRIBE: 'git:credentials:subscribe',
   GIT_CREDENTIALS_LIST: 'git:credentials:list',

@@ -9,6 +9,7 @@ import SettingsLLMConfigModal from '@renderer/screens/settings/llms/SettingsLLMC
 import SettingsGitHubCredentialsModal from '@renderer/screens/settings/github/SettingsGitHubCredentialsModal'
 import ProjectManagerModal from '@renderer/screens/projects/ProjectManagerModal'
 import GitMergeModal from '@renderer/screens/git/GitMergeModal'
+import GitCommitModal from '@renderer/screens/git/GitCommitModal'
 
 export default function ModalHost() {
   const { modal, closeModal } = useNavigator()
@@ -74,6 +75,15 @@ export default function ModalHost() {
           storyId={modal.storyId}
           featureId={modal.featureId}
           openConfirm={modal.openConfirm}
+          onRequestClose={closeModal}
+        />
+      )
+      break
+    case 'git-commit':
+      content = (
+        <GitCommitModal
+          projectId={modal.projectId}
+          currentBranch={modal.currentBranch}
           onRequestClose={closeModal}
         />
       )

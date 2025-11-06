@@ -18,6 +18,8 @@ import {
   GitUnifiedBranch,
   GitCommitInfo,
   GitSelectCommitsOptions,
+  // Types for commit operations
+  GitCommitInput,
 } from 'thefactory-tools'
 import ProjectsManager from '../projects/ProjectsManager'
 import Mutex from '../utils/Mutex'
@@ -89,6 +91,14 @@ export default class GitManager extends BaseManager {
 
     handlers[IPC_HANDLER_KEYS.GIT_CHECKOUT] = ({ projectId, name }) =>
       this.checkout(projectId, name)
+
+    handlers[IPC_HANDLER_KEYS.GIT_STAGE_PATHS] = ({ projectId, paths }) =>
+      this.stage(projectId, paths)
+    handlers[IPC_HANDLER_KEYS.GIT_UNSTAGE_PATHS] = ({ projectId, paths }) =>
+      this.unstage(projectId, paths)
+    handlers[IPC_HANDLER_KEYS.GIT_RESET_PATHS] = ({ projectId, paths }) =>
+      this.reset(projectId, paths)
+    handlers[IPC_HANDLER_KEYS.GIT_COMMIT] = ({ projectId, input }) => this.commit(projectId, input)
 
     return handlers
   }
@@ -252,6 +262,30 @@ export default class GitManager extends BaseManager {
       return { ok: false, error: (e as any)?.message || 'Failed to read local status' }
     }
     return tools.checkoutBranch(name, false)
+  }
+
+  private async stage(projectId: string, paths: string[]): Promise<GitOpResult | undefined> {
+    const tools = await this.__getTools(projectId)
+    if (!tools) return
+    return await tools.stage(paths)
+  }
+
+  private async unstage(projectId: string, paths: string[]): Promise<GitOpResult | undefined> {
+    const tools = await this.__getTools(projectId)
+    if (!tools) return
+    return await tools.unstage(paths)
+  }
+
+  private async reset(projectId: string, paths: string[]): Promise<GitOpResult | undefined> {
+    const tools = await this.__getTools(projectId)
+    if (!tools) return
+    return await tools.reset(paths)
+  }
+
+  private async commit(projectId: string, input: GitCommitInput): Promise<GitOpResult | undefined> {
+    const tools = await this.__getTools(projectId)
+    if (!tools) return
+    return await tools.commit(input)
   }
 
   private async updateTool(projectId: string): Promise<GitTools | undefined> {

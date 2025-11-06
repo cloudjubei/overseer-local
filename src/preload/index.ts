@@ -351,6 +351,8 @@ const GIT_API = {
     ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_DELETE_BRANCH, { projectId, name }),
   push: (projectId, remote, branch) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_PUSH, { projectId, remote, branch }),
+  pull: (projectId, remote, branch) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_PULL, { projectId, remote, branch }),
   deleteRemoteBranch: (projectId, name) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_DELETE_REMOTE_BRANCH, { projectId, name }),
   startMonitor: (projectId, options) =>
@@ -358,6 +360,14 @@ const GIT_API = {
   stopMonitor: (projectId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_MONITOR_STOP, { projectId }),
   checkout: (projectId, name) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_CHECKOUT, { projectId, name }),
+  stage: (projectId, paths) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_STAGE_PATHS, { projectId, paths }),
+  unstage: (projectId, paths) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_UNSTAGE_PATHS, { projectId, paths }),
+  reset: (projectId, paths) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_RESET_PATHS, { projectId, paths }),
+  commit: (projectId, input) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_COMMIT, { projectId, input }),
   subscribeToMonitorUpdates: (callback) => {
     const listener = (_event, payload) => callback(payload)
     ipcRenderer.on(IPC_HANDLER_KEYS.GIT_MONITOR_UPDATE, listener)
