@@ -713,7 +713,16 @@ export default function SidebarView({}: SidebarProps) {
                 (sum, pid) => sum + (thinkingCountByProject.get(pid) || 0),
                 0,
               )
-              const showAnyBadge = aggActive > 0 || aggUnread > 0 || aggChatUnread > 0 || aggThinking > 0
+              const aggGitUnread = (g.projects || []).reduce(
+                (sum, pid) => sum + getProjectUpdatedBranchesCount(pid),
+                0,
+              )
+              const showAnyBadge =
+                aggActive > 0 ||
+                aggUnread > 0 ||
+                aggChatUnread > 0 ||
+                aggThinking > 0 ||
+                aggGitUnread > 0
 
               return (
                 <li key={g.id} className="nav-li">
@@ -766,6 +775,14 @@ export default function SidebarView({}: SidebarProps) {
                             className={''}
                             text={`${aggUnread}`}
                             tooltipLabel={`${aggUnread} unread notifications in group`}
+                          />
+                        )}
+                        {aggGitUnread > 0 && (
+                          <NotificationBadge
+                            className={''}
+                            text={`${aggGitUnread}`}
+                            tooltipLabel={`${aggGitUnread} updated ${aggGitUnread === 1 ? 'branch' : 'branches'} in group`}
+                            color="green"
                           />
                         )}
                       </span>
