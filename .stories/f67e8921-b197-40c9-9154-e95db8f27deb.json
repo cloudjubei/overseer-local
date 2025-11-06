@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "-",
+  "status": "?",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -2939,7 +2939,7 @@
     },
     {
       "id": "96900adf-6346-4780-a5dd-7202f8eb9a5d",
-      "status": "-",
+      "status": "?",
       "title": "when coming back to chat - first open the least recently opened chat",
       "description": "In @src/renderer/src/screens/ChatView.tsx - it needs to work when going from chat to any other screen (and then back), and when switching projects but staying inside @src/renderer/src/screens/ChatView.tsx .\nIt also needs to select the chat so that it's obvious which one it is (i.e. it has to become highlighted - blue as it does now when clicking a chat).\nIt also needs to scroll to the last message (if it's unread, then to the top of it so the user can start reading the beginning - or to the very bottom otherwise, i.e. when read).\nCurrently the opening behaviour even interferes with deleting a chat (cos it has to switch to a new one - i.e. project chat if nothing is available as that one is always available) - because it immediately recreates the chat after it gets deleted - this shouldn't happen.",
       "context": [
@@ -2947,8 +2947,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-11-05T08:32:59.874Z",
-      "updatedAt": "2025-11-06T07:55:06.596Z",
-      "rejection": "when within the same project going away to another screen and then back to @src/renderer/src/screens/ChatView.tsx - it opens correctly. But when switching projects (i.e.  @src/renderer/src/screens/ChatView.tsx is open but project/projectId changes) it doesn't work.\nIt also doesn't highlight a chat when first opening the @src/renderer/src/screens/ChatView.tsx (it opens the project chat but doesn't highlight it).\nAlso, when the chat opens - it doesn't fully scroll to the bottom if there's a tool result or spinner. My suspicion is that these things dynamically pop in and the scrollbar gets told to scroll to the bottom, but the bottom extends right after.\n\nadditionally - there's this error that shows when opening ChatView:\n\nreact-dom_client.js?v=624470c6:8155 The tag <path> is unrecognized in this browser. If you meant to render a React component, start its name with an uppercase letter."
+      "updatedAt": "2025-11-06T08:26:06.260Z",
+      "rejection": "Blocked: Agent loop failed: {}"
     },
     {
       "id": "9a74d29d-8267-4fae-99c1-aa34c2ab45a5",

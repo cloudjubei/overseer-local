@@ -239,7 +239,10 @@ export default function ChatView() {
 
       // 3. Current context is invalid or missing, find a new one.
       // Wait until chats for this project are loaded.
-      if (!hasLoadedProjectChats) return
+      if (!hasLoadedProjectChats) {
+        if (selectedContext) setSelectedContext(undefined)
+        return
+      }
 
       // Find best candidate for new context
       let newContext: ChatContext | undefined = loadLeastRecentlyOpened()
