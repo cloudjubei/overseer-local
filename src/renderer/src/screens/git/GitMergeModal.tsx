@@ -9,13 +9,10 @@ import {
   GitMergeResult,
   GitConflictEntry,
   CoverageResult,
-  GitLocalStatus,
-  GitFileChange,
 } from 'thefactory-tools'
 import SegmentedControl from '@renderer/components/ui/SegmentedControl'
 import { factoryTestsService } from '@renderer/services/factoryTestsService'
 import { gitService } from '@renderer/services/gitService'
-import { filesService } from '@renderer/services/filesService'
 import { IconFastMerge } from '@renderer/components/ui/icons/Icons'
 import { IconChevron } from '@renderer/components/ui/icons/IconChevron'
 import Tooltip from '@renderer/components/ui/Tooltip'
@@ -24,8 +21,6 @@ import {
   IconFileAdded,
   IconFileDeleted,
   IconFileModified,
-  IconDelete,
-  IconRefresh,
 } from '@renderer/components/ui/icons/Icons'
 import MergeConflictResolver from '@renderer/screens/git/MergeConflictResolver'
 
@@ -280,17 +275,6 @@ function ProgressBar({ value }: { value: number }) {
   )
 }
 
-// Infer file status icon from local status buckets and workspace listing
-function inferStatusForPath(
-  path: string,
-  buckets: { untracked: Set<string> },
-  workspace: Set<string>,
-): GitMergeReportFile['status'] {
-  if (buckets.untracked.has(path)) return 'A'
-  if (!workspace.has(path)) return 'D'
-  return 'M'
-}
-
 // ============ Main component ============
 export default function GitMergeModal(props: GitMergeModalProps) {
   const { onRequestClose, projectId, repoPath, baseRef, branch, storyId, featureId, openConfirm } =
@@ -348,69 +332,6 @@ export default function GitMergeModal(props: GitMergeModalProps) {
     perFile: Array<{ path: string; added: number; covered: number; pct: number }>
   } | null>(null)
 
-  // Local status for Changes tab (staged top, unstaged bottom)
-  const [localStatus, setLocalStatus] = React.useState<GitLocalStatus | null>(null)
-  const [workspaceFiles, setWorkspaceFiles] = React.useState<Set<string>>(new Set())
-  const [changesLoading, setChangesLoading] = React.useState(false)
-  const [leftWidth, setLeftWidth] = React.useState<number>(
-    Math.max(280, Math.floor(window.innerWidth * 0.28)),
-  )
-  const resizeRef = React.useRef<{ startX: number; startW: number } | null>(null)
-
-  // Diff for selected (primary) file
-  const [selectedDiff, setSelectedDiff] = React.useState<GitFileChange | null>(null)
-  const [selectedDiffLoading, setSelectedDiffLoading] = React.useState<boolean>(false)
-  const [selectedDiffError, setSelectedDiffError] = React.useState<string | null>(null)
-  const diffCacheRef = React.useRef<Map<string, GitFileChange | null>>(new Map())
-
-  // Selection state (multi-select)
-  const [selection, setSelection] = React.useState<Set<string>>(new Set())
-  const lastSelectedRef = React.useRef<{ area: 'staged' | 'unstaged'; path: string } | null>(null)
-
-  // Drag and drop state (section-level)
-  const [dragItem, setDragItem] = React.useState<{
-    paths: string[]
-    area: 'staged' | 'unstaged'
-  } | null>(null)
-  const [dragOverArea, setDragOverArea] = React.useState<'staged' | 'unstaged' | null>(null)
-
-  const makeKey = React.useCallback(
-    (area: 'staged' | 'unstaged', path: string) => `${area}:${path}`,
-    [],
-  )
-
-  const refreshLocal = React.useCallback(async () => {
-    if (!projectId) return
-    setChangesLoading(true)
-    try {
-      const st = await gitService.getLocalStatus(projectId)
-      const all = new Set<string>(await filesService.listFiles(projectId))
-      setLocalStatus(st)
-      setWorkspaceFiles(all)
-      // Preserve selection on refresh; default to first file if none
-      const staged = st?.staged || []
-      const unstaged = [...(st?.unstaged || []), ...(st?.untracked || [])]
-      setSelection((prev) => {
-        const next = new Set<string>()
-        for (const k of prev) {
-          const [area, ...rest] = k.split(':')
-          const p = rest.join(':')
-          if (area === 'staged' && staged.includes(p)) next.add(k)
-          if (area === 'unstaged' && unstaged.includes(p)) next.add(k)
-        }
-        if (next.size === 0) {
-          if (staged[0]) next.add(makeKey('staged', staged[0]))
-          else if (unstaged[0]) next.add(makeKey('unstaged', unstaged[0]))
-        }
-        return next
-      })
-    } catch (e) {
-      console.warn('Failed to load local git status', e)
-    } finally {
-      setChangesLoading(false)
-    }
-  }, [projectId])
-
   React.useEffect(() => {
     let mounted = true
     ;(async () => {
@@ -448,66 +369,213 @@ export default function GitMergeModal(props: GitMergeModalProps) {
     if (hasConflicts) setActiveTab('resolve')
   }, [hasConflicts])
 
-  // Load local status when opening or when switching back to changes tab
+  // Build compilation impact using backend analysis when available, otherwise fallback to heuristic
   React.useEffect(() => {
-    if (activeTab === 'changes') void refreshLocal()
-  }, [activeTab, refreshLocal])
-
-  // Compute primary selected item by on-screen order (staged first, then unstaged)
-  const primarySelected = React.useMemo((): {
-    area: 'staged' | 'unstaged'
-    path: string
-  } | null => {
-    const staged = localStatus?.staged || []
-    const unstagedCombined = [...(localStatus?.unstaged || []), ...(localStatus?.untracked || [])]
-    for (const p of staged) {
-      if (selection.has(makeKey('staged', p))) return { area: 'staged', path: p }
+    if (!report) {
+      setCompilationInfo(null)
+      return
     }
-    for (const p of unstagedCombined) {
-      if (selection.has(makeKey('unstaged', p))) return { area: 'unstaged', path: p }
-    }
-    return null
-  }, [selection, localStatus, makeKey])
 
+    // Prefer backend analysis when provided
+    const backend = report.analysis?.compilation
+    if (backend) {
+      setCompilationInfo(backend)
+      return
+    }
+
+    // Fallback heuristic
+    const details: Array<{ path: string; risk: 'low' | 'medium' | 'high'; reason: string }> = []
+    const criticalNames = [
+      'package.json',
+      'tsconfig.json',
+      'tsconfig.base.json',
+      'vite.config',
+      'webpack.config',
+    ]
+
+    for (const f of report.files) {
+      const p = f.path
+      const lower = p.toLowerCase()
+      if (criticalNames.some((name) => lower.includes(name))) {
+        details.push({ path: p, risk: 'high', reason: 'Build configuration change' })
+        continue
+      }
+      if (p.endsWith('.d.ts')) {
+        details.push({ path: p, risk: 'high', reason: 'Type definition change can cascade' })
+        continue
+      }
+      if (p.endsWith('.ts') || p.endsWith('.tsx') || p.endsWith('.js') || p.endsWith('.jsx')) {
+        // Heuristic based on additions/deletions
+        const churn = (f.additions || 0) + (f.deletions || 0)
+        const risk: 'low' | 'medium' | 'high' = churn > 200 ? 'high' : churn > 50 ? 'medium' : 'low'
+        details.push({
+          path: p,
+          risk,
+          reason: `Source change (+${f.additions || 0}/-${f.deletions || 0})`,
+        })
+        continue
+      }
+      if (p.endsWith('.json') || p.endsWith('.yaml') || p.endsWith('.yml')) {
+        details.push({ path: p, risk: 'medium', reason: 'Configuration/content change' })
+        continue
+      }
+      // default low
+      details.push({ path: p, risk: 'low', reason: 'Non-code change' })
+    }
+
+    const counts = details.reduce(
+      (acc, d) => {
+        acc[d.risk] += 1
+        return acc
+      },
+      { low: 0, medium: 0, high: 0 } as Record<'low' | 'medium' | 'high', number>,
+    )
+    const summary = `Risk estimate · High ${counts.high} · Medium ${counts.medium} · Low ${counts.low} (no compile adapter configured)`
+    setCompilationInfo({ summary, details })
+  }, [report])
+
+  // Compute tests impact: use backend when available, otherwise fallback heuristic when the tab is opened
   React.useEffect(() => {
     let cancelled = false
-    async function load() {
-      if (!projectId || !primarySelected) {
-        setSelectedDiff(null)
+    async function run() {
+      if (activeTab !== 'tests') return
+      if (!projectId || !report) {
+        setTestsImpact(null)
         return
       }
-      const key = `${primarySelected.area}:${primarySelected.path}`
-      const cached = diffCacheRef.current.get(key)
-      if (cached !== undefined) {
-        setSelectedDiff(cached)
+
+      // Prefer backend-provided tests analysis
+      const backend = report.analysis?.tests
+      if (backend) {
+        if (!cancelled) {
+          setTestsImpactError(null)
+          setTestsImpact(backend)
+        }
         return
       }
-      setSelectedDiffLoading(true)
-      setSelectedDiffError(null)
+
+      // Fallback heuristic
+      setTestsImpactError(null)
       try {
-        const list = await gitService.getLocalDiffSummary(projectId, {
-          staged: primarySelected.area === 'staged',
-          includePatch: true,
-          includeStructured: true,
+        const catalog = await factoryTestsService.listTests(projectId)
+        if (cancelled) return
+        const testsList = (catalog || []).map((t: any) =>
+          String((t && (t.name || t.path || t.file || t.id)) ?? ''),
+        )
+        const testSet = new Set<string>()
+        const changed = report.files.map((f) => normalizePath(f.path))
+
+        for (const test of testsList) {
+          const tnorm = normalizePath(test)
+          const base = tnorm.split('/').pop() || tnorm
+          const stem = base.replace(/\.(spec|test)\.[a-z0-9]+$/i, '')
+          // heuristic: match if filename stem or any directory segment overlaps
+          for (const ch of changed) {
+            const chBase = ch.split('/').pop() || ch
+            const chStem = chBase.replace(/\.[a-z0-9]+$/i, '')
+            if (tnorm.includes(chStem) || ch.includes(stem)) {
+              testSet.add(test)
+              break
+            }
+          }
+        }
+        setTestsImpact({
+          impacted: Array.from(testSet).slice(0, 50),
+          totalCatalog: testsList.length,
         })
-        const entry =
-          list.find((f) => f.path === primarySelected.path || f.oldPath === primarySelected.path) ||
-          null
-        diffCacheRef.current.set(key, entry)
-        setSelectedDiff(entry)
       } catch (e: any) {
-        setSelectedDiffError(e?.message || String(e))
-        diffCacheRef.current.set(`${primarySelected.area}:${primarySelected.path}`, null)
-        setSelectedDiff(null)
-      } finally {
-        if (!cancelled) setSelectedDiffLoading(false)
+        if (!cancelled) setTestsImpactError(e?.message || String(e))
       }
     }
-    void load()
+    run()
     return () => {
       cancelled = true
     }
-  }, [projectId, primarySelected])
+  }, [activeTab, projectId, report])
+
+  // Compute diff coverage: use backend when available, otherwise fallback to last coverage computation when the tab is opened
+  React.useEffect(() => {
+    let cancelled = false
+    async function compute() {
+      if (activeTab !== 'coverage') return
+      if (!projectId || !report) {
+        setDiffCoverage(null)
+        return
+      }
+
+      // Prefer backend-provided coverage analysis
+      const backend = report.analysis?.coverage
+      if (backend) {
+        if (!cancelled) {
+          setCoverageError(null)
+          setCoverageLoading(false)
+          setDiffCoverage(backend)
+        }
+        return
+      }
+
+      // Fallback: compute from last known coverage
+      setCoverageLoading(true)
+      setCoverageError(null)
+      try {
+        const cov: CoverageResult | undefined = await factoryTestsService.getLastCoverage(projectId)
+        if (cancelled) return
+        if (!cov || !cov.files || Object.keys(cov.files).length === 0) {
+          setCoverageError('No coverage data available. Run coverage in Tests view.')
+          setDiffCoverage(null)
+          setCoverageLoading(false)
+          return
+        }
+
+        // Build map from normalized rel path -> uncovered lines set and total lines covered include pct_lines
+        const coverByRel: Record<string, { uncovered: Set<number>; pct_lines: number | null }> = {}
+        for (const [file, stats] of Object.entries<any>(cov.files || {})) {
+          const rel = normalizePath(file)
+          const uncovered = new Set<number>(
+            Array.isArray((stats as any).uncovered_lines)
+              ? ((stats as any).uncovered_lines as number[])
+              : [],
+          )
+          const pct = typeof (stats as any).pct_lines === 'number' ? (stats as any).pct_lines : null
+          coverByRel[rel] = { uncovered, pct_lines: pct }
+        }
+
+        let totalAdded = 0
+        let covered = 0
+        const perFile: Array<{ path: string; added: number; covered: number; pct: number }> = []
+
+        for (const f of report.files) {
+          if (f.binary) continue
+          const addedLines = parseAddedLineNumbersFromPatch(f.patch)
+          if (addedLines.length === 0) continue
+          const rel = normalizePath(f.path)
+          const cover = coverByRel[rel]
+          let fileCovered = 0
+          if (cover) {
+            for (const ln of addedLines) {
+              if (!cover.uncovered.has(ln)) fileCovered += 1
+            }
+          }
+          const fileTotal = addedLines.length
+          totalAdded += fileTotal
+          covered += fileCovered
+          const pct = fileTotal > 0 ? (fileCovered / fileTotal) * 100 : 0
+          perFile.push({ path: f.path, added: fileTotal, covered: fileCovered, pct })
+        }
+
+        const pct = totalAdded > 0 ? (covered / totalAdded) * 100 : 0
+        setDiffCoverage({ totalAdded, covered, pct, perFile })
+      } catch (e: any) {
+        if (!cancelled) setCoverageError(e?.message || String(e))
+      } finally {
+        if (!cancelled) setCoverageLoading(false)
+      }
+    }
+    compute()
+    return () => {
+      cancelled = true
+    }
+  }, [activeTab, projectId, report])
 
   const doMergeWithPostActions = async () => {
     if (merging || postActionRunning) return
@@ -539,6 +607,7 @@ export default function GitMergeModal(props: GitMergeModalProps) {
             }
           }
           if (deleteRemote && (!autoPush || pushOk)) {
+            // Ensure we pass a short branch name (without remote prefix like 'origin/')
             const shortBranch = branch.replace(/^[^\/]+\//, '')
             const delRes = await gitService.deleteRemoteBranch(projectId, shortBranch)
             if (!delRes || !delRes.ok) {
@@ -549,9 +618,12 @@ export default function GitMergeModal(props: GitMergeModalProps) {
           }
           setPostActionRunning(false)
         }
+        // Refresh unified branches after a successful merge (regardless of post-action outcome)
         try {
           void unified.reload(projectId)
-        } catch (e) {}
+        } catch (e) {
+          // non-fatal
+        }
         if (localError) {
           setPostActionError(localError)
         } else {
@@ -559,6 +631,7 @@ export default function GitMergeModal(props: GitMergeModalProps) {
           return
         }
       }
+      // If not ok or conflicts exist, keep modal open and show conflict info below
     } catch (e: any) {
       console.error('Merge failed', e)
       setMergeError(e?.message || String(e))
@@ -605,406 +678,31 @@ export default function GitMergeModal(props: GitMergeModalProps) {
     </div>
   )
 
-  // Handlers for staged/unstaged actions
-  const stagePath = React.useCallback(
-    async (p: string) => {
-      await gitService.stage(projectId, [p])
-      await refreshLocal()
-    },
-    [projectId, refreshLocal],
-  )
-  const unstagePath = React.useCallback(
-    async (p: string) => {
-      await gitService.unstage(projectId, [p])
-      await refreshLocal()
-    },
-    [projectId, refreshLocal],
-  )
-  const resetPath = React.useCallback(
-    async (p: string) => {
-      await gitService.reset(projectId, [p])
-      await refreshLocal()
-    },
-    [projectId, refreshLocal],
-  )
-  const removePath = React.useCallback(
-    async (p: string) => {
-      const ok = window.confirm(`Delete '${p}' from disk? This cannot be undone.`)
-      if (!ok) return
-      await filesService.deletePath(projectId, p)
-      await refreshLocal()
-    },
-    [projectId, refreshLocal],
-  )
-
-  // Resizer handlers (left pane width)
-  const onResizeStart = (e: React.PointerEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
-    resizeRef.current = { startX: e.clientX, startW: leftWidth }
-    window.addEventListener('pointermove', onResizeMove)
-    window.addEventListener('pointerup', onResizeEnd)
-  }
-  const onResizeMove = (e: PointerEvent) => {
-    if (!resizeRef.current) return
-    const { startX, startW } = resizeRef.current
-    const dx = e.clientX - startX
-    const next = startW + dx
-    const maxByViewport = Math.floor(window.innerWidth * 0.7)
-    const clamped = Math.max(260, Math.min(maxByViewport, next))
-    setLeftWidth(clamped)
-  }
-  const onResizeEnd = () => {
-    resizeRef.current = null
-    window.removeEventListener('pointermove', onResizeMove)
-    window.removeEventListener('pointerup', onResizeEnd)
-  }
-
   function renderChangesTab() {
-    const staged = localStatus?.staged || []
-    const unstagedCombined = [...(localStatus?.unstaged || []), ...(localStatus?.untracked || [])]
-
-    const buckets = {
-      untracked: new Set(localStatus?.untracked || []),
-    }
-
-    const isSelected = (area: 'staged' | 'unstaged', path: string) =>
-      selection.has(makeKey(area, path))
-
-    const selectSingle = (area: 'staged' | 'unstaged', path: string) => {
-      setSelection(new Set([makeKey(area, path)]))
-      lastSelectedRef.current = { area, path }
-    }
-
-    const toggleOne = (area: 'staged' | 'unstaged', path: string) => {
-      setSelection((prev) => {
-        const next = new Set(prev)
-        const k = makeKey(area, path)
-        if (next.has(k)) next.delete(k)
-        else next.add(k)
-        return next
-      })
-      lastSelectedRef.current = { area, path }
-    }
-
-    const selectRange = (area: 'staged' | 'unstaged', path: string) => {
-      const anchor = lastSelectedRef.current
-      const list = area === 'staged' ? staged : unstagedCombined
-      if (!anchor || anchor.area !== area) {
-        selectSingle(area, path)
-        return
-      }
-      const a = list.indexOf(anchor.path)
-      const b = list.indexOf(path)
-      if (a === -1 || b === -1) {
-        selectSingle(area, path)
-        return
-      }
-      const [start, end] = a <= b ? [a, b] : [b, a]
-      const keys = list.slice(start, end + 1).map((p) => makeKey(area, p))
-      setSelection(new Set(keys))
-    }
-
-    const handleToggleStagedAll = (nextChecked: boolean) => {
-      // If toggled off, unstage all files in the staged list
-      if (!nextChecked && staged.length > 0) {
-        void gitService.unstage(projectId, staged).then(() => refreshLocal())
-      }
-    }
-
-    const handleToggleUnstagedAll = (nextChecked: boolean) => {
-      // If toggled on, stage all files in the unstaged list
-      if (nextChecked && unstagedCombined.length > 0) {
-        void gitService.stage(projectId, unstagedCombined).then(() => refreshLocal())
-      }
-    }
-
-    const Row = ({ path, area }: { path: string; area: 'staged' | 'unstaged' }) => {
-      const sel = isSelected(area, path)
-      const isUntracked = buckets.untracked.has(path)
-      const status = inferStatusForPath(path, buckets, workspaceFiles)
-
-      return (
-        <div
-          className={`group flex items-center justify-between gap-2 px-2 py-1.5 cursor-pointer rounded ${sel ? 'bg-neutral-200/60 dark:bg-neutral-800/60' : 'hover:bg-neutral-100 dark:hover:bg-neutral-900/40'}`}
-          onClick={(e) => {
-            if (e.shiftKey) {
-              selectRange(area, path)
-            } else if (e.metaKey || e.ctrlKey) {
-              toggleOne(area, path)
-            } else {
-              selectSingle(area, path)
-            }
-          }}
-          title={path}
-          draggable
-          onDragStart={(e) => {
-            // Drag group: if this row is selected, drag all selected from same area; otherwise just this row
-            const areaKeys = (area === 'staged' ? staged : unstagedCombined).map((p) =>
-              makeKey(area, p),
-            )
-            const selectedInArea = areaKeys
-              .filter((k) => selection.has(k))
-              .map((k) => k.split(':').slice(1).join(':'))
-            const paths = sel && selectedInArea.length > 0 ? selectedInArea : [path]
-            setDragItem({ paths, area })
-            try {
-              e.dataTransfer.setData('text/plain', JSON.stringify({ paths, area }))
-            } catch {}
-            e.dataTransfer.effectAllowed = 'move'
-          }}
-          onDragEnd={() => {
-            setDragItem(null)
-            setDragOverArea(null)
-          }}
-        >
-          <div className="flex items-center gap-2 min-w-0 flex-1">
-            <input
-              type="checkbox"
-              className="shrink-0"
-              checked={area === 'staged'}
-              onChange={(e) => (e.target.checked ? stagePath(path) : unstagePath(path))}
-              onClick={(e) => e.stopPropagation()}
-              aria-label={area === 'staged' ? 'Unstage file' : 'Stage file'}
-              title={area === 'staged' ? 'Unstage' : 'Stage'}
-            />
-            <StatusIcon status={status} />
-            <span className="truncate font-mono text-xs">{path}</span>
-          </div>
-          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            {!isUntracked ? (
-              <Tooltip content={'Reset'} placement="top">
-                <button
-                  className="btn-secondary btn-icon"
-                  aria-label="Reset file changes"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    void resetPath(path)
-                  }}
-                >
-                  <IconRefresh className="w-4 h-4" />
-                </button>
-              </Tooltip>
-            ) : null}
-            <Tooltip content={'Remove'} placement="top">
-              <button
-                className="btn-secondary btn-icon"
-                aria-label="Remove file"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  void removePath(path)
-                }}
-              >
-                <IconDelete className="w-4 h-4" />
-              </button>
-            </Tooltip>
-          </div>
-        </div>
-      )
-    }
-
     return (
-      <div className="flex min-h-[300px] max-h-[70vh] overflow-hidden border border-neutral-200 dark:border-neutral-800 rounded-md">
-        {/* Left pane: staged (top) and unstaged (bottom) */}
-        <div
-          className="h-full flex flex-col overflow-hidden"
-          style={{ width: leftWidth, minWidth: 260 }}
-        >
-          <div className="flex-1 min-h-0 overflow-auto p-2">
-            {/* Staged section (drop target) */}
-            <div
-              className={`rounded-md ${dragOverArea === 'staged' && dragItem?.area !== 'staged' ? 'outline outline-1 outline-teal-500/60 bg-teal-500/5' : ''}`}
-              onDragOver={(e) => {
-                if (dragItem && dragItem.area !== 'staged') {
-                  e.preventDefault()
-                  setDragOverArea('staged')
-                }
-              }}
-              onDragLeave={() => setDragOverArea((prev) => (prev === 'staged' ? null : prev))}
-              onDrop={(e) => {
-                e.preventDefault()
-                const data = e.dataTransfer.getData('text/plain')
-                try {
-                  const parsed = JSON.parse(data)
-                  if (Array.isArray(parsed?.paths) && parsed?.area && parsed.area !== 'staged') {
-                    void gitService.stage(projectId, parsed.paths).then(() => refreshLocal())
-                  } else if (parsed?.path && parsed?.area && parsed.area !== 'staged') {
-                    void stagePath(parsed.path)
-                  }
-                } catch {
-                  if (dragItem && dragItem.area !== 'staged') {
-                    const paths = dragItem.paths || []
-                    if (paths.length)
-                      void gitService.stage(projectId, paths).then(() => refreshLocal())
-                  }
-                }
-                setDragOverArea(null)
-                setDragItem(null)
-              }}
-            >
-              <div className="flex items-center justify-between pb-1">
-                <div className="text-[11px] font-semibold uppercase tracking-wide text-neutral-600 dark:text-neutral-400">
-                  Staged ({staged.length})
-                </div>
-                <Tooltip content={'Unstage all'} placement="top">
-                  <input
-                    type="checkbox"
-                    checked={staged.length > 0}
-                    onChange={(e) => handleToggleStagedAll(e.target.checked)}
-                    aria-label="Unstage all staged files"
-                    title="Unstage all"
-                  />
-                </Tooltip>
-              </div>
-              {changesLoading ? (
-                <div className="text-xs text-neutral-500 flex items-center gap-2 p-2">
-                  <Spinner size={14} label="Loading status..." />
-                </div>
-              ) : staged.length === 0 ? (
-                <div className="text-xs text-neutral-500 px-2 py-2">No staged files.</div>
-              ) : (
-                <div className="space-y-1">
-                  {staged.map((p) => (
-                    <Row key={`st-${p}`} path={p} area="staged" />
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Unstaged section (drop target) */}
-            <div
-              className={`mt-3 rounded-md ${dragOverArea === 'unstaged' && dragItem?.area !== 'unstaged' ? 'outline outline-1 outline-teal-500/60 bg-teal-500/5' : ''}`}
-              onDragOver={(e) => {
-                if (dragItem && dragItem.area !== 'unstaged') {
-                  e.preventDefault()
-                  setDragOverArea('unstaged')
-                }
-              }}
-              onDragLeave={() => setDragOverArea((prev) => (prev === 'unstaged' ? null : prev))}
-              onDrop={(e) => {
-                e.preventDefault()
-                const data = e.dataTransfer.getData('text/plain')
-                try {
-                  const parsed = JSON.parse(data)
-                  if (Array.isArray(parsed?.paths) && parsed?.area && parsed.area !== 'unstaged') {
-                    void gitService.unstage(projectId, parsed.paths).then(() => refreshLocal())
-                  } else if (parsed?.path && parsed?.area && parsed.area !== 'unstaged') {
-                    void unstagePath(parsed.path)
-                  }
-                } catch {
-                  if (dragItem && dragItem.area !== 'unstaged') {
-                    const paths = dragItem.paths || []
-                    if (paths.length)
-                      void gitService.unstage(projectId, paths).then(() => refreshLocal())
-                  }
-                }
-                setDragOverArea(null)
-                setDragItem(null)
-              }}
-            >
-              <div className="flex items-center justify-between pb-1">
-                <div className="text-[11px] font-semibold uppercase tracking-wide text-neutral-600 dark:text-neutral-400">
-                  Unstaged ({unstagedCombined.length})
-                </div>
-                <Tooltip content={'Stage all'} placement="top">
-                  <input
-                    type="checkbox"
-                    checked={unstagedCombined.length === 0}
-                    onChange={(e) => handleToggleUnstagedAll(e.target.checked)}
-                    aria-label="Stage all unstaged files"
-                    title="Stage all"
-                  />
-                </Tooltip>
-              </div>
-              {changesLoading ? (
-                <div className="text-xs text-neutral-500 flex items-center gap-2 p-2">
-                  <Spinner size={14} label="Loading status..." />
-                </div>
-              ) : unstagedCombined.length === 0 ? (
-                <div className="text-xs text-neutral-500 px-2 py-2">No unstaged files.</div>
-              ) : (
-                <div className="space-y-1">
-                  {unstagedCombined.map((p) => (
-                    <Row key={`us-${p}`} path={p} area="unstaged" />
-                  ))}
-                </div>
-              )}
-            </div>
+      <div className="flex flex-col gap-3">
+        {loading && (
+          <div className="p-3 text-sm text-neutral-600 dark:text-neutral-400 flex items-center gap-2">
+            <Spinner size={14} label="Loading diff preview..." />
           </div>
-        </div>
-
-        {/* Divider with hover handle */}
-        <div
-          className="relative w-2 cursor-col-resize group flex-shrink-0"
-          role="separator"
-          aria-orientation="vertical"
-          aria-label="Resize panel"
-          onPointerDown={onResizeStart}
-        >
-          <div className="absolute inset-y-0 left-0 right-0" />
-          <div
-            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity"
-            style={{ width: 16, height: 48 }}
-            aria-hidden
-          >
-            <div className="h-full w-full rounded bg-teal-500/20 border border-teal-500 shadow">
-              <div className="h-full w-full flex items-center justify-center gap-[3px]">
-                <div className="w-[2px] h-[24px] rounded-sm bg-teal-600" />
-                <div className="w-[2px] h-[24px] rounded-sm bg-teal-600" />
-                <div className="w-[2px] h-[24px] rounded-sm bg-teal-600" />
-              </div>
-            </div>
+        )}
+        {!loading && error && (
+          <div className="p-3 text-sm text-red-600 dark:text-red-400 whitespace-pre-wrap">
+            {error}
           </div>
-        </div>
-
-        {/* Right pane: diff view for primary selected file */}
-        <div className="flex-1 min-w-0 min-h-[300px] max-h-[70vh] overflow-auto p-3">
-          {!primarySelected ? (
-            <div className="text-sm text-neutral-600 dark:text-neutral-400">
-              Select a file to preview.
-            </div>
-          ) : (
-            <div className="space-y-2">
-              <div className="text-xs text-neutral-600 dark:text-neutral-400 flex items-center gap-2">
-                <span className="font-mono truncate" title={primarySelected.path}>
-                  {primarySelected.path}
-                </span>
-                <span className="ml-1 px-1.5 py-0.5 rounded bg-neutral-100 dark:bg-neutral-900/60">
-                  {primarySelected.area === 'staged' ? 'Staged' : 'Unstaged'}
-                </span>
-                {selectedDiff &&
-                (typeof selectedDiff.additions === 'number' ||
-                  typeof selectedDiff.deletions === 'number') ? (
-                  <span className="ml-2 text-[11px] text-neutral-600 dark:text-neutral-400">
-                    +{selectedDiff.additions || 0}/-{selectedDiff.deletions || 0}
-                  </span>
-                ) : null}
-              </div>
-
-              {selectedDiffLoading ? (
-                <div className="text-xs text-neutral-600 dark:text-neutral-400 flex items-center gap-2">
-                  <Spinner size={14} label="Loading diff..." />
-                </div>
-              ) : selectedDiffError ? (
-                <div className="text-xs text-red-600 dark:text-red-400 whitespace-pre-wrap">
-                  {selectedDiffError}
-                </div>
-              ) : !selectedDiff ? (
-                <div className="text-xs text-neutral-500">
-                  Diff not available. The API may not be implemented yet.
-                </div>
-              ) : selectedDiff.binary ? (
-                <div className="text-xs text-neutral-600 dark:text-neutral-400">
-                  Binary file diff not shown
-                </div>
-              ) : selectedDiff.patch ? (
-                <DiffPatch patch={selectedDiff.patch} />
-              ) : (
-                <div className="text-xs text-neutral-500">No patch available.</div>
-              )}
-            </div>
-          )}
-        </div>
+        )}
+        {!loading && !error && (!report || report.files.length === 0) && (
+          <div className="p-3 text-sm text-neutral-600 dark:text-neutral-400">
+            Diff preview unavailable. You can still proceed to merge.
+          </div>
+        )}
+        {!loading && !error && report && report.files.length > 0 && (
+          <div className="flex flex-col gap-3">
+            {report.files.map((f: GitMergeReportFile) => (
+              <FileDiffItem key={f.path} file={f} />
+            ))}
+          </div>
+        )}
       </div>
     )
   }
