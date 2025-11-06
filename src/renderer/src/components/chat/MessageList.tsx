@@ -12,6 +12,7 @@ import { ChatMessage, ToolCall, ToolResult, ToolResultType } from 'thefactory-to
 import { inferFileType } from 'thefactory-tools/utils'
 import { IconToolbox, IconDelete, IconRefresh } from '../ui/icons/Icons'
 import { Switch } from '../ui/Switch'
+import { useChatUnread } from '@renderer/hooks/useChatUnread'
 
 interface EnhancedMessage extends ChatMessage {
   showModel?: boolean
@@ -93,6 +94,7 @@ export default function MessageList({
   onRetry?: () => void
 }) {
   const { filesByPath } = useFiles()
+  const { getLastReadForKey } = useChatUnread()
 
   const enhancedMessages: EnhancedMessage[] = useMemo(() => {
     return messages.map((m, index) => {
@@ -259,17 +261,80 @@ export default function MessageList({
     }
   }
 
-  // On chat switch, ensure we start at the bottom (covers cases where spinner is visible on open)
+  // Determine first unread message index for this chat
+  const lastReadIso = useMemo(() => {
+    return chatId ? getLastReadForKey(chatId) : undefined
+  }, [chatId, getLastReadForKey])
+
+  const systemPromptMessage = useMemo(() => {
+    return enhancedMessages.length === 1 && enhancedMessages[0].completionMessage.role === 'system'
+      ? enhancedMessages[0]
+      : undefined
+  }, [enhancedMessages])
+  const messagesToDisplay = useMemo(() => {
+    return systemPromptMessage !== undefined ? enhancedMessages.slice(1) : enhancedMessages
+  }, [enhancedMessages, systemPromptMessage])
+
+  // Determine if there are unread messages and where the last unread sits
+  const lastMessageIsoMemo = useMemo(() => {
+    if (!messagesToDisplay.length) return undefined
+    return messageIso(messagesToDisplay[messagesToDisplay.length - 1])
+  }, [messagesToDisplay])
+
+  const hasUnreadOnOpen = useMemo(() => {
+    if (!messagesToDisplay.length) return false
+    if (!lastReadIso) return true
+    if (!lastMessageIsoMemo) return false
+    return lastMessageIsoMemo.localeCompare(lastReadIso) > 0
+  }, [messagesToDisplay, lastReadIso, lastMessageIsoMemo])
+
+  const lastUnreadIndex: number | null = useMemo(() => {
+    if (!messagesToDisplay.length) return null
+    if (!hasUnreadOnOpen) return null
+    // If never read, last message is the last unread
+    if (!lastReadIso) return messagesToDisplay.length - 1
+    for (let i = messagesToDisplay.length - 1; i >= 0; i--) {
+      const iso = messageIso(messagesToDisplay[i])
+      if (iso && iso.localeCompare(lastReadIso) > 0) return i
+    }
+    return null
+  }, [messagesToDisplay, lastReadIso, hasUnreadOnOpen])
+
+  // On chat switch, prefer scrolling to the first unread message; otherwise to bottom
   useEffect(() => {
     justSwitchedChatRef.current = true
     requestAnimationFrame(() => {
-      forceScrollToBottom('auto')
+      const container = messageListRef.current
+      if (container && messagesToDisplay.length > 0) {
+        if (!hasUnreadOnOpen) {
+          // Last message already read: go to bottom
+          forceScrollToBottom('auto')
+        } else if (typeof lastUnreadIndex === 'number') {
+          // Scroll to the last unread message with generous headroom
+          const target = container.querySelector(
+            `[data-msg-idx="${lastUnreadIndex}"]`,
+          ) as HTMLElement | null
+          if (target) {
+            const headroom = Math.floor(container.clientHeight * 0.3)
+            const top = Math.max(0, target.offsetTop - headroom)
+            container.scrollTo({ top, behavior: 'auto' })
+            isAtBottomRef.current = false
+            onAtBottomChange?.(false)
+          } else {
+            forceScrollToBottom('auto')
+          }
+        } else {
+          forceScrollToBottom('auto')
+        }
+      } else {
+        forceScrollToBottom('auto')
+      }
       // Clear the switch flag after initial adjustment
       justSwitchedChatRef.current = false
-      // On opening, if we're at bottom and there are messages, mark them as read
+      // If we ended up at bottom, mark latest as read
       if (isAtBottomRef.current) onReadLatest?.(lastMessageIso(messages))
     })
-  }, [chatId])
+  }, [chatId, messagesToDisplay.length, hasUnreadOnOpen, lastUnreadIndex])
 
   useEffect(() => {
     const container = messageListRef.current
@@ -281,7 +346,7 @@ export default function MessageList({
 
     if (!increased) return
 
-    // If chat switched, jump to bottom
+    // If chat switched, jump to bottom or keep position based on unread handling already
     if (animationChatChangedRef.current) {
       requestAnimationFrame(() => {
         forceScrollToBottom('auto')
@@ -399,15 +464,6 @@ export default function MessageList({
     return () => ro.disconnect()
   }, [])
 
-  const systemPromptMessage = useMemo(() => {
-    return enhancedMessages.length === 1 && enhancedMessages[0].completionMessage.role === 'system'
-      ? enhancedMessages[0]
-      : undefined
-  }, [enhancedMessages])
-  const messagesToDisplay = useMemo(() => {
-    return systemPromptMessage !== undefined ? enhancedMessages.slice(1) : enhancedMessages
-  }, [enhancedMessages, systemPromptMessage])
-
   const cutoffIndex = useMemo(() => {
     if (
       !numberMessagesToSend ||
@@ -485,7 +541,7 @@ export default function MessageList({
             const isLast = index === messagesToDisplay.length - 1
             const showRetry = !!onRetry && isLast
             return (
-              <div key={index} className="flex items-start gap-2">
+              <div key={index} data-msg-idx={index} className="flex items-start gap-2">
                 {/* Left avatar */}
                 <div
                   className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-semibold bg-[color-mix(in_srgb,var(--accent-primary)_14%,transparent)] text-[var(--text-primary)] border border-[var(--border-subtle)]"
@@ -578,7 +634,7 @@ export default function MessageList({
             : 'Delete last message'
 
           return (
-            <div key={index}>
+            <div key={index} data-msg-idx={index}>
               {showCutoff && (
                 <div className="relative text-center my-4 group" title={tooltipText}>
                   <hr className="border-dashed border-neutral-300 dark:border-neutral-700" />

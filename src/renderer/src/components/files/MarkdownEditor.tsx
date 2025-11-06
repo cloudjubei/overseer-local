@@ -1,35 +1,8 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useUnsavedChanges } from '../../navigation/UnsavedChanges'
 import { useFiles } from '../../contexts/FilesContext'
 import { FileMeta } from 'thefactory-tools'
-
-function escapeHtml(str: string) {
-  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-}
-
-function basicMarkdownToHtml(md: string) {
-  // Very minimal: headings, code blocks, inline code, bold, italic, links, paragraphs
-  let html = escapeHtml(md)
-  html = html.replace(/^######\s(.+)$/gm, '<h6>$1</h6>')
-  html = html.replace(/^#####\s(.+)$/gm, '<h5>$1</h5>')
-  html = html.replace(/^####\s(.+)$/gm, '<h4>$1</h4>')
-  html = html.replace(/^###\s(.+)$/gm, '<h3>$1</h3>')
-  html = html.replace(/^##\s(.+)$/gm, '<h2>$1</h2>')
-  html = html.replace(/^#\s(.+)$/gm, '<h1>$1</h1>')
-  // fenced code blocks ```
-  html = html.replace(
-    /```([\s\S]*?)```/g,
-    (_, code) => `<pre class="md-code"><code>${code}</code></pre>`,
-  )
-  html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-  html = html.replace(/\*(.*?)\*/g, '<em>$1</em>')
-  html = html.replace(/`([^`]+)`/g, '<code>$1</code>')
-  html = html.replace(/\n\n+/g, '</p><p>')
-  html = `<p>${html}</p>`
-  // links [text](url)
-  html = html.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noreferrer">$1</a>')
-  return html
-}
+import Markdown from '../ui/Markdown'
 
 export type MarkdownEditorProps = {
   file: FileMeta
@@ -68,8 +41,6 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ file }) => {
       alert('Failed to save file')
     }
   }
-
-  const previewHtml = useMemo(() => basicMarkdownToHtml(value || ''), [value])
 
   return (
     <div className="md-editor" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -123,7 +94,9 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ file }) => {
             />
           </div>
           <div style={{ padding: 12, overflow: 'auto' }}>
-            <div className="md-preview" dangerouslySetInnerHTML={{ __html: previewHtml }} />
+            <div className="md-preview">
+              <Markdown text={value || ''} allowHtml />
+            </div>
           </div>
         </div>
       )}

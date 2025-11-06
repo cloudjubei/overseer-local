@@ -236,7 +236,7 @@ export default function ChatsNavigationSidebar({
   const isActive = useCallback(
     (ctx: ChatContext) => {
       if (!selectedContext) return false
-      return JSON.stringify(selectedContext) === JSON.stringify(ctx)
+      return getChatContextPath(selectedContext) === getChatContextPath(ctx)
     },
     [selectedContext],
   )

@@ -99,7 +99,8 @@ export default class ChatsManager extends BaseManager {
 
     let trimCount = 1
     const last = msgs[msgs.length - 1]
-    const lastHasToolResults = Array.isArray((last as any)?.toolResults) && (last as any).toolResults.length > 0
+    const lastHasToolResults =
+      Array.isArray((last as any)?.toolResults) && (last as any).toolResults.length > 0
     if (lastHasToolResults && msgs.length >= 2) {
       const prev = msgs[msgs.length - 2]
       if (prev?.completionMessage?.role === 'assistant') {

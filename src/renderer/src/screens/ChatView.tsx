@@ -188,12 +188,12 @@ export default function ChatView() {
     localStorage.setItem('chat-sidebar-mode', mode)
   }, [mode])
 
-  // Initial selection: honor deep-link; else open least recently opened chat after project chats load; else fall back to project chat
+  // Initial selection: honor deep-link; else open most recently used chat after project chats load; else fall back to project chat
   useEffect(() => {
     const hasLoadedProjectChats =
       !!(activeProjectId && Object.prototype.hasOwnProperty.call(chatsByProjectId, activeProjectId))
 
-    const loadLeastRecentlyOpened = (): ChatContext | undefined => {
+    const loadMostRecentlyOpened = (): ChatContext | undefined => {
       try {
         const projId = activeProjectId
         if (!projId) return undefined
@@ -201,14 +201,14 @@ export default function ChatView() {
         if (!list.length) return undefined
         const raw = localStorage.getItem(`chat-last-opened:${projId}`)
         const map: Record<string, string> = raw ? JSON.parse(raw) : {}
-        let pick: { key: string; ts: string; ctx: ChatContext } | undefined
-        for (const c of list) {
-          const ts = map[c.key] || '' // missing timestamp => least recently opened
-          if (!pick || ts.localeCompare(pick.ts) < 0) {
-            pick = { key: c.key, ts, ctx: c.chat.context }
-          }
+        const candidates = list
+          .map((c) => ({ ts: map[c.key] as string | undefined, ctx: c.chat.context }))
+          .filter((x) => !!x.ts) as { ts: string; ctx: ChatContext }[]
+        if (candidates.length > 0) {
+          candidates.sort((a, b) => a.ts.localeCompare(b.ts))
+          return candidates[candidates.length - 1].ctx
         }
-        return pick?.ctx
+        return undefined
       } catch {
         return undefined
       }
@@ -218,7 +218,6 @@ export default function ChatView() {
       // 1. Handle hash navigation first
       const hashCtx = parseChatRouteFromHash(window.location.hash)
       if (hashCtx) {
-
         if (!selectedContext || getChatContextPath(hashCtx) !== getChatContextPath(selectedContext)) {
           try {
             await getChat(hashCtx)
@@ -245,7 +244,7 @@ export default function ChatView() {
       }
 
       // Find best candidate for new context
-      let newContext: ChatContext | undefined = loadLeastRecentlyOpened()
+      let newContext: ChatContext | undefined = loadMostRecentlyOpened()
       if (!newContext && activeProjectId) {
         newContext = { type: 'PROJECT', projectId: activeProjectId }
       }
