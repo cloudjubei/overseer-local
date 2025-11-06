@@ -1020,7 +1020,7 @@ const AllProjectsView = () => {
 }
 
 const chatContextAgentRun = (projectId: string, storyId: string, agentRunId: string) => {
-  return { type: 'AGENT_RUN', projectId, storyId, agentRunId }
+  return { type: 'AGENT_RUN', projectId, storyId, agentRunId } as ChatContext
 }
 const chatContextAgentRunFeature = (
   projectId: string,
@@ -1046,18 +1046,10 @@ export default function AgentsView() {
 
   const chatContext: ChatContext | undefined = useMemo(() => {
     if (selectedRun) {
-      if (selectedRun.featureId) {
-        return chatContextAgentRunFeature(
-          selectedRun.projectId,
-          selectedRun.storyId,
-          selectedRun.featureId,
-          selectedRun.id,
-        )
-      }
       return chatContextAgentRun(selectedRun.projectId, selectedRun.storyId, selectedRun.id)
     }
     if (!projectId) return undefined
-    return { type: 'PROJECT_TOPIC', projectId, projectTopic: 'agent_runs' }
+    return { type: 'PROJECT_TOPIC', projectId, projectTopic: 'agentRuns' }
   }, [projectId, selectedRun])
 
   return (

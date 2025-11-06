@@ -1,4 +1,4 @@
-import {
+import type {
   GitApplyMergeOptions,
   GitDiffSummary,
   GitBranchEvent,
@@ -15,7 +15,6 @@ import {
   GitCommitInfo,
   GitSelectCommitsOptions,
 } from 'thefactory-tools'
-import type { GitOpResult } from 'thefactory-tools'
 
 export type GitService = {
   getMergePlan: (

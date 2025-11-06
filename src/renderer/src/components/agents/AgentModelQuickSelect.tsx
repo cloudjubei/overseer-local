@@ -4,9 +4,9 @@ import { useLLMConfig } from '../../contexts/LLMConfigContext'
 
 export default function AgentModelQuickSelect({ className = '' }: { className?: string }) {
   const {
-    recentConfigs,
+    setActiveAgentRun,
+    recentAgentRunConfigs,
     activeAgentRunConfigId: activeConfigId,
-    setActive,
     configs,
   } = useLLMConfig()
   const { navigateView } = useNavigator()
@@ -34,14 +34,14 @@ export default function AgentModelQuickSelect({ className = '' }: { className?: 
             navigateView('Settings')
             return
           }
-          setActive(v)
+          setActiveAgentRun(v)
         }}
       >
         <SelectTrigger className="ui-select w-[220px]" aria-label="Agent Model">
           <SelectValue placeholder="Select Model" />
         </SelectTrigger>
         <SelectContent>
-          {recentConfigs.map((cfg) => (
+          {recentAgentRunConfigs.map((cfg) => (
             <SelectItem key={cfg.id} value={cfg.id!}>
               {cfg.name} {cfg.model ? `(${cfg.model})` : ''}
             </SelectItem>

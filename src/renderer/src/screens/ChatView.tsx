@@ -68,6 +68,16 @@ function titleForContext(
   }
 }
 
+// the chat file structure
+// projects/<projectId>/<projectTopic>.json
+// projects/<projectId>/stories/<storyId>/agents/<agentRunId>.json
+// projects/<projectId>/stories/<storyId>/features/<featureId>/agents/<agentRunId>.json
+// projects/<projectId>/stories/<storyId>/features/<featureId>.json
+// projects/<projectId>/stories/<storyId>/<storyTopic>.json
+// projects/<projectId>/stories/<storyId>.json
+// projects/<projectId>.json
+// `thefactory-tools` -> getChatContextPath + getChatContextFromFilename
+
 // Support deep-linking to specific chat contexts under the chat route
 // Formats:
 // - #chat/project/<projectId>
@@ -93,33 +103,28 @@ function parseChatRouteFromHash(hashRaw: string): ChatContext | undefined {
     }
     if (seg === 'story' && parts.length >= 2) {
       const storyId = decodeURIComponent(parts[1])
-      const ctx: ChatContextStory = { type: 'STORY', storyId }
-      return ctx
+      return { type: 'STORY', storyId } as ChatContextStory
     }
     if (seg === 'feature' && parts.length >= 3) {
       const storyId = decodeURIComponent(parts[1])
       const featureId = decodeURIComponent(parts[2])
-      const ctx: ChatContextFeature = { type: 'FEATURE', storyId, featureId }
-      return ctx
+      return { type: 'FEATURE', storyId, featureId } as ChatContextFeature
     }
     if (seg === 'project-topic' && parts.length >= 3) {
       const projectId = decodeURIComponent(parts[1])
       const projectTopic = decodeURIComponent(parts[2])
-      const ctx: ChatContextProjectTopic = { type: 'PROJECT_TOPIC', projectId, projectTopic }
-      return ctx
+      return { type: 'PROJECT_TOPIC', projectId, projectTopic } as ChatContextProjectTopic
     }
     if (seg === 'story-topic' && parts.length >= 3) {
       const storyId = decodeURIComponent(parts[1])
       const storyTopic = decodeURIComponent(parts[2])
-      const ctx: ChatContextStoryTopic = { type: 'STORY_TOPIC', storyId, storyTopic }
-      return ctx
+      return { type: 'STORY_TOPIC', storyId, storyTopic } as ChatContextStoryTopic
     }
     if (seg === 'agent-run' && parts.length >= 4) {
       const projectId = decodeURIComponent(parts[1])
       const storyId = decodeURIComponent(parts[2])
       const agentRunId = decodeURIComponent(parts[3])
-      const ctx: ChatContextAgentRun = { type: 'AGENT_RUN', projectId, storyId, agentRunId }
-      return ctx
+      return { type: 'AGENT_RUN', projectId, storyId, agentRunId } as ChatContextAgentRun
     }
     if (seg === 'agent-run-feature' && parts.length >= 5) {
       const projectId = decodeURIComponent(parts[1])
@@ -190,8 +195,9 @@ export default function ChatView() {
 
   // Initial selection: honor deep-link; else open most recently used chat after project chats load; else fall back to project chat
   useEffect(() => {
-    const hasLoadedProjectChats =
-      !!(activeProjectId && Object.prototype.hasOwnProperty.call(chatsByProjectId, activeProjectId))
+    const hasLoadedProjectChats = !!(
+      activeProjectId && Object.prototype.hasOwnProperty.call(chatsByProjectId, activeProjectId)
+    )
 
     const loadMostRecentlyOpened = (): ChatContext | undefined => {
       try {
@@ -218,7 +224,10 @@ export default function ChatView() {
       // 1. Handle hash navigation first
       const hashCtx = parseChatRouteFromHash(window.location.hash)
       if (hashCtx) {
-        if (!selectedContext || getChatContextPath(hashCtx) !== getChatContextPath(selectedContext)) {
+        if (
+          !selectedContext ||
+          getChatContextPath(hashCtx) !== getChatContextPath(selectedContext)
+        ) {
           try {
             await getChat(hashCtx)
           } catch {}
@@ -341,12 +350,12 @@ export default function ChatView() {
         ]}
         value={mode}
         onChange={(v) => setMode(v as 'categories' | 'history')}
-        size='sm'
+        size="sm"
       />
     )
     const showDot = hasUnreadForProject(activeProjectId)
     return (
-      <div className='flex items-center gap-2'>
+      <div className="flex items-center gap-2">
         {seg}
         {showDot && <DotBadge title={'Unread chats in this project'} />}
       </div>

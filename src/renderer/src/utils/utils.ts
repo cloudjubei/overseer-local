@@ -15,6 +15,7 @@ export const DEFAULT_PROJECT_SETTINGS: ProjectSettings = {
       stories: true,
       system: true,
       updates: true,
+      agent_run: true,
     },
   },
 }

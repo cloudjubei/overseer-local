@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useRef, useState, useId } from 'react'
+import React, { useEffect, useLayoutEffect, useRef, useState, useId, JSX } from 'react'
 import { createPortal } from 'react-dom'
 
 export type TooltipProps = {
@@ -34,7 +34,9 @@ export default function Tooltip({
   const [pinned, setPinned] = useState(false)
   const [position, setPosition] = useState<{ top: number; left: number } | null>(null)
   const [maxWidth, setMaxWidth] = useState<number | undefined>(undefined)
-  const [effectivePlacement, setEffectivePlacement] = useState<'top' | 'bottom' | 'left' | 'right'>(placement)
+  const [effectivePlacement, setEffectivePlacement] = useState<'top' | 'bottom' | 'left' | 'right'>(
+    placement,
+  )
   const timerRef = useRef<number | null>(null)
   const hideTimerRef = useRef<number | null>(null)
   const anchorRef = useRef<HTMLElement | null>(null)
@@ -166,11 +168,13 @@ export default function Tooltip({
     }
 
     const fitsSide = (pl: 'left' | 'right') => {
-      const available = pl === 'right' ? viewportWidth - (anchorRect.right + spacing) : anchorRect.left - spacing
+      const available =
+        pl === 'right' ? viewportWidth - (anchorRect.right + spacing) : anchorRect.left - spacing
       return available >= Math.min(tipRect.width, viewportWidth * 0.6)
     }
     const fitsVert = (pl: 'top' | 'bottom') => {
-      const available = pl === 'bottom' ? viewportHeight - (anchorRect.bottom + spacing) : anchorRect.top - spacing
+      const available =
+        pl === 'bottom' ? viewportHeight - (anchorRect.bottom + spacing) : anchorRect.top - spacing
       return available >= Math.min(tipRect.height, viewportHeight * 0.6)
     }
 
@@ -207,12 +211,15 @@ export default function Tooltip({
     // Constrain max width/height so we never cover the anchor and keep tooltip on the chosen side
     let availableWidth = viewportWidth
     let availableHeight = viewportHeight
-    if (chosen === 'right') availableWidth = Math.max(120, viewportWidth - (anchorRect.right + spacing) - 4)
+    if (chosen === 'right')
+      availableWidth = Math.max(120, viewportWidth - (anchorRect.right + spacing) - 4)
     else if (chosen === 'left') availableWidth = Math.max(120, anchorRect.left - spacing - 4)
-    else if (chosen === 'top' || chosen === 'bottom') availableWidth = Math.max(160, Math.min(viewportWidth - 16, 480))
+    else if (chosen === 'top' || chosen === 'bottom')
+      availableWidth = Math.max(160, Math.min(viewportWidth - 16, 480))
 
     if (chosen === 'top') availableHeight = Math.max(120, anchorRect.top - spacing - 4)
-    else if (chosen === 'bottom') availableHeight = Math.max(120, viewportHeight - (anchorRect.bottom + spacing) - 4)
+    else if (chosen === 'bottom')
+      availableHeight = Math.max(120, viewportHeight - (anchorRect.bottom + spacing) - 4)
 
     // Clamp position to viewport for safety
     const clampedTop = Math.max(0, Math.min(pos.top, viewportHeight - tipRect.height))
@@ -291,7 +298,13 @@ export default function Tooltip({
             ref={tooltipRef}
             onMouseEnter={() => show(true)}
             onMouseLeave={() => hide()}
-            style={{ position: 'absolute', top: position.top, left: position.left, zIndex: zIndex, maxWidth: maxWidth }}
+            style={{
+              position: 'absolute',
+              top: position.top,
+              left: position.left,
+              zIndex: zIndex,
+              maxWidth: maxWidth,
+            }}
             data-placement={effectivePlacement}
           >
             <div className="ui-tooltip__content">{content}</div>

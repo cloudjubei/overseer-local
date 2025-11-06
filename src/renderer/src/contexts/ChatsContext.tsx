@@ -1,4 +1,12 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import type {
   LLMConfig,
   ChatContext,
@@ -212,7 +220,12 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
           delete newChats[key]
         } else if (chatUpdate.type === 'change') {
           const next: ChatState = {
-            ...(newChats[key] || { key, isLoading: false, isThinking: false, chat: chatUpdate.chat! }),
+            ...(newChats[key] || {
+              key,
+              isLoading: false,
+              isThinking: false,
+              chat: chatUpdate.chat!,
+            }),
             chat: chatUpdate.chat!,
           }
           newChats[key] = next
@@ -257,7 +270,9 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
                     title = 'Agent run chat update'
                     break
                 }
-                const raw = String((msgs[lastAssistantIdx] as any)?.completionMessage?.content || '')
+                const raw = String(
+                  (msgs[lastAssistantIdx] as any)?.completionMessage?.content || '',
+                )
                 const snippet = raw.replace(/\s+/g, ' ').slice(0, 120)
                 const message = snippet || 'Assistant responded'
 
@@ -302,7 +317,12 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
             // no-op
           }
         } else {
-          const next: ChatState = { key, chat: chatUpdate.chat!, isLoading: false, isThinking: false }
+          const next: ChatState = {
+            key,
+            chat: chatUpdate.chat!,
+            isLoading: false,
+            isThinking: false,
+          }
           newChats[key] = next
           upsertChatsByProject(next)
         }
@@ -435,12 +455,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
   )
 
   const retryCompletion = useCallback(
-    async (
-      context: ChatContext,
-      prompt: string,
-      settings: ChatSettings,
-      config: LLMConfig,
-    ) => {
+    async (context: ChatContext, prompt: string, settings: ChatSettings, config: LLMConfig) => {
       const key = getChatContextPath(context)
       const chatState = await getChat(context)
       if (chatState.isThinking) return
@@ -504,39 +519,45 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
     [updateChatState],
   )
 
-  const deleteChat = useCallback(async (context: ChatContext) => {
-    const key = getChatContextPath(context)
-    // Optimistic removal from local state
-    setChats((prev) => {
-      const existing = prev[key]
-      if (existing) {
-        removeFromChatsByProject(existing)
+  const deleteChat = useCallback(
+    async (context: ChatContext) => {
+      const key = getChatContextPath(context)
+      // Optimistic removal from local state
+      setChats((prev) => {
+        const existing = prev[key]
+        if (existing) {
+          removeFromChatsByProject(existing)
+        }
+        const newState = { ...prev }
+        delete newState[key]
+        return newState
+      })
+      await chatsService.deleteChat(context)
+    },
+    [removeFromChatsByProject],
+  )
+
+  const deleteLastMessage = useCallback(
+    async (context: ChatContext) => {
+      const key = getChatContextPath(context)
+      const chatState = await getChat(context)
+
+      // Do not allow deletion while assistant is thinking
+      if (chatState.isThinking) return
+
+      try {
+        const updated = await chatsService.deleteLastMessage(context)
+        if (updated) {
+          const nextState: ChatState = { ...chatState, chat: updated }
+          updateChatState(key, nextState)
+        }
+      } catch (e) {
+        console.error('Failed to delete last message', e)
+        // No state mutation here; rely on subscription to reconcile
       }
-      const newState = { ...prev }
-      delete newState[key]
-      return newState
-    })
-    await chatsService.deleteChat(context)
-  }, [removeFromChatsByProject])
-
-  const deleteLastMessage = useCallback(async (context: ChatContext) => {
-    const key = getChatContextPath(context)
-    const chatState = await getChat(context)
-
-    // Do not allow deletion while assistant is thinking
-    if (chatState.isThinking) return
-
-    try {
-      const updated = await chatsService.deleteLastMessage(context)
-      if (updated) {
-        const nextState: ChatState = { ...chatState, chat: updated }
-        updateChatState(key, nextState)
-      }
-    } catch (e) {
-      console.error('Failed to delete last message', e)
-      // No state mutation here; rely on subscription to reconcile
-    }
-  }, [getChat, updateChatState])
+    },
+    [getChat, updateChatState],
+  )
 
   const getSettings = useCallback(
     (context: ChatContext): ChatSettings | undefined => {
@@ -606,6 +627,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       } catch (e) {
         console.error('Failed to get settings prompt', e)
       }
+      return
     },
     [],
   )
@@ -619,8 +641,9 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       } catch (e) {
         console.error('Failed to get settings prompt', e)
       }
+      return
     },
-        [],
+    [],
   )
 
   const value = useMemo<ChatsContextValue>(

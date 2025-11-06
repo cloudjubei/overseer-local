@@ -136,7 +136,7 @@
   --focus-ring: var(--color-brand-400);
 
   /* Status: bold */
-  --status-empty-bg: var(#ffffff);
+  --status-empty-bg: #ffffff;
   --status-empty-fg: #000000;
   --status-done-bg: var(--color-green-600);
   --status-done-fg: #053b2e;
@@ -177,6 +177,11 @@
   --status-queued-soft-bg: color-mix(in srgb, var(--status-queued-bg) 30%, transparent);
   --status-queued-soft-fg: var(--status-queued-fg);
   --status-queued-soft-border: #d4d4d4;
+
+  /* Newly added: empty soft tokens */
+  --status-empty-soft-bg: color-mix(in srgb, var(--color-gray-400) 12%, transparent);
+  --status-empty-soft-fg: var(--color-gray-800);
+  --status-empty-soft-border: var(--color-gray-300);
 
   /* Typography tokens */
   --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -283,6 +288,9 @@
 
   --focus-ring: var(--color-brand-400);
 
+  /* Dark: status bold */
+  --status-empty-bg: var(--surface-raised);
+  --status-empty-fg: var(--text-primary);
   --status-done-bg: color-mix(in srgb, var(--color-green-600) 85%, #0b0f14);
   --status-done-fg: #e9fff6;
   --status-working-bg: color-mix(in srgb, var(--color-orange-650) 80%, #0b0f14);
@@ -295,6 +303,11 @@
   --status-review-fg: #f2f7ff;
   --status-queued-bg: #313843;
   --status-queued-fg: #e5e7eb;
+
+  /* Dark: status soft */
+  --status-empty-soft-bg: color-mix(in srgb, #ffffff 10%, transparent);
+  --status-empty-soft-fg: var(--text-secondary);
+  --status-empty-soft-border: color-mix(in srgb, #ffffff 35%, transparent);
 
   --status-done-soft-bg: color-mix(in srgb, var(--color-green-600) 18%, transparent);
   --status-done-soft-fg: #bbf7e1;

@@ -114,7 +114,9 @@ export default function SettingsLLMConfigModal({
     setModelsLoading(true)
     setModelsError(null)
     try {
-      const models = await chatsService.listModels(form)
+      //TODO:
+      // const models = await chatsService.listModels(form)
+      const models: string[] = []
       setAvailableModels(models)
       if (!models.includes(form.model)) {
         setForm((prev) => ({ ...prev, model: '' }))
@@ -162,7 +164,8 @@ export default function SettingsLLMConfigModal({
       {isEdit && existing && (
         <div className="mb-3 flex items-center justify-between">
           <div className="text-sm">
-            Chat status: {isChatActive ? (
+            Chat status:{' '}
+            {isChatActive ? (
               <span className="badge badge--soft badge--info">Chat Active</span>
             ) : (
               <span className="text-[var(--text-secondary)]">Not chat active</span>

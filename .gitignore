@@ -96,6 +96,8 @@ typings/
 
 # Electron-Forge
 out/
+dist/
+
 
 # APP SPECIFIC
 chats/

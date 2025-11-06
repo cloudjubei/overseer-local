@@ -4,6 +4,8 @@
     "src/types/**/*"],
   "compilerOptions": {
     "composite": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
     "types": ["electron-vite/node"]
   }
 }

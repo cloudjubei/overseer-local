@@ -234,6 +234,7 @@ export default function MessageList({
   const isAtBottomRef = useRef<boolean>(true)
   const prevLenForScrollRef = useRef<number>(messages.length)
   const justSwitchedChatRef = useRef<boolean>(false)
+  const initialScrollTargetRef = useRef<'unread' | 'bottom' | null>(null)
 
   const NEAR_BOTTOM_PX = 80
   const computeIsNearBottom = (): boolean => {
@@ -300,40 +301,44 @@ export default function MessageList({
     return null
   }, [messagesToDisplay, lastReadIso, hasUnreadOnOpen])
 
-  // On chat switch, prefer scrolling to the first unread message; otherwise to bottom
-  useEffect(() => {
+  // On chat switch, perform initial scroll pre-paint: last unread (with headroom) or bottom
+  useLayoutEffect(() => {
     justSwitchedChatRef.current = true
-    requestAnimationFrame(() => {
-      const container = messageListRef.current
-      if (container && messagesToDisplay.length > 0) {
-        if (!hasUnreadOnOpen) {
-          // Last message already read: go to bottom
-          forceScrollToBottom('auto')
-        } else if (typeof lastUnreadIndex === 'number') {
-          // Scroll to the last unread message with generous headroom
-          const target = container.querySelector(
-            `[data-msg-idx="${lastUnreadIndex}"]`,
-          ) as HTMLElement | null
-          if (target) {
-            const headroom = Math.floor(container.clientHeight * 0.3)
-            const top = Math.max(0, target.offsetTop - headroom)
-            container.scrollTo({ top, behavior: 'auto' })
-            isAtBottomRef.current = false
-            onAtBottomChange?.(false)
-          } else {
-            forceScrollToBottom('auto')
-          }
+    const container = messageListRef.current
+    if (container && messagesToDisplay.length > 0) {
+      if (!hasUnreadOnOpen) {
+        initialScrollTargetRef.current = 'bottom'
+        // Last message already read: go to bottom
+        forceScrollToBottom('auto')
+      } else if (typeof lastUnreadIndex === 'number') {
+        // Scroll to the last unread message with generous headroom
+        initialScrollTargetRef.current = 'unread'
+        const target = container.querySelector(
+          `[data-msg-idx="${lastUnreadIndex}"]`,
+        ) as HTMLElement | null
+        if (target) {
+          const headroom = Math.floor(container.clientHeight * 0.3)
+          const top = Math.max(0, target.offsetTop - headroom)
+          container.scrollTo({ top, behavior: 'auto' })
+          // We are not at bottom when jumping to unread
+          isAtBottomRef.current = false
+          onAtBottomChange?.(false)
         } else {
+          initialScrollTargetRef.current = 'bottom'
           forceScrollToBottom('auto')
         }
       } else {
+        initialScrollTargetRef.current = 'bottom'
         forceScrollToBottom('auto')
       }
-      // Clear the switch flag after initial adjustment
-      justSwitchedChatRef.current = false
-      // If we ended up at bottom, mark latest as read
-      if (isAtBottomRef.current) onReadLatest?.(lastMessageIso(messages))
-    })
+    } else {
+      initialScrollTargetRef.current = 'bottom'
+      forceScrollToBottom('auto')
+    }
+    // Clear the switch flag after initial adjustment
+    justSwitchedChatRef.current = false
+    // If we ended up at bottom, mark latest as read
+    if (isAtBottomRef.current) onReadLatest?.(lastMessageIso(messages))
   }, [chatId, messagesToDisplay.length, hasUnreadOnOpen, lastUnreadIndex])
 
   useEffect(() => {
@@ -346,13 +351,16 @@ export default function MessageList({
 
     if (!increased) return
 
-    // If chat switched, jump to bottom or keep position based on unread handling already
+    // If chat switched, only force bottom when initial target was 'bottom';
+    // preserve position if initial target was 'unread' to avoid scroll flip.
     if (animationChatChangedRef.current) {
       requestAnimationFrame(() => {
-        forceScrollToBottom('auto')
+        if (initialScrollTargetRef.current === 'bottom') {
+          forceScrollToBottom('auto')
+          if (isAtBottomRef.current) onReadLatest?.(lastMessageIso(messages))
+        }
         animationChatChangedRef.current = false
-        // After snapping, mark latest as read since we're at bottom
-        if (isAtBottomRef.current) onReadLatest?.(lastMessageIso(messages))
+        initialScrollTargetRef.current = null
       })
       return
     }

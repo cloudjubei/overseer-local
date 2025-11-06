@@ -1,10 +1,7 @@
 import { app, shell, BrowserWindow, nativeImage } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
-// import icon from '../../resources/icon.png?asset'
 import { initManagers } from './managers'
-
-let mainWindow
 
 const getAppIcon = () => {
   // In dev (electron-forge start + vite), __dirname points to .vite/build, so use process.cwd()
@@ -13,8 +10,8 @@ const getAppIcon = () => {
   return image
 }
 
-function createWindow(): void {
-  mainWindow = new BrowserWindow({
+async function createWindow(): Promise<void> {
+  const mainWindow = new BrowserWindow({
     width: is.dev ? 1600 : 1200,
     height: 800,
     show: false,
@@ -35,13 +32,17 @@ function createWindow(): void {
     return { action: 'deny' }
   })
 
-  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-    mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
-  } else {
-    mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
-  }
+  const projectRoot = app.getAppPath()
+  await initManagers(projectRoot, mainWindow)
 
-  mainWindow.webContents.openDevTools()
+  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+    await mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
+  } else {
+    await mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
+  }
+  if (is.dev) {
+    mainWindow.webContents.openDevTools()
+  }
 }
 
 app.whenReady().then(async () => {
@@ -58,11 +59,7 @@ app.whenReady().then(async () => {
     }
   }
 
-  createWindow()
-
-  const projectRoot = app.getAppPath()
-
-  await initManagers(projectRoot, mainWindow)
+  await createWindow()
 
   app.on('activate', function () {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
