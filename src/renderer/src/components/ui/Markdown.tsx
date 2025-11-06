@@ -2,6 +2,7 @@ import { FC, memo } from 'react'
 import ReactMarkdown, { Options, type Components } from 'react-markdown'
 import rehypeExternalLinks from 'rehype-external-links'
 import rehypeRaw from 'rehype-raw'
+import rehypeSanitize, { defaultSchema } from 'rehype-sanitize'
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
@@ -182,16 +183,42 @@ export const MemoizedReactMarkdown: FC<Options> = memo(
   (prevProps, nextProps) => prevProps.children === nextProps.children,
 )
 
-export default function Markdown({ text }: { text: string }) {
+// Sanitization schema: allow className on elements (for KaTeX/code styling) and safe link attributes
+const sanitizeSchema: any = {
+  ...defaultSchema,
+  attributes: {
+    ...(defaultSchema as any).attributes,
+    '*': [
+      ...(((defaultSchema as any).attributes && (defaultSchema as any).attributes['*']) || []),
+      'className',
+    ],
+    a: [
+      ...(((defaultSchema as any).attributes && (defaultSchema as any).attributes.a) || []),
+      ['target', /^(_blank|_self|_parent|_top)$/],
+      [
+        'rel',
+        /^(noopener|noreferrer|nofollow|ugc|external)(\s+(noopener|noreferrer|nofollow|ugc|external))*$/,
+      ],
+    ],
+  },
+}
+
+export default function Markdown({ text, allowHtml = false }: { text: string; allowHtml?: boolean }) {
   const containsLaTeX = isContainingLaTeX(text)
   const processedText = containsLaTeX ? preprocessLaTeX(text || '') : text
+
+  const rehypePlugins: any[] = []
+  if (allowHtml) {
+    // Parse raw HTML and then sanitize it
+    rehypePlugins.push(rehypeRaw)
+    rehypePlugins.push([rehypeSanitize, sanitizeSchema])
+  }
+  rehypePlugins.push([rehypeExternalLinks, { target: '_blank' }])
+  if (containsLaTeX) rehypePlugins.push(rehypeKatex)
+
   return (
     <MemoizedReactMarkdown
-      rehypePlugins={[
-        rehypeRaw,
-        [rehypeExternalLinks, { target: '_blank' }],
-        ...(containsLaTeX ? [rehypeKatex] : []),
-      ]}
+      rehypePlugins={rehypePlugins}
       remarkPlugins={[remarkGfm, ...(containsLaTeX ? [remarkMath] : [])]}
       components={components}
     >

@@ -47,6 +47,8 @@ export type UseChatUnread = {
   markReadByContext: (ctx: ChatContext, readTime?: string) => void
   // Count of unread messages for a specific chat key
   getUnreadCountForKey: (chatKey: string) => number
+  // Last-read ISO timestamp for a specific chat key (if any)
+  getLastReadForKey: (chatKey: string) => string | undefined
 }
 
 export function useChatUnread(): UseChatUnread {
@@ -153,6 +155,10 @@ export function useChatUnread(): UseChatUnread {
     [],
   )
 
+  const getLastReadForKey = useCallback((chatKey: string): string | undefined => {
+    return readLastRead(chatKey)
+  }, [])
+
   // React to changes from other tabs/windows and from same-document updates
   useEffect(() => {
     const onStorage = (e: StorageEvent) => {
@@ -174,5 +180,6 @@ export function useChatUnread(): UseChatUnread {
     markReadByKey,
     markReadByContext,
     getUnreadCountForKey,
+    getLastReadForKey,
   }
 }

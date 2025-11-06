@@ -402,12 +402,12 @@ export default function ChatSidebar({
       try {
         localStorage.setItem('chat-last-selected-context', JSON.stringify(general))
       } catch {}
-      // Set hash to chat route root so ChatView stays active; it will default to project General
-      if (!window.location.hash.startsWith('#chat')) {
-        window.location.hash = '#chat'
+      // Deep-link to the project's General chat to ensure selection is updated
+      const targetHash = `#chat/project/${encodeURIComponent(projectId)}`
+      if (window.location.hash !== targetHash) {
+        window.location.hash = targetHash
       } else {
-        // If already on chat route, trigger selection by updating hash to same route
-        // This can be a no-op; ChatView will pick up last-selected context
+        // If already on the same hash, manually dispatch to trigger selection
         window.dispatchEvent(new HashChangeEvent('hashchange'))
       }
       setIsSettingsOpen(false)

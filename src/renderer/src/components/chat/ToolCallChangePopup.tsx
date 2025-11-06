@@ -297,8 +297,8 @@ export default function ToolCallChangePopup({
 
       return (
         <div className="text-xs space-y-1">
-          {files.map((file) => (
-            <Row>
+          {files.map((file, idx) => (
+            <Row key={file || idx}>
               <span className="font-mono text-[11px]">{file || '(unknown)'}</span>
             </Row>
           ))}
@@ -534,8 +534,8 @@ export default function ToolCallChangePopup({
 
       return (
         <div className="text-xs space-y-1">
-          {testFiles.map((testFile) => (
-            <Row>
+          {testFiles.map((testFile, i) => (
+            <Row key={testFile || i}>
               <span className="font-mono text-[11px]">{testFile || '(unknown)'}</span>
             </Row>
           ))}
