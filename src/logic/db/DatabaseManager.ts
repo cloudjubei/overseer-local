@@ -1,6 +1,6 @@
 import type { BrowserWindow } from 'electron'
 import IPC_HANDLER_KEYS from '../../preload/ipcHandlersKeys'
-import { openDatabase, TheFactoryDb } from 'thefactory-db'
+import { openDatabase, createReusableDatabase, TheFactoryDb } from 'thefactory-db'
 import type {
   DocumentInput,
   MatchParams,
@@ -59,12 +59,15 @@ export default class DatabaseManager extends BaseManager {
     return handlers
   }
 
+  //TODO: think about what to do here with a custom db and using connectionString
   async connect(connectionString: string): Promise<{ connected: boolean; lastError?: string }> {
     try {
+      const { connectionString } = await createReusableDatabase()
+
       this._dbClient = await openDatabase({ connectionString })
       this._connectionString = connectionString
       this._setConnected(true)
-      console.log('[db] thefactory-db client initialized')
+      console.log('[db] thefactory-db client initialized at ', connectionString)
     } catch (err: any) {
       this._status.lastError = err?.message || String(err)
       this._setConnected(false)
