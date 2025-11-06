@@ -9,10 +9,13 @@ import {
   GitMergeResult,
   GitConflictEntry,
   CoverageResult,
+  GitLocalStatus,
+  GitFileChange,
 } from 'thefactory-tools'
 import SegmentedControl from '@renderer/components/ui/SegmentedControl'
 import { factoryTestsService } from '@renderer/services/factoryTestsService'
 import { gitService } from '@renderer/services/gitService'
+import { filesService } from '@renderer/services/filesService'
 import { IconFastMerge } from '@renderer/components/ui/icons/Icons'
 import { IconChevron } from '@renderer/components/ui/icons/IconChevron'
 import Tooltip from '@renderer/components/ui/Tooltip'
@@ -21,6 +24,8 @@ import {
   IconFileAdded,
   IconFileDeleted,
   IconFileModified,
+  IconDelete,
+  IconRefresh,
 } from '@renderer/components/ui/icons/Icons'
 import MergeConflictResolver from '@renderer/screens/git/MergeConflictResolver'
 
@@ -275,6 +280,17 @@ function ProgressBar({ value }: { value: number }) {
   )
 }
 
+// Infer file status icon from local status buckets and workspace listing
+function inferStatusForPath(
+  path: string,
+  buckets: { untracked: Set<string> },
+  workspace: Set<string>,
+): GitMergeReportFile['status'] {
+  if (buckets.untracked.has(path)) return 'A'
+  if (!workspace.has(path)) return 'D'
+  return 'M'
+}
+
 // ============ Main component ============
 export default function GitMergeModal(props: GitMergeModalProps) {
   const { onRequestClose, projectId, repoPath, baseRef, branch, storyId, featureId, openConfirm } =
@@ -332,6 +348,51 @@ export default function GitMergeModal(props: GitMergeModalProps) {
     perFile: Array<{ path: string; added: number; covered: number; pct: number }>
   } | null>(null)
 
+  // Local status for Changes tab (staged top, unstaged bottom)
+  const [localStatus, setLocalStatus] = React.useState<GitLocalStatus | null>(null)
+  const [workspaceFiles, setWorkspaceFiles] = React.useState<Set<string>>(new Set())
+  const [selected, setSelected] = React.useState<{ path: string; area: 'staged' | 'unstaged' } | null>(null)
+  const [changesLoading, setChangesLoading] = React.useState(false)
+  const [leftWidth, setLeftWidth] = React.useState<number>(Math.max(280, Math.floor(window.innerWidth * 0.28)))
+  const resizeRef = React.useRef<{ startX: number; startW: number } | null>(null)
+  const [selectedDiff, setSelectedDiff] = React.useState<GitFileChange | null>(null)
+  const [selectedDiffLoading, setSelectedDiffLoading] = React.useState<boolean>(false)
+  const [selectedDiffError, setSelectedDiffError] = React.useState<string | null>(null)
+  const diffCacheRef = React.useRef<Map<string, GitFileChange | null>>(new Map())
+
+  const refreshLocal = React.useCallback(async () => {
+    if (!projectId) return
+    setChangesLoading(true)
+    try {
+      const st = await gitService.getLocalStatus(projectId)
+      const all = new Set<string>(await filesService.listFiles(projectId))
+      setLocalStatus(st)
+      setWorkspaceFiles(all)
+      // Default selection: prefer staged else unstaged/untracked
+      const staged = st?.staged || []
+      const unstaged = [...(st?.unstaged || []), ...(st?.untracked || [])]
+      const currentSel = staged[0]
+        ? { path: staged[0], area: 'staged' as const }
+        : unstaged[0]
+          ? { path: unstaged[0], area: 'unstaged' as const }
+          : null
+      setSelected((prev) => {
+        if (
+          prev &&
+          ((prev.area === 'staged' && staged.includes(prev.path)) ||
+            (prev.area === 'unstaged' && unstaged.includes(prev.path)))
+        ) {
+          return prev
+        }
+        return currentSel
+      })
+    } catch (e) {
+      console.warn('Failed to load local git status', e)
+    } finally {
+      setChangesLoading(false)
+    }
+  }, [projectId])
+
   React.useEffect(() => {
     let mounted = true
     ;(async () => {
@@ -368,6 +429,57 @@ export default function GitMergeModal(props: GitMergeModalProps) {
   React.useEffect(() => {
     if (hasConflicts) setActiveTab('resolve')
   }, [hasConflicts])
+
+  // Load local status when opening or when switching back to changes tab
+  React.useEffect(() => {
+    if (activeTab === 'changes') void refreshLocal()
+  }, [activeTab, refreshLocal])
+
+  // Load diff for selected file using assumed getLocalDiffSummary API (graceful fallback when missing)
+  React.useEffect(() => {
+    let cancelled = false
+    async function load() {
+      if (!projectId || !selected) {
+        setSelectedDiff(null)
+        return
+      }
+      const key = `${selected.area}:${selected.path}`
+      const cached = diffCacheRef.current.get(key)
+      if (cached !== undefined) {
+        setSelectedDiff(cached)
+        return
+      }
+      setSelectedDiffLoading(true)
+      setSelectedDiffError(null)
+      try {
+        const api = (gitService as any)?.getLocalDiffSummary
+        if (typeof api !== 'function') {
+          diffCacheRef.current.set(key, null)
+          setSelectedDiff(null)
+          return
+        }
+        const list: GitFileChange[] =
+          (await api(projectId, {
+            staged: selected.area === 'staged',
+            includePatch: true,
+            includeStructured: true,
+          })) || []
+        const entry = list.find((f) => f.path === selected.path || f.oldPath === selected.path) || null
+        diffCacheRef.current.set(key, entry)
+        setSelectedDiff(entry)
+      } catch (e: any) {
+        setSelectedDiffError(e?.message || String(e))
+        diffCacheRef.current.set(`${selected.area}:${selected.path}`, null)
+        setSelectedDiff(null)
+      } finally {
+        if (!cancelled) setSelectedDiffLoading(false)
+      }
+    }
+    void load()
+    return () => {
+      cancelled = true
+    }
+  }, [projectId, selected])
 
   // Build compilation impact using backend analysis when available, otherwise fallback to heuristic
   React.useEffect(() => {
@@ -678,31 +790,231 @@ export default function GitMergeModal(props: GitMergeModalProps) {
     </div>
   )
 
+  // Handlers for staged/unstaged actions
+  const stagePath = React.useCallback(
+    async (p: string) => {
+      await gitService.stage(projectId, [p])
+      await refreshLocal()
+    },
+    [projectId, refreshLocal],
+  )
+  const unstagePath = React.useCallback(
+    async (p: string) => {
+      await gitService.unstage(projectId, [p])
+      await refreshLocal()
+    },
+    [projectId, refreshLocal],
+  )
+  const resetPath = React.useCallback(
+    async (p: string) => {
+      await gitService.reset(projectId, [p])
+      await refreshLocal()
+    },
+    [projectId, refreshLocal],
+  )
+  const removePath = React.useCallback(
+    async (p: string) => {
+      const ok = window.confirm(`Delete '${p}' from disk? This cannot be undone.`)
+      if (!ok) return
+      await filesService.deletePath(projectId, p)
+      await refreshLocal()
+    },
+    [projectId, refreshLocal],
+  )
+
+  // Resizer handlers (left pane width)
+  const onResizeStart = (e: React.PointerEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
+    resizeRef.current = { startX: e.clientX, startW: leftWidth }
+    window.addEventListener('pointermove', onResizeMove)
+    window.addEventListener('pointerup', onResizeEnd)
+  }
+  const onResizeMove = (e: PointerEvent) => {
+    if (!resizeRef.current) return
+    const { startX, startW } = resizeRef.current
+    const dx = e.clientX - startX
+    const next = startW + dx
+    const maxByViewport = Math.floor(window.innerWidth * 0.7)
+    const clamped = Math.max(260, Math.min(maxByViewport, next))
+    setLeftWidth(clamped)
+  }
+  const onResizeEnd = () => {
+    resizeRef.current = null
+    window.removeEventListener('pointermove', onResizeMove)
+    window.removeEventListener('pointerup', onResizeEnd)
+  }
+
   function renderChangesTab() {
+    const staged = localStatus?.staged || []
+    const unstagedCombined = [
+      ...(localStatus?.unstaged || []),
+      ...(localStatus?.untracked || []),
+    ]
+
+    const buckets = {
+      untracked: new Set(localStatus?.untracked || []),
+    }
+
+    const Row = ({ path, area }: { path: string; area: 'staged' | 'unstaged' }) => {
+      const isSelected = selected?.path === path && selected?.area === area
+      const isUntracked = buckets.untracked.has(path)
+      const status = inferStatusForPath(path, buckets, workspaceFiles)
+
+      return (
+        <div
+          className={`group flex items-center justify-between gap-2 px-2 py-1.5 cursor-pointer rounded ${isSelected ? 'bg-neutral-200/60 dark:bg-neutral-800/60' : 'hover:bg-neutral-100 dark:hover:bg-neutral-900/40'}`}
+          onClick={() => setSelected({ path, area })}
+          title={path}
+        >
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <input
+              type="checkbox"
+              className="shrink-0"
+              checked={area === 'staged'}
+              onChange={(e) => (e.target.checked ? stagePath(path) : unstagePath(path))}
+              onClick={(e) => e.stopPropagation()}
+              aria-label={area === 'staged' ? 'Unstage file' : 'Stage file'}
+              title={area === 'staged' ? 'Unstage' : 'Stage'}
+            />
+            <StatusIcon status={status} />
+            <span className="truncate font-mono text-xs">{path}</span>
+          </div>
+          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            {!isUntracked ? (
+              <Tooltip content={'Reset'} placement="top">
+                <button
+                  className="btn-secondary btn-icon"
+                  aria-label="Reset file changes"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    void resetPath(path)
+                  }}
+                >
+                  <IconRefresh className="w-4 h-4" />
+                </button>
+              </Tooltip>
+            ) : null}
+            <Tooltip content={'Remove'} placement="top">
+              <button
+                className="btn-secondary btn-icon"
+                aria-label="Remove file"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  void removePath(path)
+                }}
+              >
+                <IconDelete className="w-4 h-4" />
+              </button>
+            </Tooltip>
+          </div>
+        </div>
+      )
+    }
+
     return (
-      <div className="flex flex-col gap-3">
-        {loading && (
-          <div className="p-3 text-sm text-neutral-600 dark:text-neutral-400 flex items-center gap-2">
-            <Spinner size={14} label="Loading diff preview..." />
+      <div className="flex min-h-[300px] max-h-[70vh] overflow-hidden border border-neutral-200 dark:border-neutral-800 rounded-md">
+        {/* Left pane: staged (top) and unstaged (bottom) */}
+        <div
+          className="h-full flex flex-col overflow-hidden"
+          style={{ width: leftWidth, minWidth: 260 }}
+        >
+          <div className="flex-1 min-h-0 overflow-auto p-2">
+            <div className="text-[11px] font-semibold uppercase tracking-wide text-neutral-600 dark:text-neutral-400 pb-1">
+              Staged ({staged.length})
+            </div>
+            {changesLoading ? (
+              <div className="text-xs text-neutral-500 flex items-center gap-2 p-2">
+                <Spinner size={14} label="Loading status..." />
+              </div>
+            ) : staged.length === 0 ? (
+              <div className="text-xs text-neutral-500 px-2 py-2">No staged files.</div>
+            ) : (
+              <div className="space-y-1">
+                {staged.map((p) => (
+                  <Row key={`st-${p}`} path={p} area="staged" />
+                ))}
+              </div>
+            )}
+
+            <div className="mt-3 text-[11px] font-semibold uppercase tracking-wide text-neutral-600 dark:text-neutral-400 pb-1">
+              Unstaged ({unstagedCombined.length})
+            </div>
+            {changesLoading ? (
+              <div className="text-xs text-neutral-500 flex items-center gap-2 p-2">
+                <Spinner size={14} label="Loading status..." />
+              </div>
+            ) : unstagedCombined.length === 0 ? (
+              <div className="text-xs text-neutral-500 px-2 py-2">No unstaged files.</div>
+            ) : (
+              <div className="space-y-1">
+                {unstagedCombined.map((p) => (
+                  <Row key={`us-${p}`} path={p} area="unstaged" />
+                ))}
+              </div>
+            )}
           </div>
-        )}
-        {!loading && error && (
-          <div className="p-3 text-sm text-red-600 dark:text-red-400 whitespace-pre-wrap">
-            {error}
+        </div>
+
+        {/* Divider with hover handle */}
+        <div
+          className="relative w-2 cursor-col-resize group flex-shrink-0"
+          role="separator"
+          aria-orientation="vertical"
+          aria-label="Resize panel"
+          onPointerDown={onResizeStart}
+        >
+          <div className="absolute inset-y-0 left-0 right-0" />
+          <div
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity"
+            style={{ width: 16, height: 48 }}
+            aria-hidden
+          >
+            <div className="h-full w-full rounded bg-teal-500/20 border border-teal-500 shadow">
+              <div className="h-full w-full flex items-center justify-center gap-[3px]">
+                <div className="w-[2px] h-[24px] rounded-sm bg-teal-600" />
+                <div className="w-[2px] h-[24px] rounded-sm bg-teal-600" />
+                <div className="w-[2px] h-[24px] rounded-sm bg-teal-600" />
+              </div>
+            </div>
           </div>
-        )}
-        {!loading && !error && (!report || report.files.length === 0) && (
-          <div className="p-3 text-sm text-neutral-600 dark:text-neutral-400">
-            Diff preview unavailable. You can still proceed to merge.
-          </div>
-        )}
-        {!loading && !error && report && report.files.length > 0 && (
-          <div className="flex flex-col gap-3">
-            {report.files.map((f: GitMergeReportFile) => (
-              <FileDiffItem key={f.path} file={f} />
-            ))}
-          </div>
-        )}
+        </div>
+
+        {/* Right pane: diff view for selected file */}
+        <div className="flex-1 min-w-0 min-h-[300px] max-h-[70vh] overflow-auto p-3">
+          {!selected ? (
+            <div className="text-sm text-neutral-600 dark:text-neutral-400">Select a file to preview.</div>
+          ) : (
+            <div className="space-y-2">
+              <div className="text-xs text-neutral-600 dark:text-neutral-400 flex items-center gap-2">
+                <span className="font-mono truncate" title={selected.path}>{selected.path}</span>
+                <span className="ml-1 px-1.5 py-0.5 rounded bg-neutral-100 dark:bg-neutral-900/60">
+                  {selected.area === 'staged' ? 'Staged' : 'Unstaged'}
+                </span>
+              </div>
+
+              {selectedDiffLoading ? (
+                <div className="text-xs text-neutral-600 dark:text-neutral-400 flex items-center gap-2">
+                  <Spinner size={14} label="Loading diff..." />
+                </div>
+              ) : selectedDiffError ? (
+                <div className="text-xs text-red-600 dark:text-red-400 whitespace-pre-wrap">
+                  {selectedDiffError}
+                </div>
+              ) : !selectedDiff ? (
+                <div className="text-xs text-neutral-500">
+                  Diff not available. The API may not be implemented yet.
+                </div>
+              ) : selectedDiff.binary ? (
+                <div className="text-xs text-neutral-600 dark:text-neutral-400">Binary file diff not shown</div>
+              ) : selectedDiff.patch ? (
+                <DiffPatch patch={selectedDiff.patch} />
+              ) : (
+                <div className="text-xs text-neutral-500">No patch available.</div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     )
   }

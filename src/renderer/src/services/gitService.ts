@@ -15,6 +15,7 @@ import type {
   GitCommitInfo,
   GitSelectCommitsOptions,
   GitCommitInput,
+  GitFileChange,
 } from 'thefactory-tools'
 
 export type GitService = {
@@ -35,6 +36,10 @@ export type GitService = {
     projectId: string,
     options?: Omit<GitLocalStatusOptions, 'repoPath'>,
   ) => Promise<GitLocalStatus>
+  getLocalDiffSummary: (
+    projectId: string,
+    options?: { staged?: boolean; includePatch?: boolean; includeStructured?: boolean },
+  ) => Promise<GitFileChange[]>
   getBranchDiffSummary: (
     projectId: string,
     options: {
