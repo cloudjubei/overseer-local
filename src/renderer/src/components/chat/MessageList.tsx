@@ -241,9 +241,8 @@ export default function MessageList({
   }
 
   const forceScrollToBottom = (behavior: ScrollBehavior = 'auto') => {
-    const c = messageListRef.current
-    if (!c) return
-    c.scrollTo({ top: c.scrollHeight, behavior })
+    // Use a dedicated anchor element for more reliable scrolling
+    bottomAnchorRef.current?.scrollIntoView({ behavior })
     isAtBottomRef.current = true
     onAtBottomChange?.(true)
   }

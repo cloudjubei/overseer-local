@@ -190,7 +190,8 @@ export default function ChatView() {
 
   // Initial selection: honor deep-link; else open least recently opened chat after project chats load; else fall back to project chat
   useEffect(() => {
-    const hasLoadedProjectChats = !!(activeProjectId && Object.prototype.hasOwnProperty.call(chatsByProjectId, activeProjectId))
+    const hasLoadedProjectChats =
+      !!(activeProjectId && Object.prototype.hasOwnProperty.call(chatsByProjectId, activeProjectId))
 
     const loadLeastRecentlyOpened = (): ChatContext | undefined => {
       try {
@@ -214,42 +215,51 @@ export default function ChatView() {
     }
 
     const apply = async () => {
-      // Always respect deep-link if present
+      // 1. Handle hash navigation first
       const hashCtx = parseChatRouteFromHash(window.location.hash)
       if (hashCtx) {
-        // Avoid re-selecting if hash points to the already-selected context
-        if (selectedContext && getChatContextPath(hashCtx) === getChatContextPath(selectedContext)) {
-          return
+
+        if (!selectedContext || getChatContextPath(hashCtx) !== getChatContextPath(selectedContext)) {
+          try {
+            await getChat(hashCtx)
+          } catch {}
+          setSelectedContext(hashCtx)
         }
-        try {
-          await getChat(hashCtx)
-        } catch {}
-        setSelectedContext(hashCtx)
         return
       }
 
-      // If a context is selected, validate it against the current project's chats.
-      // If it's not in the current project (e.g., after a project switch or chat deletion),
-      // proceed to select a new one. Otherwise, keep it.
+      // 2. Check if current selection is valid for the active project
       if (selectedContext) {
         const key = getChatContextPath(selectedContext)
         const projectChats = chatsByProjectId[activeProjectId ?? ''] || []
         if (projectChats.some((c) => c.key === key)) {
-          return
+          return // Current context is valid, do nothing
         }
       }
 
-      // Wait until chats for this project have loaded before picking one
+      // 3. Current context is invalid or missing, find a new one.
+      // Wait until chats for this project are loaded.
       if (!hasLoadedProjectChats) return
-      // Prefer least recently opened chat for this project
-      const lruCtx = loadLeastRecentlyOpened()
-      if (lruCtx) {
-        setSelectedContext(lruCtx)
-        return
+
+      // Find best candidate for new context
+      let newContext: ChatContext | undefined = loadLeastRecentlyOpened()
+      if (!newContext && activeProjectId) {
+        newContext = { type: 'PROJECT', projectId: activeProjectId }
       }
 
-      // Fallback to General chat for active project
-      if (activeProjectId) setSelectedContext({ type: 'PROJECT', projectId: activeProjectId })
+      if (newContext) {
+        // Only update if context has changed to prevent potential loops.
+        const newKey = getChatContextPath(newContext)
+        const oldKey = selectedContext ? getChatContextPath(selectedContext) : undefined
+        if (newKey !== oldKey) {
+          try {
+            await getChat(newContext) // Ensure chat exists
+          } catch {}
+          setSelectedContext(newContext) // Set new context
+        }
+      } else if (selectedContext) {
+        setSelectedContext(undefined) // Nothing to select, clear if something was selected
+      }
     }
 
     void apply()
