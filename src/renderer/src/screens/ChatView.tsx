@@ -68,6 +68,16 @@ function titleForContext(
   }
 }
 
+// the chat file structure
+// projects/<projectId>/<projectTopic>.json
+// projects/<projectId>/stories/<storyId>/agents/<agentRunId>.json
+// projects/<projectId>/stories/<storyId>/features/<featureId>/agents/<agentRunId>.json
+// projects/<projectId>/stories/<storyId>/features/<featureId>.json
+// projects/<projectId>/stories/<storyId>/<storyTopic>.json
+// projects/<projectId>/stories/<storyId>.json
+// projects/<projectId>.json
+// `thefactory-tools` -> getChatContextPath + getChatContextFromFilename
+
 // Support deep-linking to specific chat contexts under the chat route
 // Formats:
 // - #chat/project/<projectId>
@@ -190,8 +200,9 @@ export default function ChatView() {
 
   // Initial selection: honor deep-link; else open most recently used chat after project chats load; else fall back to project chat
   useEffect(() => {
-    const hasLoadedProjectChats =
-      !!(activeProjectId && Object.prototype.hasOwnProperty.call(chatsByProjectId, activeProjectId))
+    const hasLoadedProjectChats = !!(
+      activeProjectId && Object.prototype.hasOwnProperty.call(chatsByProjectId, activeProjectId)
+    )
 
     const loadMostRecentlyOpened = (): ChatContext | undefined => {
       try {
@@ -218,7 +229,10 @@ export default function ChatView() {
       // 1. Handle hash navigation first
       const hashCtx = parseChatRouteFromHash(window.location.hash)
       if (hashCtx) {
-        if (!selectedContext || getChatContextPath(hashCtx) !== getChatContextPath(selectedContext)) {
+        if (
+          !selectedContext ||
+          getChatContextPath(hashCtx) !== getChatContextPath(selectedContext)
+        ) {
           try {
             await getChat(hashCtx)
           } catch {}
@@ -263,7 +277,12 @@ export default function ChatView() {
         setSelectedContext(undefined) // Nothing to select, clear if something was selected
       }
     }
-
+    // // Sync URL hash so hash router does not override user selection later
+    // const targetHash = `#chat/${newKey}`
+    // if (window.location.hash !== targetHash) {
+    //   window.location.hash = targetHash
+    // }
+    // setSelectedContext(newContext) // Set new context
     void apply()
 
     const onHash = () => void apply()
@@ -341,12 +360,12 @@ export default function ChatView() {
         ]}
         value={mode}
         onChange={(v) => setMode(v as 'categories' | 'history')}
-        size='sm'
+        size="sm"
       />
     )
     const showDot = hasUnreadForProject(activeProjectId)
     return (
-      <div className='flex items-center gap-2'>
+      <div className="flex items-center gap-2">
         {seg}
         {showDot && <DotBadge title={'Unread chats in this project'} />}
       </div>
@@ -376,6 +395,14 @@ export default function ChatView() {
       {selectedContext ? (
         <ChatSidebar
           context={selectedContext}
+          // onSelectContext={(ctx) => {
+          //   try {
+          //     const key = getChatContextPath(ctx)
+          //     const targetHash = `#chat/${key}`
+          //     if (window.location.hash !== targetHash) window.location.hash = targetHash
+          //   } catch {}
+          //   setSelectedContext(ctx)
+          // }}
           chatContextTitle={titleForContext(selectedContext, {
             getProjectTitle,
             getStoryTitle,

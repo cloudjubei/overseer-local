@@ -18,6 +18,8 @@ import {
   GitUnifiedBranch,
   GitCommitInfo,
   GitSelectCommitsOptions,
+  // Types for commit operations
+  GitCommitInput,
 } from 'thefactory-tools'
 import ProjectsManager from '../projects/ProjectsManager'
 import Mutex from '../utils/Mutex'
@@ -89,6 +91,17 @@ export default class GitManager extends BaseManager {
 
     handlers[IPC_HANDLER_KEYS.GIT_CHECKOUT] = ({ projectId, name }) =>
       this.checkout(projectId, name)
+
+    // Local commit workflow
+    handlers[IPC_HANDLER_KEYS.GIT_STAGE_PATHS] = ({ projectId, paths }) =>
+      this.stagePaths(projectId, paths)
+    handlers[IPC_HANDLER_KEYS.GIT_UNSTAGE_PATHS] = ({ projectId, paths }) =>
+      this.unstagePaths(projectId, paths)
+    handlers[IPC_HANDLER_KEYS.GIT_RESET_PATHS] = ({ projectId, paths }) =>
+      this.resetPaths(projectId, paths)
+    handlers[IPC_HANDLER_KEYS.GIT_REMOVE_PATHS] = ({ projectId, paths }) =>
+      this.removePaths(projectId, paths)
+    handlers[IPC_HANDLER_KEYS.GIT_COMMIT] = ({ projectId, input }) => this.commit(projectId, input)
 
     return handlers
   }
@@ -252,6 +265,60 @@ export default class GitManager extends BaseManager {
       return { ok: false, error: (e as any)?.message || 'Failed to read local status' }
     }
     return tools.checkoutBranch(name, false)
+  }
+
+  // ====== Local commit workflow proxies ======
+  private async stagePaths(projectId: string, paths: string[]): Promise<GitOpResult | undefined> {
+    const tools = await this.__getTools(projectId)
+    if (!tools) return
+    try {
+      return await tools.stagePaths(paths)
+    } catch (e) {
+      return { ok: false, error: (e as any)?.message || 'Failed to stage paths' }
+    }
+  }
+
+  private async unstagePaths(projectId: string, paths: string[]): Promise<GitOpResult | undefined> {
+    const tools = await this.__getTools(projectId)
+    if (!tools) return
+    try {
+      return await tools.unstagePaths(paths)
+    } catch (e) {
+      return { ok: false, error: (e as any)?.message || 'Failed to unstage paths' }
+    }
+  }
+
+  private async resetPaths(projectId: string, paths: string[]): Promise<GitOpResult | undefined> {
+    const tools = await this.__getTools(projectId)
+    if (!tools) return
+    try {
+      return await tools.resetPaths(paths)
+    } catch (e) {
+      return { ok: false, error: (e as any)?.message || 'Failed to reset paths' }
+    }
+  }
+
+  private async removePaths(projectId: string, paths: string[]): Promise<GitOpResult | undefined> {
+    const tools = await this.__getTools(projectId)
+    if (!tools) return
+    try {
+      return await tools.removePaths(paths)
+    } catch (e) {
+      return { ok: false, error: (e as any)?.message || 'Failed to remove paths' }
+    }
+  }
+
+  private async commit(
+    projectId: string,
+    input: GitCommitInput,
+  ): Promise<GitOpResult | undefined> {
+    const tools = await this.__getTools(projectId)
+    if (!tools) return
+    try {
+      return await tools.commit(input)
+    } catch (e) {
+      return { ok: false, error: (e as any)?.message || 'Failed to commit' }
+    }
   }
 
   private async updateTool(projectId: string): Promise<GitTools | undefined> {

@@ -14,6 +14,7 @@ import {
   GitUnifiedBranch,
   GitCommitInfo,
   GitSelectCommitsOptions,
+  GitCommitInput,
 } from 'thefactory-tools'
 import type { GitOpResult } from 'thefactory-tools'
 
@@ -64,6 +65,13 @@ export type GitService = {
     options: Omit<GitSelectCommitsOptions, 'repoPath'>,
   ) => Promise<GitCommitInfo[]>
   checkout: (projectId: string, name: string) => Promise<GitOpResult | undefined>
+
+  // Local commit workflow
+  stagePaths: (projectId: string, paths: string[]) => Promise<GitOpResult | undefined>
+  unstagePaths: (projectId: string, paths: string[]) => Promise<GitOpResult | undefined>
+  resetPaths: (projectId: string, paths: string[]) => Promise<GitOpResult | undefined>
+  removePaths: (projectId: string, paths: string[]) => Promise<GitOpResult | undefined>
+  commit: (projectId: string, input: GitCommitInput) => Promise<GitOpResult | undefined>
 }
 
 export const gitService: GitService = {

@@ -7,6 +7,7 @@ import { Button } from '../components/ui/Button'
 import Tooltip from '../components/ui/Tooltip'
 import { IconFastMerge } from '../components/ui/icons/IconFastMerge'
 import { IconDelete } from '../components/ui/icons/IconDelete'
+import { IconCommit } from '../components/ui/icons/IconCommit'
 import { gitService } from '@renderer/services/gitService'
 import { GitUnifiedBranch } from 'thefactory-tools'
 import { useGit } from '../contexts/GitContext'
@@ -158,6 +159,7 @@ function UnifiedBranchItem({
   showSwitch,
   canSwitch,
   onSwitch,
+  hasPendingChanges,
 }: {
   projectId: string
   baseRef?: string
@@ -169,6 +171,7 @@ function UnifiedBranchItem({
   showSwitch?: boolean
   canSwitch?: boolean
   onSwitch?: (branchName: string) => Promise<void> | void
+  hasPendingChanges?: boolean
 }) {
   const { openModal } = useNavigator()
   const { pending, unified, isBranchUnread, markBranchSeen } = useGit()
@@ -559,6 +562,26 @@ function UnifiedBranchItem({
         <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 pointer-events-none group-hover:pointer-events-auto group-focus-within:pointer-events-auto transition-opacity">
           {mode === 'current' ? (
             <>
+              {hasPendingChanges ? (
+                <Tooltip content={'commit changes'} placement="bottom">
+                  <span onClick={(e) => e.stopPropagation()}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() =>
+                        openModal({ type: 'git-commit', projectId, currentBranch: branch.name })
+                      }
+                      aria-label="Commit changes"
+                      title="Commit changes"
+                    >
+                      <span className="inline-flex items-center gap-1">
+                        <IconCommit className="w-4 h-4" />
+                        Commit
+                      </span>
+                    </Button>
+                  </span>
+                </Tooltip>
+              ) : null}
               {showPull && (
                 <Tooltip content={'pull from remote'} placement="bottom">
                   <span onClick={(e) => e.stopPropagation()}>
@@ -784,6 +807,7 @@ function CurrentProjectView() {
                   mode="current"
                   onAfterAction={reload}
                   baseRef={current.name}
+                  hasPendingChanges={isClean === false}
                 />
               </div>
             )}

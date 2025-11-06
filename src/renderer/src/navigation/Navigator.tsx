@@ -31,6 +31,11 @@ export type ModalRoute =
       featureId?: string
       openConfirm?: boolean
     }
+  | {
+      type: 'git-commit'
+      projectId: string
+      currentBranch: string
+    }
 
 export type NavigatorState = {
   currentView: NavigationView
