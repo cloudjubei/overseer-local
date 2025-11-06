@@ -12,11 +12,15 @@ export function IconMinimize({ className }: { className?: string }) {
       className={className}
       aria-hidden='true'
     >
-      {/* Corner arrows pointing inwards (minimize) */}
-      <polyline points='3 8 3 3 8 3' stroke='#0EA5E9' strokeWidth='2' />
-      <polyline points='21 8 21 3 16 3' stroke='#0EA5E9' strokeWidth='2' />
-      <polyline points='16 21 21 21 21 16' stroke='#0EA5E9' strokeWidth='2' />
-      <polyline points='8 21 3 21 3 16' stroke='#0EA5E9' strokeWidth='2' />
+      {/* Corner arrows pointing further inward (minimize) by rotating the inner bend one more step toward center */}
+      {/* Top-left inward corner: bend then head further inward */}
+      <polyline points='9 3 9 9 3 9' stroke='#0EA5E9' strokeWidth='2' />
+      {/* Top-right inward corner */}
+      <polyline points='15 3 15 9 21 9' stroke='#0EA5E9' strokeWidth='2' />
+      {/* Bottom-right inward corner */}
+      <polyline points='15 21 15 15 21 15' stroke='#0EA5E9' strokeWidth='2' />
+      {/* Bottom-left inward corner */}
+      <polyline points='9 21 9 15 3 15' stroke='#0EA5E9' strokeWidth='2' />
     </svg>
   )
 }

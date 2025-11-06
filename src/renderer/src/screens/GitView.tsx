@@ -160,6 +160,7 @@ function UnifiedBranchItem({
   canSwitch,
   onSwitch,
   hasPendingChanges,
+  changedCount,
 }: {
   projectId: string
   baseRef?: string
@@ -172,6 +173,7 @@ function UnifiedBranchItem({
   canSwitch?: boolean
   onSwitch?: (branchName: string) => Promise<void> | void
   hasPendingChanges?: boolean
+  changedCount?: number
 }) {
   const { openModal } = useNavigator()
   const { pending, unified, isBranchUnread, markBranchSeen } = useGit()
@@ -528,6 +530,15 @@ function UnifiedBranchItem({
             <DeltaChip label="Current" ahead={currentDelta?.ahead || 0} behind={currentDelta?.behind || 0} />
           )}
           <DeltaChip label="Remote" ahead={branch.ahead || 0} behind={branch.behind || 0} />
+          {mode === 'current' && hasPendingChanges && (changedCount ?? 0) > 0 ? (
+            <span
+              className="text-xs text-blue-600 dark:text-blue-400 whitespace-nowrap"
+              aria-label={`${changedCount} files changed`}
+              title={`${changedCount} files changed`}
+            >
+              {(changedCount as number)} files changed
+            </span>
+          ) : null}
         </div>
         <div className="text-xs text-neutral-600 dark:text-neutral-400 truncate">
           {resolvablePendingEntries.length > 0 || resolvableStoryId ? (
@@ -721,6 +732,7 @@ function CurrentProjectView() {
   const { branches, loading, error } = unified.get(projectId)
   const [isClean, setIsClean] = React.useState<boolean | undefined>(undefined)
   const [checkingClean, setCheckingClean] = React.useState(false)
+  const [changedCount, setChangedCount] = React.useState<number>(0)
 
   const current = React.useMemo(() => branches?.find((b) => b.current), [branches])
   const others = React.useMemo(() => (branches || []).filter((b) => !b.current), [branches])
@@ -741,6 +753,7 @@ function CurrentProjectView() {
         if (typeof v === 'number') return v > 0
         return !!v
       }
+      const num = (v: any): number => (Array.isArray(v) ? v.length : typeof v === 'number' ? v : 0)
       const dirty = [
         (s as any).isClean === false,
         any((s as any).unstaged),
@@ -749,9 +762,17 @@ function CurrentProjectView() {
         any((s as any).changed),
         any((s as any).untracked),
       ].some(Boolean)
+      const count =
+        num((s as any).unstaged) +
+        num((s as any).staged) +
+        num((s as any).untracked) +
+        num((s as any).conflicts) +
+        num((s as any).changed)
       setIsClean(!dirty)
+      setChangedCount(count)
     } catch (e) {
       setIsClean(undefined)
+      setChangedCount(0)
     } finally {
       setCheckingClean(false)
     }
@@ -808,6 +829,7 @@ function CurrentProjectView() {
                   onAfterAction={reload}
                   baseRef={current.name}
                   hasPendingChanges={isClean === false}
+                  changedCount={changedCount}
                 />
               </div>
             )}
