@@ -22,6 +22,7 @@ import { Button } from '@renderer/components/ui/Button'
 import { Modal } from '@renderer/components/ui/Modal'
 import { useChatUnread } from '@renderer/hooks/useChatUnread'
 import { useActiveProject } from '@renderer/contexts/ProjectContext'
+import { getChatContextPath } from 'thefactory-tools/utils'
 
 export type ChatSidebarProps = {
   context: ChatContext
@@ -402,8 +403,8 @@ export default function ChatSidebar({
       try {
         localStorage.setItem('chat-last-selected-context', JSON.stringify(general))
       } catch {}
-      // Deep-link to the project's General chat to ensure selection is updated
-      const targetHash = `#chat/project/${encodeURIComponent(projectId)}`
+      const generalPath = getChatContextPath(general).replace(/\.json$/, '')
+      const targetHash = `#chat/${generalPath}`
       if (window.location.hash !== targetHash) {
         window.location.hash = targetHash
       } else {

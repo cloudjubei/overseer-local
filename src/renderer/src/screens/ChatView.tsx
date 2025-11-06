@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { ChatSidebar } from '@renderer/components/chat'
 import { useProjectContext, useActiveProject } from '@renderer/contexts/ProjectContext'
 import { useStories } from '@renderer/contexts/StoriesContext'
@@ -21,7 +21,7 @@ import ChatsNavigationSidebar from '@renderer/components/chat/ChatsNavigationSid
 import SegmentedControl from '@renderer/components/ui/SegmentedControl'
 import { useChatUnread } from '@renderer/hooks/useChatUnread'
 import DotBadge from '@renderer/components/ui/DotBadge'
-import { getChatContextPath } from 'thefactory-tools/utils'
+import { getChatContextPath, getChatContextFromFilename } from 'thefactory-tools/utils'
 
 function prettyTopicName(topic?: string): string {
   if (!topic) return 'Topic'
@@ -68,82 +68,21 @@ function titleForContext(
   }
 }
 
-// the chat file structure
-// projects/<projectId>/<projectTopic>.json
-// projects/<projectId>/stories/<storyId>/agents/<agentRunId>.json
-// projects/<projectId>/stories/<storyId>/features/<featureId>/agents/<agentRunId>.json
-// projects/<projectId>/stories/<storyId>/features/<featureId>.json
-// projects/<projectId>/stories/<storyId>/<storyTopic>.json
-// projects/<projectId>/stories/<storyId>.json
-// projects/<projectId>.json
-// `thefactory-tools` -> getChatContextPath + getChatContextFromFilename
-
-// Support deep-linking to specific chat contexts under the chat route
-// Formats:
-// - #chat/project/<projectId>
-// - #chat/story/<storyId>
-// - #chat/feature/<storyId>/<featureId>
-// - #chat/project-topic/<projectId>/<topic>
-// - #chat/story-topic/<storyId>/<topic>
-// - #chat/agent-run/<projectId>/<storyId>/<agentRunId>
-// - #chat/agent-run-feature/<projectId>/<storyId>/<featureId>/<agentRunId>
+// Support deep-linking to specific chat contexts under the chat route using helpers.
+// The hash should be '#chat/' + getChatContextPath(ctx) with the '.json' stripped.
 function parseChatRouteFromHash(hashRaw: string): ChatContext | undefined {
   const raw = (hashRaw || '').replace(/^#/, '')
   if (!raw.startsWith('chat')) return undefined
-  const withoutPrefix = raw.slice('chat'.length)
-  const parts = withoutPrefix.split('/').filter(Boolean)
-  if (parts.length === 0) return undefined
-
+  let path = raw.slice('chat'.length)
+  if (path.startsWith('/')) path = path.slice(1)
+  if (!path) return undefined
+  const filename = path.endsWith('.json') ? path : `${path}.json`
   try {
-    const seg = parts[0]
-    if (seg === 'project' && parts.length >= 2) {
-      const projectId = decodeURIComponent(parts[1])
-      const ctx: ChatContextProject = { type: 'PROJECT', projectId }
-      return ctx
-    }
-    if (seg === 'story' && parts.length >= 2) {
-      const storyId = decodeURIComponent(parts[1])
-      return { type: 'STORY', storyId } as ChatContextStory
-    }
-    if (seg === 'feature' && parts.length >= 3) {
-      const storyId = decodeURIComponent(parts[1])
-      const featureId = decodeURIComponent(parts[2])
-      return { type: 'FEATURE', storyId, featureId } as ChatContextFeature
-    }
-    if (seg === 'project-topic' && parts.length >= 3) {
-      const projectId = decodeURIComponent(parts[1])
-      const projectTopic = decodeURIComponent(parts[2])
-      return { type: 'PROJECT_TOPIC', projectId, projectTopic } as ChatContextProjectTopic
-    }
-    if (seg === 'story-topic' && parts.length >= 3) {
-      const storyId = decodeURIComponent(parts[1])
-      const storyTopic = decodeURIComponent(parts[2])
-      return { type: 'STORY_TOPIC', storyId, storyTopic } as ChatContextStoryTopic
-    }
-    if (seg === 'agent-run' && parts.length >= 4) {
-      const projectId = decodeURIComponent(parts[1])
-      const storyId = decodeURIComponent(parts[2])
-      const agentRunId = decodeURIComponent(parts[3])
-      return { type: 'AGENT_RUN', projectId, storyId, agentRunId } as ChatContextAgentRun
-    }
-    if (seg === 'agent-run-feature' && parts.length >= 5) {
-      const projectId = decodeURIComponent(parts[1])
-      const storyId = decodeURIComponent(parts[2])
-      const featureId = decodeURIComponent(parts[3])
-      const agentRunId = decodeURIComponent(parts[4])
-      const ctx: ChatContextAgentRunFeature = {
-        type: 'AGENT_RUN_FEATURE',
-        projectId,
-        storyId,
-        featureId,
-        agentRunId,
-      }
-      return ctx
-    }
+    return getChatContextFromFilename(filename)
   } catch (e) {
     console.warn('Failed to parse chat route from hash', e)
+    return undefined
   }
-  return undefined
 }
 
 export default function ChatView() {
@@ -224,10 +163,7 @@ export default function ChatView() {
       // 1. Handle hash navigation first
       const hashCtx = parseChatRouteFromHash(window.location.hash)
       if (hashCtx) {
-        if (
-          !selectedContext ||
-          getChatContextPath(hashCtx) !== getChatContextPath(selectedContext)
-        ) {
+        if (!selectedContext || getChatContextPath(hashCtx) !== getChatContextPath(selectedContext)) {
           try {
             await getChat(hashCtx)
           } catch {}
@@ -259,17 +195,22 @@ export default function ChatView() {
       }
 
       if (newContext) {
-        // Only update if context has changed to prevent potential loops.
         const newKey = getChatContextPath(newContext)
         const oldKey = selectedContext ? getChatContextPath(selectedContext) : undefined
         if (newKey !== oldKey) {
           try {
             await getChat(newContext) // Ensure chat exists
           } catch {}
-          setSelectedContext(newContext) // Set new context
+          // Sync URL hash to canonical chat path (without .json)
+          try {
+            const hashPath = newKey.replace(/\.json$/, '')
+            const targetHash = `#chat/${hashPath}`
+            if (window.location.hash !== targetHash) window.location.hash = targetHash
+          } catch {}
+          setSelectedContext(newContext)
         }
       } else if (selectedContext) {
-        setSelectedContext(undefined) // Nothing to select, clear if something was selected
+        setSelectedContext(undefined)
       }
     }
 
@@ -350,12 +291,12 @@ export default function ChatView() {
         ]}
         value={mode}
         onChange={(v) => setMode(v as 'categories' | 'history')}
-        size="sm"
+        size='sm'
       />
     )
     const showDot = hasUnreadForProject(activeProjectId)
     return (
-      <div className="flex items-center gap-2">
+      <div className='flex items-center gap-2'>
         {seg}
         {showDot && <DotBadge title={'Unread chats in this project'} />}
       </div>
@@ -377,7 +318,14 @@ export default function ChatView() {
       navContent={
         <ChatsNavigationSidebar
           selectedContext={selectedContext}
-          onSelectContext={(ctx) => setSelectedContext(ctx)}
+          onSelectContext={(ctx) => {
+            try {
+              const p = getChatContextPath(ctx).replace(/\.json$/, '')
+              const targetHash = `#chat/${p}`
+              if (window.location.hash !== targetHash) window.location.hash = targetHash
+            } catch {}
+            setSelectedContext(ctx)
+          }}
           mode={mode}
         />
       }
