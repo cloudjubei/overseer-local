@@ -388,11 +388,22 @@ export default function GitMergeModal(props: GitMergeModalProps) {
       setLocalStatus(st)
       setWorkspaceFiles(all)
       // Preserve selection on refresh; default to first file if none
-      // const staged = st?.staged || []
-      // const unstaged = [...(st?.unstaged || []), ...(st?.untracked || [])]
-      // setSelection((prev) => {
-      //   const next = new Set<string>()
-      // })
+      const staged = st?.staged || []
+      const unstaged = [...(st?.unstaged || []), ...(st?.untracked || [])]
+      setSelection((prev) => {
+        const next = new Set<string>()
+        for (const k of prev) {
+          const [area, ...rest] = k.split(':')
+          const p = rest.join(':')
+          if (area === 'staged' && staged.includes(p)) next.add(k)
+          if (area === 'unstaged' && unstaged.includes(p)) next.add(k)
+        }
+        if (next.size === 0) {
+          if (staged[0]) next.add(makeKey('staged', staged[0]))
+          else if (unstaged[0]) next.add(makeKey('unstaged', unstaged[0]))
+        }
+        return next
+      })
     } catch (e) {
       console.warn('Failed to load local git status', e)
     } finally {
