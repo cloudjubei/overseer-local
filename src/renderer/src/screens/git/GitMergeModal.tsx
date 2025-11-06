@@ -618,12 +618,10 @@ export default function GitMergeModal(props: GitMergeModalProps) {
           }
           setPostActionRunning(false)
         }
-        // Refresh unified branches after a successful merge (regardless of post-action outcome)
-        try {
-          void unified.reload(projectId)
-        } catch (e) {
-          // non-fatal
-        }
+        // Immediate refresh: reload, read local status and dispatch UI event
+        try { await unified.reload(projectId) } catch {}
+        try { await gitService.getLocalStatus(projectId) } catch {}
+        try { window.dispatchEvent(new CustomEvent('git:refresh-now', { detail: { projectId } })) } catch {}
         if (localError) {
           setPostActionError(localError)
         } else {

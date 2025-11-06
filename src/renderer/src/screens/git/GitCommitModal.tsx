@@ -7,6 +7,7 @@ import { gitService } from '@renderer/services/gitService'
 import { filesService } from '@renderer/services/filesService'
 import { StructuredUnifiedDiff } from '@renderer/components/chat/tool-popups/diffUtils'
 import { IconDelete, IconRefresh, IconFileAdded, IconFileDeleted, IconFileModified, IconMaximize, IconMinimize } from '@renderer/components/ui/icons/Icons'
+import { useGit } from '@renderer/contexts/GitContext'
 
 export type GitCommitModalProps = {
   projectId: string
@@ -86,6 +87,8 @@ function FileRow({ file, checked, selected, onToggle, onReset, onRemove, draggab
 }
 
 export default function GitCommitModal({ projectId, currentBranch, onRequestClose }: GitCommitModalProps) {
+  const { unified } = useGit()
+
   const [loading, setLoading] = React.useState(true)
   const [error, setError] = React.useState<string | undefined>(undefined)
   const [status, setStatus] = React.useState<LocalStatus>({ staged: [], unstaged: [], untracked: [] })
@@ -544,7 +547,7 @@ export default function GitCommitModal({ projectId, currentBranch, onRequestClos
       <Modal isOpen={confirmOpen} onClose={() => setConfirmOpen(false)} title={<div className='text-base font-semibold'>Confirm commit</div>} size='md' footer={
         <div className='flex items-center justify-end gap-2 w-full'>
           <Button onClick={() => setConfirmOpen(false)} variant='secondary'>Cancel</Button>
-          <Button onClick={async () => { setBusy(true); setOpError(undefined); try { const res = await gitService.commit(projectId, { message: commitMsg, pushToOrigin: pushNow }); if (!res?.ok) { setOpError(res?.error || 'Commit failed'); setBusy(false); return } setBusy(false); onRequestClose() } catch (e: any) { setBusy(false); setOpError(e?.message || String(e)) } }} disabled={!commitMsg.trim() || busy} loading={busy}>
+          <Button onClick={async () => { setBusy(true); setOpError(undefined); try { const res = await gitService.commit(projectId, { message: commitMsg, pushToOrigin: pushNow }); if (!res?.ok) { setOpError(res?.error || 'Commit failed'); setBusy(false); return } try { await unified.reload(projectId) } catch {} try { await gitService.getLocalStatus(projectId) } catch {} try { window.dispatchEvent(new CustomEvent('git:refresh-now', { detail: { projectId } })) } catch {} setBusy(false); onRequestClose() } catch (e: any) { setBusy(false); setOpError(e?.message || String(e)) } }} disabled={!commitMsg.trim() || busy} loading={busy}>
             {busy ? 'Working…' : 'Commit'}
           </Button>
         </div>

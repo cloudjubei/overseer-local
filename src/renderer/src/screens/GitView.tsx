@@ -782,6 +782,19 @@ function CurrentProjectView() {
     void loadCleanStatus()
   }, [projectId, loadCleanStatus])
 
+  // Immediate refresh listener after commit/merge
+  React.useEffect(() => {
+    const handler = (ev: any) => {
+      const pid = ev?.detail?.projectId
+      if (projectId && pid && pid !== projectId) return
+      // Force reload and cleanliness check immediately
+      void unified.reload(projectId)
+      void loadCleanStatus()
+    }
+    window.addEventListener('git:refresh-now' as any, handler as any)
+    return () => window.removeEventListener('git:refresh-now' as any, handler as any)
+  }, [projectId, unified, loadCleanStatus])
+
   const isEqualToCurrent = React.useCallback(
     (b: GitUnifiedBranch): boolean => {
       if (!current) return false
