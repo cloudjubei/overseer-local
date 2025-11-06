@@ -2943,13 +2943,12 @@
       "title": "when coming back to chat - first open the least recently opened chat",
       "description": "In @src/renderer/src/screens/ChatView.tsx - it needs to work when going from chat to any other screen (and then back), and when switching projects but staying inside @src/renderer/src/screens/ChatView.tsx .\nIt also needs to select the chat so that it's obvious which one it is (i.e. it has to become highlighted - blue as it does now when clicking a chat).\nIt also needs to scroll to the last message (if it's unread, then to the top of it so the user can start reading the beginning - or to the very bottom otherwise, i.e. when read).\nCurrently the opening behaviour even interferes with deleting a chat (cos it has to switch to a new one - i.e. project chat if nothing is available as that one is always available) - because it immediately recreates the chat after it gets deleted - this shouldn't happen.",
       "context": [
-        "src/renderer/src/screens/ChatView.tsx",
-        "src/renderer/src/contexts/ChatsContext.tsx"
+        "src/renderer/src/screens/ChatView.tsx"
       ],
       "blockers": [],
       "createdAt": "2025-11-05T08:32:59.874Z",
-      "updatedAt": "2025-11-05T22:33:55.309Z",
-      "rejection": "This is not working at all. Spend some time reviewing the code and @src/renderer/src/contexts/ChatsContext.tsx and produce a quality fix."
+      "updatedAt": "2025-11-06T01:13:33.826Z",
+      "rejection": "when within the same project going away to another screen and then back to @src/renderer/src/screens/ChatView.tsx - it opens correctly. But when switching projects (i.e. keeping @src/renderer/src/screens/ChatView.tsx open) it doesn't work.\nIt also doesn't highlight a chat when first opening the @src/renderer/src/screens/ChatView.tsx (it opens the project chat but doesn't highlight it).\nAlso, when the chat opens - it doesn't fully scroll to the bottom if there's a tool result or spinner. My suspicion is that these things dynamically pop in and the scrollbar gets told to scroll to the bottom, but the bottom extends right after."
     },
     {
       "id": "9a74d29d-8267-4fae-99c1-aa34c2ab45a5",

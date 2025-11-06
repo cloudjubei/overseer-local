@@ -167,7 +167,17 @@ export default function ChatView() {
   }
 
   // Selected context state
-  const [selectedContext, setSelectedContext] = useState<ChatContext | undefined>(undefined)
+  const [selectedContext, setSelectedContext] = useState<ChatContext | undefined>(() => {
+    try {
+      const raw = localStorage.getItem('chat-last-selected-context')
+      if (raw) {
+        return JSON.parse(raw)
+      }
+    } catch (e) {
+      console.warn('Failed to parse last-selected-context from localStorage', e)
+    }
+    return undefined
+  })
 
   // Sidebar mode state (categories | history)
   const [mode, setMode] = useState<'categories' | 'history'>(() => {
@@ -207,17 +217,30 @@ export default function ChatView() {
       // Always respect deep-link if present
       const hashCtx = parseChatRouteFromHash(window.location.hash)
       if (hashCtx) {
-        try { await getChat(hashCtx) } catch {}
+        // Avoid re-selecting if hash points to the already-selected context
+        if (selectedContext && getChatContextPath(hashCtx) === getChatContextPath(selectedContext)) {
+          return
+        }
+        try {
+          await getChat(hashCtx)
+        } catch {}
         setSelectedContext(hashCtx)
         return
       }
 
-      // If user already has a selection, do nothing (unless deep-link above)
-      if (selectedContext) return
+      // If a context is selected, validate it against the current project's chats.
+      // If it's not in the current project (e.g., after a project switch or chat deletion),
+      // proceed to select a new one. Otherwise, keep it.
+      if (selectedContext) {
+        const key = getChatContextPath(selectedContext)
+        const projectChats = chatsByProjectId[activeProjectId ?? ''] || []
+        if (projectChats.some((c) => c.key === key)) {
+          return
+        }
+      }
 
-      // Wait until chats for this project have loaded to pick LRU
+      // Wait until chats for this project have loaded before picking one
       if (!hasLoadedProjectChats) return
-
       // Prefer least recently opened chat for this project
       const lruCtx = loadLeastRecentlyOpened()
       if (lruCtx) {
