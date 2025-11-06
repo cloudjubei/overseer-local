@@ -1,7 +1,5 @@
 import React from 'react'
 
-// Note: This component aims to never wrap diff lines; use horizontal scroll instead.
-
 export type ParsedHunk = {
   header?: string
   oldStart: number
@@ -36,12 +34,9 @@ export function parseUnifiedDiff(patch: string): ParsedHunk[] {
         continue
       }
     }
-    if (!cur) {
-      continue
-    }
-    if (ln.startsWith('+++ ') || ln.startsWith('--- ')) {
-      continue
-    }
+    if (!cur) continue
+    if (ln.startsWith('+++ ') || ln.startsWith('--- ')) continue
+
     if (ln.startsWith('+')) {
       newLine += 1
       cur.lines.push({ type: 'add', text: ln.slice(1), newLine })
@@ -60,22 +55,22 @@ export function parseUnifiedDiff(patch: string): ParsedHunk[] {
   return out
 }
 
-export function StructuredUnifiedDiff({ patch, maxHunks = 3 }: { patch: string; maxHunks?: number }) {
-  const [expanded, setExpanded] = React.useState(false)
+// Note: parent should control scrolling. We always render all hunks and stretch to full width.
+export function StructuredUnifiedDiff({ patch }: { patch: string }) {
   const hunks = React.useMemo(() => parseUnifiedDiff(patch), [patch])
-  const visible = expanded ? hunks : hunks.slice(0, maxHunks)
+
   const headerText = (h: ParsedHunk) => {
     const left = `-${h.oldStart}${typeof h.oldLines === 'number' ? ',' + h.oldLines : ''}`
     const right = `+${h.newStart}${typeof h.newLines === 'number' ? ',' + h.newLines : ''}`
     return `@@ ${left} ${right} @@${h.header ? ' ' + h.header : ''}`
   }
-  const canExpand = hunks.length > maxHunks
+
   return (
-    <div className="font-mono text-[11px] overflow-x-auto">
-      {/* Inner block grows to content width so backgrounds match the scrolled width */}
-      <div className="inline-block min-w-max">
-        {visible.map((hunk, hi) => (
-          <div key={hi} className="mb-3">
+    <div className="font-mono text-[11px] w-full">
+      {/* Inner block is at least full width; it can grow wider so the parent shows a horizontal scrollbar. */}
+      <div className="inline-block min-w-full">
+        {hunks.map((hunk, hi) => (
+          <div key={hi} className="mb-3 w-full">
             <div className="px-2 py-0.5 bg-neutral-100 dark:bg-neutral-900/60 text-neutral-700 dark:text-neutral-300 w-full">
               {headerText(hunk)}
             </div>
@@ -88,11 +83,11 @@ export function StructuredUnifiedDiff({ patch, maxHunks = 3 }: { patch: string; 
                   const bgCls = isAdd
                     ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300'
                     : isDel
-                      ? 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300'
-                      : ''
+                    ? 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300'
+                    : ''
                   const marker = isAdd ? '+' : isDel ? '-' : ' '
                   return (
-                    <div key={li} className={`grid grid-cols-[56px_56px_auto] w-full ${bgCls}`}>
+                    <div key={li} className={`grid grid-cols-[56px_56px_1fr] w-full ${bgCls}`}>
                       <div className="px-2 py-0.5 text-right select-none text-neutral-500 dark:text-neutral-400 tabular-nums">
                         {typeof (ln as any).oldLine === 'number' ? (ln as any).oldLine : ''}
                       </div>
@@ -110,21 +105,6 @@ export function StructuredUnifiedDiff({ patch, maxHunks = 3 }: { patch: string; 
           </div>
         ))}
       </div>
-      {canExpand ? (
-        <div className="mt-1">
-          <button
-            type="button"
-            className="text-[10px] text-blue-600 hover:underline"
-            aria-expanded={expanded}
-            onClick={(e) => {
-              e.stopPropagation()
-              setExpanded((v) => !v)
-            }}
-          >
-            {expanded ? 'Collapse changes' : 'View more changes'}
-          </button>
-        </div>
-      ) : null}
     </div>
   )
 }

@@ -21,6 +21,10 @@ export type ModalProps = {
   headerActions?: React.ReactNode
   // Optional override for the content container className (defaults to a scrollable padded container)
   contentClassName?: string
+  // Optional override for the panel container className (appended to the panel classes; useful for fullscreen sizing)
+  panelClassName?: string
+  // Optional override for the footer container className (defaults to a fixed, padded container)
+  footerClassName?: string
   // Optional: hide the header bar entirely (useful for embedded views without a top bar)
   hideHeader?: boolean
 }
@@ -68,6 +72,8 @@ export function Modal({
   closeOnOverlayClick = true,
   headerActions,
   contentClassName,
+  panelClassName,
+  footerClassName,
   hideHeader = false,
 }: ModalProps) {
   const overlayRef = useRef<HTMLDivElement | null>(null)
@@ -151,7 +157,7 @@ export function Modal({
         ref={panelRef}
         className={
           `relative z-10 w-full flex flex-col ${sizeClass(size)} rounded-lg border bg-surface-overlay text-text-primary shadow-xl max-h-[90vh] tf-modal-panel` +
-          ' border-border outline-none focus:outline-none animate-in fade-in-50 zoom-in-95'
+          ' border-border outline-none focus:outline-none animate-in fade-in-50 zoom-in-95' + (panelClassName ? ` ${panelClassName}` : '')
         }
         role="dialog"
         aria-modal="true"
@@ -194,7 +200,9 @@ export function Modal({
           </div>
         )}
         <div className={contentClasses}>{children}</div>
-        {footer ? <div className="shrink-0 border-t p-3 border-border">{footer}</div> : null}
+        {footer ? (
+          <div className={footerClassName || 'shrink-0 border-t p-3 border-border'}>{footer}</div>
+        ) : null}
       </div>
     </div>
   )

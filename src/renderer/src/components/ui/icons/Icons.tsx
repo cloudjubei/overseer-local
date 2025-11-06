@@ -80,6 +80,8 @@ export * from './IconShield'
 export * from './IconKey'
 export * from './IconEye'
 export * from './IconFastMerge'
+export * from './IconMaximize'
+export * from './IconMinimize'
 
 // New finance icons (split per file)
 export * from './IconDollar'
