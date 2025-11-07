@@ -83,7 +83,7 @@ export default class StoriesManager extends BaseManager {
       return
     }
 
-    const newStory = await tools.createStory(storyData)
+    const newStory = await tools.addStory(storyData)
 
     const newProject = { ...project }
     newProject.storyIdToDisplayIndex[newStory.id] =
