@@ -189,12 +189,10 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
     }
 
     for (const { storyId, projectId, isDelete, story, project } of stories) {
-      const currentStoryIds = (newStoryIdsByProject[projectId] ?? []).filter((s) =>
-        s !== storyId ? s : undefined,
-      )
-      if (!isDelete) {
-        newStoryIdsByProject[projectId] = [...currentStoryIds, storyId]
-      }
+      // Build a filtered list of story ids for the project that excludes the target id
+      const currentStoryIds = (newStoryIdsByProject[projectId] ?? []).filter((s) => s !== storyId)
+      // On delete: persist the filtered list. On upsert: append id (order is driven elsewhere by display index)
+      newStoryIdsByProject[projectId] = isDelete ? currentStoryIds : [...currentStoryIds, storyId]
 
       delete newStoriesById[storyId]
       if (!isDelete && story) {
@@ -225,11 +223,12 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
     }
 
     console.log('newStoryIdsByProject: ', newStoryIdsByProject)
-    setStoryIdsByProject((prev) => ({ ...prev, ...newStoryIdsByProject }))
-    setStoriesById((prev) => ({ ...prev, ...newStoriesById }))
-    setFeaturesById((prev) => ({ ...prev, ...newFeaturesById }))
-    setStoryDisplayToId((prev) => ({ ...prev, ...newStoryDisplayToId }))
-    setFeatureDisplayToIdByStory((prev) => ({ ...prev, ...newFeatureDisplayToIdByStory }))
+    // Important: set computed objects directly. Merging with prev would reintroduce deleted keys.
+    setStoryIdsByProject(newStoryIdsByProject)
+    setStoriesById(newStoriesById)
+    setFeaturesById(newFeaturesById)
+    setStoryDisplayToId(newStoryDisplayToId)
+    setFeatureDisplayToIdByStory(newFeatureDisplayToIdByStory)
   }
 
   const onStoryUpdate = useCallback(

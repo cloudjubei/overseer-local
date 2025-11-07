@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "-",
+  "status": "+",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -3015,7 +3015,7 @@
     },
     {
       "id": "0c94352d-002a-4b31-86e9-20bf9306a7cf",
-      "status": "-",
+      "status": "+",
       "title": "delete story doesn't refresh the ui (story is still shown)",
       "description": "when in @src/renderer/src/screens/stories/StoriesListView.tsx or in @src/renderer/src/screens/stories/StoryDetailsView.tsx   and deleting a story - it still shows in StoriesListView . The cache or context - @src/renderer/src/contexts/StoriesContext.tsx - must not clear it correctly.\nAfter an app restart it doesn't show (i.e. the story is correctly removed).",
       "context": [
@@ -3025,7 +3025,8 @@
       ],
       "blockers": [],
       "createdAt": "2025-11-07T12:58:44.015Z",
-      "updatedAt": "2025-11-07T13:00:26.056Z"
+      "updatedAt": "2025-11-07T13:02:33.600Z",
+      "completedAt": "2025-11-07T13:02:33.600Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -3238,5 +3239,6 @@
     "0c94352d-002a-4b31-86e9-20bf9306a7cf": 207
   },
   "createdAt": "2025-09-16T13:05:37.984Z",
-  "updatedAt": "2025-11-05T00:22:06.741Z"
+  "updatedAt": "2025-11-05T00:22:06.741Z",
+  "completedAt": "2025-11-07T13:02:33.600Z"
 }
