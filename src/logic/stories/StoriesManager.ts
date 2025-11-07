@@ -74,8 +74,28 @@ export default class StoriesManager extends BaseManager {
     return tools?.getStory(storyId)
   }
   async createStory(projectId: string, storyData: StoryCreateInput): Promise<Story | undefined> {
+    const project = await this.projectsManager.getProject(projectId)
+    if (!project) {
+      return
+    }
+
     const tools = await this.__getTools(projectId)
-    return await tools?.addStory(storyData)
+    if (!tools) {
+      return
+    }
+
+    const newStory = await tools.addStory(storyData)
+    if (newStory) {
+      const newProject = { ...project }
+      newProject.storyIdToDisplayIndex[newStory.id] =
+        Object.keys(newProject.storyIdToDisplayIndex).length + 1
+      await this.projectsManager.updateProject(project.id, newProject)
+      return newStory
+    }
+    return
+
+    // const tools = await this.__getTools(projectId)
+    // return await tools?.addStory(storyData)
   }
   async updateStory(
     projectId: string,
@@ -87,8 +107,30 @@ export default class StoriesManager extends BaseManager {
   }
 
   async deleteStory(projectId: string, storyId: string): Promise<ProjectSpec | undefined> {
+    const project = await this.projectsManager.getProject(projectId)
+    if (!project) {
+      return
+    }
+
     const tools = await this.__getTools(projectId)
-    return await tools?.deleteStory(storyId)
+    if (!tools) {
+      return
+    }
+    await tools.deleteStory(storyId)
+
+    const newProject = { ...project }
+    const index = newProject.storyIdToDisplayIndex[storyId]
+    delete newProject.storyIdToDisplayIndex[storyId]
+    for (const key of Object.keys(newProject.storyIdToDisplayIndex)) {
+      if (newProject.storyIdToDisplayIndex[key] > index) {
+        newProject.storyIdToDisplayIndex[key] = newProject.storyIdToDisplayIndex[key] - 1
+      }
+    }
+    await this.projectsManager.updateProject(projectId, newProject)
+    return newProject
+
+    // const tools = await this.__getTools(projectId)
+    // return await tools?.deleteStory(storyId)
   }
 
   async getFeature(

@@ -14,7 +14,13 @@
     "framework": "nextjs",
     "testFramework": "jest"
   },
-  "storyIdToDisplayIndex": {},
+  "storyIdToDisplayIndex": {
+    "efbaed0b-e7dd-42f6-a6ec-0c4805502973": 1,
+    "70afa8c8-4f3b-4c21-9a6d-2b07f81ae6da": 2,
+    "d9eef420-85b7-4269-832e-daa010df4bb1": 3,
+    "e61c6e05-6017-4df1-bd91-ce0227824c21": 4,
+    "ed165545-68c7-4586-887f-0c27595faba6": 5
+  },
   "createdAt": "2025-11-07T10:26:44.843Z",
-  "updatedAt": "2025-11-07T14:48:49.678Z"
+  "updatedAt": "2025-11-07T15:14:15.331Z"
 }
