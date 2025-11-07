@@ -1,6 +1,6 @@
 {
   "id": "osc-compass-web-admin",
-  "title": "OSC Compass Admin",
+  "title": "Compass Admin",
   "description": "The Compass frontend web admin app used for handling users, viewing stats and resolving issues.\nIntegrates with the Compass BE via a swagger and code generation.\nThe stack is:\nTypeScript, React, Vite, tailwind and shadcn for UI.\n\nAll code is under `src` and the generated backend code is under `src/generated` - the latter should never be touched directly unless there's a library patch required.",
   "path": "../../compass-web-admin",
   "repo_url": "https://github.com/OSCGROUPLTD/compass-web-admin.git",
@@ -18,5 +18,5 @@
     "001f80e1-5a55-47ac-8b74-dee89ae3efed": 1
   },
   "createdAt": "2025-10-08T11:48:22.205Z",
-  "updatedAt": "2025-10-24T15:22:57.197Z"
+  "updatedAt": "2025-11-07T14:48:36.875Z"
 }

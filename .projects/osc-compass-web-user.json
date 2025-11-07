@@ -1,6 +1,6 @@
 {
-  "id": "compass-web-user",
-  "title": "CompassWebUser",
+  "id": "osc-compass-web-user",
+  "title": "Compass Web User",
   "description": "The Compass user facing app for macro/micro goals, journaling and health tracking.",
   "path": "../../compass-web-user",
   "repo_url": "https://github.com/OSCGROUPLTD/compass-web-user.git",
@@ -16,5 +16,5 @@
   },
   "storyIdToDisplayIndex": {},
   "createdAt": "2025-11-07T10:26:44.843Z",
-  "updatedAt": "2025-11-07T10:27:19.471Z"
+  "updatedAt": "2025-11-07T14:48:49.678Z"
 }

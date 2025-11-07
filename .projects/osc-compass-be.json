@@ -1,7 +1,7 @@
 {
   "id": "osc-compass-be",
-  "title": "OSC Compass BE",
-  "description": "todo",
+  "title": "Compass BE",
+  "description": "The backend powering the whole Compass experience.\nA NestJs project.",
   "path": "../../compass-be",
   "repo_url": "https://github.com/OSCGROUPLTD/compass-be",
   "requirements": [],
@@ -26,7 +26,7 @@
     "efbb2487-496f-4485-bdfc-0cd11818ad27": 14
   },
   "createdAt": "2025-09-14T19:03:30.461Z",
-  "updatedAt": "2025-11-07T12:51:27.674Z",
+  "updatedAt": "2025-11-07T14:48:29.731Z",
   "codeInfo": {
     "language": "typescript",
     "framework": "nest",
