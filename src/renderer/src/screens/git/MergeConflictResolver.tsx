@@ -77,21 +77,6 @@ function parseConflictSegments(raw: string): Segment[] {
   return segments
 }
 
-function renderCodeBlock(s: string) {
-  const lines = (s || '').replace(/\r\n/g, '\n').split('\n')
-  return (
-    <pre className='text-xs font-mono whitespace-pre-wrap max-h-64 overflow-auto border border-neutral-200 dark:border-neutral-800 rounded-md'>
-      <code>
-        {lines.map((l, idx) => (
-          <span key={idx} className='block px-2 py-0.5'>
-            {l || ' '}
-          </span>
-        ))}
-      </code>
-    </pre>
-  )
-}
-
 function joinSegments(segments: Segment[]): string {
   return segments
     .map((seg) => (seg.type === 'text' ? seg.text : `<<<<<<< ${seg.oursLabel}\n${seg.ours}\n=======\n${seg.theirs}\n>>>>>>> ${seg.theirsLabel}\n`))
@@ -114,6 +99,11 @@ export default function MergeConflictResolver({ projectId, baseRef, branch, conf
   const [theirsText, setTheirsText] = React.useState<string>('')
   const [triplesLoading, setTriplesLoading] = React.useState<boolean>(false)
 
+  // UI toggles
+  const [showContextPanes, setShowContextPanes] = React.useState<boolean>(true) // stage 1 'base/context' toggle
+  const [wrapLines, setWrapLines] = React.useState<boolean>(true)
+  const [syncScroll, setSyncScroll] = React.useState<boolean>(false)
+
   // Sidebar/search and session controls
   const [search, setSearch] = React.useState<string>('')
   const [abortRunning, setAbortRunning] = React.useState<boolean>(false)
@@ -131,8 +121,9 @@ export default function MergeConflictResolver({ projectId, baseRef, branch, conf
   const allResolved = totalFiles > 0 && resolvedCount === totalFiles
 
   const currentConflict = conflicts.find((c) => c.path === selected) || null
-  const isBinary = currentConflict?.type && /binary/i.test(String(currentConflict.type))
+  const isBinary = currentConflict?.type && /binary/i.test(String(currentConflict?.type || ''))
   const unresolvedCount = React.useMemo(() => segments.filter((s) => s.type === 'conflict').length, [segments])
+  const isVeryLarge = React.useMemo(() => (content?.length || 0) > 200000 || segments.length > 800, [content, segments.length])
 
   const loadTriples = React.useCallback(async (path: string | null, base: string, incoming: string) => {
     if (!path) return
@@ -187,19 +178,9 @@ export default function MergeConflictResolver({ projectId, baseRef, branch, conf
     setResolvedMap(map)
   }, [conflicts, projectId])
 
-  React.useEffect(() => {
-    void loadFile(selected)
-  }, [selected, loadFile])
-
-  React.useEffect(() => {
-    if (!selected) return
-    void loadTriples(selected, baseRef, branch)
-  }, [selected, baseRef, branch, loadTriples])
-
-  React.useEffect(() => {
-    // On mount or conflicts change, compute resolved states
-    void recomputeResolvedAll()
-  }, [recomputeResolvedAll])
+  React.useEffect(() => { void loadFile(selected) }, [selected, loadFile])
+  React.useEffect(() => { if (selected) void loadTriples(selected, baseRef, branch) }, [selected, baseRef, branch, loadTriples])
+  React.useEffect(() => { void recomputeResolvedAll() }, [recomputeResolvedAll])
 
   const applyChoice = (index: number, choice: 'ours' | 'theirs' | 'both') => {
     setSegments((prev) => {
@@ -246,10 +227,7 @@ export default function MergeConflictResolver({ projectId, baseRef, branch, conf
     setError(null)
     try {
       await filesService.writeFile(projectId, selected, content)
-      try {
-        // Stage immediately after save so git can consider it resolved
-        await gitService.stage(projectId, [selected])
-      } catch {}
+      try { await gitService.stage(projectId, [selected]) } catch {}
       setDirty(false)
       setResolvedMap((prev) => ({ ...prev, [selected]: !hasConflictMarkers(content) }))
     } catch (e: any) {
@@ -288,8 +266,115 @@ export default function MergeConflictResolver({ projectId, baseRef, branch, conf
     }
   }
 
+  // Keyboard shortcuts and hunk focus
+  const conflictIdxList = React.useMemo(() => segments.map((s, i) => (s.type === 'conflict' ? i : -1)).filter((i) => i >= 0), [segments])
+  const [focusedHunk, setFocusedHunk] = React.useState<number>(conflictIdxList[0] ?? -1)
+  const segmentRefs = React.useRef<Record<number, HTMLDivElement | null>>({})
+  React.useEffect(() => { setFocusedHunk(conflictIdxList[0] ?? -1) }, [selected])
+
+  const scrollHunkIntoView = React.useCallback((idx: number) => {
+    const el = segmentRefs.current[idx]
+    if (el) { try { el.scrollIntoView({ block: 'center', behavior: 'smooth' }) } catch {} }
+  }, [])
+
+  React.useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null
+      const inText = target && (target.tagName === 'TEXTAREA' || target.tagName === 'INPUT' || target.isContentEditable)
+      const mod = e.metaKey || e.ctrlKey
+      if (!inText && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) {
+        e.preventDefault()
+        if (conflictIdxList.length === 0) return
+        const curPos = conflictIdxList.indexOf(focusedHunk)
+        if (e.key === 'ArrowDown') {
+          const next = conflictIdxList[Math.min(conflictIdxList.length - 1, Math.max(0, curPos) + 1)]
+          if (typeof next === 'number') { setFocusedHunk(next); scrollHunkIntoView(next) }
+        } else if (e.key === 'ArrowUp') {
+          const prev = conflictIdxList[Math.max(0, curPos <= 0 ? 0 : curPos - 1)]
+          if (typeof prev === 'number') { setFocusedHunk(prev); scrollHunkIntoView(prev) }
+        }
+        return
+      }
+      if (mod && !inText && (e.key === '1' || e.key === '2' || e.key === '3')) {
+        e.preventDefault()
+        const idx = focusedHunk >= 0 ? focusedHunk : (conflictIdxList[0] ?? -1)
+        if (idx < 0) return
+        if (e.key === '1') applyChoice(idx, 'ours')
+        else if (e.key === '2') applyChoice(idx, 'theirs')
+        else applyChoice(idx, 'both')
+        return
+      }
+      if (mod && e.key.toLowerCase() === 's') {
+        e.preventDefault()
+        void onSave()
+        return
+      }
+      if (mod && (e.key === 'Enter')) {
+        e.preventDefault()
+        void doFinalize()
+        return
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [focusedHunk, conflictIdxList])
+
+  const doFinalize = React.useCallback(async () => {
+    if (finalizing) return
+    setFinalizing(true)
+    try {
+      await recomputeResolvedAll()
+      const unresolved = Object.entries(resolvedMap).filter(([_, v]) => !v).map(([k]) => k)
+      if (unresolved.length > 0) {
+        alert(`Cannot finalize: ${unresolved.length} file(s) still have unresolved markers.`)
+        return
+      }
+      try { await gitService.stage(projectId, conflicts.map((c) => c.path)) } catch {}
+      const message = finalizeMsg && finalizeMsg.trim().length > 0 ? finalizeMsg : `Merge branch ${branch}`
+      const res = await gitService.commit(projectId, { message })
+      if (!res?.ok) { alert(`Commit failed: ${res?.error || 'unknown error'}`); return }
+      if (pushImmediately) {
+        const p = await gitService.push(projectId, 'origin')
+        if (!p?.ok) alert(`Push failed: ${p?.error || 'unknown error'}`)
+      }
+      try { window.dispatchEvent(new CustomEvent('git:refresh-now', { detail: { projectId } })) } catch {}
+      alert('Merge finalized.')
+    } catch (e) {
+      console.error('Finalize merge failed', e)
+      alert('Finalize merge failed')
+    } finally {
+      setFinalizing(false)
+    }
+  }, [finalizing, recomputeResolvedAll, resolvedMap, projectId, conflicts, finalizeMsg, branch, pushImmediately])
+
+  // Sync scroll between panes
+  const leftPaneRef = React.useRef<HTMLDivElement | null>(null)
+  const rightPaneRef = React.useRef<HTMLDivElement | null>(null)
+  const onSyncScroll = React.useCallback((src: 'left' | 'right') => {
+    if (!syncScroll) return
+    const a = src === 'left' ? leftPaneRef.current : rightPaneRef.current
+    const b = src === 'left' ? rightPaneRef.current : leftPaneRef.current
+    if (a && b) { b.scrollTop = a.scrollTop }
+  }, [syncScroll])
+
   return (
     <div className='flex flex-col gap-3 min-h-[480px]'>
+      {/* Top toolbar for toggles */}
+      <div className='flex items-center justify-end gap-3 text-xs'>
+        <label className='inline-flex items-center gap-1'>
+          <input type='checkbox' checked={showContextPanes} onChange={(e) => setShowContextPanes(e.target.checked)} />
+          <span>Show context panes</span>
+        </label>
+        <label className='inline-flex items-center gap-1'>
+          <input type='checkbox' checked={wrapLines} onChange={(e) => setWrapLines(e.target.checked)} />
+          <span>Wrap</span>
+        </label>
+        <label className='inline-flex items-center gap-1'>
+          <input type='checkbox' checked={syncScroll} onChange={(e) => setSyncScroll(e.target.checked)} />
+          <span>Sync scroll</span>
+        </label>
+      </div>
+
       <div className='flex gap-3 min-h-[420px]'>
         {/* Sidebar */}
         <div className='w-64 shrink-0 border rounded-md border-neutral-200 dark:border-neutral-800 flex flex-col overflow-hidden'>
@@ -378,6 +463,15 @@ export default function MergeConflictResolver({ projectId, baseRef, branch, conf
                 <Button size='sm' variant='secondary' onClick={() => void onSave()}>Save & Stage</Button>
               </div>
             </div>
+          ) : isVeryLarge ? (
+            <div className='p-4 text-sm text-neutral-600 dark:text-neutral-400'>
+              Large file detected. For performance, hunk rendering is disabled. Use file-level actions below and Save & Stage.
+              <div className='mt-2 flex items-center gap-2'>
+                <Button size='sm' onClick={() => void acceptFile('ours')}>Accept ours (file)</Button>
+                <Button size='sm' onClick={() => void acceptFile('theirs')}>Accept theirs (file)</Button>
+                <Button size='sm' variant='secondary' onClick={() => void onSave()}>Save & Stage</Button>
+              </div>
+            </div>
           ) : (
             <div className='flex-1 min-h-0 overflow-auto p-3 flex flex-col gap-3'>
               {error && (
@@ -385,28 +479,40 @@ export default function MergeConflictResolver({ projectId, baseRef, branch, conf
               )}
 
               {/* 3-pane context */}
-              <div className='grid grid-cols-1 lg:grid-cols-3 gap-3'>
-                <div className='min-w-0'>
-                  <div className='text-xs text-neutral-600 dark:text-neutral-400 mb-1'>Theirs (incoming)</div>
-                  {triplesLoading ? (
-                    <div className='text-xs text-neutral-600 dark:text-neutral-400 flex items-center gap-2'><Spinner size={12} label='Loading...' /></div>
-                  ) : renderCodeBlock(theirsText)}
-                </div>
+              <div className={`grid grid-cols-1 ${showContextPanes ? 'lg:grid-cols-3' : 'lg:grid-cols-1'} gap-3`}>
+                {showContextPanes && (
+                  <div className='min-w-0'>
+                    <div className='text-xs text-neutral-600 dark:text-neutral-400 mb-1'>Theirs (incoming)</div>
+                    {triplesLoading ? (
+                      <div className='text-xs text-neutral-600 dark:text-neutral-400 flex items-center gap-2'><Spinner size={12} label='Loading...' /></div>
+                    ) : (
+                      <pre ref={leftPaneRef} onScroll={() => onSyncScroll('left')} className={`text-xs font-mono ${wrapLines ? 'whitespace-pre-wrap break-words' : 'whitespace-pre'} max-h-64 overflow-auto border border-neutral-200 dark:border-neutral-800 rounded-md`}>
+                        <code>{(theirsText || '').replace(/\r\n/g, '\n')}</code>
+                      </pre>
+                    )}
+                  </div>
+                )}
                 <div className='min-w-0'>
                   <div className='text-xs text-neutral-600 dark:text-neutral-400 mb-1'>Result (editable)</div>
                   <textarea
                     value={content}
                     onChange={onManualEditChange}
-                    className='w-full h-56 lg:h-full min-h-[224px] font-mono text-xs rounded-md border border-neutral-200 dark:border-neutral-800 bg-transparent p-2 resize-vertical'
+                    className={`w-full h-56 lg:h-full min-h-[224px] font-mono text-xs rounded-md border border-neutral-200 dark:border-neutral-800 bg-transparent p-2 resize-vertical ${wrapLines ? 'whitespace-pre-wrap' : 'whitespace-pre'}`}
                     spellCheck={false}
                   />
                 </div>
-                <div className='min-w-0'>
-                  <div className='text-xs text-neutral-600 dark:text-neutral-400 mb-1'>Ours (current)</div>
-                  {triplesLoading ? (
-                    <div className='text-xs text-neutral-600 dark:text-neutral-400 flex items-center gap-2'><Spinner size={12} label='Loading...' /></div>
-                  ) : renderCodeBlock(oursText)}
-                </div>
+                {showContextPanes && (
+                  <div className='min-w-0'>
+                    <div className='text-xs text-neutral-600 dark:text-neutral-400 mb-1'>Ours (current)</div>
+                    {triplesLoading ? (
+                      <div className='text-xs text-neutral-600 dark:text-neutral-400 flex items-center gap-2'><Spinner size={12} label='Loading...' /></div>
+                    ) : (
+                      <pre ref={rightPaneRef} onScroll={() => onSyncScroll('right')} className={`text-xs font-mono ${wrapLines ? 'whitespace-pre-wrap break-words' : 'whitespace-pre'} max-h-64 overflow-auto border border-neutral-200 dark:border-neutral-800 rounded-md`}>
+                        <code>{(oursText || '').replace(/\r\n/g, '\n')}</code>
+                      </pre>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Per-hunk controls and segments */}
@@ -445,12 +551,14 @@ export default function MergeConflictResolver({ projectId, baseRef, branch, conf
                 if (seg.type === 'text') {
                   return (
                     <div key={idx} className='border rounded-md border-neutral-200 dark:border-neutral-800'>
-                      {renderCodeBlock(seg.text)}
+                      <pre className={`text-xs font-mono ${wrapLines ? 'whitespace-pre-wrap break-words' : 'whitespace-pre'} max-h-64 overflow-auto`}>
+                        <code>{(seg.text || '').replace(/\r\n/g, '\n')}</code>
+                      </pre>
                     </div>
                   )
                 }
                 return (
-                  <div key={idx} className='border rounded-md border-amber-300/60 dark:border-amber-600/40 overflow-hidden'>
+                  <div key={idx} ref={(el) => { segmentRefs.current[idx] = el }} className={`border rounded-md border-amber-300/60 dark:border-amber-600/40 overflow-hidden ${focusedHunk === idx ? 'ring-2 ring-amber-400/60' : ''}`}>
                     <div className='px-3 py-2 text-xs font-semibold uppercase tracking-wide bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300'>
                       Conflict
                     </div>
@@ -459,7 +567,9 @@ export default function MergeConflictResolver({ projectId, baseRef, branch, conf
                         <div className='text-xs text-neutral-600 dark:text-neutral-400 mb-1'>
                           Ours: <span className='font-mono'>{seg.oursLabel || 'current'}</span>
                         </div>
-                        {renderCodeBlock(seg.ours)}
+                        <pre className={`text-xs font-mono ${wrapLines ? 'whitespace-pre-wrap break-words' : 'whitespace-pre'} max-h-64 overflow-auto border border-neutral-200 dark:border-neutral-800 rounded-md`}>
+                          <code>{(seg.ours || '').replace(/\r\n/g, '\n')}</code>
+                        </pre>
                         <div className='mt-2'>
                           <Button size='sm' onClick={() => applyChoice(idx, 'ours')}>Accept ours</Button>
                         </div>
@@ -468,7 +578,9 @@ export default function MergeConflictResolver({ projectId, baseRef, branch, conf
                         <div className='text-xs text-neutral-600 dark:text-neutral-400 mb-1'>
                           Theirs: <span className='font-mono'>{seg.theirsLabel || 'incoming'}</span>
                         </div>
-                        {renderCodeBlock(seg.theirs)}
+                        <pre className={`text-xs font-mono ${wrapLines ? 'whitespace-pre-wrap break-words' : 'whitespace-pre'} max-h-64 overflow-auto border border-neutral-200 dark:border-neutral-800 rounded-md`}>
+                          <code>{(seg.theirs || '').replace(/\r\n/g, '\n')}</code>
+                        </pre>
                         <div className='mt-2'>
                           <Button size='sm' onClick={() => applyChoice(idx, 'theirs')}>Accept theirs</Button>
                         </div>
@@ -509,44 +621,16 @@ export default function MergeConflictResolver({ projectId, baseRef, branch, conf
           >
             Abort merge
           </Button>
-          <Button
-            onClick={async () => {
-              if (finalizing) return
-              setFinalizing(true)
-              try {
-                // Verify all files resolved
-                await recomputeResolvedAll()
-                const unresolved = Object.entries(resolvedMap).filter(([_, v]) => !v).map(([k]) => k)
-                if (unresolved.length > 0) {
-                  alert(`Cannot finalize: ${unresolved.length} file(s) still have unresolved markers.`)
-                  return
-                }
-                // Stage conflicted files and commit
-                try { await gitService.stage(projectId, conflicts.map((c) => c.path)) } catch {}
-                const message = finalizeMsg && finalizeMsg.trim().length > 0 ? finalizeMsg : `Merge branch ${branch}`
-                const res = await gitService.commit(projectId, { message })
-                if (!res?.ok) {
-                  alert(`Commit failed: ${res?.error || 'unknown error'}`)
-                  return
-                }
-                if (pushImmediately) {
-                  const p = await gitService.push(projectId, 'origin')
-                  if (!p?.ok) alert(`Push failed: ${p?.error || 'unknown error'}`)
-                }
-                try { window.dispatchEvent(new CustomEvent('git:refresh-now', { detail: { projectId } })) } catch {}
-                alert('Merge finalized.')
-              } catch (e) {
-                console.error('Finalize merge failed', e)
-                alert('Finalize merge failed')
-              } finally {
-                setFinalizing(false)
-              }
-            }}
-            disabled={!allResolved || finalizing}
-            loading={finalizing}
-          >
-            Continue (finalize merge)
-          </Button>
+          <div className='flex items-center gap-2'>
+            <input type='text' value={finalizeMsg} onChange={(e) => setFinalizeMsg(e.target.value)} className='px-2 py-1 text-xs rounded border border-neutral-200 dark:border-neutral-800 bg-transparent' placeholder={`Merge branch ${branch}`} />
+            <label className='inline-flex items-center gap-1 text-xs'>
+              <input type='checkbox' checked={pushImmediately} onChange={(e) => setPushImmediately(e.target.checked)} />
+              <span>Push</span>
+            </label>
+            <Button onClick={async () => { await doFinalize() }} disabled={!allResolved || finalizing} loading={finalizing}>
+              Continue (finalize merge)
+            </Button>
+          </div>
         </div>
       </div>
     </div>

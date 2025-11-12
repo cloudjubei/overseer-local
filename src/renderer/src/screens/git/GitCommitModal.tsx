@@ -5,7 +5,7 @@ import Spinner from '@renderer/components/ui/Spinner'
 import Tooltip from '@renderer/components/ui/Tooltip'
 import { gitService } from '@renderer/services/gitService'
 import { filesService } from '@renderer/services/filesService'
-import { StructuredUnifiedDiff } from '@renderer/components/chat/tool-popups/diffUtils'
+import { StructuredUnifiedDiff, IntraMode } from '@renderer/components/chat/tool-popups/diffUtils'
 import { IconDelete, IconRefresh, IconFileAdded, IconFileDeleted, IconFileModified, IconMaximize, IconMinimize } from '@renderer/components/ui/icons/Icons'
 import { useGit } from '@renderer/contexts/GitContext'
 
@@ -151,7 +151,7 @@ export default function GitCommitModal({ projectId, currentBranch, onRequestClos
         for (const k of prev) {
           const [area, ...rest] = k.split(':')
           const p = rest.join(':')
-          if ((area === 'staged' && stagedPaths.includes(p)) || (area === 'unstaged' && unPaths.includes(p))) nextSel.add(k)
+          if ((area === 'staged' && stagedPaths.includes(p)) || (area === 'unstaged' && unPaths.includes(p)) ) nextSel.add(k)
         }
         if (nextSel.size === 0) {
           if (stagedPaths[0]) nextSel.add(makeKey('staged', stagedPaths[0]))
@@ -432,6 +432,11 @@ export default function GitCommitModal({ projectId, currentBranch, onRequestClos
   const panelClassName = maximized ? 'max-w-none w-[calc(100vw-16px)] h-[calc(100vh-16px)] max-h-none m-2' : ''
   const rightWidth = `calc(100% - ${leftWidth}px)`
 
+  // Diff view toggles
+  const [wrap, setWrap] = React.useState<boolean>(false)
+  const [ignoreWS, setIgnoreWS] = React.useState<boolean>(false)
+  const [intra, setIntra] = React.useState<IntraMode>('none')
+
   return (
     <>
       <Modal isOpen={true} onClose={onRequestClose} title={header} size='xl' footer={footer} headerActions={headerActions} contentClassName='p-0' panelClassName={panelClassName}>
@@ -516,20 +521,40 @@ export default function GitCommitModal({ projectId, currentBranch, onRequestClos
           {/* Right panel */}
           <div className='min-w-0 min-h-0 flex flex-col' style={{ width: rightWidth }}>
             <div className='px-2 py-1 text-[11px] uppercase tracking-wide text-neutral-600 dark:text-neutral-400 border-b border-neutral-200 dark:border-neutral-800'>Diff</div>
-            <div className='px-2 py-1 text-xs text-neutral-600 dark:text-neutral-400 border-b border-neutral-200 dark:border-neutral-800 flex items-baseline gap-2 min-h-[32px] w-full'>
-              {selectedPath ? (
-                <>
-                  <PathDisplay path={selectedPath} />
-                  {selectedPatch ? (() => { const { add, del } = parseAddDel(selectedPatch); return (<span className='ml-2 opacity-80'>+{add}/-{del}</span>) })() : null}
-                </>
-              ) : (
-                <span className='opacity-70'>No file selected</span>
-              )}
+            <div className='px-2 py-1 text-xs text-neutral-600 dark:text-neutral-400 border-b border-neutral-200 dark:border-neutral-800 flex items-center justify-between gap-2 min-h-[32px] w-full'>
+              <div className='flex items-baseline gap-2 min-w-0'>
+                {selectedPath ? (
+                  <>
+                    <PathDisplay path={selectedPath} />
+                    {selectedPatch ? (() => { const { add, del } = parseAddDel(selectedPatch); return (<span className='ml-2 opacity-80'>+{add}/-{del}</span>) })() : null}
+                  </>
+                ) : (
+                  <span className='opacity-70'>No file selected</span>
+                )}
+              </div>
+              <div className='flex items-center gap-3 shrink-0'>
+                <label className='inline-flex items-center gap-1'>
+                  <input type='checkbox' checked={wrap} onChange={(e) => setWrap(e.target.checked)} />
+                  <span>Wrap</span>
+                </label>
+                <label className='inline-flex items-center gap-1'>
+                  <input type='checkbox' checked={ignoreWS} onChange={(e) => setIgnoreWS(e.target.checked)} />
+                  <span>Ignore WS</span>
+                </label>
+                <label className='inline-flex items-center gap-1'>
+                  <span>Intra</span>
+                  <select className='border border-neutral-200 dark:border-neutral-800 bg-transparent rounded px-1 py-0.5' value={intra} onChange={(e) => setIntra(e.target.value as IntraMode)}>
+                    <option value='none'>none</option>
+                    <option value='word'>word</option>
+                    <option value='char'>char</option>
+                  </select>
+                </label>
+              </div>
             </div>
             <div className='flex-1 overflow-x-auto overflow-y-auto p-2 w-full'>
               {selectedPath ? (
                 selectedPatch ? (
-                  <StructuredUnifiedDiff patch={selectedPatch} />
+                  <StructuredUnifiedDiff patch={selectedPatch} wrap={wrap} ignoreWhitespace={ignoreWS} intraline={intra} />
                 ) : (
                   <div className='text-xs text-neutral-600 dark:text-neutral-400'>No patch available for {selectedPath}.</div>
                 )
