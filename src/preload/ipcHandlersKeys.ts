@@ -167,6 +167,10 @@ const IPC_HANDLER_KEYS = {
   GIT_SELECT_COMMITS: 'git:select-commits',
   GIT_CHECKOUT: 'git:checkout',
   GIT_GET_LOCAL_DIFF_SUMMARY: 'git:local-diff-summary',
+  // Conflict resolution helpers / file ops
+  GIT_GET_FILE_CONTENT: 'git:get-file-content',
+  GIT_RESET_ALL: 'git:reset-all',
+  
   // Local commit workflow
   GIT_STAGE: 'git:stage-paths',
   GIT_UNSTAGE: 'git:unstage-paths',

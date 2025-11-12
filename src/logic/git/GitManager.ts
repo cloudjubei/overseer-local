@@ -96,6 +96,11 @@ export default class GitManager extends BaseManager {
     handlers[IPC_HANDLER_KEYS.GIT_GET_LOCAL_DIFF_SUMMARY] = ({ projectId, options }) =>
       this.getLocalDiffSummary(projectId, options)
 
+    // Conflict helpers / file ops
+    handlers[IPC_HANDLER_KEYS.GIT_GET_FILE_CONTENT] = ({ projectId, path, ref }) =>
+      this.getFileContent(projectId, path, ref)
+    handlers[IPC_HANDLER_KEYS.GIT_RESET_ALL] = ({ projectId }) => this.resetAll(projectId)
+
     handlers[IPC_HANDLER_KEYS.GIT_STAGE] = ({ projectId, paths }) => this.stage(projectId, paths)
     handlers[IPC_HANDLER_KEYS.GIT_UNSTAGE] = ({ projectId, paths }) =>
       this.unstage(projectId, paths)
@@ -296,6 +301,23 @@ export default class GitManager extends BaseManager {
     const tools = await this.__getTools(projectId)
     if (!tools) return
     return await tools.commit(input)
+  }
+
+  // Conflict helpers
+  private async getFileContent(
+    projectId: string,
+    path: string,
+    ref: string,
+  ): Promise<string | undefined> {
+    const tools = await this.__getTools(projectId)
+    if (!tools) return
+    return tools.getFileContent(path, ref)
+  }
+
+  private async resetAll(projectId: string): Promise<GitOpResult | undefined> {
+    const tools = await this.__getTools(projectId)
+    if (!tools) return
+    return tools.resetAll()
   }
 
   private async updateTool(projectId: string): Promise<GitTools | undefined> {

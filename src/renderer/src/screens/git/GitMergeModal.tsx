@@ -880,15 +880,15 @@ export default function GitMergeModal(props: GitMergeModalProps) {
               Resolve merge conflicts directly in the app. Save each file after resolving hunks.
             </div>
             {hasConflicts && mergeResult?.conflicts ? (
-              <MergeConflictResolver projectId={projectId} conflicts={mergeResult.conflicts} />
+              <MergeConflictResolver projectId={projectId} baseRef={baseRef} branch={branch} conflicts={mergeResult.conflicts} />
             ) : (
               <div className="text-sm text-neutral-600 dark:text-neutral-400">
                 No conflicts to resolve.
               </div>
             )}
             <div className="text-[11px] text-neutral-500">
-              Note: staging and committing the merge is not yet automated here. After saving all
-              files and resolving conflicts, complete the merge commit using your git tool.
+              Tip: use 'Save & Stage' per file and the bottom bar to finalize the merge with a commit
+              message and optional push.
             </div>
           </div>
         )

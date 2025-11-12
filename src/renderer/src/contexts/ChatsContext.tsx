@@ -124,6 +124,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
     if (!pid) return
     setChatsByProjectId((prev) => {
       const existing = prev[pid] || []
+      // console.log('upsertChatsByProject setChatsByProjectId existing: ', existing)
       const idx = existing.findIndex((c) => c.key === chatState.key)
       let nextForProject: ChatState[]
       if (idx >= 0) {
@@ -131,6 +132,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       } else {
         nextForProject = [...existing, chatState]
       }
+      // console.log('upsertChatsByProject setChatsByProjectId nextForProject: ', nextForProject)
       return { ...prev, [pid]: nextForProject }
     })
   }, [])
@@ -151,6 +153,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
     (key: string, updates: Partial<ChatState>) => {
       setChats((prev) => {
         const current = prev[key]
+        // console.log('updateChatState current: ', current)
         const base: ChatState = current || {
           key,
           chat: (updates as any).chat,
@@ -158,6 +161,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
           isThinking: false,
         }
         const next: ChatState = { ...base, ...updates }
+        // console.log('updateChatState next: ', next)
         if (next.chat) {
           upsertChatsByProject(next)
         }
@@ -510,6 +514,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
 
       const chat = await chatsService.createChat({ context, messages: [] })
       const state = { key, chat, isLoading: false, isThinking: false } as ChatState
+      // console.log('restartChat new state: ', state)
       updateChatState(key, state)
       return state
     },
