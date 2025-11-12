@@ -12,14 +12,8 @@ export type NotificationType =
   | 'chat'
   | 'files'
 
-export type NotificationCategory =
-  | 'general'
-  | 'stories'
-  | 'chat'
-  | 'files'
-  | 'system'
-  | 'updates'
-  | 'agent_run'
+// Functional categories used to control creation and badges
+export type NotificationCategory = 'agent_runs' | 'chat_messages' | 'git_changes'
 
 export interface NotificationMetadata {
   [key: string]: any

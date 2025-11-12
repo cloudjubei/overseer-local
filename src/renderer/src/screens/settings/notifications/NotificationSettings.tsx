@@ -9,11 +9,28 @@ import { Switch } from '../../../components/ui/Switch'
 import { useNotifications } from '../../../hooks/useNotifications'
 import { useProjectSettings } from '../../../hooks/useProjectSettings'
 import { useAppSettings } from '../../../contexts/AppSettingsContext'
+import type { NotificationCategory } from 'src/types/notifications'
 
 export default function NotificationSettings() {
   const { projectSettings, setNotificationProjectSettings } = useProjectSettings()
-  const { appSettings, setNotificationSystemSettings } = useAppSettings()
+  const { appSettings, setNotificationSystemSettings, setUserPreferences } = useAppSettings()
   const { enableNotifications } = useNotifications()
+
+  const categories: NotificationCategory[] = ['agent_runs', 'chat_messages', 'git_changes']
+
+  const notifEnabled = projectSettings.notifications.notificationsEnabled || ({} as Record<NotificationCategory, boolean>)
+  const badgeEnabled = projectSettings.notifications.badgesEnabled || ({} as Record<NotificationCategory, boolean>)
+
+  const labelFor = (c: NotificationCategory): string => {
+    switch (c) {
+      case 'agent_runs':
+        return 'Agent runs'
+      case 'chat_messages':
+        return 'Chat messages'
+      case 'git_changes':
+        return 'Git changes'
+    }
+  }
 
   return (
     <div className="max-w-3xl">
@@ -35,28 +52,59 @@ export default function NotificationSettings() {
           }}
           label="Enable OS Notifications"
         />
-        <div>
-          <h3 className="font-medium mb-2">Notification Categories</h3>
+        <div className="space-y-2">
+          <h3 className="font-medium mb-2">Sidebar Navigation</h3>
+          <Switch
+            checked={appSettings.userPreferences.showNotificationsNav !== false}
+            onCheckedChange={(checked) =>
+              setUserPreferences({ showNotificationsNav: checked })
+            }
+            label="Show Notifications section in sidebar"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <h3 className="font-medium mb-2">Create Notifications For</h3>
           <div className="space-y-2">
-            {Object.entries(projectSettings.notifications.categoriesEnabled).map(
-              ([category, enabled]) => (
-                <Switch
-                  key={category}
-                  checked={enabled ?? true}
-                  onCheckedChange={(checked) =>
-                    setNotificationProjectSettings({
-                      categoriesEnabled: {
-                        ...projectSettings.notifications.categoriesEnabled,
-                        [category]: checked,
-                      },
-                    })
-                  }
-                  label={category.charAt(0).toUpperCase() + category.slice(1)}
-                />
-              ),
-            )}
+            {categories.map((c) => (
+              <Switch
+                key={`notif-${c}`}
+                checked={notifEnabled[c] !== false}
+                onCheckedChange={(checked) =>
+                  setNotificationProjectSettings({
+                    notificationsEnabled: {
+                      ...notifEnabled,
+                      [c]: checked,
+                    },
+                  })
+                }
+                label={labelFor(c)}
+              />
+            ))}
           </div>
         </div>
+
+        <div className="space-y-2">
+          <h3 className="font-medium mb-2">Show Badges For</h3>
+          <div className="space-y-2">
+            {categories.map((c) => (
+              <Switch
+                key={`badge-${c}`}
+                checked={badgeEnabled[c] !== false}
+                onCheckedChange={(checked) =>
+                  setNotificationProjectSettings({
+                    badgesEnabled: {
+                      ...badgeEnabled,
+                      [c]: checked,
+                    },
+                  })
+                }
+                label={labelFor(c)}
+              />
+            ))}
+          </div>
+        </div>
+
         <Switch
           checked={appSettings.notificationSystemSettings.soundsEnabled}
           onCheckedChange={(checked) =>

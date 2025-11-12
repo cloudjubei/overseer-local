@@ -332,7 +332,6 @@ export default function ToolCallChangePopup({
       return <InlineOldNew oldVal={oldVal} newVal={newVal} />
     }
     if (n === 'updateFeatureTitle') {
-      console.log('result: ', result)
       const oldVal = result ? undefined : featuresById[args.featureId]?.title
       const newVal = tryString(extract(args, ['title']))
       return <InlineOldNew oldVal={oldVal} newVal={newVal} />
@@ -397,7 +396,7 @@ export default function ToolCallChangePopup({
     }
 
     if (n === 'deletePath') {
-      const delPath = tryString(extract(args, ['path']) || extract(result, ['path']))
+      const delPath = tryString(extract(args, ['path']))
       // If a result is present, show it (commonly indicates not found or a message)
       const resStr = (() => {
         if (result == null) return undefined

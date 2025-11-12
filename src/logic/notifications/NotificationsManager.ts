@@ -4,6 +4,7 @@ import IPC_HANDLER_KEYS from '../../preload/ipcHandlersKeys'
 import NotificationsStorage from './NotificationsStorage'
 import SettingsManager from '../settings/SettingsManager'
 import BaseManager from '../BaseManager'
+import type { NotificationCategory } from '../../types/notifications'
 
 export default class NotificationsManager extends BaseManager {
   private storages: Record<string, NotificationsStorage>
@@ -99,7 +100,11 @@ export default class NotificationsManager extends BaseManager {
     return handlers
   }
 
-  private _getPrefsForProject(projectId: string): any {
+  private _getPrefsForProject(projectId: string): {
+    sys: { osNotificationsEnabled: boolean; soundsEnabled: boolean; displayDuration: number }
+    notificationsEnabled: Record<NotificationCategory, boolean>
+    badgesEnabled: Record<NotificationCategory, boolean>
+  } {
     try {
       const appSettings = this.settingsManager.getAppSettings?.()
       const project = this.settingsManager.getProjectSettings?.(projectId)
@@ -108,21 +113,32 @@ export default class NotificationsManager extends BaseManager {
         soundsEnabled: false,
         displayDuration: 5,
       }
-      const categoriesEnabled = project?.notifications.categoriesEnabled || {}
-      return { sys, categoriesEnabled }
+      const n = project?.notifications || {}
+      const notificationsEnabled = n.notificationsEnabled || {
+        agent_runs: true,
+        chat_messages: true,
+        git_changes: true,
+      }
+      const badgesEnabled = n.badgesEnabled || {
+        agent_runs: true,
+        chat_messages: true,
+        git_changes: true,
+      }
+      return { sys, notificationsEnabled, badgesEnabled }
     } catch (e) {
       return {
         sys: { osNotificationsEnabled: false, soundsEnabled: false, displayDuration: 5 },
-        categoriesEnabled: {},
+        notificationsEnabled: { agent_runs: true, chat_messages: true, git_changes: true },
+        badgesEnabled: { agent_runs: true, chat_messages: true, git_changes: true },
       }
     }
   }
 
   private _maybeShowOsNotification(projectId: string, notification: any): void {
     try {
-      const { sys, categoriesEnabled } = this._getPrefsForProject(projectId)
+      const { sys, notificationsEnabled } = this._getPrefsForProject(projectId)
       if (!sys?.osNotificationsEnabled) return
-      if (categoriesEnabled && categoriesEnabled[notification.category] === false) return
+      if (notificationsEnabled && notificationsEnabled[notification.category] === false) return
 
       const data = {
         title: notification.title,
@@ -173,6 +189,24 @@ export default class NotificationsManager extends BaseManager {
   }
 
   createNotification(projectId: string, input: any): any {
+    // Do not create/store when notifications for this category are disabled
+    try {
+      const { notificationsEnabled } = this._getPrefsForProject(projectId)
+      const cat = (input?.category || undefined) as NotificationCategory | undefined
+      if (cat && notificationsEnabled && notificationsEnabled[cat] === false) {
+        // Return a harmless stub so callers awaiting the promise do not break.
+        return {
+          id: 'skipped',
+          timestamp: Date.now(),
+          type: input.type,
+          category: cat,
+          title: input.title,
+          message: input.message,
+          read: true,
+          metadata: { ...(input.metadata || {}), projectId },
+        }
+      }
+    } catch {}
     const storage = this.__getStorage(projectId)
     const created = storage.create(input)
     // Best-effort OS notification based on preferences

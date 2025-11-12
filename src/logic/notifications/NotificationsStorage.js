@@ -244,13 +244,11 @@ export default class NotificationsStorage {
     const total = notifications.length
     const unread = notifications.filter((n) => !n.read).length
 
+    // Align categories to functional ones used by the app
     const byCategory = {
-      general: 0,
-      stories: 0,
-      chat: 0,
-      documents: 0,
-      system: 0,
-      updates: 0,
+      agent_runs: 0,
+      chat_messages: 0,
+      git_changes: 0,
     }
 
     const byType = {
@@ -265,7 +263,9 @@ export default class NotificationsStorage {
     }
 
     notifications.forEach((notification) => {
-      byCategory[notification.category] = (byCategory[notification.category] || 0) + 1
+      if (Object.prototype.hasOwnProperty.call(byCategory, notification.category)) {
+        byCategory[notification.category] = (byCategory[notification.category] || 0) + 1
+      }
       byType[notification.type] = (byType[notification.type] || 0) + 1
     })
 

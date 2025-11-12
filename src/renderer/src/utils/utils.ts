@@ -8,14 +8,15 @@ export function cn(...inputs: ClassValue[]) {
 
 export const DEFAULT_PROJECT_SETTINGS: ProjectSettings = {
   notifications: {
-    categoriesEnabled: {
-      general: true,
-      files: true,
-      chat: true,
-      stories: true,
-      system: true,
-      updates: true,
-      agent_run: true,
+    notificationsEnabled: {
+      agent_runs: true,
+      chat_messages: true,
+      git_changes: true,
+    },
+    badgesEnabled: {
+      agent_runs: true,
+      chat_messages: true,
+      git_changes: true,
     },
   },
 }

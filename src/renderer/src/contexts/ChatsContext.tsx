@@ -120,7 +120,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
   // Helper: safely update chatsByProjectId for a given chat state
   const upsertChatsByProject = useCallback((chatState: ChatState) => {
     const ctx = chatState.chat.context
-    const pid = (ctx as any).projectId as string | undefined
+    const pid = ctx.projectId
     if (!pid) return
     setChatsByProjectId((prev) => {
       const existing = prev[pid] || []
@@ -153,14 +153,11 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
         const current = prev[key]
         const base: ChatState = current || {
           key,
-          // Fallback: if we do not have a chat yet, we cannot upsert project map safely.
-          // Callers that create chats should pass 'chat' in updates.
           chat: (updates as any).chat,
           isLoading: false,
           isThinking: false,
         }
         const next: ChatState = { ...base, ...updates }
-        // Keep project mapping in sync (so hooks like useChatThinking reflect immediate state)
         if (next.chat) {
           upsertChatsByProject(next)
         }
@@ -304,7 +301,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
                   void notificationsService
                     .create(pid, {
                       type: 'info',
-                      category: 'chat',
+                      category: 'chat_messages',
                       title,
                       message,
                       metadata: { actionUrl },

@@ -6,6 +6,7 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
     storiesViewMode: 'list',
     storiesListViewSorting: 'index_desc',
     storiesListViewStatusFilter: 'all',
+    showNotificationsNav: true,
     sidebarCollapsed: false,
     shortcutsModifier: navigator.userAgent.toLowerCase().includes('mac') ? 'meta' : 'ctrl',
     shortcuts: {
@@ -26,14 +27,15 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
 
 export const DEFAULT_PROJECT_SETTINGS: ProjectSettings = {
   notifications: {
-    categoriesEnabled: {
-      general: true,
-      files: true,
-      chat: true,
-      stories: true,
-      system: true,
-      updates: true,
-      agent_run: true,
+    notificationsEnabled: {
+      agent_runs: true,
+      chat_messages: true,
+      git_changes: true,
+    },
+    badgesEnabled: {
+      agent_runs: true,
+      chat_messages: true,
+      git_changes: true,
     },
   },
 }

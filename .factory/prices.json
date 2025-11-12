@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-11-04T19:16:07.217Z",
+  "updatedAt": "2025-11-11T21:21:08.002Z",
   "prices": [
     {
       "provider": "openai",
@@ -10350,8 +10350,8 @@
     {
       "provider": "bedrock_converse",
       "model": "global.anthropic.claude-haiku-4-5-20251001-v1:0",
-      "inputPerMTokensUSD": 1,
-      "outputPerMTokensUSD": 5,
+      "inputPerMTokensUSD": 1.1,
+      "outputPerMTokensUSD": 5.5,
       "currency": "USD"
     },
     {
@@ -10527,6 +10527,41 @@
       "model": "vercel_ai_gateway/zai/glm-4.6",
       "inputPerMTokensUSD": 0.44999999999999996,
       "outputPerMTokensUSD": 1.7999999999999998,
+      "currency": "USD"
+    },
+    {
+      "provider": "azure",
+      "model": "azure/gpt-5-pro",
+      "inputPerMTokensUSD": 15,
+      "outputPerMTokensUSD": 120,
+      "currency": "USD"
+    },
+    {
+      "provider": "cohere",
+      "model": "cohere/embed-v4.0",
+      "inputPerMTokensUSD": 0.12,
+      "outputPerMTokensUSD": 0,
+      "currency": "USD"
+    },
+    {
+      "provider": "mistral",
+      "model": "mistral/magistral-medium-2509",
+      "inputPerMTokensUSD": 2,
+      "outputPerMTokensUSD": 5,
+      "currency": "USD"
+    },
+    {
+      "provider": "moonshot",
+      "model": "moonshot/kimi-k2-thinking",
+      "inputPerMTokensUSD": 0.6,
+      "outputPerMTokensUSD": 2.5,
+      "currency": "USD"
+    },
+    {
+      "provider": "vertex_ai-minimax_models",
+      "model": "vertex_ai/minimaxai/minimax-m2-maas",
+      "inputPerMTokensUSD": 0.3,
+      "outputPerMTokensUSD": 1.2,
       "currency": "USD"
     }
   ]

@@ -30,6 +30,8 @@ export interface UserPreferences {
   storiesViewMode: StoryViewMode
   storiesListViewSorting: StoryListViewSorting
   storiesListViewStatusFilter: StoryListStatusFilter
+  // Master toggle: show/hide the Notifications nav in the sidebar
+  showNotificationsNav?: boolean
   sidebarCollapsed: boolean
   // Preferred width of the right chat sidebar (pixels)
   chatSidebarWidth?: number
@@ -40,7 +42,10 @@ export type StoryViewMode = 'list' | 'board'
 export type StoryListViewSorting = 'index_asc' | 'index_desc' | 'status_asc' | 'status_desc'
 
 export interface NotificationProjectSettings {
-  categoriesEnabled: Record<NotificationCategory, boolean>
+  // Controls whether notifications of a category are created at all
+  notificationsEnabled: Record<NotificationCategory, boolean>
+  // Controls whether badges for a category are shown in the UI
+  badgesEnabled: Record<NotificationCategory, boolean>
 }
 export interface ProjectSettings {
   notifications: NotificationProjectSettings

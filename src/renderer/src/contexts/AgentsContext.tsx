@@ -55,7 +55,7 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
 
       await notificationsService.create(run.projectId, {
         type: 'success',
-        category: 'agent_run',
+        category: 'agent_runs',
         title: baseTitle,
         message,
         metadata: { runId: run.id },

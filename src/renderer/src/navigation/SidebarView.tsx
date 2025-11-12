@@ -43,6 +43,8 @@ import { useChatUnread } from '../hooks/useChatUnread'
 import { useChatThinking } from '../hooks/useChatThinking'
 import SpinnerWithDot from '../components/ui/SpinnerWithDot'
 import { useGit } from '../contexts/GitContext'
+import { settingsService } from '../services/settingsService'
+import { useNotificationPrefs } from '@renderer/hooks/useNotificationPrefs'
 
 export type SidebarProps = {}
 
@@ -172,6 +174,7 @@ export default function SidebarView({}: SidebarProps) {
   const { unreadCountByProject } = useChatUnread()
   const { thinkingCountByProject, anyThinkingForProject } = useChatThinking(500)
   const { getProjectUpdatedBranchesCount } = useGit()
+  const { isBadgeEnabled, reload: reloadNotifPrefs } = useNotificationPrefs()
 
   const [collapsed, setCollapsed] = useState<boolean>(appSettings.userPreferences.sidebarCollapsed)
 
@@ -250,6 +253,22 @@ export default function SidebarView({}: SidebarProps) {
     })
     return () => unsubscribe()
   }, [projects.map((p) => p.id).join('|'), refreshAllUnread, refreshUnreadFor])
+
+  // Preload badges prefs for all projects and refresh when settings change
+  useEffect(() => {
+    const ids = projects.map((p) => p.id)
+    if (ids.length) {
+      ids.forEach((pid) => void reloadNotifPrefs(pid))
+    }
+  }, [projects.map((p) => p.id).join('|'), reloadNotifPrefs])
+
+  useEffect(() => {
+    const unsub = settingsService.subscribe(() => {
+      const ids = projects.map((p) => p.id)
+      if (ids.length) ids.forEach((pid) => void reloadNotifPrefs(pid))
+    })
+    return () => unsub()
+  }, [projects.map((p) => p.id).join('|'), reloadNotifPrefs])
 
   const isMobile = useMediaQuery('(max-width: 768px)')
   const [mobileOpen, setMobileOpen] = useState<boolean>(false)
@@ -407,7 +426,11 @@ export default function SidebarView({}: SidebarProps) {
     const gitUnread = getProjectUpdatedBranchesCount(p.id)
     const iconKey = p.metadata?.icon || (isMain ? 'collection' : 'folder')
     const projectIcon = renderProjectIcon(iconKey)
-    const hasAnyBadge = activeCount > 0 || unread > 0 || chatUnread > 0 || chatThinking || gitUnread > 0
+
+    const showAgents = isBadgeEnabled('agent_runs', p.id) && activeCount > 0
+    const showChat = isBadgeEnabled('chat_messages', p.id) && (chatUnread > 0 || chatThinking)
+    const showGit = isBadgeEnabled('git_changes', p.id) && gitUnread > 0
+    const hasAnyBadge = showAgents || unread > 0 || showChat || showGit
 
     const Btn = (
       <button
@@ -434,7 +457,7 @@ export default function SidebarView({}: SidebarProps) {
             )}
             aria-hidden
           >
-            {activeCount > 0 && (
+            {showAgents && (
               <NotificationBadge
                 className={effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''}
                 text={`${activeCount}`}
@@ -442,14 +465,14 @@ export default function SidebarView({}: SidebarProps) {
                 isInformative
               />
             )}
-            {chatThinking && !active ? (
+            {isBadgeEnabled('chat_messages', p.id) && chatThinking && !active ? (
               <SpinnerWithDot
                 size={effectiveCollapsed ? 14 : 16}
                 showDot={chatUnread > 0}
                 className={effectiveCollapsed ? '' : ''}
                 dotTitle={chatUnread > 0 ? `${chatUnread} unread chats` : undefined}
               />
-            ) : chatUnread > 0 ? (
+            ) : isBadgeEnabled('chat_messages', p.id) && chatUnread > 0 ? (
               <NotificationBadge
                 className={effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''}
                 text={cap99(chatUnread)}
@@ -463,7 +486,7 @@ export default function SidebarView({}: SidebarProps) {
                 tooltipLabel={`${unread} unread notifications`}
               />
             )}
-            {gitUnread > 0 && (
+            {showGit && (
               <NotificationBadge
                 className={effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''}
                 text={`${gitUnread}`}
@@ -535,7 +558,11 @@ export default function SidebarView({}: SidebarProps) {
             const isActive = currentView === item.view
             const ref = i === 0 ? firstItemRef : undefined
 
-            // Decide badge for Notifications, Git, Agents, or Chat
+            // Master: hide Notifications nav item entirely when disabled
+            const showNotificationsNav = appSettings.userPreferences.showNotificationsNav !== false
+            if (item.view === 'Notifications' && !showNotificationsNav) return null
+
+            // Decide badge for Notifications, Git, Agents, or Chat (gated by per-project badge prefs)
             let badgeEl: React.ReactNode | null = null
             if (item.view === 'Notifications' && unreadCount > 0) {
               badgeEl = (
@@ -545,7 +572,11 @@ export default function SidebarView({}: SidebarProps) {
                   tooltipLabel={`${unreadCount} unread notifications`}
                 />
               )
-            } else if (item.view === 'Git' && gitUnreadCurrentProject > 0) {
+            } else if (
+              item.view === 'Git' &&
+              gitUnreadCurrentProject > 0 &&
+              isBadgeEnabled('git_changes', activeProjectId)
+            ) {
               badgeEl = (
                 <NotificationBadge
                   className={effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''}
@@ -554,7 +585,11 @@ export default function SidebarView({}: SidebarProps) {
                   color="green"
                 />
               )
-            } else if (item.view === 'Agents' && activeRunsCurrentProject > 0) {
+            } else if (
+              item.view === 'Agents' &&
+              activeRunsCurrentProject > 0 &&
+              isBadgeEnabled('agent_runs', activeProjectId)
+            ) {
               badgeEl = (
                 <NotificationBadge
                   className={effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''}
@@ -563,7 +598,10 @@ export default function SidebarView({}: SidebarProps) {
                   isInformative
                 />
               )
-            } else if (item.view === 'Chat') {
+            } else if (
+              item.view === 'Chat' &&
+              isBadgeEnabled('chat_messages', activeProjectId)
+            ) {
               if (chatThinkingCurrentProject) {
                 badgeEl = (
                   <SpinnerWithDot
@@ -717,12 +755,17 @@ export default function SidebarView({}: SidebarProps) {
                 (sum, pid) => sum + getProjectUpdatedBranchesCount(pid),
                 0,
               )
-              const showAnyBadge =
-                aggActive > 0 ||
-                aggUnread > 0 ||
-                aggChatUnread > 0 ||
-                aggThinking > 0 ||
-                aggGitUnread > 0
+
+              // Apply per-project badge prefs across the group (show if any project enables that category)
+              const aggShowAgents =
+                (g.projects || []).some((pid) => isBadgeEnabled('agent_runs', pid)) && aggActive > 0
+              const aggShowChat =
+                (g.projects || []).some((pid) => isBadgeEnabled('chat_messages', pid)) &&
+                (aggChatUnread > 0 || aggThinking > 0)
+              const aggShowGit =
+                (g.projects || []).some((pid) => isBadgeEnabled('git_changes', pid)) && aggGitUnread > 0
+
+              const showAnyBadge = aggShowAgents || aggUnread > 0 || aggShowChat || aggShowGit
 
               return (
                 <li key={g.id} className="nav-li">
@@ -749,7 +792,7 @@ export default function SidebarView({}: SidebarProps) {
 
                     {showAnyBadge && !isOpen && (
                       <span className="nav-item__badges" aria-hidden>
-                        {aggActive > 0 && (
+                        {aggShowAgents && (
                           <NotificationBadge
                             className={''}
                             text={`${aggActive}`}
@@ -757,13 +800,13 @@ export default function SidebarView({}: SidebarProps) {
                             isInformative
                           />
                         )}
-                        {aggThinking > 0 ? (
+                        {aggShowChat && aggThinking > 0 ? (
                           <SpinnerWithDot
                             size={16}
                             showDot={aggChatUnread > 0}
                             dotTitle={aggChatUnread > 0 ? `${aggChatUnread} unread chats in group` : undefined}
                           />
-                        ) : aggChatUnread > 0 ? (
+                        ) : aggShowChat && aggChatUnread > 0 ? (
                           <NotificationBadge
                             className={''}
                             text={cap99(aggChatUnread)}
@@ -777,7 +820,7 @@ export default function SidebarView({}: SidebarProps) {
                             tooltipLabel={`${aggUnread} unread notifications in group`}
                           />
                         )}
-                        {aggGitUnread > 0 && (
+                        {aggShowGit && (
                           <NotificationBadge
                             className={''}
                             text={`${aggGitUnread}`}

@@ -29,16 +29,13 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ onLoaded }) => {
       setStatusText('Connecting to database…')
       const dbStatus = await dbService.connect(connectionString)
       if (!dbStatus.connected) {
-        // proceed without DB
-        setIsDBSetup(true)
         setStatusText('Database unavailable. Continuing…')
       } else {
-        await filesService.updateAllTools()
-        setIsDBSetup(true)
+        setStatusText('Database Connected!')
       }
-    } else {
-      setIsDBSetup(true)
     }
+    await filesService.updateAllTools()
+    setIsDBSetup(true)
 
     // Trigger ingestion of all projects and wait for completion
     try {

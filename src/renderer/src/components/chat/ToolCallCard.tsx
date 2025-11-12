@@ -157,7 +157,7 @@ export default function ToolCallCard({
     return Object.keys(args).length > 0
   }, [toolCall?.arguments])
 
-  const hasPopup = typeof result !== 'undefined' && resultType !== 'aborted'
+  const hasPopup = resultType !== 'aborted'
   const anchorClassName = [
     'rounded-md border text-sm text-[var(--text-primary)] relative focus:outline-none focus:ring-2 focus:ring-blue-500/40',
     isRequireConfirm
