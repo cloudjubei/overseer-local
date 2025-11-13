@@ -66,8 +66,6 @@ function viewPrefixToView(prefix: string): NavigationView {
       return 'Chat'
     case 'settings':
       return 'Settings'
-    case 'notifications':
-      return 'Notifications'
     case 'agents':
       return 'Agents'
     case 'live-data':
@@ -148,9 +146,6 @@ export function NavigatorProvider({ children }: { children: React.ReactNode }) {
         break
       case 'Settings':
         window.location.hash = '#settings'
-        break
-      case 'Notifications':
-        window.location.hash = '#notifications'
         break
       case 'Agents':
         window.location.hash = '#agents'

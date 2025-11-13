@@ -15,6 +15,8 @@ import TokensChip from './TokensChip'
 import { AgentRunHistory, AgentRunRatingPatch } from 'thefactory-tools'
 import { Button } from '../ui/Button'
 import { formatDate, formatHmsCompact, formatTime } from '../../utils/time'
+import { useAgents } from '../../contexts/AgentsContext'
+import DotBadge from '../ui/DotBadge'
 
 function useConversationCounts(run: AgentRunHistory) {
   return useMemo(() => {
@@ -36,7 +38,6 @@ function useDurationTimers(run: AgentRunHistory) {
   }, [run.state])
 
   const create = new Date(run.createdAt).getTime()
-  // const start = run.startedAt ? new Date(run.startedAt).getTime() : now
   const end = run.finishedAt ? new Date(run.finishedAt).getTime() : now
   const lastUpdate = new Date(run.updatedAt).getTime()
 
@@ -75,6 +76,8 @@ export default function AgentRunRow({
 }: AgentRunRowProps) {
   const { total, completed } = useConversationCounts(run)
   const { duration, thinking } = useDurationTimers(run)
+  const { isRunUnread, markRunSeen } = useAgents()
+  const unread = isRunUnread(run)
 
   const [isAnimating, setIsAnimating] = useState(false)
   const [animKind, setAnimKind] = useState<'up' | 'down' | null>(null)
@@ -120,7 +123,21 @@ export default function AgentRunRow({
     <tr
       id={`run-${run.id ?? 'unknown'}`}
       className="border-t border-neutral-200 dark:border-neutral-800 group"
+      onMouseEnter={() => {
+        if (unread && run.id) markRunSeen(run.id)
+      }}
+      onFocus={() => {
+        if (unread && run.id) markRunSeen(run.id)
+      }}
     >
+      {/* Unseen-completed red dot indicator to the left of the first column */}
+      <td className="px-3 py-2 leading-tight w-4">
+        {unread ? (
+          <DotBadge title={'Run completed (unseen)'} />
+        ) : (
+          <span className="inline-block w-2.5" aria-hidden />
+        )}
+      </td>
       <td className="px-3 py-2 leading-tight">
         <div>{formatDate(run.finishedAt || run.createdAt)}</div>
         <div className="text-neutral-500">{formatTime(run.finishedAt || run.createdAt)}</div>

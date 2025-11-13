@@ -13,13 +13,15 @@ import type { NotificationCategory } from 'src/types/notifications'
 
 export default function NotificationSettings() {
   const { projectSettings, setNotificationProjectSettings } = useProjectSettings()
-  const { appSettings, setNotificationSystemSettings, setUserPreferences } = useAppSettings()
+  const { appSettings, setNotificationSystemSettings } = useAppSettings()
   const { enableNotifications } = useNotifications()
 
   const categories: NotificationCategory[] = ['agent_runs', 'chat_messages', 'git_changes']
 
-  const notifEnabled = projectSettings.notifications.notificationsEnabled || ({} as Record<NotificationCategory, boolean>)
-  const badgeEnabled = projectSettings.notifications.badgesEnabled || ({} as Record<NotificationCategory, boolean>)
+  const notifEnabled =
+    projectSettings.notifications.notificationsEnabled || ({} as Record<NotificationCategory, boolean>)
+  const badgeEnabled =
+    projectSettings.notifications.badgesEnabled || ({} as Record<NotificationCategory, boolean>)
 
   const labelFor = (c: NotificationCategory): string => {
     switch (c) {
@@ -33,9 +35,9 @@ export default function NotificationSettings() {
   }
 
   return (
-    <div className="max-w-3xl">
-      <h2 className="text-xl font-semibold mb-3">Notification Preferences</h2>
-      <div className="space-y-4">
+    <div className='max-w-3xl'>
+      <h2 className='text-xl font-semibold mb-3'>Notification Preferences</h2>
+      <div className='space-y-4'>
         <Switch
           checked={appSettings.notificationSystemSettings.osNotificationsEnabled}
           onCheckedChange={async (checked) => {
@@ -50,22 +52,13 @@ export default function NotificationSettings() {
               setNotificationSystemSettings({ osNotificationsEnabled: false })
             }
           }}
-          label="Enable OS Notifications"
+          label='Enable OS Notifications'
         />
-        <div className="space-y-2">
-          <h3 className="font-medium mb-2">Sidebar Navigation</h3>
-          <Switch
-            checked={appSettings.userPreferences.showNotificationsNav !== false}
-            onCheckedChange={(checked) =>
-              setUserPreferences({ showNotificationsNav: checked })
-            }
-            label="Show Notifications section in sidebar"
-          />
-        </div>
+        {/* Sidebar Notifications nav toggle removed by design */}
 
-        <div className="space-y-2">
-          <h3 className="font-medium mb-2">Create Notifications For</h3>
-          <div className="space-y-2">
+        <div className='space-y-2'>
+          <h3 className='font-medium mb-2'>Create Notifications For</h3>
+          <div className='space-y-2'>
             {categories.map((c) => (
               <Switch
                 key={`notif-${c}`}
@@ -84,9 +77,9 @@ export default function NotificationSettings() {
           </div>
         </div>
 
-        <div className="space-y-2">
-          <h3 className="font-medium mb-2">Show Badges For</h3>
-          <div className="space-y-2">
+        <div className='space-y-2'>
+          <h3 className='font-medium mb-2'>Show Badges For</h3>
+          <div className='space-y-2'>
             {categories.map((c) => (
               <Switch
                 key={`badge-${c}`}
@@ -113,10 +106,10 @@ export default function NotificationSettings() {
               soundsEnabled: checked,
             })
           }
-          label="Enable Notification Sounds"
+          label='Enable Notification Sounds'
         />
         <div>
-          <label className="block text-sm font-medium mb-1">Notification Display Duration</label>
+          <label className='block text-sm font-medium mb-1'>Notification Display Duration</label>
           <Select
             value={appSettings.notificationSystemSettings.displayDuration.toString()}
             onValueChange={(value) =>
@@ -127,13 +120,13 @@ export default function NotificationSettings() {
             }
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select duration" />
+              <SelectValue placeholder='Select duration' />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="3">3 seconds</SelectItem>
-              <SelectItem value="5">5 seconds</SelectItem>
-              <SelectItem value="10">10 seconds</SelectItem>
-              <SelectItem value="0">Persistent</SelectItem>
+              <SelectItem value='3'>3 seconds</SelectItem>
+              <SelectItem value='5'>5 seconds</SelectItem>
+              <SelectItem value='10'>10 seconds</SelectItem>
+              <SelectItem value='0'>Persistent</SelectItem>
             </SelectContent>
           </Select>
         </div>

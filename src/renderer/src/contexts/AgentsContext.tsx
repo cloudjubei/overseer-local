@@ -11,6 +11,10 @@ import { useProjectContext } from './ProjectContext'
 export type AgentsContextValue = {
   runsActive: AgentRunHistory[]
   runsHistory: AgentRunHistory[]
+  // unseen completed runs helpers
+  isRunUnread: (run: AgentRunHistory) => boolean
+  markRunSeen: (runId: string) => void
+  getCompletedUnreadCount: (projectId?: string) => number
   startAgent: (
     agentType: AgentType,
     projectId: string,
@@ -34,6 +38,48 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
   const runsActive = useMemo(
     () => runsHistory.filter((h) => h.state === 'running' || h.state === 'created'),
     [runsHistory],
+  )
+
+  // unseen completed runs tracking
+  const [seenCompletedIds, setSeenCompletedIds] = useState<Set<string>>(() => {
+    try {
+      const raw = localStorage.getItem('agentRuns.seenCompleted')
+      if (!raw) return new Set()
+      const arr = JSON.parse(raw)
+      return new Set(Array.isArray(arr) ? arr : [])
+    } catch {
+      return new Set()
+    }
+  })
+  const isFinished = (r: AgentRunHistory) => r.state !== 'running' && r.state !== 'created'
+  const isRunUnread = useCallback(
+    (run: AgentRunHistory) => {
+      if (!isFinished(run)) return false
+      return !seenCompletedIds.has(run.id)
+    },
+    [seenCompletedIds],
+  )
+  const markRunSeen = useCallback((runId: string) => {
+    setSeenCompletedIds((prev) => {
+      if (prev.has(runId)) return prev
+      const next = new Set(prev)
+      next.add(runId)
+      try {
+        localStorage.setItem('agentRuns.seenCompleted', JSON.stringify(Array.from(next)))
+      } catch {}
+      return next
+    })
+  }, [])
+  const getCompletedUnreadCount = useCallback(
+    (projectId?: string) => {
+      const runs = projectId ? runsHistory.filter((r) => r.projectId === projectId) : runsHistory
+      let count = 0
+      for (const r of runs) {
+        if (isFinished(r) && !seenCompletedIds.has(r.id)) count += 1
+      }
+      return count
+    },
+    [runsHistory, seenCompletedIds],
   )
 
   const update = async () => {
@@ -197,12 +243,25 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
     () => ({
       runsActive,
       runsHistory,
+      isRunUnread,
+      markRunSeen,
+      getCompletedUnreadCount,
       startAgent,
       cancelRun,
       deleteRunHistory,
       rateRun,
     }),
-    [runsActive, runsHistory, startAgent, cancelRun, deleteRunHistory, rateRun],
+    [
+      runsActive,
+      runsHistory,
+      isRunUnread,
+      markRunSeen,
+      getCompletedUnreadCount,
+      startAgent,
+      cancelRun,
+      deleteRunHistory,
+      rateRun,
+    ],
   )
 
   return <AgentsContext.Provider value={value}>{children}</AgentsContext.Provider>

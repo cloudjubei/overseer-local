@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useMemo, useRef, useState 
 import { gitService } from '../services/gitService'
 import { useProjectContext } from './ProjectContext'
 import { GitCommitInfo, GitBranchEvent, GitUnifiedBranch } from 'thefactory-tools'
+import { notificationsService } from '../services/notificationsService'
 
 export type PendingBranch = {
   projectId: string
@@ -244,6 +245,23 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
 
       return newAllProjects
     })
+
+    // Create a git_changes notification when a feature branch is ahead
+    try {
+      const storyId = getStoryIdFromBranchName(branchUpdate.name)
+      const isFeature = !!storyId
+      const isUpdated = branchUpdate.ahead > 0
+      const currentBase = unifiedByProject[projectId]?.branches?.find((b) => b.current)?.name
+      if (isFeature && isUpdated) {
+        await notificationsService.create(projectId, {
+          type: 'info',
+          category: 'git_changes',
+          title: 'Branch updated',
+          message: `${branchUpdate.name} is ${branchUpdate.ahead} commit${branchUpdate.ahead === 1 ? '' : 's'} ahead of ${currentBase || 'main'}`,
+          metadata: { branch: branchUpdate.name, baseRef: currentBase || 'main' },
+        })
+      }
+    } catch {}
 
     // Debounce unified reload for this project so UI badge/deltas stay fresh
     try {

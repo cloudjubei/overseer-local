@@ -3,7 +3,6 @@ export type NavigationView =
   | 'Files'
   | 'Settings'
   | 'Chat'
-  | 'Notifications'
   | 'Agents'
   | 'LiveData'
   | 'ProjectTimeline'

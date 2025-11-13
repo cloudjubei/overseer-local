@@ -25,61 +25,6 @@ export default class NotificationsManager extends BaseManager {
     this._updateAppBadgeCount()
   }
 
-  private __getStorage(projectId: string): NotificationsStorage {
-    if (!this.storages[projectId]) {
-      const storage = new NotificationsStorage(projectId)
-      storage.subscribe(() => {
-        this._broadcast(projectId)
-        this._updateAppBadgeCount()
-      })
-      this.storages[projectId] = storage
-    }
-    return this.storages[projectId]
-  }
-
-  private _broadcast(projectId: string): void {
-    try {
-      if (this.window && !this.window.isDestroyed()) {
-        this.window.webContents.send(IPC_HANDLER_KEYS.NOTIFICATIONS_SUBSCRIBE, { projectId })
-      }
-    } catch (e) {
-      // ignore
-    }
-  }
-
-  private _updateAppBadgeCount(): void {
-    try {
-      const storages = Object.values(this.storages || {})
-      const unreadTotal = storages.reduce((acc, s: any) => {
-        try {
-          if (typeof s.getUnreadCount === 'function') return acc + s.getUnreadCount()
-          if (typeof s.getUnread === 'function') return acc + s.getUnread().length
-          return acc
-        } catch {
-          return acc
-        }
-      }, 0)
-
-      try {
-        if (typeof (app as any).setBadgeCount === 'function') {
-          app.setBadgeCount(unreadTotal)
-        }
-      } catch {}
-
-      if (
-        process.platform === 'darwin' &&
-        (app as any).dock &&
-        typeof (app as any).dock.setBadge === 'function'
-      ) {
-        try {
-          ;(app as any).dock.setBadge(unreadTotal > 0 ? String(unreadTotal) : '')
-        } catch {}
-      }
-    } catch {
-      // ignore badge errors
-    }
-  }
-
   getHandlers(): Record<string, (args: any) => any> {
     const handlers: Record<string, (args: any) => any> = {}
 
@@ -98,6 +43,81 @@ export default class NotificationsManager extends BaseManager {
       this.createNotification(projectId, input)
 
     return handlers
+  }
+
+  sendOs(data: any): { success: boolean; error?: string } {
+    if (!Notification.isSupported()) {
+      return { success: false, error: 'Notifications not supported' }
+    }
+
+    try {
+      const notification = new Notification({
+        title: data.title,
+        body: data.message,
+        silent: !data.soundsEnabled,
+        icon: 'resources/icon.png',
+        timeoutType: data.displayDuration > 0 ? 'default' : 'never',
+      })
+
+      notification.on('click', () => {
+        if (this.window) {
+          try {
+            this.window.focus()
+            this.window.webContents.send(IPC_HANDLER_KEYS.NOTIFICATIONS_ON_OPEN, data.metadata)
+          } catch (_) {}
+        }
+      })
+
+      notification.show()
+      return { success: true }
+    } catch (error: any) {
+      return { success: false, error: String(error) }
+    }
+  }
+
+  createNotification(projectId: string, input: any): any {
+    try {
+      const { notificationsEnabled } = this._getPrefsForProject(projectId)
+      const cat = (input?.category || undefined) as NotificationCategory | undefined
+      if (cat && notificationsEnabled && notificationsEnabled[cat] === false) {
+        return {
+          id: 'skipped',
+          timestamp: Date.now(),
+          type: input.type,
+          category: cat,
+          title: input.title,
+          message: input.message,
+          read: true,
+          metadata: { ...(input.metadata || {}), projectId },
+        }
+      }
+    } catch {}
+
+    const storage = this.__getStorage(projectId)
+    const created = storage.create(input)
+    this._maybeShowOsNotification(projectId, created)
+    return created
+  }
+
+  getRecentNotifications(projectId: string): any[] {
+    const storage = this.__getStorage(projectId)
+    return storage.getRecent()
+  }
+  getUnreadNotificationsCount(projectId: string): number {
+    const storage = this.__getStorage(projectId)
+    return storage.getUnread().length
+  }
+  markAllNotificationsAsRead(projectId: string): void {
+    const storage = this.__getStorage(projectId)
+    storage.markAllAsRead()
+  }
+  markNotificationAsRead(projectId: string, id: string): void {
+    const storage = this.__getStorage(projectId)
+    storage.markAsRead(id)
+  }
+  deleteAllNotifications(projectId: string): void {
+    const storage = this.__getStorage(projectId)
+    storage.deleteAll()
   }
 
   private _getPrefsForProject(projectId: string): {
@@ -151,91 +171,53 @@ export default class NotificationsManager extends BaseManager {
         displayDuration: Number.isFinite(sys?.displayDuration) ? sys.displayDuration : 5,
       }
       this.sendOs(data)
-    } catch (e) {
+    } catch (_) {}
+  }
+
+  private __getStorage(projectId: string): NotificationsStorage {
+    if (!this.storages[projectId]) {
+      const storage = new NotificationsStorage(projectId)
+      storage.subscribe(() => {
+        this._broadcast(projectId)
+        this._updateAppBadgeCount()
+      })
+      this.storages[projectId] = storage
+    }
+    return this.storages[projectId]
+  }
+
+  private _broadcast(projectId: string): void {
+    try {
+      if (this.window && !this.window.isDestroyed()) {
+        this.window.webContents.send(IPC_HANDLER_KEYS.NOTIFICATIONS_SUBSCRIBE, { projectId })
+      }
+    } catch (_) {
       // ignore
     }
   }
 
-  sendOs(data: any): { success: boolean; error?: string } {
-    if (!Notification.isSupported()) {
-      return { success: false, error: 'Notifications not supported' }
+  private _updateAppBadgeCount(): void {
+    const storages = Object.values(this.storages || {})
+    const allowed: Record<string, true> = {
+      agent_runs: true,
+      chat_messages: true,
+      git_changes: true,
     }
+    const badgeCount = storages.reduce((acc, s) => {
+      const filtered = s.getUnread().filter((n) => allowed[n.category])
+      return acc + filtered.length
+    }, 0)
+
+    app.setBadgeCount(badgeCount)
 
     try {
-      const notification = new Notification({
-        title: data.title,
-        body: data.message,
-        silent: !data.soundsEnabled,
-        icon: 'resources/icon.png',
-        timeoutType: data.displayDuration > 0 ? 'default' : 'never',
-      })
-
-      notification.on('click', () => {
-        if (this.window) {
-          try {
-            this.window.focus()
-            this.window.webContents.send(IPC_HANDLER_KEYS.NOTIFICATIONS_ON_OPEN, data.metadata)
-          } catch (_) {
-            // Ignore focus/send errors if window is gone
-          }
-        }
-      })
-
-      notification.show()
-      return { success: true }
-    } catch (error: any) {
-      return { success: false, error: String(error) }
-    }
-  }
-
-  createNotification(projectId: string, input: any): any {
-    // Do not create/store when notifications for this category are disabled
-    try {
-      const { notificationsEnabled } = this._getPrefsForProject(projectId)
-      const cat = (input?.category || undefined) as NotificationCategory | undefined
-      if (cat && notificationsEnabled && notificationsEnabled[cat] === false) {
-        // Return a harmless stub so callers awaiting the promise do not break.
-        return {
-          id: 'skipped',
-          timestamp: Date.now(),
-          type: input.type,
-          category: cat,
-          title: input.title,
-          message: input.message,
-          read: true,
-          metadata: { ...(input.metadata || {}), projectId },
-        }
+      if (
+        process.platform === 'darwin' &&
+        (app as any).dock &&
+        typeof (app as any).dock.setBadge === 'function'
+      ) {
+        // (app as any).dock.setBadge(badgeCount > 0 ? String(badgeCount) : '')
       }
     } catch {}
-    const storage = this.__getStorage(projectId)
-    const created = storage.create(input)
-    // Best-effort OS notification based on preferences
-    this._maybeShowOsNotification(projectId, created)
-    // Badge will update via subscription; no extra call needed
-    return created
-  }
-
-  getRecentNotifications(projectId: string): any[] {
-    const storage = this.__getStorage(projectId)
-    return storage.getRecent()
-  }
-  getUnreadNotificationsCount(projectId: string): number {
-    const storage = this.__getStorage(projectId)
-    return storage.getUnread().length
-  }
-  markAllNotificationsAsRead(projectId: string): void {
-    const storage = this.__getStorage(projectId)
-    storage.markAllAsRead()
-    // Badge updates via subscription
-  }
-  markNotificationAsRead(projectId: string, id: string): void {
-    const storage = this.__getStorage(projectId)
-    storage.markAsRead(id)
-    // Badge updates via subscription
-  }
-  deleteAllNotifications(projectId: string): void {
-    const storage = this.__getStorage(projectId)
-    storage.deleteAll()
-    // Badge updates via subscription
   }
 }

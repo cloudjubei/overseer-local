@@ -30,8 +30,6 @@ export interface UserPreferences {
   storiesViewMode: StoryViewMode
   storiesListViewSorting: StoryListViewSorting
   storiesListViewStatusFilter: StoryListStatusFilter
-  // Master toggle: show/hide the Notifications nav in the sidebar
-  showNotificationsNav?: boolean
   sidebarCollapsed: boolean
   // Preferred width of the right chat sidebar (pixels)
   chatSidebarWidth?: number

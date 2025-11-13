@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import FilesView from '../screens/FilesView'
 import SettingsView from '../screens/SettingsView'
 import ChatView from '../screens/ChatView'
-import NotificationsView from '../screens/NotificationsView'
 import StoriesView from '../screens/StoriesView'
 import AgentsView from '../screens/AgentsView'
 import LiveDataView from '../screens/LiveDataView'
@@ -12,10 +11,8 @@ import TestsView from '../screens/TestsView'
 import GitView from '../screens/GitView'
 import { useNavigator } from './Navigator'
 import Tooltip from '../components/ui/Tooltip'
-import { useNotifications } from '../hooks/useNotifications'
 import { MAIN_PROJECT, useProjectContext } from '../contexts/ProjectContext'
 import { useAppSettings } from '../contexts/AppSettingsContext'
-import { useAgents } from '../contexts/AgentsContext'
 import NotificationBadge from '../components/stories/NotificationBadge'
 import { ProjectSpec } from 'thefactory-tools'
 import {
@@ -24,7 +21,6 @@ import {
   IconChat,
   IconRobot,
   IconAntenna,
-  IconBell,
   IconSettings,
   IconWarningTriangle,
   IconMenu,
@@ -34,17 +30,12 @@ import {
   IconTests,
   IconBranch,
 } from '../components/ui/icons/Icons'
-import { notificationsService } from '../services/notificationsService'
 import { renderProjectIcon } from '@renderer/screens/projects/projectIcons'
 import { NavigationView } from '@renderer/types'
 import { hideScrollStyle } from '@renderer/utils/hideScrollStyle'
 import { useProjectsGroups } from '../contexts/ProjectsGroupsContext'
-import { useChatUnread } from '../hooks/useChatUnread'
-import { useChatThinking } from '../hooks/useChatThinking'
 import SpinnerWithDot from '../components/ui/SpinnerWithDot'
-import { useGit } from '../contexts/GitContext'
-import { settingsService } from '../services/settingsService'
-import { useNotificationPrefs } from '@renderer/hooks/useNotificationPrefs'
+import { useNotifications } from '@renderer/hooks/useNotifications'
 
 export type SidebarProps = {}
 
@@ -113,13 +104,6 @@ const NAV_ITEMS: NavDef[] = [
     accent: 'brand',
   },
   {
-    id: 'notifications',
-    label: 'Notifications',
-    view: 'Notifications',
-    icon: <IconBell />,
-    accent: 'teal',
-  },
-  {
     id: 'settings',
     label: 'Settings',
     view: 'Settings',
@@ -150,7 +134,6 @@ function useAccentClass(seed: string, isMain: boolean): string {
   if (isMain) {
     return 'nav-item nav-accent-gray'
   }
-  // Stable but simple accent class selection based on id
   const n = [...seed].reduce((a, c) => a + c.charCodeAt(0), 0)
   const i = n % 3
   switch (i) {
@@ -166,15 +149,10 @@ function useAccentClass(seed: string, isMain: boolean): string {
 
 export default function SidebarView({}: SidebarProps) {
   const { currentView, navigateView, openModal } = useNavigator()
-  const { unreadCount } = useNotifications()
   const { activeProjectId, projects, setActiveProjectId } = useProjectContext()
   const { isAppSettingsLoaded, appSettings, updateAppSettings } = useAppSettings()
-  const { runsActive } = useAgents()
   const { groups } = useProjectsGroups()
-  const { unreadCountByProject } = useChatUnread()
-  const { thinkingCountByProject, anyThinkingForProject } = useChatThinking(500)
-  const { getProjectUpdatedBranchesCount } = useGit()
-  const { isBadgeEnabled, reload: reloadNotifPrefs } = useNotificationPrefs()
+  const { isBadgeEnabled, getProjectBadgeState, getGroupBadgeState } = useNotifications()
 
   const [collapsed, setCollapsed] = useState<boolean>(appSettings.userPreferences.sidebarCollapsed)
 
@@ -190,85 +168,17 @@ export default function SidebarView({}: SidebarProps) {
   }, [collapsed])
 
   const handleProjectSwitch = (projectId: string) => {
-    if (projectId === activeProjectId) {
-      return
-    }
+    if (projectId === activeProjectId) return
     setActiveProjectId(projectId)
     navigateView(currentView)
   }
 
-  const activeCountByProject = useMemo(() => {
-    const map = new Map<string, number>()
-    for (const r of runsActive) {
-      const k = r.projectId
-      map.set(k, (map.get(k) || 0) + 1)
-    }
-    return map
-  }, [runsActive])
-
-  // Active agent runs for the current project for Agents nav badge
-  const activeRunsCurrentProject = activeCountByProject.get(activeProjectId) || 0
-  const chatUnreadCurrentProject = unreadCountByProject.get(activeProjectId) || 0
-  const chatThinkingCurrentProject = anyThinkingForProject(activeProjectId)
-  const gitUnreadCurrentProject = getProjectUpdatedBranchesCount(activeProjectId)
-
-  // Track unread notifications per project for badges in the Projects list.
-  const [unreadByProject, setUnreadByProject] = useState<Map<string, number>>(new Map())
-
-  const refreshUnreadFor = useCallback(async (projectId: string) => {
-    try {
-      const count = await notificationsService.getUnreadNotificationsCount(projectId)
-      setUnreadByProject((prev) => {
-        const next = new Map(prev)
-        next.set(projectId, count)
-        return next
-      })
-    } catch (_) {
-      // ignore errors; keep previous
-    }
-  }, [])
-
-  const refreshAllUnread = useCallback(
-    async (projectIds: string[]) => {
-      await Promise.all(projectIds.map((id) => refreshUnreadFor(id)))
-    },
-    [refreshUnreadFor],
-  )
-
-  useEffect(() => {
-    const ids = projects.map((p) => p.id)
-    if (ids.length) refreshAllUnread(ids)
-  }, [projects.map((p) => p.id).join('|'), refreshAllUnread])
-
-  useEffect(() => {
-    // Subscribe to notification changes; update affected project only
-    const unsubscribe = notificationsService.subscribe((payload) => {
-      const pid = payload?.projectId
-      if (pid) refreshUnreadFor(pid)
-      else {
-        // Unknown project; refresh all to be safe
-        const ids = projects.map((p) => p.id)
-        if (ids.length) refreshAllUnread(ids)
-      }
-    })
-    return () => unsubscribe()
-  }, [projects.map((p) => p.id).join('|'), refreshAllUnread, refreshUnreadFor])
-
-  // Preload badges prefs for all projects and refresh when settings change
-  useEffect(() => {
-    const ids = projects.map((p) => p.id)
-    if (ids.length) {
-      ids.forEach((pid) => void reloadNotifPrefs(pid))
-    }
-  }, [projects.map((p) => p.id).join('|'), reloadNotifPrefs])
-
-  useEffect(() => {
-    const unsub = settingsService.subscribe(() => {
-      const ids = projects.map((p) => p.id)
-      if (ids.length) ids.forEach((pid) => void reloadNotifPrefs(pid))
-    })
-    return () => unsub()
-  }, [projects.map((p) => p.id).join('|'), reloadNotifPrefs])
+  const stCurrent = getProjectBadgeState(activeProjectId)
+  const activeRunsCurrentProject = stCurrent.agent_runs.running
+  const agentsCompletedUnreadCurrentProject = stCurrent.agent_runs.unread
+  const chatUnreadCurrentProject = stCurrent.chat_messages.unread
+  const chatThinkingCurrentProject = stCurrent.chat_messages.thinking
+  const gitUnreadCurrentProject = stCurrent.git_changes.unread
 
   const isMobile = useMediaQuery('(max-width: 768px)')
   const [mobileOpen, setMobileOpen] = useState<boolean>(false)
@@ -280,9 +190,7 @@ export default function SidebarView({}: SidebarProps) {
   }, [isMobile])
 
   useEffect(() => {
-    if (mobileOpen) {
-      setTimeout(() => firstItemRef.current?.focus(), 0)
-    }
+    if (mobileOpen) setTimeout(() => firstItemRef.current?.focus(), 0)
   }, [mobileOpen])
 
   const activeIndex = useMemo(() => {
@@ -339,12 +247,6 @@ export default function SidebarView({}: SidebarProps) {
           <ChatView />
         </div>
       )
-    if (currentView === 'Notifications')
-      return (
-        <div key="Notifications" className="flex flex-col flex-1 min-h-0 view-transition">
-          <NotificationsView />
-        </div>
-      )
     if (currentView === 'Agents')
       return (
         <div key="Agents" className="flex flex-col flex-1 min-h-0 view-transition">
@@ -388,17 +290,18 @@ export default function SidebarView({}: SidebarProps) {
     )
   }, [currentView])
 
+  const isMainProject = (id?: string) => id === MAIN_PROJECT
   const effectiveCollapsed = isMobile ? false : collapsed
 
-  // Expanded/collapsed state for project groups in sidebar (default closed)
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({})
+  const { projects: allProjects } = useProjectContext()
+  const { groups: allGroups } = useProjectsGroups()
   useEffect(() => {
     setOpenGroups((prev) => {
       const next: Record<string, boolean> = { ...prev }
       for (const g of groups) {
-        if (!(g.id in next)) next[g.id] = false // start closed
+        if (!(g.id in next)) next[g.id] = false
       }
-      // Remove any no-longer-existing groups keys
       const validIds = new Set(groups.map((g) => g.id))
       for (const k of Object.keys(next)) {
         if (!validIds.has(k)) delete next[k]
@@ -416,21 +319,24 @@ export default function SidebarView({}: SidebarProps) {
   const cap99 = (n: number) => (n > 99 ? '99+' : `${n}`)
 
   const renderProjectItem = (p: ProjectSpec) => {
-    const isMain = p.id === MAIN_PROJECT
     const active = activeProjectId === p.id
-    const accent = useAccentClass(p.id, isMain)
-    const activeCount = activeCountByProject.get(p.id) || 0
-    const unread = unreadByProject.get(p.id) || 0 // notifications (system)
-    const chatUnread = unreadCountByProject.get(p.id) || 0 // chats
-    const chatThinking = (thinkingCountByProject.get(p.id) || 0) > 0
-    const gitUnread = getProjectUpdatedBranchesCount(p.id)
-    const iconKey = p.metadata?.icon || (isMain ? 'collection' : 'folder')
+    const accent = useAccentClass(p.id, isMainProject(p.id))
+
+    const st = getProjectBadgeState(p.id)
+    const activeCount = st.agent_runs.running
+    const chatUnread = st.chat_messages.unread
+    const chatThinking = st.chat_messages.thinking
+    const gitUnread = st.git_changes.unread
+    const completedUnread = st.agent_runs.unread
+
+    const iconKey = p.metadata?.icon || (isMainProject(p.id) ? 'collection' : 'folder')
     const projectIcon = renderProjectIcon(iconKey)
 
     const showAgents = isBadgeEnabled('agent_runs', p.id) && activeCount > 0
+    const showAgentsCompleted = isBadgeEnabled('agent_runs', p.id) && completedUnread > 0
     const showChat = isBadgeEnabled('chat_messages', p.id) && (chatUnread > 0 || chatThinking)
     const showGit = isBadgeEnabled('git_changes', p.id) && gitUnread > 0
-    const hasAnyBadge = showAgents || unread > 0 || showChat || showGit
+    const hasAnyBadge = showAgents || showAgentsCompleted || showChat || showGit
 
     const Btn = (
       <button
@@ -465,11 +371,17 @@ export default function SidebarView({}: SidebarProps) {
                 isInformative
               />
             )}
+            {showAgentsCompleted && (
+              <NotificationBadge
+                className={effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''}
+                text={cap99(completedUnread)}
+                tooltipLabel={`${completedUnread} completed agent runs`}
+              />
+            )}
             {isBadgeEnabled('chat_messages', p.id) && chatThinking && !active ? (
               <SpinnerWithDot
                 size={effectiveCollapsed ? 14 : 16}
                 showDot={chatUnread > 0}
-                className={effectiveCollapsed ? '' : ''}
                 dotTitle={chatUnread > 0 ? `${chatUnread} unread chats` : undefined}
               />
             ) : isBadgeEnabled('chat_messages', p.id) && chatUnread > 0 ? (
@@ -479,13 +391,6 @@ export default function SidebarView({}: SidebarProps) {
                 tooltipLabel={`${chatUnread} unread chats`}
               />
             ) : null}
-            {unread > 0 && (
-              <NotificationBadge
-                className={effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''}
-                text={`${unread}`}
-                tooltipLabel={`${unread} unread notifications`}
-              />
-            )}
             {showGit && (
               <NotificationBadge
                 className={effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''}
@@ -510,13 +415,11 @@ export default function SidebarView({}: SidebarProps) {
     )
   }
 
-  // Sidebar element (shared for desktop and mobile drawer)
   const Aside = (
     <aside
       className={`sidebar relative z-30 flex h-full shrink-0 flex-col overflow-hidden border-r bg-white dark:bg-neutral-900 dark:border-neutral-800 ${effectiveCollapsed ? 'collapsed' : ''}`}
       aria-label="Primary navigation"
       data-collapsed={effectiveCollapsed ? 'true' : 'false'}
-      style={{}}
     >
       <div
         className={`mb-2 flex items-center ${effectiveCollapsed ? 'justify-center' : 'justify-between'} px-2 pt-3`}
@@ -540,89 +443,82 @@ export default function SidebarView({}: SidebarProps) {
           title={effectiveCollapsed ? 'Expand sidebar (⌘/Ctrl+B)' : 'Collapse sidebar (⌘/Ctrl+B)'}
         >
           <span aria-hidden>
-            <IconChevron
-              className="w-4 h-4"
-              style={{ transform: effectiveCollapsed ? 'none' : 'rotate(180deg)' }}
-            />
+            <IconChevron className="w-4 h-4" style={{ transform: effectiveCollapsed ? 'none' : 'rotate(180deg)' }} />
           </span>
         </button>
       </div>
 
-      <nav
-        className="nav flex-1 min-h-0 overflow-y-auto"
-        style={hideScrollStyle}
-        onKeyDown={onKeyDownList}
-      >
+      <nav className="nav flex-1 min-h-0 overflow-y-auto" style={hideScrollStyle} onKeyDown={onKeyDownList}>
         <ul className="nav-list" role="list">
           {NAV_ITEMS.filter((n) => n.view !== 'Settings').map((item, i) => {
             const isActive = currentView === item.view
             const ref = i === 0 ? firstItemRef : undefined
 
-            // Master: hide Notifications nav item entirely when disabled
-            const showNotificationsNav = appSettings.userPreferences.showNotificationsNav !== false
-            if (item.view === 'Notifications' && !showNotificationsNav) return null
-
-            // Decide badge for Notifications, Git, Agents, or Chat (gated by per-project badge prefs)
-            let badgeEl: React.ReactNode | null = null
-            if (item.view === 'Notifications' && unreadCount > 0) {
-              badgeEl = (
-                <NotificationBadge
-                  className={effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''}
-                  text={`${unreadCount}`}
-                  tooltipLabel={`${unreadCount} unread notifications`}
-                />
-              )
-            } else if (
-              item.view === 'Git' &&
-              gitUnreadCurrentProject > 0 &&
-              isBadgeEnabled('git_changes', activeProjectId)
-            ) {
-              badgeEl = (
-                <NotificationBadge
-                  className={effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''}
-                  text={`${gitUnreadCurrentProject}`}
-                  tooltipLabel={`${gitUnreadCurrentProject} updated ${gitUnreadCurrentProject === 1 ? 'branch' : 'branches'}`}
-                  color="green"
-                />
-              )
-            } else if (
-              item.view === 'Agents' &&
-              activeRunsCurrentProject > 0 &&
-              isBadgeEnabled('agent_runs', activeProjectId)
-            ) {
-              badgeEl = (
-                <NotificationBadge
-                  className={effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''}
-                  text={`${activeRunsCurrentProject}`}
-                  tooltipLabel={`${activeRunsCurrentProject} running agents`}
-                  isInformative
-                />
-              )
-            } else if (
-              item.view === 'Chat' &&
-              isBadgeEnabled('chat_messages', activeProjectId)
-            ) {
-              if (chatThinkingCurrentProject) {
-                badgeEl = (
-                  <SpinnerWithDot
-                    size={effectiveCollapsed ? 14 : 16}
-                    showDot={chatUnreadCurrentProject > 0}
-                    dotTitle={
-                      chatUnreadCurrentProject > 0
-                        ? `${chatUnreadCurrentProject} unread chats`
-                        : undefined
-                    }
-                  />
-                )
-              } else if (chatUnreadCurrentProject > 0) {
-                badgeEl = (
+            const BtnBadges = () => {
+              if (
+                item.view === 'Git' &&
+                gitUnreadCurrentProject > 0 &&
+                isBadgeEnabled('git_changes', activeProjectId)
+              ) {
+                return (
                   <NotificationBadge
                     className={effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''}
-                    text={cap99(chatUnreadCurrentProject)}
-                    tooltipLabel={`${chatUnreadCurrentProject} unread chats`}
+                    text={`${gitUnreadCurrentProject}`}
+                    tooltipLabel={`${gitUnreadCurrentProject} updated ${gitUnreadCurrentProject === 1 ? 'branch' : 'branches'}`}
+                    color="green"
                   />
                 )
               }
+              if (item.view === 'Agents' && isBadgeEnabled('agent_runs', activeProjectId)) {
+                const parts: React.ReactNode[] = []
+                if (activeRunsCurrentProject > 0) {
+                  parts.push(
+                    <NotificationBadge
+                      key="agents-running"
+                      className={effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''}
+                      text={`${activeRunsCurrentProject}`}
+                      tooltipLabel={`${activeRunsCurrentProject} running agents`}
+                      isInformative
+                    />,
+                  )
+                }
+                if (agentsCompletedUnreadCurrentProject > 0) {
+                  parts.push(
+                    <NotificationBadge
+                      key="agents-completed"
+                      className={effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''}
+                      text={cap99(agentsCompletedUnreadCurrentProject)}
+                      tooltipLabel={`${agentsCompletedUnreadCurrentProject} completed agent runs`}
+                    />,
+                  )
+                }
+                return parts.length ? <>{parts}</> : null
+              }
+              if (item.view === 'Chat' && isBadgeEnabled('chat_messages', activeProjectId)) {
+                if (chatThinkingCurrentProject) {
+                  return (
+                    <SpinnerWithDot
+                      size={effectiveCollapsed ? 14 : 16}
+                      showDot={chatUnreadCurrentProject > 0}
+                      dotTitle={
+                        chatUnreadCurrentProject > 0
+                          ? `${chatUnreadCurrentProject} unread chats`
+                          : undefined
+                      }
+                    />
+                  )
+                }
+                if (chatUnreadCurrentProject > 0) {
+                  return (
+                    <NotificationBadge
+                      className={effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''}
+                      text={cap99(chatUnreadCurrentProject)}
+                      tooltipLabel={`${chatUnreadCurrentProject} unread chats`}
+                    />
+                  )
+                }
+              }
+              return null
             }
 
             const Btn = (
@@ -644,17 +540,22 @@ export default function SidebarView({}: SidebarProps) {
               >
                 <span className="nav-item__icon">{item.icon}</span>
                 {!effectiveCollapsed && <span className="nav-item__label">{item.label}</span>}
-                {badgeEl && (
-                  <span
-                    className={classNames(
-                      'nav-item__badges',
-                      effectiveCollapsed && 'nav-item__badges--compact',
-                    )}
-                    aria-hidden
-                  >
-                    {badgeEl}
-                  </span>
-                )}
+                {
+                  (() => {
+                    const content = BtnBadges()
+                    return content ? (
+                      <span
+                        className={classNames(
+                          'nav-item__badges',
+                          effectiveCollapsed && 'nav-item__badges--compact',
+                        )}
+                        aria-hidden
+                      >
+                        {content}
+                      </span>
+                    ) : null
+                  })()
+                }
               </button>
             )
             return (
@@ -700,14 +601,10 @@ export default function SidebarView({}: SidebarProps) {
           </div>
         )}
 
-        {/* Projects listing: uncategorized first, then grouped with collapsible sections */}
         <ul className="nav-list" aria-label="Projects">
           {projects.length == 0 && (
             <li className="nav-li">
-              <div
-                className={classNames('nav-item', effectiveCollapsed && 'nav-item--compact')}
-                role="status"
-              >
+              <div className={classNames('nav-item', effectiveCollapsed && 'nav-item--compact')} role="status">
                 <span className="nav-item__icon" aria-hidden>
                   <IconWarningTriangle />
                 </span>
@@ -716,10 +613,10 @@ export default function SidebarView({}: SidebarProps) {
             </li>
           )}
 
-          {/* Uncategorized projects at the top */}
-          {uncategorizedProjects.map((p) => renderProjectItem(p))}
+          {projects
+            .filter((p) => !groupedProjectIds.has(p.id))
+            .map((p) => renderProjectItem(p))}
 
-          {/* Grouped projects as collapsible sections */}
           {!effectiveCollapsed &&
             groups.map((g) => {
               const projectById = new Map(projects.map((p) => [p.id, p]))
@@ -728,56 +625,38 @@ export default function SidebarView({}: SidebarProps) {
                 .filter(Boolean) as ProjectSpec[]
               const isOpen = openGroups[g.id] || false
 
-              // Determine if the active project is within this group
               const hasActive = !!groupProjects.find((p) => p.id === activeProjectId)
               const accentClass = hasActive
-                ? useAccentClass(activeProjectId, activeProjectId === MAIN_PROJECT)
+                ? useAccentClass(activeProjectId, isMainProject(activeProjectId))
                 : ''
 
-              // Aggregate badges across group projects
-              const aggActive = (g.projects || []).reduce(
-                (sum, pid) => sum + (activeCountByProject.get(pid) || 0),
-                0,
-              )
-              const aggUnread = (g.projects || []).reduce(
-                (sum, pid) => sum + (unreadByProject.get(pid) || 0),
-                0,
-              )
-              const aggChatUnread = (g.projects || []).reduce(
-                (sum, pid) => sum + (unreadCountByProject.get(pid) || 0),
-                0,
-              )
-              const aggThinking = (g.projects || []).reduce(
-                (sum, pid) => sum + (thinkingCountByProject.get(pid) || 0),
-                0,
-              )
-              const aggGitUnread = (g.projects || []).reduce(
-                (sum, pid) => sum + getProjectUpdatedBranchesCount(pid),
-                0,
-              )
+              const groupBadge = getGroupBadgeState(g.id)
+              const aggActive = groupBadge.agent_runs.running
+              const aggAgentsCompletedUnread = groupBadge.agent_runs.unread
+              const aggChatUnread = groupBadge.chat_messages.unread
+              const aggThinking = groupBadge.chat_messages.thinking ? 1 : 0
+              const aggGitUnread = groupBadge.git_changes.unread
 
-              // Apply per-project badge prefs across the group (show if any project enables that category)
               const aggShowAgents =
                 (g.projects || []).some((pid) => isBadgeEnabled('agent_runs', pid)) && aggActive > 0
+              const aggShowAgentsCompleted =
+                (g.projects || []).some((pid) => isBadgeEnabled('agent_runs', pid)) &&
+                aggAgentsCompletedUnread > 0
               const aggShowChat =
                 (g.projects || []).some((pid) => isBadgeEnabled('chat_messages', pid)) &&
                 (aggChatUnread > 0 || aggThinking > 0)
               const aggShowGit =
                 (g.projects || []).some((pid) => isBadgeEnabled('git_changes', pid)) && aggGitUnread > 0
 
-              const showAnyBadge = aggShowAgents || aggUnread > 0 || aggShowChat || aggShowGit
+              const showAnyBadge =
+                aggShowAgents || aggShowAgentsCompleted || aggShowChat || aggShowGit
 
               return (
                 <li key={g.id} className="nav-li">
                   <button
                     type="button"
                     onClick={() => setOpenGroups((prev) => ({ ...prev, [g.id]: !isOpen }))}
-                    className={classNames(
-                      'nav-item',
-                      'nav-item--compact',
-                      accentClass,
-                      hasActive && 'nav-item--active',
-                    )}
+                    className={classNames('nav-item', 'nav-item--compact', accentClass, hasActive && 'nav-item--active')}
                     aria-expanded={isOpen}
                     aria-controls={`group-${g.id}`}
                     title={g.title}
@@ -800,6 +679,13 @@ export default function SidebarView({}: SidebarProps) {
                             isInformative
                           />
                         )}
+                        {aggShowAgentsCompleted && (
+                          <NotificationBadge
+                            className={''}
+                            text={cap99(aggAgentsCompletedUnread)}
+                            tooltipLabel={`${aggAgentsCompletedUnread} completed agent runs in group`}
+                          />
+                        )}
                         {aggShowChat && aggThinking > 0 ? (
                           <SpinnerWithDot
                             size={16}
@@ -813,13 +699,6 @@ export default function SidebarView({}: SidebarProps) {
                             tooltipLabel={`${aggChatUnread} unread chats in group`}
                           />
                         ) : null}
-                        {aggUnread > 0 && (
-                          <NotificationBadge
-                            className={''}
-                            text={`${aggUnread}`}
-                            tooltipLabel={`${aggUnread} unread notifications in group`}
-                          />
-                        )}
                         {aggShowGit && (
                           <NotificationBadge
                             className={''}
@@ -843,7 +722,6 @@ export default function SidebarView({}: SidebarProps) {
         </ul>
       </nav>
 
-      {/* Fixed footer: Settings at the bottom, does not scroll */}
       <div className="shrink-0" aria-label="Footer">
         <div className="nav-sep" aria-hidden />
         <ul className="nav-list" role="list" onKeyDown={onKeyDownList}>

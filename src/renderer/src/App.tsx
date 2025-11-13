@@ -20,7 +20,7 @@ import { StoriesProvider } from './contexts/StoriesContext'
 import { GitHubCredentialsProvider } from './contexts/GitHubCredentialsContext'
 import { ChatsProvider } from './contexts/ChatsContext'
 import { GitProvider } from './contexts/GitContext'
-import { NotificationSoundBootstrap } from './hooks/useNotificationSounds'
+import { NotificationSoundBootstrap } from './hooks/useNotifications'
 
 function ServicesBootstrap() {
   const { init } = useLiveData()

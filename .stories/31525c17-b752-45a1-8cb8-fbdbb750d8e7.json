@@ -1,6 +1,6 @@
 {
   "id": "31525c17-b752-45a1-8cb8-fbdbb750d8e7",
-  "status": "+",
+  "status": "-",
   "title": "Create Sourcetree replacement - a popular version control management app",
   "description": "Goal Provide built-in Git workflows so users do not need external tools (e.g., SourceTree) for routine tasks: viewing repo status and branches, reviewing diffs (working tree, staged, and branch-to-base), running focused tests, merging, and resolving conflicts. Scope for this iteration - Navigation and views: - Add a Git section with two subviews: 'Current project' and 'All projects'. - Current project shows pending operations for the active repo; All projects aggregates across all known projects from ProjectContext (src/renderer/src/contexts/ProjectContext.tsx). - Pending operations definition: - A pending operation is a feature branch with commits ahead of the base branch (default base is the current branch). Feature branches follow the existing convention 'features/<storyId>' where storyId is a UUID. We may later extend to 'features/<storyId>.<featureId>' but uniqueness is already guaranteed by storyId. - Merge flow: - Clicking a pending item opens a Git Merge popup that shows context (project/story/branch), per-file diffs, and analysis placeholders: compilation impact, tests impact, and diff coverage across changed lines. These analyses start as stubs/adapters and should degrade gracefully when not available. On conflicts, the flow should transition into the conflict resolution UI. - Integration notes: - Reuse GitMonitor for status and add aggregation to compute ahead/behind and feature branches across projects. - Reuse/extend existing functions in src/logic/git-monitor/storyBranchNaming.js to resolve story IDs from branch names and expose this mapping to the renderer. - Respect current behavior where agents run from the branch they started; do not force checkouts. All operations must be safe-by-default with timeouts and clear error surfacing. Out of scope for this iteration - Remote PR management, stash workflows, and hunk-level staging (planned separately). Acceptance (high level) - Users can navigate to a Git panel, see pending branches grouped appropriately, open a merge popup with diffs and analysis placeholders, execute a merge, and resolve conflicts without leaving the app.\n\nThe main process class responsible for interfacing with `thefactory-tools` and the`GitTools` inside of it which provides all git operations is @src/logic/git/GitManager.ts . GitManager interfaces with the renderer via @src/renderer/src/services/gitService.ts and @src/preload/ipcHandlersKeys.ts and @src/preload/index.ts . And the forefront interface for all views that is making the usage of all git operations easy is @src/renderer/src/contexts/GitContext.tsx .",
   "features": [
@@ -474,6 +474,33 @@
       "createdAt": "2025-11-05T22:34:04.837Z",
       "updatedAt": "2025-11-05T23:26:15.666Z",
       "completedAt": "2025-11-05T23:26:15.666Z"
+    },
+    {
+      "id": "6678c4ec-5585-4297-8ce1-d43340bff417",
+      "status": "-",
+      "title": "In‑app FileMerge‑style conflict resolver – Phase 1 (MVP)",
+      "description": "Goal\n- Replicate Apple FileMerge.app interaction patterns inside the app, cross‑platform, to resolve merge conflicts without leaving the app.\nTrigger and flow\n- When a merge from Git Merge modal returns conflicts, open a new modal: Merge Conflict Resolution.\n- Modal persists for the session; users resolve conflicted files and stage as they go.\n- When all files are resolved, show a confirmation to finalize the merge with a prefilled, editable message and optional push.\nUI structure\n- Left sidebar: conflicted files only; badges for unresolved/resolved; search; quick actions on hover: accept ours, accept theirs, reset file.\n- Main area: 3‑pane editor\n  - Left: Theirs (incoming, stage 3)\n  - Right: Ours (current, stage 2)\n  - Center: Result (editable)\n  - Per‑hunk controls: pick ours, pick theirs, pick both; manual editing.\n  - Hunk navigation: next/previous.\n- Bottom bar: abort merge with confirmation, continue enabled only when all resolved; status like 'x/y files resolved'.\nInteractions and behaviors\n- Save & Stage: writes center content to working tree and stages file (mark resolved).\n- Accept ours/theirs for file level; reset file to conflicted state from index.\n- Binary files: only ours/theirs actions; no inline editing.\nCommit message and push\n- Final confirmation prefilled with 'Merge branch {branch_name_incoming}' (editable) and 'Push immediately to origin' checkbox (default off).\nGit integration and APIs (via GitManager → gitService → GitContext)\n- listConflicts(repoPath)\n- getConflictTriples(repoPath, path) -> { base, ours, theirs, isBinary }\n- writeResolution(repoPath, path, content)\n- acceptOurs(repoPath, path), acceptTheirs(repoPath, path)\n- resetFile(repoPath, path)\n- abortMerge(repoPath)\n- finalizeMerge(repoPath, message, pushImmediately)\nSafety and integration\n- No auto‑checkout; timeouts and error surfacing; graceful degradation when base or triples unavailable.\n- GitMergeModal launches this modal on conflicts; resizable dividers reuse ChatSidebar pattern.\nAcceptance criteria\n- Conflicted merge opens resolver; selecting a file shows 3‑pane diff with per‑hunk controls.\n- Saving & staging marks file resolved; binary files limited to ours/theirs.\n- Continue enabled only when all resolved; final step creates the merge commit with default message and optional push.",
+      "context": [],
+      "createdAt": "2025-11-12T16:01:35.396Z",
+      "updatedAt": "2025-11-12T16:01:35.396Z"
+    },
+    {
+      "id": "2c16ee82-88a4-44d6-8bd7-4c49230bd1c0",
+      "status": "-",
+      "title": "FileMerge parity and performance – Phase 2",
+      "description": "Scope\n- Base panel (stage 1) toggle for extra context.\n- Diff UX enhancements: whitespace‑ignore toggle, word/char diff toggle, wrap lines, polished synced scrolling.\n- Apply to all remaining hunks in current file for chosen action.\n- Badges and correct handling for renames and mode or symlink conflicts.\n- Large file strategy: virtualized rendering; fallback to file‑level actions if too large.\n- Keyboard shortcuts: up/down navigate hunks; cmd/ctrl+1 ours, +2 theirs, +3 both; cmd/ctrl+S save & stage; cmd/ctrl+Enter continue.\nAcceptance criteria\n- Users can toggle base, whitespace, word/char, wrap.\n- Apply‑to‑all for file works.\n- Large files remain responsive with virtualization or guarded fallback.\n- Shortcuts work cross‑platform.",
+      "context": [],
+      "createdAt": "2025-11-12T16:01:35.399Z",
+      "updatedAt": "2025-11-12T16:01:35.399Z"
+    },
+    {
+      "id": "2bde8cff-8bd0-4dae-a51e-844d666730b9",
+      "status": "-",
+      "title": "Advanced productivity, robustness, and accessibility – Phase 3",
+      "description": "Scope\n- Preferences: default order for 'pick both'; default whitespace and wrap; remember per repo.\n- Concurrency: detect external edits while modal open and prompt to reload.\n- EOL and encoding: preserve ours by default; option to normalize EOL; warnings on mixed encodings.\n- Accessibility: ARIA roles and labels for hunk controls, strong focus management, high‑contrast themes.\n- Optional external tool fallback button; on return, refresh conflicted state.\n- Telemetry and error logging (non‑PII) around conflict sessions and failures.\nAcceptance criteria\n- Preferences persist and apply; concurrency prompts trigger appropriately.\n- EOL and encoding options behave correctly.\n- Accessibility improvements present and verifiable.\n- External tool fallback works without breaking in‑app flow.",
+      "context": [],
+      "createdAt": "2025-11-12T16:01:35.400Z",
+      "updatedAt": "2025-11-12T16:01:35.400Z"
     }
   ],
   "featureIdToDisplayIndex": {
@@ -518,9 +545,11 @@
     "d43c4450-a3cd-43dd-a248-aa75f5c69233": 39,
     "8c824dc4-24d7-4d6b-81b6-133bcd933506": 40,
     "2efcd766-e423-4f70-ad84-77c35a6c1f44": 41,
-    "afdb5f6a-978d-44b4-9995-03f69feb1b01": 42
+    "afdb5f6a-978d-44b4-9995-03f69feb1b01": 42,
+    "6678c4ec-5585-4297-8ce1-d43340bff417": 43,
+    "2c16ee82-88a4-44d6-8bd7-4c49230bd1c0": 44,
+    "2bde8cff-8bd0-4dae-a51e-844d666730b9": 45
   },
   "createdAt": "2025-10-21T17:28:55.063Z",
-  "updatedAt": "2025-11-06T08:27:10.366Z",
-  "completedAt": "2025-11-06T11:19:43.999Z"
+  "updatedAt": "2025-11-06T08:27:10.366Z"
 }
