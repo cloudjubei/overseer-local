@@ -6,7 +6,6 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
     storiesViewMode: 'list',
     storiesListViewSorting: 'index_desc',
     storiesListViewStatusFilter: 'all',
-    showNotificationsNav: true,
     sidebarCollapsed: false,
     shortcutsModifier: navigator.userAgent.toLowerCase().includes('mac') ? 'meta' : 'ctrl',
     shortcuts: {

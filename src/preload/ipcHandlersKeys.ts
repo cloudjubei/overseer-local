@@ -63,6 +63,7 @@ const IPC_HANDLER_KEYS = {
   STORIES_GET: 'stories:get',
   STORIES_CREATE: 'stories:create',
   STORIES_UPDATE: 'stories:update',
+  STORIES_UPDATE_STATUS: 'stories:update-status',
   STORIES_DELETE: 'stories:delete',
   STORIES_FEATURE_GET: 'stories-feature:get',
   STORIES_FEATURE_ADD: 'stories-feature:add',

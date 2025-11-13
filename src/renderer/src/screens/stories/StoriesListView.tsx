@@ -85,7 +85,7 @@ export default function StoriesListView() {
   const {
     storyIdsByProject,
     storiesById,
-    updateStory,
+    updateStoryStatus,
     reorderStory,
     getBlockers,
     getBlockersOutbound,
@@ -172,7 +172,7 @@ export default function StoriesListView() {
 
   const handleStatusChange = async (storyId: string, status: Status) => {
     try {
-      await updateStory(storyId, { status })
+      await updateStoryStatus(storyId, status)
     } catch (e) {
       console.error('Failed to update status', e)
     }

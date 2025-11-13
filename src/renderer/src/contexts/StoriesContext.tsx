@@ -18,6 +18,7 @@ import {
   FeatureEditInput,
   ReorderPayload,
   StoryUpdate,
+  Status,
 } from 'thefactory-tools'
 
 // Define the context value type based on useStories return value
@@ -27,6 +28,7 @@ export type StoriesContextValue = {
   featuresById: Record<string, Feature>
   createStory: (updates: StoryCreateInput) => Promise<Story | undefined>
   updateStory: (storyId: string, updates: StoryEditInput) => Promise<Story | undefined>
+  updateStoryStatus: (storyId: string, status: Status) => Promise<Story | undefined>
   deleteStory: (storyId: string) => Promise<void>
   addFeature: (storyId: string, updates: FeatureCreateInput) => Promise<Story | undefined>
   updateFeature: (
@@ -375,6 +377,26 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
     },
     [activeProject, normalizeDependency],
   )
+  const updateStoryStatus = useCallback(
+    async (storyId: string, status: Status): Promise<Story | undefined> => {
+      if (activeProject) {
+        const s = await storiesService.updateStoryStatus(activeProject.id, storyId, status)
+        if (s) {
+          updateStories([
+            {
+              storyId: s.id,
+              projectId: activeProject.id,
+              isDelete: false,
+              story: s,
+              project: activeProject,
+            },
+          ])
+        }
+      }
+      return
+    },
+    [activeProject],
+  )
 
   const deleteStory = useCallback(
     async (storyId: string): Promise<void> => {
@@ -529,6 +551,7 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
       featuresById,
       createStory,
       updateStory,
+      updateStoryStatus,
       deleteStory,
       addFeature,
       updateFeature,
@@ -545,6 +568,7 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
       featuresById,
       createStory,
       updateStory,
+      updateStoryStatus,
       deleteStory,
       addFeature,
       updateFeature,

@@ -3,6 +3,7 @@ import type {
   FeatureCreateInput,
   FeatureEditInput,
   ReorderPayload,
+  Status,
   Story,
   StoryCreateInput,
   StoryEditInput,
@@ -46,6 +47,11 @@ export type StoriesService = {
     projectId: string,
     storyId: string,
     patch: StoryEditInput,
+  ) => Promise<Story | undefined>
+  updateStoryStatus: (
+    projectId: string,
+    storyId: string,
+    status: Status,
   ) => Promise<Story | undefined>
   deleteStory: (projectId: string, storyId: string) => Promise<void>
   getFeature: (projectId: string, featureId: string) => Promise<Feature | undefined>

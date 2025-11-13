@@ -196,7 +196,6 @@ export default function CoverageReport({ data }: { data: CoverageResult }) {
       const created = await createStory({
         title: 'TESTING',
         description: 'Ongoing Testing improvements',
-        status: '-',
       })
       return created?.id
     } catch (e) {

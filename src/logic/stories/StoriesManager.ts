@@ -8,6 +8,7 @@ import {
   FeatureEditInput,
   ProjectSpec,
   ReorderPayload,
+  Status,
   Story,
   StoryChangeHandler,
   StoryCreateInput,
@@ -45,6 +46,8 @@ export default class StoriesManager extends BaseManager {
       this.createStory(projectId, input)
     handlers[IPC_HANDLER_KEYS.STORIES_UPDATE] = ({ projectId, storyId, patch }) =>
       this.updateStory(projectId, storyId, patch)
+    handlers[IPC_HANDLER_KEYS.STORIES_UPDATE_STATUS] = ({ projectId, storyId, status }) =>
+      this.updateStoryStatus(projectId, storyId, status)
     handlers[IPC_HANDLER_KEYS.STORIES_DELETE] = ({ projectId, storyId }) =>
       this.deleteStory(projectId, storyId)
     handlers[IPC_HANDLER_KEYS.STORIES_FEATURE_GET] = ({ projectId, storyId, featureId }) =>
@@ -104,6 +107,14 @@ export default class StoriesManager extends BaseManager {
   ): Promise<Story | undefined> {
     const tools = await this.__getTools(projectId)
     return await tools?.updateStory(storyId, patch)
+  }
+  async updateStoryStatus(
+    projectId: string,
+    storyId: string,
+    status: Status,
+  ): Promise<Story | undefined> {
+    const tools = await this.__getTools(projectId)
+    return await tools?.updateStoryStatus(storyId, status)
   }
 
   async deleteStory(projectId: string, storyId: string): Promise<ProjectSpec | undefined> {

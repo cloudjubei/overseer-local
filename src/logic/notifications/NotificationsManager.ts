@@ -6,6 +6,9 @@ import SettingsManager from '../settings/SettingsManager'
 import BaseManager from '../BaseManager'
 import type { NotificationCategory } from '../../types/notifications'
 
+// If true, read notifications are removed from storage instead of kept as read
+const DELETE_READ_NOTIFICATIONS = true
+
 export default class NotificationsManager extends BaseManager {
   private storages: Record<string, NotificationsStorage>
   private settingsManager: SettingsManager
@@ -109,11 +112,22 @@ export default class NotificationsManager extends BaseManager {
   }
   markAllNotificationsAsRead(projectId: string): void {
     const storage = this.__getStorage(projectId)
-    storage.markAllAsRead()
+    if (DELETE_READ_NOTIFICATIONS) {
+      try {
+        const unread = storage.getUnread()
+        for (const n of unread) storage.delete(n.id)
+      } catch {}
+    } else {
+      storage.markAllAsRead()
+    }
   }
   markNotificationAsRead(projectId: string, id: string): void {
     const storage = this.__getStorage(projectId)
-    storage.markAsRead(id)
+    if (DELETE_READ_NOTIFICATIONS) {
+      storage.delete(id)
+    } else {
+      storage.markAsRead(id)
+    }
   }
   deleteAllNotifications(projectId: string): void {
     const storage = this.__getStorage(projectId)

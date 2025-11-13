@@ -98,7 +98,10 @@ typings/
 out/
 dist/
 
-
 # APP SPECIFIC
 chats/
 .factory/
+
+# Vendorized build artifacts
+vendor/
+package.json.vendored-backup.json

@@ -18,7 +18,10 @@
     "build:unpack": "npm run build && electron-builder --dir",
     "build:win": "npm run build && electron-builder --win",
     "build:mac": "electron-vite build && electron-builder --mac",
-    "build:linux": "electron-vite build && electron-builder --linux"
+    "build:linux": "electron-vite build && electron-builder --linux",
+    "build:mac:vendor": "node scripts/vendorize.js mac",
+    "build:win:vendor": "node scripts/vendorize.js win",
+    "build:linux:vendor": "node scripts/vendorize.js linux"
   },
   "keywords": [],
   "author": {

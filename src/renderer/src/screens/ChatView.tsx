@@ -22,6 +22,7 @@ import SegmentedControl from '@renderer/components/ui/SegmentedControl'
 import { useChatUnread } from '@renderer/hooks/useChatUnread'
 import DotBadge from '@renderer/components/ui/DotBadge'
 import { getChatContextPath, getChatContextFromFilename } from 'thefactory-tools/utils'
+import { useNotifications } from '@renderer/hooks/useNotifications'
 
 function prettyTopicName(topic?: string): string {
   if (!topic) return 'Topic'
@@ -92,6 +93,7 @@ export default function ChatView() {
   const { getChat, chats, chatsByProjectId } = useChats()
   const { runsHistory } = useAgents()
   const { hasUnreadForProject } = useChatUnread()
+  const { markNotificationsByMetadata } = useNotifications()
 
   // Helpers for titles
   const getProjectTitle = (id?: string) => {
@@ -243,6 +245,16 @@ export default function ChatView() {
       // ignore storage errors
     }
   }, [selectedContext, activeProjectId])
+
+  // When opening/switching chats, mark only matching chat notifications as read (which will delete them in main)
+  useEffect(() => {
+    if (!selectedContext || !activeProjectId) return
+    try {
+      const rawPath = getChatContextPath(selectedContext).replace(/\.json$/, '')
+      const actionUrl = `#chat/${rawPath}`
+      void markNotificationsByMetadata({ actionUrl }, { category: 'chat_messages' })
+    } catch (_) {}
+  }, [selectedContext, activeProjectId, markNotificationsByMetadata])
 
   // Seed from agent run history when switching to a run context
   useEffect(() => {

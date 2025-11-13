@@ -28,7 +28,7 @@ export default function BoardView({ stories }: Props) {
   const [canScrollRight, setCanScrollRight] = useState(false)
   const { project } = useActiveProject()
   const { navigateStoryDetails } = useNavigator()
-  const { updateStory } = useStories()
+  const { updateStory, updateStoryStatus } = useStories()
 
   const grouped = useMemo(() => {
     const map: Record<Status, Story[]> = { '+': [], '~': [], '-': [], '?': [], '=': [] }
@@ -73,7 +73,7 @@ export default function BoardView({ stories }: Props) {
     const story = stories.find((t) => t.id === fromId)
     if (!story || story.status === status) return
     try {
-      await updateStory(fromId, { status })
+      await updateStoryStatus(fromId, status)
     } catch (err) {
       console.error('Failed to move story', err)
       alert('Failed to move story')
@@ -237,7 +237,7 @@ export default function BoardView({ stories }: Props) {
                     showStatus={false}
                     onStatusChange={async (next) => {
                       try {
-                        await updateStory(t.id, { status: next })
+                        await updateStoryStatus(t.id, next)
                       } catch (err) {
                         console.error('Failed to update status', err)
                       }

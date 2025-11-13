@@ -46,6 +46,8 @@ const STORIES_API = {
     ipcRenderer.invoke(IPC_HANDLER_KEYS.STORIES_CREATE, { projectId, input }),
   updateStory: (projectId, storyId, patch) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.STORIES_UPDATE, { projectId, storyId, patch }),
+  updateStoryStatus: (projectId, storyId, status) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.STORIES_UPDATE_STATUS, { projectId, storyId, status }),
   deleteStory: (projectId, storyId) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.STORIES_DELETE, { projectId, storyId }),
   getFeature: (projectId, featureId) =>

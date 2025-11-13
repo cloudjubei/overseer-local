@@ -50,7 +50,7 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
   const { project, projectId } = useActiveProject()
   const {
     storiesById,
-    updateStory,
+    updateStoryStatus,
     updateFeature,
     reorderFeatures,
     getBlockers,
@@ -149,7 +149,7 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
 
   const handleStoryStatusChange = async (storyId: string, status: Status) => {
     try {
-      await updateStory(storyId, { status })
+      await updateStoryStatus(storyId, status)
     } catch (e) {
       console.error('Failed to update status', e)
     }

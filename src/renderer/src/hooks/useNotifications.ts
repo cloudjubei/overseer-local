@@ -1,10 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { notificationsService } from '@renderer/services/notificationsService'
-import type {
-  Notification,
-  NotificationMetadata,
-  NotificationCategory,
-} from 'src/types/notifications'
+import type { Notification, NotificationMetadata, NotificationCategory } from 'src/types/notifications'
 import { settingsService } from '@renderer/services/settingsService'
 import { useProjectContext } from '@renderer/contexts/ProjectContext'
 import { useProjectsGroups } from '@renderer/contexts/ProjectsGroupsContext'
@@ -55,7 +51,6 @@ export function useNotifications() {
     }
   }, [])
 
-  // Load/refresh prefs when active project changes or settings change
   useEffect(() => {
     if (activeProject?.id) void loadPrefs(activeProject.id)
   }, [activeProject?.id, loadPrefs])
@@ -97,25 +92,17 @@ export function useNotifications() {
   }, [runsActive])
 
   // Badge state computed from notifications + running/thinking
-  const [badgeStateByProject, setBadgeStateByProject] = useState<Record<string, ProjectBadgeState>>(
-    {},
-  )
+  const [badgeStateByProject, setBadgeStateByProject] = useState<Record<string, ProjectBadgeState>>({})
 
   const recomputeBadgeStates = useCallback(async () => {
     try {
       const ids = projects.map((p) => p.id)
       const recentByProject = await Promise.all(
-        ids.map(async (pid) => ({
-          pid,
-          items: await notificationsService.getRecentNotifications(pid),
-        })),
+        ids.map(async (pid) => ({ pid, items: await notificationsService.getRecentNotifications(pid) })),
       )
       const next: Record<string, ProjectBadgeState> = {}
       for (const { pid, items } of recentByProject) {
-        const unread = { agent_runs: 0, chat_messages: 0, git_changes: 0 } as Record<
-          NotificationCategory,
-          number
-        >
+        const unread = { agent_runs: 0, chat_messages: 0, git_changes: 0 } as Record<NotificationCategory, number>
         for (const n of items || []) {
           if (n.read) continue
           if (n.category in unread) unread[n.category as NotificationCategory] += 1
@@ -194,6 +181,48 @@ export function useNotifications() {
     }
   }, [])
 
+  // Generic helpers to mark notifications as read
+  const markNotificationsByIds = useCallback(
+    async (ids: string[], opts?: { projectId?: string }) => {
+      const pid = opts?.projectId || activeProject?.id
+      if (!pid || !ids || ids.length === 0) return
+      for (const id of ids) {
+        try {
+          await notificationsService.markNotificationAsRead(pid, id)
+        } catch (_) {}
+      }
+    },
+    [activeProject?.id],
+  )
+
+  const markNotificationsByMetadata = useCallback(
+    async (
+      match: Record<string, any>,
+      opts?: { category?: NotificationCategory; projectId?: string },
+    ) => {
+      const pid = opts?.projectId || activeProject?.id
+      if (!pid) return
+      try {
+        const recent: Notification[] = await notificationsService.getRecentNotifications(pid)
+        const targets = (recent || []).filter((n) => {
+          if (n.read) return false
+          if (opts?.category && n.category !== opts.category) return false
+          const md = n.metadata || {}
+          for (const [k, v] of Object.entries(match || {})) {
+            if (md[k] !== v) return false
+          }
+          return true
+        })
+        for (const n of targets) {
+          try {
+            await notificationsService.markNotificationAsRead(pid, n.id)
+          } catch (_) {}
+        }
+      } catch (_) {}
+    },
+    [activeProject?.id],
+  )
+
   return {
     isNotificationsEnabled,
     isBadgeEnabled,
@@ -201,6 +230,8 @@ export function useNotifications() {
     getProjectBadgeState,
     getGroupBadgeState,
     enableNotifications,
+    markNotificationsByIds,
+    markNotificationsByMetadata,
   }
 }
 
@@ -208,23 +239,21 @@ export function NotificationClickHandler() {
   const nav = useNavigator()
 
   useEffect(() => {
-    const unsubscribe = window.notificationsService.onOpenNotification(
-      (metadata: NotificationMetadata) => {
-        if (metadata.storyId) {
-          nav.navigateStoryDetails(metadata.storyId, metadata.featureId)
-        } else if (metadata.chatId) {
-          nav.navigateView('Chat')
-        } else if (metadata.documentPath) {
-          nav.navigateView('Files')
-        } else if (metadata.actionUrl) {
-          try {
-            if (typeof metadata.actionUrl === 'string') {
-              window.location.hash = metadata.actionUrl
-            }
-          } catch (_) {}
-        }
-      },
-    )
+    const unsubscribe = window.notificationsService.onOpenNotification((metadata: NotificationMetadata) => {
+      if (metadata.storyId) {
+        nav.navigateStoryDetails(metadata.storyId, metadata.featureId)
+      } else if (metadata.chatId) {
+        nav.navigateView('Chat')
+      } else if (metadata.documentPath) {
+        nav.navigateView('Files')
+      } else if (metadata.actionUrl) {
+        try {
+          if (typeof metadata.actionUrl === 'string') {
+            window.location.hash = metadata.actionUrl
+          }
+        } catch (_) {}
+      }
+    })
 
     return unsubscribe
   }, [nav])
