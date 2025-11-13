@@ -35,6 +35,23 @@ function packToVendor(pkgDir, vendorDir) {
   return filename
 }
 
+function fileExists(p) {
+  try {
+    fs.accessSync(p)
+    return true
+  } catch (_) {
+    return false
+  }
+}
+
+function rimrafSync(p) {
+  try {
+    if (fileExists(p)) {
+      fs.rmSync(p, { recursive: true, force: true })
+    }
+  } catch (_) {}
+}
+
 function main() {
   const platform = (process.argv[2] || '').toLowerCase()
   const targets = { mac: '--mac', win: '--win', windows: '--win', linux: '--linux' }
@@ -47,12 +64,16 @@ function main() {
   const projectRoot = process.cwd()
   const pkgPath = path.join(projectRoot, 'package.json')
   const backupPath = path.join(projectRoot, 'package.json.vendored-backup.json')
+  const lockPath = path.join(projectRoot, 'package-lock.json')
   const vendorDir = path.join(projectRoot, 'vendor')
   fs.mkdirSync(vendorDir, { recursive: true })
 
   const original = fs.readFileSync(pkgPath, 'utf8')
   const pkg = JSON.parse(original)
   fs.writeFileSync(backupPath, original)
+
+  const hadOriginalLock = fileExists(lockPath)
+  const originalLock = hadOriginalLock ? fs.readFileSync(lockPath, 'utf8') : null
 
   const depSources = pkg.dependencies || {}
   const devDepSources = pkg.devDependencies || {}
@@ -105,7 +126,29 @@ function main() {
     try {
       fs.writeFileSync(pkgPath, original)
       console.log('package.json restored.')
-      run('npm install --no-audit --no-fund', { cwd: projectRoot })
+      // Restore or remove lockfile to avoid inconsistent state
+      if (hadOriginalLock && typeof originalLock === 'string') {
+        fs.writeFileSync(lockPath, originalLock)
+        console.log('package-lock.json restored.')
+      } else {
+        rimrafSync(lockPath)
+        console.log('package-lock.json removed (no original to restore).')
+      }
+
+      // Ensure a clean install by removing node_modules
+      rimrafSync(path.join(projectRoot, 'node_modules'))
+
+      // Prefer npm ci when lockfile is restored, fallback to install otherwise
+      try {
+        if (hadOriginalLock && typeof originalLock === 'string') {
+          run('npm ci --no-audit --no-fund', { cwd: projectRoot })
+        } else {
+          run('npm install --no-audit --no-fund', { cwd: projectRoot })
+        }
+      } catch (e) {
+        console.warn('npm ci/install failed, retrying with npm install...')
+        run('npm install --no-audit --no-fund', { cwd: projectRoot })
+      }
     } catch (e) {
       console.error('Failed to restore dev dependencies:', e && e.message ? e.message : e)
     }
