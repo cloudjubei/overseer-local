@@ -223,6 +223,36 @@ export function useNotifications() {
     [activeProject?.id],
   )
 
+  const markNotificationsByMetadataUntil = useCallback(
+    async (
+      match: Record<string, any>,
+      untilTs: number,
+      opts?: { category?: NotificationCategory; projectId?: string },
+    ) => {
+      const pid = opts?.projectId || activeProject?.id
+      if (!pid) return
+      try {
+        const recent: Notification[] = await notificationsService.getRecentNotifications(pid)
+        const targets = (recent || []).filter((n) => {
+          if (n.read) return false
+          if (opts?.category && n.category !== opts.category) return false
+          if (typeof n.timestamp !== 'number' || n.timestamp > untilTs) return false
+          const md = n.metadata || {}
+          for (const [k, v] of Object.entries(match || {})) {
+            if (md[k] !== v) return false
+          }
+          return true
+        })
+        for (const n of targets) {
+          try {
+            await notificationsService.markNotificationAsRead(pid, n.id)
+          } catch (_) {}
+        }
+      } catch (_) {}
+    },
+    [activeProject?.id],
+  )
+
   return {
     isNotificationsEnabled,
     isBadgeEnabled,
@@ -232,6 +262,7 @@ export function useNotifications() {
     enableNotifications,
     markNotificationsByIds,
     markNotificationsByMetadata,
+    markNotificationsByMetadataUntil,
   }
 }
 

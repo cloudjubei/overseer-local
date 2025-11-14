@@ -23,6 +23,7 @@ import { Modal } from '@renderer/components/ui/Modal'
 import { useChatUnread } from '@renderer/hooks/useChatUnread'
 import { useActiveProject } from '@renderer/contexts/ProjectContext'
 import { getChatContextPath } from 'thefactory-tools/utils'
+import { useNotifications } from '@renderer/hooks/useNotifications'
 
 export type ChatSidebarProps = {
   context: ChatContext
@@ -65,6 +66,7 @@ export default function ChatSidebar({
   const { navigateView } = useNavigator()
   const { markReadByKey } = useChatUnread()
   const { projectId: activeProjectId } = useActiveProject()
+  const { markNotificationsByMetadata } = useNotifications()
 
   const [chat, setChat] = useState<ChatState | undefined>(undefined)
   const [effectivePrompt, setEffectivePrompt] = useState<string>('')
@@ -99,8 +101,8 @@ export default function ChatSidebar({
   }, [context, getChat])
 
   // Track whether the user is at the bottom to decide read state
-  const atBottomRef = useRef<boolean>(true)
-  const [atBottom, setAtBottom] = useState<boolean>(true)
+  const atBottomRef = useRef<boolean>(false)
+  const [atBottom, setAtBottom] = useState<boolean>(false)
   useEffect(() => {
     atBottomRef.current = atBottom
   }, [atBottom])
@@ -127,25 +129,23 @@ export default function ChatSidebar({
     markReadByKey(key, iso)
   }, [chat?.key, computeLatestIso, markReadByKey])
 
-  // Ensure that after the chat loads or updates, if the user is at bottom, we mark the latest as read.
-  // This covers the case where MessageList triggers read before the chat is loaded, and on new incoming messages
-  // while the user is already scrolled to the bottom.
-  useEffect(() => {
-    if (!chat?.key) return
-    if (!atBottomRef.current) return
-    // Use a microtask to avoid clobbering during initial render
-    Promise.resolve().then(() => markLatestAsRead())
-  }, [chat?.key, chat?.chat?.updatedAt, chat?.chat?.messages?.length, markLatestAsRead])
+  // Clear any unread chat message notifications for this chat (generic notifications API)
+  const clearChatNotifications = useCallback(() => {
+    const key = chat?.key
+    if (!key) return
+    void markNotificationsByMetadata({ chatKey: key }, { category: 'chat_messages' })
+  }, [chat?.key, markNotificationsByMetadata])
 
-  // When the user scrolls to bottom, mark as read
+  // When the user scrolls to bottom, mark as read and clear notifications
   const handleAtBottomChange = useCallback(
     (isBottom: boolean) => {
       setAtBottom(isBottom)
       if (isBottom) {
         markLatestAsRead()
+        clearChatNotifications()
       }
     },
-    [markLatestAsRead],
+    [markLatestAsRead, clearChatNotifications],
   )
 
   // When we detect the latest has been viewed (e.g., new message arrives while at bottom)
@@ -160,8 +160,9 @@ export default function ChatSidebar({
         return computed || iso || new Date().toISOString()
       })()
       markReadByKey(key, freshest)
+      clearChatNotifications()
     },
-    [chat?.key, computeLatestIso, markReadByKey],
+    [chat?.key, computeLatestIso, markReadByKey, clearChatNotifications],
   )
 
   const isThinking = chat?.isThinking || false
@@ -468,7 +469,7 @@ export default function ChatSidebar({
           {isSettingsOpen && (
             <div
               ref={dropdownRef}
-              className="absolute top-full right-3 left-3 mt-2 w-auto max-w-[520px] ml-auto rounded-md border border-[var(--border-default)] bg-[var(--surface-raised)] shadow-xl z-50"
+              className="absolute top-full right-3 left-3 mt-2 w-auto max-w-[520px] ml-auto rounded-md border border-[var(--border-subtle)] bg-[var(--surface-raised)] shadow-xl z-50"
               role="menu"
               aria-label="Chat Settings"
             >

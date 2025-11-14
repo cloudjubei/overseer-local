@@ -26,7 +26,8 @@ export default class ChatsManager extends BaseManager {
   }
 
   async init(): Promise<void> {
-    this.chatSettings = await this.tools.init()
+    await this.tools.init()
+    this.chatSettings = await this.tools.getChatSettings()
     this.tools.subscribe(async (chatUpdate) => {
       if (this.window) {
         this.window.webContents.send(IPC_HANDLER_KEYS.CHATS_SUBSCRIBE, chatUpdate)

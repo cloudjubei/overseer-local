@@ -37,6 +37,15 @@ function messageTimestamp(msg: ChatMessage): string | undefined {
   return undefined
 }
 
+// Only assistant messages should count as unread
+function isAssistant(msg: ChatMessage): boolean {
+  return ((msg as any)?.completionMessage?.role) === 'assistant'
+}
+function assistantTimestamp(msg: ChatMessage): string | undefined {
+  if (!isAssistant(msg)) return undefined
+  return messageTimestamp(msg)
+}
+
 export type UseChatUnread = {
   // Set of chat keys that are currently unread
   unreadKeys: Set<string>
@@ -45,7 +54,7 @@ export type UseChatUnread = {
   hasUnreadForProject: (projectId?: string) => boolean
   markReadByKey: (chatKey: string, readTime?: string) => void
   markReadByContext: (ctx: ChatContext, readTime?: string) => void
-  // Count of unread messages for a specific chat key
+  // Count of unread messages for a specific chat key (assistant messages only)
   getUnreadCountForKey: (chatKey: string) => number
   // Last-read ISO timestamp for a specific chat key (if any)
   getLastReadForKey: (chatKey: string) => string | undefined
@@ -64,24 +73,16 @@ export function useChatUnread(): UseChatUnread {
           const chat = c.chat
           const lastRead = readLastRead(chatKey)
           const msgs = chat.messages || []
-          if (!msgs.length) return 0
+          const assistantMsgs = msgs.filter(isAssistant)
+          if (assistantMsgs.length === 0) return 0
           if (!lastRead) {
-            // Never opened: count messages as unread (best effort)
-            return msgs.length
+            // Never opened: count assistant messages as unread (best effort)
+            return assistantMsgs.length
           }
           let count = 0
-          for (const m of msgs) {
-            const ts = messageTimestamp(m)
-            if (!ts) {
-              // If no timestamp, assume it might be unread only if chat updatedAt is newer
-              continue
-            }
-            if (ts.localeCompare(lastRead) > 0) count += 1
-          }
-          // Fallback: if none counted but chat updated suggests newer, mark as 1
-          const updatedAt = chat.updatedAt || chat.createdAt || ''
-          if (count === 0 && updatedAt && lastRead && updatedAt.localeCompare(lastRead) > 0) {
-            return 1
+          for (const m of assistantMsgs) {
+            const ts = assistantTimestamp(m)
+            if (ts && ts.localeCompare(lastRead) > 0) count += 1
           }
           return count
         }
@@ -97,15 +98,23 @@ export function useChatUnread(): UseChatUnread {
       for (const c of arr) {
         const key = c.key
         const chat = c.chat
-        const updatedAt = chat.updatedAt || chat.createdAt || ''
-        if (!updatedAt) continue
+        const msgs = chat.messages || []
+        // Find last assistant message iso (if any)
+        let lastAssistantIso: string | undefined
+        for (let i = msgs.length - 1; i >= 0; i--) {
+          const ts = assistantTimestamp(msgs[i])
+          if (ts) {
+            lastAssistantIso = ts
+            break
+          }
+        }
+        if (!lastAssistantIso) continue
         const lastRead = readLastRead(key)
         if (!lastRead) {
-          const hasAny = (chat.messages || []).length > 0
-          if (hasAny) keys.add(key)
+          keys.add(key)
           continue
         }
-        if (updatedAt.localeCompare(lastRead) > 0) {
+        if (lastAssistantIso.localeCompare(lastRead) > 0) {
           keys.add(key)
         }
       }
@@ -118,15 +127,23 @@ export function useChatUnread(): UseChatUnread {
     for (const [projectId, arr] of Object.entries(chatsByProjectId)) {
       let n = 0
       for (const c of arr) {
-        const updatedAt = c.chat.updatedAt || c.chat.createdAt || ''
-        if (!updatedAt) continue
+        const msgs = c.chat.messages || []
+        // Find last assistant message iso
+        let lastAssistantIso: string | undefined
+        for (let i = msgs.length - 1; i >= 0; i--) {
+          const ts = assistantTimestamp(msgs[i])
+          if (ts) {
+            lastAssistantIso = ts
+            break
+          }
+        }
+        if (!lastAssistantIso) continue
         const lastRead = readLastRead(c.key)
         if (!lastRead) {
-          const hasAny = (c.chat.messages || []).length > 0
-          if (hasAny) n += 1
+          n += 1
           continue
         }
-        if (updatedAt.localeCompare(lastRead) > 0) n += 1
+        if (lastAssistantIso.localeCompare(lastRead) > 0) n += 1
       }
       map.set(projectId, n)
     }

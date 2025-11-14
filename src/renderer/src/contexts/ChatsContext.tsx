@@ -114,7 +114,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
   const [chats, setChats] = useState<Record<string, ChatState>>({})
   const [chatsByProjectId, setChatsByProjectId] = useState<Record<string, ChatState[]>>({})
   const [allChatSettings, setAllChatSettings] = useState<ChatsSettings | undefined>(undefined)
-  // Track last assistant message index notified per chat key to avoid duplicates
+  // Track last assistant message index notified per chat key to avoid duplicates/retroactive notices
   const lastAssistantNotifiedRef = useRef<Record<string, number>>({})
 
   // Helper: safely update chatsByProjectId for a given chat state
@@ -190,6 +190,21 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
             }))
             byProject[project.id] = chatStates
             for (const c of chatStates) all[c.key] = c
+            // Initialize baseline assistant index so we do not notify for historical messages
+            for (const c of chatStates) {
+              try {
+                const msgs = c.chat?.messages || []
+                let lastAssistantIdx = -1
+                for (let i = msgs.length - 1; i >= 0; i--) {
+                  const role = (msgs[i] as any)?.completionMessage?.role
+                  if (role === 'assistant') {
+                    lastAssistantIdx = i
+                    break
+                  }
+                }
+                lastAssistantNotifiedRef.current[c.key] = lastAssistantIdx
+              } catch (_) {}
+            }
           } catch (e) {
             console.error(`Failed to list chats for project ${project.id}`, e)
           }
@@ -231,7 +246,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
           // Fire OS notification for new assistant messages (debounced per chat)
           try {
             const msgs = chatUpdate.chat?.messages || []
-            // find last assistant message index
+            // find last assistant message index in the updated chat
             let lastAssistantIdx = -1
             for (let i = msgs.length - 1; i >= 0; i--) {
               const role = (msgs[i] as any)?.completionMessage?.role
@@ -241,8 +256,24 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
               }
             }
             if (lastAssistantIdx >= 0) {
-              const prevIdx = lastAssistantNotifiedRef.current[key] ?? -1
-              if (lastAssistantIdx > prevIdx) {
+              // Previous assistant index from previous chat state
+              const prevChat = prev[key]?.chat
+              let prevAssistantIdx = -1
+              if (prevChat) {
+                const prevMsgs = prevChat.messages || []
+                for (let i = prevMsgs.length - 1; i >= 0; i--) {
+                  const role = (prevMsgs[i] as any)?.completionMessage?.role
+                  if (role === 'assistant') {
+                    prevAssistantIdx = i
+                    break
+                  }
+                }
+              }
+              const seenIdx = lastAssistantNotifiedRef.current[key] ?? -1
+              const baseline = Math.max(prevAssistantIdx, seenIdx)
+              const isLatestAssistant = (msgs[lastAssistantIdx] as any)?.completionMessage?.role === 'assistant'
+
+              if (isLatestAssistant && lastAssistantIdx > baseline) {
                 lastAssistantNotifiedRef.current[key] = lastAssistantIdx
 
                 // Build notification content
@@ -298,16 +329,20 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
 
                 const pid = ctx.projectId || projectId
                 if (pid) {
+                  const chatKey = key
                   void notificationsService
                     .create(pid, {
                       type: 'info',
                       category: 'chat_messages',
                       title,
                       message,
-                      metadata: { actionUrl },
+                      metadata: { actionUrl, chatKey },
                     })
                     .catch(() => {})
                 }
+              } else {
+                // Update baseline even if we didn't notify to prevent retroactive notifications later
+                lastAssistantNotifiedRef.current[key] = Math.max(baseline, lastAssistantIdx)
               }
             }
           } catch (_) {

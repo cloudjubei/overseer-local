@@ -11,6 +11,7 @@ files:
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
   - '!vendor/**'
   - '!package.json.vendored-backup.json'
+asar: false
 asarUnpack:
   - resources/**
 win:
