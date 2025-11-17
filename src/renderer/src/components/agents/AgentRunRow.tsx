@@ -17,6 +17,7 @@ import { Button } from '../ui/Button'
 import { formatDate, formatHmsCompact, formatTime } from '../../utils/time'
 import { useAgents } from '../../contexts/AgentsContext'
 import DotBadge from '../ui/DotBadge'
+import { useNotifications } from '@renderer/hooks/useNotifications'
 
 function useConversationCounts(run: AgentRunHistory) {
   return useMemo(() => {
@@ -77,6 +78,7 @@ export default function AgentRunRow({
   const { total, completed } = useConversationCounts(run)
   const { duration, thinking } = useDurationTimers(run)
   const { isRunUnread, markRunSeen } = useAgents()
+  const { markNotificationsByMetadata } = useNotifications()
   const unread = isRunUnread(run)
 
   const [isAnimating, setIsAnimating] = useState(false)
@@ -119,16 +121,22 @@ export default function AgentRunRow({
     [run.price, prompt, completion],
   )
 
+  const acknowledgeRun = () => {
+    if (unread && run.id) {
+      markRunSeen(run.id)
+      void markNotificationsByMetadata({ runId: run.id }, {
+        category: 'agent_runs',
+        projectId: run.projectId,
+      })
+    }
+  }
+
   return (
     <tr
       id={`run-${run.id ?? 'unknown'}`}
       className="border-t border-neutral-200 dark:border-neutral-800 group"
-      onMouseEnter={() => {
-        if (unread && run.id) markRunSeen(run.id)
-      }}
-      onFocus={() => {
-        if (unread && run.id) markRunSeen(run.id)
-      }}
+      onMouseEnter={acknowledgeRun}
+      onFocus={acknowledgeRun}
     >
       {/* Unseen-completed red dot indicator to the left of the first column */}
       <td className="px-3 py-2 leading-tight w-4">

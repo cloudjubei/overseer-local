@@ -18,10 +18,7 @@
     "build:unpack": "npm run build && electron-builder --dir",
     "build:win": "npm run build && electron-builder --win",
     "build:mac": "electron-vite build && electron-builder --mac",
-    "build:linux": "electron-vite build && electron-builder --linux",
-    "build:mac:vendor": "node scripts/vendorize.js mac",
-    "build:win:vendor": "node scripts/vendorize.js win",
-    "build:linux:vendor": "node scripts/vendorize.js linux"
+    "build:linux": "electron-vite build && electron-builder --linux"
   },
   "keywords": [],
   "author": {
@@ -34,7 +31,9 @@
     "@electron-toolkit/utils": "^4.0.0",
     "@radix-ui/react-select": "^2.2.6",
     "@radix-ui/react-slot": "^1.2.3",
+    "archiver-utils": "^5.0.2",
     "clsx": "^2.1.1",
+    "color-name": "^2.1.0",
     "electron-updater": "^6.3.9",
     "prismjs": "^1.30.0",
     "react-markdown": "^10.1.0",
@@ -44,6 +43,7 @@
     "rehype-sanitize": "^6.0.0",
     "remark-gfm": "^4.0.1",
     "remark-math": "^6.0.0",
+    "sharp": "^0.34.5",
     "tailwind-merge": "^3.3.1",
     "thefactory-db": "file:../thefactory-db",
     "thefactory-tools": "file:../thefactory-tools",

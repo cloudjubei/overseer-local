@@ -370,6 +370,9 @@ const GIT_API = {
   reset: (projectId, paths) => ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_RESET, { projectId, paths }),
   commit: (projectId, input) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_COMMIT, { projectId, input }),
+  getFileContent: (projectId, path, ref) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_GET_FILE_CONTENT, { projectId, path, ref }),
+  resetAll: (projectId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_RESET_ALL, { projectId }),
   subscribeToMonitorUpdates: (callback) => {
     const listener = (_event, payload) => callback(payload)
     ipcRenderer.on(IPC_HANDLER_KEYS.GIT_MONITOR_UPDATE, listener)

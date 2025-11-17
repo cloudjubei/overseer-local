@@ -74,6 +74,8 @@ export type GitService = {
   unstage: (projectId: string, paths: string[]) => Promise<GitOpResult | undefined>
   reset: (projectId: string, paths: string[]) => Promise<GitOpResult | undefined>
   commit: (projectId: string, input: GitCommitInput) => Promise<GitOpResult | undefined>
+  getFileContent: (projectId: string, path: string, ref: string) => Promise<string>
+  resetAll: (projectId: string) => Promise<GitOpResult | undefined>
 }
 
 export const gitService: GitService = {

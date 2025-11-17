@@ -1,4 +1,4 @@
-import {
+import type {
   DocumentInput,
   DocumentWithScore,
   Entity,
@@ -6,7 +6,7 @@ import {
   EntityWithScore,
   MatchParams,
   SearchParams,
-} from 'thefactory-db/dist/types'
+} from 'thefactory-db'
 
 export type DbStatus = {
   connected: boolean
