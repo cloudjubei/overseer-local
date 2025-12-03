@@ -11,7 +11,7 @@ export type NotificationsService = {
   sendOs: (data: any) => Promise<void>
   subscribe: (callback: (payload?: any) => void) => () => void
   getRecentNotifications: (projectId: string) => Promise<Notification[]>
-  getUnreadNotificationsCount: (projectId: string) => Promise<number>
+  getUnreadNotifications: (projectId: string) => Promise<Notification[]>
   markAllNotificationsAsRead: (projectId: string) => Promise<void>
   markNotificationAsRead: (projectId: string, id: string) => Promise<void>
   deleteAllNotifications: (projectId: string) => Promise<void>

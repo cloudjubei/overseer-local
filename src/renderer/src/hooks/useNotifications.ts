@@ -1,6 +1,10 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { notificationsService } from '@renderer/services/notificationsService'
-import type { Notification, NotificationMetadata, NotificationCategory } from 'src/types/notifications'
+import type {
+  Notification,
+  NotificationMetadata,
+  NotificationCategory,
+} from 'src/types/notifications'
 import { settingsService } from '@renderer/services/settingsService'
 import { useProjectContext } from '@renderer/contexts/ProjectContext'
 import { useProjectsGroups } from '@renderer/contexts/ProjectsGroupsContext'
@@ -81,7 +85,6 @@ export function useNotifications() {
     [activeProject?.id, prefsByProject],
   )
 
-  // Running agents per project
   const runningByProject = useMemo(() => {
     const map = new Map<string, number>()
     for (const r of runsActive) {
@@ -91,29 +94,34 @@ export function useNotifications() {
     return map
   }, [runsActive])
 
-  // Badge state computed from notifications + running/thinking
-  const [badgeStateByProject, setBadgeStateByProject] = useState<Record<string, ProjectBadgeState>>({})
+  const [badgeStateByProject, setBadgeStateByProject] = useState<Record<string, ProjectBadgeState>>(
+    {},
+  )
 
   const recomputeBadgeStates = useCallback(async () => {
     try {
-      const ids = projects.map((p) => p.id)
-      const recentByProject = await Promise.all(
-        ids.map(async (pid) => ({ pid, items: await notificationsService.getRecentNotifications(pid) })),
+      const unreadByProject = await Promise.all(
+        projects.map(async (p) => {
+          const projectId = p.id
+          const unread = await notificationsService.getUnreadNotifications(projectId)
+
+          const agentRuns = unread.filter((n) => n.category === 'agent_runs')
+          const chatMessages = unread.filter((n) => n.category === 'chat_messages')
+          const gitChanges = unread.filter((n) => n.category === 'git_changes')
+
+          return { projectId, agentRuns, chatMessages, gitChanges }
+        }),
       )
       const next: Record<string, ProjectBadgeState> = {}
-      for (const { pid, items } of recentByProject) {
-        const unread = { agent_runs: 0, chat_messages: 0, git_changes: 0 } as Record<NotificationCategory, number>
-        for (const n of items || []) {
-          if (n.read) continue
-          if (n.category in unread) unread[n.category as NotificationCategory] += 1
-        }
-        next[pid] = {
-          agent_runs: { running: runningByProject.get(pid) || 0, unread: unread.agent_runs },
+
+      for (const { projectId, agentRuns, chatMessages, gitChanges } of unreadByProject) {
+        next[projectId] = {
+          agent_runs: { running: runningByProject.get(projectId) ?? 0, unread: agentRuns.length },
           chat_messages: {
-            unread: unread.chat_messages,
-            thinking: (thinkingCountByProject.get(pid) || 0) > 0,
+            unread: chatMessages.length,
+            thinking: (thinkingCountByProject.get(projectId) ?? 0) > 0,
           },
-          git_changes: { unread: unread.git_changes },
+          git_changes: { unread: gitChanges.length },
         }
       }
       setBadgeStateByProject(next)
@@ -130,7 +138,6 @@ export function useNotifications() {
     }
   }, [recomputeBadgeStates])
 
-  // Refresh when structural deps change
   useEffect(() => {
     void recomputeBadgeStates()
   }, [recomputeBadgeStates])
@@ -270,21 +277,23 @@ export function NotificationClickHandler() {
   const nav = useNavigator()
 
   useEffect(() => {
-    const unsubscribe = window.notificationsService.onOpenNotification((metadata: NotificationMetadata) => {
-      if (metadata.storyId) {
-        nav.navigateStoryDetails(metadata.storyId, metadata.featureId)
-      } else if (metadata.chatId) {
-        nav.navigateView('Chat')
-      } else if (metadata.documentPath) {
-        nav.navigateView('Files')
-      } else if (metadata.actionUrl) {
-        try {
-          if (typeof metadata.actionUrl === 'string') {
-            window.location.hash = metadata.actionUrl
-          }
-        } catch (_) {}
-      }
-    })
+    const unsubscribe = window.notificationsService.onOpenNotification(
+      (metadata: NotificationMetadata) => {
+        if (metadata.storyId) {
+          nav.navigateStoryDetails(metadata.storyId, metadata.featureId)
+        } else if (metadata.chatId) {
+          nav.navigateView('Chat')
+        } else if (metadata.documentPath) {
+          nav.navigateView('Files')
+        } else if (metadata.actionUrl) {
+          try {
+            if (typeof metadata.actionUrl === 'string') {
+              window.location.hash = metadata.actionUrl
+            }
+          } catch (_) {}
+        }
+      },
+    )
 
     return unsubscribe
   }, [nav])

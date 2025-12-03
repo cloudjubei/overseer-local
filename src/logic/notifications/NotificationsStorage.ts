@@ -1,6 +1,6 @@
 import AppStorage from '../settings/AppStorage'
 import type {
-  Notification,
+  Notification as AppNotification,
   NotificationCreateInput,
   NotificationUpdateInput,
   NotificationQuery,
@@ -13,7 +13,7 @@ export type NotificationsListener = () => void
 export default class NotificationsStorage {
   private projectId: string
   private appStorage: AppStorage
-  private notifications: Map<string, Notification>
+  private notifications: Map<string, AppNotification>
   private listeners: Set<NotificationsListener>
 
   constructor(projectId: string) {
@@ -36,7 +36,7 @@ export default class NotificationsStorage {
     try {
       const stored = this.appStorage.getItem(this.storageKey())
       if (stored) {
-        const data = JSON.parse(stored) as Notification[]
+        const data = JSON.parse(stored) as AppNotification[]
         this.notifications = new Map()
         data.forEach((notification) => {
           this.notifications.set(notification.id, notification)
@@ -67,8 +67,8 @@ export default class NotificationsStorage {
     })
   }
 
-  create(input: NotificationCreateInput): Notification {
-    const notification: Notification = {
+  create(input: NotificationCreateInput): AppNotification {
+    const notification: AppNotification = {
       id: this.generateId(),
       timestamp: Date.now(),
       type: input.type as NotificationType,
@@ -86,18 +86,18 @@ export default class NotificationsStorage {
     return notification
   }
 
-  getById(id: string): Notification | null {
+  getById(id: string): AppNotification | null {
     return this.notifications.get(id) || null
   }
 
   update(
     id: string,
-    updates: NotificationUpdateInput & Partial<Notification>,
-  ): Notification | null {
+    updates: NotificationUpdateInput & Partial<AppNotification>,
+  ): AppNotification | null {
     const notification = this.notifications.get(id)
     if (!notification) return null
 
-    const updatedNotification: Notification = {
+    const updatedNotification: AppNotification = {
       ...notification,
       ...updates,
       metadata: updates.metadata
@@ -122,15 +122,15 @@ export default class NotificationsStorage {
     return existed
   }
 
-  markAsRead(id: string): Notification | null {
+  markAsRead(id: string): AppNotification | null {
     return this.update(id, { read: true })
   }
 
-  markAsUnread(id: string): Notification | null {
+  markAsUnread(id: string): AppNotification | null {
     return this.update(id, { read: false })
   }
 
-  markAllAsRead(): void {
+  markAllAsRead() {
     let hasChanges = false
     this.notifications.forEach((notification, id) => {
       if (!notification.read) {
@@ -145,7 +145,7 @@ export default class NotificationsStorage {
     }
   }
 
-  deleteAll(): void {
+  deleteAll() {
     if (this.notifications.size > 0) {
       this.notifications = new Map()
       this.saveToStorage()
@@ -153,7 +153,7 @@ export default class NotificationsStorage {
     }
   }
 
-  query(query: NotificationQuery = {}): Notification[] {
+  query(query: NotificationQuery = {}): AppNotification[] {
     let results = Array.from(this.notifications.values())
 
     if (query.filter) {
@@ -174,23 +174,23 @@ export default class NotificationsStorage {
     return results
   }
 
-  getAll(): Notification[] {
+  getAll(): AppNotification[] {
     return this.query()
   }
 
-  getUnread(): Notification[] {
+  getUnread(): AppNotification[] {
     return this.query({ filter: { read: false } })
   }
 
-  getByCategory(category: NotificationCategory): Notification[] {
+  getByCategory(category: NotificationCategory): AppNotification[] {
     return this.query({ filter: { category } })
   }
 
-  getByType(type: NotificationType): Notification[] {
+  getByType(type: NotificationType): AppNotification[] {
     return this.query({ filter: { type } })
   }
 
-  getRecent(hoursBack = 24): Notification[] {
+  getRecent(hoursBack = 24): AppNotification[] {
     const since = Date.now() - hoursBack * 60 * 60 * 1000
     return this.query({ filter: { since } })
   }
@@ -200,10 +200,6 @@ export default class NotificationsStorage {
     return () => {
       this.listeners.delete(listener)
     }
-  }
-
-  getUnreadCount(): number {
-    return Array.from(this.notifications.values()).filter((n) => !n.read).length
   }
 
   cleanup(olderThanDays = 30): number {
@@ -226,7 +222,7 @@ export default class NotificationsStorage {
   }
 
   private __matchesFilter(
-    notification: Notification,
+    notification: AppNotification,
     filter: NonNullable<NotificationQuery['filter']>,
   ): boolean {
     if (filter.type && notification.type !== filter.type) return false
@@ -238,9 +234,9 @@ export default class NotificationsStorage {
   }
 
   private __sortNotifications(
-    notifications: Notification[],
+    notifications: AppNotification[],
     sort: NonNullable<NotificationQuery['sort']>,
-  ): Notification[] {
+  ): AppNotification[] {
     return notifications.sort((a, b) => {
       let valueA: any
       let valueB: any

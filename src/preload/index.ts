@@ -161,8 +161,8 @@ const NOTIFICATIONS_API = {
   },
   getRecentNotifications: (projectId) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.NOTIFICATIONS_RECENT, { projectId }),
-  getUnreadNotificationsCount: (projectId) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.NOTIFICATIONS_UNREADCOUNT, { projectId }),
+  getUnreadNotifications: (projectId) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.NOTIFICATIONS_UNREAD, { projectId }),
   markAllNotificationsAsRead: (projectId) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.NOTIFICATIONS_MARKALLASREAD, { projectId }),
   markNotificationAsRead: (projectId, id) =>

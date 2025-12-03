@@ -129,12 +129,12 @@ export default function ChatSidebar({
     markReadByKey(key, iso)
   }, [chat?.key, computeLatestIso, markReadByKey])
 
-  // Clear any unread chat message notifications for this chat (generic notifications API)
   const clearChatNotifications = useCallback(() => {
     const key = chat?.key
     if (!key) return
-    void markNotificationsByMetadata({ chatKey: key }, { category: 'chat_messages' })
-  }, [chat?.key, markNotificationsByMetadata])
+    const projectId = chat.chat.context.projectId ?? activeProjectId
+    void markNotificationsByMetadata({ chatKey: key }, { category: 'chat_messages', projectId })
+  }, [chat?.key, chat?.chat?.context?.projectId, activeProjectId, markNotificationsByMetadata])
 
   // When the user scrolls to bottom, mark as read and clear notifications
   const handleAtBottomChange = useCallback(

@@ -165,7 +165,10 @@ export default function ChatView() {
       // 1. Handle hash navigation first
       const hashCtx = parseChatRouteFromHash(window.location.hash)
       if (hashCtx) {
-        if (!selectedContext || getChatContextPath(hashCtx) !== getChatContextPath(selectedContext)) {
+        if (
+          !selectedContext ||
+          getChatContextPath(hashCtx) !== getChatContextPath(selectedContext)
+        ) {
           try {
             await getChat(hashCtx)
           } catch {}
@@ -252,7 +255,11 @@ export default function ChatView() {
     try {
       const rawPath = getChatContextPath(selectedContext).replace(/\.json$/, '')
       const actionUrl = `#chat/${rawPath}`
-      void markNotificationsByMetadata({ actionUrl }, { category: 'chat_messages' })
+
+      void markNotificationsByMetadata(
+        { actionUrl },
+        { category: 'chat_messages', projectId: activeProjectId },
+      )
     } catch (_) {}
   }, [selectedContext, activeProjectId, markNotificationsByMetadata])
 
@@ -303,12 +310,12 @@ export default function ChatView() {
         ]}
         value={mode}
         onChange={(v) => setMode(v as 'categories' | 'history')}
-        size='sm'
+        size="sm"
       />
     )
     const showDot = hasUnreadForProject(activeProjectId)
     return (
-      <div className='flex items-center gap-2'>
+      <div className="flex items-center gap-2">
         {seg}
         {showDot && <DotBadge title={'Unread chats in this project'} />}
       </div>

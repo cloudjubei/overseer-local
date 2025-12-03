@@ -4,7 +4,10 @@ import IPC_HANDLER_KEYS from '../../preload/ipcHandlersKeys'
 import NotificationsStorage from './NotificationsStorage'
 import SettingsManager from '../settings/SettingsManager'
 import BaseManager from '../BaseManager'
-import type { NotificationCategory } from '../../types/notifications'
+import type {
+  NotificationCategory,
+  Notification as AppNotification,
+} from '../../types/notifications'
 
 // If true, read notifications are removed from storage instead of kept as read
 const DELETE_READ_NOTIFICATIONS = true
@@ -34,8 +37,8 @@ export default class NotificationsManager extends BaseManager {
     handlers[IPC_HANDLER_KEYS.NOTIFICATIONS_SEND_OS] = ({ args }) => this.sendOs(args)
     handlers[IPC_HANDLER_KEYS.NOTIFICATIONS_RECENT] = ({ projectId }) =>
       this.getRecentNotifications(projectId)
-    handlers[IPC_HANDLER_KEYS.NOTIFICATIONS_UNREADCOUNT] = ({ projectId }) =>
-      this.getUnreadNotificationsCount(projectId)
+    handlers[IPC_HANDLER_KEYS.NOTIFICATIONS_UNREAD] = ({ projectId }) =>
+      this.getUnreadNotifications(projectId)
     handlers[IPC_HANDLER_KEYS.NOTIFICATIONS_MARKALLASREAD] = ({ projectId }) =>
       this.markAllNotificationsAsRead(projectId)
     handlers[IPC_HANDLER_KEYS.NOTIFICATIONS_MARKASREAD] = ({ projectId, id }) =>
@@ -78,7 +81,7 @@ export default class NotificationsManager extends BaseManager {
     }
   }
 
-  createNotification(projectId: string, input: any): any {
+  createNotification(projectId: string, input: any): AppNotification {
     try {
       const { notificationsEnabled } = this._getPrefsForProject(projectId)
       const cat = (input?.category || undefined) as NotificationCategory | undefined
@@ -97,20 +100,45 @@ export default class NotificationsManager extends BaseManager {
     } catch {}
 
     const storage = this.__getStorage(projectId)
+
+    // Centralized deduplication for ongoing git changes notifications per project
+    // If an unread notification exists with the same branch+baseRef, do not create a new one
+    try {
+      const cat = input?.category as NotificationCategory | undefined
+      if (cat === 'git_changes') {
+        const md = input?.metadata || {}
+        const branch = md.branch
+        const baseRef = md.baseRef || 'main'
+        if (branch) {
+          const existing = storage
+            .getUnread()
+            .find(
+              (n: any) =>
+                n.category === 'git_changes' &&
+                n?.metadata?.branch === branch &&
+                (n?.metadata?.baseRef || 'main') === baseRef,
+            )
+          if (existing) return existing
+        }
+      }
+    } catch {}
+
     const created = storage.create(input)
     this._maybeShowOsNotification(projectId, created)
     return created
   }
 
-  getRecentNotifications(projectId: string): any[] {
+  getRecentNotifications(projectId: string): AppNotification[] {
     const storage = this.__getStorage(projectId)
     return storage.getRecent()
   }
-  getUnreadNotificationsCount(projectId: string): number {
+
+  getUnreadNotifications(projectId: string): AppNotification[] {
     const storage = this.__getStorage(projectId)
-    return storage.getUnread().length
+    return storage.getUnread()
   }
-  markAllNotificationsAsRead(projectId: string): void {
+
+  markAllNotificationsAsRead(projectId: string) {
     const storage = this.__getStorage(projectId)
     if (DELETE_READ_NOTIFICATIONS) {
       try {
@@ -121,7 +149,8 @@ export default class NotificationsManager extends BaseManager {
       storage.markAllAsRead()
     }
   }
-  markNotificationAsRead(projectId: string, id: string): void {
+
+  markNotificationAsRead(projectId: string, id: string) {
     const storage = this.__getStorage(projectId)
     if (DELETE_READ_NOTIFICATIONS) {
       storage.delete(id)
@@ -129,11 +158,13 @@ export default class NotificationsManager extends BaseManager {
       storage.markAsRead(id)
     }
   }
-  deleteAllNotifications(projectId: string): void {
+
+  deleteAllNotifications(projectId: string) {
     const storage = this.__getStorage(projectId)
     storage.deleteAll()
   }
 
+  //TODO: fix this return type
   private _getPrefsForProject(projectId: string): {
     sys: { osNotificationsEnabled: boolean; soundsEnabled: boolean; displayDuration: number }
     notificationsEnabled: Record<NotificationCategory, boolean>
@@ -168,7 +199,7 @@ export default class NotificationsManager extends BaseManager {
     }
   }
 
-  private _maybeShowOsNotification(projectId: string, notification: any): void {
+  private _maybeShowOsNotification(projectId: string, notification: any) {
     try {
       const { sys, notificationsEnabled } = this._getPrefsForProject(projectId)
       if (!sys?.osNotificationsEnabled) return
@@ -200,7 +231,7 @@ export default class NotificationsManager extends BaseManager {
     return this.storages[projectId]
   }
 
-  private _broadcast(projectId: string): void {
+  private _broadcast(projectId: string) {
     try {
       if (this.window && !this.window.isDestroyed()) {
         this.window.webContents.send(IPC_HANDLER_KEYS.NOTIFICATIONS_SUBSCRIBE, { projectId })
@@ -210,7 +241,7 @@ export default class NotificationsManager extends BaseManager {
     }
   }
 
-  private _updateAppBadgeCount(): void {
+  private _updateAppBadgeCount() {
     const storages = Object.values(this.storages || {})
     const allowed: Record<string, true> = {
       agent_runs: true,
