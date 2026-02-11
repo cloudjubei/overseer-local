@@ -216,8 +216,29 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
   )
 
   const deleteRunHistory = useCallback(async (runId: string) => {
+    // Best-effort: clear persisted unread notifications for this run before/after deletion.
+    // This prevents stray sidebar bubbles for runs the user can no longer open.
+    try {
+      const run = runsHistory.find((r) => r.id === runId)
+      const pid = run?.projectId
+      if (pid) {
+        const recent = await notificationsService.getRecentNotifications(pid)
+        const targets = (recent || []).filter((n: any) => {
+          if (n.read) return false
+          if (n.category !== 'agent_runs') return false
+          const md = (n.metadata || {}) as any
+          return md.runId === runId
+        })
+        for (const n of targets) {
+          try {
+            await notificationsService.markNotificationAsRead(pid, n.id)
+          } catch (_) {}
+        }
+      }
+    } catch (_) {}
+
     await factoryAgentRunService.deleteRunHistory(runId)
-  }, [])
+  }, [runsHistory])
 
   const rateRun = useCallback(async (runId: string, rating?: AgentRunRatingPatch) => {
     setRunsHistory((prev) =>

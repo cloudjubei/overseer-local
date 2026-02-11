@@ -495,9 +495,12 @@ export default function SidebarView({}: SidebarProps) {
                 return parts.length ? <>{parts}</> : null
               }
               if (item.view === 'Chat' && isBadgeEnabled('chat_messages', activeProjectId)) {
+                const parts: React.ReactNode[] = []
+
                 if (chatThinkingCurrentProject) {
-                  return (
+                  parts.push(
                     <SpinnerWithDot
+                      key='chat-thinking'
                       size={effectiveCollapsed ? 14 : 16}
                       showDot={chatUnreadCurrentProject > 0}
                       dotTitle={
@@ -505,18 +508,22 @@ export default function SidebarView({}: SidebarProps) {
                           ? `${chatUnreadCurrentProject} unread chats`
                           : undefined
                       }
-                    />
+                    />,
                   )
                 }
+
                 if (chatUnreadCurrentProject > 0) {
-                  return (
+                  parts.push(
                     <NotificationBadge
+                      key='chat-unread'
                       className={effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''}
                       text={cap99(chatUnreadCurrentProject)}
                       tooltipLabel={`${chatUnreadCurrentProject} unread chats`}
-                    />
+                    />,
                   )
                 }
+
+                return parts.length ? <>{parts}</> : null
               }
               return null
             }

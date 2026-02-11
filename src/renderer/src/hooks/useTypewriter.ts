@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 /**
  * Typewriter hook that progressively reveals the provided text.
@@ -23,6 +23,23 @@ export function useTypewriter(text: string, speed: number = 50) {
   const lastTsRef = useRef<number | null>(null)
   const genRef = useRef<number>(0)
 
+  // Convert speed (ms per char) to a clamped value to avoid overly small intervals
+  const msPerChar = Math.max(16, Math.floor(speed || 0))
+
+  const skipToEnd = useCallback(() => {
+    const target = targetRef.current || ''
+    const targetLen = target.length
+
+    if (rafIdRef.current !== null) cancelAnimationFrame(rafIdRef.current)
+    rafIdRef.current = null
+
+    shownLenRef.current = targetLen
+    accMsRef.current = 0
+    lastTsRef.current = null
+
+    setDisplayText(target)
+  }, [])
+
   // Keep the latest target text in a ref and kick the loop if target grows
   useEffect(() => {
     targetRef.current = text || ''
@@ -39,9 +56,6 @@ export function useTypewriter(text: string, speed: number = 50) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [text])
-
-  // Convert speed (ms per char) to a clamped value to avoid overly small intervals
-  const msPerChar = Math.max(16, Math.floor(speed || 0))
 
   // Restart timing when speed changes
   useEffect(() => {
@@ -119,5 +133,7 @@ export function useTypewriter(text: string, speed: number = 50) {
     rafIdRef.current = requestAnimationFrame(() => loop(genRef.current))
   }
 
-  return displayText
+  const isTyping = shownLenRef.current < targetRef.current.length
+
+  return { displayText, isTyping, skipToEnd }
 }

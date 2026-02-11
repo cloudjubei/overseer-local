@@ -10,12 +10,34 @@ interface TypewriterTextProps {
 }
 
 const TypewriterText: React.FC<TypewriterTextProps> = ({ text, speed = 2, renderer = 'rich' }) => {
-  const displayText = useTypewriter(text, speed)
+  const { displayText, isTyping, skipToEnd } = useTypewriter(text, speed)
 
-  if (renderer === 'markdown') {
-    return <Markdown text={displayText} />
-  }
-  return <RichText text={displayText} />
+  return (
+    <div className='relative'>
+      {renderer === 'markdown' ? <Markdown text={displayText} /> : <RichText text={displayText} />}
+
+      {isTyping ? (
+        <button
+          type='button'
+          className={[
+            'absolute bottom-2 right-2 z-10',
+            'btn-secondary',
+            'text-[11px] px-2 py-1',
+            'shadow-sm',
+          ].join(' ')}
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            skipToEnd()
+          }}
+          aria-label='Skip to end'
+          title='Skip to end'
+        >
+          Skip to end
+        </button>
+      ) : null}
+    </div>
+  )
 }
 
 export default TypewriterText

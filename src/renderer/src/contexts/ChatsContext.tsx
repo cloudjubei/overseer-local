@@ -33,9 +33,22 @@ export type ChatState = {
   isThinking: boolean
 }
 
+export type ChatDraft = {
+  text: string
+  attachments: string[]
+  selectionStart?: number
+  selectionEnd?: number
+}
+
 export type ChatsContextValue = {
   chats: Record<string, ChatState>
   chatsByProjectId: Record<string, ChatState[]>
+
+  // In-memory-only draft state. Keyed by getChatContextPath(context).
+  // Not persisted to disk; cleared on app reload/quit.
+  getDraft: (chatKey: string) => ChatDraft
+  setDraft: (chatKey: string, patch: Partial<ChatDraft>) => void
+  clearDraft: (chatKey: string) => void
 
   sendMessage: (
     context: ChatContext,
@@ -114,6 +127,34 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
   const [chats, setChats] = useState<Record<string, ChatState>>({})
   const [chatsByProjectId, setChatsByProjectId] = useState<Record<string, ChatState[]>>({})
   const [allChatSettings, setAllChatSettings] = useState<ChatsSettings | undefined>(undefined)
+
+  // Per-chat in-memory draft message + pending attachments.
+  const [draftsByChatKey, setDraftsByChatKey] = useState<Record<string, ChatDraft>>({})
+
+  const getDraft = useCallback(
+    (chatKey: string) => {
+      return draftsByChatKey[chatKey] || { text: '', attachments: [] }
+    },
+    [draftsByChatKey],
+  )
+
+  const setDraft = useCallback((chatKey: string, patch: Partial<ChatDraft>) => {
+    setDraftsByChatKey((prev) => {
+      const cur = prev[chatKey] || { text: '', attachments: [] }
+      const next: ChatDraft = { ...cur, ...patch }
+      return { ...prev, [chatKey]: next }
+    })
+  }, [])
+
+  const clearDraft = useCallback((chatKey: string) => {
+    setDraftsByChatKey((prev) => {
+      if (!Object.prototype.hasOwnProperty.call(prev, chatKey)) return prev
+      const next = { ...prev }
+      delete next[chatKey]
+      return next
+    })
+  }, [])
+
   // Track last assistant message index notified per chat key to avoid duplicates/retroactive notices
   const lastAssistantNotifiedRef = useRef<Record<string, number>>({})
   // Map chat key -> projectId for reliable notification attribution across all contexts
@@ -236,6 +277,38 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
           try {
             delete chatKeyToProjectIdRef.current[key]
           } catch (_) {}
+
+          // Best-effort: clear persisted unread notifications that point to this chat.
+          // Prevents stray sidebar bubbles for chats the user can no longer open.
+          try {
+            const pid =
+              (existing?.chat?.context as any)?.projectId ||
+              (chatUpdate.context as any)?.projectId ||
+              projectId
+            if (pid) {
+              void (async () => {
+                try {
+                  const recent = await notificationsService.getRecentNotifications(pid)
+                  const targets = (recent || []).filter((n: any) => {
+                    if (n.read) return false
+                    if (n.category !== 'chat_messages') return false
+                    const md = (n.metadata || {}) as any
+                    return md.chatKey === key
+                  })
+                  for (const n of targets) {
+                    try {
+                      await notificationsService.markNotificationAsRead(pid, n.id)
+                    } catch (_) {}
+                  }
+                } catch (_) {}
+              })()
+            }
+          } catch (_) {}
+
+          // Best-effort clear any draft for this chat.
+          try {
+            clearDraft(key)
+          } catch (_) {}
         } else if (chatUpdate.type === 'change') {
           const next: ChatState = {
             ...(newChats[key] || {
@@ -312,9 +385,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
                     title = 'Agent run chat update'
                     break
                 }
-                const raw = String(
-                  msgs[lastAssistantIdx].completionMessage?.content || '',
-                )
+                const raw = String(msgs[lastAssistantIdx].completionMessage?.content || '')
                 const snippet = raw.replace(/\s+/g, ' ').slice(0, 120)
                 const message = snippet || 'Assistant responded'
 
@@ -390,7 +461,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
     return () => {
       if (unsubscribe) unsubscribe()
     }
-  }, [upsertChatsByProject, removeFromChatsByProject, projectId])
+  }, [upsertChatsByProject, removeFromChatsByProject, projectId, clearDraft])
 
   const getChat = useCallback(
     async (context: ChatContext): Promise<ChatState> => {
@@ -596,9 +667,13 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       try {
         delete chatKeyToProjectIdRef.current[key]
       } catch (_) {}
+      // Clear draft on explicit delete too.
+      try {
+        clearDraft(key)
+      } catch (_) {}
       await chatsService.deleteChat(context)
     },
-    [removeFromChatsByProject],
+    [removeFromChatsByProject, clearDraft],
   )
 
   const deleteLastMessage = useCallback(
@@ -714,6 +789,11 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
     () => ({
       chats,
       chatsByProjectId,
+
+      getDraft,
+      setDraft,
+      clearDraft,
+
       sendMessage,
       resumeTools,
       retryCompletion,
@@ -734,6 +814,11 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
     [
       chats,
       chatsByProjectId,
+
+      getDraft,
+      setDraft,
+      clearDraft,
+
       sendMessage,
       resumeTools,
       retryCompletion,

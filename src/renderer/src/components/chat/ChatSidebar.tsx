@@ -58,6 +58,10 @@ export default function ChatSidebar({
     resetSettingsPrompt,
     deleteLastMessage,
     deleteChat,
+    // drafts
+    getDraft,
+    setDraft,
+    clearDraft,
   } = useChats()
   const { getProjectById } = useProjectContext()
   const { storiesById, featuresById } = useStories()
@@ -73,6 +77,15 @@ export default function ChatSidebar({
   const [isPromptModalOpen, setIsPromptModalOpen] = useState(false)
 
   const currentSettings = useMemo(() => getSettings(context), [getSettings, context])
+
+  const chatKey = useMemo(() => getChatContextPath(context), [context])
+  const draft = useMemo(() => getDraft(chatKey), [getDraft, chatKey])
+
+  // Force focus restoration on context change (incrementing nonce allows ChatInput to re-run focus effect)
+  const [focusNonce, setFocusNonce] = useState(0)
+  useEffect(() => {
+    setFocusNonce((x) => x + 1)
+  }, [chatKey])
 
   // Ensure we do not clobber unrelated completion settings fields when updating a single field.
   const persistSettings = useCallback(
@@ -186,8 +199,19 @@ export default function ChatSidebar({
         activeChatConfig,
         attachments,
       )
+      // Clear only this chat's in-memory draft after successful send.
+      clearDraft(chatKey)
     },
-    [context, effectivePrompt, activeChatConfig, currentSettings, sendMessage],
+    [
+      isChatConfigured,
+      activeChatConfig,
+      currentSettings,
+      sendMessage,
+      context,
+      effectivePrompt,
+      clearDraft,
+      chatKey,
+    ],
   )
 
   const handleAbort = useCallback(() => {
@@ -691,6 +715,15 @@ export default function ChatSidebar({
 
       <div className="flex-shrink-0 max-h-[40%] overflow-y-auto">
         <ChatInput
+          value={draft.text}
+          attachments={draft.attachments}
+          onChange={(text) => setDraft(chatKey, { text })}
+          onChangeAttachments={(next) => setDraft(chatKey, { attachments: next })}
+          selectionStart={draft.selectionStart}
+          selectionEnd={draft.selectionEnd}
+          onSelectionChange={(sel) => setDraft(chatKey, sel)}
+          restoreKey={chatKey}
+          autoFocus={focusNonce > 0}
           onSend={handleSend}
           onAbort={handleAbort}
           isThinking={isThinking}

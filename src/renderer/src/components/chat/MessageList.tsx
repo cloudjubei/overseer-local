@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState, useLayoutEffect } from 'react'
+import React, { useEffect, useMemo, useRef, useState, useLayoutEffect, useCallback } from 'react'
 import type { ReactNode } from 'react'
 import Spinner from '../ui/Spinner'
 import ErrorBubble from '../ui/ErrorBubble'
@@ -71,6 +71,19 @@ function formatFriendlyTimestamp(iso: string): string {
   return new Intl.DateTimeFormat(undefined, opts).format(d)
 }
 
+function formatDurationMs(ms: number): string {
+  if (!isFinite(ms) || ms < 0) return ''
+  if (ms < 1000) return `${Math.round(ms)}ms`
+  const s = ms / 1000
+  if (s < 60) return s < 10 ? `${s.toFixed(1)}s` : `${Math.round(s)}s`
+  const m = Math.floor(s / 60)
+  const remS = Math.round(s - m * 60)
+  if (m < 60) return remS > 0 ? `${m}m ${remS}s` : `${m}m`
+  const h = Math.floor(m / 60)
+  const remM = m - h * 60
+  return remM > 0 ? `${h}h ${remM}m` : `${h}h`
+}
+
 // Collapsible wrapper to cap initial render height of long message content
 function CollapsibleContent({ children, maxHeight = 600 }: { children: ReactNode; maxHeight?: number }) {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -89,7 +102,12 @@ function CollapsibleContent({ children, maxHeight = 600 }: { children: ReactNode
 
   return (
     <div className='flex flex-col'>
-      <div ref={containerRef} style={{ maxHeight: expanded ? 'none' : `${maxHeight}px`, overflow: expanded ? 'visible' : 'hidden' }}>{children}</div>
+      <div
+        ref={containerRef}
+        style={{ maxHeight: expanded ? 'none' : `${maxHeight}px`, overflow: expanded ? 'visible' : 'hidden' }}
+      >
+        {children}
+      </div>
       {needsCollapse ? (
         <button type='button' className='btn-secondary self-end mt-2 text-xs' onClick={() => setExpanded((v) => !v)}>
           {expanded ? 'Show less' : 'Show more'}
@@ -137,7 +155,10 @@ export default function MessageList({
         effectiveMessage.completionMessage.role = 'system'
       }
       const prev = messages[index - 1]
-      const isFirstInGroup = !prev || prev.completionMessage.role !== effectiveMessage.completionMessage.role || effectiveMessage.completionMessage.role === 'system'
+      const isFirstInGroup =
+        !prev ||
+        prev.completionMessage.role !== effectiveMessage.completionMessage.role ||
+        effectiveMessage.completionMessage.role === 'system'
       return { ...effectiveMessage, showModel, isFirstInGroup }
     })
   }, [messages])
@@ -166,9 +187,12 @@ export default function MessageList({
   useEffect(() => {
     const el = messageListRef.current
     if (!el) return
-    const io = new IntersectionObserver((entries) => {
-      for (const entry of entries) setIsVisible(entry.isIntersecting)
-    }, { root: null, threshold: 0.05 })
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) setIsVisible(entry.isIntersecting)
+      },
+      { root: null, threshold: 0.05 },
+    )
     io.observe(el)
     return () => io.disconnect()
   }, [])
@@ -285,6 +309,75 @@ export default function MessageList({
     return messagesToDisplay.slice(startIndex)
   }, [messagesToDisplay, startIndex])
   const hiddenCountAbove = startIndex
+
+  // Progressive read receipts: mark assistant messages as read as they become visible.
+  // This works with the existing last-read-ISO model by advancing lastRead to the newest
+  // assistant message that the user has actually seen.
+  const lastReadIsoRef = useRef<string | undefined>(undefined)
+  useEffect(() => {
+    lastReadIsoRef.current = lastReadIso
+  }, [lastReadIso])
+
+  const latestSeenIsoRef = useRef<string | undefined>(undefined)
+  const pendingRafRef = useRef<number | null>(null)
+
+  const flushSeenToRead = useCallback(() => {
+    pendingRafRef.current = null
+    const iso = latestSeenIsoRef.current
+    if (!iso) return
+    const lastRead = lastReadIsoRef.current
+    if (lastRead && iso.localeCompare(lastRead) <= 0) return
+    onReadLatest?.(iso)
+  }, [onReadLatest])
+
+  useEffect(() => {
+    const container = messageListRef.current
+    if (!container) return
+    if (!chatId) return
+    if (!onReadLatest) return
+
+    latestSeenIsoRef.current = undefined
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        let sawNew = false
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue
+          if (entry.intersectionRatio < 0.6) continue
+          const el = entry.target as HTMLElement
+          const role = el.getAttribute('data-msg-role')
+          if (role !== 'assistant') continue
+          const iso = el.getAttribute('data-msg-iso') || undefined
+          if (!iso) continue
+
+          const prev = latestSeenIsoRef.current
+          if (!prev || iso.localeCompare(prev) > 0) {
+            latestSeenIsoRef.current = iso
+            sawNew = true
+          }
+        }
+        if (sawNew) {
+          if (pendingRafRef.current) return
+          pendingRafRef.current = requestAnimationFrame(flushSeenToRead)
+        }
+      },
+      {
+        root: container,
+        threshold: [0.6],
+      },
+    )
+
+    const nodes = container.querySelectorAll('[data-msg-idx]')
+    nodes.forEach((n) => io.observe(n))
+
+    return () => {
+      io.disconnect()
+      if (pendingRafRef.current) {
+        cancelAnimationFrame(pendingRafRef.current)
+        pendingRafRef.current = null
+      }
+    }
+  }, [chatId, visibleCount, messagesToDisplay.length, onReadLatest, flushSeenToRead])
 
   // Determine if there are unread messages and where the last unread sits
   const lastMessageIsoMemo = useMemo(() => {
@@ -501,7 +594,9 @@ export default function MessageList({
             {(() => {
               const iso = messageIso(systemPromptMessage)
               const ts = iso ? formatFriendlyTimestamp(iso) : ''
-              return ts ? <div className='text-[10px] leading-4 text-[var(--text-secondary)] mb-1 opacity-80 select-none'>{ts}</div> : null
+              return ts ? (
+                <div className='text-[10px] leading-4 text-[var(--text-secondary)] mb-1 opacity-80 select-none'>{ts}</div>
+              ) : null
             })()}
             <div
               className={[
@@ -537,7 +632,11 @@ export default function MessageList({
               {hiddenCountAbove} older message{hiddenCountAbove === 1 ? '' : 's'} hidden
             </div>
             <div className='ml-2 flex items-center gap-2'>
-              <button type='button' className='btn-secondary text-xs px-2 py-1' onClick={() => setVisibleCount((c) => Math.min(totalMessages, c + BATCH_SIZE))}>
+              <button
+                type='button'
+                className='btn-secondary text-xs px-2 py-1'
+                onClick={() => setVisibleCount((c) => Math.min(totalMessages, c + BATCH_SIZE))}
+              >
                 Load more
               </button>
             </div>
@@ -552,14 +651,23 @@ export default function MessageList({
             const showRetry = !!onRetry && isLast
             return (
               <div key={globalIndex} data-msg-idx={globalIndex} className='flex items-start gap-2'>
-                <div className='shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-semibold bg-[color-mix(in_srgb,var(--accent-primary)_14%,transparent)] text-[var(--text-primary)] border border-[var(--border-subtle)]' aria-hidden='true'>
+                <div
+                  className='shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-semibold bg-[color-mix(in_srgb,var(--accent-primary)_14%,transparent)] text-[var(--text-primary)] border border-[var(--border-subtle)]'
+                  aria-hidden='true'
+                >
                   AI
                 </div>
                 <div className='flex-1 max-w-[72%] min-w-[80px] flex flex-col items-start w-full'>
                   <ErrorBubble error={msg.error} />
                 </div>
                 {showRetry ? (
-                  <button onClick={() => onRetry?.()} disabled={isThinking} className='btn-icon' aria-label='Retry the last action' title={isThinking ? 'Please wait...' : 'Retry the last action'}>
+                  <button
+                    onClick={() => onRetry?.()}
+                    disabled={isThinking}
+                    className='btn-icon'
+                    aria-label='Retry the last action'
+                    title={isThinking ? 'Please wait...' : 'Retry the last action'}
+                  >
                     <IconRefresh className='w-5 h-5 mt-4' />
                   </button>
                 ) : null}
@@ -573,10 +681,14 @@ export default function MessageList({
 
           const isLast = globalIndex === messagesToDisplay.length - 1
 
-          const isShowingToolCalls = isAssistant && (isLast || messagesToDisplay[globalIndex + 1]?.toolResults === undefined) && !!msg.toolCalls?.length
+          const isShowingToolCalls =
+            isAssistant &&
+            (isLast || messagesToDisplay[globalIndex + 1]?.toolResults === undefined) &&
+            !!msg.toolCalls?.length
           const isShowingToolResults = isSystem && !!msg.toolResults?.length
 
-          const isNewUserBubble = isUser && globalIndex === enhancedMessages.length - 1 && messages.length > prevLenForUserAnimRef.current
+          const isNewUserBubble =
+            isUser && globalIndex === enhancedMessages.length - 1 && messages.length > prevLenForUserAnimRef.current
 
           const toggleableIds: string[] = (() => {
             if (!(isSystem && isLast)) return []
@@ -600,18 +712,30 @@ export default function MessageList({
             : ''
 
           const lastMsg = messagesToDisplay[messagesToDisplay.length - 1]
-          const lastIsSystemToolResults = lastMsg?.completionMessage?.role === 'system' && Array.isArray(lastMsg?.toolResults) && (lastMsg?.toolResults?.length ?? 0) > 0
+          const lastIsSystemToolResults =
+            lastMsg?.completionMessage?.role === 'system' &&
+            Array.isArray(lastMsg?.toolResults) &&
+            (lastMsg?.toolResults?.length ?? 0) > 0
 
           const isAssistantBeforeSystemToolResults = isAssistant && globalIndex === messagesToDisplay.length - 2 && lastIsSystemToolResults
 
           const isDeletableSystemLast = isSystem && isLast && !isShowingToolResults
 
-          const shouldShowDelete = !!onDeleteLastMessage && ((isLast && (isUser || isAssistant)) || isAssistantBeforeSystemToolResults || isDeletableSystemLast)
+          const shouldShowDelete =
+            !!onDeleteLastMessage &&
+            ((isLast && (isUser || isAssistant)) || isAssistantBeforeSystemToolResults || isDeletableSystemLast)
 
-          const deleteTitle = isAssistantBeforeSystemToolResults ? 'Delete last assistant message and tool results' : 'Delete last message'
+          const deleteTitle = isAssistantBeforeSystemToolResults
+            ? 'Delete last assistant message and tool results'
+            : 'Delete last message'
 
           return (
-            <div key={globalIndex} data-msg-idx={globalIndex}>
+            <div
+              key={globalIndex}
+              data-msg-idx={globalIndex}
+              data-msg-role={msg.completionMessage.role}
+              data-msg-iso={messageIso(msg) || ''}
+            >
               {showCutoff && (
                 <div className='relative text-center my-4 group' title={tooltipText}>
                   <hr className='border-dashed border-neutral-300 dark:border-neutral-700' />
@@ -659,6 +783,17 @@ export default function MessageList({
                       const iso = messageIso(msg)
                       const ts = iso ? formatFriendlyTimestamp(iso) : ''
                       if (isAssistant) {
+                        const prev = globalIndex > 0 ? messagesToDisplay[globalIndex - 1] : undefined
+                        const prevIso = prev ? messageIso(prev) : undefined
+                        let thinkingLabel = ''
+                        if (prevIso && iso) {
+                          const start = new Date(prevIso).getTime()
+                          const end = new Date(iso).getTime()
+                          if (!isNaN(start) && !isNaN(end) && end >= start) {
+                            thinkingLabel = formatDurationMs(end - start)
+                          }
+                        }
+
                         return (
                           <div className='w-full flex justify-between items-baseline'>
                             {msg.showModel && msg.model ? (
@@ -669,11 +804,19 @@ export default function MessageList({
                             ) : (
                               <div />
                             )}
-                            {ts ? <div className='text-[10px] leading-4 text-[var(--text-secondary)] mb-1 opacity-80 select-none'>{ts}</div> : null}
+                            {ts || thinkingLabel ? (
+                              <div className='text-[10px] leading-4 text-[var(--text-secondary)] mb-1 opacity-80 select-none flex items-baseline gap-1'>
+                                {thinkingLabel ? <span>{`+${thinkingLabel}`}</span> : null}
+                                {thinkingLabel && ts ? <span>·</span> : null}
+                                {ts ? <span>{ts}</span> : null}
+                              </div>
+                            ) : null}
                           </div>
                         )
                       }
-                      return ts ? <div className='text-[10px] leading-4 text-[var(--text-secondary)] mb-1 opacity-80 select-none'>{ts}</div> : null
+                      return ts ? (
+                        <div className='text-[10px] leading-4 text-[var(--text-secondary)] mb-1 opacity-80 select-none'>{ts}</div>
+                      ) : null
                     })()}
 
                     {!isAssistant && msg.showModel && msg.model && (
@@ -727,9 +870,7 @@ export default function MessageList({
                   {isShowingToolCalls && (
                     <div className='mt-2 w-full space-y-2'>
                       {msg.toolCalls!.map((call: ToolCall, i: number) => {
-                        return (
-                          <ToolCallCard key={`tool-${globalIndex}-${i}`} toolCall={call} selectable={false} disabled={true} />
-                        )
+                        return <ToolCallCard key={`tool-${globalIndex}-${i}`} toolCall={call} selectable={false} disabled={true} />
                       })}
                     </div>
                   )}
@@ -841,7 +982,10 @@ export default function MessageList({
 
         {isThinking && (
           <div className='flex items-start gap-2 flex-row'>
-            <div className='shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-semibold bg-[color-mix(in_srgb,var(--accent-primary)_14%,transparent)] text-[var(--text-primary)] border border-[var(--border-subtle)]' aria-hidden='true'>
+            <div
+              className='shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-semibold bg-[color-mix(in_srgb,var(--accent-primary)_14%,transparent)] text-[var(--text-primary)] border border-[var(--border-subtle)]'
+              aria-hidden='true'
+            >
               AI
             </div>
             <div className='max-w-[72%] min-w-[80px] flex flex-col items-start'>
