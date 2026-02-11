@@ -210,9 +210,8 @@ export default class StoriesManager extends BaseManager {
 
   private async updateTool(projectId: string): Promise<StoryTools | undefined> {
     const projectRoot = await this.projectsManager.getProjectDir(projectId)
-    if (!projectRoot) {
-      return
-    }
+    if (!projectRoot) return
+
     const tools = createStoryTools(projectId, projectRoot)
     await tools.init()
     this.tools[projectId] = tools

@@ -24,8 +24,8 @@ const PROVIDER_DEFAULT_URL: Record<LLMProviderType, string> = {
 }
 
 const PROVIDER_MODELS: Record<Exclude<LLMProviderType, 'local' | 'custom'>, string[]> = {
-  openai: ['gpt-5', 'gpt-4o', 'gpt-4o-mini'],
-  anthropic: ['claude-sonnet-4-20250514', 'claude-4.1-opus', 'claude-opus-4'],
+  openai: ['gpt-5.2', 'gpt-5.2-codex', 'gpt-5.2-pro'],
+  anthropic: ['claude-opus-4-6', 'claude-haiku-4-6', 'claude-sonnet-4-6'],
   gemini: ['gemini-2.5-pro', 'gemini-2.5-flash'],
   xai: ['grok-4'],
 }

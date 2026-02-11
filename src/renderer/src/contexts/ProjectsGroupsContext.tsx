@@ -12,20 +12,16 @@ import { projectsGroupsService } from '../services/projectsGroupsService'
 export type ProjectsGroupsContextValue = {
   groups: ProjectsGroup[]
 
-  // queries
   getGroupById: (id: string) => ProjectsGroup | undefined
   getGroupForProject: (projectId: string) => ProjectsGroup | undefined
 
-  // mutations (groups)
   createGroup: (title: string) => Promise<ProjectsGroup | undefined>
   updateGroupTitle: (groupId: string, title: string) => Promise<ProjectsGroup | undefined>
   deleteGroup: (groupId: string) => Promise<void>
 
-  // mutations (ordering)
   reorderProject: (groupId: string, payload: ReorderPayload) => Promise<ProjectsGroup | undefined>
   reorderGroup: (payload: ReorderPayload) => Promise<ProjectsGroups>
 
-  // membership
   setProjectGroup: (projectId: string, groupId: string | null) => Promise<void>
 }
 
@@ -170,7 +166,9 @@ export function ProjectsGroupsProvider({ children }: { children: React.ReactNode
           : g,
       )
       if (target) {
-        next = next.map((g) => (g.id === target.id ? { ...g, projects: [...g.projects, projectId] } : g))
+        next = next.map((g) =>
+          g.id === target.id ? { ...g, projects: [...g.projects, projectId] } : g,
+        )
       }
       return next
     })

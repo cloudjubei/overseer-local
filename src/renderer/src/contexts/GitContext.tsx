@@ -253,13 +253,29 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
       const isUpdated = branchUpdate.ahead > 0
       const currentBase = unifiedByProject[projectId]?.branches?.find((b) => b.current)?.name
       if (isFeature && isUpdated) {
-        await notificationsService.create(projectId, {
-          type: 'info',
-          category: 'git_changes',
-          title: 'Branch updated',
-          message: `${branchUpdate.name} is ${branchUpdate.ahead} commit${branchUpdate.ahead === 1 ? '' : 's'} ahead of ${currentBase || 'main'}`,
-          metadata: { branch: branchUpdate.name, baseRef: currentBase || 'main' },
-        })
+        // De-duplicate: if there is already an unread git_changes notification
+        // for this project+branch+baseRef, do not create a new one (treat as ongoing)
+        try {
+          const recent = await notificationsService.getRecentNotifications(projectId)
+          const baseRef = currentBase || 'main'
+          const hasOngoing = (recent || []).some(
+            (n) =>
+              !n.read &&
+              n.category === 'git_changes' &&
+              n.metadata &&
+              n.metadata.branch === branchUpdate.name &&
+              (n.metadata.baseRef || 'main') === baseRef,
+          )
+          if (!hasOngoing) {
+            await notificationsService.create(projectId, {
+              type: 'info',
+              category: 'git_changes',
+              title: 'Branch updated',
+              message: `${branchUpdate.name} is ${branchUpdate.ahead} commit${branchUpdate.ahead === 1 ? '' : 's'} ahead of ${baseRef}`,
+              metadata: { branch: branchUpdate.name, baseRef },
+            })
+          }
+        } catch (_) {}
       }
     } catch {}
 

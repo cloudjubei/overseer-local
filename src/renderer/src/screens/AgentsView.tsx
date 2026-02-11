@@ -162,6 +162,7 @@ const CurrentProjectView = ({ openRunId, setOpenRunId }: CurrentProjectViewProps
               <table className="min-w-full text-sm">
                 <thead className="bg-neutral-50 dark:bg-neutral-800/50 text-neutral-600 dark:text-neutral-400">
                   <tr>
+                    <th className="px-3 py-2 w-4" aria-label="Unread indicator" />
                     <th className="text-left px-3 py-2">Run</th>
                     <th className="text-left px-3 py-2">Story</th>
                     <th className="text-left px-3 py-2">Model</th>
@@ -205,6 +206,7 @@ const CurrentProjectView = ({ openRunId, setOpenRunId }: CurrentProjectViewProps
               <table className="min-w-full text-sm">
                 <thead className="bg-neutral-50 dark:bg-neutral-800/50 text-neutral-600 dark:text-neutral-400">
                   <tr>
+                    <th className="px-3 py-2 w-4" aria-label="Unread indicator" />
                     <th className="text-left px-3 py-2">Run</th>
                     <th className="text-left px-3 py-2">Story</th>
                     <th className="text-left px-3 py-2">Status</th>
