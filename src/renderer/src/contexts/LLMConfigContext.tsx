@@ -32,7 +32,6 @@ export type LLMConfigContextValue = {
 const LLMConfigContext = createContext<LLMConfigContextValue | null>(null)
 
 export function LLMConfigProvider({ children }: { children: React.ReactNode }) {
-  const managerRef = useRef<LLMConfigManager>(new LLMConfigManager())
   const [configs, setConfigs] = useState<LLMConfig[]>([])
 
   const [activeAgentRunConfigId, setActiveAgentRunConfigId] = useState<string>('')
@@ -41,19 +40,29 @@ export function LLMConfigProvider({ children }: { children: React.ReactNode }) {
   const [activeChatConfigId, setActiveChatConfigId] = useState<string>('')
   const [recentChatIds, setRecentChatIds] = useState<string[]>([])
 
-  const refresh = useCallback(() => {
-    setConfigs(managerRef.current.getConfigs())
-    setActiveAgentRunConfigId(managerRef.current.getAgentRunActiveId())
-    setRecentAgentRunIds(managerRef.current.getAgentRunRecentIds())
-    setActiveChatConfigId(managerRef.current.getChatActiveId())
-    setRecentChatIds(managerRef.current.getChatRecentIds())
+  const refresh = useCallback(async () => {
+    const state = await llmConfigsService.list()
+    setConfigs(state.configs)
+    setActiveAgentRunConfigId(state.activeAgentRunConfigId)
+    setRecentAgentRunIds(state.recentAgentRunConfigIds)
+    setActiveChatConfigId(state.activeChatConfigId)
+    setRecentChatIds(state.recentChatConfigIds)
   }, [])
 
   useEffect(() => {
-    refresh()
-    const handler = () => refresh()
-    window.addEventListener(LLM_CONFIGS_CHANGED_EVENT, handler as EventListener)
-    return () => window.removeEventListener(LLM_CONFIGS_CHANGED_EVENT, handler as EventListener)
+    let unsub: undefined | (() => void)
+    ;(async () => {
+      await refresh()
+      unsub = llmConfigsService.subscribe(() => {
+        refresh()
+      })
+    })()
+
+    return () => {
+      try {
+        if (unsub) unsub()
+      } catch {}
+    }
   }, [refresh])
 
   const activeAgentRunConfig: LLMConfig | undefined = useMemo(() => {
@@ -74,8 +83,7 @@ export function LLMConfigProvider({ children }: { children: React.ReactNode }) {
 
   const setActiveAgentRun = useCallback(
     (id: string) => {
-      managerRef.current.setAgentRunActiveId(id)
-      refresh()
+      llmConfigsService.setActiveAgentRunId(id).then(() => refresh())
     },
     [refresh],
   )
@@ -98,30 +106,26 @@ export function LLMConfigProvider({ children }: { children: React.ReactNode }) {
 
   const setActiveChat = useCallback(
     (id: string) => {
-      managerRef.current.setChatActiveId(id)
-      refresh()
+      llmConfigsService.setActiveChatId(id).then(() => refresh())
     },
     [refresh],
   )
 
   const addConfig = useCallback(
     (config: Omit<LLMConfig, 'id'>) => {
-      managerRef.current.addConfig(config)
-      refresh()
+      llmConfigsService.add(config).then(() => refresh())
     },
     [refresh],
   )
   const updateConfig = useCallback(
     (id: string, updates: Partial<LLMConfig>) => {
-      managerRef.current.updateConfig(id, updates)
-      refresh()
+      llmConfigsService.update(id, updates).then(() => refresh())
     },
     [refresh],
   )
   const removeConfig = useCallback(
     (id: string) => {
-      managerRef.current.removeConfig(id)
-      refresh()
+      llmConfigsService.remove(id).then(() => refresh())
     },
     [refresh],
   )

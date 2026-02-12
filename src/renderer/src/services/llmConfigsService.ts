@@ -10,14 +10,6 @@ export type LLMConfigsState = {
 
 export type LLMConfigContext = 'chat' | 'agentRun'
 
-export type LegacyLLMLocalStoragePayload = {
-  llmConfigs?: unknown
-  activeAgentRunConfigId?: unknown
-  recentAgentRunConfigIds?: unknown
-  activeChatConfigId?: unknown
-  recentChatConfigIds?: unknown
-}
-
 export type LLMConfigsService = {
   subscribe: (callback: () => void) => () => void
 
@@ -35,8 +27,6 @@ export type LLMConfigsService = {
   getRecentChatIds: () => Promise<string[]>
 
   bumpRecent: (context: LLMConfigContext, id: string, limit?: number) => Promise<void>
-
-  importLegacyLocalStorage: (payload: LegacyLLMLocalStoragePayload) => Promise<{ imported: boolean }>
 }
 
 export const llmConfigsService: LLMConfigsService = { ...window.llmConfigsService }

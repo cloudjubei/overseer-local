@@ -418,8 +418,6 @@ const LLM_CONFIGS_API = {
   getRecentChatIds: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.LLM_CONFIGS_GET_RECENT_CHAT),
   bumpRecent: (context, id, limit) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.LLM_CONFIGS_BUMP_RECENT, { context, id, limit }),
-  importLegacyLocalStorage: (payload) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.LLM_CONFIGS_IMPORT_LEGACY_LOCALSTORAGE, { payload }),
 }
 
 if (process.contextIsolated) {

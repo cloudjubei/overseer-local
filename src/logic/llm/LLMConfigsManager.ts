@@ -73,9 +73,6 @@ export default class LLMConfigsManager extends BaseManager {
     handlers[IPC_HANDLER_KEYS.LLM_CONFIGS_BUMP_RECENT] = ({ context, id, limit }) =>
       this.bumpRecent(context, id, limit)
 
-    handlers[IPC_HANDLER_KEYS.LLM_CONFIGS_IMPORT_LEGACY_LOCALSTORAGE] = ({ payload }) =>
-      this.importLegacyLocalStorage(payload)
-
     return handlers
   }
 
@@ -161,43 +158,6 @@ export default class LLMConfigsManager extends BaseManager {
     const ids = this.cache.recentChatConfigIds
     const next = [id, ...ids.filter((x) => x !== id)].slice(0, limit)
     this.__persist(this.__sanitizeState({ ...this.cache, recentChatConfigIds: next }))
-  }
-
-  /**
-   * One-time migration from renderer legacy localStorage.
-   * The renderer passes a payload containing the parsed localStorage values.
-   *
-   * Idempotent rules:
-   * - If we already have at least one config, do nothing.
-   * - Otherwise import configs and preferences if present.
-   */
-  importLegacyLocalStorage(payload: unknown): { imported: boolean } {
-    try {
-      if (this.cache.configs.length > 0) return { imported: false }
-
-      const p = (payload ?? {}) as any
-      const legacyConfigs: LLMConfig[] = Array.isArray(p.llmConfigs) ? p.llmConfigs : []
-
-      const configs = legacyConfigs
-        .filter((c) => c && typeof c === 'object')
-        .map((c) => {
-          const id = typeof c.id === 'string' && c.id ? c.id : uuidv4()
-          return { ...c, id } as LLMConfig
-        })
-
-      const nextState: LLMConfigsState = this.__sanitizeState({
-        configs,
-        activeAgentRunConfigId: typeof p.activeAgentRunConfigId === 'string' ? p.activeAgentRunConfigId : '',
-        recentAgentRunConfigIds: normalizeStringArray(p.recentAgentRunConfigIds),
-        activeChatConfigId: typeof p.activeChatConfigId === 'string' ? p.activeChatConfigId : '',
-        recentChatConfigIds: normalizeStringArray(p.recentChatConfigIds),
-      })
-
-      this.__persist(nextState)
-      return { imported: configs.length > 0 }
-    } catch {
-      return { imported: false }
-    }
   }
 
   private __storageKey() {

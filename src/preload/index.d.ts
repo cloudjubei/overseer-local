@@ -15,6 +15,7 @@ import type { FactoryTestsService } from '@renderer/services/factoryTestsService
 import type { CompletionService } from '@renderer/services/completionService'
 import type { GitService } from '@renderer/services/gitService'
 import type { GitCredentialsService } from '@renderer/services/gitCredentialsService'
+import type { LLMConfigsService } from '@renderer/services/llmConfigsService'
 
 declare global {
   interface Window {
@@ -35,6 +36,7 @@ declare global {
     factoryTestsService: FactoryTestsService
     gitService: GitService
     gitCredentialsService: GitCredentialsService
+    llmConfigsService: LLMConfigsService
   }
 }
 export {}
