@@ -270,6 +270,8 @@ const FACTORY_AGENT_RUN_API = {
 const FACTORY_TOOLS_API = {
   executeTool: (projectId, toolName, args) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TOOLS_EXECUTE, { projectId, toolName, args }),
+  previewTool: (projectId, toolName, args) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TOOLS_PREVIEW, { projectId, toolName, args }),
 }
 
 const FACTORY_TESTS_API = {

@@ -182,12 +182,7 @@ function PreLimited({
   )
 }
 
-// Simple unified diff builder to fallback when the write_file result did not include a patch
-function buildSimpleUnifiedDiff(
-  path: string,
-  beforeText?: string,
-  afterText?: string,
-): string | undefined {
+function buildSimpleUnifiedDiff(path: string, beforeText?: string, afterText?: string): string | undefined {
   if (!path || typeof afterText !== 'string') return undefined
   const before = typeof beforeText === 'string' ? beforeText : ''
   if (before === afterText) return undefined
@@ -198,6 +193,20 @@ function buildSimpleUnifiedDiff(
   const removed = beforeLines.map((l) => `-${l}`)
   const added = afterLines.map((l) => `+${l}`)
   return [...header, ...hunk, ...removed, ...added].join('\n')
+}
+
+type ToolPreview =
+  | { status: 'pending' }
+  | { status: 'error'; error: string }
+  | { status: 'ready'; patch: string }
+
+function looksLikeDiffPatchText(text: string): boolean {
+  const s = (text || '').trim()
+  if (!s) return false
+  if (s.includes('@@')) return true
+  if (/^Index:\s+/m.test(s)) return true
+  if (/^---\s+/m.test(s) && /^\+\+\+\s+/m.test(s)) return true
+  return false
 }
 
 export default function ToolCallChangePopup({
@@ -215,29 +224,9 @@ export default function ToolCallChangePopup({
   const { projectId } = useActiveProject()
   const { storiesById, featuresById } = useStories()
 
-  function errorContentOnly(): React.ReactNode {
-    const msg = tryString(
-      extract(result, ['error.message']) ||
-        extract(result, ['message']) ||
-        extract(result, ['error']),
-    )
-    const label =
-      resultType === 'errored'
-        ? 'Tool failed'
-        : resultType === 'aborted'
-          ? 'Tool aborted'
-          : 'Tool status'
-    return (
-      <div className="text-[11px] rounded border border-red-600/40 bg-red-500/10 text-red-700 dark:text-red-300 px-2 py-1">
-        <span className="font-semibold mr-1">{label}.</span>
-        {msg ? <span className="font-mono">{msg}</span> : null}
-      </div>
-    )
-  }
-
-  // Pre-compute values for write_file so we can synthesize a diff if missing
   const args = toolCall?.arguments || {}
   const toolName = String(name)
+
   const writeFilePath: string | undefined =
     tryString(
       extract(args, ['path']) ||
@@ -245,6 +234,7 @@ export default function ToolCallChangePopup({
         extract(args, ['relPath']) ||
         extract(result, ['path']),
     ) || undefined
+
   const writeFileNewText: string | undefined =
     tryString(
       extract(result, ['after.content', 'newContent', 'content']) ||
@@ -252,6 +242,7 @@ export default function ToolCallChangePopup({
         extract(args, ['text']) ||
         extract(args, ['data']),
     ) || undefined
+
   const writeFileResultDiff = buildUnifiedDiffIfPresent(result)
   const [computedDiff, setComputedDiff] = useState<string | undefined>(undefined)
   const [computedIsNewFile, setComputedIsNewFile] = useState<boolean>(false)
@@ -267,9 +258,7 @@ export default function ToolCallChangePopup({
       }
       if (!writeFilePath || !writeFileNewText) return
       try {
-        const beforeText = projectId
-          ? await filesService.readFile(projectId, writeFilePath, 'utf8')
-          : undefined
+        const beforeText = projectId ? await filesService.readFile(projectId, writeFilePath, 'utf8') : undefined
         if (cancelled) return
         setComputedIsNewFile(!beforeText)
         const diff = buildSimpleUnifiedDiff(writeFilePath, beforeText, writeFileNewText)
@@ -283,6 +272,22 @@ export default function ToolCallChangePopup({
       cancelled = true
     }
   }, [toolName, writeFilePath, writeFileNewText, writeFileResultDiff, projectId])
+
+  function errorContentOnly(): React.ReactNode {
+    const msg = tryString(extract(result, ['error.message']) || extract(result, ['message']) || extract(result, ['error']))
+    const label =
+      resultType === 'errored'
+        ? 'Tool failed'
+        : resultType === 'aborted'
+          ? 'Tool aborted'
+          : 'Tool status'
+    return (
+      <div className="text-[11px] rounded border border-red-600/40 bg-red-500/10 text-red-700 dark:text-red-300 px-2 py-1">
+        <span className="font-semibold mr-1">{label}.</span>
+        {msg ? <span className="font-mono">{msg}</span> : null}
+      </div>
+    )
+  }
 
   const content = useMemo(() => {
     const args = toolCall?.arguments || {}
@@ -312,15 +317,11 @@ export default function ToolCallChangePopup({
         <div className="text-xs">
           <span className="text-[var(--text-secondary)]">Path:</span>{' '}
           {srcPath ? (
-            <span className="font-mono text-[11px] line-through text-red-600/80 mr-1">
-              {srcPath}
-            </span>
+            <span className="font-mono text-[11px] line-through text-red-600/80 mr-1">{srcPath}</span>
           ) : null}
           {srcPath ? <span className="mx-1">→</span> : null}
           {dstPath ? (
-            <span className="font-mono text-[11px] font-semibold text-green-600 dark:text-green-400">
-              {dstPath}
-            </span>
+            <span className="font-mono text-[11px] font-semibold text-green-600 dark:text-green-400">{dstPath}</span>
           ) : null}
         </div>
       )
@@ -344,8 +345,7 @@ export default function ToolCallChangePopup({
           ? featuresById[args.featureId]?.description
           : storiesById[args.storyId]?.description
       const newDesc = tryString(extract(args, ['description']))
-      const diff = undefined //TODO: make diff work well then use only it
-      // oldDesc && newDesc ? buildSimpleUnifiedDiff('feature', oldDesc, newDesc) : undefined
+      const diff = undefined
       return (
         <div className="text-xs">
           {diff ? (
@@ -373,6 +373,40 @@ export default function ToolCallChangePopup({
 
     if (n === 'writeFile' || n === 'writeDiffToFile') {
       const path = writeFilePath
+
+      if (resultType === 'require_confirmation') {
+        const preview = result as ToolPreview | undefined
+        return (
+          <div className="space-y-1">
+            <Row>
+              <span className="text-[var(--text-secondary)]">Path:</span>{' '}
+              <span className="font-mono text-[11px]">{path || '(unknown)'}</span>
+            </Row>
+
+            {preview?.status === 'pending' ? (
+              <div className="text-xs text-[var(--text-secondary)]">Generating preview…</div>
+            ) : preview?.status === 'error' ? (
+              <div className="text-[11px] rounded border border-red-600/40 bg-red-500/10 text-red-700 dark:text-red-300 px-2 py-1">
+                <span className="font-semibold mr-1">Preview failed.</span>
+                <span className="font-mono">{preview.error}</span>
+              </div>
+            ) : preview?.status === 'ready' ? (
+              preview.patch && looksLikeDiffPatchText(preview.patch) ? (
+                preview.patch.includes('@@') ? (
+                  <StructuredUnifiedDiff patch={preview.patch} />
+                ) : (
+                  <Code language="diff" code={preview.patch} />
+                )
+              ) : (
+                <div className="text-xs text-[var(--text-secondary)]">Preview unavailable.</div>
+              )
+            ) : (
+              <div className="text-xs text-[var(--text-secondary)]">Generating preview…</div>
+            )}
+          </div>
+        )
+      }
+
       const diff = writeFileResultDiff || computedDiff
       const newText = writeFileNewText
       const isNew = isCompletelyNewFile(result, writeFileResultDiff) || computedIsNewFile
@@ -397,7 +431,6 @@ export default function ToolCallChangePopup({
 
     if (n === 'deletePath') {
       const delPath = tryString(extract(args, ['path']))
-      // If a result is present, show it (commonly indicates not found or a message)
       const resStr = (() => {
         if (result == null) return undefined
         try {
@@ -444,14 +477,11 @@ export default function ToolCallChangePopup({
     }
 
     if (n === 'finishFeature') {
-      // Show only a concise FeatureSummaryCard and nothing else
       const feature = extract(result, ['feature']) || result
       if (feature && typeof feature === 'object') {
         return <FeatureSummaryCard feature={feature} />
       }
-      return (
-        <div className="text-xs text-[var(--text-secondary)]">No feature details available.</div>
-      )
+      return <div className="text-xs text-[var(--text-secondary)]">No feature details available.</div>
     }
 
     if (n === 'reorderFeature' || n === 'reorderStory') {
@@ -508,11 +538,7 @@ export default function ToolCallChangePopup({
           {resultLines.length > 0 ? (
             <div>
               <SectionTitle>Results</SectionTitle>
-              <PreLimited
-                lines={resultLines}
-                maxLines={10}
-                renderTruncationMessage={(omitted) => <>+ {omitted} more</>}
-              />
+              <PreLimited lines={resultLines} maxLines={10} renderTruncationMessage={(omitted) => <>+ {omitted} more</>} />
             </div>
           ) : (
             <div className="text-[11px] text-[var(--text-secondary)]">No results</div>
@@ -539,16 +565,10 @@ export default function ToolCallChangePopup({
             </Row>
           ))}
           <div className="flex items-center gap-2">
-            <span className="text-green-700 dark:text-green-300 font-medium">
-              {Number(passed)} passed
-            </span>
-            <span className="text-red-700 dark:text-red-300 font-medium">
-              {Number(failed)} failed
-            </span>
+            <span className="text-green-700 dark:text-green-300 font-medium">{Number(passed)} passed</span>
+            <span className="text-red-700 dark:text-red-300 font-medium">{Number(failed)} failed</span>
             {typeof skipped === 'number' ? (
-              <span className="text-neutral-600 dark:text-neutral-400">
-                {Number(skipped)} skipped
-              </span>
+              <span className="text-neutral-600 dark:text-neutral-400">{Number(skipped)} skipped</span>
             ) : null}
             {typeof total === 'number' ? (
               <span className="text-neutral-600 dark:text-neutral-400">{Number(total)} total</span>
@@ -583,6 +603,8 @@ export default function ToolCallChangePopup({
     writeFileResultDiff,
     computedDiff,
     computedIsNewFile,
+    storiesById,
+    featuresById,
   ])
 
   return (

@@ -3,7 +3,13 @@ import IPC_HANDLER_KEYS from '../../preload/ipcHandlersKeys'
 import BaseManager from '../BaseManager'
 import ProjectsManager from '../projects/ProjectsManager'
 import SettingsManager from '../settings/SettingsManager'
-import { AgentTools, createAgentTools, createTools, GithubCredentials } from 'thefactory-tools'
+import {
+  AgentTools,
+  createAgentTools,
+  createTools,
+  GithubCredentials,
+  PreviewToolNotSupportedResult,
+} from 'thefactory-tools'
 
 export default class FactoryToolsManager extends BaseManager {
   private projectsManager: ProjectsManager
@@ -31,6 +37,9 @@ export default class FactoryToolsManager extends BaseManager {
     handlers[IPC_HANDLER_KEYS.FACTORY_TOOLS_EXECUTE] = ({ projectId, toolName, args }) =>
       this.executeTool(projectId, toolName, args)
 
+    handlers[IPC_HANDLER_KEYS.FACTORY_TOOLS_PREVIEW] = ({ projectId, toolName, args }) =>
+      this.previewTool(projectId, toolName, args)
+
     return handlers
   }
 
@@ -42,6 +51,21 @@ export default class FactoryToolsManager extends BaseManager {
     } catch (error: any) {
       console.error(`Error executing tool "${toolName}":`, error)
       throw new Error(`Failed to execute tool "${toolName}": ${error.message}`)
+    }
+  }
+
+  async previewTool(
+    projectId: string,
+    toolName: string,
+    args: any,
+  ): Promise<any | PreviewToolNotSupportedResult> {
+    const tools = await this.__getTools(projectId)
+
+    try {
+      return await tools?.previewTool(toolName, args)
+    } catch (error: any) {
+      console.error(`Error previewing tool "${toolName}":`, error)
+      throw new Error(`Failed to preview tool "${toolName}": ${error.message}`)
     }
   }
 

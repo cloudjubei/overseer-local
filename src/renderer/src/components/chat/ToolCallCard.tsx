@@ -16,6 +16,8 @@ import ToolCallChangePopup from './ToolCallChangePopup'
 export type ToolCallCardProps = {
   toolCall: ToolCall
   result?: any
+  // Optional: preview result shown when resultType is require_confirmation
+  previewResult?: any
   resultType?: ToolResultType
   durationMs?: number
   selectable?: boolean
@@ -135,9 +137,20 @@ function getErrorString(result: any): string | undefined {
   }
 }
 
+function debugValuePreview(v: any): any {
+  if (v == null) return v
+  if (typeof v === 'string') return v.length > 400 ? `${v.slice(0, 400)}…(len=${v.length})` : v
+  if (typeof v === 'object') {
+    const keys = Object.keys(v)
+    return { __type: 'object', keys: keys.slice(0, 20), hasMoreKeys: keys.length > 20 }
+  }
+  return v
+}
+
 export default function ToolCallCard({
   toolCall,
   result,
+  previewResult,
   resultType,
   durationMs,
   selectable,
@@ -238,12 +251,15 @@ export default function ToolCallCard({
     return <div className={anchorClassName}>{content}</div>
   }
 
+  const popupResult = isRequireConfirm ? previewResult : result
+
   return (
     <Tooltip
       content={
         <ToolCallChangePopup
           toolCall={toolCall}
-          result={!isRequireConfirm ? result : undefined}
+          // Important: allow preview content to show for require_confirmation
+          result={popupResult}
           resultType={resultType}
           durationMs={durationMs}
         />

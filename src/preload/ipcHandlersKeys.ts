@@ -114,6 +114,7 @@ const IPC_HANDLER_KEYS = {
 
   // Factory tools
   FACTORY_TOOLS_EXECUTE: 'factory:tools:execute',
+  FACTORY_TOOLS_PREVIEW: 'factory:tools:preview',
 
   // Factory Tests
   FACTORY_TESTS_SUBSCRIBE: 'factory:tests:subscribe',
