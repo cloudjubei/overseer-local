@@ -4,11 +4,10 @@ import React, {
   useContext,
   useEffect,
   useMemo,
-  useRef,
   useState,
 } from 'react'
-import { LLMConfigManager, LLM_CONFIGS_CHANGED_EVENT } from '../utils/LLMConfigManager'
 import type { LLMConfig } from 'thefactory-tools'
+import { llmConfigsService } from '../services/llmConfigsService'
 
 export type LLMConfigContextValue = {
   configs: LLMConfig[]

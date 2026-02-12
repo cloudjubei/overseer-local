@@ -399,6 +399,29 @@ const GIT_CREDENTIALS_API = {
   get: (id) => ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_CREDENTIALS_GET, { id }),
 }
 
+const LLM_CONFIGS_API = {
+  subscribe: (callback) => {
+    const listener = (_event, _payload) => callback()
+    ipcRenderer.on(IPC_HANDLER_KEYS.LLM_CONFIGS_SUBSCRIBE, listener)
+    return () => ipcRenderer.removeListener(IPC_HANDLER_KEYS.LLM_CONFIGS_SUBSCRIBE, listener)
+  },
+  list: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.LLM_CONFIGS_LIST),
+  add: (input) => ipcRenderer.invoke(IPC_HANDLER_KEYS.LLM_CONFIGS_ADD, { input }),
+  update: (id, patch) => ipcRenderer.invoke(IPC_HANDLER_KEYS.LLM_CONFIGS_UPDATE, { id, patch }),
+  remove: (id) => ipcRenderer.invoke(IPC_HANDLER_KEYS.LLM_CONFIGS_REMOVE, { id }),
+  getActiveAgentRunId: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.LLM_CONFIGS_GET_ACTIVE_AGENT_RUN),
+  setActiveAgentRunId: (id) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.LLM_CONFIGS_SET_ACTIVE_AGENT_RUN, { id }),
+  getRecentAgentRunIds: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.LLM_CONFIGS_GET_RECENT_AGENT_RUN),
+  getActiveChatId: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.LLM_CONFIGS_GET_ACTIVE_CHAT),
+  setActiveChatId: (id) => ipcRenderer.invoke(IPC_HANDLER_KEYS.LLM_CONFIGS_SET_ACTIVE_CHAT, { id }),
+  getRecentChatIds: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.LLM_CONFIGS_GET_RECENT_CHAT),
+  bumpRecent: (context, id, limit) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.LLM_CONFIGS_BUMP_RECENT, { context, id, limit }),
+  importLegacyLocalStorage: (payload) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.LLM_CONFIGS_IMPORT_LEGACY_LOCALSTORAGE, { payload }),
+}
+
 if (process.contextIsolated) {
   try {
     contextBridge.exposeInMainWorld('electron', electronAPI)
@@ -420,6 +443,7 @@ if (process.contextIsolated) {
     contextBridge.exposeInMainWorld('documentIngestionService', DOCUMENT_INGESTION_API)
     contextBridge.exposeInMainWorld('gitService', GIT_API)
     contextBridge.exposeInMainWorld('gitCredentialsService', GIT_CREDENTIALS_API)
+    contextBridge.exposeInMainWorld('llmConfigsService', LLM_CONFIGS_API)
   } catch (error) {
     console.error(error)
   }

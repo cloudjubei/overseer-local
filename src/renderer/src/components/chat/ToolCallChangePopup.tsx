@@ -258,7 +258,9 @@ export default function ToolCallChangePopup({
       }
       if (!writeFilePath || !writeFileNewText) return
       try {
-        const beforeText = projectId ? await filesService.readFile(projectId, writeFilePath, 'utf8') : undefined
+        const beforeText = projectId
+          ? await filesService.readFile(projectId, writeFilePath, 'utf8')
+          : undefined
         if (cancelled) return
         setComputedIsNewFile(!beforeText)
         const diff = buildSimpleUnifiedDiff(writeFilePath, beforeText, writeFileNewText)
@@ -274,7 +276,11 @@ export default function ToolCallChangePopup({
   }, [toolName, writeFilePath, writeFileNewText, writeFileResultDiff, projectId])
 
   function errorContentOnly(): React.ReactNode {
-    const msg = tryString(extract(result, ['error.message']) || extract(result, ['message']) || extract(result, ['error']))
+    const msg = tryString(
+      extract(result, ['error.message']) ||
+        extract(result, ['message']) ||
+        extract(result, ['error']),
+    )
     const label =
       resultType === 'errored'
         ? 'Tool failed'
@@ -317,11 +323,15 @@ export default function ToolCallChangePopup({
         <div className="text-xs">
           <span className="text-[var(--text-secondary)]">Path:</span>{' '}
           {srcPath ? (
-            <span className="font-mono text-[11px] line-through text-red-600/80 mr-1">{srcPath}</span>
+            <span className="font-mono text-[11px] line-through text-red-600/80 mr-1">
+              {srcPath}
+            </span>
           ) : null}
           {srcPath ? <span className="mx-1">→</span> : null}
           {dstPath ? (
-            <span className="font-mono text-[11px] font-semibold text-green-600 dark:text-green-400">{dstPath}</span>
+            <span className="font-mono text-[11px] font-semibold text-green-600 dark:text-green-400">
+              {dstPath}
+            </span>
           ) : null}
         </div>
       )
@@ -485,10 +495,11 @@ export default function ToolCallChangePopup({
     }
 
     if (n === 'reorderFeature' || n === 'reorderStory') {
-      const order = (extract(result, ['order']) ||
-        extract(result, ['features']) ||
-        extract(result, ['stories']) ||
-        extract(args, ['order'])) as any[] | undefined
+      const order =
+        (extract(result, ['order']) ||
+          extract(result, ['features']) ||
+          extract(result, ['stories']) ||
+          extract(args, ['order'])) as any[] | undefined
       const movedId = tryString(extract(args, ['movedId']) || extract(result, ['movedId']))
       if (order && Array.isArray(order) && order.length > 0) {
         return <ReorderList items={order} movedId={movedId} />
@@ -538,7 +549,11 @@ export default function ToolCallChangePopup({
           {resultLines.length > 0 ? (
             <div>
               <SectionTitle>Results</SectionTitle>
-              <PreLimited lines={resultLines} maxLines={10} renderTruncationMessage={(omitted) => <>+ {omitted} more</>} />
+              <PreLimited
+                lines={resultLines}
+                maxLines={10}
+                renderTruncationMessage={(omitted) => <>+ {omitted} more</>}
+              />
             </div>
           ) : (
             <div className="text-[11px] text-[var(--text-secondary)]">No results</div>
@@ -565,10 +580,16 @@ export default function ToolCallChangePopup({
             </Row>
           ))}
           <div className="flex items-center gap-2">
-            <span className="text-green-700 dark:text-green-300 font-medium">{Number(passed)} passed</span>
-            <span className="text-red-700 dark:text-red-300 font-medium">{Number(failed)} failed</span>
+            <span className="text-green-700 dark:text-green-300 font-medium">
+              {Number(passed)} passed
+            </span>
+            <span className="text-red-700 dark:text-red-300 font-medium">
+              {Number(failed)} failed
+            </span>
             {typeof skipped === 'number' ? (
-              <span className="text-neutral-600 dark:text-neutral-400">{Number(skipped)} skipped</span>
+              <span className="text-neutral-600 dark:text-neutral-400">
+                {Number(skipped)} skipped
+              </span>
             ) : null}
             {typeof total === 'number' ? (
               <span className="text-neutral-600 dark:text-neutral-400">{Number(total)} total</span>
@@ -608,17 +629,24 @@ export default function ToolCallChangePopup({
   ])
 
   return (
-    <div className="min-w-[260px] max-w-[42vw] max-h-[48vh] overflow-auto">
-      <div className="flex items-center justify-between gap-2 mb-1">
-        <div className="flex items-center gap-2 min-w-0">
-          <StatusIcon resultType={resultType} />
-          <div className="truncate text-xs font-semibold">{name}</div>
-        </div>
-        <div className="text-[10px] text-[var(--text-tertiary)] whitespace-nowrap">
-          {durationMs ? <span className="mr-2">{durationMs}ms</span> : null}
+    <div className="min-w-[260px] max-w-[42vw] max-h-[48vh] flex flex-col">
+      {/* Sticky header */}
+      <div className="sticky top-0 z-10 bg-[var(--surface-overlay)] px-2 pt-2">
+        <div className="flex items-center justify-between gap-2 mb-1">
+          <div className="flex items-center gap-2 min-w-0">
+            <StatusIcon resultType={resultType} />
+            <div className="truncate text-xs font-semibold">{name}</div>
+          </div>
+          <div className="text-[10px] text-[var(--text-tertiary)] whitespace-nowrap">
+            {durationMs ? <span className="mr-2">{durationMs}ms</span> : null}
+          </div>
         </div>
       </div>
-      <div className="border-t border-[var(--border-subtle)] pt-1">{content}</div>
+
+      {/* Scrollable body */}
+      <div className="border-t border-[var(--border-subtle)] pt-1 overflow-auto min-h-0 px-2 pb-2">
+        {content}
+      </div>
     </div>
   )
 }

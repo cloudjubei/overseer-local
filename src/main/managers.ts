@@ -15,6 +15,7 @@ import DocumentIngestionManager from '../logic/document_ingestion/DocumentIngest
 import FactoryCompletionManager from '../logic/factory/FactoryCompletionManager'
 import FactoryLLMPricingManager from '../logic/factory/FactoryLLMPricingManager'
 import FactoryTestsManager from '../logic/factory/FactoryTestsManager'
+import LLMConfigsManager from '../logic/llm/LLMConfigsManager'
 import GitCredentialsManager from '../logic/git/GitCredentialsManager'
 import GitManager from '../logic/git/GitManager'
 
@@ -33,6 +34,7 @@ export let documentIngestionManager: DocumentIngestionManager | undefined
 export let factoryToolsManager: FactoryToolsManager | undefined
 export let factoryCompletionManager: FactoryCompletionManager | undefined
 export let factoryTestsManager: FactoryTestsManager | undefined
+export let llmConfigsManager: LLMConfigsManager | undefined
 export let gitCredentialsManager: GitCredentialsManager | undefined
 export let gitManager: GitManager | undefined
 
@@ -75,6 +77,7 @@ export async function initManagers(projectRoot: string, mainWindow: BrowserWindo
     factoryToolsManager,
   )
   factoryTestsManager = new FactoryTestsManager(projectRoot, mainWindow, projectsManager)
+  llmConfigsManager = new LLMConfigsManager(projectRoot, mainWindow)
   gitCredentialsManager = new GitCredentialsManager(projectRoot, mainWindow)
   gitManager = new GitManager(projectRoot, mainWindow, projectsManager, gitCredentialsManager)
 
@@ -94,6 +97,7 @@ export async function initManagers(projectRoot: string, mainWindow: BrowserWindo
     factoryToolsManager,
     factoryCompletionManager,
     factoryTestsManager,
+    llmConfigsManager,
     gitCredentialsManager,
     gitManager,
   ]

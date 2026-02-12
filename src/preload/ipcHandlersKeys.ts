@@ -78,6 +78,21 @@ const IPC_HANDLER_KEYS = {
   SETTINGS_GET_PROJECT: 'preferences:get-project',
   SETTINGS_UPDATE_PROJECT: 'preferences:update-project',
 
+  // LLM Configs
+  LLM_CONFIGS_SUBSCRIBE: 'llm-configs:subscribe',
+  LLM_CONFIGS_LIST: 'llm-configs:list',
+  LLM_CONFIGS_ADD: 'llm-configs:add',
+  LLM_CONFIGS_UPDATE: 'llm-configs:update',
+  LLM_CONFIGS_REMOVE: 'llm-configs:remove',
+  LLM_CONFIGS_GET_ACTIVE_AGENT_RUN: 'llm-configs:get-active-agent-run',
+  LLM_CONFIGS_SET_ACTIVE_AGENT_RUN: 'llm-configs:set-active-agent-run',
+  LLM_CONFIGS_GET_RECENT_AGENT_RUN: 'llm-configs:get-recent-agent-run',
+  LLM_CONFIGS_GET_ACTIVE_CHAT: 'llm-configs:get-active-chat',
+  LLM_CONFIGS_SET_ACTIVE_CHAT: 'llm-configs:set-active-chat',
+  LLM_CONFIGS_GET_RECENT_CHAT: 'llm-configs:get-recent-chat',
+  LLM_CONFIGS_BUMP_RECENT: 'llm-configs:bump-recent',
+  LLM_CONFIGS_IMPORT_LEGACY_LOCALSTORAGE: 'llm-configs:import-legacy-localstorage',
+
   // Notifications
   NOTIFICATIONS_ON_OPEN: 'notifications:on-open',
   NOTIFICATIONS_SEND_OS: 'notifications:send-os',

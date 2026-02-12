@@ -1,0 +1,261 @@
+import type { BrowserWindow } from 'electron'
+import { v4 as uuidv4 } from 'uuid'
+import type { LLMConfig } from 'thefactory-tools'
+import IPC_HANDLER_KEYS from '../../preload/ipcHandlersKeys'
+import BaseManager from '../BaseManager'
+import AppStorage from '../settings/AppStorage'
+
+export type LLMConfigContext = 'chat' | 'agentRun'
+
+export type LLMConfigsState = {
+  configs: LLMConfig[]
+  activeAgentRunConfigId: string
+  recentAgentRunConfigIds: string[]
+  activeChatConfigId: string
+  recentChatConfigIds: string[]
+}
+
+const DEFAULT_STATE: LLMConfigsState = {
+  configs: [],
+  activeAgentRunConfigId: '',
+  recentAgentRunConfigIds: [],
+  activeChatConfigId: '',
+  recentChatConfigIds: [],
+}
+
+function normalizeStringArray(value: unknown): string[] {
+  if (!Array.isArray(value)) return []
+  return value.filter((x) => typeof x === 'string') as string[]
+}
+
+function normalizeState(value: unknown): LLMConfigsState {
+  try {
+    const v = (value ?? {}) as Partial<LLMConfigsState>
+    const configs = Array.isArray(v.configs) ? (v.configs as LLMConfig[]) : []
+    return {
+      configs,
+      activeAgentRunConfigId: typeof v.activeAgentRunConfigId === 'string' ? v.activeAgentRunConfigId : '',
+      recentAgentRunConfigIds: normalizeStringArray(v.recentAgentRunConfigIds),
+      activeChatConfigId: typeof v.activeChatConfigId === 'string' ? v.activeChatConfigId : '',
+      recentChatConfigIds: normalizeStringArray(v.recentChatConfigIds),
+    }
+  } catch {
+    return { ...DEFAULT_STATE }
+  }
+}
+
+export default class LLMConfigsManager extends BaseManager {
+  private storage: AppStorage
+  private cache: LLMConfigsState
+
+  constructor(projectRoot: string, window: BrowserWindow) {
+    super(projectRoot, window)
+    this.storage = new AppStorage('llm-configs')
+    this.cache = this.__load()
+  }
+
+  getHandlers(): Record<string, (args: any) => any> {
+    const handlers: Record<string, (args: any) => any> = {}
+
+    handlers[IPC_HANDLER_KEYS.LLM_CONFIGS_LIST] = () => this.list()
+    handlers[IPC_HANDLER_KEYS.LLM_CONFIGS_ADD] = ({ input }) => this.add(input)
+    handlers[IPC_HANDLER_KEYS.LLM_CONFIGS_UPDATE] = ({ id, patch }) => this.update(id, patch)
+    handlers[IPC_HANDLER_KEYS.LLM_CONFIGS_REMOVE] = ({ id }) => this.remove(id)
+
+    handlers[IPC_HANDLER_KEYS.LLM_CONFIGS_GET_ACTIVE_AGENT_RUN] = () => this.getActiveAgentRunId()
+    handlers[IPC_HANDLER_KEYS.LLM_CONFIGS_SET_ACTIVE_AGENT_RUN] = ({ id }) => this.setActiveAgentRunId(id)
+    handlers[IPC_HANDLER_KEYS.LLM_CONFIGS_GET_RECENT_AGENT_RUN] = () => this.getRecentAgentRunIds()
+
+    handlers[IPC_HANDLER_KEYS.LLM_CONFIGS_GET_ACTIVE_CHAT] = () => this.getActiveChatId()
+    handlers[IPC_HANDLER_KEYS.LLM_CONFIGS_SET_ACTIVE_CHAT] = ({ id }) => this.setActiveChatId(id)
+    handlers[IPC_HANDLER_KEYS.LLM_CONFIGS_GET_RECENT_CHAT] = () => this.getRecentChatIds()
+
+    handlers[IPC_HANDLER_KEYS.LLM_CONFIGS_BUMP_RECENT] = ({ context, id, limit }) =>
+      this.bumpRecent(context, id, limit)
+
+    handlers[IPC_HANDLER_KEYS.LLM_CONFIGS_IMPORT_LEGACY_LOCALSTORAGE] = ({ payload }) =>
+      this.importLegacyLocalStorage(payload)
+
+    return handlers
+  }
+
+  list(): LLMConfigsState {
+    return this.cache
+  }
+
+  add(input: Omit<LLMConfig, 'id'>): LLMConfig {
+    const next: LLMConfig = { ...input, id: uuidv4() }
+    const configs = [...this.cache.configs, next]
+    let state: LLMConfigsState = { ...this.cache, configs }
+
+    // Set defaults if first config
+    if (configs.length === 1) {
+      state = {
+        ...state,
+        activeAgentRunConfigId: next.id!,
+        activeChatConfigId: next.id!,
+        recentAgentRunConfigIds: [next.id!],
+        recentChatConfigIds: [next.id!],
+      }
+    }
+
+    this.__persist(this.__sanitizeState(state))
+    return next
+  }
+
+  update(id: string, patch: Partial<LLMConfig>): LLMConfig | undefined {
+    const idx = this.cache.configs.findIndex((c) => c.id === id)
+    if (idx === -1) return undefined
+
+    const updated: LLMConfig = { ...this.cache.configs[idx], ...patch, id }
+    const configs = [...this.cache.configs]
+    configs[idx] = updated
+
+    this.__persist(this.__sanitizeState({ ...this.cache, configs }))
+    return updated
+  }
+
+  remove(id: string): void {
+    const configs = this.cache.configs.filter((c) => c.id !== id)
+    this.__persist(this.__sanitizeState({ ...this.cache, configs }))
+  }
+
+  getActiveAgentRunId(): string {
+    return this.cache.activeAgentRunConfigId || ''
+  }
+
+  setActiveAgentRunId(id: string): void {
+    const state: LLMConfigsState = { ...this.cache, activeAgentRunConfigId: id }
+    this.__persist(this.__sanitizeState(state))
+    this.bumpRecent('agentRun', id)
+  }
+
+  getActiveChatId(): string {
+    return this.cache.activeChatConfigId || ''
+  }
+
+  setActiveChatId(id: string): void {
+    const state: LLMConfigsState = { ...this.cache, activeChatConfigId: id }
+    this.__persist(this.__sanitizeState(state))
+    this.bumpRecent('chat', id)
+  }
+
+  getRecentAgentRunIds(): string[] {
+    return this.cache.recentAgentRunConfigIds
+  }
+
+  getRecentChatIds(): string[] {
+    return this.cache.recentChatConfigIds
+  }
+
+  bumpRecent(context: LLMConfigContext, id: string, limit = 10): void {
+    if (!id) return
+
+    if (context === 'agentRun') {
+      const ids = this.cache.recentAgentRunConfigIds
+      const next = [id, ...ids.filter((x) => x !== id)].slice(0, limit)
+      this.__persist(this.__sanitizeState({ ...this.cache, recentAgentRunConfigIds: next }))
+      return
+    }
+
+    const ids = this.cache.recentChatConfigIds
+    const next = [id, ...ids.filter((x) => x !== id)].slice(0, limit)
+    this.__persist(this.__sanitizeState({ ...this.cache, recentChatConfigIds: next }))
+  }
+
+  /**
+   * One-time migration from renderer legacy localStorage.
+   * The renderer passes a payload containing the parsed localStorage values.
+   *
+   * Idempotent rules:
+   * - If we already have at least one config, do nothing.
+   * - Otherwise import configs and preferences if present.
+   */
+  importLegacyLocalStorage(payload: unknown): { imported: boolean } {
+    try {
+      if (this.cache.configs.length > 0) return { imported: false }
+
+      const p = (payload ?? {}) as any
+      const legacyConfigs: LLMConfig[] = Array.isArray(p.llmConfigs) ? p.llmConfigs : []
+
+      const configs = legacyConfigs
+        .filter((c) => c && typeof c === 'object')
+        .map((c) => {
+          const id = typeof c.id === 'string' && c.id ? c.id : uuidv4()
+          return { ...c, id } as LLMConfig
+        })
+
+      const nextState: LLMConfigsState = this.__sanitizeState({
+        configs,
+        activeAgentRunConfigId: typeof p.activeAgentRunConfigId === 'string' ? p.activeAgentRunConfigId : '',
+        recentAgentRunConfigIds: normalizeStringArray(p.recentAgentRunConfigIds),
+        activeChatConfigId: typeof p.activeChatConfigId === 'string' ? p.activeChatConfigId : '',
+        recentChatConfigIds: normalizeStringArray(p.recentChatConfigIds),
+      })
+
+      this.__persist(nextState)
+      return { imported: configs.length > 0 }
+    } catch {
+      return { imported: false }
+    }
+  }
+
+  private __storageKey() {
+    return 'llm_configs_state'
+  }
+
+  private __load(): LLMConfigsState {
+    try {
+      const raw = this.storage.getItem(this.__storageKey())
+      if (!raw) return { ...DEFAULT_STATE }
+      return normalizeState(JSON.parse(raw))
+    } catch {
+      return { ...DEFAULT_STATE }
+    }
+  }
+
+  private __persist(next: LLMConfigsState): void {
+    try {
+      this.storage.setItem(this.__storageKey(), JSON.stringify(next))
+      this.cache = next
+      this.__broadcast()
+    } catch (e) {
+      console.error('Failed to persist LLM configs:', e)
+    }
+  }
+
+  private __broadcast(): void {
+    try {
+      if (this.window && !this.window.isDestroyed()) {
+        this.window.webContents.send(IPC_HANDLER_KEYS.LLM_CONFIGS_SUBSCRIBE, {})
+      }
+    } catch (_) {}
+  }
+
+  private __sanitizeState(state: LLMConfigsState): LLMConfigsState {
+    const presentIds = new Set(state.configs.map((c) => c.id).filter(Boolean) as string[])
+
+    const recentAgentRunConfigIds = state.recentAgentRunConfigIds.filter((id) => presentIds.has(id))
+    const recentChatConfigIds = state.recentChatConfigIds.filter((id) => presentIds.has(id))
+
+    const fallback = state.configs[0]?.id || ''
+
+    const activeAgentRunConfigId =
+      state.activeAgentRunConfigId && presentIds.has(state.activeAgentRunConfigId)
+        ? state.activeAgentRunConfigId
+        : fallback
+
+    const activeChatConfigId =
+      state.activeChatConfigId && presentIds.has(state.activeChatConfigId)
+        ? state.activeChatConfigId
+        : fallback
+
+    return {
+      ...state,
+      activeAgentRunConfigId,
+      activeChatConfigId,
+      recentAgentRunConfigIds,
+      recentChatConfigIds,
+    }
+  }
+}
