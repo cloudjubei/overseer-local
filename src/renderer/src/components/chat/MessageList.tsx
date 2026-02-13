@@ -181,7 +181,9 @@ export default function MessageList({
         showModel = !prevAssistant || prevAssistant.model !== m.model
       }
       const effectiveMessage: EnhancedMessage = { ...m }
-      if (m.toolResults?.length) {
+      // Legacy tool results wrapper messages are rendered as system/toolbox bubbles.
+      // Canonical tool messages (role: 'tool') should preserve their role.
+      if (m.toolResults?.length && m.completionMessage.role !== 'tool') {
         effectiveMessage.completionMessage.role = 'system'
       }
       const prev = messages[index - 1]
@@ -749,6 +751,12 @@ export default function MessageList({
           const isSystem = msg.completionMessage.role === 'system'
           const isUser = msg.completionMessage.role === 'user'
           const isAssistant = msg.completionMessage.role === 'assistant'
+          const isTool = msg.completionMessage.role === 'tool'
+          const isToolbox = isSystem || isTool
+
+          const toolMeta = (msg.completionMessage as any) || {}
+          const toolName: string | undefined = isTool ? (toolMeta.toolName as string | undefined) : undefined
+          const toolCallId: string | undefined = isTool ? (toolMeta.toolCallId as string | undefined) : undefined
 
           const isLast = globalIndex === messagesToDisplay.length - 1
 
@@ -799,7 +807,7 @@ export default function MessageList({
 
           const shouldShowDelete =
             !!onDeleteLastMessage &&
-            ((isLast && (isUser || isAssistant)) ||
+            ((isLast && (isUser || isAssistant || isToolbox)) ||
               isAssistantBeforeSystemToolResults ||
               isDeletableSystemLast)
 
@@ -836,13 +844,13 @@ export default function MessageList({
                       'shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-semibold',
                       isUser
                         ? 'bg-[var(--accent-primary)] text-[var(--text-inverted)]'
-                        : isSystem
+                        : isToolbox
                           ? 'bg-[var(--surface-overlay)] text-[var(--text-primary)] border border-[var(--border-subtle)]'
                           : 'bg-[color-mix(in_srgb,var(--accent-primary)_14%,transparent)] text-[var(--text-primary)] border border-[var(--border-subtle)]',
                     ].join(' ')}
                     aria-hidden="true"
                   >
-                    {isUser ? 'You' : isSystem ? <IconToolbox /> : 'AI'}
+                    {isUser ? 'You' : isToolbox ? <IconToolbox /> : 'AI'}
                   </div>
                   {shouldShowDelete ? (
                     <button
@@ -864,7 +872,7 @@ export default function MessageList({
                 <div
                   className={[
                     'max-w-[85%] min-w-0',
-                    isUser ? 'items-end' : isSystem ? 'w-full' : 'items-start',
+                    isUser ? 'items-end' : isToolbox ? 'w-full' : 'items-start',
                   ].join(' ')}
                 >
                   <div className={['flex-col', isUser ? 'items-start' : 'items-end'].join(' ')}>
@@ -924,7 +932,7 @@ export default function MessageList({
                           'overflow-x-auto max-w-full px-3 py-2 rounded-2xl whitespace-pre-wrap break-words shadow',
                           isUser
                             ? 'bg-[var(--accent-primary)] text-[var(--text-inverted)] rounded-br-md'
-                            : isSystem
+                            : isToolbox
                               ? toggleableCount > 0
                                 ? 'border bg-teal-500/20 border-teal-600 dark:border-teal-700 dark:bg-teal-800/60'
                                 : 'border bg-[var(--surface-overlay)] text-[var(--text-primary)] border-[var(--border-subtle)]'
@@ -943,6 +951,18 @@ export default function MessageList({
                             text={msg.completionMessage.content}
                             renderer="markdown"
                           />
+                        ) : isTool ? (
+                          <div className="space-y-2">
+                            <div className="text-xs font-semibold">
+                              Tool output{toolName ? `: ${toolName}` : ''}
+                            </div>
+                            {toolCallId ? (
+                              <div className="text-[11px] text-[var(--text-secondary)]">{`toolCallId: ${toolCallId}`}</div>
+                            ) : null}
+                            <CollapsibleContent maxHeight={600}>
+                              <Markdown text={msg.completionMessage.content || ''} />
+                            </CollapsibleContent>
+                          </div>
                         ) : isSystem ? (
                           toggleableCount > 0 ? (
                             <div className="text-sm">

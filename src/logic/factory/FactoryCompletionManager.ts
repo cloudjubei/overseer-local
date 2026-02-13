@@ -92,32 +92,82 @@ export default class FactoryCompletionManager extends BaseManager {
     return handlers
   }
 
-  private processChatMessagesForCompletion(messages: ChatMessage[]): CompletionMessage[] {
-    // Transform messages with attachments into content that includes @path mentions
-    return (messages || []).map((c) => {
-      const m = c.completionMessage
+  private safeToolContent(result: any): string {
+    if (typeof result === 'string') return result
+    try {
+      return JSON.stringify(result)
+    } catch {
+      return String(result)
+    }
+  }
 
-      if (c.toolResults?.length) {
-        const toolResults = c.toolResults.map((r) => ({
-          name: r.call.name,
-          result: r.result,
-        }))
-        return {
-          role: 'user',
-          content: JSON.stringify(toolResults),
-        }
+  private processChatMessagesForCompletion(messages: ChatMessage[]): CompletionMessage[] {
+    // Canonical tool transcript support (new thefactory-tools):
+    // - Assistant tool requests are represented on assistant messages via toolCalls.
+    // - Tool outputs are represented as regular messages with role: 'tool'.
+    //
+    // Legacy support (current persisted chats in this app):
+    // - Tool outputs are stored on ChatMessage.toolResults.
+    //   We convert those into canonical role:'tool' messages at request-build time.
+
+    const out: CompletionMessage[] = []
+
+    const msgs = messages || []
+    for (let msgIndex = 0; msgIndex < msgs.length; msgIndex++) {
+      const c = msgs[msgIndex]
+      const m: any = c?.completionMessage
+      if (!m) continue
+
+      // 1) Canonical persisted tool messages (role: 'tool')
+      if (m.role === 'tool') {
+        out.push({
+          role: 'tool',
+          toolCallId: String(m.toolCallId || ''),
+          toolName: String(m.toolName || ''),
+          content: typeof m.content === 'string' ? m.content : this.safeToolContent(m.content),
+        } as any)
+        continue
       }
+
+      // 2) Legacy persisted tool results wrapper message
+      if (c.toolResults?.length) {
+        for (let toolIndex = 0; toolIndex < c.toolResults.length; toolIndex++) {
+          const r = c.toolResults[toolIndex]
+          const toolCallId = r.call?.id
+            ? String(r.call.id)
+            : `legacy:${msgIndex}:${toolIndex}`
+          out.push({
+            role: 'tool',
+            toolCallId,
+            toolName: String(r.call?.name || ''),
+            content: this.safeToolContent(r.result),
+          })
+        }
+        continue
+      }
+
+      // 3) Normal message; transform attachments into @path mentions
       if (Array.isArray(m.files) && m.files.length) {
         const unique = Array.from(new Set(m.files.filter(Boolean)))
         const attachText = unique.map((p) => `@${p}`).join('\n')
         const sep = m.content && attachText ? '\n\n' : ''
-        return {
+
+        const base: any = {
           role: m.role,
           content: `${m.content || ''}${sep}Attached files:\n${attachText}`,
         }
+        if (m.role === 'assistant' && Array.isArray(m.toolCalls)) base.toolCalls = m.toolCalls
+        out.push(base)
+        continue
       }
-      return { role: m.role, content: m.content }
-    })
+
+      // Default pass-through (including assistant toolCalls)
+      const base: any = { role: m.role, content: m.content }
+      if (m.role === 'assistant' && Array.isArray(m.toolCalls)) base.toolCalls = m.toolCalls
+      out.push(base)
+    }
+
+    return out
   }
 
   async sendCompletion(
@@ -230,7 +280,7 @@ export default class FactoryCompletionManager extends BaseManager {
           startedAt: now,
           completedAt: now,
           durationMs: 0,
-        },
+        } as any,
       },
     ])
     if (!chat) throw new Error('CHAT NOT FOUND')
@@ -300,18 +350,37 @@ export default class FactoryCompletionManager extends BaseManager {
       response: CompletionResponse,
       agentResponse?: AgentResponse,
     ): Promise<void> => {
-      let m: ChatMessage = {
+      const role: any = (response as any)?.role
+
+      // New canonical: tool output messages can arrive in the normal message stream.
+      if (role === 'tool') {
+        const toolMsg: any = {
+          completionMessage: {
+            ...(response as any),
+            role: 'tool',
+            content: (response as any).content ?? '',
+            toolCallId: String((response as any).toolCallId ?? ''),
+            toolName: String((response as any).toolName ?? ''),
+          },
+          model: { model: config.model, provider: config.provider },
+        }
+        await this.chatsManager.addChatMessages(chatContext, [toolMsg])
+        return
+      }
+
+      const assistantMsg: ChatMessage = {
         completionMessage: { ...response, content: agentResponse?.message ?? response.content },
         toolCalls: agentResponse?.toolCalls,
         model: { model: config.model, provider: config.provider },
       }
-      await this.chatsManager.addChatMessages(chatContext, [m])
+      await this.chatsManager.addChatMessages(chatContext, [assistantMsg])
     }
 
     const turnFinishedCallback = async (
       turn: number,
       response: CompletionResponseWithTools,
     ): Promise<boolean> => {
+      // Keep writing legacy toolResults wrapper messages (dual support).
       if (response.toolResults.results.length > 0) {
         let m: ChatMessage = {
           completionMessage: {
@@ -321,7 +390,7 @@ export default class FactoryCompletionManager extends BaseManager {
             completedAt: response.toolResults.completedAt,
             durationMs: response.toolResults.durationMs,
             usage: { promptTokens: 0, completionTokens: 0 },
-          },
+          } as any,
           toolResults: response.toolResults.results,
         }
         await this.chatsManager.addChatMessages(chatContext, [m])
@@ -352,7 +421,7 @@ export default class FactoryCompletionManager extends BaseManager {
           startedAt: now,
           completedAt: now,
           durationMs: 0,
-        },
+        } as any,
         error: c.error,
       }
       await this.chatsManager.addChatMessages(chatContext, [errorMessage])
@@ -366,7 +435,7 @@ export default class FactoryCompletionManager extends BaseManager {
           startedAt: now,
           completedAt: now,
           durationMs: 0,
-        },
+        } as any,
       }
       await this.chatsManager.addChatMessages(chatContext, [errorMessage])
     }
