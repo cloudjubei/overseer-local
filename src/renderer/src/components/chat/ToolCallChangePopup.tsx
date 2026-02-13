@@ -227,6 +227,8 @@ export default function ToolCallChangePopup({
   const args = toolCall?.arguments || {}
   const toolName = String(name)
 
+  const isWriteTool = toolName === 'writeFile' || toolName === 'writeDiffToFile'
+
   const writeFilePath: string | undefined =
     tryString(
       extract(args, ['path']) ||
@@ -382,17 +384,10 @@ export default function ToolCallChangePopup({
     }
 
     if (n === 'writeFile' || n === 'writeDiffToFile') {
-      const path = writeFilePath
-
       if (resultType === 'require_confirmation') {
         const preview = result as ToolPreview | undefined
         return (
           <div className="space-y-1">
-            <Row>
-              <span className="text-[var(--text-secondary)]">Path:</span>{' '}
-              <span className="font-mono text-[11px]">{path || '(unknown)'}</span>
-            </Row>
-
             {preview?.status === 'pending' ? (
               <div className="text-xs text-[var(--text-secondary)]">Generating preview…</div>
             ) : preview?.status === 'error' ? (
@@ -422,10 +417,6 @@ export default function ToolCallChangePopup({
       const isNew = isCompletelyNewFile(result, writeFileResultDiff) || computedIsNewFile
       return (
         <div className="space-y-1">
-          <Row>
-            <span className="text-[var(--text-secondary)]">Path:</span>{' '}
-            <span className="font-mono text-[11px]">{path || '(unknown)'}</span>
-          </Row>
           {isNew ? (
             <NewContentOnly text={newText} label="File completely new." />
           ) : diff ? (
@@ -619,8 +610,6 @@ export default function ToolCallChangePopup({
     toolCall?.arguments,
     result,
     resultType,
-    writeFilePath,
-    writeFileNewText,
     writeFileResultDiff,
     computedDiff,
     computedIsNewFile,
@@ -641,6 +630,17 @@ export default function ToolCallChangePopup({
             {durationMs ? <span className="mr-2">{durationMs}ms</span> : null}
           </div>
         </div>
+
+        {isWriteTool ? (
+          <div className="pb-1">
+            <div
+              className="font-mono text-[11px] text-[var(--text-secondary)] truncate"
+              title={writeFilePath || ''}
+            >
+              {writeFilePath || '(unknown path)'}
+            </div>
+          </div>
+        ) : null}
       </div>
 
       {/* Scrollable body */}
