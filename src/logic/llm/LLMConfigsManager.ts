@@ -28,10 +28,25 @@ function normalizeStringArray(value: unknown): string[] {
   return value.filter((x) => typeof x === 'string') as string[]
 }
 
+function normalizeConfig(input: unknown): LLMConfig | null {
+  if (!input || typeof input !== 'object') return null
+  const raw = input as Record<string, unknown>
+
+  const next = { ...raw }
+
+  // apiUrlOverride should only be present as a non-empty string.
+  // If empty or not a string, remove it so it stays undefined.
+  if (typeof next.apiUrlOverride !== 'string' || next.apiUrlOverride === '') {
+    delete next.apiUrlOverride
+  }
+
+  return next as LLMConfig
+}
+
 function normalizeState(value: unknown): LLMConfigsState {
   try {
     const v = (value ?? {}) as Partial<LLMConfigsState>
-    const configs = Array.isArray(v.configs) ? (v.configs as LLMConfig[]) : []
+    const configs = Array.isArray(v.configs) ? (v.configs.map(normalizeConfig).filter(Boolean) as LLMConfig[]) : []
     return {
       configs,
       activeAgentRunConfigId: typeof v.activeAgentRunConfigId === 'string' ? v.activeAgentRunConfigId : '',
@@ -51,7 +66,7 @@ export default class LLMConfigsManager extends BaseManager {
   constructor(projectRoot: string, window: BrowserWindow) {
     super(projectRoot, window)
     this.storage = new AppStorage('llm-configs')
-    this.cache = this.__load()
+    this.cache = this.__sanitizeState(this.__load())
   }
 
   getHandlers(): Record<string, (args: any) => any> {
@@ -81,7 +96,9 @@ export default class LLMConfigsManager extends BaseManager {
   }
 
   add(input: Omit<LLMConfig, 'id'>): LLMConfig {
-    const next: LLMConfig = { ...input, id: uuidv4() }
+    const normalized = normalizeConfig(input) as LLMConfig | null
+    const next: LLMConfig = { ...(normalized || (input as LLMConfig)), id: uuidv4() }
+
     const configs = [...this.cache.configs, next]
     let state: LLMConfigsState = { ...this.cache, configs }
 
@@ -104,7 +121,9 @@ export default class LLMConfigsManager extends BaseManager {
     const idx = this.cache.configs.findIndex((c) => c.id === id)
     if (idx === -1) return undefined
 
-    const updated: LLMConfig = { ...this.cache.configs[idx], ...patch, id }
+    const merged = { ...this.cache.configs[idx], ...patch, id }
+    const updated = (normalizeConfig(merged) || merged) as LLMConfig
+
     const configs = [...this.cache.configs]
     configs[idx] = updated
 
@@ -176,8 +195,9 @@ export default class LLMConfigsManager extends BaseManager {
 
   private __persist(next: LLMConfigsState): void {
     try {
-      this.storage.setItem(this.__storageKey(), JSON.stringify(next))
-      this.cache = next
+      const normalized = this.__sanitizeState(next)
+      this.storage.setItem(this.__storageKey(), JSON.stringify(normalized))
+      this.cache = normalized
       this.__broadcast()
     } catch (e) {
       console.error('Failed to persist LLM configs:', e)
@@ -193,12 +213,14 @@ export default class LLMConfigsManager extends BaseManager {
   }
 
   private __sanitizeState(state: LLMConfigsState): LLMConfigsState {
-    const presentIds = new Set(state.configs.map((c) => c.id).filter(Boolean) as string[])
+    const configs = state.configs.map((c) => normalizeConfig(c) || c).filter(Boolean) as LLMConfig[]
+
+    const presentIds = new Set(configs.map((c) => c.id).filter(Boolean) as string[])
 
     const recentAgentRunConfigIds = state.recentAgentRunConfigIds.filter((id) => presentIds.has(id))
     const recentChatConfigIds = state.recentChatConfigIds.filter((id) => presentIds.has(id))
 
-    const fallback = state.configs[0]?.id || ''
+    const fallback = configs[0]?.id || ''
 
     const activeAgentRunConfigId =
       state.activeAgentRunConfigId && presentIds.has(state.activeAgentRunConfigId)
@@ -212,6 +234,7 @@ export default class LLMConfigsManager extends BaseManager {
 
     return {
       ...state,
+      configs,
       activeAgentRunConfigId,
       activeChatConfigId,
       recentAgentRunConfigIds,

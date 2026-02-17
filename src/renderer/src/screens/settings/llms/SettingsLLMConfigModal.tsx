@@ -10,7 +10,7 @@ import {
 } from '@renderer/components/ui/Select'
 import { useToast } from '@renderer/components/ui/Toast'
 import { useLLMConfig } from '@renderer/contexts/LLMConfigContext'
-import { chatsService, LLMProviderType } from '@renderer/services/chatsService'
+import { LLMProviderType } from '@renderer/services/chatsService'
 import React, { useEffect, useMemo, useState } from 'react'
 import { LLMConfig } from 'thefactory-tools'
 
@@ -55,7 +55,6 @@ export default function SettingsLLMConfigModal({
         id: '',
         name: '',
         provider: 'openai',
-        apiBaseUrl: PROVIDER_DEFAULT_URL.openai,
         apiKey: '',
         model: '',
       },
@@ -75,22 +74,27 @@ export default function SettingsLLMConfigModal({
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
-    setForm((prev) => ({ ...prev, [name]: value }))
+    setForm((prev) => ({
+      ...prev,
+      [name]: name === 'apiUrlOverride' && value === '' ? undefined : value,
+    }))
   }
 
   const onProviderChange = (value: LLMProviderType) => {
-    setForm((prev) => ({
-      ...prev,
-      provider: value,
-      apiBaseUrl: PROVIDER_DEFAULT_URL[value] ?? prev.apiBaseUrl,
-      // reset model when provider changes
-      model: '',
-    }))
+    setForm((prev) => {
+      const next: LLMConfig = {
+        ...prev,
+        provider: value,
+        // reset model when provider changes
+        model: '',
+      }
+
+      return next
+    })
+
     setModelsError(null)
-    if (value === 'local') {
-      setAvailableModels([])
-      setModelMode('custom')
-    } else if (value === 'custom') {
+
+    if (value === 'local' || value === 'custom') {
       setAvailableModels([])
       setModelMode('custom')
     } else {
@@ -114,7 +118,7 @@ export default function SettingsLLMConfigModal({
     setModelsLoading(true)
     setModelsError(null)
     try {
-      //TODO:
+      // TODO: when chatsService supports it:
       // const models = await chatsService.listModels(form)
       const models: string[] = []
       setAvailableModels(models)
@@ -131,20 +135,27 @@ export default function SettingsLLMConfigModal({
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!form.name || !form.provider || !form.apiBaseUrl || !form.model) {
+
+    const needsUrlOverride = form.provider === 'local' || form.provider === 'custom'
+
+    if (!form.name || !form.provider || !form.model || (needsUrlOverride && !form.apiUrlOverride)) {
       toast({
         title: 'Missing fields',
-        description: 'Please provide name, provider, API URL, and model.',
+        description: needsUrlOverride
+          ? 'Please provide name, provider, API URL override, and model.'
+          : 'Please provide name, provider, and model.',
         variant: 'error',
       })
       return
     }
+
     if (isEdit) {
       updateConfig(form.id!, { ...form })
     } else {
       const { id: _omit, ...toAdd } = form
       addConfig(toAdd)
     }
+
     onRequestClose()
   }
 
@@ -162,98 +173,105 @@ export default function SettingsLLMConfigModal({
       title={isEdit ? 'Edit LLM Configuration' : 'Add LLM Configuration'}
     >
       {isEdit && existing && (
-        <div className="mb-3 flex items-center justify-between">
-          <div className="text-sm">
+        <div className='mb-3 flex items-center justify-between'>
+          <div className='text-sm'>
             Chat status:{' '}
             {isChatActive ? (
-              <span className="badge badge--soft badge--info">Chat Active</span>
+              <span className='badge badge--soft badge--info'>Chat Active</span>
             ) : (
-              <span className="text-[var(--text-secondary)]">Not chat active</span>
+              <span className='text-[var(--text-secondary)]'>Not chat active</span>
             )}
           </div>
           {!isChatActive && (
-            <Button variant="outline" onClick={() => setActiveChat(existing.id!)}>
+            <Button variant='outline' onClick={() => setActiveChat(existing.id!)}>
               Set as Chat Active
             </Button>
           )}
         </div>
       )}
-      <form className="space-y-3" onSubmit={onSubmit}>
+
+      <form className='space-y-3' onSubmit={onSubmit}>
         <div>
-          <label htmlFor="name" className="block text-sm font-medium mb-1">
+          <label htmlFor='name' className='block text-sm font-medium mb-1'>
             Name
           </label>
           <Input
-            id="name"
-            name="name"
-            placeholder="My Provider"
+            id='name'
+            name='name'
+            placeholder='My Provider'
             value={form.name}
             onChange={onChange}
           />
         </div>
 
         <div>
-          <label htmlFor="provider" className="block text-sm font-medium mb-1">
+          <label htmlFor='provider' className='block text-sm font-medium mb-1'>
             Provider
           </label>
-          <Select
-            value={form.provider}
-            onValueChange={(v) => onProviderChange(v as LLMProviderType)}
-          >
-            <SelectTrigger id="provider">
-              <SelectValue placeholder="Select provider" />
+          <Select value={form.provider} onValueChange={(v) => onProviderChange(v as LLMProviderType)}>
+            <SelectTrigger id='provider'>
+              <SelectValue placeholder='Select provider' />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="openai">OpenAI</SelectItem>
-              <SelectItem value="anthropic">Anthropic</SelectItem>
-              <SelectItem value="gemini">Gemini</SelectItem>
-              <SelectItem value="xai">xAI (Grok)</SelectItem>
-              <SelectItem value="local">Local (OpenAI-compatible)</SelectItem>
-              <SelectItem value="custom">Custom</SelectItem>
+              <SelectItem value='openai'>OpenAI</SelectItem>
+              <SelectItem value='anthropic'>Anthropic</SelectItem>
+              <SelectItem value='gemini'>Gemini</SelectItem>
+              <SelectItem value='xai'>xAI (Grok)</SelectItem>
+              <SelectItem value='local'>Local (OpenAI-compatible)</SelectItem>
+              <SelectItem value='custom'>Custom</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         <div>
-          <label htmlFor="apiBaseUrl" className="block text-sm font-medium mb-1">
-            API Base URL
+          <label htmlFor='apiUrlOverride' className='block text-sm font-medium mb-1'>
+            API URL Override
           </label>
           <Input
-            id="apiBaseUrl"
-            name="apiBaseUrl"
-            placeholder="https://..."
-            value={form.apiBaseUrl}
+            id='apiUrlOverride'
+            name='apiUrlOverride'
+            placeholder={
+              form.provider === 'local'
+                ? PROVIDER_DEFAULT_URL.local
+                : form.provider === 'custom'
+                  ? 'https://...'
+                  : 'Optional'
+            }
+            value={form.apiUrlOverride ?? ''}
             onChange={onChange}
           />
+          <p className='text-[12px] text-[var(--text-secondary)] mt-1'>
+            Leave empty to use the provider default. Set only for local/custom endpoints.
+          </p>
         </div>
 
         <div>
-          <label htmlFor="apiKey" className="block textsm font-medium mb-1">
+          <label htmlFor='apiKey' className='block textsm font-medium mb-1'>
             API Key
           </label>
           <Input
-            id="apiKey"
-            name="apiKey"
-            placeholder="sk-..."
+            id='apiKey'
+            name='apiKey'
+            placeholder='sk-...'
             value={form.apiKey}
             onChange={onChange}
           />
-          <p className="text-[12px] text-[var(--text-secondary)] mt-1">
+          <p className='text-[12px] text-[var(--text-secondary)] mt-1'>
             Some local providers may not require an API key.
           </p>
         </div>
 
         <div>
-          <div className="flex items-center justify-between">
-            <label htmlFor="model" className="block text-sm font-medium mb-1">
+          <div className='flex items-center justify-between'>
+            <label htmlFor='model' className='block text-sm font-medium mb-1'>
               Model
             </label>
             {form.provider === 'local' && (
               <Button
-                type="button"
+                type='button'
                 onClick={loadLocalModels}
                 disabled={modelsLoading}
-                variant="outline"
+                variant='outline'
               >
                 {modelsLoading ? 'Loading…' : 'Load Available Models'}
               </Button>
@@ -261,12 +279,9 @@ export default function SettingsLLMConfigModal({
           </div>
 
           {providerModels.length > 0 && (
-            <Select
-              value={modelMode === 'preset' ? form.model : 'custom'}
-              onValueChange={handleModelSelect}
-            >
-              <SelectTrigger id="model">
-                <SelectValue placeholder="Select model" />
+            <Select value={modelMode === 'preset' ? form.model : 'custom'} onValueChange={handleModelSelect}>
+              <SelectTrigger id='model'>
+                <SelectValue placeholder='Select model' />
               </SelectTrigger>
               <SelectContent>
                 {providerModels.map((m) => (
@@ -274,29 +289,29 @@ export default function SettingsLLMConfigModal({
                     {m}
                   </SelectItem>
                 ))}
-                <SelectItem value="custom">Custom</SelectItem>
+                <SelectItem value='custom'>Custom</SelectItem>
               </SelectContent>
             </Select>
           )}
 
           {(modelMode === 'custom' || providerModels.length === 0) && (
             <Input
-              className="mt-2"
-              name="model"
-              placeholder="model-id"
+              className='mt-2'
+              name='model'
+              placeholder='model-id'
               value={form.model}
               onChange={onChange}
             />
           )}
 
-          {modelsError && <p className="text-red-500 text-sm mt-1">{modelsError}</p>}
+          {modelsError && <p className='text-red-500 text-sm mt-1'>{modelsError}</p>}
         </div>
 
-        <div className="flex justify-end gap-2 pt-2">
-          <Button type="button" variant="outline" onClick={onRequestClose}>
+        <div className='flex justify-end gap-2 pt-2'>
+          <Button type='button' variant='outline' onClick={onRequestClose}>
             Cancel
           </Button>
-          <Button type="submit">Save</Button>
+          <Button type='submit'>Save</Button>
         </div>
       </form>
     </Modal>
