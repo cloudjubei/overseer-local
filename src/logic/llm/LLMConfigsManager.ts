@@ -40,16 +40,19 @@ function normalizeConfig(input: unknown): LLMConfig | null {
     delete next.apiUrlOverride
   }
 
-  return next as LLMConfig
+  return next as unknown as LLMConfig
 }
 
 function normalizeState(value: unknown): LLMConfigsState {
   try {
     const v = (value ?? {}) as Partial<LLMConfigsState>
-    const configs = Array.isArray(v.configs) ? (v.configs.map(normalizeConfig).filter(Boolean) as LLMConfig[]) : []
+    const configs = Array.isArray(v.configs)
+      ? (v.configs.map(normalizeConfig).filter(Boolean) as LLMConfig[])
+      : []
     return {
       configs,
-      activeAgentRunConfigId: typeof v.activeAgentRunConfigId === 'string' ? v.activeAgentRunConfigId : '',
+      activeAgentRunConfigId:
+        typeof v.activeAgentRunConfigId === 'string' ? v.activeAgentRunConfigId : '',
       recentAgentRunConfigIds: normalizeStringArray(v.recentAgentRunConfigIds),
       activeChatConfigId: typeof v.activeChatConfigId === 'string' ? v.activeChatConfigId : '',
       recentChatConfigIds: normalizeStringArray(v.recentChatConfigIds),
@@ -78,7 +81,8 @@ export default class LLMConfigsManager extends BaseManager {
     handlers[IPC_HANDLER_KEYS.LLM_CONFIGS_REMOVE] = ({ id }) => this.remove(id)
 
     handlers[IPC_HANDLER_KEYS.LLM_CONFIGS_GET_ACTIVE_AGENT_RUN] = () => this.getActiveAgentRunId()
-    handlers[IPC_HANDLER_KEYS.LLM_CONFIGS_SET_ACTIVE_AGENT_RUN] = ({ id }) => this.setActiveAgentRunId(id)
+    handlers[IPC_HANDLER_KEYS.LLM_CONFIGS_SET_ACTIVE_AGENT_RUN] = ({ id }) =>
+      this.setActiveAgentRunId(id)
     handlers[IPC_HANDLER_KEYS.LLM_CONFIGS_GET_RECENT_AGENT_RUN] = () => this.getRecentAgentRunIds()
 
     handlers[IPC_HANDLER_KEYS.LLM_CONFIGS_GET_ACTIVE_CHAT] = () => this.getActiveChatId()
