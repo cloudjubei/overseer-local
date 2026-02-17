@@ -20,6 +20,9 @@ interface ChatInputProps {
   isThinking: boolean
   isConfigured: boolean
 
+  // Suggested quick-reply actions from the last assistant response.
+  suggestedActions?: string[]
+
   // Optional: parent can request focus restoration on context change.
   autoFocus?: boolean
 
@@ -42,6 +45,7 @@ export default function ChatInput({
   onAbort,
   isThinking,
   isConfigured,
+  suggestedActions,
   autoFocus,
   restoreKey,
 }: ChatInputProps) {
@@ -223,6 +227,21 @@ export default function ChatInput({
     })
   }
 
+  const handleSuggestedAction = (action: string) => {
+    if (isThinking || !isConfigured) return
+    onSend(action, [])
+    onChange('')
+    onChangeAttachments([])
+    if (onSelectionChange) onSelectionChange({ selectionStart: 0, selectionEnd: 0 })
+    setInfoOpen(false)
+    requestAnimationFrame(() => {
+      if (textareaRef.current) {
+        textareaRef.current.style.height = 'auto'
+        textareaRef.current.focus()
+      }
+    })
+  }
+
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -269,6 +288,12 @@ export default function ChatInput({
 
   const rightHints = useMemo(() => [`${modifierSymbol} + Enter to send`], [modifierSymbol])
 
+  const showSuggestedActions =
+    !isThinking &&
+    isConfigured &&
+    Array.isArray(suggestedActions) &&
+    suggestedActions.length > 0
+
   const renderHintsGrid = () => {
     return (
       <div className='grid grid-cols-2 grid-rows-2 gap-x-4 text-[12px] text-[var(--text-muted)]'>
@@ -300,6 +325,35 @@ export default function ChatInput({
       ref={chatInputRef}
       className='flex-shrink-0 border-t border-[var(--border-subtle)] bg-[var(--surface-raised)]'
     >
+      {/* Suggested actions chips */}
+      {showSuggestedActions && (
+        <div
+          className='flex gap-2 px-3 py-2 overflow-x-auto border-b border-[var(--border-subtle)]'
+          role='group'
+          aria-label='Suggested replies'
+        >
+          {suggestedActions!.map((action, idx) => (
+            <button
+              key={idx}
+              type='button'
+              onClick={() => handleSuggestedAction(action)}
+              className={[
+                'flex-shrink-0 px-3 py-1.5 rounded-full text-[13px] leading-tight',
+                'border border-[var(--border-default)] bg-[var(--surface-base)]',
+                'text-[var(--text-secondary)]',
+                'hover:bg-[var(--surface-overlay)] hover:text-[var(--text-primary)]',
+                'hover:border-[var(--accent-primary)]',
+                'focus:outline-none focus:ring-2 focus:ring-[var(--focus-ring)]',
+                'transition-colors duration-150',
+              ].join(' ')}
+              title={action}
+            >
+              {action}
+            </button>
+          ))}
+        </div>
+      )}
+
       <div className='p-2'>
         <div className='relative'>
           <div className='flex gap-2'>

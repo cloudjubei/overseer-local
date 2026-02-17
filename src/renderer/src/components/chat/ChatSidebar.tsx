@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, } from 'react'
 import { useLLMConfig } from '../../contexts/LLMConfigContext'
 import { useNavigator } from '../../navigation/Navigator'
 import { useChats, ChatState } from '../../contexts/ChatsContext'
@@ -405,6 +405,19 @@ export default function ChatSidebar({
     [isChatConfigured, activeChatConfig, currentSettings, resumeTools, context, effectivePrompt],
   )
 
+  // Extract suggestedActions from the last assistant message in the chat
+  const suggestedActions = useMemo(() => {
+    if (isThinking) return undefined
+    const msgs = chat?.chat.messages || []
+    // Walk backwards to find the last assistant message
+    for (let i = msgs.length - 1; i >= 0; i--) {
+      if (msgs[i].completionMessage?.role === 'assistant') {
+        return msgs[i].suggestedActions
+      }
+    }
+    return undefined
+  }, [chat?.chat.messages, isThinking])
+
   const handleDeleteChat = useCallback(async () => {
     const projectId = context.projectId || activeProjectId
     if (!projectId) return
@@ -727,6 +740,7 @@ export default function ChatSidebar({
           onSend={handleSend}
           onAbort={handleAbort}
           isThinking={isThinking}
+          suggestedActions={suggestedActions}
           isConfigured={isChatConfigured}
         />
       </div>

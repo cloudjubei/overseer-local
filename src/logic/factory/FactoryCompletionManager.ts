@@ -303,6 +303,7 @@ export default class FactoryCompletionManager extends BaseManager {
       let m: ChatMessage = {
         completionMessage: { ...response, content: agentResponse?.message ?? response.content },
         toolCalls: agentResponse?.toolCalls,
+        suggestedActions: agentResponse?.suggestedActions,
         model: { model: config.model, provider: config.provider },
       }
       await this.chatsManager.addChatMessages(chatContext, [m])
