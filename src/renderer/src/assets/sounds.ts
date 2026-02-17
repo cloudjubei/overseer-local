@@ -1,6 +1,3 @@
-// Simple sound synthesis for chat events using WebAudio API
-// This avoids bundling binary audio assets while providing distinct send/receive cues.
-
 let audioCtx: AudioContext | null = null
 
 function getCtx(): AudioContext | null {

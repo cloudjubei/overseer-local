@@ -56,7 +56,40 @@ function playWithFallback(audio: HTMLAudioElement | null, fallback?: Notificatio
       current = audio
       const clone = audio.cloneNode(true) as HTMLAudioElement
       clone.currentTime = 0
-      clone.play()
+      clone.addEventListener(
+        'error',
+        () => {
+          try {
+            console.warn('[sounds] audio element error', {
+              category: fallback,
+              src: clone.currentSrc || clone.src,
+              error: clone.error
+                ? {
+                    code: clone.error.code,
+                    message: (clone.error as any).message,
+                  }
+                : null,
+            })
+          } catch (_) {}
+          try {
+            playFallback(fallback)
+          } catch (_) {}
+        },
+        { once: true },
+      )
+
+      const p = clone.play()
+      ;(p as Promise<void> | undefined)?.catch(() => {
+        try {
+          console.warn('[sounds] audio play() rejected', {
+            category: fallback,
+            src: clone.currentSrc || clone.src,
+          })
+        } catch (_) {}
+        try {
+          playFallback(fallback)
+        } catch (_) {}
+      })
       return
     } catch (_) {}
   }
@@ -105,11 +138,17 @@ export const NotificationSoundService = {
     ensurePreloaded()
     switch (category) {
       case 'agent_runs':
-        return playWithFallback(agentAudio, 'agent_runs')
+        playFallback('agent_runs')
+        return
+      // return playWithFallback(agentAudio, 'agent_runs') // DO NOT USE UNTIL WE FIND A GOOD SOUND
       case 'chat_messages':
-        return playWithFallback(chatAudio, 'chat_messages')
+        playFallback('chat_messages')
+        return
+      // return playWithFallback(chatAudio, 'chat_messages') // DO NOT USE UNTIL WE FIND A GOOD SOUND
       case 'git_changes':
-        return playWithFallback(gitAudio, 'git_changes')
+        playFallback('git_changes')
+        return
+      // return playWithFallback(gitAudio, 'git_changes') // DO NOT USE UNTIL WE FIND A GOOD SOUND
     }
   },
 }
