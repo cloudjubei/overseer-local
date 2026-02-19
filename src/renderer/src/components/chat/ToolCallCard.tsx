@@ -1,3 +1,4 @@
+import React from 'react'
 import {
   IconCheckmarkCircle,
   IconError,
@@ -147,7 +148,7 @@ function debugValuePreview(v: any): any {
   return v
 }
 
-export default function ToolCallCard({
+function ToolCallCardInner({
   toolCall,
   result,
   previewResult,
@@ -274,3 +275,20 @@ export default function ToolCallCard({
     </Tooltip>
   )
 }
+
+const ToolCallCard = React.memo(ToolCallCardInner, (prev, next) => {
+  // Only re-render when meaningful props change
+  return (
+    prev.toolCall === next.toolCall &&
+    prev.result === next.result &&
+    prev.previewResult === next.previewResult &&
+    prev.resultType === next.resultType &&
+    prev.durationMs === next.durationMs &&
+    prev.selectable === next.selectable &&
+    prev.selected === next.selected &&
+    prev.onToggleSelect === next.onToggleSelect &&
+    prev.disabled === next.disabled
+  )
+})
+
+export default ToolCallCard

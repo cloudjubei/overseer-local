@@ -1,9 +1,11 @@
-import React, { useState, useRef, useEffect, useMemo, useLayoutEffect } from 'react'
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useFiles } from '../../contexts/FilesContext'
 import AttachmentList from './AttachmentList'
 import FileMentionsTextarea from '../ui/FileMentionsTextarea'
 import { IconAttach, IconSend } from '../ui/icons/Icons'
 import Tooltip from '../ui/Tooltip'
+
+type SendReason = 'user' | 'suggested_action'
 
 interface ChatInputProps {
   value: string
@@ -15,7 +17,7 @@ interface ChatInputProps {
   selectionEnd?: number
   onSelectionChange?: (next: { selectionStart?: number; selectionEnd?: number }) => void
 
-  onSend: (message: string, attachments: string[]) => void
+  onSend: (message: string, attachments: string[], meta?: { reason?: SendReason }) => void
   onAbort: () => void
   isThinking: boolean
   isConfigured: boolean
@@ -29,6 +31,10 @@ interface ChatInputProps {
   // Optional: key that changes when the input context changes (e.g. switching chats).
   // Used to apply one-time caret restoration (move to end) without clobbering typing selection.
   restoreKey?: string
+
+  // Controls whether the input should clear itself after certain actions.
+  clearOnSend?: boolean
+  clearOnSuggestedAction?: boolean
 }
 
 const MAX_INPUT_HEIGHT_PX = 250
@@ -48,12 +54,12 @@ export default function ChatInput({
   suggestedActions,
   autoFocus,
   restoreKey,
+  clearOnSend = false,
+  clearOnSuggestedAction = false,
 }: ChatInputProps) {
-  // Defensive defaults in case a caller ever mis-wires props.
   const safeValue = value ?? ''
   const safeAttachments = attachments ?? []
 
-  const [visibleLines, setVisibleLines] = useState<number>(1)
   const [infoOpen, setInfoOpen] = useState<boolean>(false)
   const [flashBlocked, setFlashBlocked] = useState(false)
 
@@ -73,78 +79,94 @@ export default function ChatInput({
 
   const modifierSymbol = isMac ? '⌘' : 'Ctrl'
 
-  const computeVisibleLines = () => {
-    const el = textareaRef.current
-    if (!el) return
-    const prevHeight = el.style.height
-    el.style.height = 'auto'
-    const computed = window.getComputedStyle(el)
-    const lineHeightPx = parseFloat(computed.lineHeight || '0')
-    const lineHeight = Number.isFinite(lineHeightPx) && lineHeightPx > 0 ? lineHeightPx : 20
-    const lines = Math.max(1, Math.round(el.scrollHeight / lineHeight))
-    el.style.height = prevHeight
-    if (lines !== visibleLines) setVisibleLines(lines)
-  }
+  // --- Autosize ---
+  const autosizeRafRef = useRef<number | null>(null)
 
-  const autoSizeTextarea = () => {
+  const autoSizeTextareaNow = useCallback(() => {
     const el = textareaRef.current
     if (!el) return
 
+    // More robust than '0px': let the browser compute a natural height first.
+    // This handles wrap changes when width changes.
     el.style.height = 'auto'
     const next = Math.min(el.scrollHeight, MAX_INPUT_HEIGHT_PX)
     el.style.height = next + 'px'
+  }, [])
 
-    computeVisibleLines()
-  }
-
-  useEffect(() => {
-    autoSizeTextarea()
-    window.addEventListener('resize', autoSizeTextarea)
-    return () => {
-      window.removeEventListener('resize', autoSizeTextarea)
-    }
-    // NOTE: this intentionally re-runs on value changes (auto-size), but does not touch selection.
-  }, [safeValue])
-
-  // Restore focus on context change if requested.
-  useEffect(() => {
-    if (!autoFocus) return
-    requestAnimationFrame(() => {
-      textareaRef.current?.focus()
+  const requestAutosize = useCallback(() => {
+    if (autosizeRafRef.current) return
+    autosizeRafRef.current = requestAnimationFrame(() => {
+      autosizeRafRef.current = null
+      autoSizeTextareaNow()
     })
-  }, [autoFocus])
+  }, [autoSizeTextareaNow])
 
-  // Track restoreKey changes to apply a one-time caret-to-end.
-  const lastRestoreKeyRef = useRef<string | undefined>(restoreKey)
-  const shouldMoveCaretToEndRef = useRef<boolean>(false)
+  // Autosize on value changes (once per frame)
   useEffect(() => {
-    if (restoreKey === undefined) return
-    if (lastRestoreKeyRef.current !== restoreKey) {
-      lastRestoreKeyRef.current = restoreKey
-      shouldMoveCaretToEndRef.current = true
-    }
-  }, [restoreKey])
+    requestAutosize()
+  }, [safeValue, requestAutosize])
 
-  // Restore selection ONLY when parent explicitly provides selection OR when switching context.
-  // Crucially: do NOT depend on `safeValue`, otherwise typing will re-apply stale selection
-  // and cause caret jumps.
-  useLayoutEffect(() => {
+  // Autosize when layout-affecting UI changes (e.g. suggested actions bar mounts/unmounts,
+  // attachments wrap, etc.). These can change line-wrapping without changing `value`.
+  useEffect(() => {
+    requestAutosize()
+  }, [
+    requestAutosize,
+    safeAttachments.length,
+    Array.isArray(suggestedActions) ? suggestedActions.length : 0,
+  ])
+
+  // Autosize when textarea width changes (sidebar resize, suggested actions appear, etc.)
+  useEffect(() => {
     const el = textareaRef.current
     if (!el) return
 
-    // If requested, keep focus on the input as context changes.
+    let prevWidth = el.clientWidth
+
+    const ro = new ResizeObserver(() => {
+      const nextWidth = el.clientWidth
+      if (nextWidth !== prevWidth) {
+        prevWidth = nextWidth
+        requestAutosize()
+      }
+    })
+
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [requestAutosize])
+
+  // Bind resize listener once
+  useEffect(() => {
+    const onResize = () => requestAutosize()
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [requestAutosize])
+
+  // --- Focus and caret restoration ---
+  // Only restore focus + caret when the context (restoreKey) actually changes.
+  // During normal typing the browser manages the caret natively.
+  const lastRestoreKeyRef = useRef<string | undefined>(restoreKey)
+
+  useLayoutEffect(() => {
+    // Only fire on mount or when restoreKey changes.
+    if (restoreKey === undefined) return
+    if (lastRestoreKeyRef.current === restoreKey) return
+    lastRestoreKeyRef.current = restoreKey
+
+    const el = textareaRef.current
+    if (!el) return
+
     if (autoFocus) {
       try {
         el.focus()
       } catch {
-        // ignore
+        /* ignore */
       }
     }
 
     const len = el.value?.length ?? 0
     const hasSelection = typeof selectionStart === 'number' || typeof selectionEnd === 'number'
 
-    // 1) If parent provides explicit selection, always honor it.
     if (hasSelection) {
       const rawStart =
         typeof selectionStart === 'number'
@@ -158,28 +180,30 @@ export default function ChatInput({
           : typeof selectionStart === 'number'
             ? selectionStart
             : rawStart
-
       const start = Math.max(0, Math.min(rawStart, len))
       const end = Math.max(0, Math.min(rawEnd, len))
-
       try {
         el.setSelectionRange(start, end)
       } catch {
-        // ignore
+        /* ignore */
       }
-      return
-    }
-
-    // 2) Otherwise only move caret to end once after a context switch/restore.
-    if (shouldMoveCaretToEndRef.current) {
-      shouldMoveCaretToEndRef.current = false
+    } else {
       try {
         el.setSelectionRange(len, len)
       } catch {
-        // ignore
+        /* ignore */
       }
     }
-  }, [selectionStart, selectionEnd, autoFocus, restoreKey])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [restoreKey])
+
+  // Also restore focus when autoFocus toggles on (e.g. nonce bump).
+  useEffect(() => {
+    if (!autoFocus) return
+    requestAnimationFrame(() => {
+      textareaRef.current?.focus()
+    })
+  }, [autoFocus])
 
   useEffect(() => {
     const onDocClick = (e: MouseEvent) => {
@@ -199,11 +223,30 @@ export default function ChatInput({
     window.setTimeout(() => setFlashBlocked(false), 300)
   }
 
-  const emitSelection = () => {
+  // --- Selection emission ---
+  // We only emit selection to the parent on specific user gestures (select, mouseUp, blur).
+  // We do NOT schedule rAF per keystroke. This avoids the round-trip that causes
+  // stale selection to flow back as props and call setSelectionRange mid-typing.
+  const emitSelectionNow = useCallback(() => {
     const el = textareaRef.current
     if (!el) return
     if (!onSelectionChange) return
-    onSelectionChange({ selectionStart: el.selectionStart ?? undefined, selectionEnd: el.selectionEnd ?? undefined })
+    onSelectionChange({
+      selectionStart: el.selectionStart ?? undefined,
+      selectionEnd: el.selectionEnd ?? undefined,
+    })
+  }, [onSelectionChange])
+
+  useEffect(() => {
+    return () => {
+      if (autosizeRafRef.current) cancelAnimationFrame(autosizeRafRef.current)
+    }
+  }, [])
+
+  const clearInput = () => {
+    onChange('')
+    onChangeAttachments([])
+    if (onSelectionChange) onSelectionChange({ selectionStart: 0, selectionEnd: 0 })
   }
 
   const handleSend = () => {
@@ -212,32 +255,31 @@ export default function ChatInput({
       return
     }
     if (!safeValue.trim() && safeAttachments.length === 0) return
-    onSend(safeValue, safeAttachments)
-    onChange('')
-    onChangeAttachments([])
-    // reset caret stored in parent
-    if (onSelectionChange) onSelectionChange({ selectionStart: 0, selectionEnd: 0 })
+
+    onSend(safeValue, safeAttachments, { reason: 'user' })
+
+    if (clearOnSend) clearInput()
 
     setInfoOpen(false)
     requestAnimationFrame(() => {
       if (textareaRef.current) {
-        textareaRef.current.style.height = 'auto'
         textareaRef.current.focus()
+        requestAutosize()
       }
     })
   }
 
   const handleSuggestedAction = (action: string) => {
     if (isThinking || !isConfigured) return
-    onSend(action, [])
-    onChange('')
-    onChangeAttachments([])
-    if (onSelectionChange) onSelectionChange({ selectionStart: 0, selectionEnd: 0 })
+    onSend(action, [], { reason: 'suggested_action' })
+
+    if (clearOnSuggestedAction) clearInput()
+
     setInfoOpen(false)
     requestAnimationFrame(() => {
       if (textareaRef.current) {
-        textareaRef.current.style.height = 'auto'
         textareaRef.current.focus()
+        requestAutosize()
       }
     })
   }
@@ -282,10 +324,7 @@ export default function ChatInput({
     return { maxHeight: MAX_INPUT_HEIGHT_PX }
   }, [])
 
-  const showHintsArea = visibleLines <= 3
-
   const leftHints = useMemo(() => ['Use @ for file references', 'Use # for stories & features'], [])
-
   const rightHints = useMemo(() => [`${modifierSymbol} + Enter to send`], [modifierSymbol])
 
   const showSuggestedActions =
@@ -368,12 +407,13 @@ export default function ChatInput({
               <div className='relative p-1'>
                 <FileMentionsTextarea
                   value={safeValue}
+                  disableAutocomplete={false}
                   onChange={(val) => {
                     onChange(val)
+                    requestAutosize()
                   }}
                   placeholder={placeholderText}
                   rows={1}
-                  // Allow typing while thinking
                   disabled={false}
                   className='w-full resize-none bg-transparent px-2 py-1 outline-none text-[var(--text-primary)]'
                   style={{ ...maxHeightStyle, overflowY: 'auto' }}
@@ -382,11 +422,8 @@ export default function ChatInput({
                   onKeyDown={(e) => {
                     handleTextareaKeyDown(e)
                   }}
-                  // Keep selection synced for caret persistence
-                  onSelect={() => emitSelection()}
-                  onKeyUp={() => emitSelection()}
-                  onMouseUp={() => emitSelection()}
-                  onFocus={() => emitSelection()}
+                  onSelect={() => emitSelectionNow()}
+                  onMouseUp={() => emitSelectionNow()}
                 />
               </div>
 
@@ -401,11 +438,10 @@ export default function ChatInput({
                 <div
                   className='overflow-hidden transition-all duration-200 ease-out'
                   style={{
-                    maxHeight: showHintsArea ? 80 : 0,
-                    opacity: showHintsArea ? 1 : 0,
-                    marginTop: showHintsArea ? 8 : 0,
+                    maxHeight: 80,
+                    opacity: 1,
+                    marginTop: 8,
                   }}
-                  aria-hidden={!showHintsArea}
                 >
                   {renderHintsGrid()}
                 </div>
@@ -450,9 +486,7 @@ export default function ChatInput({
                 ) : (
                   <button
                     onClick={() => {
-                      const should = window.confirm(
-                        'Stop the assistant? This will cancel the current response.',
-                      )
+                      const should = window.confirm('Stop the assistant? This will cancel the current response.')
                       if (!should) return
                       onAbort()
                     }}
@@ -460,12 +494,10 @@ export default function ChatInput({
                     aria-label='Stop response'
                     title='Stop'
                   >
-                    {/* Spinner ring */}
                     <span
                       className='absolute inset-0 m-auto block w-7 h-7 rounded-full border-2 border-[var(--text-muted)] border-t-transparent animate-spin'
                       aria-hidden
                     />
-                    {/* Stop glyph using a small square */}
                     <span className='relative z-10 block w-3.5 h-3.5 bg-[var(--text-primary)] rounded-[2px]' />
                   </button>
                 )}
@@ -476,9 +508,7 @@ export default function ChatInput({
                 <Tooltip
                   content={
                     <div className='p-2'>
-                      <div className='font-medium mb-1 text-[var(--text-secondary)]'>
-                        Shortcuts & helpers
-                      </div>
+                      <div className='font-medium mb-1 text-[var(--text-secondary)]'>Shortcuts & helpers</div>
                       <ul className='list-disc pl-5 space-y-1 text-sm'>
                         <li>Use @ for file references</li>
                         <li>Use # for stories & features</li>

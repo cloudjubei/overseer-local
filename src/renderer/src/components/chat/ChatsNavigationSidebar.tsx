@@ -118,6 +118,174 @@ function computeKeysForContext(ctx: ChatContext): string[] {
   return keys
 }
 
+// Extracted, stable components
+const SectionHeader = memo(function SectionHeader({
+  title,
+  openKey,
+  className,
+  isOpen,
+  onToggle,
+}: {
+  title: string
+  openKey?: string
+  className?: string
+  isOpen: boolean
+  onToggle: (key: string) => void
+}) {
+  return (
+    <button
+      type="button"
+      className={`w-full flex items-center gap-2 px-2 py-1 text-[11px] uppercase tracking-wider text-[var(--text-muted)]/90 border-b border-[var(--border-subtle)] ${className ?? ''}`}
+      onClick={() => openKey && onToggle(openKey)}
+      aria-expanded={isOpen}
+      aria-controls={openKey ? `${openKey}-section` : undefined}
+    >
+      {openKey && (
+        <span className="flex-none">
+          <IconChevron
+            className="w-4 h-4"
+            style={{
+              transform: isOpen ? 'rotate(90deg)' : 'none',
+              transition: 'transform 0.15s ease',
+            }}
+          />
+        </span>
+      )}
+      <span className="font-semibold">{title}</span>
+    </button>
+  )
+})
+
+const ChatButton = memo(function ChatButton({
+  ctx,
+  label,
+  isActive,
+  onClick,
+  unreadCount,
+  isThinking,
+  updatedAt,
+}: {
+  ctx: ChatContext
+  label: string
+  isActive: boolean
+  onClick: (ctx: ChatContext) => void
+  unreadCount: number
+  isThinking: boolean
+  updatedAt?: string
+}) {
+  const cap99 = (n: number) => (n > 99 ? '99+' : `${n}`)
+  const hasUnread = unreadCount > 0
+
+  return (
+    <button
+      className={[
+        'w-full text-left rounded-md px-3 py-2 border shadow-sm transition-colors',
+        isActive
+          ? 'border-blue-500 bg-[color-mix(in_srgb,var(--accent-primary)_12%,transparent)]'
+          : 'border-[var(--border-subtle)] bg-[var(--surface-raised)] hover:border-[var(--border-default)]',
+      ].join(' ')}
+      onClick={() => onClick(ctx)}
+      title={label}
+    >
+      <div className="flex items-center justify-between gap-2 min-w-0">
+        <div className="text-[12px] font-medium text-[var(--text-primary)] truncate">{label}</div>
+        {isThinking ? (
+          <SpinnerWithDot
+            size={14}
+            showDot={hasUnread}
+            dotTitle={hasUnread ? 'Unread messages' : undefined}
+          />
+        ) : hasUnread ? (
+          <NotificationBadge
+            className={'h-[16px] min-w-[16px] px-1 text-[10px]'}
+            text={cap99(unreadCount)}
+            tooltipLabel={`${unreadCount} unread messages`}
+          />
+        ) : null}
+      </div>
+      {updatedAt && (
+        <div className="text-[10px] text-[var(--text-tertiary)] truncate">Updated {updatedAt}</div>
+      )}
+    </button>
+  )
+})
+
+// Wrapper to connect ChatButton to live data
+const ConnectedChatButton = memo(function ConnectedChatButton({
+  ctx,
+  label,
+  isActive,
+  onClick,
+  updatedAt,
+}: {
+  ctx: ChatContext
+  label: string
+  isActive: boolean
+  onClick: (ctx: ChatContext) => void
+  updatedAt?: string
+}) {
+  const { unreadKeys, getUnreadCountForKey } = useChatUnread()
+  const { isThinkingKey } = useChatThinking(500)
+
+  const key = useMemo(() => getChatContextPath(ctx), [ctx])
+  const isUnread = unreadKeys.has(key)
+  const unreadCount = isUnread ? getUnreadCountForKey(key) : 0
+  const isThinking = isThinkingKey(key)
+
+  return (
+    <ChatButton
+      ctx={ctx}
+      label={label}
+      isActive={isActive}
+      onClick={onClick}
+      unreadCount={unreadCount}
+      isThinking={isThinking}
+      updatedAt={updatedAt}
+    />
+  )
+})
+
+const StoryHeaderButton = memo(function StoryHeaderButton({
+  storyId,
+  storyTitle,
+  storyIndex,
+  openKey,
+  isOpen,
+  onToggle,
+}: {
+  storyId: string
+  storyTitle: string
+  storyIndex?: number
+  openKey: string
+  isOpen: boolean
+  onToggle: (key: string) => void
+}) {
+  return (
+    <button
+      type="button"
+      className="w-full flex items-center justify-between rounded-md border bg-[var(--surface-raised)] px-3 py-2 text-left text-[12px] font-semibold text-[var(--text-primary)] border-[var(--border-subtle)] hover:border-[var(--border-default)]"
+      onClick={() => onToggle(openKey)}
+      aria-expanded={isOpen}
+      aria-controls={`${openKey}-section`}
+      title={storyTitle}
+    >
+      <div className="flex items-center gap-2 min-w-0">
+        <span className="flex-none">
+          <IconChevron
+            className="w-4 h-4"
+            style={{
+              transform: isOpen ? 'rotate(90deg)' : 'none',
+              transition: 'transform 0.15s ease',
+            }}
+          />
+        </span>
+        <span className="truncate">{storyTitle}</span>
+      </div>
+      {typeof storyIndex === 'number' && <span className="ml-2 id-chip">{storyIndex}</span>}
+    </button>
+  )
+})
+
 export default function ChatsNavigationSidebar({
   selectedContext,
   onSelectContext,
@@ -127,26 +295,33 @@ export default function ChatsNavigationSidebar({
   const { projects } = useProjectContext()
   const { storiesById, featuresById } = useStories()
   const { chatsByProjectId } = useChats()
-  const { unreadKeys, getUnreadCountForKey } = useChatUnread()
-  const { isThinkingKey } = useChatThinking(500)
 
-  const getProjectTitle = useCallback((id?: string) => {
-    if (!id) return ''
-    const p = projects.find((prj) => prj.id === id)
-    return p?.title || id
-  }, [projects])
+  const getProjectTitle = useCallback(
+    (id?: string) => {
+      if (!id) return ''
+      const p = projects.find((prj) => prj.id === id)
+      return p?.title || id
+    },
+    [projects],
+  )
 
-  const getStoryTitle = useCallback((id?: string) => {
-    if (!id) return ''
-    const s = storiesById[id]
-    return s?.title || 'Deleted story'
-  }, [storiesById])
+  const getStoryTitle = useCallback(
+    (id?: string) => {
+      if (!id) return ''
+      const s = storiesById[id]
+      return s?.title || 'Deleted story'
+    },
+    [storiesById],
+  )
 
-  const getFeatureTitle = useCallback((id?: string) => {
-    if (!id) return ''
-    const f = featuresById[id]
-    return f?.title || 'Deleted feature'
-  }, [featuresById])
+  const getFeatureTitle = useCallback(
+    (id?: string) => {
+      if (!id) return ''
+      const f = featuresById[id]
+      return f?.title || 'Deleted feature'
+    },
+    [featuresById],
+  )
 
   // Enforce active project scoping for all chat lists
   const projectChats = useMemo(() => {
@@ -243,10 +418,17 @@ export default function ChatsNavigationSidebar({
     [selectedContext],
   )
 
-  const ensureOpen = async (ctx: ChatContext) => {
-    // Do not prefetch/create chats here to avoid accidentally recreating deleted chats
-    onSelectContext(ctx)
-  }
+  const ensureOpen = useCallback(
+    (ctx: ChatContext) => {
+      // Do not prefetch/create chats here to avoid accidentally recreating deleted chats
+      onSelectContext(ctx)
+    },
+    [onSelectContext],
+  )
+
+  const handleToggle = useCallback((key: string) => {
+    setOpen((prev) => ({ ...prev, [key]: !prev[key] }))
+  }, [])
 
   const generalContext: ChatContext = useMemo(
     () => ({ type: 'PROJECT', projectId: activeProjectId }),
@@ -357,179 +539,40 @@ export default function ChatsNavigationSidebar({
     return items
   }, [projectChats, getProjectTitle, getStoryTitle, getFeatureTitle])
 
-  const SectionHeader: React.FC<{
-    title: string
-    openKey?: string
-    className?: string
-  }> = ({ title, openKey, className }) => {
-    const isOpen = openKey ? !!open[openKey] : true
-    return (
-      <button
-        type="button"
-        className={`w-full flex items-center gap-2 px-2 py-1 text-[11px] uppercase tracking-wider text-[var(--text-muted)]/90 border-b border-[var(--border-subtle)] ${className ?? ''}`}
-        onClick={() => openKey && setOpen((prev) => ({ ...prev, [openKey]: !prev[openKey] }))}
-        aria-expanded={isOpen}
-        aria-controls={openKey ? `${openKey}-section` : undefined}
-      >
-        {openKey && (
-          <span className="flex-none">
-            <IconChevron
-              className="w-4 h-4"
-              style={{
-                transform: isOpen ? 'rotate(90deg)' : 'none',
-                transition: 'transform 0.15s ease',
-              }}
-            />
-          </span>
-        )}
-        <span className="font-semibold">{title}</span>
-      </button>
-    )
-  }
-
-  const ChatButton: React.FC<{
-    ctx: ChatContext
-    label: string
-  }> = ({ ctx, label }) => {
-    const key = getChatContextPath(ctx)
-    const isUnread = unreadKeys.has(key)
-    const unreadCount = isUnread ? getUnreadCountForKey(key) : 0
-    const isThinking = isThinkingKey(key)
-    const cap99 = (n: number) => (n > 99 ? '99+' : `${n}`)
-    return (
-      <button
-        className={[
-          'w-full text-left rounded-md px-3 py-2 border shadow-sm transition-colors',
-          isActive(ctx)
-            ? 'border-blue-500 bg-[color-mix(in_srgb,var(--accent-primary)_12%,transparent)]'
-            : 'border-[var(--border-subtle)] bg-[var(--surface-raised)] hover:border-[var(--border-default)]',
-        ].join(' ')}
-        onClick={() => ensureOpen(ctx)}
-        title={label}
-      >
-        <div className="flex items-center justify-between gap-2 min-w-0">
-          <div className="text-[12px] font-medium text-[var(--text-primary)] truncate">{label}</div>
-          {isThinking ? (
-            <SpinnerWithDot
-              size={14}
-              showDot={isUnread}
-              dotTitle={isUnread ? 'Unread messages' : undefined}
-            />
-          ) : isUnread && unreadCount > 0 ? (
-            <NotificationBadge
-              className={'h-[16px] min-w-[16px] px-1 text-[10px]'}
-              text={cap99(unreadCount)}
-              tooltipLabel={`${unreadCount} unread messages`}
-            />
-          ) : isUnread ? (
-            <DotBadge title={'Unread messages'} />
-          ) : null}
-        </div>
-      </button>
-    )
-  }
-
-  const StoryHeaderButton: React.FC<{
-    storyId: string
-    storyTitle: string
-    storyIndex?: number
-    openKey: string
-  }> = ({ storyId, storyTitle, storyIndex, openKey }) => {
-    const isOpen = !!open[openKey]
-    return (
-      <button
-        type="button"
-        className="w-full flex items-center justify-between rounded-md border bg-[var(--surface-raised)] px-3 py-2 text-left text-[12px] font-semibold text-[var(--text-primary)] border-[var(--border-subtle)] hover:border-[var(--border-default)]"
-        onClick={() => setOpen((prev) => ({ ...prev, [openKey]: !prev[openKey] }))}
-        aria-expanded={isOpen}
-        aria-controls={`${openKey}-section`}
-        title={storyTitle}
-      >
-        <div className="flex items-center gap-2 min-w-0">
-          <span className="flex-none">
-            <IconChevron
-              className="w-4 h-4"
-              style={{
-                transform: isOpen ? 'rotate(90deg)' : 'none',
-                transition: 'transform 0.15s ease',
-              }}
-            />
-          </span>
-          <span className="truncate">{storyTitle}</span>
-        </div>
-        {typeof storyIndex === 'number' && <span className="ml-2 id-chip">{storyIndex}</span>}
-      </button>
-    )
-  }
-
   return (
     <div className="flex-1 min-h-0 overflow-auto px-2 pb-3 space-y-3">
       {mode === 'categories' ? (
         <div className="space-y-3">
           <div className="space-y-1">
             <div className="px-2">
-              <SectionHeader title="General" />
+              <SectionHeader
+                title="General"
+                isOpen={true}
+                onToggle={handleToggle}
+              />
             </div>
             <div className="px-2">
-              <button
-                className={[
-                  'w-full text-left rounded-md px-3 py-3 border shadow-sm transition-colors',
-                  isActive(generalContext)
-                    ? 'border-blue-500 bg-[color-mix(in_srgb,var(--accent-primary)_12%,transparent)]'
-                    : 'border-[var(--border-subtle)] bg-[var(--surface-raised)] hover:border-[var(--border-default)]',
-                ].join(' ')}
-                onClick={() => ensureOpen(generalContext)}
-                title={titleForContext(generalContext, {
+              <ConnectedChatButton
+                ctx={generalContext}
+                label={titleForContext(generalContext, {
                   getProjectTitle,
                   getStoryTitle,
                   getFeatureTitle,
                 })}
-              >
-                <div className="flex items-center justify-between gap-2 min-w-0">
-                  <div className="text-[12px] font-semibold text-[var(--text-primary)] truncate">
-                    {titleForContext(generalContext, {
-                      getProjectTitle,
-                      getStoryTitle,
-                      getFeatureTitle,
-                    })}
-                  </div>
-                  {(() => {
-                    const key = getChatContextPath(generalContext)
-                    const isUnread = unreadKeys.has(key)
-                    const unreadCount = isUnread ? getUnreadCountForKey(key) : 0
-                    const isThinking = isThinkingKey(key)
-                    const cap99 = (n: number) => (n > 99 ? '99+' : `${n}`)
-                    if (isThinking) {
-                      return (
-                        <SpinnerWithDot
-                          size={14}
-                          showDot={isUnread}
-                          dotTitle={isUnread ? 'Unread messages' : undefined}
-                        />
-                      )
-                    }
-                    if (isUnread && unreadCount > 0)
-                      return (
-                        <NotificationBadge
-                          className={'h-[16px] min-w-[16px] px-1 text-[10px]'}
-                          text={cap99(unreadCount)}
-                          tooltipLabel={`${unreadCount} unread messages`}
-                        />
-                      )
-                    if (isUnread) return <DotBadge title={'Unread messages'} />
-                    return null
-                  })()}
-                </div>
-                <div className="text-[11px] text-[var(--text-secondary)] truncate">
-                  Single chat for this project
-                </div>
-              </button>
+                isActive={isActive(generalContext)}
+                onClick={ensureOpen}
+              />
             </div>
           </div>
 
           <div className="space-y-1">
             <div className="px-2">
-              <SectionHeader title="Stories" openKey="cat:stories" />
+              <SectionHeader
+                title="Stories"
+                openKey="cat:stories"
+                isOpen={!!open['cat:stories']}
+                onToggle={handleToggle}
+              />
             </div>
             {open['cat:stories'] && (
               <div id="cat:stories-section" className="space-y-2">
@@ -549,6 +592,8 @@ export default function ChatsNavigationSidebar({
                             storyTitle={g.storyTitle}
                             storyIndex={g.storyIndex}
                             openKey={skey}
+                            isOpen={isOpen}
+                            onToggle={handleToggle}
                           />
                         </div>
                         {isOpen && (
@@ -556,7 +601,12 @@ export default function ChatsNavigationSidebar({
                             {g.storyChat && (
                               <div className="border-l border-[var(--border-subtle)]">
                                 <div className="pl-2">
-                                  <ChatButton ctx={g.storyChat.ctx} label={g.storyChat.label} />
+                                  <ConnectedChatButton
+                                    ctx={g.storyChat.ctx}
+                                    label={g.storyChat.label}
+                                    isActive={isActive(g.storyChat.ctx)}
+                                    onClick={ensureOpen}
+                                  />
                                 </div>
                               </div>
                             )}
@@ -566,6 +616,8 @@ export default function ChatsNavigationSidebar({
                                 <SectionHeader
                                   title="Topics"
                                   openKey={`story:${g.storyId}:topics`}
+                                  isOpen={!!open[`story:${g.storyId}:topics`]}
+                                  onToggle={handleToggle}
                                 />
                                 {open[`story:${g.storyId}:topics`] && (
                                   <div
@@ -575,7 +627,12 @@ export default function ChatsNavigationSidebar({
                                     <div className="border-l border-[var(--border-subtle)]">
                                       {g.topics.map((it) => (
                                         <div key={it.key} className="pl-2">
-                                          <ChatButton ctx={it.ctx} label={it.label} />
+                                          <ConnectedChatButton
+                                            ctx={it.ctx}
+                                            label={it.label}
+                                            isActive={isActive(it.ctx)}
+                                            onClick={ensureOpen}
+                                          />
                                         </div>
                                       ))}
                                     </div>
@@ -589,6 +646,8 @@ export default function ChatsNavigationSidebar({
                                 <SectionHeader
                                   title="Agent Runs"
                                   openKey={`story:${g.storyId}:runs`}
+                                  isOpen={!!open[`story:${g.storyId}:runs`]}
+                                  onToggle={handleToggle}
                                 />
                                 {open[`story:${g.storyId}:runs`] && (
                                   <div
@@ -598,7 +657,12 @@ export default function ChatsNavigationSidebar({
                                     <div className="border-l border-[var(--border-subtle)]">
                                       {g.runs.map((it) => (
                                         <div key={it.key} className="pl-2">
-                                          <ChatButton ctx={it.ctx} label={it.label} />
+                                          <ConnectedChatButton
+                                            ctx={it.ctx}
+                                            label={it.label}
+                                            isActive={isActive(it.ctx)}
+                                            onClick={ensureOpen}
+                                          />
                                         </div>
                                       ))}
                                     </div>
@@ -612,6 +676,8 @@ export default function ChatsNavigationSidebar({
                                 <SectionHeader
                                   title="Features"
                                   openKey={`story:${g.storyId}:features`}
+                                  isOpen={!!open[`story:${g.storyId}:features`]}
+                                  onToggle={handleToggle}
                                 />
                                 {open[`story:${g.storyId}:features`] && (
                                   <div
@@ -626,9 +692,7 @@ export default function ChatsNavigationSidebar({
                                           <button
                                             type="button"
                                             className="w-full flex items-center gap-2 rounded-md border bg-[var(--surface-overlay)] px-3 py-2 text-left text-[12px] font-medium text-[var(--text-primary)] border-[var(--border-subtle)] hover:border-[var(--border-default)]"
-                                            onClick={() =>
-                                              setOpen((prev) => ({ ...prev, [fkey]: !prev[fkey] }))
-                                            }
+                                            onClick={() => handleToggle(fkey)}
                                             aria-expanded={fOpen}
                                             aria-controls={`${fkey}-section`}
                                             title={f.featureTitle}
@@ -649,9 +713,11 @@ export default function ChatsNavigationSidebar({
                                               {f.featureChat && (
                                                 <div className="border-l border-[var(--border-subtle)]">
                                                   <div className="pl-2">
-                                                    <ChatButton
+                                                    <ConnectedChatButton
                                                       ctx={f.featureChat.ctx}
                                                       label={f.featureChat.label}
+                                                      isActive={isActive(f.featureChat.ctx)}
+                                                      onClick={ensureOpen}
                                                     />
                                                   </div>
                                                 </div>
@@ -661,6 +727,8 @@ export default function ChatsNavigationSidebar({
                                                   <SectionHeader
                                                     title="Agents"
                                                     openKey={`feature:${f.featureId}:runs`}
+                                                    isOpen={!!open[`feature:${f.featureId}:runs`]}
+                                                    onToggle={handleToggle}
                                                   />
                                                   {open[`feature:${f.featureId}:runs`] && (
                                                     <div
@@ -670,9 +738,11 @@ export default function ChatsNavigationSidebar({
                                                       <div className="border-l border-[var(--border-subtle)]">
                                                         {f.runs.map((it) => (
                                                           <div key={it.key} className="pl-2">
-                                                            <ChatButton
+                                                            <ConnectedChatButton
                                                               ctx={it.ctx}
                                                               label={it.label}
+                                                              isActive={isActive(it.ctx)}
+                                                              onClick={ensureOpen}
                                                             />
                                                           </div>
                                                         ))}
@@ -702,7 +772,12 @@ export default function ChatsNavigationSidebar({
 
           <div className="space-y-1">
             <div className="px-2">
-              <SectionHeader title="Project Topics" openKey="cat:project-topics" />
+              <SectionHeader
+                title="Project Topics"
+                openKey="cat:project-topics"
+                isOpen={!!open['cat:project-topics']}
+                onToggle={handleToggle}
+              />
             </div>
             {open['cat:project-topics'] && (
               <div id="cat:project-topics-section" className="pl-4 space-y-1">
@@ -714,7 +789,12 @@ export default function ChatsNavigationSidebar({
                   <div className="border-l border-[var(--border-subtle)]">
                     {projectTopics.map((t) => (
                       <div key={t.key} className="pl-2">
-                        <ChatButton ctx={t.ctx} label={t.label} />
+                        <ConnectedChatButton
+                          ctx={t.ctx}
+                          label={t.label}
+                          isActive={isActive(t.ctx)}
+                          onClick={ensureOpen}
+                        />
                       </div>
                     ))}
                   </div>
@@ -741,46 +821,15 @@ export default function ChatsNavigationSidebar({
                   getStoryTitle,
                   getFeatureTitle,
                 })
-                const isUnread = unreadKeys.has(c.key)
-                const unreadCount = isUnread ? getUnreadCountForKey(c.key) : 0
-                const isThinking = isThinkingKey(c.key)
-                const cap99 = (n: number) => (n > 99 ? '99+' : `${n}`)
                 return (
-                  <button
+                  <ConnectedChatButton
                     key={c.key}
-                    className={[
-                      'w-full text-left rounded-md px-3 py-2 border shadow-sm transition-colors',
-                      isActive(ctx)
-                        ? 'border-blue-500 bg-[color-mix(in_srgb,var(--accent-primary)_12%,transparent)]'
-                        : 'border-[var(--border-subtle)] bg-[var(--surface-raised)] hover:border-[var(--border-default)]',
-                    ].join(' ')}
-                    onClick={() => onSelectContext(ctx)}
-                    title={label}
-                  >
-                    <div className="flex items-center justify-between gap-2 min-w-0">
-                      <div className="text-[12px] font-medium text-[var(--text-primary)] truncate">
-                        {label}
-                      </div>
-                      {isThinking ? (
-                        <SpinnerWithDot
-                          size={14}
-                          showDot={isUnread}
-                          dotTitle={isUnread ? 'Unread messages' : undefined}
-                        />
-                      ) : isUnread && unreadCount > 0 ? (
-                        <NotificationBadge
-                          className={'h-[16px] min-w-[16px] px-1 text-[10px]'}
-                          text={cap99(unreadCount)}
-                          tooltipLabel={`${unreadCount} unread messages`}
-                        />
-                      ) : isUnread ? (
-                        <DotBadge title={'Unread messages'} />
-                      ) : null}
-                    </div>
-                    <div className="text-[10px] text-[var(--text-tertiary)] truncate">
-                      Updated {c.chat.updatedAt || c.chat.createdAt || ''}
-                    </div>
-                  </button>
+                    ctx={ctx}
+                    label={label}
+                    isActive={isActive(ctx)}
+                    onClick={onSelectContext}
+                    updatedAt={c.chat.updatedAt || c.chat.createdAt || ''}
+                  />
                 )
               })}
             </div>

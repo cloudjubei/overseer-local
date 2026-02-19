@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useStories } from '../contexts/StoriesContext'
 import { useActiveProject } from '../contexts/ProjectContext'
 
@@ -6,8 +6,12 @@ type RefItem = {
   ref: string
   display: string
   title: string
+  titleLower: string
+  displayLower: string
   type: 'story' | 'feature'
 }
+
+type CursorPosition = { left: number; top: number } | null
 
 export function useReferencesAutocomplete(params: {
   input: string
@@ -19,32 +23,51 @@ export function useReferencesAutocomplete(params: {
   const { input, setInput, textareaRef, mirrorRef } = params
   const { storiesById } = useStories()
 
+  // Build a reference index and pre-normalize search fields.
+  // NOTE: This can still be sizable, but it only recomputes when stories/project change.
   const references = useMemo<RefItem[]>(() => {
-    if (!project) {
-      return []
-    }
+    if (!project) return []
+
     const refs: RefItem[] = []
-    Object.values(storiesById).forEach((story) => {
+    for (const story of Object.values(storiesById)) {
       const storyDisplay = `${project.storyIdToDisplayIndex[story.id]}`
-      refs.push({ ref: `${story.id}`, display: storyDisplay, title: story.title, type: 'story' })
-      ;(story.features || []).forEach((f) => {
+      const storyTitle = story.title || ''
+      refs.push({
+        ref: `${story.id}`,
+        display: storyDisplay,
+        title: storyTitle,
+        titleLower: storyTitle.toLowerCase(),
+        displayLower: storyDisplay.toLowerCase(),
+        type: 'story',
+      })
+
+      for (const f of story.features || []) {
         const featureDisplay = `${story.featureIdToDisplayIndex[f.id]}`
+        const display = `${storyDisplay}.${featureDisplay}`
+        const title = f.title || ''
         refs.push({
           ref: `${story.id}.${f.id}`,
-          display: `${storyDisplay}.${featureDisplay}`,
-          title: f.title,
+          display,
+          title,
+          titleLower: title.toLowerCase(),
+          displayLower: display.toLowerCase(),
           type: 'feature',
         })
-      })
-    })
-    return refs.sort((a, b) => a.ref.localeCompare(b.ref))
+      }
+    }
+
+    // Sorting is fine here (rare) but keep it stable.
+    refs.sort((a, b) => a.ref.localeCompare(b.ref))
+    return refs
   }, [storiesById, project])
 
   const [isOpen, setIsOpen] = useState(false)
   const [matches, setMatches] = useState<RefItem[]>([])
   const [mentionStart, setMentionStart] = useState<number | null>(null)
-  const [position, setPosition] = useState<{ left: number; top: number } | null>(null)
-  const [caretPos, setCaretPos] = useState<number>(0)
+  const [position, setPosition] = useState<CursorPosition>(null)
+
+  // Debounce expensive work during typing.
+  const debounceTimerRef = useRef<number | null>(null)
 
   function getCursorCoordinates(textarea: HTMLTextAreaElement, pos: number) {
     const mirror = mirrorRef.current
@@ -71,9 +94,9 @@ export function useReferencesAutocomplete(params: {
       'textTransform',
       'width',
     ] as const
-    stylesToCopy.forEach((key) => {
-      mirror.style[key] = style[key]
-    })
+
+    for (const key of stylesToCopy) mirror.style[key] = style[key]
+
     mirror.style.overflowWrap = 'break-word'
     mirror.style.whiteSpace = 'pre-wrap'
     mirror.style.wordBreak = 'break-word'
@@ -105,32 +128,49 @@ export function useReferencesAutocomplete(params: {
 
   const checkForMention = (text: string, pos: number) => {
     let start = pos
-    while (start > 0 && !isBoundaryChar(text[start - 1])) {
-      start--
-    }
+    while (start > 0 && !isBoundaryChar(text[start - 1])) start--
     const word = text.slice(start, pos)
 
-    if (word.startsWith('#')) {
-      const query = word.slice(1).toLowerCase()
-      const filtered = references.filter(
-        (item) =>
-          item.display.toLowerCase().startsWith(query) || item.title.toLowerCase().includes(query),
-      )
-      setMatches(filtered)
-      setMentionStart(start)
-
-      const textarea = textareaRef.current!
-      const coords = getCursorCoordinates(textarea, pos)
-      const textareaRect = textarea.getBoundingClientRect()
-      const cursorLeft = textareaRect.left + window.scrollX + coords.x
-      const topAboveTextarea = textareaRect.top + window.scrollY - 8
-      setPosition({ left: cursorLeft, top: topAboveTextarea })
-      setIsOpen(true)
+    if (!word.startsWith('#')) {
+      setIsOpen(false)
+      setMentionStart(null)
       return
     }
 
-    setIsOpen(false)
-    setMentionStart(null)
+    const queryLower = word.slice(1).toLowerCase()
+
+    // Avoid heavy filtering on empty query ('#').
+    if (queryLower.length < 1) {
+      setMatches([])
+      setIsOpen(false)
+      setMentionStart(start)
+      return
+    }
+
+    const filtered: RefItem[] = []
+    for (let i = 0; i < references.length; i++) {
+      const item = references[i]
+      if (item.displayLower.startsWith(queryLower) || item.titleLower.includes(queryLower)) {
+        filtered.push(item)
+        if (filtered.length >= 50) break
+      }
+    }
+
+    setMatches(filtered)
+    setMentionStart(start)
+
+    const textarea = textareaRef.current
+    if (!textarea) return
+
+    // Only now do we pay the DOM-measurement cost to position the dropdown.
+    // This keeps normal typing fast when no dropdown is needed.
+
+    const coords = getCursorCoordinates(textarea, pos)
+    const textareaRect = textarea.getBoundingClientRect()
+    const cursorLeft = textareaRect.left + window.scrollX + coords.x
+    const topAboveTextarea = textareaRect.top + window.scrollY - 8
+    setPosition({ left: cursorLeft, top: topAboveTextarea })
+    setIsOpen(filtered.length > 0)
   }
 
   // selectedRef should be the DISPLAY form (e.g., 3.2) so that the text shows as #3.2
@@ -141,6 +181,7 @@ export function useReferencesAutocomplete(params: {
     const currentPos = textarea.selectionStart
     const before = currentText.slice(0, mentionStart)
     const after = currentText.slice(currentPos)
+
     // Insert display-based reference and add a trailing space for UX consistency
     const newText = `${before}#${selectedRefDisplay} ${after}`
     setInput(newText)
@@ -149,33 +190,32 @@ export function useReferencesAutocomplete(params: {
       textarea.focus()
       textarea.setSelectionRange(newPos, newPos)
     }, 0)
+
     setIsOpen(false)
     setMentionStart(null)
   }
 
-  useEffect(() => {
-    const handleSelectionChange = () => {
-      const ta = textareaRef.current
-      if (!ta) return
-      if (document.activeElement === ta) {
-        try {
-          setCaretPos(ta.selectionStart ?? 0)
-        } catch {
-          // ignore
-        }
-      }
-    }
-    document.addEventListener('selectionchange', handleSelectionChange)
-    return () => document.removeEventListener('selectionchange', handleSelectionChange)
-  }, [textareaRef])
-
+  // Recompute suggestions from the controlled input.
+  // NOTE: We intentionally avoid a global 'selectionchange' listener for performance.
   useEffect(() => {
     const textarea = textareaRef.current
     if (!textarea) return
-    const pos = textarea.selectionStart ?? caretPos
-    checkForMention(input, pos)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [input, references, caretPos])
+
+    const pos = textarea.selectionStart ?? 0
+
+    if (debounceTimerRef.current) window.clearTimeout(debounceTimerRef.current)
+    debounceTimerRef.current = window.setTimeout(() => {
+      debounceTimerRef.current = null
+      checkForMention(input, pos)
+    }, 75)
+
+    return () => {
+      if (debounceTimerRef.current) {
+        window.clearTimeout(debounceTimerRef.current)
+        debounceTimerRef.current = null
+      }
+    }
+  }, [input, references, textareaRef])
 
   return { isOpen, matches, position, onSelect }
 }

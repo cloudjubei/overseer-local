@@ -6,6 +6,7 @@ import { useFiles } from '../../contexts/FilesContext'
 export type FileMentionsTextareaProps = {
   id?: string
   value: string
+  disableAutocomplete?: boolean
   onChange: (val: string) => void
   placeholder?: string
   rows?: number
@@ -15,15 +16,17 @@ export type FileMentionsTextareaProps = {
   ariaLabel?: string
   onFileMentionSelected?: (path: string) => void
   onReferenceSelected?: (ref: string) => void
-  // Optional external ref to control focus/caret from parent
   inputRef?: React.RefObject<HTMLTextAreaElement | null>
-  // Optional key handler (e.g., Cmd/Ctrl+Enter to submit from parent)
   onKeyDown?: React.KeyboardEventHandler<HTMLTextAreaElement>
+  onSelect?: React.ReactEventHandler<HTMLTextAreaElement>
+  onMouseUp?: React.MouseEventHandler<HTMLTextAreaElement>
+  onFocus?: React.FocusEventHandler<HTMLTextAreaElement>
 }
 
 export default function FileMentionsTextarea({
   id,
   value,
+  disableAutocomplete,
   onChange,
   placeholder,
   rows = 3,
@@ -35,6 +38,9 @@ export default function FileMentionsTextarea({
   onReferenceSelected,
   inputRef,
   onKeyDown,
+  onSelect,
+  onMouseUp,
+  onFocus,
 }: FileMentionsTextareaProps) {
   const { files } = useFiles()
   const innerRef = useRef<HTMLTextAreaElement | null>(null)
@@ -43,7 +49,15 @@ export default function FileMentionsTextarea({
   const containerRef = useRef<HTMLDivElement | null>(null)
 
   // Guard against undefined 'files' during initial loads or heavy operations
-  const filesList = useMemo(() => (files ?? []).map((f) => f.relativePath!), [files])
+  const filesList = useMemo(() => {
+    if (disableAutocomplete) return []
+    return (files ?? []).map((f) => f.relativePath!)
+  }, [files, disableAutocomplete])
+
+  // No-op input/setInput when autocomplete is disabled so hooks do zero work.
+  const acInput = disableAutocomplete ? '' : value
+  const acSetInput = disableAutocomplete ? (() => {}) : onChange
+  const acTextareaRef = disableAutocomplete ? innerRef : textareaRef
 
   const {
     isOpen: isFilesOpen,
@@ -52,9 +66,9 @@ export default function FileMentionsTextarea({
     onSelect: onFileSelectInternal,
   } = useFilesAutocomplete({
     filesList,
-    input: value,
-    setInput: onChange,
-    textareaRef,
+    input: acInput,
+    setInput: acSetInput,
+    textareaRef: acTextareaRef,
     mirrorRef,
   })
 
@@ -64,9 +78,9 @@ export default function FileMentionsTextarea({
     position: refsPosition,
     onSelect: onRefSelectInternal,
   } = useReferencesAutocomplete({
-    input: value,
-    setInput: onChange,
-    textareaRef,
+    input: acInput,
+    setInput: acSetInput,
+    textareaRef: acTextareaRef,
     mirrorRef,
   })
 
@@ -78,10 +92,9 @@ export default function FileMentionsTextarea({
   const [refsDropdownMaxWidth, setRefsDropdownMaxWidth] = useState<number | null>(null)
   const refsDropdownRef = useRef<HTMLDivElement | null>(null)
 
-  const PADDING = 8 // keep a little gap from the parent borders
+  const PADDING = 8
   const clamp = (v: number, min: number, max: number) => Math.max(min, Math.min(max, v))
 
-  // Compute stable left and maxWidth when opening files suggestions
   useEffect(() => {
     if (!isFilesOpen || !filesPosition) {
       setFilesDropdownLeft(null)
@@ -91,7 +104,7 @@ export default function FileMentionsTextarea({
     const parent = containerRef.current?.getBoundingClientRect()
     if (!parent) return
 
-    const estWidth = 260 // fallback until real width measured
+    const estWidth = 260
     const left = clamp(
       filesPosition.left,
       parent.left + PADDING,
@@ -101,7 +114,6 @@ export default function FileMentionsTextarea({
     setFilesDropdownMaxWidth(Math.max(0, parent.width - PADDING * 2))
   }, [isFilesOpen, filesPosition])
 
-  // After render, measure real width and refine left so it stays within parent; keep left stable while open
   useLayoutEffect(() => {
     if (!isFilesOpen) return
     const parent = containerRef.current?.getBoundingClientRect()
@@ -119,7 +131,6 @@ export default function FileMentionsTextarea({
     if (newMax !== filesDropdownMaxWidth) setFilesDropdownMaxWidth(newMax)
   }, [isFilesOpen, fileMatches.length])
 
-  // Recompute on window resize for files dropdown
   useEffect(() => {
     if (!isFilesOpen) return
     const onResize = () => {
@@ -139,7 +150,6 @@ export default function FileMentionsTextarea({
     return () => window.removeEventListener('resize', onResize)
   }, [isFilesOpen, filesDropdownLeft])
 
-  // Compute stable left and maxWidth when opening refs suggestions
   useEffect(() => {
     if (!isRefsOpen || !refsPosition) {
       setRefsDropdownLeft(null)
@@ -200,7 +210,6 @@ export default function FileMentionsTextarea({
     if (onFileMentionSelected) onFileMentionSelected(path)
   }
 
-  // For references, we now insert/display using the display indices (e.g., 3.2)
   const handleRefSelect = (refDisplay: string) => {
     onRefSelectInternal(refDisplay)
     if (onReferenceSelected) onReferenceSelected(refDisplay)
@@ -221,7 +230,6 @@ export default function FileMentionsTextarea({
       }
     }
 
-    // Bubble to parent handler if provided
     onKeyDown?.(e)
   }
 
@@ -238,6 +246,9 @@ export default function FileMentionsTextarea({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={onKeyDownInternal}
+        onSelect={onSelect}
+        onMouseUp={onMouseUp}
+        onFocus={onFocus}
         placeholder={placeholder}
         rows={rows}
         disabled={disabled}

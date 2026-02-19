@@ -1,4 +1,4 @@
-import { FC, memo } from 'react'
+import { FC, memo, useMemo } from 'react'
 import ReactMarkdown, { Options, type Components } from 'react-markdown'
 import rehypeExternalLinks from 'rehype-external-links'
 import rehypeRaw from 'rehype-raw'
@@ -204,22 +204,28 @@ const sanitizeSchema: any = {
 }
 
 export default function Markdown({ text, allowHtml = false }: { text: string; allowHtml?: boolean }) {
-  const containsLaTeX = isContainingLaTeX(text)
-  const processedText = containsLaTeX ? preprocessLaTeX(text || '') : text
+  const containsLaTeX = useMemo(() => isContainingLaTeX(text), [text])
+  const processedText = useMemo(
+    () => (containsLaTeX ? preprocessLaTeX(text || '') : text),
+    [text, containsLaTeX],
+  )
 
-  const rehypePlugins: any[] = []
-  if (allowHtml) {
-    // Parse raw HTML and then sanitize it
-    rehypePlugins.push(rehypeRaw)
-    rehypePlugins.push([rehypeSanitize, sanitizeSchema])
-  }
-  rehypePlugins.push([rehypeExternalLinks, { target: '_blank' }])
-  if (containsLaTeX) rehypePlugins.push(rehypeKatex)
+  const rehypePlugins = useMemo(() => {
+    const plugins: any[] = []
+    if (allowHtml) {
+      plugins.push(rehypeRaw)
+      plugins.push([rehypeSanitize, sanitizeSchema])
+    }
+    plugins.push([rehypeExternalLinks, { target: '_blank' }])
+    if (containsLaTeX) plugins.push(rehypeKatex)
+    return plugins
+  }, [allowHtml, containsLaTeX])
 
+  const remarkPlugins = useMemo(() => [remarkGfm, ...(containsLaTeX ? [remarkMath] : [])], [containsLaTeX])
   return (
     <MemoizedReactMarkdown
       rehypePlugins={rehypePlugins}
-      remarkPlugins={[remarkGfm, ...(containsLaTeX ? [remarkMath] : [])]}
+      remarkPlugins={remarkPlugins}
       components={components}
     >
       {processedText}
