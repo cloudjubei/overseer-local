@@ -13,7 +13,7 @@ function isMarkdown(f: FileMeta) {
 function Caret({ open }: { open: boolean }) {
   return (
     <IconChevron
-      className="inline-block w-4 h-4 text-text-muted transition-transform"
+      className='inline-block w-4 h-4 text-text-muted transition-transform'
       style={{ transform: open ? 'rotate(90deg)' : 'rotate(0deg)' }}
     />
   )
@@ -115,25 +115,25 @@ export const FilesView: React.FC = () => {
     return (
       <div>
         {!isRoot && (
-          <div className="flex items-center py-1" style={{ paddingLeft: indent }}>
+          <div className='flex items-center py-1' style={{ paddingLeft: indent }}>
             <button
-              type="button"
+              type='button'
               onClick={() => handleToggleOpen(node.relPath)}
-              className="inline-flex h-6 w-6 items-center justify-center rounded-md text-text-muted hover:bg-[color:var(--border-subtle)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--focus-ring)]"
+              className='inline-flex h-6 w-6 items-center justify-center rounded-md text-text-muted hover:bg-[color:var(--border-subtle)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--focus-ring)]'
               aria-label={isOpen ? 'Collapse folder' : 'Expand folder'}
               title={isOpen ? 'Collapse' : 'Expand'}
             >
               <Caret open={isOpen} />
             </button>
             <button
-              type="button"
+              type='button'
               onClick={() => handleToggleOpen(node.relPath)}
-              className="group flex items-center gap-2 rounded-md px-1 text-sm text-text-primary hover:bg-[color:var(--border-subtle)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--focus-ring)]"
+              className='group flex items-center gap-2 rounded-md px-1 text-sm text-text-primary hover:bg-[color:var(--border-subtle)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--focus-ring)]'
               title={node.name}
             >
-              {isOpen ? <IconFolderOpen className="w-4 h-4" /> : <IconFolder className="w-4 h-4" />}
-              <span className="truncate font-medium text-text-primary">{node.name || 'root'}</span>
-              <span className="ml-auto mr-2 rounded-full border border-border-subtle px-2 py-[1px] text-[10px] text-text-muted bg-[color:var(--surface-raised)]">
+              {isOpen ? <IconFolderOpen className='w-4 h-4' /> : <IconFolder className='w-4 h-4' />}
+              <span className='truncate font-medium text-text-primary'>{node.name || 'root'}</span>
+              <span className='ml-auto mr-2 rounded-full border border-border-subtle px-2 py-[1px] text-[10px] text-text-muted bg-[color:var(--surface-raised)]'>
                 {node.files.length}
               </span>
             </button>
@@ -155,10 +155,10 @@ export const FilesView: React.FC = () => {
                   title={f.name}
                   aria-current={isSel ? 'true' : undefined}
                 >
-                  <IconDocument className="w-4 h-4 opacity-80 mt-[2px]" />
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate text-text-primary">{f.name}</div>
-                    <div className="text-[10px] text-text-muted">
+                  <IconDocument className='w-4 h-4 opacity-80 mt-[2px]' />
+                  <div className='min-w-0 flex-1'>
+                    <div className='truncate text-text-primary'>{f.name}</div>
+                    <div className='text-[10px] text-text-muted'>
                       {f.mtime ? `Updated ${relTime(f.mtime)}` : ''}
                     </div>
                   </div>
@@ -189,36 +189,39 @@ export const FilesView: React.FC = () => {
   }
 
   return (
-    <div className="files-view grid h-full" style={{ gridTemplateColumns: '320px 1fr' }}>
+    <div className='files-view grid h-full' style={{ gridTemplateColumns: '320px 1fr' }}>
+      {/* Left panel: file tree — uses flex-col so the tree area scrolls independently */}
       <aside
-        className="flex-col w-min-[0] overflow-hidden"
+        className='flex flex-col h-full min-h-0 overflow-hidden'
         style={{ borderRight: '1px solid var(--border-subtle)' }}
       >
+        {/* Fixed header: search bar */}
         <div
-          className="flex p-2 gap-2 items-center"
+          className='flex-shrink-0 flex p-2 gap-2 items-center'
           style={{ borderBottom: '1px solid var(--border-subtle)' }}
         >
-          <strong className="flex-1">Files</strong>
+          <strong className='flex-1'>Files</strong>
           <input
             ref={searchRef}
-            type="search"
-            placeholder="Search files"
+            type='search'
+            placeholder='Search files'
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="ui-input"
+            className='ui-input'
             style={{ width: 160 }}
-            aria-label="Search files"
+            aria-label='Search files'
           />
         </div>
-        <div className="flex-1">
+        {/* Scrollable file tree */}
+        <div className='flex-1 min-h-0 overflow-y-auto'>
           {!directoryTree ? (
-            <div className="p-3">Loading index...</div>
+            <div className='p-3'>Loading index...</div>
           ) : files.length === 0 ? (
-            <div className="p-3" style={{ color: 'var(--text-muted)' }}>
+            <div className='p-3' style={{ color: 'var(--text-muted)' }}>
               No files found.
             </div>
           ) : (
-            <div className="flex-col overflow-auto px-2 py-2">
+            <div className='px-2 py-2'>
               <DirTree
                 node={
                   query.trim()
@@ -235,7 +238,8 @@ export const FilesView: React.FC = () => {
           )}
         </div>
       </aside>
-      <main style={{ minWidth: 0, minHeight: 0 }}>
+      {/* Right panel: file content — scrolls independently */}
+      <main className='h-full min-h-0 min-w-0 overflow-auto'>
         {!selectedFile ? (
           <div style={{ padding: 16, color: 'var(--text-muted)' }}>Select a file to view.</div>
         ) : isMarkdown(selectedFile) ? (

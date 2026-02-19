@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, useCallback } from 'react'
+import React, { useEffect, useMemo, useState, useCallback, memo } from 'react'
 import { useActiveProject, useProjectContext } from '@renderer/contexts/ProjectContext'
 import { useStories } from '@renderer/contexts/StoriesContext'
 import { useChats } from '@renderer/contexts/ChatsContext'
@@ -130,21 +130,23 @@ export default function ChatsNavigationSidebar({
   const { unreadKeys, getUnreadCountForKey } = useChatUnread()
   const { isThinkingKey } = useChatThinking(500)
 
-  const getProjectTitle = (id?: string) => {
+  const getProjectTitle = useCallback((id?: string) => {
     if (!id) return ''
     const p = projects.find((prj) => prj.id === id)
     return p?.title || id
-  }
-  const getStoryTitle = (id?: string) => {
+  }, [projects])
+
+  const getStoryTitle = useCallback((id?: string) => {
     if (!id) return ''
     const s = storiesById[id]
     return s?.title || 'Deleted story'
-  }
-  const getFeatureTitle = (id?: string) => {
+  }, [storiesById])
+
+  const getFeatureTitle = useCallback((id?: string) => {
     if (!id) return ''
     const f = featuresById[id]
     return f?.title || 'Deleted feature'
-  }
+  }, [featuresById])
 
   // Enforce active project scoping for all chat lists
   const projectChats = useMemo(() => {

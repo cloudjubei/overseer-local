@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState, useLayoutEffect, useCallback } from 'react'
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import Spinner from '../ui/Spinner'
 import ErrorBubble from '../ui/ErrorBubble'
@@ -118,8 +118,10 @@ function CollapsibleContent({
       <div
         ref={containerRef}
         style={{
+          // Keep expanded content contained within the chat scroller.
+          // Using 'visible' can cause content to escape and make the whole app/page scroll.
           maxHeight: expanded ? 'none' : `${maxHeight}px`,
-          overflow: expanded ? 'visible' : 'hidden',
+          overflow: expanded ? 'auto' : 'hidden',
         }}
       >
         {children}
@@ -172,25 +174,35 @@ export default function MessageList({
   }, [toolPreviewById])
 
   const enhancedMessages: EnhancedMessage[] = useMemo(() => {
-    return messages.map((m, index) => {
-      let showModel = false
-      if (m.completionMessage.role === 'assistant' && m.model) {
-        const prevAssistant = [...messages.slice(0, index)]
-          .reverse()
-          .find((x) => x.completionMessage.role === 'assistant')
-        showModel = !prevAssistant || prevAssistant.model !== m.model
-      }
+    // O(n) single pass to avoid scanning backwards per message (which becomes O(n^2)).
+    const out: EnhancedMessage[] = []
+    let lastAssistantModel: any | undefined
+    let lastRole: string | undefined
+
+    for (let index = 0; index < messages.length; index++) {
+      const m = messages[index]
       const effectiveMessage: EnhancedMessage = { ...m }
+
+      // Tool results are rendered as system messages
       if (m.toolResults?.length) {
         effectiveMessage.completionMessage.role = 'system'
       }
-      const prev = messages[index - 1]
-      const isFirstInGroup =
-        !prev ||
-        prev.completionMessage.role !== effectiveMessage.completionMessage.role ||
-        effectiveMessage.completionMessage.role === 'system'
-      return { ...effectiveMessage, showModel, isFirstInGroup }
-    })
+
+      const role = effectiveMessage.completionMessage.role
+
+      let showModel = false
+      if (m.completionMessage.role === 'assistant' && m.model) {
+        showModel = !lastAssistantModel || lastAssistantModel !== m.model
+        lastAssistantModel = m.model
+      }
+
+      const isFirstInGroup = !lastRole || lastRole !== role || role === 'system'
+      lastRole = role
+
+      out.push({ ...effectiveMessage, showModel, isFirstInGroup })
+    }
+
+    return out
   }, [messages])
 
   const prevCountRef = useRef<number>(messages.length)
@@ -296,7 +308,12 @@ export default function MessageList({
   }
 
   const forceScrollToBottom = (behavior: ScrollBehavior = 'auto') => {
-    bottomAnchorRef.current?.scrollIntoView({ behavior })
+    // Important: do NOT use scrollIntoView() here.
+    // It can scroll the wrong ancestor (including the whole app) depending on layout/overflow.
+    const c = messageListRef.current
+    if (!c) return
+    const top = Math.max(0, c.scrollHeight - c.clientHeight)
+    c.scrollTo({ top, behavior })
     isAtBottomRef.current = true
     onAtBottomChange?.(true)
   }
@@ -577,14 +594,6 @@ export default function MessageList({
     const container = messageListRef.current
     if (!container) return
 
-    const mo = new MutationObserver(() => {
-      if (isAtBottomRef.current) {
-        forceScrollToBottom('auto')
-        onReadLatest?.(lastMessageIso(messages))
-      }
-    })
-    mo.observe(container, { childList: true, subtree: true })
-
     let resizeRaf: number | null = null
     const onResize = () => {
       if (resizeRaf) cancelAnimationFrame(resizeRaf)
@@ -599,7 +608,6 @@ export default function MessageList({
     window.addEventListener('resize', onResize)
 
     return () => {
-      mo.disconnect()
       window.removeEventListener('resize', onResize)
       if (resizeRaf) cancelAnimationFrame(resizeRaf)
     }

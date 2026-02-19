@@ -726,7 +726,15 @@ export default function ChatSidebar({
         />
       </div>
 
-      <div className="flex-shrink-0 max-h-[40%] overflow-y-auto">
+      {/*
+        IMPORTANT: Keep the input area height deterministic and avoid creating an extra
+        scroll container that can cause the whole app/page to become scrollable.
+        The textarea inside ChatInput already scrolls internally after MAX_INPUT_HEIGHT_PX.
+      */}
+      <div
+        className="flex-shrink-0 overflow-hidden"
+        style={{ maxHeight: 'clamp(160px, 30vh, 320px)' }}
+      >
         <ChatInput
           value={draft.text}
           attachments={draft.attachments}
