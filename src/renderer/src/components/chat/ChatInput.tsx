@@ -81,16 +81,18 @@ export default function ChatInput({
 
   // --- Autosize ---
   const autosizeRafRef = useRef<number | null>(null)
+  const autosizeRetryTimerRef = useRef<number | null>(null)
 
   const autoSizeTextareaNow = useCallback(() => {
     const el = textareaRef.current
     if (!el) return
 
-    // More robust than '0px': let the browser compute a natural height first.
-    // This handles wrap changes when width changes.
-    el.style.height = 'auto'
+    // Use !important to defeat any CSS 'height: ... !important' rules.
+    // This is a common reason autosize appears stuck at 1 line.
+    el.style.setProperty('height', 'auto', 'important')
+
     const next = Math.min(el.scrollHeight, MAX_INPUT_HEIGHT_PX)
-    el.style.height = next + 'px'
+    el.style.setProperty('height', next + 'px', 'important')
   }, [])
 
   const requestAutosize = useCallback(() => {
@@ -101,9 +103,27 @@ export default function ChatInput({
     })
   }, [autoSizeTextareaNow])
 
-  // Autosize on value changes (once per frame)
-  useEffect(() => {
+  // Autosize on value changes (layout effect ensures DOM has committed the new value)
+  useLayoutEffect(() => {
     requestAutosize()
+
+    // In some layouts (flex/sidebar transitions, font rendering changes), scrollHeight can be
+    // incorrect on the first pass. A short delayed retry makes autosize much more robust.
+    if (autosizeRetryTimerRef.current) {
+      window.clearTimeout(autosizeRetryTimerRef.current)
+      autosizeRetryTimerRef.current = null
+    }
+    autosizeRetryTimerRef.current = window.setTimeout(() => {
+      autosizeRetryTimerRef.current = null
+      requestAutosize()
+    }, 50)
+
+    return () => {
+      if (autosizeRetryTimerRef.current) {
+        window.clearTimeout(autosizeRetryTimerRef.current)
+        autosizeRetryTimerRef.current = null
+      }
+    }
   }, [safeValue, requestAutosize])
 
   // Autosize when layout-affecting UI changes (e.g. suggested actions bar mounts/unmounts,
@@ -129,6 +149,20 @@ export default function ChatInput({
         prevWidth = nextWidth
         requestAutosize()
       }
+    })
+
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [requestAutosize])
+
+  // Autosize when the overall chat input container resizes.
+  // Observing only the textarea can miss some flex/grid layout changes.
+  useEffect(() => {
+    const el = chatInputRef.current
+    if (!el) return
+
+    const ro = new ResizeObserver(() => {
+      requestAutosize()
     })
 
     ro.observe(el)
@@ -240,6 +274,7 @@ export default function ChatInput({
   useEffect(() => {
     return () => {
       if (autosizeRafRef.current) cancelAnimationFrame(autosizeRafRef.current)
+      if (autosizeRetryTimerRef.current) window.clearTimeout(autosizeRetryTimerRef.current)
     }
   }, [])
 

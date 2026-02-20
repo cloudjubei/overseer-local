@@ -131,9 +131,22 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
   // Per-chat in-memory draft message + pending attachments.
   const [draftsByChatKey, setDraftsByChatKey] = useState<Record<string, ChatDraft>>({})
 
+  // Stable default draft objects per chatKey to avoid returning a fresh object on every provider re-render.
+  // This prevents unrelated chat updates (e.g. messages arriving in other chats) from causing
+  // referential churn that can cascade into input clears.
+  const defaultDraftsRef = useRef<Record<string, ChatDraft>>({})
+
   const getDraft = useCallback(
     (chatKey: string) => {
-      return draftsByChatKey[chatKey] || { text: '', attachments: [] }
+      const existing = draftsByChatKey[chatKey]
+      if (existing) return existing
+
+      const cached = defaultDraftsRef.current[chatKey]
+      if (cached) return cached
+
+      const def: ChatDraft = { text: '', attachments: [] }
+      defaultDraftsRef.current[chatKey] = def
+      return def
     },
     [draftsByChatKey],
   )
@@ -153,6 +166,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       delete next[chatKey]
       return next
     })
+    // Note: we intentionally do not delete from defaultDraftsRef; keeping defaults cached is fine.
   }, [])
 
   // Track last assistant message index notified per chat key to avoid duplicates/retroactive notices

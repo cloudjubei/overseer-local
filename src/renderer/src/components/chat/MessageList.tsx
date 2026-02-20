@@ -38,6 +38,25 @@ function MessageListInner({
   const { filesByPath } = useFiles()
   const { getLastReadForKey } = useChatUnread()
 
+  // Visibility tracking: only animate when visible (sidebar open and rendered)
+  const messageListRef = useRef<HTMLDivElement>(null)
+  const contentRef = useRef<HTMLDivElement>(null)
+  const bottomAnchorRef = useRef<HTMLDivElement>(null)
+  const [isVisible, setIsVisible] = useState<boolean>(false)
+
+  useEffect(() => {
+    const el = messageListRef.current
+    if (!el) return
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) setIsVisible(entry.isIntersecting)
+      },
+      { root: null, threshold: 0.05 },
+    )
+    io.observe(el)
+    return () => io.disconnect()
+  }, [])
+
   // In-memory preview cache for require_confirmation tool calls (write tools only)
   const [toolPreviewById, setToolPreviewById] = useState<Record<string, ToolPreview>>({})
   const toolPreviewByIdRef = useRef<Record<string, ToolPreview>>({})
@@ -95,24 +114,6 @@ function MessageListInner({
     prevCountRef.current = messages.length
   }, [messages, chatId])
 
-  // Visibility tracking: only animate when visible (sidebar open and rendered)
-  const messageListRef = useRef<HTMLDivElement>(null)
-  const contentRef = useRef<HTMLDivElement>(null)
-  const bottomAnchorRef = useRef<HTMLDivElement>(null)
-  const [isVisible, setIsVisible] = useState<boolean>(false)
-  useEffect(() => {
-    const el = messageListRef.current
-    if (!el) return
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) setIsVisible(entry.isIntersecting)
-      },
-      { root: null, threshold: 0.05 },
-    )
-    io.observe(el)
-    return () => io.disconnect()
-  }, [])
-
   // Animate assistant typing for the latest assistant message
   const [animateAssistantIdx, setAnimateAssistantIdx] = useState<number | null>(null)
   const prevLenForAnimRef = useRef<number>(messages.length)
@@ -156,19 +157,11 @@ function MessageListInner({
     prevLenForUserAnimRef.current = messages.length
   }, [messages])
 
-  // --- Scrolling behavior ---
-  // Two concepts:
-  // - isAtBottomRef: actual current position
-  // - stickToBottomRef: whether we SHOULD auto-scroll on new content
-  //
-  // IMPORTANT: do not automatically set stickToBottomRef to true from programmatic scrolls.
-  // Only user scrolling near the bottom, or explicit chat-open/user-send actions, should enable it.
+  // --- Scrolling: SIMPLE RULE ---
+  // 'Auto-scroll' is allowed ONLY if the user is currently near the bottom.
+  // Otherwise: do not touch scrollTop at all (no preserve, no compensation, no settle window).
   const isAtBottomRef = useRef<boolean>(true)
-  const stickToBottomRef = useRef<boolean>(true)
-  const prevLenForScrollRef = useRef<number>(messages.length)
-  const lastMessageRef = useRef<HTMLDivElement>(null)
 
-  // Near-bottom threshold used consistently across stickiness + auto-scroll.
   const NEAR_BOTTOM_PX = 80
   const computeIsNearBottom = useCallback((): boolean => {
     const c = messageListRef.current
@@ -176,17 +169,15 @@ function MessageListInner({
     return c.scrollTop + c.clientHeight >= c.scrollHeight - NEAR_BOTTOM_PX
   }, [])
 
-  const setStickyBottom = useCallback(
-    (sticky: boolean) => {
-      stickToBottomRef.current = sticky
-      isAtBottomRef.current = sticky
-      onAtBottomChange?.(sticky)
-      if (sticky) onReadLatest?.(lastMessageIso(messages))
-    },
-    [messages, onAtBottomChange, onReadLatest],
-  )
+  const updateAtBottomState = useCallback(() => {
+    const nearBottom = computeIsNearBottom()
+    if (nearBottom !== isAtBottomRef.current) {
+      isAtBottomRef.current = nearBottom
+      onAtBottomChange?.(nearBottom)
+      if (nearBottom) onReadLatest?.(lastMessageIso(messages))
+    }
+  }, [computeIsNearBottom, messages, onAtBottomChange, onReadLatest])
 
-  // Pure scroll helper: does NOT mutate stickiness.
   const scrollToBottom = useCallback((behavior: ScrollBehavior = 'auto') => {
     const c = messageListRef.current
     if (!c) return
@@ -194,28 +185,9 @@ function MessageListInner({
     c.scrollTo({ top, behavior })
   }, [])
 
-  const scrollToBottomAndStick = useCallback(
-    (behavior: ScrollBehavior = 'auto') => {
-      scrollToBottom(behavior)
-      setStickyBottom(true)
-    },
-    [scrollToBottom, setStickyBottom],
-  )
-
   const handleScroll: React.UIEventHandler<HTMLDivElement> = (_e) => {
-    // Use near-bottom logic to decide stickiness.
-    const nearBottom = computeIsNearBottom()
-
-    // Only mutate stickiness based on user scroll events.
-    if (nearBottom !== stickToBottomRef.current) {
-      stickToBottomRef.current = nearBottom
-    }
-
-    if (nearBottom !== isAtBottomRef.current) {
-      isAtBottomRef.current = nearBottom
-      onAtBottomChange?.(nearBottom)
-      if (nearBottom) onReadLatest?.(lastMessageIso(messages))
-    }
+    // User initiated scroll only: update UI state.
+    updateAtBottomState()
   }
 
   // Determine last read marker for this chat
@@ -386,40 +358,25 @@ function MessageListInner({
     return null
   }, [messagesToDisplay, lastReadIso, hasUnreadOnOpen])
 
-  // Short settle window after opening a chat at bottom. This accounts for async expansions.
-  const settleUntilMsRef = useRef<number>(0)
-
-  const settleToBottom = useCallback(() => {
-    requestAnimationFrame(() => {
-      if (!stickToBottomRef.current) return
-      scrollToBottom('auto')
-      requestAnimationFrame(() => {
-        if (!stickToBottomRef.current) return
-        scrollToBottom('auto')
-      })
-    })
-  }, [scrollToBottom])
-
   // Initial scroll positioning when switching chats
+  const initialPositionedChatIdRef = useRef<string | undefined>(undefined)
   useLayoutEffect(() => {
     const container = messageListRef.current
     if (!container) return
 
+    if (chatId && initialPositionedChatIdRef.current === chatId) return
+    initialPositionedChatIdRef.current = chatId
+
     const openAtBottom = () => {
-      // Explicitly enable stickiness for this open.
-      setStickyBottom(true)
-      settleUntilMsRef.current = Date.now() + 700
       scrollToBottom('auto')
-      settleToBottom()
+      updateAtBottomState()
     }
 
-    // If there are no messages, still ensure we are at bottom.
     if (!messagesToDisplay.length) {
       openAtBottom()
       return
     }
 
-    // If there is no lastReadIso, we consider this chat 'newly opened' and go to bottom.
     if (!lastReadIso) {
       openAtBottom()
       return
@@ -437,57 +394,36 @@ function MessageListInner({
         const headroom = Math.floor(container.clientHeight * 0.3)
         const top = Math.max(0, target.offsetTop - headroom)
         container.scrollTo({ top, behavior: 'auto' })
-        setStickyBottom(false)
-        settleUntilMsRef.current = 0
+        updateAtBottomState()
         return
       }
     }
 
-    // Fallback: open at bottom.
     openAtBottom()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chatId, messagesToDisplay.length, hasUnreadOnOpen, lastUnreadIndex])
+  }, [chatId])
 
-  // Continuous anchoring while content resizes
+  // ResizeObserver: obey the simple rule
   useEffect(() => {
     const container = messageListRef.current
     const content = contentRef.current
     if (!container || !content) return
 
-    let prevScrollHeight = container.scrollHeight
-
     const ro = new ResizeObserver(() => {
-      const c = messageListRef.current
-      if (!c) return
-
-      const nextScrollHeight = c.scrollHeight
-      const delta = nextScrollHeight - prevScrollHeight
-      prevScrollHeight = nextScrollHeight
-
-      if (delta === 0) return
-
-      // If we're sticking to bottom, keep pinned.
-      if (stickToBottomRef.current) {
-        scrollToBottom('auto')
-        return
-      }
-
-      // If we're in the settle window and we *intended* to be at bottom, snap down.
-      if (Date.now() < settleUntilMsRef.current && computeIsNearBottom()) {
-        setStickyBottom(true)
-        scrollToBottom('auto')
-        return
-      }
-
-      // Otherwise: preserve the user's viewport position.
-      c.scrollTop = c.scrollTop + delta
+      // NEVER move unless near bottom.
+      if (!computeIsNearBottom()) return
+      scrollToBottom('auto')
+      updateAtBottomState()
     })
 
     ro.observe(content)
     return () => ro.disconnect()
-  }, [scrollToBottom, computeIsNearBottom, setStickyBottom])
+  }, [computeIsNearBottom, scrollToBottom, updateAtBottomState])
 
-  // Scroll behavior on new messages
+  // Scroll behavior on new messages: obey the simple rule
+  const prevLenForScrollRef = useRef<number>(messages.length)
+  const lastMessageRef = useRef<HTMLDivElement>(null)
+
   useEffect(() => {
     const container = messageListRef.current
     if (!container) return
@@ -498,21 +434,17 @@ function MessageListInner({
 
     if (!increased) return
 
-    // If stickiness is stale (e.g. user scrolled up but we didn't receive a scroll event yet),
-    // recompute near-bottom now and disable sticky mode if needed.
-    if (stickToBottomRef.current && !computeIsNearBottom()) {
-      setStickyBottom(false)
+    // If not near bottom, do nothing.
+    if (!computeIsNearBottom()) {
+      updateAtBottomState()
       return
     }
-
-    // If the user is not sticking to bottom, do not auto-scroll.
-    if (!stickToBottomRef.current) return
 
     // While thinking, keep pinned to bottom.
     if (isThinking) {
       requestAnimationFrame(() => {
         scrollToBottom('auto')
-        if (isAtBottomRef.current) onReadLatest?.(lastMessageIso(messages))
+        updateAtBottomState()
       })
       return
     }
@@ -521,25 +453,30 @@ function MessageListInner({
     if (lastNow && lastNow.completionMessage.role === 'user') {
       requestAnimationFrame(() => {
         scrollToBottom('smooth')
-        if (isAtBottomRef.current) onReadLatest?.(lastMessageIso(messages))
+        updateAtBottomState()
       })
       return
     }
 
+    // Assistant/system: gentle reveal if already near bottom.
     requestAnimationFrame(() => {
       const c = messageListRef.current
       if (!c) return
+      if (!computeIsNearBottom()) {
+        updateAtBottomState()
+        return
+      }
       const revealPadding = 24
       const lastEl = lastMessageRef.current
       let targetTop = c.scrollHeight - c.clientHeight - revealPadding
       if (lastEl) targetTop = lastEl.offsetTop - (c.clientHeight - revealPadding)
       if (targetTop < 0) targetTop = 0
       c.scrollTo({ top: targetTop, behavior: 'smooth' })
-      onReadLatest?.(lastMessageIso(messages))
+      updateAtBottomState()
     })
-  }, [messages, isThinking, onReadLatest, scrollToBottom, computeIsNearBottom, setStickyBottom])
+  }, [messages, isThinking, scrollToBottom, computeIsNearBottom, updateAtBottomState])
 
-  // Explicit scroll-to-bottom signal (e.g. after user sends)
+  // Explicit scroll-to-bottom signal: obey the simple rule
   const prevSignalRef = useRef<number | undefined>(undefined)
   useEffect(() => {
     if (typeof scrollToBottomSignal === 'undefined') return
@@ -552,25 +489,30 @@ function MessageListInner({
     if (scrollToBottomSignal !== prevSignalRef.current) {
       prevSignalRef.current = scrollToBottomSignal
 
-      // Only scroll if we are currently sticky.
-      if (!stickToBottomRef.current) return
+      if (!computeIsNearBottom()) {
+        updateAtBottomState()
+        return
+      }
 
       requestAnimationFrame(() => {
         scrollToBottom('smooth')
-        onReadLatest?.(lastMessageIso(messages))
+        updateAtBottomState()
       })
     }
-  }, [scrollToBottomSignal, messages, onReadLatest, scrollToBottom])
+  }, [scrollToBottomSignal, scrollToBottom, computeIsNearBottom, updateAtBottomState])
 
-  // When thinking toggles on, keep bottom pinned only if sticking.
+  // When thinking toggles on, keep bottom pinned only if near bottom
   useLayoutEffect(() => {
     if (!isThinking) return
-    if (!stickToBottomRef.current) return
+    if (!computeIsNearBottom()) {
+      updateAtBottomState()
+      return
+    }
     scrollToBottom('auto')
-    onReadLatest?.(lastMessageIso(messages))
-  }, [isThinking, messages, onReadLatest, scrollToBottom])
+    updateAtBottomState()
+  }, [isThinking, scrollToBottom, computeIsNearBottom, updateAtBottomState])
 
-  // Keep scroll pinned on window resize only if currently sticking.
+  // Keep scroll pinned on window resize only if near bottom
   useEffect(() => {
     const container = messageListRef.current
     if (!container) return
@@ -579,10 +521,12 @@ function MessageListInner({
     const onResize = () => {
       if (resizeRaf) cancelAnimationFrame(resizeRaf)
       resizeRaf = requestAnimationFrame(() => {
-        if (stickToBottomRef.current) {
-          scrollToBottom('auto')
-          onReadLatest?.(lastMessageIso(messages))
+        if (!computeIsNearBottom()) {
+          updateAtBottomState()
+          return
         }
+        scrollToBottom('auto')
+        updateAtBottomState()
       })
     }
 
@@ -610,11 +554,7 @@ function MessageListInner({
   }, [])
 
   const cutoffIndex = useMemo(() => {
-    if (
-      !numberMessagesToSend ||
-      messagesToDisplay.length < numberMessagesToSend ||
-      numberMessagesToSend < 1
-    ) {
+    if (!numberMessagesToSend || messagesToDisplay.length < numberMessagesToSend || numberMessagesToSend < 1) {
       return null
     }
     const historyCount = numberMessagesToSend - 1

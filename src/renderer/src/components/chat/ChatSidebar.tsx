@@ -82,6 +82,7 @@ export default function ChatSidebar({
   const draft = useMemo(() => getDraft(chatKey), [getDraft, chatKey])
 
   // --- Local input state ---
+  const prevChatKeyRef = useRef<string | undefined>(undefined)
   const [localText, setLocalText] = useState<string>(draft.text)
   const [localAttachments, setLocalAttachments] = useState<string[]>(draft.attachments)
 
@@ -102,6 +103,12 @@ export default function ChatSidebar({
 
   // When switching chats, reset local state from stored draft.
   useEffect(() => {
+    // Only reset local UI when the chat context actually changes.
+    // Incoming messages can cause the Chats provider to update and change function identities
+    // (e.g. getDraft), which would otherwise risk clobbering in-progress typing.
+    if (prevChatKeyRef.current === chatKey) return
+    prevChatKeyRef.current = chatKey
+
     if (draftPersistTimerRef.current) {
       window.clearTimeout(draftPersistTimerRef.current)
       draftPersistTimerRef.current = null
@@ -115,8 +122,13 @@ export default function ChatSidebar({
     setLocalAttachments(draft.attachments)
     localSelectionStartRef.current = draft.selectionStart
     localSelectionEndRef.current = draft.selectionEnd
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chatKey])
+  }, [
+    chatKey,
+    draft.text,
+    draft.attachments,
+    draft.selectionStart,
+    draft.selectionEnd,
+  ])
 
   // If an external actor changes the stored draft for the current chatKey, sync it.
   // Keep this conservative to avoid fighting the user's typing.
