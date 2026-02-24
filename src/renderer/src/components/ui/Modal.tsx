@@ -157,7 +157,8 @@ export function Modal({
         ref={panelRef}
         className={
           `relative z-10 w-full flex flex-col ${sizeClass(size)} rounded-lg border bg-surface-overlay text-text-primary shadow-xl max-h-[90vh] tf-modal-panel` +
-          ' border-border outline-none focus:outline-none animate-in fade-in-50 zoom-in-95' + (panelClassName ? ` ${panelClassName}` : '')
+          ' border-border outline-none focus:outline-none animate-in fade-in-50 zoom-in-95' +
+          (panelClassName ? ` ${panelClassName}` : '')
         }
         role="dialog"
         aria-modal="true"

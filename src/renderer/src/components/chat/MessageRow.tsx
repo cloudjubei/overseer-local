@@ -16,6 +16,11 @@ import { Switch } from '../ui/Switch'
 import { messageIso } from '@renderer/utils/chat'
 import { formatDurationMs, formatFriendlyTimestamp } from '@renderer/utils/time'
 
+function formatUSD(n?: number) {
+  if (n == null || Number.isNaN(n)) return undefined
+  return `$${n.toFixed(4)}`
+}
+
 export type ToolPreview =
   | { status: 'pending' }
   | { status: 'error'; error: string }
@@ -208,10 +213,13 @@ function MessageRow({
   }, [messagesToDisplay, pendingTail.start, pendingTail.end])
 
   const selectedCount = selectedToolIds.filter((id) => isConfirmableToolId.has(id)).length
-  const allSelected = selectedCount > 0 && Array.from(isConfirmableToolId).every((id) => selectedToolIds.includes(id))
+  const allSelected =
+    selectedCount > 0 &&
+    Array.from(isConfirmableToolId).every((id) => selectedToolIds.includes(id))
 
   // delete button logic: allow delete on last message, and on assistant preceding a tool tail
-  const isAssistantBeforeToolTail = isAssistant && toggleableCount > 0 && globalIndex === pendingTail.start - 1
+  const isAssistantBeforeToolTail =
+    isAssistant && toggleableCount > 0 && globalIndex === pendingTail.start - 1
 
   const shouldShowDelete = !!onDeleteLastMessage && (isLast || isAssistantBeforeToolTail)
 
@@ -235,6 +243,13 @@ function MessageRow({
 
     return formatDurationMs(end - start)
   }, [globalIndex, isAssistant, iso, messagesToDisplay])
+
+  const assistantCostLabel = useMemo(() => {
+    if (!isAssistant) return undefined
+    const cost = (msg as any)?.usage?.cost
+    if (typeof cost !== 'number') return undefined
+    return formatUSD(cost)
+  }, [isAssistant, msg])
 
   return (
     <div data-msg-idx={globalIndex} data-msg-role={role} data-msg-iso={iso || ''}>
@@ -304,8 +319,10 @@ function MessageRow({
                 ) : (
                   <div />
                 )}
-                {ts || thinkingLabel ? (
+                {ts || thinkingLabel || assistantCostLabel ? (
                   <div className='text-[10px] leading-4 text-[var(--text-secondary)] mb-1 opacity-80 select-none flex items-baseline gap-1'>
+                    {assistantCostLabel ? <span>{assistantCostLabel}</span> : null}
+                    {assistantCostLabel && (thinkingLabel || ts) ? <span>·</span> : null}
                     {thinkingLabel ? <span>{`+${thinkingLabel}`}</span> : null}
                     {thinkingLabel && ts ? <span>·</span> : null}
                     {ts ? <span>{ts}</span> : null}
@@ -322,14 +339,20 @@ function MessageRow({
               <div
                 className={[
                   // Full-width for assistant/system bubbles, keep user constrained.
-                  isUser ? 'overflow-x-auto max-w-full' : 'w-full overflow-x-auto max-w-full',
+                  isUser
+                    ? 'overflow-x-auto max-w-full'
+                    : 'w-full overflow-x-auto max-w-full',
                   'px-3 py-2 rounded-2xl whitespace-pre-wrap break-words shadow',
                   isUser
                     ? 'bg-[var(--accent-primary)] text-[var(--text-inverted)] rounded-br-md'
                     : isSystem
                       ? 'border bg-[var(--surface-overlay)] text-[var(--text-primary)] border-[var(--border-subtle)]'
                       : 'bg-[var(--surface-raised)] text-[var(--text-primary)] border border-[var(--border-subtle)] rounded-bl-md',
-                  (msg as any).isFirstInGroup ? '' : isUser ? 'rounded-tr-md' : 'rounded-tl-md',
+                  (msg as any).isFirstInGroup
+                    ? ''
+                    : isUser
+                      ? 'rounded-tr-md'
+                      : 'rounded-tl-md',
                   'chat-bubble',
                   isNewUserBubble ? 'chat-bubble--user-pop-enter' : '',
                 ].join(' ')}
@@ -360,7 +383,8 @@ function MessageRow({
                 const tm = msg as unknown as CompletionToolMessage
                 const toolCallId = String(tm.toolCall?.toolCallId || '')
                 const type = tm.toolResult?.type as ToolResultType | undefined
-                const selectable = type === 'require_confirmation' && isConfirmableToolId.has(toolCallId)
+                const selectable =
+                  type === 'require_confirmation' && isConfirmableToolId.has(toolCallId)
 
                 return (
                   <ToolCallCard
@@ -418,7 +442,9 @@ function MessageRow({
                     disabled={selectedCount === 0 || !onResumeTools}
                     onClick={() => {
                       if (!onResumeTools) return
-                      const validSelected = selectedToolIds.filter((id) => isConfirmableToolId.has(id))
+                      const validSelected = selectedToolIds.filter((id) =>
+                        isConfirmableToolId.has(id),
+                      )
                       onResumeTools(validSelected)
                     }}
                   >
@@ -431,7 +457,11 @@ function MessageRow({
 
           {/* Attachments */}
           {(msg as any).role === 'user' && (msg as any).files && (msg as any).files.length > 0 ? (
-            <div className={['mt-1 flex flex-wrap gap-1', isUser ? 'justify-end' : 'justify-start'].join(' ')}>
+            <div
+              className={['mt-1 flex flex-wrap gap-1', isUser ? 'justify-end' : 'justify-start'].join(
+                ' ',
+              )}
+            >
               {(msg as any).files.map((path: string, i: number) => {
                 const meta = filesByPath[path]
                 const name = meta?.name || path.split('/').pop() || path

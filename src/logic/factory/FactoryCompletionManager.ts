@@ -19,11 +19,13 @@ import type {
 import BaseManager from '../BaseManager'
 import FactoryToolsManager from './FactoryToolsManager'
 import ChatsManager from '../chat/ChatsManager'
+import FactoryLLMPricingManager from './FactoryLLMPricingManager'
 import { getChatContextPath } from 'thefactory-tools/utils'
 
 export default class FactoryCompletionManager extends BaseManager {
   private chatsManager: ChatsManager
   private factoryToolsManager: FactoryToolsManager
+  private factoryLLMPricingManager: FactoryLLMPricingManager
 
   private abortControllers: Record<string, AbortController> = {}
 
@@ -32,11 +34,13 @@ export default class FactoryCompletionManager extends BaseManager {
     window: BrowserWindow,
     chatsManager: ChatsManager,
     factoryToolsManager: FactoryToolsManager,
+    factoryLLMPricingManager: FactoryLLMPricingManager,
   ) {
     super(projectRoot, window)
 
     this.chatsManager = chatsManager
     this.factoryToolsManager = factoryToolsManager
+    this.factoryLLMPricingManager = factoryLLMPricingManager
   }
 
   getHandlersAsync(): Record<string, (args: any) => Promise<any>> {
@@ -93,6 +97,36 @@ export default class FactoryCompletionManager extends BaseManager {
     return handlers
   }
 
+  private enrichConfigWithPricing(config: LLMConfig): LLMConfig {
+    const pricing = this.factoryLLMPricingManager.getManager()
+    if (!pricing) return config
+
+    if (
+      config.costInputPerMTokensUSD != null ||
+      config.costOutputPerMTokensUSD != null ||
+      config.costCacheReadInputPerMTokensUSD != null ||
+      config.costCacheWriteInputPerMTokensUSD != null
+    ) {
+      return config
+    }
+
+    const price = pricing.getPrice(config.provider, config.model)
+    if (!price) return config
+
+    const costInputPerMTokensUSD = price.inputPerMTokensUSD
+    const costOutputPerMTokensUSD = price.outputPerMTokensUSD
+    const costCacheReadInputPerMTokensUSD = price.cacheReadInputPerMTokensUSD
+    const costCacheWriteInputPerMTokensUSD = price.cacheWriteInputPerMTokensUSD
+
+    return {
+      ...config,
+      costInputPerMTokensUSD,
+      costOutputPerMTokensUSD,
+      costCacheReadInputPerMTokensUSD,
+      costCacheWriteInputPerMTokensUSD,
+    }
+  }
+
   private processChatMessagesForCompletion(messages: CompletionMessage[]): CompletionMessage[] {
     // Transform user messages with attachments into content that includes @path mentions.
     // Tool messages are already native (role='tool') and should be passed through.
@@ -116,7 +150,7 @@ export default class FactoryCompletionManager extends BaseManager {
     systemPrompt: string,
     config: LLMConfig,
   ): Promise<CompletionResponse> {
-    const completion = createCompletionTools(config)
+    const completion = createCompletionTools(this.enrichConfigWithPricing(config))
 
     const request: CompletionRequest = {
       systemPrompt,
@@ -133,6 +167,53 @@ export default class FactoryCompletionManager extends BaseManager {
     settings: CompletionSettings,
     config: LLMConfig,
   ): Promise<CompletionResponseTurns> {
+    // If there are tail tool calls awaiting confirmation and the user sends a new message,
+    // treat those tool calls as 'ignored' (they were not resumed/confirmed). This should be
+    // persisted in the saved chat history (not only mutated in renderer UI state).
+    let existingChat = await this.chatsManager.getChat(chatContext)
+    if (!existingChat) throw new Error('CHAT NOT FOUND')
+
+    try {
+      const msgs = existingChat.messages || []
+      const updated = [...msgs]
+
+      // Find trailing tool message run.
+      let end = updated.length - 1
+      while (end >= 0 && updated[end]?.role !== 'tool') end--
+      if (end >= 0) {
+        let start = end
+        while (start >= 0 && updated[start]?.role === 'tool') {
+          const tm = updated[start] as CompletionToolMessage
+          if (tm?.toolResult?.type === 'require_confirmation') {
+            start--
+            continue
+          }
+          break
+        }
+        start = start + 1
+
+        if (start <= end) {
+          let changed = false
+          for (let i = start; i <= end; i++) {
+            const tm = updated[i] as CompletionToolMessage
+            if (tm?.role === 'tool' && tm?.toolResult?.type === 'require_confirmation') {
+              updated[i] = {
+                ...tm,
+                toolResult: { ...(tm.toolResult || {}), type: 'ignored', durationMs: 0 },
+              }
+              changed = true
+            }
+          }
+
+          if (changed) {
+            existingChat = await this.chatsManager.saveChat({ ...existingChat, messages: updated })
+          }
+        }
+      }
+    } catch (_) {
+      // Non-fatal: proceed without persisting ignored tool messages.
+    }
+
     const chat = await this.chatsManager.addChatMessages(chatContext, [completionMessage])
     if (!chat) throw new Error('CHAT NOT FOUND')
 
@@ -303,7 +384,7 @@ export default class FactoryCompletionManager extends BaseManager {
     abortSignal?: AbortSignal,
   ): Promise<CompletionResponseTurns> {
     let currentChat: Chat = chat
-    const completion = createCompletionTools(config)
+    const completion = createCompletionTools(this.enrichConfigWithPricing(config))
 
     const messages = this.processChatMessagesForCompletion(currentChat.messages)
 

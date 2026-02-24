@@ -98,7 +98,7 @@ Notes:
 - `CompletionUsage` already includes:
   - `promptTokens`
   - `completionTokens`
-  - optional `cachedReadInputTokens`, `cachedWriteInputTokens`
+  - optional `cachedReadInputTokens`
   - optional `provider`, `model`
 
 ### Cost computation (reference)
@@ -113,10 +113,6 @@ if (usage.cachedReadInputTokens && price.cacheReadInputPerMTokensUSD != null) {
   costUSD += (price.cacheReadInputPerMTokensUSD * usage.cachedReadInputTokens) / 1_000_000
 }
 
-// optional: cache writes if priced
-if (usage.cachedWriteInputTokens && price.cacheWriteInputPerMTokensUSD != null) {
-  costUSD += (price.cacheWriteInputPerMTokensUSD * usage.cachedWriteInputTokens) / 1_000_000
-}
 ```
 
 **Important:** The ledger should store `usage` and `price`. Derived `costUSD` can be computed on read, or optionally stored separately (but that would violate the ‘nothing more nothing less’ preference).
@@ -175,7 +171,6 @@ export type CostTotals = {
   promptTokens: number
   completionTokens: number
   cachedReadInputTokens: number
-  cachedWriteInputTokens: number
   costUSD: number
 }
 

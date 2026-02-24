@@ -75,6 +75,7 @@ export async function initManagers(projectRoot: string, mainWindow: BrowserWindo
     mainWindow,
     chatsManager,
     factoryToolsManager,
+    factoryLLMPricingManager,
   )
   factoryTestsManager = new FactoryTestsManager(projectRoot, mainWindow, projectsManager)
   llmConfigsManager = new LLMConfigsManager(projectRoot, mainWindow)

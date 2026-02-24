@@ -11,6 +11,18 @@ import SystemPromptBubble from './SystemPromptBubble'
 import ThinkingRow from './ThinkingRow'
 import MessageRow, { type EnhancedMessage, type ToolPreview } from './MessageRow'
 
+function isToolMessage(msg: any): boolean {
+  return !!msg && msg.role === 'tool'
+}
+
+function isEmptyAssistantMessage(msg: any): boolean {
+  if (!msg || msg.role !== 'assistant') return false
+  const c = msg.content
+  if (c == null) return true
+  if (typeof c !== 'string') return false
+  return c.trim().length === 0
+}
+
 function MessageListInner({
   chatId,
   messages,
@@ -524,18 +536,30 @@ function MessageListInner({
   }, [])
 
   const cutoffIndex = useMemo(() => {
-    if (
-      !numberMessagesToSend ||
-      messagesToDisplay.length < numberMessagesToSend ||
-      numberMessagesToSend < 1
-    ) {
-      return null
+    if (!numberMessagesToSend || numberMessagesToSend < 1) return null
+    const totalMessages = messagesToDisplay.length
+    if (totalMessages <= numberMessagesToSend) return null
+
+    let totalCount = 0
+    let logicalCount = 0
+    let isInGroup = false
+    for (let i = totalMessages - 1; i > 0; i--) {
+      const m = messagesToDisplay[i]
+      if (!(isToolMessage(m) || isEmptyAssistantMessage(m))) {
+        if (logicalCount >= numberMessagesToSend) break
+        isInGroup = false
+        logicalCount++
+      } else {
+        if (!isInGroup) {
+          if (logicalCount >= numberMessagesToSend) break
+          logicalCount++
+        }
+        isInGroup = true
+      }
+      totalCount++
     }
-    const historyCount = numberMessagesToSend - 1
-    if (historyCount < 0) return null
-    const idx = messagesToDisplay.length - historyCount
-    return idx >= 0 ? idx : null
-  }, [messagesToDisplay.length, numberMessagesToSend])
+    return totalMessages - totalCount
+  }, [messagesToDisplay, numberMessagesToSend])
 
   const cutoffIndexInWindow = useMemo(() => {
     if (cutoffIndex === null) return null

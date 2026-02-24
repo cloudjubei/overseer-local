@@ -4,7 +4,6 @@ import { useNavigator } from '../../navigation/Navigator'
 import { useChats, type ChatState } from '../../contexts/ChatsContext'
 import { ChatInput, MessageList } from '.'
 import { playSendSound, tryResumeAudioContext } from '../../assets/sounds'
-import { Switch } from '../ui/Switch'
 import type {
   ChatContext,
   CompletionMessage,
@@ -13,13 +12,8 @@ import type {
 } from 'thefactory-tools'
 import ContextInfoButton from '../ui/ContextInfoButton'
 import ModelChip from '../agents/ModelChip'
-import {
-  IconSettings,
-  IconChevron,
-  IconScroll,
-  IconRefreshChat,
-  IconStop,
-} from '../ui/icons/Icons'
+import { IconSettings, IconChevron, IconScroll, IconRefreshChat } from '../ui/icons/Icons'
+import { IconCalculator } from '../ui/icons/IconCalculator'
 import { useProjectContext } from '../../contexts/ProjectContext'
 import { useStories } from '../../contexts/StoriesContext'
 import { useAgents } from '../../contexts/AgentsContext'
@@ -30,6 +24,9 @@ import { useChatUnread } from '@renderer/hooks/useChatUnread'
 import { useActiveProject } from '@renderer/contexts/ProjectContext'
 import { getChatContextPath } from 'thefactory-tools/utils'
 import { useNotifications } from '@renderer/hooks/useNotifications'
+import UsageModal from './UsageModal'
+import ChatSettingsDropdown, { type ToolToggle } from './ChatSettingsDropdown'
+import { useChatDraft } from './hooks/useChatDraft'
 
 export type ChatSidebarProps = {
   context: ChatContext
@@ -39,16 +36,12 @@ export type ChatSidebarProps = {
   showLeftBorder?: boolean
 }
 
-type ToolToggle = {
-  name: string
-  description: string
-  available: boolean
-  autoCall: boolean
-}
-
-type SelectionPatch = { selectionStart?: number; selectionEnd?: number }
-
 type SendMeta = { reason?: 'user' | 'suggested_action' }
+
+function formatUSD(n?: number) {
+  if (n == null || Number.isNaN(n)) return '—'
+  return `$${n.toFixed(4)}`
+}
 
 export default function ChatSidebar({
   context,
@@ -72,10 +65,6 @@ export default function ChatSidebar({
     resetSettingsPrompt,
     deleteLastMessage,
     deleteChat,
-    // drafts
-    getDraft,
-    setDraft,
-    clearDraft,
   } = useChats()
 
   const { getProjectById } = useProjectContext()
@@ -90,89 +79,24 @@ export default function ChatSidebar({
   const [chat, setChat] = useState<ChatState | undefined>(undefined)
   const [effectivePrompt, setEffectivePrompt] = useState<string>('')
   const [isPromptModalOpen, setIsPromptModalOpen] = useState(false)
+  const [isCostsModalOpen, setIsCostsModalOpen] = useState(false)
 
   const currentSettings = useMemo(() => getSettings(context), [getSettings, context])
 
   const chatKey = useMemo(() => getChatContextPath(context), [context])
 
-  const prevChatKeyRef = useRef<string | undefined>(undefined)
-  const isDirtyRef = useRef(false)
-
-  const [localText, setLocalText] = useState<string>(() => getDraft(chatKey).text)
-  const [localAttachments, setLocalAttachments] = useState<string[]>(() => getDraft(chatKey).attachments)
-
-  const localSelectionStartRef = useRef<number | undefined>(undefined)
-  const localSelectionEndRef = useRef<number | undefined>(undefined)
-
-  const draftPersistTimerRef = useRef<number | null>(null)
-  const selectionPersistTimerRef = useRef<number | null>(null)
-
-  const flushDraftPersist = useCallback(() => {
-    if (draftPersistTimerRef.current) {
-      window.clearTimeout(draftPersistTimerRef.current)
-      draftPersistTimerRef.current = null
-    }
-    setDraft(chatKey, { text: localText, attachments: localAttachments })
-  }, [chatKey, setDraft, localText, localAttachments])
-
-  // Restore local draft when switching chats.
-  // getDraft is ref-based (stable identity), so we read imperatively on chatKey change only.
-  // Do not sync localText from draft.text while typing; local state is the source of truth.
-  useEffect(() => {
-    if (prevChatKeyRef.current === chatKey) return
-    prevChatKeyRef.current = chatKey
-
-    isDirtyRef.current = false
-
-    if (draftPersistTimerRef.current) {
-      window.clearTimeout(draftPersistTimerRef.current)
-      draftPersistTimerRef.current = null
-    }
-    if (selectionPersistTimerRef.current) {
-      window.clearTimeout(selectionPersistTimerRef.current)
-      selectionPersistTimerRef.current = null
-    }
-    // Read the draft imperatively — getDraft is ref-backed and never triggers re-renders.
-    const d = getDraft(chatKey)
-    setLocalText(d.text)
-    setLocalAttachments(d.attachments)
-    localSelectionStartRef.current = d.selectionStart
-    localSelectionEndRef.current = d.selectionEnd
-  }, [chatKey, getDraft])
-
-  useEffect(() => {
-    return () => {
-      if (draftPersistTimerRef.current) window.clearTimeout(draftPersistTimerRef.current)
-      if (selectionPersistTimerRef.current) window.clearTimeout(selectionPersistTimerRef.current)
-    }
-  }, [])
-
-  const schedulePersistDraftText = useCallback(
-    (text: string) => {
-      if (draftPersistTimerRef.current) window.clearTimeout(draftPersistTimerRef.current)
-      draftPersistTimerRef.current = window.setTimeout(() => {
-        draftPersistTimerRef.current = null
-        setDraft(chatKey, { text })
-      }, 150)
-    },
-    [chatKey, setDraft],
-  )
-
-  const schedulePersistSelection = useCallback(
-    (sel: SelectionPatch) => {
-      if (selectionPersistTimerRef.current) window.clearTimeout(selectionPersistTimerRef.current)
-      selectionPersistTimerRef.current = window.setTimeout(() => {
-        selectionPersistTimerRef.current = null
-        setDraft(chatKey, sel)
-      }, 250)
-    },
-    [chatKey, setDraft],
-  )
-
-  const [focusNonce, setFocusNonce] = useState(0)
-  useEffect(() => {
-    setFocusNonce((x) => x + 1)
-  }, [chatKey])
+  const {
+    text: localText,
+    setText: setLocalText,
+    attachments: localAttachments,
+    setAttachments: setLocalAttachments,
+    selectionStart,
+    selectionEnd,
+    setSelection,
+    flushPersist,
+    clear,
+    focusNonce,
+  } = useChatDraft(chatKey)
 
   const persistSettings = useCallback(
     async (patch: Partial<CompletionSettings>) => {
@@ -222,10 +146,7 @@ export default function ChatSidebar({
     const key = chat?.key
     if (!key) return
     const projectId = chat.chat.context.projectId ?? activeProjectId
-    void markNotificationsByMetadata(
-      { chatKey: key },
-      { category: 'chat_messages', projectId },
-    )
+    void markNotificationsByMetadata({ chatKey: key }, { category: 'chat_messages', projectId })
   }, [chat?.key, chat?.chat?.context?.projectId, activeProjectId, markNotificationsByMetadata])
 
   const handleAtBottomChange = useCallback(
@@ -264,7 +185,7 @@ export default function ChatSidebar({
     async (message: string, attachments: string[], meta?: SendMeta) => {
       if (!isChatConfigured || !activeChatConfig || !currentSettings) return
 
-      flushDraftPersist()
+      flushPersist()
 
       tryResumeAudioContext()
       playSendSound()
@@ -283,24 +204,18 @@ export default function ChatSidebar({
       )
 
       if (meta?.reason === 'user' || meta?.reason === undefined) {
-        clearDraft(chatKey)
-        setLocalText('')
-        setLocalAttachments([])
-        localSelectionStartRef.current = undefined
-        localSelectionEndRef.current = undefined
-        isDirtyRef.current = false
+        clear()
       }
     },
     [
       isChatConfigured,
       activeChatConfig,
       currentSettings,
-      flushDraftPersist,
+      flushPersist,
       sendMessage,
       context,
       effectivePrompt,
-      clearDraft,
-      chatKey,
+      clear,
     ],
   )
 
@@ -389,27 +304,6 @@ export default function ChatSidebar({
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const settingsBtnRef = useRef<HTMLButtonElement | null>(null)
-  const dropdownRef = useRef<HTMLDivElement | null>(null)
-
-  useEffect(() => {
-    function onDocClick(e: MouseEvent) {
-      const t = e.target as Node
-      if (!isSettingsOpen) return
-      if (dropdownRef.current && dropdownRef.current.contains(t)) return
-      if (settingsBtnRef.current && settingsBtnRef.current.contains(t)) return
-      setIsSettingsOpen(false)
-    }
-    function onKey(e: KeyboardEvent) {
-      if (!isSettingsOpen) return
-      if (e.key === 'Escape') setIsSettingsOpen(false)
-    }
-    document.addEventListener('mousedown', onDocClick)
-    document.addEventListener('keydown', onKey)
-    return () => {
-      document.removeEventListener('mousedown', onDocClick)
-      document.removeEventListener('keydown', onKey)
-    }
-  }, [isSettingsOpen])
 
   const contextArguments: ChatContextArguments = useMemo(() => {
     const args: ChatContextArguments = { ...context }
@@ -468,6 +362,13 @@ export default function ChatSidebar({
     return cachedEmptyMsgsRef.current
   }, [chat?.chat.messages, effectivePrompt])
 
+  const totalCostUSD = useMemo(() => {
+    const msgs = chat?.chat.messages || []
+    return (msgs as any[])
+      .filter((m) => m?.role === 'assistant')
+      .reduce((sum, m) => sum + (typeof m?.usage?.cost === 'number' ? m.usage.cost : 0), 0)
+  }, [chat?.chat.messages])
+
   const shouldBorder = isCollapsible && (showLeftBorder ?? true)
   const sectionClass = [
     'flex-1 min-h-0 w-full h-full flex flex-col bg-[var(--surface-base)] overflow-hidden',
@@ -483,14 +384,7 @@ export default function ChatSidebar({
       if (!isChatConfigured || !activeChatConfig || !currentSettings) return
       await resumeTools(context, toolIds, effectivePrompt, currentSettings, activeChatConfig)
     },
-    [
-      isChatConfigured,
-      activeChatConfig,
-      currentSettings,
-      resumeTools,
-      context,
-      effectivePrompt,
-    ],
+    [isChatConfigured, activeChatConfig, currentSettings, resumeTools, context, effectivePrompt],
   )
 
   const suggestedActions = useMemo(() => {
@@ -554,293 +448,113 @@ export default function ChatSidebar({
 
   const handleInputChange = useCallback(
     (text: string) => {
-      isDirtyRef.current = true
       setLocalText(text)
-      schedulePersistDraftText(text)
     },
-    [schedulePersistDraftText],
+    [setLocalText],
   )
 
   const handleAttachmentsChange = useCallback(
     (next: string[]) => {
-      isDirtyRef.current = true
       setLocalAttachments(next)
-      setDraft(chatKey, { attachments: next })
     },
-    [chatKey, setDraft],
-  )
-
-  const handleSelectionChange = useCallback(
-    (sel: SelectionPatch) => {
-      localSelectionStartRef.current = sel.selectionStart
-      localSelectionEndRef.current = sel.selectionEnd
-      schedulePersistSelection(sel)
-    },
-    [schedulePersistSelection],
+    [setLocalAttachments],
   )
 
   return (
     <section className={sectionClass}>
-      <header className='relative flex-shrink-0 px-3 py-2 border-b border-[var(--border-subtle)] bg-[var(--surface-raised)] flex items-center justify-between gap-2'>
-        <div className='flex items-center gap-2 min-w-0'>
+      <header className="relative flex-shrink-0 px-3 py-2 border-b border-[var(--border-subtle)] bg-[var(--surface-raised)] flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0">
           {isCollapsible ? (
             <button
-              type='button'
+              type="button"
               onClick={onCollapse}
-              className='btn-secondary btn-icon'
-              aria-label='Collapse chat sidebar'
-              title='Collapse chat sidebar'
+              className="btn-secondary btn-icon"
+              aria-label="Collapse chat sidebar"
+              title="Collapse chat sidebar"
             >
-              <IconChevron className='w-4 h-4' style={{ transform: 'rotate(90deg)' }} />
+              <IconChevron className="w-4 h-4" style={{ transform: 'rotate(90deg)' }} />
             </button>
           ) : null}
           <ContextInfoButton context={context} label={chatContextTitle} />
           <button
             onClick={() => setIsPromptModalOpen(true)}
-            className='btn-secondary btn-icon'
-            aria-label='View System Prompt'
-            title='View System Prompt'
+            className="btn-secondary btn-icon"
+            aria-label="View System Prompt"
+            title="View System Prompt"
           >
-            <IconScroll className='w-4 h-4' />
+            <IconScroll className="w-4 h-4" />
+          </button>
+
+          <button
+            onClick={() => setIsCostsModalOpen(true)}
+            className="btn-secondary btn-icon"
+            aria-label="View usage costs"
+            title={totalCostUSD > 0 ? `Total cost: ${formatUSD(totalCostUSD)}` : 'Usage costs'}
+          >
+            <IconCalculator className="w-4 h-4" />
           </button>
         </div>
-        <div className='flex items-center gap-2'>
+        <div className="flex items-center gap-2">
           <Button
-            className='btn-secondary w-[34px]'
-            variant='danger'
-            aria-label='Refresh chat'
-            title='Refresh chat'
+            className="btn-secondary w-[34px]"
+            variant="danger"
+            aria-label="Refresh chat"
+            title="Refresh chat"
             onClick={() => restartChat(context)}
           >
-            <IconRefreshChat className='w-4 h-4' />
+            <IconRefreshChat className="w-4 h-4" />
           </Button>
-          <ModelChip editable className='border-blue-500' mode='chat' />
-
-          {isThinking ? (
-            <button
-              className='btn-secondary btn-icon'
-              aria-label='Abort'
-              title='Abort'
-              onClick={handleAbort}
-            >
-              <IconStop className='w-4 h-4' />
-            </button>
-          ) : null}
+          <ModelChip editable className="border-blue-500" mode="chat" />
 
           <button
             ref={settingsBtnRef}
             onClick={() => setIsSettingsOpen((v) => !v)}
-            className='btn-secondary btn-icon'
-            aria-haspopup='menu'
+            className="btn-secondary btn-icon"
+            aria-haspopup="menu"
             aria-expanded={isSettingsOpen}
-            aria-label='Open Chat Settings'
-            title='Chat settings'
+            aria-label="Open Chat Settings"
+            title="Chat settings"
           >
-            <IconSettings className='w-4 h-4' />
+            <IconSettings className="w-4 h-4" />
           </button>
 
-          {isSettingsOpen && (
-            <div
-              ref={dropdownRef}
-              className='absolute top-full right-3 left-3 mt-2 w-auto max-w-[520px] ml-auto rounded-md border border-[var(--border-subtle)] bg-[var(--surface-raised)] shadow-xl z-50'
-              role='menu'
-              aria-label='Chat Settings'
-            >
-              <div className='px-3 py-2 border-b border-[var(--border-subtle)]'>
-                <div className='text-sm font-semibold text-[var(--text-primary)]'>
-                  Chat Settings
-                </div>
-                <div className='text-xs text-[var(--text-secondary)]'>
-                  Controls for this chat
-                </div>
-              </div>
-
-              <div className='p-3 space-y-4 max-h-[70vh] overflow-auto'>
-                <div className='space-y-2'>
-                  <div className='text-xs font-medium text-[var(--text-secondary)]'>
-                    System Prompt
-                  </div>
-                  <textarea
-                    value={draftPrompt}
-                    onChange={(e) => setDraftPrompt(e.target.value)}
-                    className='w-full min-h-[100px] p-2 border border-[var(--border-subtle)] bg-[var(--surface-overlay)] rounded-md text-sm'
-                    placeholder='Custom system prompt for this chat context...'
-                  />
-                  <div className='flex items-center gap-2'>
-                    <button
-                      className='btn'
-                      onClick={async () => {
-                        await updateSettingsPrompt(context, draftPrompt)
-                      }}
-                    >
-                      Save prompt
-                    </button>
-                    <button
-                      className='btn-secondary'
-                      onClick={async () => {
-                        await resetSettingsPrompt(context)
-                      }}
-                    >
-                      Reset to defaults
-                    </button>
-                  </div>
-                </div>
-
-                {completion ? (
-                  <div className='space-y-3'>
-                    <div className='space-y-1'>
-                      <div className='flex items-center justify-between'>
-                        <label
-                          className='text-xs font-medium text-[var(--text-secondary)]'
-                          htmlFor='maxTurns'
-                        >
-                          Max turns per run:
-                          <span className='pl-4 text-[14px] text-[var(--text-secondary)]'>
-                            {completion.maxTurns ?? ''}
-                          </span>
-                        </label>
-                      </div>
-                      <input
-                        id='maxTurns'
-                        type='range'
-                        min={1}
-                        max={100}
-                        step={1}
-                        value={completion.maxTurns ?? 1}
-                        onChange={(e) =>
-                          persistSettings({ maxTurns: Number(e.target.value) })
-                        }
-                        className='w-full'
-                      />
-                      <div className='flex justify-between text-[10px] text-[var(--text-tertiary)]'>
-                        <span>1</span>
-                        <span>100</span>
-                      </div>
-                    </div>
-
-                    <div className='space-y-1'>
-                      <div className='flex items-center justify-between'>
-                        <label
-                          className='text-xs font-medium text-[var(--text-secondary)]'
-                          htmlFor='numberMessagesToSend'
-                        >
-                          Number of messages to send:
-                          <span className='pl-4 text-[14px] text-[var(--text-secondary)]'>
-                            {completion.numberMessagesToSend ?? ''}
-                          </span>
-                        </label>
-                      </div>
-                      <input
-                        id='numberMessagesToSend'
-                        type='range'
-                        min={3}
-                        max={50}
-                        step={1}
-                        value={completion.numberMessagesToSend ?? 3}
-                        onChange={(e) =>
-                          persistSettings({
-                            numberMessagesToSend: Number(e.target.value),
-                          })
-                        }
-                        className='w-full'
-                      />
-                      <div className='flex justify-between text-[10px] text-[var(--text-tertiary)]'>
-                        <span>3</span>
-                        <span>20</span>
-                      </div>
-                    </div>
-
-                    <div className='flex items-center justify-between'>
-                      <div className='flex flex-col'>
-                        <span className='text-xs font-medium text-[var(--text-secondary)]'>
-                          Finish turn on errors
-                        </span>
-                        <span className='text-[10px] text-[var(--text-tertiary)]'>
-                          When enabled, the agent ends the current turn if a tool call errors
-                        </span>
-                      </div>
-                      <Switch
-                        checked={!!completion.finishTurnOnErrors}
-                        onCheckedChange={(checked) =>
-                          persistSettings({ finishTurnOnErrors: !!checked })
-                        }
-                      />
-                    </div>
-                  </div>
-                ) : null}
-
-                <div className='space-y-2'>
-                  <div className='text-xs font-medium text-[var(--text-secondary)]'>Tools</div>
-                  <div className='rounded-md border border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)]'>
-                    {tools.length === 0 ? (
-                      <div className='text-xs text-[var(--text-secondary)] px-2 py-3'>
-                        No tools available for this context.
-                      </div>
-                    ) : (
-                      tools.map((tool) => (
-                        <div key={tool.name} className='px-2 py-2 space-y-1'>
-                          <div className='flex items-center justify-between gap-2'>
-                            <div className='flex-1 min-w-0 pr-2'>
-                              <div className='text-sm text-[var(--text-primary)] truncate'>
-                                {tool.name}
-                              </div>
-                              <div className='text-xs text-neutral-500 font-light truncate'>
-                                {tool.description}
-                              </div>
-                            </div>
-                            <div className='flex flex-col items-center gap-1'>
-                              <div className='flex flex-col items-center space-y-px'>
-                                <span className='text-[10px] text-[var(--text-secondary)]'>
-                                  Available
-                                </span>
-                                <Switch
-                                  checked={tool.available}
-                                  onCheckedChange={() => toggleAvailable(tool)}
-                                />
-                              </div>
-                              <div className='flex flex-col items-center space-y-px'>
-                                <span className='text-[10px] text-[var(--text-secondary)]'>
-                                  Auto-call
-                                </span>
-                                <Switch
-                                  checked={tool.available ? tool.autoCall : false}
-                                  onCheckedChange={() => toggleAutoCall(tool)}
-                                  disabled={!tool.available}
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-
-                <div className='pt-2 border-t border-[var(--border-subtle)]'>
-                  <Button variant='danger' onClick={handleDeleteChat}>
-                    Delete this chat
-                  </Button>
-                </div>
-              </div>
-            </div>
-          )}
+          <ChatSettingsDropdown
+            isOpen={isSettingsOpen}
+            onClose={() => setIsSettingsOpen(false)}
+            context={context}
+            completion={completion}
+            draftPrompt={draftPrompt}
+            setDraftPrompt={setDraftPrompt}
+            onSavePrompt={async () => {
+              await updateSettingsPrompt(context, draftPrompt)
+            }}
+            onResetPrompt={async () => {
+              await resetSettingsPrompt(context)
+            }}
+            tools={tools}
+            toggleAvailable={toggleAvailable}
+            toggleAutoCall={toggleAutoCall}
+            persistSettings={persistSettings}
+            onDeleteChat={handleDeleteChat}
+            settingsBtnRef={settingsBtnRef}
+          />
         </div>
       </header>
 
-      <div className='flex-1 min-h-0 flex flex-col overflow-hidden'>
+      <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
         {!isChatConfigured && (
           <div
-            className='flex-shrink-0 mx-4 mt-3 rounded-md border border-[var(--border-default)] p-2 text-[13px] flex items-center justify-between gap-2'
+            className="flex-shrink-0 mx-4 mt-3 rounded-md border border-[var(--border-default)] p-2 text-[13px] flex items-center justify-between gap-2"
             style={{
               background: 'color-mix(in srgb, var(--accent-primary) 10%, var(--surface-raised))',
               color: 'var(--text-primary)',
             }}
-            role='status'
+            role="status"
           >
             <span>
               LLM not configured. Set your API key in Settings to enable sending messages.
             </span>
-            <button className='btn' onClick={() => navigateView('Settings')}>
+            <button className="btn" onClick={() => navigateView('Settings')}>
               Configure
             </button>
           </div>
@@ -860,7 +574,7 @@ export default function ChatSidebar({
         />
       </div>
 
-      <div className='flex-shrink-0'>
+      <div className="flex-shrink-0">
         <ChatInput
           value={localText}
           attachments={localAttachments}
@@ -868,9 +582,9 @@ export default function ChatSidebar({
           clearOnSuggestedAction={false}
           onChange={handleInputChange}
           onChangeAttachments={handleAttachmentsChange}
-          selectionStart={localSelectionStartRef.current}
-          selectionEnd={localSelectionEndRef.current}
-          onSelectionChange={handleSelectionChange}
+          selectionStart={selectionStart}
+          selectionEnd={selectionEnd}
+          onSelectionChange={setSelection}
           restoreKey={chatKey}
           autoFocus={focusNonce > 0}
           onSend={handleSend}
@@ -884,12 +598,18 @@ export default function ChatSidebar({
       <Modal
         isOpen={isPromptModalOpen}
         onClose={() => setIsPromptModalOpen(false)}
-        title='System Prompt'
+        title="System Prompt"
       >
-        <div className='p-4 bg-[var(--surface-base)] text-sm text-[var(--text-secondary)] max-h-[70vh] overflow-auto'>
-          <pre className='whitespace-pre-wrap font-sans'>{effectivePrompt}</pre>
+        <div className="p-4 bg-[var(--surface-base)] text-sm text-[var(--text-secondary)] max-h-[70vh] overflow-auto">
+          <pre className="whitespace-pre-wrap font-sans">{effectivePrompt}</pre>
         </div>
       </Modal>
+
+      <UsageModal
+        isOpen={isCostsModalOpen}
+        onClose={() => setIsCostsModalOpen(false)}
+        messages={chat?.chat.messages || []}
+      />
     </section>
   )
 }

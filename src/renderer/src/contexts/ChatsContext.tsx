@@ -474,37 +474,9 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       config: LLMConfig,
       files?: string[],
     ) => {
-      // Optimistic local update with the user message
       const key = getChatContextPath(context)
       const chatState = await getChat(context)
       if (chatState.isThinking) return
-
-      // If there are tail tool calls awaiting confirmation and the user sends a new message,
-      // we treat those tool calls as 'ignored' (they were not resumed/confirmed).
-      const prevMessages = chatState.chat.messages || []
-      const ignoredMessages = [...prevMessages]
-      let end = ignoredMessages.length - 1
-      while (end >= 0 && (ignoredMessages[end] as any)?.role !== 'tool') end--
-      if (end >= 0) {
-        let start = end
-        while (
-          start >= 0 &&
-          (ignoredMessages[start] as any)?.role === 'tool' &&
-          (ignoredMessages[start] as any)?.toolResult?.type === 'require_confirmation'
-        ) {
-          start--
-        }
-        start = start + 1
-        if (start <= end) {
-          for (let i = start; i <= end; i++) {
-            const tm = ignoredMessages[i] as any
-            ignoredMessages[i] = {
-              ...tm,
-              toolResult: { ...(tm.toolResult || {}), type: 'ignored', durationMs: 0 },
-            }
-          }
-        }
-      }
 
       const now = new Date().toISOString()
       const userMessage: CompletionMessage = {
@@ -516,7 +488,8 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
         durationMs: 0,
       } as any
 
-      const chatMessages = [...ignoredMessages, userMessage]
+      const prevMessages = chatState.chat.messages || []
+      const chatMessages = [...prevMessages, userMessage]
       updateChatState(key, {
         ...chatState,
         chat: { ...chatState.chat, messages: chatMessages },
