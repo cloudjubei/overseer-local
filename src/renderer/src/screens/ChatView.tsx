@@ -13,7 +13,7 @@ import type {
   ChatContextProjectTopic,
   ChatContextStory,
   ChatContextStoryTopic,
-  ChatMessage,
+  CompletionMessage,
 } from 'thefactory-tools'
 import CollapsibleSidebar from '../components/ui/CollapsibleSidebar'
 import { chatsService } from '@renderer/services/chatsService'
@@ -273,7 +273,7 @@ export default function ChatView() {
       const run = runsHistory.find((r) => r.id === (ctx as any).agentRunId)
       if (!run) return
 
-      let seedMessages: ChatMessage[] | undefined
+      let seedMessages: CompletionMessage[] | undefined
       if (ctx.type === 'AGENT_RUN') {
         seedMessages = run.conversations[0]?.messages || []
       } else if (ctx.type === 'AGENT_RUN_FEATURE') {

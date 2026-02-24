@@ -51,10 +51,10 @@ const CurrentProjectView = ({ openRunId, setOpenRunId }: CurrentProjectViewProps
       const conversations = r.conversations ?? []
       const messages = conversations.flatMap((c) => c.messages ?? [])
       const prompt = messages
-        .map((m) => m.completionMessage.usage.promptTokens ?? 0)
+        .map((m: any) => (m?.role === 'assistant' ? m?.usage?.promptTokens ?? 0 : 0))
         .reduce((a, b) => a + b, 0)
       const completion = messages
-        .map((m) => m.completionMessage.usage.completionTokens ?? 0)
+        .map((m: any) => (m?.role === 'assistant' ? m?.usage?.completionTokens ?? 0 : 0))
         .reduce((a, b) => a + b, 0)
       const inputPerM = r.price?.inputPerMTokensUSD ?? 0
       const outputPerM = r.price?.outputPerMTokensUSD ?? 0
@@ -287,10 +287,10 @@ const AllProjectsView = () => {
       const conversations = r.conversations ?? []
       const messages = conversations.flatMap((c) => c.messages ?? [])
       const prompt = messages
-        .map((m) => m.completionMessage.usage.promptTokens ?? 0)
+        .map((m: any) => (m?.role === 'assistant' ? m?.usage?.promptTokens ?? 0 : 0))
         .reduce((a, b) => a + b, 0)
       const completion = messages
-        .map((m) => m.completionMessage.usage.completionTokens ?? 0)
+        .map((m: any) => (m?.role === 'assistant' ? m?.usage?.completionTokens ?? 0 : 0))
         .reduce((a, b) => a + b, 0)
       const inputPerM = r.price?.inputPerMTokensUSD ?? 0
       const outputPerM = r.price?.outputPerMTokensUSD ?? 0

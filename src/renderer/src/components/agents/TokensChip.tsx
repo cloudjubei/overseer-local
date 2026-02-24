@@ -8,7 +8,7 @@ export default function TokensChip({ run }: { run: AgentRunHistory }) {
     () =>
       run.conversations
         .flatMap((c) => c.messages)
-        .map((c) => c.completionMessage.usage.promptTokens ?? 0)
+        .map((m: any) => (m?.role === 'assistant' ? m?.usage?.promptTokens ?? 0 : 0))
         .reduce((acc, c) => acc + c, 0),
     [run.conversations],
   )
@@ -16,7 +16,7 @@ export default function TokensChip({ run }: { run: AgentRunHistory }) {
     () =>
       run.conversations
         .flatMap((c) => c.messages)
-        .map((c) => c.completionMessage.usage.completionTokens ?? 0)
+        .map((m: any) => (m?.role === 'assistant' ? m?.usage?.completionTokens ?? 0 : 0))
         .reduce((acc, c) => acc + c, 0),
     [run.conversations],
   )
@@ -24,10 +24,10 @@ export default function TokensChip({ run }: { run: AgentRunHistory }) {
   const { userCount, assistantCount, avgPromptPerMsg, avgCompletionPerMsg } = useMemo(() => {
     const messages = run.conversations.flatMap((c) => c.messages)
     const userCount = messages.filter(
-      (m) => m.completionMessage.role.toLowerCase() === 'user',
+      (m: any) => String(m?.role || '').toLowerCase() === 'user',
     ).length
     const assistantCount = messages.filter(
-      (m) => m.completionMessage.role.toLowerCase() === 'assistant',
+      (m: any) => String(m?.role || '').toLowerCase() === 'assistant',
     ).length
     const avgPromptPerMsg = userCount > 0 ? Math.round(prompt / userCount) : undefined
     const avgCompletionPerMsg =

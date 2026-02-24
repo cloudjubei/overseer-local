@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useFiles } from '../../contexts/FilesContext'
 import { playReceiveSound } from '../../assets/sounds'
-import { ChatMessage } from 'thefactory-tools'
+import type { CompletionMessage } from 'thefactory-tools'
 import { useChatUnread } from '@renderer/hooks/useChatUnread'
 import { useActiveProject } from '@renderer/contexts/ProjectContext'
 import { factoryToolsService } from '@renderer/services/factoryToolsService'
@@ -24,7 +24,7 @@ function MessageListInner({
   onRetry,
 }: {
   chatId?: string
-  messages: ChatMessage[]
+  messages: CompletionMessage[]
   isThinking: boolean
   onResumeTools?: (toolIds: string[]) => void
   numberMessagesToSend?: number
@@ -38,7 +38,6 @@ function MessageListInner({
   const { filesByPath } = useFiles()
   const { getLastReadForKey } = useChatUnread()
 
-  // Visibility tracking: only animate when visible (sidebar open and rendered)
   const messageListRef = useRef<HTMLDivElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
   const bottomAnchorRef = useRef<HTMLDivElement>(null)
@@ -65,29 +64,23 @@ function MessageListInner({
   }, [toolPreviewById])
 
   const enhancedMessages: EnhancedMessage[] = useMemo(() => {
-    // O(n) single pass to avoid scanning backwards per message (which becomes O(n^2)).
     const out: EnhancedMessage[] = []
     let lastAssistantModel: any | undefined
     let lastRole: string | undefined
 
     for (let index = 0; index < messages.length; index++) {
-      const m = messages[index]
+      const m = messages[index] as any
       const effectiveMessage: EnhancedMessage = { ...(m as any) }
 
-      // Tool results are rendered as system messages
-      if ((m as any).toolResults?.length) {
-        ;(effectiveMessage as any).completionMessage.role = 'system'
-      }
-
-      const role = (effectiveMessage as any).completionMessage.role
+      const role = (effectiveMessage as any).role
 
       let showModel = false
-      if ((m as any).completionMessage.role === 'assistant' && (m as any).model) {
+      if (m.role === 'assistant' && (m as any).model) {
         showModel = !lastAssistantModel || lastAssistantModel !== (m as any).model
         lastAssistantModel = (m as any).model
       }
 
-      const isFirstInGroup = !lastRole || lastRole !== role || role === 'system'
+      const isFirstInGroup = !lastRole || lastRole !== role || role === 'system' || role === 'tool'
       lastRole = role
 
       out.push({ ...effectiveMessage, showModel, isFirstInGroup })
@@ -107,14 +100,13 @@ function MessageListInner({
     }
 
     if (messages.length > prevCountRef.current) {
-      const last = messages[messages.length - 1]
-      if (last?.completionMessage.role === 'assistant' && !(last as any).error) playReceiveSound()
+      const last = messages[messages.length - 1] as any
+      if (last?.role === 'assistant' && !(last as any).error) playReceiveSound()
     }
 
     prevCountRef.current = messages.length
   }, [messages, chatId])
 
-  // Animate assistant typing for the latest assistant message
   const [animateAssistantIdx, setAnimateAssistantIdx] = useState<number | null>(null)
   const prevLenForAnimRef = useRef<number>(messages.length)
   const animationChatChangedRef = useRef<boolean>(false)
@@ -137,29 +129,23 @@ function MessageListInner({
 
     if (messages.length > prevLenForAnimRef.current) {
       const lastIdx = messages.length - 1
-      const lastMsg = messages[lastIdx]
-      if (lastMsg && lastMsg.completionMessage.role === 'assistant' && !(lastMsg as any).error)
-        setAnimateAssistantIdx(lastIdx)
+      const lastMsg = messages[lastIdx] as any
+      if (lastMsg && lastMsg.role === 'assistant' && !(lastMsg as any).error) setAnimateAssistantIdx(lastIdx)
       else setAnimateAssistantIdx(null)
     }
 
     prevLenForAnimRef.current = messages.length
   }, [messages, isVisible])
 
-  // Track recent user send (used for pop animation class in row)
   const prevLenForUserAnimRef = useRef<number>(messages.length)
   useEffect(() => {
     if (animationChatChangedRef.current) {
       prevLenForUserAnimRef.current = messages.length
       return
     }
-
     prevLenForUserAnimRef.current = messages.length
   }, [messages])
 
-  // --- Scrolling: SIMPLE RULE ---
-  // 'Auto-scroll' is allowed ONLY if the user is currently near the bottom.
-  // Otherwise: do not touch scrollTop at all (no preserve, no compensation, no settle window).
   const isAtBottomRef = useRef<boolean>(true)
 
   const NEAR_BOTTOM_PX = 80
@@ -174,7 +160,7 @@ function MessageListInner({
     if (nearBottom !== isAtBottomRef.current) {
       isAtBottomRef.current = nearBottom
       onAtBottomChange?.(nearBottom)
-      if (nearBottom) onReadLatest?.(lastMessageIso(messages))
+      if (nearBottom) onReadLatest?.(lastMessageIso(messages as any))
     }
   }, [computeIsNearBottom, messages, onAtBottomChange, onReadLatest])
 
@@ -186,17 +172,15 @@ function MessageListInner({
   }, [])
 
   const handleScroll: React.UIEventHandler<HTMLDivElement> = (_e) => {
-    // User initiated scroll only: update UI state.
     updateAtBottomState()
   }
 
-  // Determine last read marker for this chat
   const lastReadIso = useMemo(() => {
     return chatId ? getLastReadForKey(chatId) : undefined
   }, [chatId, getLastReadForKey])
 
   const systemPromptMessage = useMemo(() => {
-    return enhancedMessages.length === 1 && enhancedMessages[0].completionMessage.role === 'system'
+    return enhancedMessages.length === 1 && (enhancedMessages[0] as any).role === 'system'
       ? enhancedMessages[0]
       : undefined
   }, [enhancedMessages])
@@ -205,69 +189,73 @@ function MessageListInner({
     return systemPromptMessage !== undefined ? enhancedMessages.slice(1) : enhancedMessages
   }, [enhancedMessages, systemPromptMessage])
 
-  // Pre-apply diff preview for confirmation tools (writeFile / writeDiffToFile)
+  // Pre-apply diff preview for confirmation tools
   useEffect(() => {
     if (!projectId) return
     if (!messagesToDisplay.length) return
 
-    const lastMsg = messagesToDisplay[messagesToDisplay.length - 1]
-    if (!lastMsg || lastMsg.completionMessage.role !== 'system') return
-    const toolResults = (lastMsg as any).toolResults || []
-    if (!toolResults.length) return
+    // Find pending tail: contiguous tool messages at the end that require confirmation
+    let end = messagesToDisplay.length - 1
+    while (end >= 0 && (messagesToDisplay[end] as any).role !== 'tool') end--
+    if (end < 0) return
 
-    for (const tr of toolResults) {
-      if (tr.type !== 'require_confirmation') continue
-      if (tr.result === undefined || tr.result === null) continue
+    let start = end
+    while (
+      start >= 0 &&
+      (messagesToDisplay[start] as any).role === 'tool' &&
+      (messagesToDisplay[start] as any).toolResult?.type === 'require_confirmation'
+    ) {
+      start--
+    }
+    start = start + 1
+    if (start > end) return
 
-      const id = String(tr.result)
-      if (toolPreviewByIdRef.current[id] !== undefined) continue
+    const pendingTools = messagesToDisplay.slice(start, end + 1) as any[]
 
-      const toolName = String(tr.call?.name || '')
+    for (const tm of pendingTools) {
+      const toolCallId = String(tm.toolCall?.toolCallId || '')
+      if (!toolCallId) continue
+      if (toolPreviewByIdRef.current[toolCallId] !== undefined) continue
 
-      toolPreviewByIdRef.current = {
-        ...toolPreviewByIdRef.current,
-        [id]: { status: 'pending' },
-      }
-      setToolPreviewById((prev) => ({ ...prev, [id]: { status: 'pending' } }))
+      const toolName = String(tm.toolCall?.name || '')
+      if (!toolName) continue
 
-      const args = (tr.call as any)?.arguments || {}
+      toolPreviewByIdRef.current = { ...toolPreviewByIdRef.current, [toolCallId]: { status: 'pending' } }
+      setToolPreviewById((prev) => ({ ...prev, [toolCallId]: { status: 'pending' } }))
+
+      const args = tm.toolCall?.arguments || {}
 
       ;(async () => {
         try {
           const res = await factoryToolsService.previewTool(projectId, toolName, args)
-
-          if (res && typeof res === 'object' && (res as any).type === 'not_supported') {
-            return
-          }
+          if (res && typeof res === 'object' && (res as any).type === 'not_supported') return
 
           const patch = typeof res === 'string' ? res : JSON.stringify(res, null, 2)
           const ready: ToolPreview = { status: 'ready', patch }
-          toolPreviewByIdRef.current = { ...toolPreviewByIdRef.current, [id]: ready }
-          setToolPreviewById((prev) => ({ ...prev, [id]: ready }))
+          toolPreviewByIdRef.current = { ...toolPreviewByIdRef.current, [toolCallId]: ready }
+          setToolPreviewById((prev) => ({ ...prev, [toolCallId]: ready }))
         } catch (e: any) {
           const err: ToolPreview = { status: 'error', error: String(e?.message || e) }
-          toolPreviewByIdRef.current = { ...toolPreviewByIdRef.current, [id]: err }
-          setToolPreviewById((prev) => ({ ...prev, [id]: err }))
+          toolPreviewByIdRef.current = { ...toolPreviewByIdRef.current, [toolCallId]: err }
+          setToolPreviewById((prev) => ({ ...prev, [toolCallId]: err }))
         }
       })()
     }
   }, [messagesToDisplay, projectId])
 
-  // Render window: show only the last N messages with a pager to reveal older ones
   const DEFAULT_VISIBLE = 50
   const BATCH_SIZE = 50
   const [visibleCount, setVisibleCount] = useState<number>(DEFAULT_VISIBLE)
   useEffect(() => {
     setVisibleCount(DEFAULT_VISIBLE)
   }, [chatId])
+
   const totalMessages = messagesToDisplay.length
   const startIndex = Math.max(0, totalMessages - visibleCount)
-  const visibleMessages = useMemo(() => {
-    return messagesToDisplay.slice(startIndex)
-  }, [messagesToDisplay, startIndex])
+  const visibleMessages = useMemo(() => messagesToDisplay.slice(startIndex), [messagesToDisplay, startIndex])
   const hiddenCountAbove = startIndex
 
-  // Progressive read receipts
+  // Progressive read receipts (assistant role only)
   const lastReadIsoRef = useRef<string | undefined>(undefined)
   useEffect(() => {
     lastReadIsoRef.current = lastReadIso
@@ -316,10 +304,7 @@ function MessageListInner({
           pendingRafRef.current = requestAnimationFrame(flushSeenToRead)
         }
       },
-      {
-        root: container,
-        threshold: [0.6],
-      },
+      { root: container, threshold: [0.6] },
     )
 
     const nodes = container.querySelectorAll('[data-msg-idx]')
@@ -336,11 +321,10 @@ function MessageListInner({
 
   const lastMessageIsoMemo = useMemo(() => {
     if (!messagesToDisplay.length) return undefined
-    return messageIso(messagesToDisplay[messagesToDisplay.length - 1])
+    return messageIso(messagesToDisplay[messagesToDisplay.length - 1] as any)
   }, [messagesToDisplay])
 
   const hasUnreadOnOpen = useMemo(() => {
-    // If we've never recorded a lastRead for this chat, open at bottom by default.
     if (!lastReadIso) return false
     if (!messagesToDisplay.length) return false
     if (!lastMessageIsoMemo) return false
@@ -352,13 +336,12 @@ function MessageListInner({
     if (!hasUnreadOnOpen) return null
     if (!lastReadIso) return null
     for (let i = messagesToDisplay.length - 1; i >= 0; i--) {
-      const iso = messageIso(messagesToDisplay[i])
+      const iso = messageIso(messagesToDisplay[i] as any)
       if (iso && iso.localeCompare(lastReadIso) > 0) return i
     }
     return null
   }, [messagesToDisplay, lastReadIso, hasUnreadOnOpen])
 
-  // Initial scroll positioning when switching chats
   const initialPositionedChatIdRef = useRef<string | undefined>(undefined)
   useLayoutEffect(() => {
     const container = messageListRef.current
@@ -372,22 +355,10 @@ function MessageListInner({
       updateAtBottomState()
     }
 
-    if (!messagesToDisplay.length) {
-      openAtBottom()
-      return
-    }
+    if (!messagesToDisplay.length) return openAtBottom()
+    if (!lastReadIso) return openAtBottom()
+    if (!hasUnreadOnOpen) return openAtBottom()
 
-    if (!lastReadIso) {
-      openAtBottom()
-      return
-    }
-
-    if (!hasUnreadOnOpen) {
-      openAtBottom()
-      return
-    }
-
-    // Has unread: scroll to the last unread message rather than forcing bottom.
     if (typeof lastUnreadIndex === 'number') {
       const target = container.querySelector(`[data-msg-idx='${lastUnreadIndex}']`) as HTMLElement | null
       if (target) {
@@ -403,14 +374,12 @@ function MessageListInner({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chatId])
 
-  // ResizeObserver: obey the simple rule
   useEffect(() => {
     const container = messageListRef.current
     const content = contentRef.current
     if (!container || !content) return
 
     const ro = new ResizeObserver(() => {
-      // NEVER move unless near bottom.
       if (!computeIsNearBottom()) return
       scrollToBottom('auto')
       updateAtBottomState()
@@ -420,7 +389,6 @@ function MessageListInner({
     return () => ro.disconnect()
   }, [computeIsNearBottom, scrollToBottom, updateAtBottomState])
 
-  // Scroll behavior on new messages: obey the simple rule
   const prevLenForScrollRef = useRef<number>(messages.length)
   const lastMessageRef = useRef<HTMLDivElement>(null)
 
@@ -431,16 +399,13 @@ function MessageListInner({
     const prev = prevLenForScrollRef.current
     const increased = messages.length > prev
     prevLenForScrollRef.current = messages.length
-
     if (!increased) return
 
-    // If not near bottom, do nothing.
     if (!computeIsNearBottom()) {
       updateAtBottomState()
       return
     }
 
-    // While thinking, keep pinned to bottom.
     if (isThinking) {
       requestAnimationFrame(() => {
         scrollToBottom('auto')
@@ -449,8 +414,8 @@ function MessageListInner({
       return
     }
 
-    const lastNow = messages[messages.length - 1]
-    if (lastNow && lastNow.completionMessage.role === 'user') {
+    const lastNow = messages[messages.length - 1] as any
+    if (lastNow && lastNow.role === 'user') {
       requestAnimationFrame(() => {
         scrollToBottom('smooth')
         updateAtBottomState()
@@ -458,7 +423,6 @@ function MessageListInner({
       return
     }
 
-    // Assistant/system: gentle reveal if already near bottom.
     requestAnimationFrame(() => {
       const c = messageListRef.current
       if (!c) return
@@ -476,7 +440,6 @@ function MessageListInner({
     })
   }, [messages, isThinking, scrollToBottom, computeIsNearBottom, updateAtBottomState])
 
-  // Explicit scroll-to-bottom signal: obey the simple rule
   const prevSignalRef = useRef<number | undefined>(undefined)
   useEffect(() => {
     if (typeof scrollToBottomSignal === 'undefined') return
@@ -501,7 +464,6 @@ function MessageListInner({
     }
   }, [scrollToBottomSignal, scrollToBottom, computeIsNearBottom, updateAtBottomState])
 
-  // When thinking toggles on, keep bottom pinned only if near bottom
   useLayoutEffect(() => {
     if (!isThinking) return
     if (!computeIsNearBottom()) {
@@ -512,7 +474,6 @@ function MessageListInner({
     updateAtBottomState()
   }, [isThinking, scrollToBottom, computeIsNearBottom, updateAtBottomState])
 
-  // Keep scroll pinned on window resize only if near bottom
   useEffect(() => {
     const container = messageListRef.current
     if (!container) return
@@ -554,7 +515,11 @@ function MessageListInner({
   }, [])
 
   const cutoffIndex = useMemo(() => {
-    if (!numberMessagesToSend || messagesToDisplay.length < numberMessagesToSend || numberMessagesToSend < 1) {
+    if (
+      !numberMessagesToSend ||
+      messagesToDisplay.length < numberMessagesToSend ||
+      numberMessagesToSend < 1
+    ) {
       return null
     }
     const historyCount = numberMessagesToSend - 1
@@ -584,7 +549,7 @@ function MessageListInner({
       onScroll={handleScroll}
     >
       {systemPromptMessage ? (
-        <SystemPromptBubble message={systemPromptMessage} maxHeight={systemMaxHeight} />
+        <SystemPromptBubble message={systemPromptMessage as any} maxHeight={systemMaxHeight} />
       ) : null}
 
       {(enhancedMessages.length === 0 || systemPromptMessage != undefined) && !isThinking && (
@@ -628,9 +593,9 @@ function MessageListInner({
           return (
             <MessageRow
               key={globalIndex}
-              msg={msg}
+              msg={msg as any}
               globalIndex={globalIndex}
-              messagesToDisplay={messagesToDisplay}
+              messagesToDisplay={messagesToDisplay as any}
               enhancedMessagesTotalLength={enhancedMessages.length}
               isThinking={isThinking}
               animateAssistantIdx={animateAssistantIdx}
@@ -654,7 +619,6 @@ function MessageListInner({
         {isThinking && <ThinkingRow />}
       </div>
 
-      {/* Anchor at the very bottom to ensure flush scrolling when needed */}
       <div ref={bottomAnchorRef} />
     </div>
   )

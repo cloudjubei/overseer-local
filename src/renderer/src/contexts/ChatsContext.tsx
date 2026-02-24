@@ -11,12 +11,11 @@ import type {
   LLMConfig,
   ChatContext,
   Chat,
-  ChatMessage,
+  CompletionMessage,
   ChatUpdate,
   ChatsSettings,
   ChatSettings,
   ChatContextArguments,
-  CompletionMessage,
   CompletionSettings,
 } from 'thefactory-tools'
 import { getChatContextPath } from 'thefactory-tools/utils'
@@ -45,7 +44,6 @@ export type ChatsContextValue = {
   chatsByProjectId: Record<string, ChatState[]>
 
   // In-memory-only draft state. Keyed by getChatContextPath(context).
-  // Not persisted to disk; cleared on app reload/quit.
   getDraft: (chatKey: string) => ChatDraft
   setDraft: (chatKey: string, patch: Partial<ChatDraft>) => void
   clearDraft: (chatKey: string) => void
@@ -131,9 +129,6 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
   // Per-chat in-memory draft message + pending attachments.
   const [draftsByChatKey, setDraftsByChatKey] = useState<Record<string, ChatDraft>>({})
 
-  // Stable default draft objects per chatKey to avoid returning a fresh object on every provider re-render.
-  // This prevents unrelated chat updates (e.g. messages arriving in other chats) from causing
-  // referential churn that can cascade into input clears.
   const defaultDraftsRef = useRef<Record<string, ChatDraft>>({})
 
   const getDraft = useCallback(
@@ -166,15 +161,11 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       delete next[chatKey]
       return next
     })
-    // Note: we intentionally do not delete from defaultDraftsRef; keeping defaults cached is fine.
   }, [])
 
-  // Track last assistant message index notified per chat key to avoid duplicates/retroactive notices
   const lastAssistantNotifiedRef = useRef<Record<string, number>>({})
-  // Map chat key -> projectId for reliable notification attribution across all contexts
   const chatKeyToProjectIdRef = useRef<Record<string, string>>({})
 
-  // Helper: safely update chatsByProjectId for a given chat state
   const upsertChatsByProject = useCallback((chatState: ChatState) => {
     const ctx = chatState.chat.context
     const pid = ctx.projectId
@@ -199,7 +190,6 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
     setChatsByProjectId((prev) => {
       const existing = prev[pid] || []
       const nextForProject = existing.filter((c) => c.key !== chatState.key)
-      if (nextForProject === existing) return prev
       return { ...prev, [pid]: nextForProject }
     })
   }, [])
@@ -224,7 +214,6 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
     [upsertChatsByProject],
   )
 
-  // load all chats and settings on startup
   useEffect(() => {
     const loadAll = async () => {
       try {
@@ -248,13 +237,12 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
             byProject[project.id] = chatStates
             for (const c of chatStates) {
               all[c.key] = c
-              // Seed mapping and initialize assistant baseline
               chatKeyToProjectIdRef.current[c.key] = project.id
               try {
                 const msgs = c.chat?.messages || []
                 let lastAssistantIdx = -1
                 for (let i = msgs.length - 1; i >= 0; i--) {
-                  const role = msgs[i].completionMessage?.role
+                  const role = (msgs[i] as any)?.role
                   if (role === 'assistant') {
                     lastAssistantIdx = i
                     break
@@ -273,7 +261,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
         console.error('Failed to load chats/settings', e)
       }
     }
-    loadAll()
+    void loadAll()
   }, [])
 
   useEffect(() => {
@@ -281,19 +269,15 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       setChats((prev) => {
         const newChats = { ...prev }
         const key = getChatContextPath(chatUpdate.context)
+
         if (chatUpdate.type === 'delete') {
           const existing = newChats[key]
-          if (existing) {
-            // Remove from project mapping first
-            removeFromChatsByProject(existing)
-          }
+          if (existing) removeFromChatsByProject(existing)
           delete newChats[key]
           try {
             delete chatKeyToProjectIdRef.current[key]
           } catch (_) {}
 
-          // Best-effort: clear persisted unread notifications that point to this chat.
-          // Prevents stray sidebar bubbles for chats the user can no longer open.
           try {
             const pid =
               (existing?.chat?.context as any)?.projectId ||
@@ -319,11 +303,14 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
             }
           } catch (_) {}
 
-          // Best-effort clear any draft for this chat.
           try {
             clearDraft(key)
           } catch (_) {}
-        } else if (chatUpdate.type === 'change') {
+
+          return newChats
+        }
+
+        if (chatUpdate.type === 'change') {
           const next: ChatState = {
             ...(newChats[key] || {
               key,
@@ -336,7 +323,6 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
           newChats[key] = next
           upsertChatsByProject(next)
 
-          // Update mapping from updated chat context if available
           try {
             const pidFromChat = chatUpdate.chat?.context?.projectId
             const pidFromCtx = chatUpdate.context.projectId
@@ -344,26 +330,24 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
             if (pid) chatKeyToProjectIdRef.current[key] = pid
           } catch (_) {}
 
-          // Fire OS notification for new assistant messages (debounced per chat)
+          // Notify on new assistant messages
           try {
             const msgs = chatUpdate.chat?.messages || []
-            // find last assistant message index in the updated chat
             let lastAssistantIdx = -1
             for (let i = msgs.length - 1; i >= 0; i--) {
-              const role = msgs[i].completionMessage?.role
+              const role = (msgs[i] as any)?.role
               if (role === 'assistant') {
                 lastAssistantIdx = i
                 break
               }
             }
             if (lastAssistantIdx >= 0) {
-              // Previous assistant index from previous chat state
               const prevChat = prev[key]?.chat
               let prevAssistantIdx = -1
               if (prevChat) {
                 const prevMsgs = prevChat.messages || []
                 for (let i = prevMsgs.length - 1; i >= 0; i--) {
-                  const role = prevMsgs[i].completionMessage?.role
+                  const role = (prevMsgs[i] as any)?.role
                   if (role === 'assistant') {
                     prevAssistantIdx = i
                     break
@@ -372,12 +356,11 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
               }
               const seenIdx = lastAssistantNotifiedRef.current[key] ?? -1
               const baseline = Math.max(prevAssistantIdx, seenIdx)
-              const isLatestAssistant = msgs[lastAssistantIdx].completionMessage?.role === 'assistant'
+              const isLatestAssistant = (msgs[lastAssistantIdx] as any)?.role === 'assistant'
 
               if (isLatestAssistant && lastAssistantIdx > baseline) {
                 lastAssistantNotifiedRef.current[key] = lastAssistantIdx
 
-                // Build notification content
                 const ctx = chatUpdate.context
                 let title = 'New assistant message'
                 switch (ctx.type) {
@@ -399,11 +382,11 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
                     title = 'Agent run chat update'
                     break
                 }
-                const raw = String(msgs[lastAssistantIdx].completionMessage?.content || '')
+
+                const raw = String((msgs[lastAssistantIdx] as any)?.content || '')
                 const snippet = raw.replace(/\s+/g, ' ').slice(0, 120)
                 const message = snippet || 'Assistant responded'
 
-                // Deep link to specific chat context
                 const enc = encodeURIComponent
                 const actionUrl = (() => {
                   switch (ctx.type) {
@@ -426,12 +409,12 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
                   }
                 })()
 
-                // Resolve correct project id for notification storage using mapping first
                 const resolvedPid =
                   chatKeyToProjectIdRef.current[key] ||
                   chatUpdate.chat?.context?.projectId ||
                   ctx.projectId ||
                   projectId
+
                 if (resolvedPid) {
                   const chatKey = key
                   void notificationsService
@@ -445,33 +428,27 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
                     .catch(() => {})
                 }
               } else {
-                // Update baseline even if we didn't notify to prevent retroactive notifications later
                 lastAssistantNotifiedRef.current[key] = Math.max(baseline, lastAssistantIdx)
               }
             }
-          } catch (_) {
-            // no-op
-          }
-        } else {
-          const next: ChatState = {
-            key,
-            chat: chatUpdate.chat!,
-            isLoading: false,
-            isThinking: false,
-          }
-          newChats[key] = next
-          upsertChatsByProject(next)
-          // best-effort mapping update
-          try {
-            const pidFromChat = chatUpdate.chat?.context?.projectId
-            const pidFromCtx = chatUpdate.context.projectId
-            const pid = pidFromChat || pidFromCtx
-            if (pid) chatKeyToProjectIdRef.current[key] = pid
           } catch (_) {}
+
+          return newChats
         }
+
+        // Fallback: treat as add
+        const next: ChatState = {
+          key,
+          chat: chatUpdate.chat!,
+          isLoading: false,
+          isThinking: false,
+        }
+        newChats[key] = next
+        upsertChatsByProject(next)
         return newChats
       })
     })
+
     return () => {
       if (unsubscribe) unsubscribe()
     }
@@ -485,7 +462,6 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       const chat = await chatsService.getChat(context)
       const chatState: ChatState = { key, chat, isLoading: false, isThinking: false }
       updateChatState(key, chatState)
-      // best-effort mapping update
       try {
         const pid = chat.context?.projectId
         if (pid) chatKeyToProjectIdRef.current[key] = pid
@@ -504,52 +480,40 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       config: LLMConfig,
       files?: string[],
     ) => {
-      const completionMessage: CompletionMessage = {
-        role: 'user',
-        content: message,
-        files: files && files.length ? files : undefined,
-      }
-
       // Optimistic local update with the user message
       const key = getChatContextPath(context)
       const chatState = await getChat(context)
-
-      // DO NOT ALLOW MULTI MESSAGES WHILE AGENT IS THINKING
       if (chatState.isThinking) return
 
       const now = new Date().toISOString()
-      const m: ChatMessage = {
-        completionMessage: {
-          ...completionMessage,
-          usage: { promptTokens: 0, completionTokens: 0 },
-          startedAt: now,
-          completedAt: now,
-          durationMs: 0,
-        },
-      }
-      const chatMessages = [...chatState.chat.messages, m]
-      const nextState: ChatState = {
+      const userMessage: CompletionMessage = {
+        role: 'user',
+        content: message,
+        files: files && files.length ? files : undefined,
+        startedAt: now,
+        completedAt: now,
+        durationMs: 0,
+      } as any
+
+      const chatMessages = [...chatState.chat.messages, userMessage]
+      updateChatState(key, {
         ...chatState,
-        chat: {
-          ...chatState.chat,
-          messages: chatMessages,
-        },
+        chat: { ...chatState.chat, messages: chatMessages },
         isThinking: true,
-      }
-      updateChatState(key, nextState)
+      })
 
       const chatProjectId = context.projectId ?? projectId
       try {
         await completionService.sendCompletionTools(
           chatProjectId,
           context,
-          completionMessage,
+          userMessage,
           prompt,
           settings.completionSettings,
           config,
         )
       } catch (e) {
-        console.error('completionService.getCompletionTools:', e)
+        console.error('completionService.sendCompletionTools:', e)
       } finally {
         updateChatState(key, { isThinking: false })
       }
@@ -569,14 +533,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       const chatState = await getChat(context)
       if (chatState.isThinking) return
 
-      const nextState: ChatState = {
-        ...chatState,
-        chat: {
-          ...chatState.chat,
-        },
-        isThinking: true,
-      }
-      updateChatState(key, nextState)
+      updateChatState(key, { ...chatState, isThinking: true })
 
       const chatProjectId = context.projectId ?? projectId
       try {
@@ -603,14 +560,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       const chatState = await getChat(context)
       if (chatState.isThinking) return
 
-      const nextState: ChatState = {
-        ...chatState,
-        chat: {
-          ...chatState.chat,
-        },
-        isThinking: true,
-      }
-      updateChatState(key, nextState)
+      updateChatState(key, { ...chatState, isThinking: true })
 
       const chatProjectId = context.projectId ?? projectId
       try {
@@ -630,16 +580,13 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
     [projectId, getChat, updateChatState],
   )
 
-  const abortMessage = useCallback(
-    async (context: ChatContext) => {
-      try {
-        await completionService.abortCompletion(context)
-      } catch (e) {
-        console.warn('Abort failed or not available for chat', e)
-      }
-    },
-    [chats],
-  )
+  const abortMessage = useCallback(async (context: ChatContext) => {
+    try {
+      await completionService.abortCompletion(context)
+    } catch (e) {
+      console.warn('Abort failed or not available for chat', e)
+    }
+  }, [])
 
   const restartChat = useCallback(
     async (context: ChatContext): Promise<ChatState> => {
@@ -656,7 +603,6 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       const chat = await chatsService.createChat({ context, messages: [] })
       const state = { key, chat, isLoading: false, isThinking: false } as ChatState
       updateChatState(key, state)
-      // best-effort mapping update
       try {
         const pid = context.projectId
         if (pid) chatKeyToProjectIdRef.current[key] = pid
@@ -671,17 +617,14 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       const key = getChatContextPath(context)
       setChats((prev) => {
         const existing = prev[key]
-        if (existing) {
-          removeFromChatsByProject(existing)
-        }
-        const newState = { ...prev }
-        delete newState[key]
-        return newState
+        if (existing) removeFromChatsByProject(existing)
+        const next = { ...prev }
+        delete next[key]
+        return next
       })
       try {
         delete chatKeyToProjectIdRef.current[key]
       } catch (_) {}
-      // Clear draft on explicit delete too.
       try {
         clearDraft(key)
       } catch (_) {}
@@ -694,28 +637,19 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
     async (context: ChatContext) => {
       const key = getChatContextPath(context)
       const chatState = await getChat(context)
-
-      // Do not allow deletion while assistant is thinking
       if (chatState.isThinking) return
-
       try {
         const updated = await chatsService.deleteLastMessage(context)
-        if (updated) {
-          const nextState: ChatState = { ...chatState, chat: updated }
-          updateChatState(key, nextState)
-        }
+        if (updated) updateChatState(key, { ...chatState, chat: updated })
       } catch (e) {
         console.error('Failed to delete last message', e)
-        // No state mutation here; rely on subscription to reconcile
       }
     },
     [getChat, updateChatState],
   )
 
   const getSettings = useCallback(
-    (context: ChatContext): ChatSettings | undefined => {
-      return extractSettingsForContext(allChatSettings, context)
-    },
+    (context: ChatContext): ChatSettings | undefined => extractSettingsForContext(allChatSettings, context),
     [allChatSettings],
   )
 
@@ -770,6 +704,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
     },
     [],
   )
+
   const updateSettingsPrompt = useCallback(
     async (context: ChatContext, prompt: string): Promise<string | undefined> => {
       try {
@@ -778,12 +713,13 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
         const s = extractSettingsForContext(updated, context)
         return s?.systemPrompt
       } catch (e) {
-        console.error('Failed to get settings prompt', e)
+        console.error('Failed to update settings prompt', e)
       }
-      return
+      return undefined
     },
     [],
   )
+
   const resetSettingsPrompt = useCallback(
     async (context: ChatContext): Promise<string | undefined> => {
       try {
@@ -792,9 +728,9 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
         const s = extractSettingsForContext(updated, context)
         return s?.systemPrompt
       } catch (e) {
-        console.error('Failed to get settings prompt', e)
+        console.error('Failed to reset settings prompt', e)
       }
-      return
+      return undefined
     },
     [],
   )
@@ -812,14 +748,17 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       resumeTools,
       retryCompletion,
       abortMessage,
+
       getChat,
       restartChat,
       deleteChat,
       deleteLastMessage,
+
       allChatSettings,
       getSettings,
       resetSettings,
       updateCompletionSettings,
+
       getDefaultPrompt,
       getSettingsPrompt,
       updateSettingsPrompt,
@@ -828,11 +767,9 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
     [
       chats,
       chatsByProjectId,
-
       getDraft,
       setDraft,
       clearDraft,
-
       sendMessage,
       resumeTools,
       retryCompletion,
@@ -851,6 +788,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       resetSettingsPrompt,
     ],
   )
+
   return <ChatsContext.Provider value={value}>{children}</ChatsContext.Provider>
 }
 

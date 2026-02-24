@@ -1,18 +1,19 @@
 import type { BrowserWindow } from 'electron'
 import IPC_HANDLER_KEYS from '../../preload/ipcHandlersKeys'
-import { callCompletionTools, createCompletionTools } from 'thefactory-tools'
+import { createCompletionTools } from 'thefactory-tools'
 import type {
+  AgentResponse,
+  Chat,
+  ChatContext,
   CompletionMessage,
-  LLMConfig,
   CompletionRequest,
   CompletionResponse,
-  AgentResponse,
-  CompletionSettings,
-  CompletionResponseWithTools,
   CompletionResponseTurns,
-  ChatContext,
-  ChatMessage,
-  Chat,
+  CompletionSettings,
+  CompletionToolMessage,
+  LLMConfig,
+  ToolCall,
+  ToolCallWithResult,
   ToolResult,
 } from 'thefactory-tools'
 import BaseManager from '../BaseManager'
@@ -92,31 +93,21 @@ export default class FactoryCompletionManager extends BaseManager {
     return handlers
   }
 
-  private processChatMessagesForCompletion(messages: ChatMessage[]): CompletionMessage[] {
-    // Transform messages with attachments into content that includes @path mentions
-    return (messages || []).map((c) => {
-      const m = c.completionMessage
-
-      if (c.toolResults?.length) {
-        const toolResults = c.toolResults.map((r) => ({
-          name: r.call.name,
-          result: r.result,
-        }))
-        return {
-          role: 'user',
-          content: JSON.stringify(toolResults),
-        }
-      }
-      if (Array.isArray(m.files) && m.files.length) {
-        const unique = Array.from(new Set(m.files.filter(Boolean)))
+  private processChatMessagesForCompletion(messages: CompletionMessage[]): CompletionMessage[] {
+    // Transform user messages with attachments into content that includes @path mentions.
+    // Tool messages are already native (role='tool') and should be passed through.
+    return (messages || []).map((m) => {
+      if (m.role === 'user' && Array.isArray((m as any).files) && (m as any).files.length) {
+        const files = ((m as any).files as string[]).filter(Boolean)
+        const unique = Array.from(new Set(files))
         const attachText = unique.map((p) => `@${p}`).join('\n')
         const sep = m.content && attachText ? '\n\n' : ''
         return {
-          role: m.role,
+          ...m,
           content: `${m.content || ''}${sep}Attached files:\n${attachText}`,
-        }
+        } as CompletionMessage
       }
-      return { role: m.role, content: m.content }
+      return { ...m }
     })
   }
 
@@ -134,84 +125,6 @@ export default class FactoryCompletionManager extends BaseManager {
     return await completion.sendCompletion(request)
   }
 
-  async resumeCompletionTools(
-    projectId: string,
-    chatContext: ChatContext,
-    toolsGranted: string[],
-    systemPrompt: string,
-    settings: CompletionSettings,
-    config: LLMConfig,
-  ): Promise<CompletionResponseTurns> {
-    const chat = await this.chatsManager.getChat(chatContext)
-    if (!chat) throw new Error('CHAT NOT FOUND')
-    if (chat.messages.length < 1) throw new Error("CHAT DOESN'T HAVE MESSAGES")
-    const lastMessage = chat.messages[chat.messages.length - 1]
-    if (!lastMessage.toolResults || lastMessage.toolResults.length < 1)
-      throw new Error("CHAT DOESN'T HAVE A TOOL RESULT MESSAGE")
-
-    const toolsCheck = new Set<string>(toolsGranted)
-    const toolsRequiringConfirmation = lastMessage.toolResults.filter(
-      (r) => r.type === 'require_confirmation',
-    )
-    if (toolsRequiringConfirmation.length < 1)
-      throw new Error("CHAT DOESN'T HAVE A TOOL REQUIRING CONFIRMATION THAT HAD IT GRANTED")
-    const toolsAllowed = toolsRequiringConfirmation.filter((r) => toolsCheck.has(r.result))
-
-    const callTool = async (toolName: string, args: any): Promise<any> => {
-      const updatedArgs = { ...args }
-      if (chatContext.storyId && !('storyId' in updatedArgs))
-        updatedArgs.storyId = chatContext.storyId
-      if (chatContext.featureId && !('featureId' in updatedArgs))
-        updatedArgs.featureId = chatContext.featureId
-      return await this.factoryToolsManager.executeTool(projectId, toolName, updatedArgs)
-    }
-
-    const agentResponse: AgentResponse = { toolCalls: toolsAllowed.map((t) => t.call) }
-    const availableTools = toolsAllowed.map((t) => t.call.name)
-
-    const toolResults = await callCompletionTools(
-      agentResponse,
-      availableTools,
-      availableTools,
-      settings.finishTurnOnErrors,
-      callTool,
-      this.createAbortSignal(chatContext),
-    )
-
-    const mapToolResults: Record<string, ToolResult> = {}
-    for (let i = 0; i < toolResults.results.length; i++) {
-      mapToolResults[toolsAllowed[i].result] = toolResults.results[i]
-    }
-
-    let newLastMessage = { ...lastMessage }
-    newLastMessage.toolResults = lastMessage.toolResults.map((t) => {
-      if (t.type === 'require_confirmation') {
-        // If this tool required confirmation and was selected, replace with actual result
-        if (toolsCheck.has(t.result)) {
-          return mapToolResults[t.result] ? mapToolResults[t.result] : t
-        }
-        // Not selected: mark as aborted while preserving call/metadata
-        return { ...t, type: 'aborted' as any }
-      }
-      // For all other tool results, keep them as-is
-      return t
-    })
-
-    const newMessages = [...chat.messages]
-    newMessages[newMessages.length - 1] = newLastMessage
-    const newChat = await this.chatsManager.saveChat({ ...chat, messages: newMessages })
-
-    return await this.runCompletionTools(
-      projectId,
-      chatContext,
-      newChat,
-      systemPrompt,
-      settings,
-      config,
-      this.createAbortSignal(chatContext),
-    )
-  }
-
   async sendCompletionTools(
     projectId: string,
     chatContext: ChatContext,
@@ -222,17 +135,7 @@ export default class FactoryCompletionManager extends BaseManager {
   ): Promise<CompletionResponseTurns> {
     const now = new Date().toISOString()
 
-    const chat = await this.chatsManager.addChatMessages(chatContext, [
-      {
-        completionMessage: {
-          ...completionMessage,
-          usage: { promptTokens: 0, completionTokens: 0 },
-          startedAt: now,
-          completedAt: now,
-          durationMs: 0,
-        },
-      },
-    ])
+    const chat = await this.chatsManager.addChatMessages(chatContext, [completionMessage])
     if (!chat) throw new Error('CHAT NOT FOUND')
 
     return await this.runCompletionTools(
@@ -253,9 +156,99 @@ export default class FactoryCompletionManager extends BaseManager {
     settings: CompletionSettings,
     config: LLMConfig,
   ): Promise<CompletionResponseTurns> {
-    // Centralized delete of the last relevant message using ChatsManager
     const newChat = await this.chatsManager.deleteLastMessage(chatContext)
     if (!newChat) throw new Error('CHAT NOT FOUND')
+
+    return await this.runCompletionTools(
+      projectId,
+      chatContext,
+      newChat,
+      systemPrompt,
+      settings,
+      config,
+      this.createAbortSignal(chatContext),
+    )
+  }
+
+  async resumeCompletionTools(
+    projectId: string,
+    chatContext: ChatContext,
+    toolsGranted: string[],
+    systemPrompt: string,
+    settings: CompletionSettings,
+    config: LLMConfig,
+  ): Promise<CompletionResponseTurns> {
+    const chat = await this.chatsManager.getChat(chatContext)
+    if (!chat) throw new Error('CHAT NOT FOUND')
+    const msgs = chat.messages || []
+    if (msgs.length < 1) throw new Error("CHAT DOESN'T HAVE MESSAGES")
+
+    let end = msgs.length - 1
+    while (end >= 0 && msgs[end]?.role !== 'tool') end--
+    if (end < 0) throw new Error("CHAT DOESN'T HAVE TOOL MESSAGES")
+
+    let start = end
+    while (
+      start >= 0 &&
+      msgs[start]?.role === 'tool' &&
+      (msgs[start] as any).toolResult?.type === 'require_confirmation'
+    ) {
+      start--
+    }
+    start = start + 1
+    if (start > end) throw new Error("CHAT DOESN'T HAVE A TOOL REQUIRING CONFIRMATION")
+
+    const pending = msgs.slice(start, end + 1) as CompletionToolMessage[]
+    const granted = new Set<string>((toolsGranted || []).map(String))
+
+    const callTool = async (toolName: string, args: any): Promise<any> => {
+      const updatedArgs = { ...(args || {}) }
+      if (chatContext.storyId && !('storyId' in updatedArgs))
+        updatedArgs.storyId = chatContext.storyId
+      if (chatContext.featureId && !('featureId' in updatedArgs))
+        updatedArgs.featureId = chatContext.featureId
+      return await this.factoryToolsManager.executeTool(projectId, toolName, updatedArgs)
+    }
+
+    const updatedMessages = [...msgs]
+
+    for (let i = 0; i < pending.length; i++) {
+      const tm = pending[i]
+      const toolCallId = tm.toolCall.toolCallId
+
+      if (!toolCallId || !granted.has(toolCallId)) {
+        updatedMessages[start + i] = {
+          ...tm,
+          toolResult: { ...tm.toolResult, type: 'aborted', durationMs: 0 },
+        }
+        continue
+      }
+
+      const toolStartedAt = Date.now()
+      try {
+        const res = await callTool(tm.toolCall.name, tm.toolCall.arguments)
+        const durationMs = Date.now() - toolStartedAt
+        updatedMessages[start + i] = {
+          ...tm,
+          content: typeof res === 'string' ? res : JSON.stringify(res),
+          toolResult: { result: res, type: 'success', durationMs },
+          completedAt: new Date().toISOString(),
+          durationMs,
+        }
+      } catch (e: any) {
+        const durationMs = Date.now() - toolStartedAt
+        const err = `Error: ${e?.message || String(e)}`
+        updatedMessages[start + i] = {
+          ...tm,
+          content: err,
+          toolResult: { result: err, type: 'errored', durationMs },
+          completedAt: new Date().toISOString(),
+          durationMs,
+        }
+      }
+    }
+
+    const newChat = await this.chatsManager.saveChat({ ...chat, messages: updatedMessages })
 
     return await this.runCompletionTools(
       projectId,
@@ -276,7 +269,7 @@ export default class FactoryCompletionManager extends BaseManager {
     settings: CompletionSettings,
     config: LLMConfig,
     abortSignal?: AbortSignal,
-  ) {
+  ): Promise<CompletionResponseTurns> {
     const completion = createCompletionTools(config)
 
     const messages = this.processChatMessagesForCompletion(chat.messages)
@@ -286,47 +279,58 @@ export default class FactoryCompletionManager extends BaseManager {
       messages,
       abortSignal,
     }
-    const callTool = async (toolName: string, args: any): Promise<string> => {
-      const updatedArgs = { ...args }
+
+    const callTool = async (toolCall: any): Promise<any> => {
+      const updatedArgs = { ...(toolCall?.arguments || {}) }
       if (chatContext.storyId && !('storyId' in updatedArgs))
         updatedArgs.storyId = chatContext.storyId
       if (chatContext.featureId && !('featureId' in updatedArgs))
         updatedArgs.featureId = chatContext.featureId
-      return await this.factoryToolsManager.executeTool(projectId, toolName, updatedArgs)
+      return await this.factoryToolsManager.executeTool(projectId, toolCall.name, updatedArgs)
     }
-    const promptPreparedCallback = async (systemPrompt: string) => {}
+
+    const promptPreparedCallback = async (_systemPrompt: string) => {}
+
     const responseReceivedCallback = async (
-      turn: number,
+      _turn: number,
       response: CompletionResponse,
       agentResponse?: AgentResponse,
     ): Promise<void> => {
-      let m: ChatMessage = {
-        completionMessage: { ...response, content: agentResponse?.message ?? response.content },
-        toolCalls: agentResponse?.toolCalls,
-        suggestedActions: agentResponse?.suggestedActions,
-        model: { model: config.model, provider: config.provider },
+      const assistant = response.assistantMessage
+      const m: CompletionMessage = {
+        ...assistant,
+        suggestedActions: assistant.suggestedActions ?? agentResponse?.suggestedActions,
       }
       await this.chatsManager.addChatMessages(chatContext, [m])
     }
 
-    const turnFinishedCallback = async (
-      turn: number,
-      response: CompletionResponseWithTools,
-    ): Promise<boolean> => {
-      if (response.toolResults.results.length > 0) {
-        let m: ChatMessage = {
-          completionMessage: {
-            role: 'user',
-            content: '',
-            startedAt: response.toolResults.startedAt,
-            completedAt: response.toolResults.completedAt,
-            durationMs: response.toolResults.durationMs,
-            usage: { promptTokens: 0, completionTokens: 0 },
-          },
-          toolResults: response.toolResults.results,
-        }
-        await this.chatsManager.addChatMessages(chatContext, [m])
+    const toolCalledCallback = async (toolCallWithResult: ToolCallWithResult): Promise<void> => {
+      const now = new Date().toISOString()
+
+      const result = toolCallWithResult.result
+      const content = typeof result === 'string' ? result : JSON.stringify(result)
+
+      const toolMessage: CompletionToolMessage = {
+        role: 'tool',
+        content,
+        toolCall: {
+          toolCallId: toolCallWithResult.toolCallId,
+          name: toolCallWithResult.name,
+          arguments: toolCallWithResult.arguments,
+        },
+        toolResult: {
+          result,
+          type: toolCallWithResult.type,
+          durationMs: toolCallWithResult.durationMs,
+        },
+        startedAt: now,
+        completedAt: now,
+        durationMs: toolCallWithResult.durationMs,
       }
+      await this.chatsManager.addChatMessages(chatContext, [toolMessage])
+    }
+
+    const turnFinishedCallback = async (_turn: number, response: any): Promise<boolean> => {
       return (
         response.toolResults.resultType === 'require_confirmation' ||
         response.toolResults.resultType === 'no_tool_calls' ||
@@ -339,38 +343,35 @@ export default class FactoryCompletionManager extends BaseManager {
       request,
       settings,
       callTool,
+      toolCalledCallback,
       promptPreparedCallback,
       responseReceivedCallback,
       turnFinishedCallback,
     )
+
     if (c.resultType === 'errored') {
       const now = new Date().toISOString()
-      const errorMessage: ChatMessage = {
-        completionMessage: {
-          role: 'assistant',
-          content: 'Error',
-          usage: { promptTokens: 0, completionTokens: 0 },
-          startedAt: now,
-          completedAt: now,
-          durationMs: 0,
-        },
-        error: c.error,
-      }
+      const errorMessage: CompletionMessage = {
+        role: 'system',
+        content: 'Error',
+        error: String(c.error || 'Unknown error'),
+        startedAt: now,
+        completedAt: now,
+        durationMs: 0,
+      } as any
       await this.chatsManager.addChatMessages(chatContext, [errorMessage])
     } else if (c.resultType === 'max_turns_reached') {
       const now = new Date().toISOString()
-      const errorMessage: ChatMessage = {
-        completionMessage: {
-          role: 'system',
-          content: 'Max Turns Reached',
-          usage: { promptTokens: 0, completionTokens: 0 },
-          startedAt: now,
-          completedAt: now,
-          durationMs: 0,
-        },
-      }
+      const errorMessage: CompletionMessage = {
+        role: 'system',
+        content: 'Max Turns Reached',
+        startedAt: now,
+        completedAt: now,
+        durationMs: 0,
+      } as any
       await this.chatsManager.addChatMessages(chatContext, [errorMessage])
     }
+
     this.cleanupAbort(chatContext)
     return c
   }
@@ -386,10 +387,8 @@ export default class FactoryCompletionManager extends BaseManager {
 
   private createAbortSignal(chatContext: ChatContext): AbortSignal {
     const abortController = new AbortController()
-
     const path = getChatContextPath(chatContext)
     this.abortControllers[path] = abortController
-
     return abortController.signal
   }
 

@@ -101,7 +101,7 @@ export default function AgentRunRow({
     () =>
       run.conversations
         .flatMap((c) => c.messages)
-        .map((c) => c.completionMessage.usage.promptTokens ?? 0)
+        .map((m: any) => (m?.role === 'assistant' ? m?.usage?.promptTokens ?? 0 : 0))
         .reduce((acc, c) => acc + c, 0),
     [run.conversations],
   )
@@ -109,7 +109,7 @@ export default function AgentRunRow({
     () =>
       run.conversations
         .flatMap((c) => c.messages)
-        .map((c) => c.completionMessage.usage.completionTokens ?? 0)
+        .map((m: any) => (m?.role === 'assistant' ? m?.usage?.completionTokens ?? 0 : 0))
         .reduce((acc, c) => acc + c, 0),
     [run.conversations],
   )

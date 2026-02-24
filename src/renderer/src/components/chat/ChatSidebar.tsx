@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useLLMConfig } from '../../contexts/LLMConfigContext'
 import { useNavigator } from '../../navigation/Navigator'
-import { useChats, ChatState } from '../../contexts/ChatsContext'
+import { useChats, type ChatState } from '../../contexts/ChatsContext'
 import { ChatInput, MessageList } from '.'
 import { playSendSound, tryResumeAudioContext } from '../../assets/sounds'
 import { Switch } from '../ui/Switch'
-import type { ChatContext, ChatMessage, ChatContextArguments, CompletionSettings } from 'thefactory-tools'
+import type { ChatContext, CompletionMessage, ChatContextArguments, CompletionSettings } from 'thefactory-tools'
 import ContextInfoButton from '../ui/ContextInfoButton'
 import ModelChip from '../agents/ModelChip'
-import { IconSettings, IconChevron, IconScroll, IconRefreshChat } from '../ui/icons/Icons'
+import { IconSettings, IconChevron, IconScroll, IconRefreshChat, IconStop } from '../ui/icons/Icons'
 import { useProjectContext } from '../../contexts/ProjectContext'
 import { useStories } from '../../contexts/StoriesContext'
 import { useAgents } from '../../contexts/AgentsContext'
@@ -49,7 +49,6 @@ export default function ChatSidebar({
     retryCompletion,
     abortMessage,
     getSettings,
-    resetSettings,
     updateCompletionSettings,
     getDefaultPrompt,
     getSettingsPrompt,
@@ -81,13 +80,11 @@ export default function ChatSidebar({
   const chatKey = useMemo(() => getChatContextPath(context), [context])
   const draft = useMemo(() => getDraft(chatKey), [getDraft, chatKey])
 
-  // --- Local input state ---
   const prevChatKeyRef = useRef<string | undefined>(undefined)
   const isDirtyRef = useRef(false)
   const [localText, setLocalText] = useState<string>(draft.text)
   const [localAttachments, setLocalAttachments] = useState<string[]>(draft.attachments)
 
-  // Selection is kept in refs to avoid re-rendering the whole sidebar while selecting/typing.
   const localSelectionStartRef = useRef<number | undefined>(draft.selectionStart)
   const localSelectionEndRef = useRef<number | undefined>(draft.selectionEnd)
 
@@ -102,13 +99,9 @@ export default function ChatSidebar({
     setDraft(chatKey, { text: localText, attachments: localAttachments })
   }, [chatKey, setDraft, localText, localAttachments])
 
-  // When switching chats, reset local state from stored draft.
   useEffect(() => {
-    // Only reset local UI when the chat context actually changes.
     if (prevChatKeyRef.current === chatKey) return
     prevChatKeyRef.current = chatKey
-
-    // New chat context: treat local input as pristine until the user edits.
     isDirtyRef.current = false
 
     if (draftPersistTimerRef.current) {
@@ -125,9 +118,6 @@ export default function ChatSidebar({
     localSelectionStartRef.current = draft.selectionStart
     localSelectionEndRef.current = draft.selectionEnd
   }, [chatKey, draft.text, draft.attachments, draft.selectionStart, draft.selectionEnd])
-
-  // NOTE: We intentionally do NOT sync local state from `draft` on provider updates for the same chatKey.
-  // The local input is the source-of-truth while the user is typing; background chat updates must not clobber it.
 
   useEffect(() => {
     return () => {
@@ -158,7 +148,6 @@ export default function ChatSidebar({
     [chatKey, setDraft],
   )
 
-  // Force focus restoration on context change (incrementing nonce allows ChatInput to re-run focus effect)
   const [focusNonce, setFocusNonce] = useState(0)
   useEffect(() => {
     setFocusNonce((x) => x + 1)
@@ -166,7 +155,7 @@ export default function ChatSidebar({
 
   const persistSettings = useCallback(
     async (patch: Partial<CompletionSettings>) => {
-      const prev = currentSettings?.completionSettings || {}
+      const prev = currentSettings?.completionSettings || ({} as any)
       const merged: Partial<CompletionSettings> = { ...prev, ...patch }
       await updateCompletionSettings(context, merged)
     },
@@ -188,20 +177,12 @@ export default function ChatSidebar({
     void loadChat()
   }, [context, getChat])
 
-  // Track whether the user is at the bottom to decide read state
-  const atBottomRef = useRef<boolean>(false)
-  const [atBottom, setAtBottom] = useState<boolean>(false)
-  useEffect(() => {
-    atBottomRef.current = atBottom
-  }, [atBottom])
-
   const computeLatestIso = useCallback((): string | undefined => {
     const msgs = chat?.chat.messages || []
     const lastMsg = msgs.length ? msgs[msgs.length - 1] : undefined
     const lastMsgIso = (() => {
       if (!lastMsg) return undefined
-      const cm = (lastMsg as any)?.completionMessage
-      return (cm?.completedAt as string) || (cm?.startedAt as string) || undefined
+      return (lastMsg as any)?.completedAt || (lastMsg as any)?.startedAt || undefined
     })()
     const updatedAt = chat?.chat.updatedAt
     if (updatedAt && lastMsgIso) return updatedAt.localeCompare(lastMsgIso) >= 0 ? updatedAt : lastMsgIso
@@ -224,7 +205,6 @@ export default function ChatSidebar({
 
   const handleAtBottomChange = useCallback(
     (isBottom: boolean) => {
-      setAtBottom(isBottom)
       if (isBottom) {
         markLatestAsRead()
         clearChatNotifications()
@@ -259,20 +239,17 @@ export default function ChatSidebar({
     async (message: string, attachments: string[], meta?: SendMeta) => {
       if (!isChatConfigured || !activeChatConfig || !currentSettings) return
 
-      // Flush pending draft persistence so we don't keep stale drafts around.
       flushDraftPersist()
 
       tryResumeAudioContext()
       playSendSound()
 
-      // Only user-originated sends should force-scroll the message list.
       if (meta?.reason !== 'suggested_action') {
         setScrollSignal((s) => s + 1)
       }
 
       await sendMessage(context, message, effectivePrompt, currentSettings, activeChatConfig, attachments)
 
-      // Only clear drafts + local UI for real user sends.
       if (meta?.reason === 'user' || meta?.reason === undefined) {
         clearDraft(chatKey)
         setLocalText('')
@@ -317,7 +294,7 @@ export default function ChatSidebar({
     const mapped: ToolToggle[] = allTools
       .filter((t) => allAllowedSet.has(t))
       .map((t) => {
-        const schema = ToolSchemas[t]
+        const schema = (ToolSchemas as any)[t]
         const toolName = schema.name
         return {
           name: toolName,
@@ -416,7 +393,7 @@ export default function ChatSidebar({
       const p = await getSettingsPrompt(contextArguments)
       setEffectivePrompt(p)
       if (currentSettings?.systemPrompt) {
-        setDraftPrompt(currentSettings?.systemPrompt)
+        setDraftPrompt(currentSettings.systemPrompt)
       } else {
         const def = await getDefaultPrompt(context)
         setDraftPrompt(def)
@@ -431,9 +408,9 @@ export default function ChatSidebar({
   }, [currentSettings?.systemPrompt])
 
   const prevPromptRef = useRef<string>('')
-  const cachedEmptyMsgsRef = useRef<ChatMessage[]>([])
+  const cachedEmptyMsgsRef = useRef<CompletionMessage[]>([])
 
-  const messagesWithSystem: ChatMessage[] = useMemo(() => {
+  const messagesWithSystem: CompletionMessage[] = useMemo(() => {
     const original = chat?.chat.messages || []
     if (original.length > 0) return original
     if (!effectivePrompt) return original
@@ -442,15 +419,12 @@ export default function ChatSidebar({
       prevPromptRef.current = effectivePrompt
       cachedEmptyMsgsRef.current = [
         {
-          completionMessage: {
-            role: 'system',
-            content: effectivePrompt,
-            usage: { promptTokens: 0, completionTokens: 0 },
-            startedAt: '',
-            completedAt: '',
-            durationMs: 0,
-          },
-        },
+          role: 'system',
+          content: effectivePrompt,
+          startedAt: '',
+          completedAt: '',
+          durationMs: 0,
+        } as any,
       ]
     }
     return cachedEmptyMsgsRef.current
@@ -478,7 +452,7 @@ export default function ChatSidebar({
     if (isThinking) return undefined
     const msgs = chat?.chat.messages || []
     for (let i = msgs.length - 1; i >= 0; i--) {
-      if (msgs[i].completionMessage?.role === 'assistant') return msgs[i].suggestedActions
+      if ((msgs[i] as any)?.role === 'assistant') return (msgs[i] as any).suggestedActions
     }
     return undefined
   }, [chat?.chat.messages, isThinking])
@@ -562,8 +536,8 @@ export default function ChatSidebar({
               type='button'
               onClick={onCollapse}
               className='btn-secondary btn-icon'
-              aria-label={'Collapse chat sidebar'}
-              title={'Collapse chat sidebar'}
+              aria-label='Collapse chat sidebar'
+              title='Collapse chat sidebar'
             >
               <IconChevron className='w-4 h-4' style={{ transform: 'rotate(90deg)' }} />
             </button>
@@ -589,6 +563,17 @@ export default function ChatSidebar({
             <IconRefreshChat className='w-4 h-4' />
           </Button>
           <ModelChip editable className='border-blue-500' mode='chat' />
+
+          {isThinking ? (
+            <button
+              className='btn-secondary btn-icon'
+              aria-label='Abort'
+              title='Abort'
+              onClick={handleAbort}
+            >
+              <IconStop className='w-4 h-4' />
+            </button>
+          ) : null}
 
           <button
             ref={settingsBtnRef}
@@ -647,7 +632,10 @@ export default function ChatSidebar({
                   <div className='space-y-3'>
                     <div className='space-y-1'>
                       <div className='flex items-center justify-between'>
-                        <label className='text-xs font-medium text-[var(--text-secondary)]' htmlFor='maxTurns'>
+                        <label
+                          className='text-xs font-medium text-[var(--text-secondary)]'
+                          htmlFor='maxTurns'
+                        >
                           Max turns per run:
                           <span className='pl-4 text-[14px] text-[var(--text-secondary)]'>
                             {completion.maxTurns ?? ''}
@@ -700,58 +688,69 @@ export default function ChatSidebar({
 
                     <div className='flex items-center justify-between'>
                       <div className='flex flex-col'>
-                        <span className='text-xs font-medium text-[var(--text-secondary)]'>Finish turn on errors</span>
+                        <span className='text-xs font-medium text-[var(--text-secondary)]'>
+                          Finish turn on errors
+                        </span>
                         <span className='text-[10px] text-[var(--text-tertiary)]'>
                           When enabled, the agent ends the current turn if a tool call errors
                         </span>
                       </div>
                       <Switch
                         checked={!!completion.finishTurnOnErrors}
-                        onCheckedChange={(checked) => persistSettings({ finishTurnOnErrors: !!checked })}
+                        onCheckedChange={(checked) =>
+                          persistSettings({ finishTurnOnErrors: !!checked })
+                        }
                       />
                     </div>
                   </div>
                 ) : null}
 
-                {tools ? (
-                  <div className='space-y-2'>
-                    <div className='text-xs font-medium text-[var(--text-secondary)]'>Tools</div>
-                    <div className='rounded-md border border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)]'>
-                      {tools.length === 0 ? (
-                        <div className='text-xs text-[var(--text-secondary)] px-2 py-3'>
-                          No tools available for this context.
-                        </div>
-                      ) : (
-                        tools.map((tool) => (
-                          <div key={tool.name} className='px-2 py-2 space-y-1'>
-                            <div className='flex items-center justify-between gap-2'>
-                              <div className='flex-1 min-w-0 pr-2'>
-                                <div className='text-sm text-[var(--text-primary)] truncate'>{tool.name}</div>
-                                <div className='text-xs text-neutral-500 font-light truncate'>
-                                  {tool.description}
-                                </div>
+                <div className='space-y-2'>
+                  <div className='text-xs font-medium text-[var(--text-secondary)]'>Tools</div>
+                  <div className='rounded-md border border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)]'>
+                    {tools.length === 0 ? (
+                      <div className='text-xs text-[var(--text-secondary)] px-2 py-3'>
+                        No tools available for this context.
+                      </div>
+                    ) : (
+                      tools.map((tool) => (
+                        <div key={tool.name} className='px-2 py-2 space-y-1'>
+                          <div className='flex items-center justify-between gap-2'>
+                            <div className='flex-1 min-w-0 pr-2'>
+                              <div className='text-sm text-[var(--text-primary)] truncate'>
+                                {tool.name}
                               </div>
-                              <div className='flex flex-col items-center gap-1'>
-                                <div className='flex flex-col items-center space-y-px'>
-                                  <span className='text-[10px] text-[var(--text-secondary)]'>Available</span>
-                                  <Switch checked={tool.available} onCheckedChange={() => toggleAvailable(tool)} />
-                                </div>
-                                <div className='flex flex-col items-center space-y-px'>
-                                  <span className='text-[10px] text-[var(--text-secondary)]'>Auto-call</span>
-                                  <Switch
-                                    checked={tool.available ? tool.autoCall : false}
-                                    onCheckedChange={() => toggleAutoCall(tool)}
-                                    disabled={!tool.available}
-                                  />
-                                </div>
+                              <div className='text-xs text-neutral-500 font-light truncate'>
+                                {tool.description}
+                              </div>
+                            </div>
+                            <div className='flex flex-col items-center gap-1'>
+                              <div className='flex flex-col items-center space-y-px'>
+                                <span className='text-[10px] text-[var(--text-secondary)]'>
+                                  Available
+                                </span>
+                                <Switch
+                                  checked={tool.available}
+                                  onCheckedChange={() => toggleAvailable(tool)}
+                                />
+                              </div>
+                              <div className='flex flex-col items-center space-y-px'>
+                                <span className='text-[10px] text-[var(--text-secondary)]'>
+                                  Auto-call
+                                </span>
+                                <Switch
+                                  checked={tool.available ? tool.autoCall : false}
+                                  onCheckedChange={() => toggleAutoCall(tool)}
+                                  disabled={!tool.available}
+                                />
                               </div>
                             </div>
                           </div>
-                        ))
-                      )}
-                    </div>
+                        </div>
+                      ))
+                    )}
                   </div>
-                ) : null}
+                </div>
 
                 <div className='pt-2 border-t border-[var(--border-subtle)]'>
                   <Button variant='danger' onClick={handleDeleteChat}>
@@ -774,7 +773,9 @@ export default function ChatSidebar({
             }}
             role='status'
           >
-            <span>LLM not configured. Set your API key in Settings to enable sending messages.</span>
+            <span>
+              LLM not configured. Set your API key in Settings to enable sending messages.
+            </span>
             <button className='btn' onClick={() => navigateView('Settings')}>
               Configure
             </button>
@@ -816,7 +817,11 @@ export default function ChatSidebar({
         />
       </div>
 
-      <Modal isOpen={isPromptModalOpen} onClose={() => setIsPromptModalOpen(false)} title='System Prompt'>
+      <Modal
+        isOpen={isPromptModalOpen}
+        onClose={() => setIsPromptModalOpen(false)}
+        title='System Prompt'
+      >
         <div className='p-4 bg-[var(--surface-base)] text-sm text-[var(--text-secondary)] max-h-[70vh] overflow-auto'>
           <pre className='whitespace-pre-wrap font-sans'>{effectivePrompt}</pre>
         </div>

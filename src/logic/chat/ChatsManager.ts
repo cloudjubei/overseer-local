@@ -9,7 +9,7 @@ import type {
   ChatEditInput,
   ChatsSettings,
   ChatContextArguments,
-  ChatMessage,
+  CompletionMessage,
   CompletionSettings,
 } from 'thefactory-tools'
 import BaseManager from '../BaseManager'
@@ -88,7 +88,7 @@ export default class ChatsManager extends BaseManager {
   }
   async addChatMessages(
     chatContext: ChatContext,
-    messages: ChatMessage[],
+    messages: CompletionMessage[],
   ): Promise<Chat | undefined> {
     return await this.tools.addChatMessages(chatContext, messages)
   }
@@ -98,17 +98,26 @@ export default class ChatsManager extends BaseManager {
     const msgs = chat.messages || []
     if (msgs.length === 0) return chat
 
-    let trimCount = 1
     const last = msgs[msgs.length - 1]
-    const lastHasToolResults =
-      Array.isArray((last as any)?.toolResults) && (last as any).toolResults.length > 0
-    if (lastHasToolResults && msgs.length >= 2) {
-      const prev = msgs[msgs.length - 2]
-      if (prev?.completionMessage?.role === 'assistant') {
-        trimCount = 2
+
+    // Native tool calling:
+    // A turn is typically: assistant message, followed by 0..N tool messages.
+    // If the last message is a tool message, delete the entire contiguous tail of tool messages,
+    // and also delete the assistant message immediately before that tail (if present).
+    let trimCount = 1
+    if (last?.role === 'tool') {
+      // Count contiguous trailing tool messages
+      let i = msgs.length - 1
+      while (i >= 0 && msgs[i]?.role === 'tool') i--
+      const toolTailCount = msgs.length - 1 - i
+      trimCount = toolTailCount
+      // If the message before the tool tail is assistant, remove it too.
+      if (i >= 0 && msgs[i]?.role === 'assistant') {
+        trimCount = toolTailCount + 1
       }
     }
-    const trimmed = msgs.slice(0, msgs.length - trimCount)
+
+    const trimmed = msgs.slice(0, Math.max(0, msgs.length - trimCount))
     const newChat: Chat = { ...chat, messages: trimmed }
     return await this.saveChat(newChat)
   }

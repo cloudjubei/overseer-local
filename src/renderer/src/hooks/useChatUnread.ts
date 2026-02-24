@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useChats } from '@renderer/contexts/ChatsContext'
-import type { ChatContext, ChatMessage } from 'thefactory-tools'
+import type { ChatContext, CompletionMessage } from 'thefactory-tools'
 import { getChatContextPath } from 'thefactory-tools/utils'
 
 // LocalStorage helpers
@@ -26,11 +26,10 @@ function writeLastRead(chatKey: string, iso: string) {
   } catch {}
 }
 
-function messageTimestamp(msg: ChatMessage): string | undefined {
+function messageTimestamp(msg: CompletionMessage): string | undefined {
   // Try to derive an ISO timestamp for the message; prefer completion timestamps if present
-  const cm = (msg as any).completionMessage
-  if (cm?.completedAt) return cm.completedAt as string
-  if (cm?.startedAt) return cm.startedAt as string
+  if ((msg as any)?.completedAt) return (msg as any).completedAt as string
+  if ((msg as any)?.startedAt) return (msg as any).startedAt as string
   // Fallbacks: some implementations may carry createdAt directly
   const createdAt = (msg as any).createdAt
   if (typeof createdAt === 'string') return createdAt
@@ -38,10 +37,10 @@ function messageTimestamp(msg: ChatMessage): string | undefined {
 }
 
 // Only assistant messages should count as unread
-function isAssistant(msg: ChatMessage): boolean {
-  return ((msg as any)?.completionMessage?.role) === 'assistant'
+function isAssistant(msg: CompletionMessage): boolean {
+  return ((msg as any)?.role) === 'assistant'
 }
-function assistantTimestamp(msg: ChatMessage): string | undefined {
+function assistantTimestamp(msg: CompletionMessage): string | undefined {
   if (!isAssistant(msg)) return undefined
   return messageTimestamp(msg)
 }
