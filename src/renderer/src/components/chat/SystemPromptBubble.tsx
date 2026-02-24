@@ -1,24 +1,24 @@
-import React, { memo } from 'react'
-import type { ChatMessage } from 'thefactory-tools'
+import { memo } from 'react'
 import Markdown from '../ui/Markdown'
 import { messageIso } from '@renderer/utils/chat'
 import { formatFriendlyTimestamp } from '@renderer/utils/time'
+import { CompletionMessage } from 'thefactory-tools'
 
 function SystemPromptBubble({
   message,
   maxHeight,
 }: {
-  message: ChatMessage
+  message: CompletionMessage
   maxHeight?: number
 }) {
   const iso = messageIso(message)
   const ts = iso ? formatFriendlyTimestamp(iso) : ''
 
   return (
-    <div className='flex justify-center'>
-      <div className='inline-flex flex-col items-end max-w-full'>
+    <div className="flex justify-center">
+      <div className="inline-flex flex-col items-end max-w-full">
         {ts ? (
-          <div className='text-[10px] leading-4 text-[var(--text-secondary)] mb-1 opacity-80 select-none'>
+          <div className="text-[10px] leading-4 text-[var(--text-secondary)] mb-1 opacity-80 select-none">
             {ts}
           </div>
         ) : null}
@@ -32,9 +32,9 @@ function SystemPromptBubble({
             maxHeight: typeof maxHeight === 'number' ? `${maxHeight}px` : undefined,
             minHeight: '3.5em',
           }}
-          aria-label='System prompt'
+          aria-label="System prompt"
         >
-          <Markdown text={message.completionMessage.content} />
+          <Markdown text={message.content} />
         </div>
       </div>
     </div>

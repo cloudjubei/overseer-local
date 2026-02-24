@@ -14,7 +14,6 @@ import type {
   LLMConfig,
   ToolCall,
   ToolCallWithResult,
-  ToolResult,
 } from 'thefactory-tools'
 import BaseManager from '../BaseManager'
 import FactoryToolsManager from './FactoryToolsManager'
@@ -201,13 +200,13 @@ export default class FactoryCompletionManager extends BaseManager {
     const pending = msgs.slice(start, end + 1) as CompletionToolMessage[]
     const granted = new Set<string>((toolsGranted || []).map(String))
 
-    const callTool = async (toolName: string, args: any): Promise<any> => {
-      const updatedArgs = { ...(args || {}) }
+    const callTool = async (toolCall: ToolCall): Promise<any> => {
+      const updatedArgs = { ...(toolCall.arguments || {}) }
       if (chatContext.storyId && !('storyId' in updatedArgs))
         updatedArgs.storyId = chatContext.storyId
       if (chatContext.featureId && !('featureId' in updatedArgs))
         updatedArgs.featureId = chatContext.featureId
-      return await this.factoryToolsManager.executeTool(projectId, toolName, updatedArgs)
+      return await this.factoryToolsManager.executeTool(projectId, toolCall.name, updatedArgs)
     }
 
     const updatedMessages = [...msgs]
@@ -226,7 +225,7 @@ export default class FactoryCompletionManager extends BaseManager {
 
       const toolStartedAt = Date.now()
       try {
-        const res = await callTool(tm.toolCall.name, tm.toolCall.arguments)
+        const res = await callTool(tm.toolCall)
         const durationMs = Date.now() - toolStartedAt
         updatedMessages[start + i] = {
           ...tm,
@@ -270,9 +269,10 @@ export default class FactoryCompletionManager extends BaseManager {
     config: LLMConfig,
     abortSignal?: AbortSignal,
   ): Promise<CompletionResponseTurns> {
+    let currentChat: Chat = chat
     const completion = createCompletionTools(config)
 
-    const messages = this.processChatMessagesForCompletion(chat.messages)
+    const messages = this.processChatMessagesForCompletion(currentChat.messages)
 
     const request: CompletionRequest = {
       systemPrompt,
@@ -280,8 +280,8 @@ export default class FactoryCompletionManager extends BaseManager {
       abortSignal,
     }
 
-    const callTool = async (toolCall: any): Promise<any> => {
-      const updatedArgs = { ...(toolCall?.arguments || {}) }
+    const callTool = async (toolCall: ToolCall): Promise<any> => {
+      const updatedArgs = { ...(toolCall.arguments || {}) }
       if (chatContext.storyId && !('storyId' in updatedArgs))
         updatedArgs.storyId = chatContext.storyId
       if (chatContext.featureId && !('featureId' in updatedArgs))
@@ -296,38 +296,57 @@ export default class FactoryCompletionManager extends BaseManager {
       response: CompletionResponse,
       agentResponse?: AgentResponse,
     ): Promise<void> => {
+      // console.log('responseReceivedCallback response: ', response)
+      // console.log('responseReceivedCallback agentResponse: ', agentResponse)
       const assistant = response.assistantMessage
-      const m: CompletionMessage = {
-        ...assistant,
-        suggestedActions: assistant.suggestedActions ?? agentResponse?.suggestedActions,
+      const messages: CompletionMessage[] = [assistant]
+      // {
+      //   ...assistant,
+      //   suggestedActions: assistant.suggestedActions ?? agentResponse?.suggestedActions,
+      // },
+      // ]
+      const now = new Date().toISOString()
+      for (const t of response.toolCalls) {
+        const toolMessage: CompletionToolMessage = {
+          role: 'tool',
+          content: '',
+          toolCall: {
+            toolCallId: t.toolCallId,
+            name: t.name,
+            arguments: t.arguments,
+          },
+          toolResult: {
+            result: undefined,
+            type: 'require_confirmation',
+            durationMs: 0,
+          },
+          startedAt: now,
+          completedAt: now,
+          durationMs: 0,
+        }
+        messages.push(toolMessage)
       }
-      await this.chatsManager.addChatMessages(chatContext, [m])
+      const newChat = await this.chatsManager.addChatMessages(chatContext, messages)
+      if (newChat) {
+        currentChat = newChat
+      }
     }
 
-    const toolCalledCallback = async (toolCallWithResult: ToolCallWithResult): Promise<void> => {
-      const now = new Date().toISOString()
-
-      const result = toolCallWithResult.result
-      const content = typeof result === 'string' ? result : JSON.stringify(result)
-
-      const toolMessage: CompletionToolMessage = {
-        role: 'tool',
-        content,
-        toolCall: {
-          toolCallId: toolCallWithResult.toolCallId,
-          name: toolCallWithResult.name,
-          arguments: toolCallWithResult.arguments,
-        },
-        toolResult: {
-          result,
-          type: toolCallWithResult.type,
-          durationMs: toolCallWithResult.durationMs,
-        },
-        startedAt: now,
-        completedAt: now,
-        durationMs: toolCallWithResult.durationMs,
+    const toolCalledCallback = async (toolResult: ToolCallWithResult) => {
+      const newMessages = [...currentChat.messages]
+      const m = newMessages.find(
+        (m) =>
+          m.role === 'tool' &&
+          (m as CompletionToolMessage).toolCall.toolCallId === toolResult.toolCallId,
+      ) as CompletionToolMessage | undefined
+      if (m) {
+        m.toolResult = {
+          result: toolResult.result,
+          type: toolResult.type,
+          durationMs: toolResult.durationMs,
+        }
       }
-      await this.chatsManager.addChatMessages(chatContext, [toolMessage])
+      currentChat = await this.chatsManager.saveChat({ ...currentChat, messages: newMessages })
     }
 
     const turnFinishedCallback = async (_turn: number, response: any): Promise<boolean> => {
@@ -358,7 +377,7 @@ export default class FactoryCompletionManager extends BaseManager {
         startedAt: now,
         completedAt: now,
         durationMs: 0,
-      } as any
+      }
       await this.chatsManager.addChatMessages(chatContext, [errorMessage])
     } else if (c.resultType === 'max_turns_reached') {
       const now = new Date().toISOString()
@@ -368,7 +387,7 @@ export default class FactoryCompletionManager extends BaseManager {
         startedAt: now,
         completedAt: now,
         durationMs: 0,
-      } as any
+      }
       await this.chatsManager.addChatMessages(chatContext, [errorMessage])
     }
 

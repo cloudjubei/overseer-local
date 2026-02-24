@@ -130,7 +130,8 @@ function MessageListInner({
     if (messages.length > prevLenForAnimRef.current) {
       const lastIdx = messages.length - 1
       const lastMsg = messages[lastIdx] as any
-      if (lastMsg && lastMsg.role === 'assistant' && !(lastMsg as any).error) setAnimateAssistantIdx(lastIdx)
+      if (lastMsg && lastMsg.role === 'assistant' && !(lastMsg as any).error)
+        setAnimateAssistantIdx(lastIdx)
       else setAnimateAssistantIdx(null)
     }
 
@@ -220,7 +221,10 @@ function MessageListInner({
       const toolName = String(tm.toolCall?.name || '')
       if (!toolName) continue
 
-      toolPreviewByIdRef.current = { ...toolPreviewByIdRef.current, [toolCallId]: { status: 'pending' } }
+      toolPreviewByIdRef.current = {
+        ...toolPreviewByIdRef.current,
+        [toolCallId]: { status: 'pending' },
+      }
       setToolPreviewById((prev) => ({ ...prev, [toolCallId]: { status: 'pending' } }))
 
       const args = tm.toolCall?.arguments || {}
@@ -252,7 +256,10 @@ function MessageListInner({
 
   const totalMessages = messagesToDisplay.length
   const startIndex = Math.max(0, totalMessages - visibleCount)
-  const visibleMessages = useMemo(() => messagesToDisplay.slice(startIndex), [messagesToDisplay, startIndex])
+  const visibleMessages = useMemo(
+    () => messagesToDisplay.slice(startIndex),
+    [messagesToDisplay, startIndex],
+  )
   const hiddenCountAbove = startIndex
 
   // Progressive read receipts (assistant role only)
@@ -360,7 +367,9 @@ function MessageListInner({
     if (!hasUnreadOnOpen) return openAtBottom()
 
     if (typeof lastUnreadIndex === 'number') {
-      const target = container.querySelector(`[data-msg-idx='${lastUnreadIndex}']`) as HTMLElement | null
+      const target = container.querySelector(
+        `[data-msg-idx='${lastUnreadIndex}']`,
+      ) as HTMLElement | null
       if (target) {
         const headroom = Math.floor(container.clientHeight * 0.3)
         const top = Math.max(0, target.offsetTop - headroom)
@@ -545,7 +554,7 @@ function MessageListInner({
   return (
     <div
       ref={messageListRef}
-      className='flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-4'
+      className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-4"
       onScroll={handleScroll}
     >
       {systemPromptMessage ? (
@@ -553,9 +562,9 @@ function MessageListInner({
       ) : null}
 
       {(enhancedMessages.length === 0 || systemPromptMessage != undefined) && !isThinking && (
-        <div className='mt-10 mx-auto max-w-[720px] text-center text-[var(--text-secondary)]'>
-          <div className='text-[18px] font-medium'>Start chatting about the project</div>
-          <div className='mt-4 inline-block rounded-lg border border-[var(--border-default)] bg-[var(--surface-raised)] px-4 py-3 text-[13px]'>
+        <div className="mt-10 mx-auto max-w-[720px] text-center text-[var(--text-secondary)]">
+          <div className="text-[18px] font-medium">Start chatting about the project</div>
+          <div className="mt-4 inline-block rounded-lg border border-[var(--border-default)] bg-[var(--surface-raised)] px-4 py-3 text-[13px]">
             Attach text files to give context
             <br />
             Mention files with @<br />
@@ -564,16 +573,16 @@ function MessageListInner({
         </div>
       )}
 
-      <div ref={contentRef} className='mx-auto max-w-[960px] space-y-3'>
+      <div ref={contentRef} className="mx-auto max-w-[960px] space-y-3">
         {hiddenCountAbove > 0 && (
-          <div className='relative my-2 flex items-center justify-center'>
-            <div className='text-xs text-[var(--text-secondary)] bg-[var(--surface-overlay)] border border-[var(--border-subtle)] rounded-full px-3 py-1 shadow'>
+          <div className="relative my-2 flex items-center justify-center">
+            <div className="text-xs text-[var(--text-secondary)] bg-[var(--surface-overlay)] border border-[var(--border-subtle)] rounded-full px-3 py-1 shadow">
               {hiddenCountAbove} older message{hiddenCountAbove === 1 ? '' : 's'} hidden
             </div>
-            <div className='ml-2 flex items-center gap-2'>
+            <div className="ml-2 flex items-center gap-2">
               <button
-                type='button'
-                className='btn-secondary text-xs px-2 py-1'
+                type="button"
+                className="btn-secondary text-xs px-2 py-1"
                 onClick={() => setVisibleCount((c) => Math.min(totalMessages, c + BATCH_SIZE))}
               >
                 Load more
