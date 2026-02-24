@@ -127,40 +127,32 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
   const [allChatSettings, setAllChatSettings] = useState<ChatsSettings | undefined>(undefined)
 
   // Per-chat in-memory draft message + pending attachments.
-  const [draftsByChatKey, setDraftsByChatKey] = useState<Record<string, ChatDraft>>({})
+  const draftsRef = useRef<Record<string, ChatDraft>>({})
 
   const defaultDraftsRef = useRef<Record<string, ChatDraft>>({})
 
-  const getDraft = useCallback(
-    (chatKey: string) => {
-      const existing = draftsByChatKey[chatKey]
-      if (existing) return existing
+  // getDraft is intentionally ref-based (stable identity, no re-render cascade).
+  // Consumers should read it at the point they need the value (e.g. on chat switch),
+  // NOT as a reactive dependency.
+  const getDraft = useCallback((chatKey: string): ChatDraft => {
+    const existing = draftsRef.current[chatKey]
+    if (existing) return existing
 
-      const cached = defaultDraftsRef.current[chatKey]
-      if (cached) return cached
+    const cached = defaultDraftsRef.current[chatKey]
+    if (cached) return cached
 
-      const def: ChatDraft = { text: '', attachments: [] }
-      defaultDraftsRef.current[chatKey] = def
-      return def
-    },
-    [draftsByChatKey],
-  )
+    const def: ChatDraft = { text: '', attachments: [] }
+    defaultDraftsRef.current[chatKey] = def
+    return def
+  }, [])
 
   const setDraft = useCallback((chatKey: string, patch: Partial<ChatDraft>) => {
-    setDraftsByChatKey((prev) => {
-      const cur = prev[chatKey] || { text: '', attachments: [] }
-      const next: ChatDraft = { ...cur, ...patch }
-      return { ...prev, [chatKey]: next }
-    })
+    const cur = draftsRef.current[chatKey] || { text: '', attachments: [] }
+    draftsRef.current[chatKey] = { ...cur, ...patch }
   }, [])
 
   const clearDraft = useCallback((chatKey: string) => {
-    setDraftsByChatKey((prev) => {
-      if (!Object.prototype.hasOwnProperty.call(prev, chatKey)) return prev
-      const next = { ...prev }
-      delete next[chatKey]
-      return next
-    })
+    delete draftsRef.current[chatKey]
   }, [])
 
   const lastAssistantNotifiedRef = useRef<Record<string, number>>({})
@@ -387,7 +379,9 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
                 const snippet = raw.replace(/\s+/g, ' ').slice(0, 120)
                 const message = snippet || 'Assistant responded'
 
-                const enc = encodeURIComponent
+                const enc = (v: string | number | boolean | null | undefined) =>
+                  encodeURIComponent(String(v ?? ''))
+
                 const actionUrl = (() => {
                   switch (ctx.type) {
                     case 'PROJECT':
@@ -485,6 +479,33 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       const chatState = await getChat(context)
       if (chatState.isThinking) return
 
+      // If there are tail tool calls awaiting confirmation and the user sends a new message,
+      // we treat those tool calls as 'ignored' (they were not resumed/confirmed).
+      const prevMessages = chatState.chat.messages || []
+      const ignoredMessages = [...prevMessages]
+      let end = ignoredMessages.length - 1
+      while (end >= 0 && (ignoredMessages[end] as any)?.role !== 'tool') end--
+      if (end >= 0) {
+        let start = end
+        while (
+          start >= 0 &&
+          (ignoredMessages[start] as any)?.role === 'tool' &&
+          (ignoredMessages[start] as any)?.toolResult?.type === 'require_confirmation'
+        ) {
+          start--
+        }
+        start = start + 1
+        if (start <= end) {
+          for (let i = start; i <= end; i++) {
+            const tm = ignoredMessages[i] as any
+            ignoredMessages[i] = {
+              ...tm,
+              toolResult: { ...(tm.toolResult || {}), type: 'ignored', durationMs: 0 },
+            }
+          }
+        }
+      }
+
       const now = new Date().toISOString()
       const userMessage: CompletionMessage = {
         role: 'user',
@@ -495,7 +516,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
         durationMs: 0,
       } as any
 
-      const chatMessages = [...chatState.chat.messages, userMessage]
+      const chatMessages = [...ignoredMessages, userMessage]
       updateChatState(key, {
         ...chatState,
         chat: { ...chatState.chat, messages: chatMessages },
@@ -649,7 +670,8 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
   )
 
   const getSettings = useCallback(
-    (context: ChatContext): ChatSettings | undefined => extractSettingsForContext(allChatSettings, context),
+    (context: ChatContext): ChatSettings | undefined =>
+      extractSettingsForContext(allChatSettings, context),
     [allChatSettings],
   )
 

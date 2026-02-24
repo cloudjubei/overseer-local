@@ -71,6 +71,8 @@ function StatusIcon({ resultType }: { resultType?: ToolResultType }) {
       return <IconError className={`${size} text-red-500`} />
     case 'aborted':
       return <IconStop className={`${size} text-orange-500`} />
+    case 'ignored':
+      return <IconNotAllowed className={`${size} text-neutral-500`} />
     case 'not_allowed':
       return <IconNotAllowed className={`${size} text-neutral-500`} />
     case 'require_confirmation':
@@ -99,6 +101,7 @@ function StatusPill({ resultType }: { resultType?: ToolResultType }) {
     case 'aborted':
       colors = 'bg-orange-500/20 text-orange-600 dark:text-orange-400'
       break
+    case 'ignored':
     case 'not_allowed':
       colors = 'bg-neutral-500/20 text-neutral-600 dark:text-neutral-400'
       break
@@ -115,7 +118,9 @@ function StatusPill({ resultType }: { resultType?: ToolResultType }) {
       colors = 'bg-neutral-500/20 text-neutral-600 dark:text-neutral-400'
       break
   }
-  return <div className={`${base} ${colors}`}>{resultType.replace('_', ' ')}</div>
+
+  const label = resultType === 'require_confirmation' ? 'needs confirmation' : resultType
+  return <div className={`${base} ${colors}`}>{label.replace('_', ' ')}</div>
 }
 
 function getResultString(result: any): string {

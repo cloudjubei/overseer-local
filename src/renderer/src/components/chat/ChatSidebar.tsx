@@ -5,10 +5,21 @@ import { useChats, type ChatState } from '../../contexts/ChatsContext'
 import { ChatInput, MessageList } from '.'
 import { playSendSound, tryResumeAudioContext } from '../../assets/sounds'
 import { Switch } from '../ui/Switch'
-import type { ChatContext, CompletionMessage, ChatContextArguments, CompletionSettings } from 'thefactory-tools'
+import type {
+  ChatContext,
+  CompletionMessage,
+  ChatContextArguments,
+  CompletionSettings,
+} from 'thefactory-tools'
 import ContextInfoButton from '../ui/ContextInfoButton'
 import ModelChip from '../agents/ModelChip'
-import { IconSettings, IconChevron, IconScroll, IconRefreshChat, IconStop } from '../ui/icons/Icons'
+import {
+  IconSettings,
+  IconChevron,
+  IconScroll,
+  IconRefreshChat,
+  IconStop,
+} from '../ui/icons/Icons'
 import { useProjectContext } from '../../contexts/ProjectContext'
 import { useStories } from '../../contexts/StoriesContext'
 import { useAgents } from '../../contexts/AgentsContext'
@@ -28,7 +39,12 @@ export type ChatSidebarProps = {
   showLeftBorder?: boolean
 }
 
-type ToolToggle = { name: string; description: string; available: boolean; autoCall: boolean }
+type ToolToggle = {
+  name: string
+  description: string
+  available: boolean
+  autoCall: boolean
+}
 
 type SelectionPatch = { selectionStart?: number; selectionEnd?: number }
 
@@ -78,15 +94,15 @@ export default function ChatSidebar({
   const currentSettings = useMemo(() => getSettings(context), [getSettings, context])
 
   const chatKey = useMemo(() => getChatContextPath(context), [context])
-  const draft = useMemo(() => getDraft(chatKey), [getDraft, chatKey])
 
   const prevChatKeyRef = useRef<string | undefined>(undefined)
   const isDirtyRef = useRef(false)
-  const [localText, setLocalText] = useState<string>(draft.text)
-  const [localAttachments, setLocalAttachments] = useState<string[]>(draft.attachments)
 
-  const localSelectionStartRef = useRef<number | undefined>(draft.selectionStart)
-  const localSelectionEndRef = useRef<number | undefined>(draft.selectionEnd)
+  const [localText, setLocalText] = useState<string>(() => getDraft(chatKey).text)
+  const [localAttachments, setLocalAttachments] = useState<string[]>(() => getDraft(chatKey).attachments)
+
+  const localSelectionStartRef = useRef<number | undefined>(undefined)
+  const localSelectionEndRef = useRef<number | undefined>(undefined)
 
   const draftPersistTimerRef = useRef<number | null>(null)
   const selectionPersistTimerRef = useRef<number | null>(null)
@@ -99,9 +115,13 @@ export default function ChatSidebar({
     setDraft(chatKey, { text: localText, attachments: localAttachments })
   }, [chatKey, setDraft, localText, localAttachments])
 
+  // Restore local draft when switching chats.
+  // getDraft is ref-based (stable identity), so we read imperatively on chatKey change only.
+  // Do not sync localText from draft.text while typing; local state is the source of truth.
   useEffect(() => {
     if (prevChatKeyRef.current === chatKey) return
     prevChatKeyRef.current = chatKey
+
     isDirtyRef.current = false
 
     if (draftPersistTimerRef.current) {
@@ -112,12 +132,13 @@ export default function ChatSidebar({
       window.clearTimeout(selectionPersistTimerRef.current)
       selectionPersistTimerRef.current = null
     }
-
-    setLocalText(draft.text)
-    setLocalAttachments(draft.attachments)
-    localSelectionStartRef.current = draft.selectionStart
-    localSelectionEndRef.current = draft.selectionEnd
-  }, [chatKey, draft.text, draft.attachments, draft.selectionStart, draft.selectionEnd])
+    // Read the draft imperatively — getDraft is ref-backed and never triggers re-renders.
+    const d = getDraft(chatKey)
+    setLocalText(d.text)
+    setLocalAttachments(d.attachments)
+    localSelectionStartRef.current = d.selectionStart
+    localSelectionEndRef.current = d.selectionEnd
+  }, [chatKey, getDraft])
 
   useEffect(() => {
     return () => {
@@ -185,7 +206,8 @@ export default function ChatSidebar({
       return (lastMsg as any)?.completedAt || (lastMsg as any)?.startedAt || undefined
     })()
     const updatedAt = chat?.chat.updatedAt
-    if (updatedAt && lastMsgIso) return updatedAt.localeCompare(lastMsgIso) >= 0 ? updatedAt : lastMsgIso
+    if (updatedAt && lastMsgIso)
+      return updatedAt.localeCompare(lastMsgIso) >= 0 ? updatedAt : lastMsgIso
     return updatedAt || lastMsgIso
   }, [chat?.chat.messages, chat?.chat.updatedAt])
 
@@ -200,7 +222,10 @@ export default function ChatSidebar({
     const key = chat?.key
     if (!key) return
     const projectId = chat.chat.context.projectId ?? activeProjectId
-    void markNotificationsByMetadata({ chatKey: key }, { category: 'chat_messages', projectId })
+    void markNotificationsByMetadata(
+      { chatKey: key },
+      { category: 'chat_messages', projectId },
+    )
   }, [chat?.key, chat?.chat?.context?.projectId, activeProjectId, markNotificationsByMetadata])
 
   const handleAtBottomChange = useCallback(
@@ -248,7 +273,14 @@ export default function ChatSidebar({
         setScrollSignal((s) => s + 1)
       }
 
-      await sendMessage(context, message, effectivePrompt, currentSettings, activeChatConfig, attachments)
+      await sendMessage(
+        context,
+        message,
+        effectivePrompt,
+        currentSettings,
+        activeChatConfig,
+        attachments,
+      )
 
       if (meta?.reason === 'user' || meta?.reason === undefined) {
         clearDraft(chatKey)
@@ -400,7 +432,13 @@ export default function ChatSidebar({
       }
     }
     void update()
-  }, [context, contextArguments, currentSettings?.systemPrompt, getSettingsPrompt, getDefaultPrompt])
+  }, [
+    context,
+    contextArguments,
+    currentSettings?.systemPrompt,
+    getSettingsPrompt,
+    getDefaultPrompt,
+  ])
 
   useEffect(() => {
     const custom = currentSettings?.systemPrompt
@@ -445,7 +483,14 @@ export default function ChatSidebar({
       if (!isChatConfigured || !activeChatConfig || !currentSettings) return
       await resumeTools(context, toolIds, effectivePrompt, currentSettings, activeChatConfig)
     },
-    [isChatConfigured, activeChatConfig, currentSettings, resumeTools, context, effectivePrompt],
+    [
+      isChatConfigured,
+      activeChatConfig,
+      currentSettings,
+      resumeTools,
+      context,
+      effectivePrompt,
+    ],
   )
 
   const suggestedActions = useMemo(() => {
@@ -498,7 +543,14 @@ export default function ChatSidebar({
   const onRetry = useMemo(() => {
     if (!(isChatConfigured && activeChatConfig && currentSettings)) return undefined
     return () => retryCompletion(context, effectivePrompt, currentSettings, activeChatConfig)
-  }, [isChatConfigured, activeChatConfig, currentSettings, retryCompletion, context, effectivePrompt])
+  }, [
+    isChatConfigured,
+    activeChatConfig,
+    currentSettings,
+    retryCompletion,
+    context,
+    effectivePrompt,
+  ])
 
   const handleInputChange = useCallback(
     (text: string) => {
@@ -595,13 +647,19 @@ export default function ChatSidebar({
               aria-label='Chat Settings'
             >
               <div className='px-3 py-2 border-b border-[var(--border-subtle)]'>
-                <div className='text-sm font-semibold text-[var(--text-primary)]'>Chat Settings</div>
-                <div className='text-xs text-[var(--text-secondary)]'>Controls for this chat</div>
+                <div className='text-sm font-semibold text-[var(--text-primary)]'>
+                  Chat Settings
+                </div>
+                <div className='text-xs text-[var(--text-secondary)]'>
+                  Controls for this chat
+                </div>
               </div>
 
               <div className='p-3 space-y-4 max-h-[70vh] overflow-auto'>
                 <div className='space-y-2'>
-                  <div className='text-xs font-medium text-[var(--text-secondary)]'>System Prompt</div>
+                  <div className='text-xs font-medium text-[var(--text-secondary)]'>
+                    System Prompt
+                  </div>
                   <textarea
                     value={draftPrompt}
                     onChange={(e) => setDraftPrompt(e.target.value)}
@@ -649,7 +707,9 @@ export default function ChatSidebar({
                         max={100}
                         step={1}
                         value={completion.maxTurns ?? 1}
-                        onChange={(e) => persistSettings({ maxTurns: Number(e.target.value) })}
+                        onChange={(e) =>
+                          persistSettings({ maxTurns: Number(e.target.value) })
+                        }
                         className='w-full'
                       />
                       <div className='flex justify-between text-[10px] text-[var(--text-tertiary)]'>
@@ -677,7 +737,11 @@ export default function ChatSidebar({
                         max={50}
                         step={1}
                         value={completion.numberMessagesToSend ?? 3}
-                        onChange={(e) => persistSettings({ numberMessagesToSend: Number(e.target.value) })}
+                        onChange={(e) =>
+                          persistSettings({
+                            numberMessagesToSend: Number(e.target.value),
+                          })
+                        }
                         className='w-full'
                       />
                       <div className='flex justify-between text-[10px] text-[var(--text-tertiary)]'>

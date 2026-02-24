@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState, useEffect } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useTypewriter } from '../../hooks/useTypewriter'
 import RichText from './RichText'
 import Markdown from './Markdown'
@@ -10,30 +10,36 @@ interface TypewriterTextProps {
 }
 
 /**
- * Debounced Markdown renderer: during rapid typing we render cheap pre-formatted
- * text and only invoke the full Markdown pipeline after content has been stable
- * for `debounceMs` milliseconds. Once typing finishes we always render full Markdown.
+ * Debounced Markdown renderer.
+ *
+ * IMPORTANT: While the typewriter effect is running, we must render Markdown using
+ * the exact same component/pipeline as the final state. The animation should only
+ * control how much text is revealed, not change how Markdown is interpreted.
+ *
+ * This component debounces updates to reduce Markdown re-parses during rapid typing,
+ * but it always renders a single `<Markdown />` tree (no 'raw tail' spans).
  */
 function DebouncedMarkdown({ text, isTyping }: { text: string; isTyping: boolean }) {
-  const DEBOUNCE_MS = 120
-  const [committedText, setCommittedText] = useState(text)
+  const DEBOUNCE_MS = 16
+  const [debouncedText, setDebouncedText] = useState(text)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
+    // If typing is finished, snap immediately to the final text.
     if (!isTyping) {
-      // Typing done — render full markdown immediately
       if (timerRef.current) {
         clearTimeout(timerRef.current)
         timerRef.current = null
       }
-      setCommittedText(text)
+      setDebouncedText(text)
       return
     }
 
-    // During typing, debounce Markdown commits
+    // During typing, debounce updates so we don't re-run the Markdown pipeline
+    // on every character.
     if (timerRef.current) clearTimeout(timerRef.current)
     timerRef.current = setTimeout(() => {
-      setCommittedText(text)
+      setDebouncedText(text)
       timerRef.current = null
     }, DEBOUNCE_MS)
 
@@ -45,24 +51,7 @@ function DebouncedMarkdown({ text, isTyping }: { text: string; isTyping: boolean
     }
   }, [text, isTyping])
 
-  // While typing, show the debounced markdown for structure + a cheap live tail
-  // for the characters that arrived after the last committed snapshot.
-  if (isTyping) {
-    // If the committed text is a prefix of current text, render committed Markdown
-    // plus a lightweight <span> for the new tail. This gives good visual fidelity
-    // without re-running the full pipeline every frame.
-    const tail = text.startsWith(committedText) ? text.slice(committedText.length) : ''
-    return (
-      <div>
-        <Markdown text={committedText} />
-        {tail ? (
-          <span className='whitespace-pre-wrap break-words'>{tail}</span>
-        ) : null}
-      </div>
-    )
-  }
-
-  return <Markdown text={committedText} />
+  return <Markdown text={isTyping ? debouncedText : text} />
 }
 
 const TypewriterText: React.FC<TypewriterTextProps> = ({ text, speed = 2, renderer = 'rich' }) => {

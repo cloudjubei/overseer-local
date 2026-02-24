@@ -234,11 +234,11 @@ export default function FileMentionsTextarea({
   }
 
   return (
-    <div className="relative" ref={containerRef}>
+    <div className='relative' ref={containerRef}>
       <div
         ref={mirrorRef}
-        aria-hidden="true"
-        className="absolute top-[-9999px] left-0 overflow-hidden whitespace-pre-wrap break-words pointer-events-none"
+        aria-hidden='true'
+        className='absolute top-[-9999px] left-0 overflow-hidden whitespace-pre-wrap break-words pointer-events-none'
       />
       <textarea
         id={id}
@@ -260,21 +260,21 @@ export default function FileMentionsTextarea({
       {isFilesOpen && filesPosition && (
         <div
           ref={filesDropdownRef}
-          className="fixed z-[var(--z-dropdown,1000)] min-w-[260px] max-h-[220px] overflow-auto rounded-md border border-[var(--border-default)] bg-[var(--surface-overlay)] shadow-[var(--shadow-3)] p-1"
+          className='fixed z-[var(--z-dropdown,1000)] min-w-[260px] max-h-[220px] overflow-auto rounded-md border border-[var(--border-default)] bg-[var(--surface-overlay)] shadow-[var(--shadow-3)] p-1'
           style={{
             left: `${(filesDropdownLeft ?? filesPosition.left)}px`,
             top: `${filesPosition.top}px`,
             transform: 'translateY(-100%)',
             maxWidth: filesDropdownMaxWidth ? `${filesDropdownMaxWidth}px` : undefined,
           }}
-          role="listbox"
-          aria-label="Files suggestions"
+          role='listbox'
+          aria-label='Files suggestions'
         >
           {fileMatches.map((path, idx) => (
             <div
               key={idx}
-              role="option"
-              className="px-3 py-2 cursor-pointer hover:bg-[color-mix(in_srgb,var(--accent-primary)_8%,transparent)] text-[var(--text-primary)] text-sm"
+              role='option'
+              className='px-3 py-2 cursor-pointer hover:bg-[color-mix(in_srgb,var(--accent-primary)_8%,transparent)] text-[var(--text-primary)] text-sm'
               onClick={() => handleFileSelect(path)}
             >
               {path}
@@ -286,21 +286,21 @@ export default function FileMentionsTextarea({
       {isRefsOpen && refsPosition && (
         <div
           ref={refsDropdownRef}
-          className="fixed z-[var(--z-dropdown,1000)] min-w-[260px] max-h-[220px] overflow-auto rounded-md border border-[var(--border-default)] bg-[var(--surface-overlay)] shadow-[var(--shadow-3)]"
+          className='fixed z-[var(--z-dropdown,1000)] min-w-[260px] max-h-[220px] overflow-auto rounded-md border border-[var(--border-default)] bg-[var(--surface-overlay)] shadow-[var(--shadow-3)]'
           style={{
             left: `${(refsDropdownLeft ?? refsPosition.left)}px`,
             top: `${refsPosition.top}px`,
             transform: 'translateY(-100%)',
             maxWidth: refsDropdownMaxWidth ? `${refsDropdownMaxWidth}px` : undefined,
           }}
-          role="listbox"
-          aria-label="References suggestions"
+          role='listbox'
+          aria-label='References suggestions'
         >
           {refMatches.map((item, idx) => (
             <div
               key={idx}
-              className="px-3 py-2 cursor-pointer hover:bg-[color-mix(in_srgb,var(--accent-primary)_8%,transparent)] text-[var(--text-primary)]"
-              role="option"
+              className='px-3 py-2 cursor-pointer hover:bg-[color-mix(in_srgb,var(--accent-primary)_8%,transparent)] text-[var(--text-primary)]'
+              role='option'
               onClick={() => handleRefSelect(item.display)}
             >
               #{item.display} - {item.title} ({item.type})

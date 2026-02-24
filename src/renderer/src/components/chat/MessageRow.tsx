@@ -162,18 +162,27 @@ function MessageRow({
     globalIndex === enhancedMessagesTotalLength - 1 &&
     globalIndex >= prevLenForUserAnimRef.current
 
-  // Compute last contiguous tail of require_confirmation tool messages.
+  // Compute last contiguous tail of tool messages that are either awaiting confirmation or in-flight.
+  // We treat this whole tail as one 'batch' for toggle-all / resume.
   const pendingTail = useMemo(() => {
     const msgs = messagesToDisplay as any[]
     let end = msgs.length - 1
     while (end >= 0 && msgs[end]?.role !== 'tool') end--
     if (end < 0) return { start: -1, end: -1, ids: [] as string[] }
+
     let start = end
-    while (start >= 0 && msgs[start]?.role === 'tool' && msgs[start]?.toolResult?.type === 'require_confirmation') {
+    while (
+      start >= 0 &&
+      msgs[start]?.role === 'tool' &&
+      (msgs[start]?.toolResult?.type === 'require_confirmation' ||
+        msgs[start]?.toolResult?.type === 'pending' ||
+        msgs[start]?.toolResult?.type === 'running')
+    ) {
       start--
     }
     start = start + 1
     if (start > end) return { start: -1, end: -1, ids: [] as string[] }
+
     const ids: string[] = []
     for (let i = start; i <= end; i++) {
       const id = String(msgs[i]?.toolCall?.toolCallId || '')
@@ -184,18 +193,27 @@ function MessageRow({
 
   const toggleableIds = pendingTail.ids
   const toggleableCount = toggleableIds.length
-  const selectedCount = selectedToolIds.filter((id) => toggleableIds.includes(id)).length
-  const allSelected = toggleableCount > 0 && toggleableIds.every((id) => selectedToolIds.includes(id))
+
+  // Only confirmation-required tools can be selected.
+  const isConfirmableToolId = useMemo(() => {
+    const set = new Set<string>()
+    for (let i = pendingTail.start; i >= 0 && i <= pendingTail.end; i++) {
+      const m = messagesToDisplay[i] as any
+      if (m?.role !== 'tool') continue
+      if (m?.toolResult?.type !== 'require_confirmation') continue
+      const id = String(m?.toolCall?.toolCallId || '')
+      if (id) set.add(id)
+    }
+    return set
+  }, [messagesToDisplay, pendingTail.start, pendingTail.end])
+
+  const selectedCount = selectedToolIds.filter((id) => isConfirmableToolId.has(id)).length
+  const allSelected = selectedCount > 0 && Array.from(isConfirmableToolId).every((id) => selectedToolIds.includes(id))
 
   // delete button logic: allow delete on last message, and on assistant preceding a tool tail
-  const isAssistantBeforeToolTail =
-    isAssistant &&
-    toggleableCount > 0 &&
-    globalIndex === pendingTail.start - 1
+  const isAssistantBeforeToolTail = isAssistant && toggleableCount > 0 && globalIndex === pendingTail.start - 1
 
-  const shouldShowDelete =
-    !!onDeleteLastMessage &&
-    (isLast || isAssistantBeforeToolTail)
+  const shouldShowDelete = !!onDeleteLastMessage && (isLast || isAssistantBeforeToolTail)
 
   const deleteTitle = isAssistantBeforeToolTail
     ? 'Delete last assistant message and tool messages'
@@ -267,10 +285,12 @@ function MessageRow({
           ) : null}
         </div>
 
+        {/* Full-width for assistant + tool; keep user width constrained */}
         <div
           className={[
-            'max-w-[85%] min-w-0',
-            isUser ? 'items-end' : isSystem ? 'w-full' : 'items-start',
+            'min-w-0',
+            isUser ? 'max-w-[85%]' : 'w-full',
+            isUser ? 'items-end' : 'items-start',
           ].join(' ')}
         >
           <div className={['flex-col', isUser ? 'items-start' : 'items-end'].join(' ')}>
@@ -301,7 +321,9 @@ function MessageRow({
             {((msg as any).content && !isTool) || (isSystem && toggleableCount > 0) ? (
               <div
                 className={[
-                  'overflow-x-auto max-w-full px-3 py-2 rounded-2xl whitespace-pre-wrap break-words shadow',
+                  // Full-width for assistant/system bubbles, keep user constrained.
+                  isUser ? 'overflow-x-auto max-w-full' : 'w-full overflow-x-auto max-w-full',
+                  'px-3 py-2 rounded-2xl whitespace-pre-wrap break-words shadow',
                   isUser
                     ? 'bg-[var(--accent-primary)] text-[var(--text-inverted)] rounded-br-md'
                     : isSystem
@@ -334,47 +356,50 @@ function MessageRow({
           {/* Tool message rendering */}
           {isTool ? (
             <div className='mt-2 w-full space-y-2'>
-              <ToolCallCard
-                toolCall={(msg as unknown as CompletionToolMessage).toolCall}
-                result={(msg as unknown as CompletionToolMessage).toolResult?.result}
-                resultType={(msg as unknown as CompletionToolMessage).toolResult?.type as ToolResultType}
-                durationMs={(msg as unknown as CompletionToolMessage).toolResult?.durationMs}
-                previewResult={
-                  toolPreviewById[
-                    String((msg as unknown as CompletionToolMessage).toolCall?.toolCallId || '')
-                  ]
-                }
-                selectable={
-                  isLast &&
-                  (msg as any).toolResult?.type === 'require_confirmation' &&
-                  toggleableIds.includes(String((msg as any).toolCall?.toolCallId || ''))
-                }
-                selected={selectedToolIds.includes(String((msg as any).toolCall?.toolCallId || ''))}
-                onToggleSelect={() => {
-                  const id = String((msg as any).toolCall?.toolCallId || '')
-                  if (!id) return
-                  setSelectedToolIds((prev) =>
-                    prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
-                  )
-                }}
-                disabled={!(isLast && (msg as any).toolResult?.type === 'require_confirmation')}
-              />
+              {(() => {
+                const tm = msg as unknown as CompletionToolMessage
+                const toolCallId = String(tm.toolCall?.toolCallId || '')
+                const type = tm.toolResult?.type as ToolResultType | undefined
+                const selectable = type === 'require_confirmation' && isConfirmableToolId.has(toolCallId)
+
+                return (
+                  <ToolCallCard
+                    toolCall={tm.toolCall}
+                    result={tm.toolResult?.result}
+                    resultType={type}
+                    durationMs={tm.toolResult?.durationMs}
+                    previewResult={toolPreviewById[toolCallId]}
+                    selectable={selectable}
+                    selected={selectedToolIds.includes(toolCallId)}
+                    onToggleSelect={() => {
+                      if (!toolCallId) return
+                      setSelectedToolIds((prev) =>
+                        prev.includes(toolCallId)
+                          ? prev.filter((x) => x !== toolCallId)
+                          : [...prev, toolCallId],
+                      )
+                    }}
+                    disabled={!selectable}
+                  />
+                )
+              })()}
 
               {/* Resume controls shown at the end of the pending batch */}
               {toggleableCount > 0 && isLast ? (
                 <div className='pt-1 flex items-center justify-between'>
-                  {toggleableCount > 1 ? (
+                  {isConfirmableToolId.size > 1 ? (
                     <div className='flex items-center gap-2 text:[12px] text-[var(--text-secondary)]'>
                       <span>Toggle all</span>
                       <Switch
                         checked={allSelected}
                         onCheckedChange={(checked) => {
                           setSelectedToolIds((prev) => {
+                            const confirmable = Array.from(isConfirmableToolId)
                             if (checked) {
-                              const set = new Set([...prev, ...toggleableIds])
+                              const set = new Set([...prev, ...confirmable])
                               return Array.from(set)
                             }
-                            return prev.filter((id) => !toggleableIds.includes(id))
+                            return prev.filter((id) => !confirmable.includes(id))
                           })
                         }}
                       />
@@ -393,11 +418,11 @@ function MessageRow({
                     disabled={selectedCount === 0 || !onResumeTools}
                     onClick={() => {
                       if (!onResumeTools) return
-                      const validSelected = selectedToolIds.filter((id) => toggleableIds.includes(id))
+                      const validSelected = selectedToolIds.filter((id) => isConfirmableToolId.has(id))
                       onResumeTools(validSelected)
                     }}
                   >
-                    {`Resume ${selectedCount}/${toggleableCount} Tools`}
+                    {`Resume ${selectedCount}/${isConfirmableToolId.size} Tools`}
                   </button>
                 </div>
               ) : null}
@@ -406,9 +431,7 @@ function MessageRow({
 
           {/* Attachments */}
           {(msg as any).role === 'user' && (msg as any).files && (msg as any).files.length > 0 ? (
-            <div
-              className={['mt-1 flex flex-wrap gap-1', isUser ? 'justify-end' : 'justify-start'].join(' ')}
-            >
+            <div className={['mt-1 flex flex-wrap gap-1', isUser ? 'justify-end' : 'justify-start'].join(' ')}>
               {(msg as any).files.map((path: string, i: number) => {
                 const meta = filesByPath[path]
                 const name = meta?.name || path.split('/').pop() || path

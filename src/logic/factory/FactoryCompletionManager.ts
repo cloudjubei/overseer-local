@@ -478,7 +478,7 @@ export default class FactoryCompletionManager extends BaseManager {
     delete this.abortControllers[path]
   }
   private isResumableToolResultType(t: ToolResultType): boolean {
-    return t === 'require_confirmation' || t === 'pending' || t === 'running'
+    return t === 'require_confirmation' || t === 'pending' || t === 'running' || t === 'ignored'
   }
 
   private toolInitialResultType(settings: CompletionSettings, toolName: string): ToolResultType {
