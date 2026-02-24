@@ -26,6 +26,7 @@ export type ToolCallCardProps = {
   onToggleSelect?: () => void
   disabled?: boolean
 }
+
 function Collapsible({
   title,
   children,
@@ -52,7 +53,7 @@ function Collapsible({
         }}
       >
         <span className="text-xs font-medium truncate pr-2">{title}</span>
-        <span className="text-xs text-[var(--text-secondary)]">{open ? '\u2212' : '+'}</span>
+        <span className="text-xs text-[var(--text-secondary)]">{open ? '−' : '+'}</span>
       </button>
       {open ? (
         <div className={`${innerClassName ?? ''} border-t border-[var(--border-subtle)]`}>
@@ -74,6 +75,10 @@ function StatusIcon({ resultType }: { resultType?: ToolResultType }) {
       return <IconNotAllowed className={`${size} text-neutral-500`} />
     case 'require_confirmation':
       return <IconHourglass className={`${size} text-teal-500`} />
+    case 'pending':
+      return <IconHourglass className={`${size} text-neutral-500`} />
+    case 'running':
+      return <IconHourglass className={`${size} text-blue-500`} />
     default:
       return <IconCheckmarkCircle className={`${size} text-green-500`} />
   }
@@ -99,6 +104,12 @@ function StatusPill({ resultType }: { resultType?: ToolResultType }) {
       break
     case 'require_confirmation':
       colors = 'bg-neutral-500/20 text-teal-600 dark:text-teal-400'
+      break
+    case 'pending':
+      colors = 'bg-neutral-500/20 text-neutral-600 dark:text-neutral-400'
+      break
+    case 'running':
+      colors = 'bg-blue-500/20 text-blue-600 dark:text-blue-400'
       break
     default:
       colors = 'bg-neutral-500/20 text-neutral-600 dark:text-neutral-400'
@@ -138,16 +149,6 @@ function getErrorString(result: any): string | undefined {
   }
 }
 
-function debugValuePreview(v: any): any {
-  if (v == null) return v
-  if (typeof v === 'string') return v.length > 400 ? `${v.slice(0, 400)}…(len=${v.length})` : v
-  if (typeof v === 'object') {
-    const keys = Object.keys(v)
-    return { __type: 'object', keys: keys.slice(0, 20), hasMoreKeys: keys.length > 20 }
-  }
-  return v
-}
-
 function ToolCallCardInner({
   toolCall,
   result,
@@ -156,6 +157,7 @@ function ToolCallCardInner({
   durationMs,
   selectable,
   selected,
+  disabled,
   onToggleSelect,
 }: ToolCallCardProps) {
   const [isCallExpanded, setIsCallExpanded] = useState(false)
@@ -182,10 +184,10 @@ function ToolCallCardInner({
   const content = (
     <>
       <div className="flex items-center justify-between px-3 pt-2">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 min-w-0">
           <StatusIcon resultType={resultType} />
-          <span className="font-semibold">{toolCall.name}</span>
-          {(durationMs ?? 0) > 0 && <span className="font-light text-xs ">{durationMs}ms</span>}
+          <span className="font-semibold truncate">{toolCall.name}</span>
+          {(durationMs ?? 0) > 0 && <span className="font-light text-xs">{durationMs}ms</span>}
         </div>
         <div className="flex items-center gap-2">
           {/* Mobile hint icon */}
@@ -216,25 +218,37 @@ function ToolCallCardInner({
           ) : null}
         </div>
       </div>
+
       <div className="flex items-center justify-between px-3 py-2">
-        <StatusPill resultType={resultType} />
+        <div className="flex items-center gap-2">
+          <StatusPill resultType={resultType} />
+          {resultType === 'pending' ? (
+            <span className="text-[11px] text-[var(--text-secondary)]">Queued for auto-run</span>
+          ) : null}
+        </div>
+
         {selectable && onToggleSelect && (
           <span onClick={(e) => e.stopPropagation()}>
-            <Switch checked={selected == true} onCheckedChange={onToggleSelect} label="" />
+            <Switch
+              checked={selected == true}
+              onCheckedChange={onToggleSelect}
+              label=""
+              disabled={disabled}
+            />
           </span>
         )}
       </div>
+
       {isCallExpanded && hasArgs && (
         <div className="px-3 pb-2">
           <Code language="json" code={JSON.stringify(toolCall.arguments ?? {}, null, 2)} />
-          {/* <JsonView value={result} /> */}
         </div>
-      )}{' '}
+      )}
+
       {resultString && (
         <Collapsible title={<span>View result</span>}>
           <div className="p-2 max-h-72 overflow-auto bg-[var(--surface-raised)] border-t border-[var(--border-subtle)]">
             <Code language="json" code={resultString} />
-            {/* <JsonView value={result} /> */}
           </div>
         </Collapsible>
       )}

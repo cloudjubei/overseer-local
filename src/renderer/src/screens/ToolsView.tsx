@@ -332,7 +332,6 @@ const ToolsScreen: React.FC = () => {
               <div className="mt-4 flex-grow flex flex-col">
                 <h3 className="text-lg font-semibold">Result</h3>
                 <div className="bg-gray-900 p-4 rounded-lg mt-2 flex-grow overflow-y-auto">
-                  {isExecuting && <p>Running...</p>}
                   {executionError && (
                     <pre className="text-red-500 whitespace-pre-wrap">{executionError}</pre>
                   )}

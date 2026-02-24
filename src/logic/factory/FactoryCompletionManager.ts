@@ -14,6 +14,7 @@ import type {
   LLMConfig,
   ToolCall,
   ToolCallWithResult,
+  ToolResultType,
 } from 'thefactory-tools'
 import BaseManager from '../BaseManager'
 import FactoryToolsManager from './FactoryToolsManager'
@@ -132,8 +133,6 @@ export default class FactoryCompletionManager extends BaseManager {
     settings: CompletionSettings,
     config: LLMConfig,
   ): Promise<CompletionResponseTurns> {
-    const now = new Date().toISOString()
-
     const chat = await this.chatsManager.addChatMessages(chatContext, [completionMessage])
     if (!chat) throw new Error('CHAT NOT FOUND')
 
@@ -177,52 +176,86 @@ export default class FactoryCompletionManager extends BaseManager {
     settings: CompletionSettings,
     config: LLMConfig,
   ): Promise<CompletionResponseTurns> {
-    const chat = await this.chatsManager.getChat(chatContext)
+    let chat = await this.chatsManager.getChat(chatContext)
     if (!chat) throw new Error('CHAT NOT FOUND')
+
     const msgs = chat.messages || []
     if (msgs.length < 1) throw new Error("CHAT DOESN'T HAVE MESSAGES")
 
+    // Resume any tail tool messages that are not finished yet.
     let end = msgs.length - 1
     while (end >= 0 && msgs[end]?.role !== 'tool') end--
     if (end < 0) throw new Error("CHAT DOESN'T HAVE TOOL MESSAGES")
 
     let start = end
-    while (
-      start >= 0 &&
-      msgs[start]?.role === 'tool' &&
-      (msgs[start] as any).toolResult?.type === 'require_confirmation'
-    ) {
-      start--
+    while (start >= 0 && msgs[start]?.role === 'tool') {
+      const tm = msgs[start] as CompletionToolMessage
+      if (this.isResumableToolResultType(tm.toolResult.type)) {
+        start--
+        continue
+      }
+      break
     }
     start = start + 1
-    if (start > end) throw new Error("CHAT DOESN'T HAVE A TOOL REQUIRING CONFIRMATION")
+    if (start > end) throw new Error("CHAT DOESN'T HAVE RESUMABLE TOOL MESSAGES")
 
-    const pending = msgs.slice(start, end + 1) as CompletionToolMessage[]
+    const tailToolMessages = msgs.slice(start, end + 1) as CompletionToolMessage[]
     const granted = new Set<string>((toolsGranted || []).map(String))
 
+    const markToolMessageRunning = async (toolCallId: string) => {
+      const updatedMessages = [...(chat.messages || [])]
+      const idx = updatedMessages.findIndex(
+        (m) => m.role === 'tool' && (m as CompletionToolMessage).toolCall.toolCallId === toolCallId,
+      )
+      if (idx < 0) return
+
+      const nowIso = new Date().toISOString()
+      const existing = updatedMessages[idx] as CompletionToolMessage
+      updatedMessages[idx] = {
+        ...existing,
+        toolResult: { ...existing.toolResult, type: 'running', durationMs: 0 },
+        startedAt: existing.startedAt || nowIso,
+        completedAt: nowIso,
+        durationMs: 0,
+      }
+
+      const newChat = await this.chatsManager.saveChat({ ...chat, messages: updatedMessages })
+      chat = newChat
+    }
+
     const callTool = async (toolCall: ToolCall): Promise<any> => {
+      if (toolCall.toolCallId) await markToolMessageRunning(toolCall.toolCallId)
+
       const updatedArgs = { ...(toolCall.arguments || {}) }
-      if (chatContext.storyId && !('storyId' in updatedArgs))
+      if (chatContext.storyId && !('storyId' in updatedArgs)) {
         updatedArgs.storyId = chatContext.storyId
-      if (chatContext.featureId && !('featureId' in updatedArgs))
+      }
+      if (chatContext.featureId && !('featureId' in updatedArgs)) {
         updatedArgs.featureId = chatContext.featureId
+      }
       return await this.factoryToolsManager.executeTool(projectId, toolCall.name, updatedArgs)
     }
 
     const updatedMessages = [...msgs]
 
-    for (let i = 0; i < pending.length; i++) {
-      const tm = pending[i]
+    for (let i = 0; i < tailToolMessages.length; i++) {
+      const tm = tailToolMessages[i]
       const toolCallId = tm.toolCall.toolCallId
+      const toolName = tm.toolCall.name
 
-      if (!toolCallId || !granted.has(toolCallId)) {
+      const requiresConfirmation = !settings.autoCallTools.includes(toolName)
+      const isGranted = granted.has(toolCallId)
+
+      if (requiresConfirmation && !isGranted) {
+        // Still waiting on user confirmation.
         updatedMessages[start + i] = {
           ...tm,
-          toolResult: { ...tm.toolResult, type: 'aborted', durationMs: 0 },
+          toolResult: { ...tm.toolResult, type: 'require_confirmation', durationMs: 0 },
         }
         continue
       }
 
+      // If it's auto-call OR confirmed, execute.
       const toolStartedAt = Date.now()
       try {
         const res = await callTool(tm.toolCall)
@@ -280,12 +313,36 @@ export default class FactoryCompletionManager extends BaseManager {
       abortSignal,
     }
 
+    const markToolMessageRunning = async (toolCallId: string) => {
+      const newMessages = [...(currentChat.messages || [])]
+      const idx = newMessages.findIndex(
+        (m) => m.role === 'tool' && (m as CompletionToolMessage).toolCall.toolCallId === toolCallId,
+      )
+      if (idx < 0) return
+
+      const nowIso = new Date().toISOString()
+      const existing = newMessages[idx] as CompletionToolMessage
+      newMessages[idx] = {
+        ...existing,
+        toolResult: { ...existing.toolResult, type: 'running', durationMs: 0 },
+        startedAt: existing.startedAt || nowIso,
+        completedAt: nowIso,
+        durationMs: 0,
+      }
+
+      currentChat = await this.chatsManager.saveChat({ ...currentChat, messages: newMessages })
+    }
+
     const callTool = async (toolCall: ToolCall): Promise<any> => {
+      if (toolCall.toolCallId) await markToolMessageRunning(toolCall.toolCallId)
+
       const updatedArgs = { ...(toolCall.arguments || {}) }
-      if (chatContext.storyId && !('storyId' in updatedArgs))
+      if (chatContext.storyId && !('storyId' in updatedArgs)) {
         updatedArgs.storyId = chatContext.storyId
-      if (chatContext.featureId && !('featureId' in updatedArgs))
+      }
+      if (chatContext.featureId && !('featureId' in updatedArgs)) {
         updatedArgs.featureId = chatContext.featureId
+      }
       return await this.factoryToolsManager.executeTool(projectId, toolCall.name, updatedArgs)
     }
 
@@ -296,15 +353,9 @@ export default class FactoryCompletionManager extends BaseManager {
       response: CompletionResponse,
       agentResponse?: AgentResponse,
     ): Promise<void> => {
-      // console.log('responseReceivedCallback response: ', response)
-      // console.log('responseReceivedCallback agentResponse: ', agentResponse)
       const assistant = response.assistantMessage
-      const messages: CompletionMessage[] = [assistant]
-      // {
-      //   ...assistant,
-      //   suggestedActions: assistant.suggestedActions ?? agentResponse?.suggestedActions,
-      // },
-      // ]
+      const newMessages: CompletionMessage[] = [assistant]
+
       const now = new Date().toISOString()
       for (const t of response.toolCalls) {
         const toolMessage: CompletionToolMessage = {
@@ -317,18 +368,19 @@ export default class FactoryCompletionManager extends BaseManager {
           },
           toolResult: {
             result: undefined,
-            type: 'require_confirmation',
+            type: this.toolInitialResultType(settings, t.name),
             durationMs: 0,
           },
           startedAt: now,
           completedAt: now,
           durationMs: 0,
         }
-        messages.push(toolMessage)
+        newMessages.push(toolMessage)
       }
-      const newChat = await this.chatsManager.addChatMessages(chatContext, messages)
-      if (newChat) {
-        currentChat = newChat
+
+      const chatAfterAppend = await this.chatsManager.addChatMessages(chatContext, newMessages)
+      if (chatAfterAppend) {
+        currentChat = chatAfterAppend
       }
     }
 
@@ -340,11 +392,21 @@ export default class FactoryCompletionManager extends BaseManager {
           (m as CompletionToolMessage).toolCall.toolCallId === toolResult.toolCallId,
       ) as CompletionToolMessage | undefined
       if (m) {
+        const nowIso = new Date().toISOString()
         m.toolResult = {
           result: toolResult.result,
           type: toolResult.type,
           durationMs: toolResult.durationMs,
         }
+
+        if (toolResult.result !== undefined) {
+          m.content =
+            typeof toolResult.result === 'string'
+              ? toolResult.result
+              : JSON.stringify(toolResult.result)
+        }
+        m.completedAt = nowIso
+        m.durationMs = toolResult.durationMs
       }
       currentChat = await this.chatsManager.saveChat({ ...currentChat, messages: newMessages })
     }
@@ -414,5 +476,12 @@ export default class FactoryCompletionManager extends BaseManager {
   private cleanupAbort(chatContext: ChatContext) {
     const path = getChatContextPath(chatContext)
     delete this.abortControllers[path]
+  }
+  private isResumableToolResultType(t: ToolResultType): boolean {
+    return t === 'require_confirmation' || t === 'pending' || t === 'running'
+  }
+
+  private toolInitialResultType(settings: CompletionSettings, toolName: string): ToolResultType {
+    return settings.autoCallTools.includes(toolName) ? 'pending' : 'require_confirmation'
   }
 }
