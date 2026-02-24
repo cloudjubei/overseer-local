@@ -82,6 +82,9 @@ export default function ChatInput({
   // --- Autosize ---
   const autosizeRafRef = useRef<number | null>(null)
   const autosizeRetryTimerRef = useRef<number | null>(null)
+  const autosizeFallbackTimerRef = useRef<number | null>(null)
+  const autosizeRequestTokenRef = useRef<number>(0)
+  const lastTextareaElRef = useRef<HTMLTextAreaElement | null>(null)
 
   const autoSizeTextareaNow = useCallback(() => {
     const el = textareaRef.current
@@ -96,11 +99,34 @@ export default function ChatInput({
   }, [])
 
   const requestAutosize = useCallback(() => {
-    if (autosizeRafRef.current) return
-    autosizeRafRef.current = requestAnimationFrame(() => {
-      autosizeRafRef.current = null
+    autosizeRequestTokenRef.current += 1
+    const token = autosizeRequestTokenRef.current
+
+    // Detect ref swaps (can happen if component remounts or DOM node is replaced)
+    if (textareaRef.current !== lastTextareaElRef.current) {
+      lastTextareaElRef.current = textareaRef.current
+    }
+
+    // Cancel any previous fallback timers
+    if (autosizeFallbackTimerRef.current) {
+      window.clearTimeout(autosizeFallbackTimerRef.current)
+      autosizeFallbackTimerRef.current = null
+    }
+
+    // Schedule rAF autosize (preferred)
+    if (!autosizeRafRef.current) {
+      autosizeRafRef.current = requestAnimationFrame(() => {
+        autosizeRafRef.current = null
+        autoSizeTextareaNow()
+      })
+    }
+
+    // Fallback: if rAF is delayed/throttled, run autosize on the next macrotask.
+    // This helps when the app is busy or the window/tab throttles rAF.
+    autosizeFallbackTimerRef.current = window.setTimeout(() => {
+      autosizeFallbackTimerRef.current = null
       autoSizeTextareaNow()
-    })
+    }, 0)
   }, [autoSizeTextareaNow])
 
   // Autosize on value changes (layout effect ensures DOM has committed the new value)
@@ -275,6 +301,7 @@ export default function ChatInput({
     return () => {
       if (autosizeRafRef.current) cancelAnimationFrame(autosizeRafRef.current)
       if (autosizeRetryTimerRef.current) window.clearTimeout(autosizeRetryTimerRef.current)
+      if (autosizeFallbackTimerRef.current) window.clearTimeout(autosizeFallbackTimerRef.current)
     }
   }, [])
 
@@ -363,31 +390,28 @@ export default function ChatInput({
   const rightHints = useMemo(() => [`${modifierSymbol} + Enter to send`], [modifierSymbol])
 
   const showSuggestedActions =
-    !isThinking &&
-    isConfigured &&
-    Array.isArray(suggestedActions) &&
-    suggestedActions.length > 0
+    !isThinking && isConfigured && Array.isArray(suggestedActions) && suggestedActions.length > 0
 
   const renderHintsGrid = () => {
     return (
-      <div className='grid grid-cols-2 grid-rows-2 gap-x-4 text-[12px] text-[var(--text-muted)]'>
+      <div className="grid grid-cols-2 grid-rows-2 gap-x-4 text-[12px] text-[var(--text-muted)]">
         {leftHints.length <= 1 ? (
-          <div className='col-start-1 row-span-2 self-center truncate'>{leftHints[0]}</div>
+          <div className="col-start-1 row-span-2 self-center truncate">{leftHints[0]}</div>
         ) : (
           <>
-            <div className='col-start-1 row-start-1 truncate'>{leftHints[0]}</div>
-            <div className='col-start-1 row-start-2 truncate'>{leftHints[1]}</div>
+            <div className="col-start-1 row-start-1 truncate">{leftHints[0]}</div>
+            <div className="col-start-1 row-start-2 truncate">{leftHints[1]}</div>
           </>
         )}
 
         {rightHints.length <= 1 ? (
-          <div className='col-start-2 row-span-2 self-center text-right truncate'>
+          <div className="col-start-2 row-span-2 self-center text-right truncate">
             {rightHints[0]}
           </div>
         ) : (
           <>
-            <div className='col-start-2 row-start-1 text-right truncate'>{rightHints[0]}</div>
-            <div className='col-start-2 row-start-2 text-right truncate'>{rightHints[1]}</div>
+            <div className="col-start-2 row-start-1 text-right truncate">{rightHints[0]}</div>
+            <div className="col-start-2 row-start-2 text-right truncate">{rightHints[1]}</div>
           </>
         )}
       </div>
@@ -397,19 +421,19 @@ export default function ChatInput({
   return (
     <div
       ref={chatInputRef}
-      className='flex-shrink-0 border-t border-[var(--border-subtle)] bg-[var(--surface-raised)]'
+      className="flex-shrink-0 border-t border-[var(--border-subtle)] bg-[var(--surface-raised)]"
     >
       {/* Suggested actions chips */}
       {showSuggestedActions && (
         <div
-          className='flex gap-2 px-3 py-2 overflow-x-auto border-b border-[var(--border-subtle)]'
-          role='group'
-          aria-label='Suggested replies'
+          className="flex gap-2 px-3 py-2 overflow-x-auto border-b border-[var(--border-subtle)]"
+          role="group"
+          aria-label="Suggested replies"
         >
           {suggestedActions!.map((action, idx) => (
             <button
               key={idx}
-              type='button'
+              type="button"
               onClick={() => handleSuggestedAction(action)}
               className={[
                 'flex-shrink-0 px-3 py-1.5 rounded-full text-[13px] leading-tight',
@@ -428,9 +452,9 @@ export default function ChatInput({
         </div>
       )}
 
-      <div className='p-2'>
-        <div className='relative'>
-          <div className='flex gap-2'>
+      <div className="p-2">
+        <div className="relative">
+          <div className="flex gap-2">
             {/* Main input box */}
             <div
               className={[
@@ -439,7 +463,7 @@ export default function ChatInput({
                 flashBlocked ? 'border-red-500 ring-2 ring-red-500/60' : '',
               ].join(' ')}
             >
-              <div className='relative p-1'>
+              <div className="relative p-1">
                 <FileMentionsTextarea
                   value={safeValue}
                   disableAutocomplete={false}
@@ -450,9 +474,9 @@ export default function ChatInput({
                   placeholder={placeholderText}
                   rows={1}
                   disabled={false}
-                  className='w-full resize-none bg-transparent px-2 py-1 outline-none text-[var(--text-primary)]'
+                  className="w-full resize-none bg-transparent px-2 py-1 outline-none text-[var(--text-primary)]"
                   style={{ ...maxHeightStyle, overflowY: 'auto' }}
-                  ariaLabel='Message input'
+                  ariaLabel="Message input"
                   inputRef={textareaRef}
                   onKeyDown={(e) => {
                     handleTextareaKeyDown(e)
@@ -463,15 +487,17 @@ export default function ChatInput({
               </div>
 
               {/* Attachments and bottom info area (hints) */}
-              <div className='px-2 py-1.5 border-t border-[var(--border-subtle)]'>
+              <div className="px-2 py-1.5 border-t border-[var(--border-subtle)]">
                 <AttachmentList
                   attachments={safeAttachments}
-                  onRemove={(path) => onChangeAttachments((safeAttachments || []).filter((p) => p !== path))}
+                  onRemove={(path) =>
+                    onChangeAttachments((safeAttachments || []).filter((p) => p !== path))
+                  }
                   disabled={false}
                 />
 
                 <div
-                  className='overflow-hidden transition-all duration-200 ease-out'
+                  className="overflow-hidden transition-all duration-200 ease-out"
                   style={{
                     maxHeight: 80,
                     opacity: 1,
@@ -484,22 +510,22 @@ export default function ChatInput({
             </div>
 
             {/* Right-side vertical controls anchored top/middle/bottom */}
-            <div className='relative w-10'>
+            <div className="relative w-10">
               {/* Attach (top) */}
-              <div className='absolute top-0 left-0 right-0 flex items-start justify-center'>
+              <div className="absolute top-0 left-0 right-0 flex items-start justify-center">
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className='btn-icon'
-                  aria-label='Attach Files'
-                  title='Attach Files'
-                  type='button'
+                  className="btn-icon"
+                  aria-label="Attach Files"
+                  title="Attach Files"
+                  type="button"
                   disabled={false}
                 >
-                  <IconAttach className='w-5 h-5' />
+                  <IconAttach className="w-5 h-5" />
                 </button>
                 <input
-                  type='file'
-                  accept='.md,.txt,.json,.js,.jsx,.ts,.tsx,.css,.scss,.less,.html,.htm,.xml,.yml,.yaml,.csv,.log,.sh,.bash,.zsh,.bat,.ps1,.py,.rb,.java,.kt,.go,.rs,.c,.h,.cpp,.hpp,.m,.swift,.ini,.conf,.env'
+                  type="file"
+                  accept=".md,.txt,.json,.js,.jsx,.ts,.tsx,.css,.scss,.less,.html,.htm,.xml,.yml,.yaml,.csv,.log,.sh,.bash,.zsh,.bat,.ps1,.py,.rb,.java,.kt,.go,.rs,.c,.h,.cpp,.hpp,.m,.swift,.ini,.conf,.env"
                   ref={fileInputRef}
                   style={{ display: 'none' }}
                   onChange={handleFileUpload}
@@ -507,55 +533,59 @@ export default function ChatInput({
               </div>
 
               {/* Middle: Send or Stop */}
-              <div className='absolute left-0 right-0 top-1/2 -translate-y-1/2 flex items-center justify-center'>
+              <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 flex items-center justify-center">
                 {!isThinking ? (
                   <button
                     onClick={handleSend}
-                    className='btn-icon'
+                    className="btn-icon"
                     disabled={!canSend}
-                    aria-label='Send message'
-                    title='Send'
+                    aria-label="Send message"
+                    title="Send"
                   >
-                    <IconSend className='w-5 h-5' />
+                    <IconSend className="w-5 h-5" />
                   </button>
                 ) : (
                   <button
                     onClick={() => {
-                      const should = window.confirm('Stop the assistant? This will cancel the current response.')
+                      const should = window.confirm(
+                        'Stop the assistant? This will cancel the current response.',
+                      )
                       if (!should) return
                       onAbort()
                     }}
-                    className='relative btn-icon'
-                    aria-label='Stop response'
-                    title='Stop'
+                    className="relative btn-icon"
+                    aria-label="Stop response"
+                    title="Stop"
                   >
                     <span
-                      className='absolute inset-0 m-auto block w-7 h-7 rounded-full border-2 border-[var(--text-muted)] border-t-transparent animate-spin'
+                      className="absolute inset-0 m-auto block w-7 h-7 rounded-full border-2 border-[var(--text-muted)] border-t-transparent animate-spin"
                       aria-hidden
                     />
-                    <span className='relative z-10 block w-3.5 h-3.5 bg-[var(--text-primary)] rounded-[2px]' />
+                    <span className="relative z-10 block w-3.5 h-3.5 bg-[var(--text-primary)] rounded-[2px]" />
                   </button>
                 )}
               </div>
 
               {/* Info (bottom) */}
-              <div className='absolute bottom-0 left-0 right-0 flex items-end justify-center'>
+              <div className="absolute bottom-0 left-0 right-0 flex items-end justify-center">
                 <Tooltip
                   content={
-                    <div className='p-2'>
-                      <div className='font-medium mb-1 text-[var(--text-secondary)]'>Shortcuts & helpers</div>
-                      <ul className='list-disc pl-5 space-y-1 text-sm'>
+                    <div className="p-2">
+                      <div className="font-medium mb-1 text-[var(--text-secondary)]">
+                        Shortcuts & helpers
+                      </div>
+                      <ul className="list-disc pl-5 space-y-1 text-sm">
                         <li>Use @ for file references</li>
                         <li>Use # for stories & features</li>
                         <li>{modifierSymbol} + Enter to send</li>
                       </ul>
                     </div>
                   }
-                  placement='top'
+                  placement="top"
                 >
                   <button
-                    id='chat-input-info-btn'
-                    type='button'
+                    id="chat-input-info-btn"
+                    type="button"
                     className={[
                       'inline-flex items-center justify-center w-6 h-6 rounded-full',
                       'border border-pink-500 text-pink-600 bg-transparent',
@@ -564,7 +594,7 @@ export default function ChatInput({
                       'no-drag',
                     ].join(' ')}
                   >
-                    <span className='text-[11px] font-semibold'>i</span>
+                    <span className="text-[11px] font-semibold">i</span>
                   </button>
                 </Tooltip>
               </div>

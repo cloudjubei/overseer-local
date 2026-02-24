@@ -83,6 +83,7 @@ export default function ChatSidebar({
 
   // --- Local input state ---
   const prevChatKeyRef = useRef<string | undefined>(undefined)
+  const isDirtyRef = useRef(false)
   const [localText, setLocalText] = useState<string>(draft.text)
   const [localAttachments, setLocalAttachments] = useState<string[]>(draft.attachments)
 
@@ -104,10 +105,11 @@ export default function ChatSidebar({
   // When switching chats, reset local state from stored draft.
   useEffect(() => {
     // Only reset local UI when the chat context actually changes.
-    // Incoming messages can cause the Chats provider to update and change function identities
-    // (e.g. getDraft), which would otherwise risk clobbering in-progress typing.
     if (prevChatKeyRef.current === chatKey) return
     prevChatKeyRef.current = chatKey
+
+    // New chat context: treat local input as pristine until the user edits.
+    isDirtyRef.current = false
 
     if (draftPersistTimerRef.current) {
       window.clearTimeout(draftPersistTimerRef.current)
@@ -122,19 +124,10 @@ export default function ChatSidebar({
     setLocalAttachments(draft.attachments)
     localSelectionStartRef.current = draft.selectionStart
     localSelectionEndRef.current = draft.selectionEnd
-  }, [
-    chatKey,
-    draft.text,
-    draft.attachments,
-    draft.selectionStart,
-    draft.selectionEnd,
-  ])
+  }, [chatKey, draft.text, draft.attachments, draft.selectionStart, draft.selectionEnd])
 
-  // If an external actor changes the stored draft for the current chatKey, sync it.
-  // Keep this conservative to avoid fighting the user's typing.
-  useEffect(() => {
-    setLocalAttachments(draft.attachments)
-  }, [draft.attachments])
+  // NOTE: We intentionally do NOT sync local state from `draft` on provider updates for the same chatKey.
+  // The local input is the source-of-truth while the user is typing; background chat updates must not clobber it.
 
   useEffect(() => {
     return () => {
@@ -286,6 +279,7 @@ export default function ChatSidebar({
         setLocalAttachments([])
         localSelectionStartRef.current = undefined
         localSelectionEndRef.current = undefined
+        isDirtyRef.current = false
       }
     },
     [
@@ -534,6 +528,7 @@ export default function ChatSidebar({
 
   const handleInputChange = useCallback(
     (text: string) => {
+      isDirtyRef.current = true
       setLocalText(text)
       schedulePersistDraftText(text)
     },
@@ -542,6 +537,7 @@ export default function ChatSidebar({
 
   const handleAttachmentsChange = useCallback(
     (next: string[]) => {
+      isDirtyRef.current = true
       setLocalAttachments(next)
       setDraft(chatKey, { attachments: next })
     },
