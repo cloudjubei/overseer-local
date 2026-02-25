@@ -302,7 +302,7 @@ export default class FactoryCompletionManager extends BaseManager {
     }
 
     const callTool = async (toolCall: ToolCall): Promise<any> => {
-      if (toolCall.toolCallId) await markToolMessageRunning(toolCall.toolCallId)
+      await markToolMessageRunning(toolCall.toolCallId)
 
       const updatedArgs = { ...(toolCall.arguments || {}) }
       if (chatContext.storyId && !('storyId' in updatedArgs)) {

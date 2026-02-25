@@ -12,7 +12,7 @@ import { useMemo, useState } from 'react'
 import { Switch } from '../ui/Switch'
 import { ToolCall, ToolResultType } from 'thefactory-tools'
 import Tooltip from '../ui/Tooltip'
-import ToolCallChangePopup from './ToolCallChangePopup'
+import ToolCallHoverCard from './ToolCall/ToolCallHoverCard'
 
 export type ToolCallCardProps = {
   toolCall: ToolCall
@@ -78,7 +78,7 @@ function StatusIcon({ resultType }: { resultType?: ToolResultType }) {
     case 'require_confirmation':
       return <IconHourglass className={`${size} text-teal-500`} />
     case 'pending':
-      return <IconHourglass className={`${size} text-neutral-500`} />
+      return <IconHourglass className={`${size} text-blue-500`} />
     case 'running':
       return <IconHourglass className={`${size} text-blue-500`} />
     default:
@@ -109,7 +109,7 @@ function StatusPill({ resultType }: { resultType?: ToolResultType }) {
       colors = 'bg-neutral-500/20 text-teal-600 dark:text-teal-400'
       break
     case 'pending':
-      colors = 'bg-neutral-500/20 text-neutral-600 dark:text-neutral-400'
+      colors = 'bg-blue-500/20 text-blue-600 dark:text-blue-400'
       break
     case 'running':
       colors = 'bg-blue-500/20 text-blue-600 dark:text-blue-400'
@@ -228,11 +228,13 @@ function ToolCallCardInner({
         <div className="flex items-center gap-2">
           <StatusPill resultType={resultType} />
           {resultType === 'pending' ? (
-            <span className="text-[11px] text-[var(--text-secondary)]">Queued for auto-run</span>
+            <span className="text-[11px] text-blue-600 dark:text-blue-400">
+              Queued for auto-run
+            </span>
           ) : null}
         </div>
 
-        {selectable && onToggleSelect && (
+      	{selectable && onToggleSelect && (
           <span onClick={(e) => e.stopPropagation()}>
             <Switch
               checked={selected == true}
@@ -275,13 +277,13 @@ function ToolCallCardInner({
 
   return (
     <Tooltip
+      variant="bare"
       content={
-        <ToolCallChangePopup
+        <ToolCallHoverCard
           toolCall={toolCall}
           // Important: allow preview content to show for require_confirmation
           result={popupResult}
           resultType={resultType}
-          durationMs={durationMs}
         />
       }
       placement="right"

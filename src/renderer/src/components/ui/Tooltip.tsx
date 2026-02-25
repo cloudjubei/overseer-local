@@ -7,6 +7,12 @@ export type TooltipProps = {
   placement?: 'top' | 'bottom' | 'left' | 'right'
   delayMs?: number
   disabled?: boolean
+  /**
+   * Visual style for the tooltip container.
+   * - 'default': tooltip draws its own surface (bg/border/shadow/padding) via CSS.
+   * - 'bare': tooltip container is chrome-less so the content can render its own card.
+   */
+  variant?: 'default' | 'bare'
   // New: allow customizing anchor element and behavior
   anchorAs?: keyof JSX.IntrinsicElements
   anchorClassName?: string
@@ -23,6 +29,7 @@ export default function Tooltip({
   placement = 'right',
   delayMs = 300,
   disabled = false,
+  variant = 'default',
   anchorAs = 'span',
   anchorClassName,
   anchorStyle,
@@ -247,6 +254,8 @@ export default function Tooltip({
 
   const AnchorTag: any = anchorAs as any
 
+  const tooltipClassName = variant === 'bare' ? 'ui-tooltip ui-tooltip--bare' : 'ui-tooltip'
+
   return (
     <>
       <AnchorTag
@@ -292,7 +301,7 @@ export default function Tooltip({
         position &&
         createPortal(
           <div
-            className="ui-tooltip"
+            className={tooltipClassName}
             role="tooltip"
             id={tooltipId}
             ref={tooltipRef}

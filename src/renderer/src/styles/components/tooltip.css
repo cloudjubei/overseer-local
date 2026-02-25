@@ -9,3 +9,11 @@
   box-shadow: var(--shadow-2);
   padding: 6px 8px;
 }
+
+/* Chrome-less tooltip container so content can render its own surface */
+.ui-tooltip.ui-tooltip--bare {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+}

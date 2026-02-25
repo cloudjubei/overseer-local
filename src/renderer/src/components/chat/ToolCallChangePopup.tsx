@@ -8,6 +8,7 @@ import {
   IconNotAllowed,
   IconHourglass,
 } from '../ui/icons/Icons'
+import Spinner from '../ui/Spinner'
 import { StructuredUnifiedDiff } from './tool-popups/diffUtils'
 import FeatureSummaryCard from '../stories/FeatureSummaryCard'
 import { filesService } from '../../services/filesService'
@@ -94,7 +95,7 @@ function buildUnifiedDiffIfPresent(result: any): string | undefined {
   const nestedPatch = extract(result, ['diff.patch'])
   if (typeof nestedPatch === 'string' && nestedPatch.trim()) return nestedPatch
   if (typeof result === 'string' && result.includes('@@')) return result
-  return undefined
+  return false as any
 }
 
 function isCompletelyNewFile(result: any, diff?: string): boolean {
@@ -440,7 +441,10 @@ export default function ToolCallChangePopup({
         return (
           <div className="space-y-1">
             {preview?.status === 'pending' ? (
-              <div className="text-xs text-[var(--text-secondary)]">Generating preview…</div>
+              <div className="flex items-center gap-2 text-xs text-[var(--text-secondary)]">
+                <Spinner size={14} />
+                <span>Generating preview…</span>
+              </div>
             ) : preview?.status === 'error' ? (
               <div className="text-[11px] rounded border border-red-600/40 bg-red-500/10 text-red-700 dark:text-red-300 px-2 py-1">
                 <span className="font-semibold mr-1">Preview failed.</span>
@@ -457,7 +461,10 @@ export default function ToolCallChangePopup({
                 <div className="text-xs text-[var(--text-secondary)]">Preview unavailable.</div>
               )
             ) : (
-              <div className="text-xs text-[var(--text-secondary)]">Generating preview…</div>
+              <div className="flex items-center gap-2 text-xs text-[var(--text-secondary)]">
+                <Spinner size={14} />
+                <span>Generating preview…</span>
+              </div>
             )}
           </div>
         )

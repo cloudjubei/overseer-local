@@ -1,9 +1,15 @@
 import { useEffect, useRef } from 'react'
-import type { ChatContext, CompletionSettings, CompletionHistorySummarization } from 'thefactory-tools'
+import type {
+  ChatContext,
+  CompletionSettings,
+  CompletionHistorySummarization,
+  CompletionMessageSanitization,
+} from 'thefactory-tools'
 
 import { Button } from '@renderer/components/ui/Button'
 import { Switch } from '@renderer/components/ui/Switch'
 import HistorySummarizationSettings from './HistorySummarizationSettings'
+import MessageSanitizationSettings from './MessageSanitizationSettings'
 
 export type ToolToggle = {
   name: string
@@ -23,6 +29,7 @@ export type ChatSettingsDropdownProps = {
     numberMessagesToSend?: number
     finishTurnOnErrors?: boolean
     historySummarization?: CompletionHistorySummarization
+    messageSanitization?: CompletionMessageSanitization
   }
 
   draftPrompt: string
@@ -187,6 +194,11 @@ export default function ChatSettingsDropdown({
 
             <HistorySummarizationSettings
               historySummarization={completion.historySummarization}
+              persistSettings={persistSettings}
+            />
+
+            <MessageSanitizationSettings
+              messageSanitization={completion.messageSanitization}
               persistSettings={persistSettings}
             />
           </div>
