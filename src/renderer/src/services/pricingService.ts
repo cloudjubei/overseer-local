@@ -1,15 +1,10 @@
-/* Renderer-side pricing service: fetch and cache pricing from Electron preload (window.factory) */
+import type { ModelPrice, PricingState } from 'thefactory-tools'
 
-export type PricingRecord = {
-  provider: string
-  model: string
-  inputPerMTokensUSD: number
-  outputPerMTokensUSD: number
-}
+export type PricingRecord = ModelPrice
 
-export type PricingState = {
-  updatedAt: string
-  prices: PricingRecord[]
+export type PricingService = {
+  listPrices: () => Promise<PricingState>
+  refreshPricing: (provider?: string, url?: string) => Promise<PricingState>
 }
 
 let cache: PricingState | null = null
@@ -18,32 +13,28 @@ let inflight: Promise<PricingState> | null = null
 async function fetchPricing(): Promise<PricingState> {
   if (cache) return cache
   if (inflight) return inflight
-  const w: any = window as any
-  const fn = w?.factory?.getPricing
-  inflight = Promise.resolve()
-    .then(() => (fn ? fn() : { updatedAt: new Date().toISOString(), prices: [] }))
-    .then((state: any) => {
+
+  inflight = pricingService
+    .listPrices()
+    .then((state) => {
       cache = state || { updatedAt: new Date().toISOString(), prices: [] }
       inflight = null
-      return cache!
+      return cache
     })
-    .catch(() => {
+    .catch((e) => {
       inflight = null
       cache = { updatedAt: new Date().toISOString(), prices: [] }
-      return cache!
+      return cache
     })
+
   return inflight
 }
 
 export async function refreshPricing(provider?: string, url?: string): Promise<PricingState> {
-  const w: any = window as any
-  const fn = w?.factory?.refreshPricing
   try {
-    const state = await (fn
-      ? fn(provider, url)
-      : Promise.resolve({ updatedAt: new Date().toISOString(), prices: [] }))
+    const state = await pricingService.refreshPricing(provider, url)
     cache = state || { updatedAt: new Date().toISOString(), prices: [] }
-    return cache!
+    return cache
   } catch {
     return cache || { updatedAt: new Date().toISOString(), prices: [] }
   }
@@ -63,15 +54,12 @@ function normalizeModel(s: string) {
   const raw = String(s || '')
     .trim()
     .toLowerCase()
-  // Drop any namespace/prefix like "openai/" or "openai:" and keep the last segment
+  // Drop any namespace/prefix like 'openai/' or 'openai:' and keep the last segment
   const seg = raw.split(/[/:]/).pop() || raw
   return seg
 }
 
-export async function getPrice(
-  provider?: string,
-  model?: string,
-): Promise<PricingRecord | undefined> {
+export async function getPrice(provider?: string, model?: string): Promise<ModelPrice | undefined> {
   const state = await fetchPricing()
   if (!provider || !model) return undefined
   const p = normalizeProvider(provider)
@@ -113,3 +101,5 @@ export async function getPrice(
   )
   return rec
 }
+
+export const pricingService: PricingService = { ...window.pricingService }

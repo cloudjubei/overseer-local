@@ -72,6 +72,7 @@ export type ChatsContextValue = {
 
   abortMessage: (context: ChatContext) => Promise<void>
 
+  getChatIfExists: (context: ChatContext) => Promise<ChatState | undefined>
   getChat: (context: ChatContext) => Promise<ChatState>
   restartChat: (context: ChatContext) => Promise<ChatState>
   deleteChat: (context: ChatContext) => Promise<void>
@@ -157,6 +158,25 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
 
   const lastAssistantNotifiedRef = useRef<Record<string, number>>({})
   const chatKeyToProjectIdRef = useRef<Record<string, string>>({})
+
+  const removeLastOpenedChatKey = useCallback((projectId: string, chatKey: string) => {
+    try {
+      const storageKey = `chat-last-opened:${projectId}`
+      const raw = localStorage.getItem(storageKey)
+      if (!raw) return
+      const map = JSON.parse(raw) as Record<string, number>
+      if (!map || typeof map !== 'object') return
+      if (!(chatKey in map)) return
+      delete map[chatKey]
+      localStorage.setItem(storageKey, JSON.stringify(map))
+    } catch {
+      // ignore invalid/missing localStorage
+    }
+  }, [])
+
+  // Track recently-deleted chat keys so that getChat does not accidentally
+  // re-create them via the auto-create behaviour in ChatsTools.getChat.
+  const deletedKeysRef = useRef<Set<string>>(new Set())
 
   const upsertChatsByProject = useCallback((chatState: ChatState) => {
     const ctx = chatState.chat.context
@@ -265,6 +285,17 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
         if (chatUpdate.type === 'delete') {
           const existing = newChats[key]
           if (existing) removeFromChatsByProject(existing)
+          // Ensure getChat won't auto-recreate this chat.
+          deletedKeysRef.current.add(key)
+
+          try {
+            const pid =
+              (existing?.chat?.context as any)?.projectId ||
+              (chatUpdate.context as any)?.projectId ||
+              projectId
+            if (pid) removeLastOpenedChatKey(pid, key)
+          } catch (_) {}
+
           delete newChats[key]
           try {
             delete chatKeyToProjectIdRef.current[key]
@@ -303,6 +334,12 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
         }
 
         if (chatUpdate.type === 'change') {
+          // If this key was recently deleted, ignore any late 'change/add'
+          // events that could resurrect an empty chat.
+          if (deletedKeysRef.current.has(key)) {
+            return newChats
+          }
+
           const next: ChatState = {
             ...(newChats[key] || {
               key,
@@ -431,6 +468,11 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
         }
 
         // Fallback: treat as add
+        // If this key was recently deleted, ignore any late 'add' events.
+        if (deletedKeysRef.current.has(key)) {
+          return newChats
+        }
+
         const next: ChatState = {
           key,
           chat: chatUpdate.chat!,
@@ -448,11 +490,19 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
     }
   }, [upsertChatsByProject, removeFromChatsByProject, projectId, clearDraft])
 
-  const getChat = useCallback(
-    async (context: ChatContext): Promise<ChatState> => {
+  const getChatIfExists = useCallback(
+    async (context: ChatContext): Promise<ChatState | undefined> => {
       const key = getChatContextPath(context)
+
+      // If this chat was recently deleted, do not call the backend which
+      // would auto-create an empty replacement file.
+      if (deletedKeysRef.current.has(key)) {
+        return undefined
+      }
+
       const c = chats[key]
       if (c) return c
+
       const chat = await chatsService.getChat(context)
       const chatState: ChatState = { key, chat, isLoading: false, isThinking: false }
       updateChatState(key, chatState)
@@ -463,6 +513,15 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       return chatState
     },
     [chats, updateChatState],
+  )
+
+  const getChat = useCallback(
+    async (context: ChatContext): Promise<ChatState> => {
+      const chatState = await getChatIfExists(context)
+      if (!chatState) throw new Error('Chat does not exist')
+      return chatState
+    },
+    [getChatIfExists],
   )
 
   const sendMessage = useCallback(
@@ -585,7 +644,12 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
   const restartChat = useCallback(
     async (context: ChatContext): Promise<ChatState> => {
       const key = getChatContextPath(context)
+
+      // User explicitly wants this chat to exist again.
+      deletedKeysRef.current.delete(key)
       const now = new Date().toISOString()
+
+      // Optimistically clear in the UI.
       const optimistic: ChatState = {
         key,
         chat: { context, messages: [], createdAt: now, updatedAt: now },
@@ -594,7 +658,12 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       }
       updateChatState(key, optimistic)
 
-      const chat = await chatsService.createChat({ context, messages: [] })
+      // Preferred: use thefactory-tools clearChat semantics (main-process storage).
+      let chat = await chatsService.clearChat(context)
+
+      // If the chat didn't exist, clearChat can return undefined; ensure chat exists.
+      if (!chat) chat = await chatsService.getChat(context)
+
       const state = { key, chat, isLoading: false, isThinking: false } as ChatState
       updateChatState(key, state)
       try {
@@ -609,6 +678,9 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
   const deleteChat = useCallback(
     async (context: ChatContext) => {
       const key = getChatContextPath(context)
+      // Mark as deleted BEFORE removing from state to prevent getChat from
+      // auto-creating the chat when the state change triggers re-renders.
+      deletedKeysRef.current.add(key)
       setChats((prev) => {
         const existing = prev[key]
         if (existing) removeFromChatsByProject(existing)
@@ -744,6 +816,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       retryCompletion,
       abortMessage,
 
+      getChatIfExists,
       getChat,
       restartChat,
       deleteChat,
@@ -769,6 +842,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       resumeTools,
       retryCompletion,
       abortMessage,
+      getChatIfExists,
       getChat,
       restartChat,
       deleteChat,

@@ -51,7 +51,7 @@ export default function ChatSidebar({
   showLeftBorder,
 }: ChatSidebarProps) {
   const {
-    getChat,
+    getChatIfExists,
     restartChat,
     sendMessage,
     resumeTools,
@@ -110,17 +110,15 @@ export default function ChatSidebar({
   const isDeletingRef = useRef(false)
 
   useEffect(() => {
+    // New context mounted/selected; allow loading again.
+    isDeletingRef.current = false
     const loadChat = async () => {
       if (isDeletingRef.current) return
-      try {
-        const c = await getChat(context)
-        setChat(c)
-      } catch (e) {
-        console.warn('Chat load failed (possibly deleted)', e)
-      }
+      const c = await getChatIfExists(context)
+      setChat(c)
     }
     void loadChat()
-  }, [context, getChat])
+  }, [context, getChatIfExists])
 
   const computeLatestIso = useCallback((): string | undefined => {
     const msgs = chat?.chat.messages || []
@@ -426,7 +424,6 @@ export default function ChatSidebar({
         window.dispatchEvent(new HashChangeEvent('hashchange'))
       }
       setIsSettingsOpen(false)
-      isDeletingRef.current = false
     }
   }, [context, activeProjectId, deleteChat])
 

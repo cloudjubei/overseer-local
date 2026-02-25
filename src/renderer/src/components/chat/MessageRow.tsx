@@ -50,7 +50,7 @@ function CollapsibleContent({
   }, [maxHeight])
 
   return (
-    <div className='flex flex-col'>
+    <div className="flex flex-col">
       <div
         ref={containerRef}
         style={{
@@ -62,8 +62,8 @@ function CollapsibleContent({
       </div>
       {needsCollapse ? (
         <button
-          type='button'
-          className='btn-secondary self-end mt-2 text-xs'
+          type="button"
+          className="btn-secondary self-end mt-2 text-xs"
           onClick={() => setExpanded((v) => !v)}
         >
           {expanded ? 'Show less' : 'Show more'}
@@ -130,25 +130,25 @@ function MessageRow({
     const showRetry = !!onRetry && isLast
 
     return (
-      <div data-msg-idx={globalIndex} className='flex items-start gap-2'>
+      <div data-msg-idx={globalIndex} className="flex items-start gap-2">
         <div
-          className='shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-semibold bg-[color-mix(in_srgb,var(--accent-primary)_14%,transparent)] text-[var(--text-primary)] border border-[var(--border-subtle)]'
-          aria-hidden='true'
+          className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-semibold bg-[color-mix(in_srgb,var(--accent-primary)_14%,transparent)] text-[var(--text-primary)] border border-[var(--border-subtle)]"
+          aria-hidden="true"
         >
           AI
         </div>
-        <div className='flex-1 max-w-[72%] min-w-[80px] flex flex-col items-start w-full'>
+        <div className="flex-1 max-w-[72%] min-w-[80px] flex flex-col items-start w-full">
           <ErrorBubble error={(msg as any).error} />
         </div>
         {showRetry ? (
           <button
             onClick={() => onRetry?.()}
             disabled={isThinking}
-            className='btn-icon'
-            aria-label='Retry the last action'
+            className="btn-icon"
+            aria-label="Retry the last action"
             title={isThinking ? 'Please wait...' : 'Retry the last action'}
           >
-            <IconRefresh className='w-5 h-5 mt-4' />
+            <IconRefresh className="w-5 h-5 mt-4" />
           </button>
         ) : null}
       </div>
@@ -181,7 +181,8 @@ function MessageRow({
       msgs[start]?.role === 'tool' &&
       (msgs[start]?.toolResult?.type === 'require_confirmation' ||
         msgs[start]?.toolResult?.type === 'pending' ||
-        msgs[start]?.toolResult?.type === 'running')
+        msgs[start]?.toolResult?.type === 'running' ||
+        msgs[start]?.toolResult?.type === 'ignored')
     ) {
       start--
     }
@@ -203,10 +204,12 @@ function MessageRow({
   const isConfirmableToolId = useMemo(() => {
     const set = new Set<string>()
     for (let i = pendingTail.start; i >= 0 && i <= pendingTail.end; i++) {
-      const m = messagesToDisplay[i] as any
-      if (m?.role !== 'tool') continue
-      if (m?.toolResult?.type !== 'require_confirmation') continue
-      const id = String(m?.toolCall?.toolCallId || '')
+      const message = messagesToDisplay[i]
+      if (message.role !== 'tool') continue
+      const m = message as CompletionToolMessage
+      if (!(m.toolResult.type === 'require_confirmation' || m.toolResult.type === 'ignored'))
+        continue
+      const id = m.toolCall.toolCallId
       if (id) set.add(id)
     }
     return set
@@ -214,8 +217,7 @@ function MessageRow({
 
   const selectedCount = selectedToolIds.filter((id) => isConfirmableToolId.has(id)).length
   const allSelected =
-    selectedCount > 0 &&
-    Array.from(isConfirmableToolId).every((id) => selectedToolIds.includes(id))
+    selectedCount > 0 && Array.from(isConfirmableToolId).every((id) => selectedToolIds.includes(id))
 
   // delete button logic: allow delete on last message, and on assistant preceding a tool tail
   const isAssistantBeforeToolTail =
@@ -254,9 +256,9 @@ function MessageRow({
   return (
     <div data-msg-idx={globalIndex} data-msg-role={role} data-msg-iso={iso || ''}>
       {showCutoff && (
-        <div className='relative text-center my-4 group' title={tooltipText}>
-          <hr className='border-dashed border-neutral-300 dark:border-neutral-700' />
-          <span className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 px-2 bg-[var(--surface-base)] text-xs text-neutral-500 whitespace-nowrap'>
+        <div className="relative text-center my-4 group" title={tooltipText}>
+          <hr className="border-dashed border-neutral-300 dark:border-neutral-700" />
+          <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 px-2 bg-[var(--surface-base)] text-xs text-neutral-500 whitespace-nowrap">
             Context from here on
           </span>
         </div>
@@ -266,7 +268,7 @@ function MessageRow({
         ref={isLast ? setLastMessageRef : undefined}
         className={['flex items-start gap-2', isUser ? 'flex-row-reverse' : 'flex-row'].join(' ')}
       >
-        <div className='flex flex-col items-center group'>
+        <div className="flex flex-col items-center group">
           <div
             className={[
               'shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-semibold',
@@ -278,14 +280,14 @@ function MessageRow({
                     ? 'bg-[var(--surface-overlay)] text-[var(--text-primary)] border border-[var(--border-subtle)]'
                     : 'bg-[color-mix(in_srgb,var(--accent-primary)_14%,transparent)] text-[var(--text-primary)] border border-[var(--border-subtle)]',
             ].join(' ')}
-            aria-hidden='true'
+            aria-hidden="true"
           >
             {isUser ? 'You' : isSystem || isTool ? <IconToolbox /> : 'AI'}
           </div>
 
           {shouldShowDelete ? (
             <button
-              type='button'
+              type="button"
               title={deleteTitle}
               aria-label={deleteTitle}
               className={[
@@ -295,7 +297,7 @@ function MessageRow({
               onClick={() => onDeleteLastMessage && onDeleteLastMessage()}
               disabled={isThinking}
             >
-              <IconDelete className='w-3.5 h-3.5' />
+              <IconDelete className="w-3.5 h-3.5" />
             </button>
           ) : null}
         </div>
@@ -310,17 +312,17 @@ function MessageRow({
         >
           <div className={['flex-col', isUser ? 'items-start' : 'items-end'].join(' ')}>
             {isAssistant ? (
-              <div className='w-full flex justify-between items-baseline'>
+              <div className="w-full flex justify-between items-baseline">
                 {(msg as any).showModel && (msg as any).model ? (
-                  <div className='text-[11px] text-[var(--text-secondary)] mb-1 inline-flex items-center gap-1 border border-[var(--border-subtle)] bg-[var(--surface-overlay)] rounded-full px-2 py-[2px]'>
-                    <span className='inline-block w-1.5 h-1.5 rounded-full bg-[var(--accent-primary)]' />
+                  <div className="text-[11px] text-[var(--text-secondary)] mb-1 inline-flex items-center gap-1 border border-[var(--border-subtle)] bg-[var(--surface-overlay)] rounded-full px-2 py-[2px]">
+                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-[var(--accent-primary)]" />
                     {(msg as any).model.model}
                   </div>
                 ) : (
                   <div />
                 )}
                 {ts || thinkingLabel || assistantCostLabel ? (
-                  <div className='text-[10px] leading-4 text-[var(--text-secondary)] mb-1 opacity-80 select-none flex items-baseline gap-1'>
+                  <div className="text-[10px] leading-4 text-[var(--text-secondary)] mb-1 opacity-80 select-none flex items-baseline gap-1">
                     {assistantCostLabel ? <span>{assistantCostLabel}</span> : null}
                     {assistantCostLabel && (thinkingLabel || ts) ? <span>·</span> : null}
                     {thinkingLabel ? <span>{`+${thinkingLabel}`}</span> : null}
@@ -330,7 +332,7 @@ function MessageRow({
                 ) : null}
               </div>
             ) : ts ? (
-              <div className='text-[10px] leading-4 text-[var(--text-secondary)] mb-1 opacity-80 select-none'>
+              <div className="text-[10px] leading-4 text-[var(--text-secondary)] mb-1 opacity-80 select-none">
                 {ts}
               </div>
             ) : null}
@@ -339,20 +341,14 @@ function MessageRow({
               <div
                 className={[
                   // Full-width for assistant/system bubbles, keep user constrained.
-                  isUser
-                    ? 'overflow-x-auto max-w-full'
-                    : 'w-full overflow-x-auto max-w-full',
+                  isUser ? 'overflow-x-auto max-w-full' : 'w-full overflow-x-auto max-w-full',
                   'px-3 py-2 rounded-2xl whitespace-pre-wrap break-words shadow',
                   isUser
                     ? 'bg-[var(--accent-primary)] text-[var(--text-inverted)] rounded-br-md'
                     : isSystem
                       ? 'border bg-[var(--surface-overlay)] text-[var(--text-primary)] border-[var(--border-subtle)]'
                       : 'bg-[var(--surface-raised)] text-[var(--text-primary)] border border-[var(--border-subtle)] rounded-bl-md',
-                  (msg as any).isFirstInGroup
-                    ? ''
-                    : isUser
-                      ? 'rounded-tr-md'
-                      : 'rounded-tl-md',
+                  (msg as any).isFirstInGroup ? '' : isUser ? 'rounded-tr-md' : 'rounded-tl-md',
                   'chat-bubble',
                   isNewUserBubble ? 'chat-bubble--user-pop-enter' : '',
                 ].join(' ')}
@@ -362,7 +358,7 @@ function MessageRow({
                     <RichText text={String((msg as any).content || '')} />
                   </CollapsibleContent>
                 ) : globalIndex === animateAssistantIdx ? (
-                  <TypewriterText text={String((msg as any).content || '')} renderer='markdown' />
+                  <TypewriterText text={String((msg as any).content || '')} renderer="markdown" />
                 ) : isSystem ? (
                   <CollapsibleContent maxHeight={600}>
                     <Markdown text={String((msg as any).content || '')} />
@@ -378,13 +374,14 @@ function MessageRow({
 
           {/* Tool message rendering */}
           {isTool ? (
-            <div className='mt-2 w-full space-y-2'>
+            <div className="mt-2 w-full space-y-2">
               {(() => {
                 const tm = msg as unknown as CompletionToolMessage
                 const toolCallId = String(tm.toolCall?.toolCallId || '')
                 const type = tm.toolResult?.type as ToolResultType | undefined
                 const selectable =
-                  type === 'require_confirmation' && isConfirmableToolId.has(toolCallId)
+                  (type === 'require_confirmation' || type === 'ignored') &&
+                  isConfirmableToolId.has(toolCallId)
 
                 return (
                   <ToolCallCard
@@ -410,9 +407,9 @@ function MessageRow({
 
               {/* Resume controls shown at the end of the pending batch */}
               {toggleableCount > 0 && isLast ? (
-                <div className='pt-1 flex items-center justify-between'>
+                <div className="pt-1 flex items-center justify-between">
                   {isConfirmableToolId.size > 1 ? (
-                    <div className='flex items-center gap-2 text:[12px] text-[var(--text-secondary)]'>
+                    <div className="flex items-center gap-2 text:[12px] text-[var(--text-secondary)]">
                       <span>Toggle all</span>
                       <Switch
                         checked={allSelected}
@@ -432,7 +429,7 @@ function MessageRow({
                     <div />
                   )}
                   <button
-                    type='button'
+                    type="button"
                     className={[
                       'btn',
                       selectedCount > 0
@@ -458,9 +455,10 @@ function MessageRow({
           {/* Attachments */}
           {(msg as any).role === 'user' && (msg as any).files && (msg as any).files.length > 0 ? (
             <div
-              className={['mt-1 flex flex-wrap gap-1', isUser ? 'justify-end' : 'justify-start'].join(
-                ' ',
-              )}
+              className={[
+                'mt-1 flex flex-wrap gap-1',
+                isUser ? 'justify-end' : 'justify-start',
+              ].join(' ')}
             >
               {(msg as any).files.map((path: string, i: number) => {
                 const meta = filesByPath[path]
@@ -482,7 +480,7 @@ function MessageRow({
                       mtime,
                       ctime,
                     }}
-                    density='compact'
+                    density="compact"
                     interactive
                     showPreviewOnHover
                   />

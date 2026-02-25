@@ -227,8 +227,6 @@ export default function ToolCallChangePopup({
   const args = toolCall?.arguments || {}
   const toolName = String(name)
 
-  const isWriteTool = toolName === 'writeFile' || toolName === 'writeDiffToFile'
-
   const writeFilePath: string | undefined =
     tryString(
       extract(args, ['path']) ||
@@ -236,6 +234,18 @@ export default function ToolCallChangePopup({
         extract(args, ['relPath']) ||
         extract(result, ['path']),
     ) || undefined
+
+  const headerPath: string | undefined = (() => {
+    // Show relevant file path in the sticky header for common file-based tools.
+    if (toolName === 'writeFile' || toolName === 'writeDiffToFile') return writeFilePath
+
+    // Read-style file tools
+    if (toolName === 'readFileRange') return tryString(extract(args, ['path']) || extract(result, ['path']))
+    if (toolName === 'grepFile') return tryString(extract(args, ['path']) || extract(result, ['path']))
+    if (toolName === 'readFileStructure') return tryString(extract(args, ['path']) || extract(result, ['path']))
+
+    return undefined
+  })()
 
   const writeFileNewText: string | undefined =
     tryString(
@@ -350,6 +360,52 @@ export default function ToolCallChangePopup({
       return <InlineOldNew oldVal={oldVal} newVal={newVal} />
     }
 
+    if (n === 'updateStory' || n === 'updateFeature') {
+      // Prefer a diff/patch if the preview/result provides one.
+      // This supports 'dryRun' via previewTool (resultType === 'require_confirmation').
+      const patchText = buildUnifiedDiffIfPresent(result)
+      if (patchText) {
+        return (
+          <div className="space-y-1">
+            <StructuredUnifiedDiff patch={patchText} />
+          </div>
+        )
+      }
+
+      // Fallback: show a minimal summary from args (useful if preview doesn't include a diff).
+      const storyId = tryString(extract(args, ['storyId']))
+      const featureId = tryString(extract(args, ['featureId']))
+
+      // Common shapes we may see: { patch: {...} } or patch fields at top-level args.
+      const patchObj = extract(args, ['patch']) || args
+
+      const maybeTitle = tryString(extract(patchObj, ['title']))
+      const maybeDescription = tryString(extract(patchObj, ['description']))
+
+      const oldTitle =
+        n === 'updateFeature'
+          ? featureId
+            ? featuresById[featureId]?.title
+            : undefined
+          : storyId
+            ? storiesById[storyId]?.title
+            : undefined
+
+      return (
+        <div className="text-xs space-y-2">
+          {maybeTitle ? <InlineOldNew oldVal={oldTitle} newVal={maybeTitle} /> : null}
+          {maybeDescription ? (
+            <div>
+              <SectionTitle>New description</SectionTitle>
+              <Code language="text" code={maybeDescription} />
+            </div>
+          ) : (
+            <div className="text-[11px] text-[var(--text-secondary)]">Diff unavailable.</div>
+          )}
+        </div>
+      )
+    }
+
     if (n === 'updateStoryDescription' || n === 'updateFeatureDescription') {
       const oldDesc = result
         ? undefined
@@ -357,27 +413,22 @@ export default function ToolCallChangePopup({
           ? featuresById[args.featureId]?.description
           : storiesById[args.storyId]?.description
       const newDesc = tryString(extract(args, ['description']))
-      const diff = undefined
+      const descLabel = n === 'updateFeatureDescription' ? 'feature description' : 'story description'
+      const descDiff = oldDesc && newDesc && oldDesc !== newDesc
+        ? buildSimpleUnifiedDiff(descLabel, oldDesc, newDesc)
+        : undefined
       return (
         <div className="text-xs">
-          {diff ? (
-            <Code language="diff" code={diff} />
-          ) : oldDesc && newDesc ? (
+          {descDiff ? (
             <div>
               <SectionTitle>Updated description</SectionTitle>
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <div className="text-[11px] text-[var(--text-secondary)] mb-1">Before</div>
-                  <Code language="text" code={oldDesc} />
-                </div>
-                <div>
-                  <div className="text-[11px] text-[var(--text-secondary)] mb-1">After</div>
-                  <Code language="text" code={newDesc} />
-                </div>
-              </div>
+              <StructuredUnifiedDiff patch={descDiff} wrap intraline="word" />
             </div>
           ) : (
-            <NewContentOnly text={newDesc} />
+            <NewContentOnly
+              text={newDesc}
+              label={oldDesc && newDesc && oldDesc === newDesc ? 'No changes detected.' : undefined}
+            />
           )}
         </div>
       )
@@ -631,13 +682,13 @@ export default function ToolCallChangePopup({
           </div>
         </div>
 
-        {isWriteTool ? (
+        {headerPath ? (
           <div className="pb-1">
             <div
               className="font-mono text-[11px] text-[var(--text-secondary)] truncate"
-              title={writeFilePath || ''}
+              title={headerPath || ''}
             >
-              {writeFilePath || '(unknown path)'}
+              {headerPath || '(unknown path)'}
             </div>
           </div>
         ) : null}

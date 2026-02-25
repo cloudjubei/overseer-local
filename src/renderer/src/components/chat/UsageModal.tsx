@@ -1,15 +1,15 @@
 import { useEffect, useMemo, useState } from 'react'
-import type { CompletionMessage } from 'thefactory-tools'
+import type { CompletionAssistantMessage, CompletionMessage, ModelPrice } from 'thefactory-tools'
 
 import { Modal } from '@renderer/components/ui/Modal'
-import { getPrice, type PricingRecord } from '@renderer/services/pricingService'
+import { getPrice } from '@renderer/services/pricingService'
 
 function formatUSD(n?: number) {
   if (n == null || Number.isNaN(n)) return '—'
   return `$${n.toFixed(4)}`
 }
 
-function safeNumber(n: any): number {
+function safeNumber(n: unknown): number {
   return typeof n === 'number' && isFinite(n) ? n : 0
 }
 
@@ -34,14 +34,14 @@ function emptyAgg(): UsageAgg {
 type UsageRow = {
   idx: number
   role: string
-  provider?: string
-  model?: string
+  provider: string
+  model: string
   promptTokens: number
   completionTokens: number
   cachedReadInputTokens: number
   costUSD?: number
   estimatedCostUSD?: number
-  price?: PricingRecord
+  price?: ModelPrice
 }
 
 export type UsageModalProps = {
@@ -50,24 +50,25 @@ export type UsageModalProps = {
   messages: CompletionMessage[]
 }
 
+function isAssistant(m: CompletionMessage): m is CompletionAssistantMessage {
+  return m.role === 'assistant' && !!m.usage && !!m.model
+}
+
 export default function UsageModal({ isOpen, onClose, messages }: UsageModalProps) {
-  const [pricesByKey, setPricesByKey] = useState<Record<string, PricingRecord | undefined>>({})
+  const [pricesByKey, setPricesByKey] = useState<Record<string, ModelPrice | undefined>>({})
 
   useEffect(() => {
     let cancelled = false
 
     const keys = new Set<string>()
-    for (const m of messages as any[]) {
-      const usage = (m as any)?.usage
-      if (!usage) continue
-      const provider = String(usage.provider || '')
-      const model = String(usage.model || '')
-      if (!provider || !model) continue
-      keys.add(`${provider}::${model}`)
+    for (const m of messages) {
+      if (!isAssistant(m)) continue
+
+      keys.add(`${m.model.provider}::${m.model.model}`)
     }
 
     const run = async () => {
-      const next: Record<string, PricingRecord | undefined> = {}
+      const next: Record<string, ModelPrice | undefined> = {}
       for (const k of Array.from(keys)) {
         const [provider, model] = k.split('::')
         try {
@@ -86,15 +87,15 @@ export default function UsageModal({ isOpen, onClose, messages }: UsageModalProp
   }, [messages])
 
   const usageRows: UsageRow[] = useMemo(() => {
-    return (messages as any[])
+    return messages
+      .filter((m) => isAssistant(m))
       .map((m, idx) => {
-        const usage = m?.usage
-        if (!usage) return undefined
+        const usage = m.usage
+        const provider = m.model.provider
+        const model = m.model.model
 
-        const provider = String(usage.provider || '') || undefined
-        const model = String(usage.model || '') || undefined
-        const key = provider && model ? `${provider}::${model}` : ''
-        const price = key ? pricesByKey[key] : undefined
+        const key = `${provider}::${model}`
+        const price = pricesByKey[key]
 
         const promptTokens = safeNumber(usage.promptTokens)
         const completionTokens = safeNumber(usage.completionTokens)
@@ -104,9 +105,7 @@ export default function UsageModal({ isOpen, onClose, messages }: UsageModalProp
 
         const inputRate = safeNumber(price?.inputPerMTokensUSD)
         const outputRate = safeNumber(price?.outputPerMTokensUSD)
-        const cacheReadRate =
-          safeNumber((price as any)?.cacheReadInputPerMTokensUSD) ||
-          safeNumber((price as any)?.cachedReadInputPerMTokensUSD)
+        const cacheReadRate = safeNumber(price?.cacheReadInputPerMTokensUSD)
 
         const canEstimate = inputRate > 0 || outputRate > 0 || cacheReadRate > 0
 
@@ -125,7 +124,7 @@ export default function UsageModal({ isOpen, onClose, messages }: UsageModalProp
 
         return {
           idx,
-          role: String(m?.role || 'unknown'),
+          role: m.role,
           provider,
           model,
           promptTokens,
@@ -136,14 +135,13 @@ export default function UsageModal({ isOpen, onClose, messages }: UsageModalProp
           price,
         } satisfies UsageRow
       })
-      .filter(Boolean) as UsageRow[]
   }, [messages, pricesByKey])
 
   const aggByModel = useMemo(() => {
     const totalsAgg = emptyAgg()
     const map = new Map<string, UsageAgg>()
     for (const r of usageRows) {
-      const name = `${r.provider || 'unknown'} · ${r.model || 'unknown'}`
+      const name = `${r.provider} · ${r.model}`
       const a = map.get(name) || emptyAgg()
 
       const cost =
@@ -175,7 +173,6 @@ export default function UsageModal({ isOpen, onClose, messages }: UsageModalProp
 
   const colGroup = (
     <colgroup>
-      {/* 6 equal columns */}
       <col style={{ width: '160px' }} />
       <col style={{ width: '160px' }} />
       <col style={{ width: '160px' }} />

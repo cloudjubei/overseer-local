@@ -24,6 +24,7 @@ const IPC_HANDLER_KEYS = {
   CHATS_GET: 'chats:get',
   CHATS_CREATE: 'chats:create',
   CHATS_UPDATE: 'chats:update',
+  CHATS_CLEAR: 'chats:clear',
   CHATS_DELETE: 'chats:delete',
   CHATS_DELETE_LAST_MESSAGE: 'chats:delete-last-message',
 

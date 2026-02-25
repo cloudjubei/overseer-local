@@ -126,6 +126,8 @@ const CHATS_API = {
   getChat: (chatContext) => ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_GET, { chatContext }),
   updateChat: (chatContext, patch) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_UPDATE, { chatContext, patch }),
+  clearChat: (chatContext) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_CLEAR, { chatContext }),
   deleteChat: (chatContext) => ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_DELETE, { chatContext }),
   deleteLastMessage: (chatContext) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_DELETE_LAST_MESSAGE, { chatContext }),
@@ -267,6 +269,13 @@ const FACTORY_AGENT_RUN_API = {
   refreshPricing: (provider, url) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_PRICING_REFRESH, { provider, url }),
 }
+
+const PRICING_API = {
+  listPrices: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_PRICING_LIST),
+  refreshPricing: (provider, url) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_PRICING_REFRESH, { provider, url }),
+}
+
 const FACTORY_TOOLS_API = {
   executeTool: (projectId, toolName, args) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TOOLS_EXECUTE, { projectId, toolName, args }),
@@ -437,6 +446,7 @@ if (process.contextIsolated) {
     contextBridge.exposeInMainWorld('factoryAgentRunService', FACTORY_AGENT_RUN_API)
     contextBridge.exposeInMainWorld('factoryToolsService', FACTORY_TOOLS_API)
     contextBridge.exposeInMainWorld('factoryTestsService', FACTORY_TESTS_API)
+    contextBridge.exposeInMainWorld('pricingService', PRICING_API)
     contextBridge.exposeInMainWorld('dbService', DB_API)
     contextBridge.exposeInMainWorld('documentIngestionService', DOCUMENT_INGESTION_API)
     contextBridge.exposeInMainWorld('gitService', GIT_API)

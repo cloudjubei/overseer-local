@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useFiles } from '../../contexts/FilesContext'
 import { playReceiveSound } from '../../assets/sounds'
-import type { CompletionMessage } from 'thefactory-tools'
+import type { CompletionMessage, CompletionToolMessage } from 'thefactory-tools'
 import { useChatUnread } from '@renderer/hooks/useChatUnread'
 import { useActiveProject } from '@renderer/contexts/ProjectContext'
 import { factoryToolsService } from '@renderer/services/factoryToolsService'
@@ -215,8 +215,8 @@ function MessageListInner({
     let start = end
     while (
       start >= 0 &&
-      (messagesToDisplay[start] as any).role === 'tool' &&
-      (messagesToDisplay[start] as any).toolResult?.type === 'require_confirmation'
+      messagesToDisplay[start].role === 'tool' &&
+      (messagesToDisplay[start] as CompletionToolMessage).toolResult.type === 'require_confirmation'
     ) {
       start--
     }

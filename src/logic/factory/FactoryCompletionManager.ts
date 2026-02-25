@@ -104,8 +104,7 @@ export default class FactoryCompletionManager extends BaseManager {
     if (
       config.costInputPerMTokensUSD != null ||
       config.costOutputPerMTokensUSD != null ||
-      config.costCacheReadInputPerMTokensUSD != null ||
-      config.costCacheWriteInputPerMTokensUSD != null
+      config.costCacheReadInputPerMTokensUSD != null
     ) {
       return config
     }
@@ -116,14 +115,12 @@ export default class FactoryCompletionManager extends BaseManager {
     const costInputPerMTokensUSD = price.inputPerMTokensUSD
     const costOutputPerMTokensUSD = price.outputPerMTokensUSD
     const costCacheReadInputPerMTokensUSD = price.cacheReadInputPerMTokensUSD
-    const costCacheWriteInputPerMTokensUSD = price.cacheWriteInputPerMTokensUSD
 
     return {
       ...config,
       costInputPerMTokensUSD,
       costOutputPerMTokensUSD,
       costCacheReadInputPerMTokensUSD,
-      costCacheWriteInputPerMTokensUSD,
     }
   }
 

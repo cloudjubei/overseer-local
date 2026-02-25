@@ -2,6 +2,7 @@ import { ElectronAPI } from '@electron-toolkit/preload'
 import type { ProjectsGroupsService } from '@renderer/services/projectsGroupsService'
 import type { ProjectsService } from '@renderer/services/projectsService'
 import type { ChatsService } from '@renderer/services/chatsService'
+import type { PricingService } from '@renderer/services/pricingService'
 import type { FilesService } from '@renderer/services/filesService'
 import type { NotificationsService } from '@renderer/services/notificationsService'
 import type { SettingsService } from '@renderer/services/settingsService'
@@ -29,6 +30,7 @@ declare global {
     filesService: FilesService
     chatsService: ChatsService
     completionService: CompletionService
+    pricingService: PricingService
     notificationsService: NotificationsService
     settingsService: SettingsService
     liveDataService: LiveDataService

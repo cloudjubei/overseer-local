@@ -1,4 +1,4 @@
-import { PricingState } from './pricingService'
+import type { PricingState } from 'thefactory-tools'
 import { AgentRun, AgentRunHistory, AgentRunRatingPatch, AgentRunUpdate } from 'thefactory-tools'
 
 export type FactoryAgentRunService = {

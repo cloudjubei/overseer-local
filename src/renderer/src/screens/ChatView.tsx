@@ -90,7 +90,7 @@ export default function ChatView() {
   const { projectId: activeProjectId } = useActiveProject()
   const { projects } = useProjectContext()
   const { storiesById, featuresById } = useStories()
-  const { getChat, chats, chatsByProjectId } = useChats()
+  const { getChatIfExists, chats, chatsByProjectId } = useChats()
   const { runsHistory } = useAgents()
   const { hasUnreadForProject } = useChatUnread()
   const { markNotificationsByMetadata } = useNotifications()
@@ -169,9 +169,7 @@ export default function ChatView() {
           !selectedContext ||
           getChatContextPath(hashCtx) !== getChatContextPath(selectedContext)
         ) {
-          try {
-            await getChat(hashCtx)
-          } catch {}
+          await getChatIfExists(hashCtx)
           setSelectedContext(hashCtx)
         }
         return
@@ -203,9 +201,7 @@ export default function ChatView() {
         const newKey = getChatContextPath(newContext)
         const oldKey = selectedContext ? getChatContextPath(selectedContext) : undefined
         if (newKey !== oldKey) {
-          try {
-            await getChat(newContext) // Ensure chat exists
-          } catch {}
+          await getChatIfExists(newContext) // Ensure chat exists (without throwing)
           // Sync URL hash to canonical chat path (without .json)
           try {
             const hashPath = newKey.replace(/\.json$/, '')
@@ -224,7 +220,7 @@ export default function ChatView() {
     const onHash = () => void apply()
     window.addEventListener('hashchange', onHash)
     return () => window.removeEventListener('hashchange', onHash)
-  }, [getChat, activeProjectId, chatsByProjectId, selectedContext])
+  }, [getChatIfExists, activeProjectId, chatsByProjectId, selectedContext])
 
   useEffect(() => {
     if (selectedContext) {

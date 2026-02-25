@@ -80,10 +80,7 @@ export type CostLedgerPriceSnapshot = {
   currency: 'USD' | string
   inputPerMTokensUSD: number
   outputPerMTokensUSD: number
-  // optional but recommended to support OpenAI/Anthropic cache pricing
   cacheReadInputPerMTokensUSD?: number
-  // reserved for future, keep optional
-  cacheWriteInputPerMTokensUSD?: number
 }
 
 export type CostLedgerEntry = {

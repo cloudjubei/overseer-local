@@ -44,6 +44,8 @@ export default class ChatsManager extends BaseManager {
     handlers[IPC_HANDLER_KEYS.CHATS_GET] = async ({ chatContext }) => this.getChat(chatContext)
     handlers[IPC_HANDLER_KEYS.CHATS_UPDATE] = async ({ chatContext, patch }) =>
       this.updateChat(chatContext, patch)
+    handlers[IPC_HANDLER_KEYS.CHATS_CLEAR] = async ({ chatContext }) =>
+      this.clearChat(chatContext)
     handlers[IPC_HANDLER_KEYS.CHATS_DELETE] = async ({ chatContext }) =>
       this.deleteChat(chatContext)
     handlers[IPC_HANDLER_KEYS.CHATS_DELETE_LAST_MESSAGE] = async ({ chatContext }) =>
@@ -85,6 +87,9 @@ export default class ChatsManager extends BaseManager {
   }
   async deleteChat(chatContext: ChatContext): Promise<void> {
     return await this.tools.deleteChat(chatContext)
+  }
+  async clearChat(chatContext: ChatContext): Promise<Chat | undefined> {
+    return await this.tools.clearChat(chatContext)
   }
   async addChatMessages(
     chatContext: ChatContext,
