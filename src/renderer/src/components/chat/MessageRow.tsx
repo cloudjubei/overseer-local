@@ -331,13 +331,13 @@ function MessageRow({
                   </div>
                 ) : null}
               </div>
-            ) : ts ? (
+            ) : !isTool && ts ? (
               <div className="text-[10px] leading-4 text-[var(--text-secondary)] mb-1 opacity-80 select-none">
                 {ts}
               </div>
             ) : null}
 
-            {((msg as any).content && !isTool) || (isSystem && toggleableCount > 0) ? (
+            {(msg.content && !isTool) || (isSystem && toggleableCount > 0) ? (
               <div
                 className={[
                   // Full-width for assistant/system bubbles, keep user constrained.
@@ -374,7 +374,7 @@ function MessageRow({
 
           {/* Tool message rendering */}
           {isTool ? (
-            <div className="mt-2 w-full space-y-2">
+            <div className="w-full space-y-2">
               {(() => {
                 const tm = msg as unknown as CompletionToolMessage
                 const toolCallId = String(tm.toolCall?.toolCallId || '')
