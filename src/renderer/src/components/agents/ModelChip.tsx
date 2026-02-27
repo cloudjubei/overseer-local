@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useSta
 import { createPortal } from 'react-dom'
 import { useLLMConfig } from '../../contexts/LLMConfigContext'
 import { useNavigator } from '../../navigation/Navigator'
+import { getPrice } from '../../services/pricingService'
 import type { LLMConfig } from 'thefactory-tools'
 
 function providerLabel(p?: string) {
@@ -32,7 +33,7 @@ function providerDotClasses(p?: string) {
       return 'bg-orange-500'
     case 'gemini':
     case 'google':
-      return 'bg-indigo-500'
+      return 'bg-green-500'
     case 'xai':
       return 'bg-black'
     case 'groq':
@@ -47,12 +48,19 @@ function providerDotClasses(p?: string) {
     case 'custom':
       return 'bg-purple-500'
     default:
-      return 'bg-neutral-400'
+      return 'bg-pink-500'
   }
 }
 
 function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n))
+}
+
+function formatUSD(n?: number) {
+  if (n == null || Number.isNaN(n)) return '?'
+  const fixed = n.toFixed(4)
+  const trimmed = fixed.replace(/\.0+$/, '').replace(/(\.\d*?)0+$/, '$1')
+  return `$${trimmed}`
 }
 
 function computePosition(
@@ -79,17 +87,15 @@ function computePosition(
     top = ar.top + scrollY - panelH - gap
   }
 
-  const padding = 12 // A bit more padding
+  const padding = 12
 
   let left: number
-  // If aligning left would push it off-screen, align right instead.
   if (ar.left + panelW > viewportW - padding) {
     left = ar.right - panelW + scrollX
   } else {
     left = ar.left + scrollX
   }
 
-  // Final clamping to ensure it's always on screen.
   const maxLeft = scrollX + viewportW - panelW - padding
   const minLeft = scrollX + padding
   left = clamp(left, minLeft, maxLeft)
@@ -111,6 +117,12 @@ function useOutsideClick(refs: React.RefObject<HTMLElement | null>[], onOutside:
     document.addEventListener('mousedown', onDoc)
     return () => document.removeEventListener('mousedown', onDoc)
   }, [refs, onOutside])
+}
+
+type PriceRecord = {
+  inputPerMTokensUSD: number
+  outputPerMTokensUSD: number
+  cacheReadInputPerMTokensUSD?: number
 }
 
 function Picker({
@@ -136,6 +148,7 @@ function Picker({
   const { configs } = useLLMConfig()
   const { navigateView } = useNavigator()
   const [activeIndex, setActiveIndex] = useState(0)
+  const [pricesByKey, setPricesByKey] = useState<Record<string, PriceRecord | null | undefined>>({})
 
   useLayoutEffect(() => {
     const update = () => setCoords(computePosition(anchorEl, panelRef.current))
@@ -157,6 +170,45 @@ function Picker({
     }
     return []
   }, [recentConfigIds, configs])
+
+  useEffect(() => {
+    let cancelled = false
+
+    const run = async () => {
+      const next: Record<string, PriceRecord | null> = {}
+      const items = recents
+        .map((cfg) => ({ provider: cfg.provider, model: cfg.model }))
+        .filter((x) => x.provider && x.model) as { provider: string; model: string }[]
+
+      const uniqKeys = Array.from(new Set(items.map((x) => `${x.provider}::${x.model}`)))
+
+      await Promise.all(
+        uniqKeys.map(async (key) => {
+          const [provider, model] = key.split('::')
+          try {
+            const rec = await getPrice(provider, model)
+            next[key] = rec
+              ? {
+                  inputPerMTokensUSD: rec.inputPerMTokensUSD,
+                  outputPerMTokensUSD: rec.outputPerMTokensUSD,
+                  cacheReadInputPerMTokensUSD: rec.cacheReadInputPerMTokensUSD,
+                }
+              : null
+          } catch {
+            next[key] = null
+          }
+        }),
+      )
+
+      if (cancelled) return
+      setPricesByKey(next)
+    }
+
+    void run()
+    return () => {
+      cancelled = true
+    }
+  }, [recents])
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -217,6 +269,12 @@ function Picker({
       {recents.map((cfg, i) => {
         const isActive = cfg.id === selectedConfigId
         const dot = providerDotClasses(cfg.provider)
+        const priceKey = cfg.provider && cfg.model ? `${cfg.provider}::${cfg.model}` : undefined
+        const p = priceKey ? pricesByKey[priceKey] : undefined
+        const inStr = p ? formatUSD(p.inputPerMTokensUSD) : '?'
+        const outStr = p ? formatUSD(p.outputPerMTokensUSD) : '?'
+        const cacheStr = p && p.cacheReadInputPerMTokensUSD != null ? formatUSD(p.cacheReadInputPerMTokensUSD) : '?'
+
         return (
           <button
             key={cfg.id}
@@ -234,8 +292,14 @@ function Picker({
               className={['inline-block w-1.5 h-1.5 rounded-full mr-2', dot].join(' ')}
               aria-hidden
             />
-            <span className="standard-picker__label">
-              {cfg.name} {cfg.model ? `(${cfg.model})` : ''}
+            <span className="standard-picker__label flex min-w-0 flex-col leading-tight">
+              <span className="truncate text-[12px] font-medium">{cfg.name || 'Untitled'}</span>
+              <span className="truncate text-[11px] text-[var(--text-secondary)]">
+                {cfg.model || '—'}
+              </span>
+              <span className="truncate text-[10px] text-[var(--text-secondary)]">
+                In {inStr} · Out {outStr} · Cache {cacheStr}
+              </span>
             </span>
           </button>
         )
@@ -261,7 +325,7 @@ export type ModelChipProps = {
   provider?: string
   model?: string
   className?: string
-  editable?: boolean // false by default
+  editable?: boolean
   mode?: 'agentRun' | 'chat'
 }
 

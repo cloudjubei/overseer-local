@@ -56,7 +56,7 @@ export default function SettingsView() {
       headerTitle="Categories"
       headerSubtitle=""
     >
-      <div className="p-4">
+      <div className="h-full min-h-0 overflow-y-auto p-4">
         {activeCategory === 'visual' && <VisualSettings />}
         {activeCategory === 'llms' && <LLMSettings />}
         {activeCategory === 'notifications' && <NotificationSettings />}

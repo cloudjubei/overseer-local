@@ -1,11 +1,9 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import type { ToolCall, ToolResultType } from 'thefactory-tools'
 import Code from '../../ui/Code'
-import { StructuredUnifiedDiff } from '../tool-popups/diffUtils'
 import FeatureSummaryCard from '../../stories/FeatureSummaryCard'
 import { useStories } from '@renderer/contexts/StoriesContext'
 import { useActiveProject } from '@renderer/contexts/ProjectContext'
-import { filesService } from '@renderer/services/filesService'
 
 import { StatusIcon } from './components/StatusIcon'
 import { SectionTitle } from './components/SectionTitle'
@@ -15,15 +13,10 @@ import { InlineOldNew } from './components/InlineOldNew'
 import { NewContentOnly } from './components/NewContentOnly'
 import { ReorderList } from './components/ReorderList'
 
-import {
-  buildSimpleUnifiedDiff,
-  buildUnifiedDiffIfPresent,
-  extract,
-  isCompletelyNewFile,
-  looksLikeDiffPatchText,
-  tryString,
-} from './utils'
+import { extract, isCompletelyNewFile, tryString } from './utils'
 import StorySummaryCard from '@renderer/components/stories/StorySummaryCard'
+import { WriteToolsPreview } from './renderers/WriteToolsPreview'
+import { TextToolsPreview } from './renderers/TextToolsPreview'
 
 export default function ToolCallHoverCard({
   toolCall,
@@ -41,10 +34,13 @@ export default function ToolCallHoverCard({
   const args = toolCall?.arguments || {}
   const toolName = String(name)
 
+  const isInFlight =
+    resultType === 'pending' || resultType === 'running' || resultType === 'require_confirmation'
+
   const toolPrimaryPath: string | undefined = (() => {
-    // Used for headers/labels. Keep this conservative and only for tools that clearly have a 'path'.
     if (toolName === 'writeFile') return tryString(extract(args, ['path']))
     if (toolName === 'writeDiffToFile') return tryString(extract(args, ['path']))
+    if (toolName === 'writeStructuredDiffToFile') return tryString(extract(args, ['path']))
     if (toolName === 'readFileRange') return tryString(extract(args, ['path']))
     if (toolName === 'readFileStructure') return tryString(extract(args, ['path']))
     if (toolName === 'grepFile') return tryString(extract(args, ['path']))
@@ -54,70 +50,78 @@ export default function ToolCallHoverCard({
 
   const headerPath: string | undefined = toolPrimaryPath
 
-  const writeFileNewText: string | undefined = (() => {
-    if (toolName !== 'writeFile') return undefined
-    const content = extract(args, ['content'])
-    if (typeof content === 'string') return content
-    return tryString(content)
-  })()
+  const [sideBySide, setSideBySide] = useState<boolean>(false)
 
-  const writeFileResultDiff = buildUnifiedDiffIfPresent(result)
-
-  const [computedDiff, setComputedDiff] = useState<string | undefined>(undefined)
-  const [computedIsNewFile, setComputedIsNewFile] = useState<boolean>(false)
-
-  useEffect(() => {
-    let cancelled = false
-    async function run() {
-      if (toolName !== 'writeFile') return
-      if (!toolPrimaryPath) return
-      if (typeof writeFileNewText !== 'string') return
-
-      try {
-        const beforeText = projectId
-          ? await filesService.readFile(projectId, toolPrimaryPath)
-          : undefined
-
-        if (cancelled) return
-
-        const diff = buildSimpleUnifiedDiff(toolPrimaryPath, beforeText, writeFileNewText)
-        setComputedDiff(diff)
-        setComputedIsNewFile(beforeText == null)
-      } catch {
-        // If we can't read the file, just skip computed diff.
-      }
+  // Split-toggle rules:
+  // - write tools: allow only when it is NOT a completely new file.
+  // - text tools: allow only while in-flight (once finished we only show new content).
+  const canShowSplitToggle = useMemo(() => {
+    if (toolName === 'writeFile' || toolName === 'writeDiffToFile' || toolName === 'writeStructuredDiffToFile') {
+      const isNew = toolName === 'writeFile' ? isCompletelyNewFile(result) : false
+      return !isNew
     }
 
-    run()
-    return () => {
-      cancelled = true
+    if (toolName === 'updateStoryDescription' || toolName === 'updateFeatureDescription') {
+      return isInFlight
     }
-  }, [toolName, toolPrimaryPath, writeFileNewText, projectId])
 
-  function errorContentOnly(): React.ReactNode {
-    const msg = tryString(
-      extract(result, ['message']) || extract(result, ['error']) || extract(result, ['result']),
-    )
-    const label = msg ? 'Error' : 'Error (no details)'
-    return <NewContentOnly text={msg} label={label} />
-  }
+    return false
+  }, [toolName, result, isInFlight])
+
+  // If we hide the split toggle, force inline view.
+  useMemo(() => {
+    if (!canShowSplitToggle && sideBySide) setSideBySide(false)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canShowSplitToggle])
 
   const content = useMemo(() => {
     const args = toolCall?.arguments || {}
     const n = String(name)
 
     if (resultType === 'errored') {
-      return errorContentOnly()
+      const msg = tryString(
+        extract(result, ['message']) || extract(result, ['error']) || extract(result, ['result']),
+      )
+      const label = msg ? 'Error' : 'Error (no details)'
+      return <NewContentOnly text={msg} label={label} />
     }
 
+    // ── extracted renderers ──
+    if (n === 'writeFile' || n === 'writeDiffToFile' || n === 'writeStructuredDiffToFile') {
+      return (
+        <WriteToolsPreview
+          toolCall={toolCall}
+          result={result}
+          resultType={resultType}
+          sideBySide={sideBySide}
+          projectId={projectId}
+        />
+      )
+    }
+
+    if (n === 'updateStoryDescription' || n === 'updateFeatureDescription') {
+      return (
+        <TextToolsPreview
+          toolCall={toolCall}
+          result={result}
+          resultType={resultType}
+          sideBySide={sideBySide}
+          projectId={projectId}
+          storiesById={storiesById}
+          featuresById={featuresById}
+        />
+      )
+    }
+
+    // ── existing local renderers ──
     if (n === 'readPaths') {
       const files: string[] = extract(args, ['paths']) ?? []
 
       return (
-        <div className="text-xs space-y-1">
+        <div className='text-xs space-y-1'>
           {files.map((file, idx) => (
             <Row key={file || idx}>
-              <span className="font-mono text-[11px]">{file || '(unknown)'}</span>
+              <span className='font-mono text-[11px]'>{file || '(unknown)'}</span>
             </Row>
           ))}
         </div>
@@ -125,15 +129,14 @@ export default function ToolCallHoverCard({
     }
 
     if (n === 'webReadURLs') {
-      // Treat identical to 'readPaths'
       const urls = (extract(args, ['urls']) ?? []) as Array<string | undefined>
       const safeUrls = urls.filter((u): u is string => typeof u === 'string')
 
       return (
-        <div className="text-xs space-y-1">
+        <div className='text-xs space-y-1'>
           {safeUrls.map((url, idx) => (
             <Row key={url || idx}>
-              <span className="font-mono text-[11px]">{url || '(unknown)'}</span>
+              <span className='font-mono text-[11px]'>{url || '(unknown)'}</span>
             </Row>
           ))}
         </div>
@@ -144,7 +147,6 @@ export default function ToolCallHoverCard({
       const query = tryString(extract(args, ['query'])) || ''
       const qLines = query.split(/\r?\n/)
 
-      // When done, output titles of items returned.
       const rawItems =
         extract(result, ['items']) ||
         extract(result, ['results']) ||
@@ -165,9 +167,9 @@ export default function ToolCallHoverCard({
         : []
 
       return (
-        <div className="text-xs space-y-1">
+        <div className='text-xs space-y-1'>
           <Row>
-            <span className="text-[var(--text-secondary)]">Query:</span>
+            <span className='text-[var(--text-secondary)]'>Query:</span>
           </Row>
           <PreLimited lines={qLines} maxLines={2} />
 
@@ -182,7 +184,7 @@ export default function ToolCallHoverCard({
                 />
               </div>
             ) : (
-              <div className="text-[11px] text-[var(--text-secondary)]">No results</div>
+              <div className='text-[11px] text-[var(--text-secondary)]'>No results</div>
             )
           ) : null}
         </div>
@@ -190,7 +192,6 @@ export default function ToolCallHoverCard({
     }
 
     if (n === 'listContents' || n === 'getInterface') {
-      // Display vertically to avoid horizontal scrolling regressions.
       const raw =
         extract(result, ['result']) ||
         extract(result, ['results']) ||
@@ -214,15 +215,15 @@ export default function ToolCallHoverCard({
           : []
 
       return (
-        <div className="text-xs space-y-1">
+        <div className='text-xs space-y-1'>
           {items.length > 0 ? (
             items.map((line, idx) => (
               <Row key={`${line}-${idx}`}>
-                <span className="font-mono text-[11px]">{line}</span>
+                <span className='font-mono text-[11px]'>{line}</span>
               </Row>
             ))
           ) : (
-            <div className="text-[11px] text-[var(--text-secondary)]">No results</div>
+            <div className='text-[11px] text-[var(--text-secondary)]'>No results</div>
           )}
         </div>
       )
@@ -245,35 +246,6 @@ export default function ToolCallHoverCard({
       const oldVal = result ? undefined : featuresById[args.featureId]?.title
       const newVal = tryString(extract(args, ['title']))
       return <InlineOldNew oldVal={oldVal} newVal={newVal} />
-    }
-
-    if (n === 'writeDiffToFile') {
-      const patchText = buildUnifiedDiffIfPresent(result) || tryString(extract(args, ['diff']))
-      if (patchText) {
-        // Prefer the nicer structured diff viewer when we have a unified diff.
-        if (patchText.includes('@@')) return <StructuredUnifiedDiff patch={patchText} />
-        return <Code code={patchText} language="diff" />
-      }
-      return <div className="text-[11px] text-[var(--text-secondary)]">No diff output</div>
-    }
-
-    if (n === 'writeFile') {
-      const diff = writeFileResultDiff || computedDiff
-      const newText = writeFileNewText
-      const isNew = isCompletelyNewFile(result, writeFileResultDiff) || computedIsNewFile
-
-      if (diff) {
-        if (isNew) {
-          return <NewContentOnly text={diff} label={headerPath} />
-        }
-        return <StructuredUnifiedDiff patch={diff} />
-      }
-
-      if (typeof newText === 'string') {
-        return <NewContentOnly text={newText} />
-      }
-
-      return <div className="text-[11px] text-[var(--text-secondary)]">No content</div>
     }
 
     if (n === 'deletePath') {
@@ -301,7 +273,7 @@ export default function ToolCallHoverCard({
       if (Array.isArray(order)) {
         return <ReorderList items={order} movedId={movedId} />
       }
-      return <div className="text-[11px] text-[var(--text-secondary)]">No reorder data</div>
+      return <div className='text-[11px] text-[var(--text-secondary)]'>No reorder data</div>
     }
 
     if (n === 'searchFiles') {
@@ -311,9 +283,9 @@ export default function ToolCallHoverCard({
       const qLines = query.split(/\r?\n/)
 
       return (
-        <div className="text-xs space-y-1">
+        <div className='text-xs space-y-1'>
           <Row>
-            <span className="text-[var(--text-secondary)]">Query:</span>
+            <span className='text-[var(--text-secondary)]'>Query:</span>
           </Row>
           <PreLimited lines={qLines} maxLines={2} />
 
@@ -328,7 +300,7 @@ export default function ToolCallHoverCard({
                 />
               </div>
             ) : (
-              <div className="text-[11px] text-[var(--text-secondary)]">No matches</div>
+              <div className='text-[11px] text-[var(--text-secondary)]'>No matches</div>
             )
           ) : null}
         </div>
@@ -347,21 +319,21 @@ export default function ToolCallHoverCard({
       const safeTestFiles = testFiles.filter((p): p is string => typeof p === 'string')
 
       return (
-        <div className="text-xs space-y-1">
+        <div className='text-xs space-y-1'>
           <Row>
-            <span className="text-[var(--text-secondary)]">Summary:</span>
+            <span className='text-[var(--text-secondary)]'>Summary:</span>
           </Row>
           <Row>
-            <span className="font-mono text-[11px]">passed={passed}</span>
-            <span className="mx-1">·</span>
-            <span className="font-mono text-[11px]">failed={failed}</span>
-            <span className="mx-1">·</span>
-            <span className="font-mono text-[11px]">skipped={skipped}</span>
-            <span className="mx-1">·</span>
-            <span className="font-mono text-[11px]">total={total}</span>
+            <span className='font-mono text-[11px]'>passed={passed}</span>
+            <span className='mx-1'>·</span>
+            <span className='font-mono text-[11px]'>failed={failed}</span>
+            <span className='mx-1'>·</span>
+            <span className='font-mono text-[11px]'>skipped={skipped}</span>
+            <span className='mx-1'>·</span>
+            <span className='font-mono text-[11px]'>total={total}</span>
           </Row>
           <Row>
-            <span className="font-mono text-[11px]">durationMs={duration}</span>
+            <span className='font-mono text-[11px]'>durationMs={duration}</span>
           </Row>
 
           {safeTestFiles.length > 0 ? (
@@ -384,11 +356,7 @@ export default function ToolCallHoverCard({
       return a || ''
     })()
 
-    if (looksLikeDiffPatchText(str)) {
-      return <Code language="diff" code={str} />
-    }
-
-    return <Code language="json" code={str} />
+    return <Code language='json' code={str} />
   }, [
     toolCall,
     name,
@@ -396,32 +364,47 @@ export default function ToolCallHoverCard({
     resultType,
     storiesById,
     featuresById,
-    writeFileResultDiff,
-    computedDiff,
-    computedIsNewFile,
-    writeFileNewText,
-    headerPath,
+    sideBySide,
+    projectId,
   ])
 
   return (
-    <div className="w-[420px] max-w-[70vw] rounded-md border border-[var(--border-subtle)] bg-[var(--surface-overlay)] p-2 shadow-[var(--shadow-2)]">
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
+    <div className='w-[480px] max-w-[70vw] rounded-md border border-[var(--border-subtle)] bg-[var(--surface-overlay)] p-2 shadow-[var(--shadow-2)]'>
+      <div className='flex items-center justify-between gap-2'>
+        <div className='flex items-center gap-2'>
           <StatusIcon resultType={resultType} />
-          <div className="text-sm font-semibold">{toolName}</div>
+          <div className='text-sm font-semibold'>{toolName}</div>
         </div>
+
+        {canShowSplitToggle ? (
+          <div className='flex bg-[var(--surface-base)] rounded-md border border-[var(--border-subtle)] p-0.5 gap-0.5'>
+            <button
+              onClick={() => setSideBySide(false)}
+              className={`px-2 py-0.5 text-[10px] font-medium rounded transition-colors ${!sideBySide ? 'bg-[var(--surface-overlay)] text-[var(--text-primary)] shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
+              title='Inline Unified View'
+              type='button'
+            >
+              Inline
+            </button>
+            <button
+              onClick={() => setSideBySide(true)}
+              className={`px-2 py-0.5 text-[10px] font-medium rounded transition-colors ${sideBySide ? 'bg-[var(--surface-overlay)] text-[var(--text-primary)] shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
+              title='Split Side-by-Side View'
+              type='button'
+            >
+              Split
+            </button>
+          </div>
+        ) : null}
       </div>
 
       {headerPath ? (
-        <div
-          className="mt-1 font-mono text-[11px] text-[var(--text-secondary)] truncate"
-          title={headerPath}
-        >
+        <div className='mt-1 font-mono text-[11px] text-[var(--text-secondary)] truncate' title={headerPath}>
           {headerPath}
         </div>
       ) : null}
 
-      <div className="mt-2 max-h-[60vh] overflow-auto pr-1">{content}</div>
+      <div className='mt-2 max-h-[60vh] overflow-auto pr-1'>{content}</div>
     </div>
   )
 }

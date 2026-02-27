@@ -4,6 +4,8 @@
   z-index: var(--z-popover, 1300); /* Above chat sidebar (z-1100) and modals (1200) */
   background: var(--surface-overlay);
   color: var(--text-primary);
+  max-width: min(520px, calc(100vw - 16px));
+  overflow-x: hidden;
   border: 1px solid var(--border-default);
   border-radius: var(--radius-2);
   box-shadow: var(--shadow-3);

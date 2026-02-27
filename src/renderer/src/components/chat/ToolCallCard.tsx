@@ -278,6 +278,7 @@ function ToolCallCardInner({
   return (
     <Tooltip
       variant="bare"
+      sideAlign="start"
       content={
         <ToolCallHoverCard
           toolCall={toolCall}

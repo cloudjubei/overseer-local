@@ -1,3 +1,5 @@
+import { createTwoFilesPatch } from 'diff'
+
 export function tryString(v: any): string | undefined {
   if (v == null) return undefined
   try {
@@ -48,13 +50,19 @@ export function buildSimpleUnifiedDiff(
   if (!path || typeof afterText !== 'string') return undefined
   const before = typeof beforeText === 'string' ? beforeText : ''
   if (before === afterText) return undefined
-  const beforeLines = before.split(/\r?\n/)
-  const afterLines = afterText.split(/\r?\n/)
-  const header = [`--- a/${path}`, `+++ b/${path}`]
-  const hunk = [`@@ -1,${Math.max(1, beforeLines.length)} +1,${Math.max(1, afterLines.length)} @@`]
-  const removed = beforeLines.map((l) => `-${l}`)
-  const added = afterLines.map((l) => `+${l}`)
-  return [...header, ...hunk, ...removed, ...added].join('\n')
+
+  // Use the 'diff' library to generate a proper unified diff
+  // This handles context lines, hunk headers, and proper line counting automatically.
+  // We pass empty strings for headers to keep it minimal if preferred,
+  // or use the path for clarity.
+  try {
+    const patch = createTwoFilesPatch(path, path, before, afterText, '', '')
+    return patch
+  } catch (err) {
+    console.error('Failed to generate diff', err)
+    // Fallback or return undefined
+    return undefined
+  }
 }
 
 export function buildUnifiedDiffIfPresent(result: any): string | undefined {
