@@ -22,7 +22,7 @@ import { Button } from '@renderer/components/ui/Button'
 import { Modal } from '@renderer/components/ui/Modal'
 import { useChatUnread } from '@renderer/hooks/useChatUnread'
 import { useActiveProject } from '@renderer/contexts/ProjectContext'
-import { getChatContextPath } from 'thefactory-tools/utils'
+import { getChatContextKey } from 'thefactory-tools/utils'
 import { useNotifications } from '@renderer/hooks/useNotifications'
 import UsageModal from './UsageModal'
 import ChatSettingsDropdown, { type ToolToggle } from './ChatSettingsDropdown'
@@ -83,7 +83,7 @@ export default function ChatSidebar({
 
   const currentSettings = useMemo(() => getSettings(context), [getSettings, context])
 
-  const chatKey = useMemo(() => getChatContextPath(context), [context])
+  const chatKey = useMemo(() => getChatContextKey(context), [context])
 
   const {
     text: localText,
@@ -416,8 +416,8 @@ export default function ChatSidebar({
       try {
         localStorage.setItem('chat-last-selected-context', JSON.stringify(general))
       } catch {}
-      const generalPath = getChatContextPath(general).replace(/\.json$/, '')
-      const targetHash = `#chat/${generalPath}`
+      const generalPath = getChatContextKey(general)
+      const targetHash = `#chats${generalPath}`
       if (window.location.hash !== targetHash) {
         window.location.hash = targetHash
       } else {
@@ -606,6 +606,7 @@ export default function ChatSidebar({
         isOpen={isCostsModalOpen}
         onClose={() => setIsCostsModalOpen(false)}
         messages={chat?.chat.messages || []}
+        chatKey={chatKey}
       />
     </section>
   )

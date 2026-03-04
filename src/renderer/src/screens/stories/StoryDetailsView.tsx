@@ -6,11 +6,13 @@ import { useActiveProject } from '@renderer/contexts/ProjectContext'
 import { useAgents } from '@renderer/contexts/AgentsContext'
 import AgentRunBullet from '@renderer/components/agents/AgentRunBullet'
 import { ChatContext, Feature, Status, Story } from 'thefactory-tools'
-import { IconBack, IconChevron, IconEdit, IconPlus } from '@renderer/components/ui/icons/Icons'
+import { IconBack, IconCalculator, IconChevron, IconEdit, IconPlus } from '@renderer/components/ui/icons/Icons'
 import ExclamationChip from '@renderer/components/stories/ExclamationChip'
 import RunAgentButton from '@renderer/components/stories/RunAgentButton'
 import { RichText } from '@renderer/components/ui/RichText'
 import ModelChip from '@renderer/components/agents/ModelChip'
+import { getChatContextKey } from 'thefactory-tools/utils'
+import UsageModal from '@renderer/components/chat/UsageModal'
 import { StatusPicker, statusKey, STATUS_LABELS } from '@renderer/components/stories/StatusControl'
 import { Button } from '@renderer/components/ui/Button'
 import { useStories } from '@renderer/contexts/StoriesContext'
@@ -36,6 +38,7 @@ function featureMatchesQuery(f: Feature, q: string) {
 export default function StoryDetailsView({ storyId }: { storyId: string }) {
   const [story, setStory] = useState<Story | null>(null)
   const [saving, setSaving] = useState(false)
+  const [isCostsModalOpen, setIsCostsModalOpen] = useState(false)
   const { openModal, navigateView, storiesRoute, navigateAgentRun } = useNavigator()
   const ulRef = useRef<HTMLUListElement>(null)
   const [isOverviewExpanded, setIsOverviewExpanded] = useState(false)
@@ -71,6 +74,11 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
   const chatContext: ChatContext | undefined = useMemo(() => {
     if (!projectId || !storyId) return undefined
     return { type: 'STORY', projectId, storyId }
+  }, [projectId, storyId])
+
+  const chatKey = useMemo(() => {
+    if (!projectId || !storyId) return undefined
+    return getChatContextKey({ type: 'STORY', projectId, storyId })
   }, [projectId, storyId])
 
   useEffect(() => {
@@ -382,10 +390,31 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
                   />
                 )}
               </div>
-              <ModelChip editable />
+              <div className="flex items-center gap-2">
+                <ModelChip editable />
+                <button
+                  type="button"
+                  className="btn-secondary btn-icon"
+                  title="Usage costs"
+                  aria-label="View usage costs"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setIsCostsModalOpen(true)
+                  }}
+                >
+                  <IconCalculator className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           </div>
         </header>
+
+        <UsageModal
+          isOpen={isCostsModalOpen}
+          onClose={() => setIsCostsModalOpen(false)}
+          chatKey={chatKey}
+          messages={[]}
+        />
 
         {/* New Blockers section between header and search toolbar (only if any blockers) */}
         {showStoryBlockersSection && (

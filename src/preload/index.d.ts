@@ -3,6 +3,7 @@ import type { ProjectsGroupsService } from '@renderer/services/projectsGroupsSer
 import type { ProjectsService } from '@renderer/services/projectsService'
 import type { ChatsService } from '@renderer/services/chatsService'
 import type { PricingService } from '@renderer/services/pricingService'
+import type { CostsService } from '@renderer/services/costsService'
 import type { FilesService } from '@renderer/services/filesService'
 import type { NotificationsService } from '@renderer/services/notificationsService'
 import type { SettingsService } from '@renderer/services/settingsService'
@@ -31,6 +32,7 @@ declare global {
     chatsService: ChatsService
     completionService: CompletionService
     pricingService: PricingService
+    costsService: CostsService
     notificationsService: NotificationsService
     settingsService: SettingsService
     liveDataService: LiveDataService

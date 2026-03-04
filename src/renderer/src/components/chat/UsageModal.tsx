@@ -1,8 +1,14 @@
 import { useEffect, useMemo, useState } from 'react'
-import type { CompletionAssistantMessage, CompletionMessage, ModelPrice } from 'thefactory-tools'
+import type {
+  CompletionAssistantMessage,
+  CompletionMessage,
+  LLMCostAggregateContent,
+  ModelPrice,
+} from 'thefactory-tools'
 
 import { Modal } from '@renderer/components/ui/Modal'
 import { getPrice } from '@renderer/services/pricingService'
+import { useCosts } from '@renderer/contexts/CostsContext'
 
 function formatUSD(n?: number) {
   if (n == null || Number.isNaN(n)) return '—'
@@ -11,6 +17,38 @@ function formatUSD(n?: number) {
 
 function safeNumber(n: unknown): number {
   return typeof n === 'number' && isFinite(n) ? n : 0
+}
+
+function prettifyBreakdownKey(k: string): { provider?: string; model?: string; label: string } {
+  // Common convention across the UI is 'provider::model'
+  if (k.includes('::')) {
+    const [provider, ...rest] = k.split('::')
+    const model = rest.join('::')
+    if (provider && model) return { provider, model, label: `${provider} · ${model}` }
+  }
+
+  // Alternate convention: 'provider/model'
+  // (avoid parsing URLs like 'https://...' by requiring exactly one slash)
+  if (k.includes('/') && !k.includes('://')) {
+    const parts = k.split('/')
+    if (parts.length === 2) {
+      const [provider, model] = parts
+      if (provider && model) return { provider, model, label: `${provider} · ${model}` }
+    }
+  }
+
+  // Alternate convention: 'provider:model'
+  // Avoid colliding with other colon-containing strings (e.g. JSON, time, etc.) by requiring exactly one ':'
+  // and excluding '://'
+  if (k.includes(':') && !k.includes('://')) {
+    const parts = k.split(':')
+    if (parts.length === 2) {
+      const [provider, model] = parts
+      if (provider && model) return { provider, model, label: `${provider} · ${model}` }
+    }
+  }
+
+  return { label: k }
 }
 
 type UsageAgg = {
@@ -48,14 +86,42 @@ export type UsageModalProps = {
   isOpen: boolean
   onClose: () => void
   messages: CompletionMessage[]
+  chatKey?: string
 }
 
 function isAssistant(m: CompletionMessage): m is CompletionAssistantMessage {
   return m.role === 'assistant' && !!m.usage && !!m.model
 }
 
-export default function UsageModal({ isOpen, onClose, messages }: UsageModalProps) {
+export default function UsageModal({ isOpen, onClose, messages, chatKey }: UsageModalProps) {
   const [pricesByKey, setPricesByKey] = useState<Record<string, ModelPrice | undefined>>({})
+  const [durable, setDurable] = useState<LLMCostAggregateContent | undefined>(undefined)
+  const { getCost } = useCosts()
+
+  useEffect(() => {
+    let cancelled = false
+    if (!isOpen) return
+    if (!chatKey) {
+      setDurable(undefined)
+      return
+    }
+
+    const run = async () => {
+      try {
+        const agg = await getCost(chatKey)
+        if (cancelled) return
+        setDurable(agg)
+      } catch {
+        if (cancelled) return
+        setDurable(undefined)
+      }
+    }
+
+    void run()
+    return () => {
+      cancelled = true
+    }
+  }, [chatKey, isOpen, getCost])
 
   useEffect(() => {
     let cancelled = false
@@ -136,6 +202,8 @@ export default function UsageModal({ isOpen, onClose, messages }: UsageModalProp
         } satisfies UsageRow
       })
   }, [messages, pricesByKey])
+  const hasCurrent = usageRows.length > 0
+
 
   const aggByModel = useMemo(() => {
     const totalsAgg = emptyAgg()
@@ -222,6 +290,46 @@ export default function UsageModal({ isOpen, onClose, messages }: UsageModalProp
     )
   }
 
+  const durableAgg: UsageAgg | undefined = durable
+    ? {
+        costUSD: durable.totalCostUSD,
+        promptTokens: durable.totalPromptTokens,
+        completionTokens: durable.totalCompletionTokens,
+        totalTokens: durable.totalPromptTokens + durable.totalCompletionTokens,
+        cachedReadInputTokens: durable.totalCachedReadInputTokens,
+      }
+    : undefined
+
+  const durableBreakdownRows: Array<{ key: string; label: string } & UsageAgg> | undefined = useMemo(
+    () => {
+      if (!durable) return undefined
+      const rows = Object.entries(durable.breakdown)
+        .map(([k, b]) => {
+          const pretty = prettifyBreakdownKey(k)
+          return {
+            key: `durable:${k}`,
+            label: pretty.label,
+            costUSD: b.costUSD,
+            promptTokens: b.promptTokens,
+            completionTokens: b.completionTokens,
+            totalTokens: b.promptTokens + b.completionTokens,
+            cachedReadInputTokens: b.cachedReadInputTokens,
+          }
+        })
+        .sort((a, b) => b.costUSD - a.costUSD)
+
+      return [
+        {
+          key: 'durable:TOTALS',
+          label: 'TOTALS',
+          ...(durableAgg || emptyAgg()),
+        },
+        ...rows,
+      ]
+    },
+    [durable, durableAgg],
+  )
+
   return (
     <Modal
       isOpen={isOpen}
@@ -231,29 +339,75 @@ export default function UsageModal({ isOpen, onClose, messages }: UsageModalProp
     >
       <div className="bg-[var(--surface-base)] text-sm text-[var(--text-secondary)]">
         <div className="space-y-6">
-          <div className="space-y-2">
-            <div className="p-4">
-              <div className="border border-[var(--border-subtle)] rounded-md overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="min-w-full text-sm table-fixed">
-                    {colGroup}
-                    {sharedHeader}
-                    {renderAggBody(
-                      aggByModel.map((r) => ({
-                        key: `${r.name}`,
-                        label: `${r.name}`,
-                        ...r,
-                      })),
-                    )}
-                  </table>
+          {chatKey ? (
+            <div className="space-y-2">
+              <div className="px-4 pt-4">
+                <div className="text-[12px] text-[var(--text-secondary)]">
+                  Ledger totals (durable)
+                </div>
+              </div>
+              <div className="px-4">
+                <div className="border border-[var(--border-subtle)] rounded-md overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full text-sm table-fixed">
+                      {colGroup}
+                      {sharedHeader}
+                      {durableBreakdownRows
+                        ? renderAggBody(durableBreakdownRows)
+                        : renderAggBody([
+                            {
+                              key: 'durable',
+                              label: 'TOTALS (unavailable)',
+                              ...emptyAgg(),
+                            },
+                          ])}
+                    </table>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          ) : null}
 
-          <div className="text-[11px] text-[var(--text-secondary)] opacity-80 px-4 pb-4">
-            If a message has no stored cost, cost is estimated using current pricing for that
-            provider+model and the message's tokens.
+          {hasCurrent ? (
+            <div className="space-y-2">
+              <div className="px-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 h-px bg-[var(--border-subtle)]" />
+                  <div className="text-[12px] text-[var(--text-secondary)] tracking-wide">
+                    CURRENT
+                  </div>
+                  <div className="flex-1 h-px bg-[var(--border-subtle)]" />
+                </div>
+              </div>
+              <div className="px-4 pb-4">
+                <div className="border border-[var(--border-subtle)] rounded-md overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full text-sm table-fixed">
+                      {colGroup}
+                      {sharedHeader}
+                      {renderAggBody(
+                        aggByModel.map((r) => ({
+                          key: `${r.name}`,
+                          label: `${r.name}`,
+                          ...r,
+                        })),
+                      )}
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : null}
+
+          <div className="text-[11px] text-[var(--text-secondary)] opacity-80 px-4 pb-4 space-y-1">
+            <div>
+              If a message has no stored cost, cost is estimated using current pricing for that
+              provider+model and the message's tokens.
+            </div>
+            <div>
+              Durable totals are computed from the persisted cost ledger for this 'chatKey' and do
+              not decrease if you clear/restart/delete a chat.
+            </div>
           </div>
         </div>
       </div>

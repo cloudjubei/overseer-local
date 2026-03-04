@@ -10,25 +10,25 @@ import {
   AgentRun,
 } from 'thefactory-tools'
 import type DatabaseManager from '../db/DatabaseManager'
-import FactoryLLMPricingManager from './FactoryLLMPricingManager'
+import FactoryLLMCostsManager from './FactoryLLMCostsManager'
 import BaseManager from '../BaseManager'
 
 export default class FactoryAgentRunManager extends BaseManager {
   private agentRunTools?: AgentRunTools
   private orchestrator?: RunOrchestrator
 
-  private factoryLLMPricingManager: FactoryLLMPricingManager
+  private factoryLLMCostsManager: FactoryLLMCostsManager
   private dbManager: DatabaseManager
 
   constructor(
     projectRoot: string,
     window: BrowserWindow,
-    factoryLLMPricingManager: FactoryLLMPricingManager,
+    factoryLLMCostsManager: FactoryLLMCostsManager,
     dbManager: DatabaseManager,
   ) {
     super(projectRoot, window)
 
-    this.factoryLLMPricingManager = factoryLLMPricingManager
+    this.factoryLLMCostsManager = factoryLLMCostsManager
     this.dbManager = dbManager
 
     this.agentRunTools = undefined
@@ -38,7 +38,6 @@ export default class FactoryAgentRunManager extends BaseManager {
   async init(): Promise<void> {
     this.agentRunTools = createAgentRunTools(this.projectRoot)
     this.agentRunTools!.subscribe(async (agentRunUpdate) => {
-      console.log('AGENT RUN UPDATE: ', agentRunUpdate.type)
       if (this.window) {
         this.window.webContents.send(IPC_HANDLER_KEYS.FACTORY_RUNS_SUBSCRIBE, agentRunUpdate)
       }
@@ -47,7 +46,7 @@ export default class FactoryAgentRunManager extends BaseManager {
 
     this.orchestrator = createOrchestrator({
       agentRunTools: this.agentRunTools,
-      pricing: this.factoryLLMPricingManager.getManager()!,
+      llmCostsTools: this.factoryLLMCostsManager.getTools(),
     })
 
     await super.init()
@@ -77,7 +76,6 @@ export default class FactoryAgentRunManager extends BaseManager {
   }
 
   async startRun(params: AgentRun): Promise<AgentRunHistory> {
-    console.log('[factory] START_STORY', this._maskSecrets(params))
     try {
       const dbConnectionString = this.dbManager.getConnectionString()
       return await this.orchestrator!.startRun({ ...params, dbConnectionString })

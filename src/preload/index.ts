@@ -50,6 +50,8 @@ const STORIES_API = {
     ipcRenderer.invoke(IPC_HANDLER_KEYS.STORIES_UPDATE_STATUS, { projectId, storyId, status }),
   deleteStory: (projectId, storyId) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.STORIES_DELETE, { projectId, storyId }),
+  reindexStories: (projectId) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.STORIES_REINDEX, { projectId }),
   getFeature: (projectId, featureId) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.STORIES_FEATURE_GET, { projectId, featureId }),
   addFeature: (projectId, storyId, input) =>
@@ -276,6 +278,10 @@ const PRICING_API = {
     ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_PRICING_REFRESH, { provider, url }),
 }
 
+const COSTS_API = {
+  getCost: (chatKey) => ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_COSTS_GET, { chatKey }),
+}
+
 const FACTORY_TOOLS_API = {
   executeTool: (projectId, toolName, args) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TOOLS_EXECUTE, { projectId, toolName, args }),
@@ -447,6 +453,7 @@ if (process.contextIsolated) {
     contextBridge.exposeInMainWorld('factoryToolsService', FACTORY_TOOLS_API)
     contextBridge.exposeInMainWorld('factoryTestsService', FACTORY_TESTS_API)
     contextBridge.exposeInMainWorld('pricingService', PRICING_API)
+    contextBridge.exposeInMainWorld('costsService', COSTS_API)
     contextBridge.exposeInMainWorld('dbService', DB_API)
     contextBridge.exposeInMainWorld('documentIngestionService', DOCUMENT_INGESTION_API)
     contextBridge.exposeInMainWorld('gitService', GIT_API)

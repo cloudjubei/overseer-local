@@ -12,7 +12,15 @@ import StatusControl, {
 import { useAgents } from '@renderer/contexts/AgentsContext'
 import { Status, Story } from 'thefactory-tools'
 import ExclamationChip from '@renderer/components/stories/ExclamationChip'
-import { IconBoard, IconEdit, IconPlus, IconList } from '@renderer/components/ui/icons/Icons'
+import {
+  IconBoard,
+  IconEdit,
+  IconPlus,
+  IconList,
+  IconCalculator,
+} from '@renderer/components/ui/icons/Icons'
+import { getChatContextKey } from 'thefactory-tools/utils'
+import UsageModal from '@renderer/components/chat/UsageModal'
 import AgentRunBullet from '@renderer/components/agents/AgentRunBullet'
 import RunAgentButton from '@renderer/components/stories/RunAgentButton'
 import { RichText } from '@renderer/components/ui/RichText'
@@ -82,6 +90,13 @@ export default function StoriesListView() {
   const statusFilterRef = useRef<HTMLDivElement>(null)
 
   const { project, projectId } = useActiveProject()
+
+  const [isCostsModalOpen, setIsCostsModalOpen] = useState(false)
+  const chatKey = useMemo(() => {
+    if (!projectId) return undefined
+    return getChatContextKey({ type: 'PROJECT', projectId })
+  }, [projectId])
+
   const {
     storyIdsByProject,
     storiesById,
@@ -115,7 +130,7 @@ export default function StoriesListView() {
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [openModal, view])
+  }, [openModal, view, setView])
 
   const storyIdToDisplayIndex: Record<string, number> = useMemo(() => {
     return project?.storyIdToDisplayIndex ?? {}
@@ -339,8 +354,22 @@ export default function StoriesListView() {
           </div>
           <div className="right">
             <ModelChip editable className="mr-2" />
+            <button
+              onClick={() => setIsCostsModalOpen(true)}
+              className="btn-secondary btn-icon"
+              aria-label="View usage costs"
+              title="Usage costs"
+            >
+              <IconCalculator className="w-4 h-4" />
+            </button>
           </div>
         </div>
+        <UsageModal
+          isOpen={isCostsModalOpen}
+          onClose={() => setIsCostsModalOpen(false)}
+          messages={[]}
+          chatKey={chatKey}
+        />
 
         {/* Search and filters toolbar (wraps to two rows on small screens) */}
         <div className="stories-toolbar stories-searchbar shrink-0">

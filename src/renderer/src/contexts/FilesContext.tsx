@@ -9,7 +9,6 @@ export type DirNode = {
   dirs: DirNode[]
   files: FileMeta[]
 }
-
 function buildDirTree(files: FileMeta[]): DirNode {
   const root: DirNode = { name: '', relPath: '', dirs: [], files: [] }
   const dirMap = new Map<string, DirNode>()
@@ -44,7 +43,6 @@ function buildDirTree(files: FileMeta[]): DirNode {
     node.dirs.forEach(sortTree)
   }
   sortTree(root)
-
   return root
 }
 
@@ -58,7 +56,6 @@ export type FilesContextValue = {
 }
 
 const FilesContext = createContext<FilesContextValue | null>(null)
-
 export function FilesProvider({ children }: { children: React.ReactNode }) {
   const { projectId } = useActiveProject()
 
@@ -66,16 +63,29 @@ export function FilesProvider({ children }: { children: React.ReactNode }) {
   const [filesByPath, setFilesByPath] = useState<Record<string, FileMeta>>({})
   const [directoryTree, setDirectoryTree] = useState<DirNode | null>(null)
 
-  const update = async () => {
-    const files = await filesService.getAllFileStats(projectId)
-    updateCurrentFiles(files)
+  const normalizeFiles = (input: unknown): FileMeta[] => {
+    if (Array.isArray(input)) return input as FileMeta[]
+    // Prevent runtime crashes if the service returns undefined/null/object.
+    // Logging helps us diagnose upstream service issues without breaking the UI.
+    if (input != null) {
+      // eslint-disable-next-line no-console
+      console.warn('FilesContext: expected getAllFileStats() to return an array, got:', input)
+    }
+    return []
   }
-  const updateCurrentFiles = (files: FileMeta[]) => {
-    setFiles(files)
-    const newTree = buildDirTree(files)
+
+  const update = async () => {
+    const result = await filesService.getAllFileStats(projectId)
+    updateCurrentFiles(normalizeFiles(result))
+  }
+
+  const updateCurrentFiles = (filesInput: FileMeta[] | unknown) => {
+    const nextFiles = normalizeFiles(filesInput)
+    setFiles(nextFiles)
+    const newTree = buildDirTree(nextFiles)
     setDirectoryTree(newTree)
     let newFilesByPath: Record<string, FileMeta> = {}
-    for (const f of files) {
+    for (const f of nextFiles) {
       newFilesByPath[f.absolutePath] = f
       if (f.relativePath) {
         newFilesByPath[f.relativePath] = f
@@ -120,7 +130,6 @@ export function FilesProvider({ children }: { children: React.ReactNode }) {
     }),
     [files, directoryTree, readFile, writeFile, filesByPath, uploadFile],
   )
-
   return <FilesContext.Provider value={value}>{children}</FilesContext.Provider>
 }
 

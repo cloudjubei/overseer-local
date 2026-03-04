@@ -67,6 +67,7 @@ const IPC_HANDLER_KEYS = {
   STORIES_UPDATE_STATUS: 'stories:update-status',
   STORIES_DELETE: 'stories:delete',
   STORIES_FEATURE_GET: 'stories-feature:get',
+  STORIES_REINDEX: 'stories:reindex',
   STORIES_FEATURE_ADD: 'stories-feature:add',
   STORIES_FEATURE_UPDATE: 'stories-feature:update',
   STORIES_FEATURE_DELETE: 'stories-feature:delete',
@@ -126,6 +127,9 @@ const IPC_HANDLER_KEYS = {
   // Factory pricing
   FACTORY_PRICING_LIST: 'factory:pricing:list',
   FACTORY_PRICING_REFRESH: 'factory:pricing:refresh',
+
+  // Factory costs
+  FACTORY_COSTS_GET: 'factory:costs:get',
 
   // Factory tools
   FACTORY_TOOLS_EXECUTE: 'factory:tools:execute',

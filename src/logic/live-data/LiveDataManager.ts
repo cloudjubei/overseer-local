@@ -4,7 +4,7 @@ import { LiveDataStore } from './LiveDataStore'
 import { LiveDataRegistry } from './LiveDataRegistry'
 import { createAgentPricesProvider } from './providers/agentPricesProvider'
 import { createFetchJsonProvider } from './providers/fetchJsonProvider'
-import FactoryLLMPricingManager from '../factory/FactoryLLMPricingManager'
+import FactoryLLMCostsManager from '../factory/FactoryLLMCostsManager'
 import BaseManager from '../BaseManager'
 
 export type LiveService = {
@@ -41,25 +41,25 @@ export default class LiveDataManager extends BaseManager {
   private store: LiveDataStore
   private registry: LiveDataRegistry
 
-  private factoryLLMPricingManager: FactoryLLMPricingManager
+  private factoryLLMCostsManager: FactoryLLMCostsManager
 
   private services: LiveService[]
 
   constructor(
     projectRoot: string,
     window: BrowserWindow,
-    factoryLLMPricingManager: FactoryLLMPricingManager,
+    factoryLLMCostsManager: FactoryLLMCostsManager,
   ) {
     super(projectRoot, window)
     this.store = new LiveDataStore()
     this.registry = new LiveDataRegistry()
 
-    this.factoryLLMPricingManager = factoryLLMPricingManager
+    this.factoryLLMCostsManager = factoryLLMCostsManager
 
     this.services = this._loadServices()
 
     // Register built-in providers
-    this.registry.register(createAgentPricesProvider(this.store, this.factoryLLMPricingManager))
+    this.registry.register(createAgentPricesProvider(this.store, this.factoryLLMCostsManager))
     // Generic provider enables future-proof dynamic services by URL
     this.registry.register(createFetchJsonProvider(this.store))
   }

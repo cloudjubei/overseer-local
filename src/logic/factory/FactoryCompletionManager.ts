@@ -19,13 +19,13 @@ import type {
 import BaseManager from '../BaseManager'
 import FactoryToolsManager from './FactoryToolsManager'
 import ChatsManager from '../chat/ChatsManager'
-import FactoryLLMPricingManager from './FactoryLLMPricingManager'
-import { getChatContextPath } from 'thefactory-tools/utils'
+import FactoryLLMCostsManager from './FactoryLLMCostsManager'
+import { getChatContextKey } from 'thefactory-tools/utils'
 
 export default class FactoryCompletionManager extends BaseManager {
   private chatsManager: ChatsManager
   private factoryToolsManager: FactoryToolsManager
-  private factoryLLMPricingManager: FactoryLLMPricingManager
+  private factoryLLMCostsManager: FactoryLLMCostsManager
 
   private abortControllers: Record<string, AbortController> = {}
 
@@ -34,20 +34,24 @@ export default class FactoryCompletionManager extends BaseManager {
     window: BrowserWindow,
     chatsManager: ChatsManager,
     factoryToolsManager: FactoryToolsManager,
-    factoryLLMPricingManager: FactoryLLMPricingManager,
+    factoryLLMCostsManager: FactoryLLMCostsManager,
   ) {
     super(projectRoot, window)
 
     this.chatsManager = chatsManager
     this.factoryToolsManager = factoryToolsManager
-    this.factoryLLMPricingManager = factoryLLMPricingManager
+    this.factoryLLMCostsManager = factoryLLMCostsManager
   }
 
   getHandlersAsync(): Record<string, (args: any) => Promise<any>> {
     const handlers: Record<string, (args: any) => Promise<any>> = {}
 
-    handlers[IPC_HANDLER_KEYS.COMPLETION_SEND] = async ({ messages, systemPrompt, config }) =>
-      this.sendCompletion(messages, systemPrompt, config)
+    handlers[IPC_HANDLER_KEYS.COMPLETION_SEND] = async ({
+      chatContext,
+      config,
+      messages,
+      systemPrompt,
+    }) => this.sendCompletion(chatContext, config, messages, systemPrompt)
 
     handlers[IPC_HANDLER_KEYS.COMPLETION_TOOLS_SEND] = async ({
       projectId,
@@ -98,8 +102,8 @@ export default class FactoryCompletionManager extends BaseManager {
   }
 
   private enrichConfigWithPricing(config: LLMConfig): LLMConfig {
-    const pricing = this.factoryLLMPricingManager.getManager()
-    if (!pricing) return config
+    const llmCostsTools = this.factoryLLMCostsManager.getTools()
+    if (!llmCostsTools) return config
 
     if (
       config.costInputPerMTokensUSD != null ||
@@ -109,7 +113,7 @@ export default class FactoryCompletionManager extends BaseManager {
       return config
     }
 
-    const price = pricing.getPrice(config.provider, config.model)
+    const price = llmCostsTools.getPrice(config.provider, config.model)
     if (!price) return config
 
     const costInputPerMTokensUSD = price.inputPerMTokensUSD
@@ -143,13 +147,16 @@ export default class FactoryCompletionManager extends BaseManager {
   }
 
   async sendCompletion(
+    chatContext: ChatContext,
+    config: LLMConfig,
     messages: CompletionMessage[],
     systemPrompt: string,
-    config: LLMConfig,
   ): Promise<CompletionResponse> {
-    const completion = createCompletionTools(this.enrichConfigWithPricing(config))
-
+    const completion = createCompletionTools()
+    const llmConfig = this.enrichConfigWithPricing(config)
     const request: CompletionRequest = {
+      chatContext,
+      llmConfig,
       systemPrompt,
       messages,
     }
@@ -304,7 +311,7 @@ export default class FactoryCompletionManager extends BaseManager {
     const callTool = async (toolCall: ToolCall): Promise<any> => {
       await markToolMessageRunning(toolCall.toolCallId)
 
-      const updatedArgs = { ...(toolCall.arguments || {}) }
+      const updatedArgs = { ...(toolCall.arguments || {}), chatContext }
       if (chatContext.storyId && !('storyId' in updatedArgs)) {
         updatedArgs.storyId = chatContext.storyId
       }
@@ -381,11 +388,14 @@ export default class FactoryCompletionManager extends BaseManager {
     abortSignal?: AbortSignal,
   ): Promise<CompletionResponseTurns> {
     let currentChat: Chat = chat
-    const completion = createCompletionTools(this.enrichConfigWithPricing(config))
+    const completion = createCompletionTools()
+    const llmConfig = this.enrichConfigWithPricing(config)
 
     const messages = this.processChatMessagesForCompletion(currentChat.messages)
 
     const request: CompletionRequest = {
+      chatContext,
+      llmConfig,
       systemPrompt,
       messages,
       abortSignal,
@@ -502,6 +512,7 @@ export default class FactoryCompletionManager extends BaseManager {
       request,
       settings,
       callTool,
+      this.factoryLLMCostsManager.getTools(),
       toolCalledCallback,
       promptPreparedCallback,
       responseReceivedCallback,
@@ -536,7 +547,7 @@ export default class FactoryCompletionManager extends BaseManager {
   }
 
   async abortCompletion(chatContext: ChatContext): Promise<void> {
-    const path = getChatContextPath(chatContext)
+    const path = getChatContextKey(chatContext)
     const abortController = this.abortControllers[path]
     if (abortController) {
       abortController.abort()
@@ -546,13 +557,13 @@ export default class FactoryCompletionManager extends BaseManager {
 
   private createAbortSignal(chatContext: ChatContext): AbortSignal {
     const abortController = new AbortController()
-    const path = getChatContextPath(chatContext)
+    const path = getChatContextKey(chatContext)
     this.abortControllers[path] = abortController
     return abortController.signal
   }
 
   private cleanupAbort(chatContext: ChatContext) {
-    const path = getChatContextPath(chatContext)
+    const path = getChatContextKey(chatContext)
     delete this.abortControllers[path]
   }
   private isResumableToolResultType(t: ToolResultType): boolean {

@@ -13,14 +13,14 @@ import LiveDataManager from '../logic/live-data/LiveDataManager'
 import DatabaseManager from '../logic/db/DatabaseManager'
 import DocumentIngestionManager from '../logic/document_ingestion/DocumentIngestionManager'
 import FactoryCompletionManager from '../logic/factory/FactoryCompletionManager'
-import FactoryLLMPricingManager from '../logic/factory/FactoryLLMPricingManager'
+import FactoryLLMCostsManager from '../logic/factory/FactoryLLMCostsManager'
 import FactoryTestsManager from '../logic/factory/FactoryTestsManager'
 import LLMConfigsManager from '../logic/llm/LLMConfigsManager'
 import GitCredentialsManager from '../logic/git/GitCredentialsManager'
 import GitManager from '../logic/git/GitManager'
 
 export let databaseManager: DatabaseManager | undefined
-export let factoryLLMPricingManager: FactoryLLMPricingManager | undefined
+export let factoryLLMCostsManager: FactoryLLMCostsManager | undefined
 export let factoryAgentRunManager: FactoryAgentRunManager | undefined
 export let storiesManager: StoriesManager | undefined
 export let filesManager: FilesManager | undefined
@@ -42,20 +42,12 @@ let managers: BaseManager[] = []
 
 export async function initManagers(projectRoot: string, mainWindow: BrowserWindow): Promise<void> {
   databaseManager = new DatabaseManager(projectRoot, mainWindow)
-  factoryLLMPricingManager = new FactoryLLMPricingManager(projectRoot, mainWindow)
-  factoryAgentRunManager = new FactoryAgentRunManager(
-    projectRoot,
-    mainWindow,
-    factoryLLMPricingManager,
-    databaseManager,
-  )
   projectsGroupsManager = new ProjectsGroupsManager(projectRoot, mainWindow)
   projectsManager = new ProjectsManager(projectRoot, mainWindow)
   storiesManager = new StoriesManager(projectRoot, mainWindow, projectsManager)
   filesManager = new FilesManager(projectRoot, mainWindow, projectsManager, databaseManager)
   settingsManager = new SettingsManager(projectRoot, mainWindow)
   notificationsManager = new NotificationsManager(projectRoot, mainWindow, settingsManager)
-  liveDataManager = new LiveDataManager(projectRoot, mainWindow, factoryLLMPricingManager)
   chatsManager = new ChatsManager(projectRoot, mainWindow)
   documentIngestionManager = new DocumentIngestionManager(
     projectRoot,
@@ -64,28 +56,37 @@ export async function initManagers(projectRoot: string, mainWindow: BrowserWindo
     projectsManager,
     filesManager,
   )
+  llmConfigsManager = new LLMConfigsManager(projectRoot, mainWindow)
+  gitCredentialsManager = new GitCredentialsManager(projectRoot, mainWindow)
+  gitManager = new GitManager(projectRoot, mainWindow, projectsManager, gitCredentialsManager)
+
+  factoryLLMCostsManager = new FactoryLLMCostsManager(projectRoot, mainWindow, databaseManager)
+  liveDataManager = new LiveDataManager(projectRoot, mainWindow, factoryLLMCostsManager)
+  factoryTestsManager = new FactoryTestsManager(projectRoot, mainWindow, projectsManager)
+  factoryAgentRunManager = new FactoryAgentRunManager(
+    projectRoot,
+    mainWindow,
+    factoryLLMCostsManager,
+    databaseManager,
+  )
   factoryToolsManager = new FactoryToolsManager(
     projectRoot,
     mainWindow,
     projectsManager,
     settingsManager,
+    databaseManager,
+    gitManager,
   )
   factoryCompletionManager = new FactoryCompletionManager(
     projectRoot,
     mainWindow,
     chatsManager,
     factoryToolsManager,
-    factoryLLMPricingManager,
+    factoryLLMCostsManager,
   )
-  factoryTestsManager = new FactoryTestsManager(projectRoot, mainWindow, projectsManager)
-  llmConfigsManager = new LLMConfigsManager(projectRoot, mainWindow)
-  gitCredentialsManager = new GitCredentialsManager(projectRoot, mainWindow)
-  gitManager = new GitManager(projectRoot, mainWindow, projectsManager, gitCredentialsManager)
 
   managers = [
     databaseManager,
-    factoryLLMPricingManager,
-    factoryAgentRunManager,
     projectsGroupsManager,
     projectsManager,
     storiesManager,
@@ -93,14 +94,16 @@ export async function initManagers(projectRoot: string, mainWindow: BrowserWindo
     chatsManager,
     notificationsManager,
     settingsManager,
-    liveDataManager,
     documentIngestionManager,
+    gitCredentialsManager,
+    gitManager,
+    factoryLLMCostsManager,
+    liveDataManager,
+    factoryAgentRunManager,
     factoryToolsManager,
     factoryCompletionManager,
     factoryTestsManager,
     llmConfigsManager,
-    gitCredentialsManager,
-    gitManager,
   ]
 
   for (const manager of managers) {

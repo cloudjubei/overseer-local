@@ -10,6 +10,10 @@ import { ChatContext } from 'thefactory-tools'
 import { useAppSettings } from '../contexts/AppSettingsContext'
 import StatusChip from '@renderer/components/agents/StatusChip'
 import { formatDate, formatTime } from '@renderer/utils/time'
+import { useCosts } from '@renderer/contexts/CostsContext'
+import { getChatContextKey } from 'thefactory-tools/utils'
+import { COST_GROUP_ID_ALL } from 'thefactory-tools/constants'
+// import { costsService } from '@renderer/services/costsService'
 
 function formatUSD(n?: number) {
   if (n == null || !isFinite(n)) return '\u2014'
@@ -43,6 +47,26 @@ type CurrentProjectViewProps = {
 const CurrentProjectView = ({ openRunId, setOpenRunId }: CurrentProjectViewProps) => {
   const { runsHistory, cancelRun, deleteRunHistory, rateRun } = useAgents()
   const { projectId } = useActiveProject()
+  const { getCost } = useCosts()
+
+  const [durableAllCostUSD, setDurableAllCostUSD] = useState<number | undefined>(undefined)
+
+  useEffect(() => {
+    let cancelled = false
+    getCost(getChatContextKey({ type: 'PROJECT', projectId }))
+      .then((res) => {
+        if (cancelled) return
+        setDurableAllCostUSD(res?.totalCostUSD)
+      })
+      .catch(() => {
+        if (cancelled) return
+        setDurableAllCostUSD(undefined)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const projectKpis = useMemo(() => {
     const projectRuns = runsHistory.filter((r) => r.projectId === projectId)
@@ -51,10 +75,10 @@ const CurrentProjectView = ({ openRunId, setOpenRunId }: CurrentProjectViewProps
       const conversations = r.conversations ?? []
       const messages = conversations.flatMap((c) => c.messages ?? [])
       const prompt = messages
-        .map((m: any) => (m?.role === 'assistant' ? m?.usage?.promptTokens ?? 0 : 0))
+        .map((m: any) => (m?.role === 'assistant' ? (m?.usage?.promptTokens ?? 0) : 0))
         .reduce((a, b) => a + b, 0)
       const completion = messages
-        .map((m: any) => (m?.role === 'assistant' ? m?.usage?.completionTokens ?? 0 : 0))
+        .map((m: any) => (m?.role === 'assistant' ? (m?.usage?.completionTokens ?? 0) : 0))
         .reduce((a, b) => a + b, 0)
       const inputPerM = r.price?.inputPerMTokensUSD ?? 0
       const outputPerM = r.price?.outputPerMTokensUSD ?? 0
@@ -141,7 +165,7 @@ const CurrentProjectView = ({ openRunId, setOpenRunId }: CurrentProjectViewProps
           </div>
           <div className="rounded-md border p-3 border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
             <div className="text-xs text-neutral-500">Total Cost</div>
-            <div className="text-lg font-semibold">{formatUSD(projectKpis.cost)}</div>
+            <div className="text-lg font-semibold">{formatUSD(durableAllCostUSD)}</div>
           </div>
           <div className="rounded-md border p-3 border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
             <div className="text-xs text-neutral-500">Total Features Worked On</div>
@@ -275,6 +299,26 @@ const CurrentProjectView = ({ openRunId, setOpenRunId }: CurrentProjectViewProps
 
 const AllProjectsView = () => {
   const { runsHistory } = useAgents()
+  const { getCost } = useCosts()
+
+  const [durableAllCostUSD, setDurableAllCostUSD] = useState<number | undefined>(undefined)
+
+  useEffect(() => {
+    let cancelled = false
+    getCost(COST_GROUP_ID_ALL)
+      .then((res) => {
+        if (cancelled) return
+        setDurableAllCostUSD(res?.totalCostUSD)
+      })
+      .catch(() => {
+        if (cancelled) return
+        setDurableAllCostUSD(undefined)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   type ModelKey = string // provider::model
   type ProjectKey = string // projectId
@@ -287,10 +331,10 @@ const AllProjectsView = () => {
       const conversations = r.conversations ?? []
       const messages = conversations.flatMap((c) => c.messages ?? [])
       const prompt = messages
-        .map((m: any) => (m?.role === 'assistant' ? m?.usage?.promptTokens ?? 0 : 0))
+        .map((m: any) => (m?.role === 'assistant' ? (m?.usage?.promptTokens ?? 0) : 0))
         .reduce((a, b) => a + b, 0)
       const completion = messages
-        .map((m: any) => (m?.role === 'assistant' ? m?.usage?.completionTokens ?? 0 : 0))
+        .map((m: any) => (m?.role === 'assistant' ? (m?.usage?.completionTokens ?? 0) : 0))
         .reduce((a, b) => a + b, 0)
       const inputPerM = r.price?.inputPerMTokensUSD ?? 0
       const outputPerM = r.price?.outputPerMTokensUSD ?? 0
@@ -615,8 +659,9 @@ const AllProjectsView = () => {
         </div>
         <div className="rounded-md border p-3 border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
           <div className="text-xs text-neutral-500">Total Cost</div>
-          <div className="text-lg font-semibold">{formatUSD(stats.kpis.cost)}</div>
+          <div className="text-lg font-semibold">{formatUSD(durableAllCostUSD)}</div>
         </div>
+
         <div className="rounded-md border p-3 border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
           <div className="text-xs text-neutral-500">Total Features Worked On</div>
           <div className="text-lg font-semibold">{formatInteger(stats.kpis.featuresTotal)}</div>

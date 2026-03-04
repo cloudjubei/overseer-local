@@ -60,6 +60,7 @@ export default class DatabaseManager extends BaseManager {
   }
 
   //TODO: think about what to do here with a custom db and using connectionString
+  //TODO: connectionString comes from LoadingScreen.tsx
   async connect(connectionString: string): Promise<{ connected: boolean; lastError?: string }> {
     try {
       const { connectionString } = await createReusableDatabase()

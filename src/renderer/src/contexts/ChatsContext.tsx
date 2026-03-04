@@ -18,7 +18,7 @@ import type {
   ChatContextArguments,
   CompletionSettings,
 } from 'thefactory-tools'
-import { getChatContextPath } from 'thefactory-tools/utils'
+import { getChatContextKey } from 'thefactory-tools/utils'
 import { chatsService } from '../services/chatsService'
 import { projectsService } from '../services/projectsService'
 import { useActiveProject } from './ProjectContext'
@@ -43,7 +43,6 @@ export type ChatsContextValue = {
   chats: Record<string, ChatState>
   chatsByProjectId: Record<string, ChatState[]>
 
-  // In-memory-only draft state. Keyed by getChatContextPath(context).
   getDraft: (chatKey: string) => ChatDraft
   setDraft: (chatKey: string, patch: Partial<ChatDraft>) => void
   clearDraft: (chatKey: string) => void
@@ -241,7 +240,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
           try {
             const projectChats = await chatsService.listChats(project.id)
             const chatStates: ChatState[] = projectChats.map((chat) => ({
-              key: getChatContextPath(chat.context),
+              key: getChatContextKey(chat.context),
               chat,
               isLoading: false,
               isThinking: false,
@@ -280,7 +279,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
     const unsubscribe = chatsService.subscribe((chatUpdate: ChatUpdate) => {
       setChats((prev) => {
         const newChats = { ...prev }
-        const key = getChatContextPath(chatUpdate.context)
+        const key = getChatContextKey(chatUpdate.context)
 
         if (chatUpdate.type === 'delete') {
           const existing = newChats[key]
@@ -420,24 +419,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
                   encodeURIComponent(String(v ?? ''))
 
                 const actionUrl = (() => {
-                  switch (ctx.type) {
-                    case 'PROJECT':
-                      return `#chat/project/${enc(ctx.projectId)}`
-                    case 'STORY':
-                      return `#chat/story/${enc(ctx.storyId)}`
-                    case 'FEATURE':
-                      return `#chat/feature/${enc(ctx.storyId)}/${enc(ctx.featureId)}`
-                    case 'PROJECT_TOPIC':
-                      return `#chat/project-topic/${enc(ctx.projectId)}/${enc(ctx.projectTopic)}`
-                    case 'STORY_TOPIC':
-                      return `#chat/story-topic/${enc(ctx.storyId)}/${enc(ctx.storyTopic)}`
-                    case 'AGENT_RUN':
-                      return `#chat/agent-run/${enc(ctx.projectId)}/${enc(ctx.storyId)}/${enc(ctx.agentRunId)}`
-                    case 'AGENT_RUN_FEATURE':
-                      return `#chat/agent-run-feature/${enc(ctx.projectId)}/${enc(ctx.storyId)}/${enc(ctx.featureId)}/${enc(ctx.agentRunId)}`
-                    default:
-                      return '#chat'
-                  }
+                  return `#chats${getChatContextKey(ctx)}`
                 })()
 
                 const resolvedPid =
@@ -492,7 +474,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
 
   const getChatIfExists = useCallback(
     async (context: ChatContext): Promise<ChatState | undefined> => {
-      const key = getChatContextPath(context)
+      const key = getChatContextKey(context)
 
       // If this chat was recently deleted, do not call the backend which
       // would auto-create an empty replacement file.
@@ -533,7 +515,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       config: LLMConfig,
       files?: string[],
     ) => {
-      const key = getChatContextPath(context)
+      const key = getChatContextKey(context)
       const chatState = await getChat(context)
       if (chatState.isThinking) return
 
@@ -582,7 +564,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       settings: ChatSettings,
       config: LLMConfig,
     ) => {
-      const key = getChatContextPath(context)
+      const key = getChatContextKey(context)
       const chatState = await getChat(context)
       if (chatState.isThinking) return
 
@@ -609,7 +591,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
 
   const retryCompletion = useCallback(
     async (context: ChatContext, prompt: string, settings: ChatSettings, config: LLMConfig) => {
-      const key = getChatContextPath(context)
+      const key = getChatContextKey(context)
       const chatState = await getChat(context)
       if (chatState.isThinking) return
 
@@ -643,7 +625,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
 
   const restartChat = useCallback(
     async (context: ChatContext): Promise<ChatState> => {
-      const key = getChatContextPath(context)
+      const key = getChatContextKey(context)
 
       // User explicitly wants this chat to exist again.
       deletedKeysRef.current.delete(key)
@@ -677,7 +659,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
 
   const deleteChat = useCallback(
     async (context: ChatContext) => {
-      const key = getChatContextPath(context)
+      const key = getChatContextKey(context)
       // Mark as deleted BEFORE removing from state to prevent getChat from
       // auto-creating the chat when the state change triggers re-renders.
       deletedKeysRef.current.add(key)
@@ -701,7 +683,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
 
   const deleteLastMessage = useCallback(
     async (context: ChatContext) => {
-      const key = getChatContextPath(context)
+      const key = getChatContextKey(context)
       const chatState = await getChat(context)
       if (chatState.isThinking) return
       try {

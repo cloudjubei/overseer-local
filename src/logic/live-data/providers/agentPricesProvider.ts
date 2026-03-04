@@ -1,11 +1,11 @@
 import { LiveDataStore } from '../LiveDataStore'
 import { LiveService } from '../LiveDataManager'
-import FactoryLLMPricingManager from '../../factory/FactoryLLMPricingManager'
+import FactoryLLMCostsManager from '../../factory/FactoryLLMCostsManager'
 
 // and mirrors a snapshot into LiveDataStore for renderer consumption.
 export function createAgentPricesProvider(
   store: LiveDataStore,
-  factoryLLMPricingManager: FactoryLLMPricingManager,
+  factoryLLMCostsManager: FactoryLLMCostsManager,
 ) {
   return {
     id: 'agent-prices',
@@ -15,16 +15,15 @@ export function createAgentPricesProvider(
         service?.config?.url ||
         'https://raw.githubusercontent.com/BerriAI/litellm/main/model_prices_and_context_window.json'
 
-      await factoryLLMPricingManager.refreshPrices(undefined, url)
+      await factoryLLMCostsManager.refreshPrices(undefined, url)
 
-      // Pull snapshot for caching in store
-      const snapshot = await factoryLLMPricingManager.listPrices()
+      const snapshot = factoryLLMCostsManager.listPrices()
       store.setServiceData(service.id, snapshot)
       return true
     },
     getData: async (service: LiveService) => {
       try {
-        return await factoryLLMPricingManager.listPrices()
+        return factoryLLMCostsManager.listPrices()
       } catch (_) {}
       return store.getServiceData(service.id) || { updatedAt: new Date().toISOString(), prices: [] }
     },

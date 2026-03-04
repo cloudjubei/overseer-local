@@ -273,7 +273,10 @@ function Picker({
         const p = priceKey ? pricesByKey[priceKey] : undefined
         const inStr = p ? formatUSD(p.inputPerMTokensUSD) : '?'
         const outStr = p ? formatUSD(p.outputPerMTokensUSD) : '?'
-        const cacheStr = p && p.cacheReadInputPerMTokensUSD != null ? formatUSD(p.cacheReadInputPerMTokensUSD) : '?'
+        const cacheStr =
+          p && p.cacheReadInputPerMTokensUSD != null
+            ? formatUSD(p.cacheReadInputPerMTokensUSD)
+            : '?'
 
         return (
           <button

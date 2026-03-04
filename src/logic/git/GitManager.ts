@@ -113,7 +113,7 @@ export default class GitManager extends BaseManager {
     projectId: string,
     options: Omit<GitMonitorConfig, 'repoPath'>,
   ): Promise<void> {
-    const tools = await this.__getTools(projectId)
+    const tools = await this.getTools(projectId)
     if (!tools) {
       console.error(`[GitManager] Could not get tools for project ${projectId} to start monitor.`)
       return
@@ -151,7 +151,7 @@ export default class GitManager extends BaseManager {
     projectId: string,
     options: Omit<GitMergePlanOptions, 'repoPath'>,
   ): Promise<GitMergePlan | undefined> {
-    const tools = await this.__getTools(projectId)
+    const tools = await this.getTools(projectId)
     if (!tools) return
     return tools.getMergePlan(options)
   }
@@ -161,7 +161,7 @@ export default class GitManager extends BaseManager {
     plan: GitMergePlan,
     options?: GitBuildMergeReportOptions,
   ): Promise<GitMergeReport | undefined> {
-    const tools = await this.__getTools(projectId)
+    const tools = await this.getTools(projectId)
     if (!tools) return
     return await tools.buildMergeReport(plan, options)
   }
@@ -170,7 +170,7 @@ export default class GitManager extends BaseManager {
     projectId: string,
     options?: Omit<GitLocalStatusOptions, 'repoPath'>,
   ): Promise<GitLocalStatus | undefined> {
-    const tools = await this.__getTools(projectId)
+    const tools = await this.getTools(projectId)
     if (!tools) return
     return await tools.getLocalStatus(options)
   }
@@ -179,7 +179,7 @@ export default class GitManager extends BaseManager {
     projectId: string,
     options: { baseRef: string; headRef: string; incomingOnly?: boolean; includePatch?: boolean },
   ): Promise<GitDiffSummary | undefined> {
-    const tools = await this.__getTools(projectId)
+    const tools = await this.getTools(projectId)
     if (!tools) return
     return tools.getBranchDiffSummary(options)
   }
@@ -188,7 +188,7 @@ export default class GitManager extends BaseManager {
     projectId: string,
     options: Omit<GitApplyMergeOptions, 'repoPath'>,
   ): Promise<GitMergeResult | undefined> {
-    const tools = await this.__getTools(projectId)
+    const tools = await this.getTools(projectId)
     if (!tools) {
       return
     }
@@ -200,7 +200,7 @@ export default class GitManager extends BaseManager {
     remote?: string,
     branch?: string,
   ): Promise<GitOpResult | undefined> {
-    const tools = await this.__getTools(projectId)
+    const tools = await this.getTools(projectId)
     if (!tools) return
     return await tools.push(remote, branch)
   }
@@ -210,13 +210,13 @@ export default class GitManager extends BaseManager {
     remote?: string,
     branch?: string,
   ): Promise<GitOpResult | undefined> {
-    const tools = await this.__getTools(projectId)
+    const tools = await this.getTools(projectId)
     if (!tools) return
     return await tools.pull(remote, branch)
   }
 
   private async deleteBranch(projectId: string, name: string): Promise<GitOpResult | undefined> {
-    const tools = await this.__getTools(projectId)
+    const tools = await this.getTools(projectId)
     if (!tools) return
     return tools.deleteBranch(name)
   }
@@ -225,13 +225,13 @@ export default class GitManager extends BaseManager {
     projectId: string,
     name: string,
   ): Promise<GitOpResult | undefined> {
-    const tools = await this.__getTools(projectId)
+    const tools = await this.getTools(projectId)
     if (!tools) return
     return tools.deleteRemoteBranch(name)
   }
 
   private async listUnifiedBranches(projectId: string): Promise<GitUnifiedBranch[] | undefined> {
-    const tools = await this.__getTools(projectId)
+    const tools = await this.getTools(projectId)
     if (!tools) return
     const res = await tools.listUnifiedBranches()
     if (!res.ok) {
@@ -245,13 +245,13 @@ export default class GitManager extends BaseManager {
     projectId: string,
     options: Omit<GitSelectCommitsOptions, 'repoPath'>,
   ): Promise<GitCommitInfo[] | undefined> {
-    const tools = await this.__getTools(projectId)
+    const tools = await this.getTools(projectId)
     if (!tools) return
     return tools.selectCommits(options)
   }
 
   private async checkout(projectId: string, name: string): Promise<GitOpResult | undefined> {
-    const tools = await this.__getTools(projectId)
+    const tools = await this.getTools(projectId)
     if (!tools) return
 
     try {
@@ -273,31 +273,31 @@ export default class GitManager extends BaseManager {
     projectId: string,
     options?: GitLocalDiffOptions,
   ): Promise<GitFileChange[]> {
-    const tools = await this.__getTools(projectId)
+    const tools = await this.getTools(projectId)
     if (!tools) return []
     return tools.getLocalDiffSummary(options)
   }
 
   private async stage(projectId: string, paths: string[]): Promise<GitOpResult | undefined> {
-    const tools = await this.__getTools(projectId)
+    const tools = await this.getTools(projectId)
     if (!tools) return
     return await tools.stage(paths)
   }
 
   private async unstage(projectId: string, paths: string[]): Promise<GitOpResult | undefined> {
-    const tools = await this.__getTools(projectId)
+    const tools = await this.getTools(projectId)
     if (!tools) return
     return await tools.unstage(paths)
   }
 
   private async reset(projectId: string, paths: string[]): Promise<GitOpResult | undefined> {
-    const tools = await this.__getTools(projectId)
+    const tools = await this.getTools(projectId)
     if (!tools) return
     return await tools.reset(paths)
   }
 
   private async commit(projectId: string, input: GitCommitInput): Promise<GitOpResult | undefined> {
-    const tools = await this.__getTools(projectId)
+    const tools = await this.getTools(projectId)
     if (!tools) return
     return await tools.commit(input)
   }
@@ -307,13 +307,13 @@ export default class GitManager extends BaseManager {
     path: string,
     ref: string,
   ): Promise<string | undefined> {
-    const tools = await this.__getTools(projectId)
+    const tools = await this.getTools(projectId)
     if (!tools) return
     return tools.getFileContent(path, ref)
   }
 
   private async resetAll(projectId: string): Promise<GitOpResult | undefined> {
-    const tools = await this.__getTools(projectId)
+    const tools = await this.getTools(projectId)
     if (!tools) return
     return tools.resetAll()
   }
@@ -350,7 +350,7 @@ export default class GitManager extends BaseManager {
     return tools
   }
 
-  private async __getTools(projectId: string): Promise<GitTools | undefined> {
+  async getTools(projectId: string): Promise<GitTools | undefined> {
     await this.toolsLock.lock()
     if (!this.tools[projectId]) {
       await this.updateTool(projectId)

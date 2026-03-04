@@ -21,6 +21,7 @@ import { GitHubCredentialsProvider } from './contexts/GitHubCredentialsContext'
 import { ChatsProvider } from './contexts/ChatsContext'
 import { GitProvider } from './contexts/GitContext'
 import { NotificationSoundBootstrap } from './hooks/useNotifications'
+import { CostsProvider } from './contexts/CostsContext'
 
 function ServicesBootstrap() {
   const { init } = useLiveData()
@@ -45,17 +46,19 @@ function App() {
                     <LLMConfigProvider>
                       <GitHubCredentialsProvider>
                         <GitProvider>
-                          <ChatsProvider>
-                            <AgentsProvider>
-                              <ServicesBootstrap />
-                              <ShortcutsBootstrap />
-                              <NotificationClickHandler />
-                              <NotificationSoundBootstrap />
-                              <CommandMenu />
-                              <ShortcutsHelp />
-                              <MainApp />
-                            </AgentsProvider>
-                          </ChatsProvider>
+                          <CostsProvider>
+                            <ChatsProvider>
+                              <AgentsProvider>
+                                <ServicesBootstrap />
+                                <ShortcutsBootstrap />
+                                <NotificationClickHandler />
+                                <NotificationSoundBootstrap />
+                                <CommandMenu />
+                                <ShortcutsHelp />
+                                <MainApp />
+                              </AgentsProvider>
+                            </ChatsProvider>
+                          </CostsProvider>
                         </GitProvider>
                       </GitHubCredentialsProvider>
                     </LLMConfigProvider>

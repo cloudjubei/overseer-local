@@ -56,7 +56,11 @@ export default function ToolCallHoverCard({
   // - write tools: allow only when it is NOT a completely new file.
   // - text tools: allow only while in-flight (once finished we only show new content).
   const canShowSplitToggle = useMemo(() => {
-    if (toolName === 'writeFile' || toolName === 'writeDiffToFile' || toolName === 'writeStructuredDiffToFile') {
+    if (
+      toolName === 'writeFile' ||
+      toolName === 'writeDiffToFile' ||
+      toolName === 'writeStructuredDiffToFile'
+    ) {
       const isNew = toolName === 'writeFile' ? isCompletelyNewFile(result) : false
       return !isNew
     }
@@ -118,10 +122,10 @@ export default function ToolCallHoverCard({
       const files: string[] = extract(args, ['paths']) ?? []
 
       return (
-        <div className='text-xs space-y-1'>
+        <div className="text-xs space-y-1">
           {files.map((file, idx) => (
             <Row key={file || idx}>
-              <span className='font-mono text-[11px]'>{file || '(unknown)'}</span>
+              <span className="font-mono text-[11px]">{file || '(unknown)'}</span>
             </Row>
           ))}
         </div>
@@ -133,10 +137,10 @@ export default function ToolCallHoverCard({
       const safeUrls = urls.filter((u): u is string => typeof u === 'string')
 
       return (
-        <div className='text-xs space-y-1'>
+        <div className="text-xs space-y-1">
           {safeUrls.map((url, idx) => (
             <Row key={url || idx}>
-              <span className='font-mono text-[11px]'>{url || '(unknown)'}</span>
+              <span className="font-mono text-[11px]">{url || '(unknown)'}</span>
             </Row>
           ))}
         </div>
@@ -167,9 +171,9 @@ export default function ToolCallHoverCard({
         : []
 
       return (
-        <div className='text-xs space-y-1'>
+        <div className="text-xs space-y-1">
           <Row>
-            <span className='text-[var(--text-secondary)]'>Query:</span>
+            <span className="text-[var(--text-secondary)]">Query:</span>
           </Row>
           <PreLimited lines={qLines} maxLines={2} />
 
@@ -184,7 +188,7 @@ export default function ToolCallHoverCard({
                 />
               </div>
             ) : (
-              <div className='text-[11px] text-[var(--text-secondary)]'>No results</div>
+              <div className="text-[11px] text-[var(--text-secondary)]">No results</div>
             )
           ) : null}
         </div>
@@ -215,15 +219,15 @@ export default function ToolCallHoverCard({
           : []
 
       return (
-        <div className='text-xs space-y-1'>
+        <div className="text-xs space-y-1">
           {items.length > 0 ? (
             items.map((line, idx) => (
               <Row key={`${line}-${idx}`}>
-                <span className='font-mono text-[11px]'>{line}</span>
+                <span className="font-mono text-[11px]">{line}</span>
               </Row>
             ))
           ) : (
-            <div className='text-[11px] text-[var(--text-secondary)]'>No results</div>
+            <div className="text-[11px] text-[var(--text-secondary)]">No results</div>
           )}
         </div>
       )
@@ -273,20 +277,44 @@ export default function ToolCallHoverCard({
       if (Array.isArray(order)) {
         return <ReorderList items={order} movedId={movedId} />
       }
-      return <div className='text-[11px] text-[var(--text-secondary)]'>No reorder data</div>
+      return <div className="text-[11px] text-[var(--text-secondary)]">No reorder data</div>
     }
 
-    if (n === 'searchFiles') {
+    if (n === 'searchFilesByExact' || n === 'searchFilesByKeywords') {
+      const qLines: string[] = extract(args, ['needles']) || extract(args, ['keywords']) || ['']
+      let resultLines: string[] = result
+
+      return (
+        <div className="text-xs space-y-1">
+          <SectionTitle>Query:</SectionTitle>
+          <PreLimited lines={qLines} maxLines={10} />
+
+          {resultType === 'success' ? (
+            resultLines.length > 0 ? (
+              <div>
+                <SectionTitle>Results</SectionTitle>
+                <PreLimited
+                  lines={resultLines}
+                  maxLines={10}
+                  renderTruncationMessage={(omitted) => <>+ {omitted} more</>}
+                />
+              </div>
+            ) : (
+              <div className="text-[11px] text-[var(--text-secondary)]">No matches</div>
+            )
+          ) : null}
+        </div>
+      )
+    }
+    if (n === 'searchFiles' || n === 'searchFilePaths') {
       const query = tryString(extract(args, ['query']) || extract(result, ['query'])) || ''
       let resultLines: string[] = result
 
       const qLines = query.split(/\r?\n/)
 
       return (
-        <div className='text-xs space-y-1'>
-          <Row>
-            <span className='text-[var(--text-secondary)]'>Query:</span>
-          </Row>
+        <div className="text-xs space-y-1">
+          <SectionTitle>Query:</SectionTitle>
           <PreLimited lines={qLines} maxLines={2} />
 
           {resultType === 'success' ? (
@@ -300,7 +328,7 @@ export default function ToolCallHoverCard({
                 />
               </div>
             ) : (
-              <div className='text-[11px] text-[var(--text-secondary)]'>No matches</div>
+              <div className="text-[11px] text-[var(--text-secondary)]">No matches</div>
             )
           ) : null}
         </div>
@@ -319,21 +347,21 @@ export default function ToolCallHoverCard({
       const safeTestFiles = testFiles.filter((p): p is string => typeof p === 'string')
 
       return (
-        <div className='text-xs space-y-1'>
+        <div className="text-xs space-y-1">
           <Row>
-            <span className='text-[var(--text-secondary)]'>Summary:</span>
+            <span className="text-[var(--text-secondary)]">Summary:</span>
           </Row>
           <Row>
-            <span className='font-mono text-[11px]'>passed={passed}</span>
-            <span className='mx-1'>·</span>
-            <span className='font-mono text-[11px]'>failed={failed}</span>
-            <span className='mx-1'>·</span>
-            <span className='font-mono text-[11px]'>skipped={skipped}</span>
-            <span className='mx-1'>·</span>
-            <span className='font-mono text-[11px]'>total={total}</span>
+            <span className="font-mono text-[11px]">passed={passed}</span>
+            <span className="mx-1">·</span>
+            <span className="font-mono text-[11px]">failed={failed}</span>
+            <span className="mx-1">·</span>
+            <span className="font-mono text-[11px]">skipped={skipped}</span>
+            <span className="mx-1">·</span>
+            <span className="font-mono text-[11px]">total={total}</span>
           </Row>
           <Row>
-            <span className='font-mono text-[11px]'>durationMs={duration}</span>
+            <span className="font-mono text-[11px]">durationMs={duration}</span>
           </Row>
 
           {safeTestFiles.length > 0 ? (
@@ -356,41 +384,32 @@ export default function ToolCallHoverCard({
       return a || ''
     })()
 
-    return <Code language='json' code={str} />
-  }, [
-    toolCall,
-    name,
-    result,
-    resultType,
-    storiesById,
-    featuresById,
-    sideBySide,
-    projectId,
-  ])
+    return <Code language="json" code={str} />
+  }, [toolCall, name, result, resultType, storiesById, featuresById, sideBySide, projectId])
 
   return (
-    <div className='w-[480px] max-w-[70vw] rounded-md border border-[var(--border-subtle)] bg-[var(--surface-overlay)] p-2 shadow-[var(--shadow-2)]'>
-      <div className='flex items-center justify-between gap-2'>
-        <div className='flex items-center gap-2'>
+    <div className="w-[480px] max-w-[70vw] rounded-md border border-[var(--border-subtle)] bg-[var(--surface-overlay)] p-2 shadow-[var(--shadow-2)]">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
           <StatusIcon resultType={resultType} />
-          <div className='text-sm font-semibold'>{toolName}</div>
+          <div className="text-sm font-semibold">{toolName}</div>
         </div>
 
         {canShowSplitToggle ? (
-          <div className='flex bg-[var(--surface-base)] rounded-md border border-[var(--border-subtle)] p-0.5 gap-0.5'>
+          <div className="flex bg-[var(--surface-base)] rounded-md border border-[var(--border-subtle)] p-0.5 gap-0.5">
             <button
               onClick={() => setSideBySide(false)}
               className={`px-2 py-0.5 text-[10px] font-medium rounded transition-colors ${!sideBySide ? 'bg-[var(--surface-overlay)] text-[var(--text-primary)] shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
-              title='Inline Unified View'
-              type='button'
+              title="Inline Unified View"
+              type="button"
             >
               Inline
             </button>
             <button
               onClick={() => setSideBySide(true)}
               className={`px-2 py-0.5 text-[10px] font-medium rounded transition-colors ${sideBySide ? 'bg-[var(--surface-overlay)] text-[var(--text-primary)] shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
-              title='Split Side-by-Side View'
-              type='button'
+              title="Split Side-by-Side View"
+              type="button"
             >
               Split
             </button>
@@ -399,12 +418,15 @@ export default function ToolCallHoverCard({
       </div>
 
       {headerPath ? (
-        <div className='mt-1 font-mono text-[11px] text-[var(--text-secondary)] truncate' title={headerPath}>
+        <div
+          className="mt-1 font-mono text-[11px] text-[var(--text-secondary)] truncate"
+          title={headerPath}
+        >
           {headerPath}
         </div>
       ) : null}
 
-      <div className='mt-2 max-h-[60vh] overflow-auto pr-1'>{content}</div>
+      <div className="mt-2 max-h-[60vh] overflow-auto pr-1">{content}</div>
     </div>
   )
 }

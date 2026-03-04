@@ -18,6 +18,8 @@ import { formatDate, formatHmsCompact, formatTime } from '../../utils/time'
 import { useAgents } from '../../contexts/AgentsContext'
 import DotBadge from '../ui/DotBadge'
 import { useNotifications } from '@renderer/hooks/useNotifications'
+import { useCosts } from '@renderer/contexts/CostsContext'
+import { getChatContextKey } from 'thefactory-tools/utils'
 
 function useConversationCounts(run: AgentRunHistory) {
   return useMemo(() => {
@@ -79,10 +81,44 @@ export default function AgentRunRow({
   const { duration, thinking } = useDurationTimers(run)
   const { isRunUnread, markRunSeen } = useAgents()
   const { markNotificationsByMetadata } = useNotifications()
+  const { getCost } = useCosts()
   const unread = isRunUnread(run)
 
   const [isAnimating, setIsAnimating] = useState(false)
   const [animKind, setAnimKind] = useState<'up' | 'down' | null>(null)
+
+  const [durableCostUSD, setDurableCostUSD] = useState<number | undefined>(undefined)
+
+  const chatKey = useMemo(() => {
+    if (!run?.id) return undefined
+    // Canonical chatKey used by the ledger is derived from ChatContext.
+    return getChatContextKey({
+      type: 'AGENT_RUN',
+      projectId: run.projectId,
+      storyId: run.storyId,
+      agentRunId: run.id,
+    })
+  }, [run?.id, run?.projectId, run?.storyId])
+
+  useEffect(() => {
+    let cancelled = false
+    if (!chatKey) {
+      setDurableCostUSD(undefined)
+      return
+    }
+    getCost(chatKey)
+      .then((res) => {
+        if (cancelled) return
+        setDurableCostUSD(res?.totalCostUSD)
+      })
+      .catch(() => {
+        if (cancelled) return
+        setDurableCostUSD(undefined)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [chatKey, getCost])
 
   const handleRate = (rating: AgentRunRatingPatch | undefined) => {
     if (onRate) {
@@ -101,7 +137,7 @@ export default function AgentRunRow({
     () =>
       run.conversations
         .flatMap((c) => c.messages)
-        .map((m: any) => (m?.role === 'assistant' ? m?.usage?.promptTokens ?? 0 : 0))
+        .map((m: any) => (m?.role === 'assistant' ? (m?.usage?.promptTokens ?? 0) : 0))
         .reduce((acc, c) => acc + c, 0),
     [run.conversations],
   )
@@ -109,25 +145,30 @@ export default function AgentRunRow({
     () =>
       run.conversations
         .flatMap((c) => c.messages)
-        .map((m: any) => (m?.role === 'assistant' ? m?.usage?.completionTokens ?? 0 : 0))
+        .map((m: any) => (m?.role === 'assistant' ? (m?.usage?.completionTokens ?? 0) : 0))
         .reduce((acc, c) => acc + c, 0),
     [run.conversations],
   )
 
   const costUSD = useMemo(
     () =>
-      (run.price.inputPerMTokensUSD * prompt) / 1_000_000 +
-      (run.price.outputPerMTokensUSD * completion) / 1_000_000,
-    [run.price, prompt, completion],
+      durableCostUSD != null
+        ? durableCostUSD
+        : (run.price.inputPerMTokensUSD * prompt) / 1_000_000 +
+          (run.price.outputPerMTokensUSD * completion) / 1_000_000,
+    [durableCostUSD, run.price, prompt, completion],
   )
 
   const acknowledgeRun = () => {
     if (unread && run.id) {
       markRunSeen(run.id)
-      void markNotificationsByMetadata({ runId: run.id }, {
-        category: 'agent_runs',
-        projectId: run.projectId,
-      })
+      void markNotificationsByMetadata(
+        { runId: run.id },
+        {
+          category: 'agent_runs',
+          projectId: run.projectId,
+        },
+      )
     }
   }
 

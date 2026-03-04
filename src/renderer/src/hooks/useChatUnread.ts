@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useChats } from '@renderer/contexts/ChatsContext'
 import type { ChatContext, CompletionMessage } from 'thefactory-tools'
-import { getChatContextPath } from 'thefactory-tools/utils'
+import { getChatContextKey } from 'thefactory-tools/utils'
 
 // LocalStorage helpers
 const LS_PREFIX = 'chat:last-read:'
@@ -38,7 +38,7 @@ function messageTimestamp(msg: CompletionMessage): string | undefined {
 
 // Only assistant messages should count as unread
 function isAssistant(msg: CompletionMessage): boolean {
-  return ((msg as any)?.role) === 'assistant'
+  return (msg as any)?.role === 'assistant'
 }
 function assistantTimestamp(msg: CompletionMessage): string | undefined {
   if (!isAssistant(msg)) return undefined
@@ -162,14 +162,11 @@ export function useChatUnread(): UseChatUnread {
     setVersion((v) => v + 1)
   }, [])
 
-  const markReadByContext = useCallback(
-    (ctx: ChatContext, readTime?: string) => {
-      const key = getChatContextPath(ctx)
-      writeLastRead(key, readTime || new Date().toISOString())
-      setVersion((v) => v + 1)
-    },
-    [],
-  )
+  const markReadByContext = useCallback((ctx: ChatContext, readTime?: string) => {
+    const key = getChatContextKey(ctx)
+    writeLastRead(key, readTime || new Date().toISOString())
+    setVersion((v) => v + 1)
+  }, [])
 
   const getLastReadForKey = useCallback((chatKey: string): string | undefined => {
     return readLastRead(chatKey)

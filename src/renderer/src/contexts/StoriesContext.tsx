@@ -26,6 +26,7 @@ export type StoriesContextValue = {
   storyIdsByProject: Record<string, string[]>
   storiesById: Record<string, Story>
   featuresById: Record<string, Feature>
+  reindexStories: (projectId: string) => Promise<void>
   createStory: (updates: StoryCreateInput) => Promise<Story | undefined>
   updateStory: (storyId: string, updates: StoryEditInput) => Promise<Story | undefined>
   updateStoryStatus: (storyId: string, status: Status) => Promise<Story | undefined>
@@ -232,6 +233,10 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
     setStoryDisplayToId(newStoryDisplayToId)
     setFeatureDisplayToIdByStory(newFeatureDisplayToIdByStory)
   }
+
+  const reindexStories = useCallback(async (projectId: string) => {
+    await storiesService.reindexStories(projectId)
+  }, [])
 
   const onStoryUpdate = useCallback(
     async (storyUpdate: StoryUpdate) => {
@@ -549,6 +554,7 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
       storyIdsByProject,
       storiesById,
       featuresById,
+      reindexStories,
       createStory,
       updateStory,
       updateStoryStatus,
@@ -566,6 +572,7 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
     [
       storiesById,
       featuresById,
+      reindexStories,
       createStory,
       updateStory,
       updateStoryStatus,

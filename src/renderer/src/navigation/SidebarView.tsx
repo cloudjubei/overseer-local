@@ -60,7 +60,7 @@ const NAV_ITEMS: NavDef[] = [
     icon: <IconFiles />,
     accent: 'purple',
   },
-  { id: 'chat', label: 'Chat', view: 'Chat', icon: <IconChat />, accent: 'teal' },
+  { id: 'chats', label: 'Chat', view: 'Chat', icon: <IconChat />, accent: 'teal' },
   {
     id: 'agents',
     label: 'Agents',
@@ -310,7 +310,10 @@ export default function SidebarView({}: SidebarProps) {
     })
   }, [groups.map((g) => g.id).join('|')])
 
-  const groupedProjectIds = useMemo(() => new Set(groups.flatMap((g) => g.projects || [])), [groups])
+  const groupedProjectIds = useMemo(
+    () => new Set(groups.flatMap((g) => g.projects || [])),
+    [groups],
+  )
   const uncategorizedProjects = useMemo(
     () => projects.filter((p) => !groupedProjectIds.has(p.id)),
     [projects, groupedProjectIds],
@@ -407,7 +410,9 @@ export default function SidebarView({}: SidebarProps) {
     return (
       <li className="nav-li" key={p.id}>
         {effectiveCollapsed ? (
-          <Tooltip content={p.title} placement="right">{Btn}</Tooltip>
+          <Tooltip content={p.title} placement="right">
+            {Btn}
+          </Tooltip>
         ) : (
           Btn
         )}
@@ -443,12 +448,19 @@ export default function SidebarView({}: SidebarProps) {
           title={effectiveCollapsed ? 'Expand sidebar (⌘/Ctrl+B)' : 'Collapse sidebar (⌘/Ctrl+B)'}
         >
           <span aria-hidden>
-            <IconChevron className="w-4 h-4" style={{ transform: effectiveCollapsed ? 'none' : 'rotate(180deg)' }} />
+            <IconChevron
+              className="w-4 h-4"
+              style={{ transform: effectiveCollapsed ? 'none' : 'rotate(180deg)' }}
+            />
           </span>
         </button>
       </div>
 
-      <nav className="nav flex-1 min-h-0 overflow-y-auto" style={hideScrollStyle} onKeyDown={onKeyDownList}>
+      <nav
+        className="nav flex-1 min-h-0 overflow-y-auto"
+        style={hideScrollStyle}
+        onKeyDown={onKeyDownList}
+      >
         <ul className="nav-list" role="list">
           {NAV_ITEMS.filter((n) => n.view !== 'Settings').map((item, i) => {
             const isActive = currentView === item.view
@@ -475,7 +487,9 @@ export default function SidebarView({}: SidebarProps) {
                   parts.push(
                     <NotificationBadge
                       key="agents-running"
-                      className={effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''}
+                      className={
+                        effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''
+                      }
                       text={`${activeRunsCurrentProject}`}
                       tooltipLabel={`${activeRunsCurrentProject} running agents`}
                       isInformative
@@ -486,7 +500,9 @@ export default function SidebarView({}: SidebarProps) {
                   parts.push(
                     <NotificationBadge
                       key="agents-completed"
-                      className={effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''}
+                      className={
+                        effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''
+                      }
                       text={cap99(agentsCompletedUnreadCurrentProject)}
                       tooltipLabel={`${agentsCompletedUnreadCurrentProject} completed agent runs`}
                     />,
@@ -500,7 +516,7 @@ export default function SidebarView({}: SidebarProps) {
                 if (chatThinkingCurrentProject) {
                   parts.push(
                     <SpinnerWithDot
-                      key='chat-thinking'
+                      key="chat-thinking"
                       size={effectiveCollapsed ? 14 : 16}
                       showDot={chatUnreadCurrentProject > 0}
                       dotTitle={
@@ -515,8 +531,10 @@ export default function SidebarView({}: SidebarProps) {
                 if (chatUnreadCurrentProject > 0) {
                   parts.push(
                     <NotificationBadge
-                      key='chat-unread'
-                      className={effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''}
+                      key="chat-unread"
+                      className={
+                        effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''
+                      }
                       text={cap99(chatUnreadCurrentProject)}
                       tooltipLabel={`${chatUnreadCurrentProject} unread chats`}
                     />,
@@ -547,22 +565,20 @@ export default function SidebarView({}: SidebarProps) {
               >
                 <span className="nav-item__icon">{item.icon}</span>
                 {!effectiveCollapsed && <span className="nav-item__label">{item.label}</span>}
-                {
-                  (() => {
-                    const content = BtnBadges()
-                    return content ? (
-                      <span
-                        className={classNames(
-                          'nav-item__badges',
-                          effectiveCollapsed && 'nav-item__badges--compact',
-                        )}
-                        aria-hidden
-                      >
-                        {content}
-                      </span>
-                    ) : null
-                  })()
-                }
+                {(() => {
+                  const content = BtnBadges()
+                  return content ? (
+                    <span
+                      className={classNames(
+                        'nav-item__badges',
+                        effectiveCollapsed && 'nav-item__badges--compact',
+                      )}
+                      aria-hidden
+                    >
+                      {content}
+                    </span>
+                  ) : null
+                })()}
               </button>
             )
             return (
@@ -611,7 +627,10 @@ export default function SidebarView({}: SidebarProps) {
         <ul className="nav-list" aria-label="Projects">
           {projects.length == 0 && (
             <li className="nav-li">
-              <div className={classNames('nav-item', effectiveCollapsed && 'nav-item--compact')} role="status">
+              <div
+                className={classNames('nav-item', effectiveCollapsed && 'nav-item--compact')}
+                role="status"
+              >
                 <span className="nav-item__icon" aria-hidden>
                   <IconWarningTriangle />
                 </span>
@@ -620,9 +639,7 @@ export default function SidebarView({}: SidebarProps) {
             </li>
           )}
 
-          {projects
-            .filter((p) => !groupedProjectIds.has(p.id))
-            .map((p) => renderProjectItem(p))}
+          {projects.filter((p) => !groupedProjectIds.has(p.id)).map((p) => renderProjectItem(p))}
 
           {!effectiveCollapsed &&
             groups.map((g) => {
@@ -653,7 +670,8 @@ export default function SidebarView({}: SidebarProps) {
                 (g.projects || []).some((pid) => isBadgeEnabled('chat_messages', pid)) &&
                 (aggChatUnread > 0 || aggThinking > 0)
               const aggShowGit =
-                (g.projects || []).some((pid) => isBadgeEnabled('git_changes', pid)) && aggGitUnread > 0
+                (g.projects || []).some((pid) => isBadgeEnabled('git_changes', pid)) &&
+                aggGitUnread > 0
 
               const showAnyBadge =
                 aggShowAgents || aggShowAgentsCompleted || aggShowChat || aggShowGit
@@ -663,7 +681,12 @@ export default function SidebarView({}: SidebarProps) {
                   <button
                     type="button"
                     onClick={() => setOpenGroups((prev) => ({ ...prev, [g.id]: !isOpen }))}
-                    className={classNames('nav-item', 'nav-item--compact', accentClass, hasActive && 'nav-item--active')}
+                    className={classNames(
+                      'nav-item',
+                      'nav-item--compact',
+                      accentClass,
+                      hasActive && 'nav-item--active',
+                    )}
                     aria-expanded={isOpen}
                     aria-controls={`group-${g.id}`}
                     title={g.title}
@@ -671,7 +694,10 @@ export default function SidebarView({}: SidebarProps) {
                     <span className="nav-item__icon" aria-hidden>
                       <IconChevron
                         className="w-4 h-4"
-                        style={{ transform: isOpen ? 'rotate(90deg)' : 'none', transition: 'transform 0.15s ease' }}
+                        style={{
+                          transform: isOpen ? 'rotate(90deg)' : 'none',
+                          transition: 'transform 0.15s ease',
+                        }}
                       />
                     </span>
                     <span className="nav-item__label flex-1 text-left">{g.title}</span>
@@ -697,7 +723,11 @@ export default function SidebarView({}: SidebarProps) {
                           <SpinnerWithDot
                             size={16}
                             showDot={aggChatUnread > 0}
-                            dotTitle={aggChatUnread > 0 ? `${aggChatUnread} unread chats in group` : undefined}
+                            dotTitle={
+                              aggChatUnread > 0
+                                ? `${aggChatUnread} unread chats in group`
+                                : undefined
+                            }
                           />
                         ) : aggShowChat && aggChatUnread > 0 ? (
                           <NotificationBadge
@@ -719,7 +749,11 @@ export default function SidebarView({}: SidebarProps) {
                   </button>
 
                   {isOpen && groupProjects.length > 0 && (
-                    <ul id={`group-${g.id}`} className="nav-list" aria-label={`${g.title} projects`}>
+                    <ul
+                      id={`group-${g.id}`}
+                      className="nav-list"
+                      aria-label={`${g.title} projects`}
+                    >
                       {groupProjects.map((p) => renderProjectItem(p))}
                     </ul>
                   )}

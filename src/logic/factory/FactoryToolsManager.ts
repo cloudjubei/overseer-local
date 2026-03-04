@@ -9,11 +9,16 @@ import {
   createTools,
   GithubCredentials,
   PreviewToolNotSupportedResult,
+  ToolCallContext,
 } from 'thefactory-tools'
+import DatabaseManager from '../db/DatabaseManager'
+import GitManager from '../git/GitManager'
 
 export default class FactoryToolsManager extends BaseManager {
   private projectsManager: ProjectsManager
   private settingsManager: SettingsManager
+  private databaseManager: DatabaseManager
+  private gitManager: GitManager
   private agentToolsMap: Record<string, AgentTools> = {}
 
   constructor(
@@ -21,10 +26,14 @@ export default class FactoryToolsManager extends BaseManager {
     window: BrowserWindow,
     projectsManager: ProjectsManager,
     settingsManager: SettingsManager,
+    databaseManager: DatabaseManager,
+    gitManager: GitManager,
   ) {
     super(projectRoot, window)
     this.projectsManager = projectsManager
     this.settingsManager = settingsManager
+    this.databaseManager = databaseManager
+    this.gitManager = gitManager
   }
 
   async init(): Promise<void> {
@@ -45,9 +54,12 @@ export default class FactoryToolsManager extends BaseManager {
 
   async executeTool(projectId: string, toolName: string, args: any): Promise<any> {
     const tools = await this.__getTools(projectId)
-
+    const git = await this.gitManager.getTools(projectId)
+    const context: ToolCallContext = {
+      git,
+    }
     try {
-      return await tools?.callTool(toolName, args)
+      return await tools?.callTool(toolName, args, context)
     } catch (error: any) {
       console.error(`Error executing tool "${toolName}":`, error)
       throw new Error(`Failed to execute tool "${toolName}": ${error.message}`)
@@ -83,7 +95,7 @@ export default class FactoryToolsManager extends BaseManager {
 
     const appSettings = this.settingsManager.getAppSettings()
     const webSearchApiKeys = appSettings?.webSearchApiKeys
-    const dbConnectionString = appSettings?.database?.connectionString
+    const connectionString = this.databaseManager.getConnectionString()
 
     const tools = await createTools(
       projectId,
@@ -91,7 +103,7 @@ export default class FactoryToolsManager extends BaseManager {
       // project.repo_url,
       // gitCredentials,
       webSearchApiKeys,
-      dbConnectionString,
+      connectionString,
     )
     const agentTools = createAgentTools(tools)
 

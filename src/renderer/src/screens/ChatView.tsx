@@ -21,7 +21,7 @@ import ChatsNavigationSidebar from '@renderer/components/chat/ChatsNavigationSid
 import SegmentedControl from '@renderer/components/ui/SegmentedControl'
 import { useChatUnread } from '@renderer/hooks/useChatUnread'
 import DotBadge from '@renderer/components/ui/DotBadge'
-import { getChatContextPath, getChatContextFromFilename } from 'thefactory-tools/utils'
+import { getChatContextKey, getChatContext } from 'thefactory-tools/utils'
 import { useNotifications } from '@renderer/hooks/useNotifications'
 
 function prettyTopicName(topic?: string): string {
@@ -70,16 +70,15 @@ function titleForContext(
 }
 
 // Support deep-linking to specific chat contexts under the chat route using helpers.
-// The hash should be '#chat/' + getChatContextPath(ctx) with the '.json' stripped.
+// The hash should be '#chat/' + getChatContextKey(ctx)
 function parseChatRouteFromHash(hashRaw: string): ChatContext | undefined {
   const raw = (hashRaw || '').replace(/^#/, '')
-  if (!raw.startsWith('chat')) return undefined
-  let path = raw.slice('chat'.length)
+  if (!raw.startsWith('chats')) return undefined
+  let path = raw.slice('chats'.length)
   if (path.startsWith('/')) path = path.slice(1)
   if (!path) return undefined
-  const filename = path.endsWith('.json') ? path : `${path}.json`
   try {
-    return getChatContextFromFilename(filename)
+    return getChatContext(path)
   } catch (e) {
     console.warn('Failed to parse chat route from hash', e)
     return undefined
@@ -165,10 +164,7 @@ export default function ChatView() {
       // 1. Handle hash navigation first
       const hashCtx = parseChatRouteFromHash(window.location.hash)
       if (hashCtx) {
-        if (
-          !selectedContext ||
-          getChatContextPath(hashCtx) !== getChatContextPath(selectedContext)
-        ) {
+        if (!selectedContext || getChatContextKey(hashCtx) !== getChatContextKey(selectedContext)) {
           await getChatIfExists(hashCtx)
           setSelectedContext(hashCtx)
         }
@@ -177,7 +173,7 @@ export default function ChatView() {
 
       // 2. Check if current selection is valid for the active project
       if (selectedContext) {
-        const key = getChatContextPath(selectedContext)
+        const key = getChatContextKey(selectedContext)
         const projectChats = chatsByProjectId[activeProjectId ?? ''] || []
         if (projectChats.some((c) => c.key === key)) {
           return // Current context is valid, do nothing
@@ -198,14 +194,13 @@ export default function ChatView() {
       }
 
       if (newContext) {
-        const newKey = getChatContextPath(newContext)
-        const oldKey = selectedContext ? getChatContextPath(selectedContext) : undefined
+        const newKey = getChatContextKey(newContext)
+        const oldKey = selectedContext ? getChatContextKey(selectedContext) : undefined
         if (newKey !== oldKey) {
           await getChatIfExists(newContext) // Ensure chat exists (without throwing)
           // Sync URL hash to canonical chat path (without .json)
           try {
-            const hashPath = newKey.replace(/\.json$/, '')
-            const targetHash = `#chat/${hashPath}`
+            const targetHash = `#chats${newKey}`
             if (window.location.hash !== targetHash) window.location.hash = targetHash
           } catch {}
           setSelectedContext(newContext)
@@ -234,7 +229,7 @@ export default function ChatView() {
   useEffect(() => {
     if (!selectedContext || !activeProjectId) return
     try {
-      const key = getChatContextPath(selectedContext)
+      const key = getChatContextKey(selectedContext)
       const storageKey = `chat-last-opened:${activeProjectId}`
       const raw = localStorage.getItem(storageKey)
       const map: Record<string, string> = raw ? JSON.parse(raw) : {}
@@ -249,8 +244,8 @@ export default function ChatView() {
   useEffect(() => {
     if (!selectedContext || !activeProjectId) return
     try {
-      const rawPath = getChatContextPath(selectedContext).replace(/\.json$/, '')
-      const actionUrl = `#chat/${rawPath}`
+      const chatKey = getChatContextKey(selectedContext)
+      const actionUrl = `#chats${chatKey}`
 
       void markNotificationsByMetadata(
         { actionUrl },
@@ -335,8 +330,8 @@ export default function ChatView() {
           selectedContext={selectedContext}
           onSelectContext={(ctx) => {
             try {
-              const p = getChatContextPath(ctx).replace(/\.json$/, '')
-              const targetHash = `#chat/${p}`
+              const p = getChatContextKey(ctx)
+              const targetHash = `#chats${p}`
               if (window.location.hash !== targetHash) window.location.hash = targetHash
             } catch {}
             setSelectedContext(ctx)

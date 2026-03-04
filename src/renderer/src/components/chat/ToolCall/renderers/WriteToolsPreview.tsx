@@ -33,6 +33,19 @@ export function WriteToolsPreview({
   const isInFlight =
     resultType === 'pending' || resultType === 'running' || resultType === 'require_confirmation'
 
+  // Check for explicit error in result, even if resultType isn't 'errored'
+  const resultError = useMemo(() => {
+    if (resultType === 'errored') {
+      return (
+        tryString(extract(result, ['message']) || extract(result, ['error']) || result) ||
+        'Tool errored'
+      )
+    }
+    const err = extract(result, ['error'])
+    if (err) return tryString(err.message || err)
+    return undefined
+  }, [result, resultType])
+
   // When the tool succeeds, we expect a diff in the tool result.
   const successPatch = useMemo(() => {
     return buildUnifiedDiffIfPresent(result)
@@ -58,13 +71,18 @@ export function WriteToolsPreview({
         setPreview({ loading: false })
         return
       }
+      // If there's a result error, don't preview
+      if (resultError) {
+        setPreview({ loading: false })
+        return
+      }
 
       if (!isInFlight) {
         // Not in-flight and no patch: nothing to show.
         setPreview({ loading: false })
         return
       }
-
+      setPreview({ loading: false, error: 'Missing project context' })
       if (!projectId) {
         setPreview({ loading: true })
         return
@@ -86,10 +104,8 @@ export function WriteToolsPreview({
     }
 
     run()
-    return () => {
-      cancelled = true
-    }
-  }, [toolName, args, projectId, isInFlight, successPatch])
+    return () => {}
+  }, [toolName, args, projectId, isInFlight, successPatch, resultError])
 
   // Determine whether this is a brand new file (affects split toggle & banner)
   const isNewFile: boolean =
@@ -116,6 +132,7 @@ export function WriteToolsPreview({
   }
 
   // writeFile, writeDiffToFile, writeStructuredDiffToFile are display-equivalent: all are diffs.
+  if (resultError) return errorContent(resultError)
   const patchToShow = successPatch || preview.patch
 
   if (preview.error) return errorContent(preview.error)

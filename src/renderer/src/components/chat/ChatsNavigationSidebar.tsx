@@ -6,7 +6,7 @@ import type { ChatContext } from 'thefactory-tools'
 import { IconChevron } from '@renderer/components/ui/icons/Icons'
 import { useChatUnread } from '@renderer/hooks/useChatUnread'
 import DotBadge from '@renderer/components/ui/DotBadge'
-import { getChatContextPath } from 'thefactory-tools/utils'
+import { getChatContextKey } from 'thefactory-tools/utils'
 import NotificationBadge from '@renderer/components/stories/NotificationBadge'
 import { useChatThinking } from '@renderer/hooks/useChatThinking'
 import SpinnerWithDot from '@renderer/components/ui/SpinnerWithDot'
@@ -227,7 +227,7 @@ const ConnectedChatButton = memo(function ConnectedChatButton({
   const { unreadKeys, getUnreadCountForKey } = useChatUnread()
   const { isThinkingKey } = useChatThinking(500)
 
-  const key = useMemo(() => getChatContextPath(ctx), [ctx])
+  const key = useMemo(() => getChatContextKey(ctx), [ctx])
   const isUnread = unreadKeys.has(key)
   const unreadCount = isUnread ? getUnreadCountForKey(key) : 0
   const isThinking = isThinkingKey(key)
@@ -413,7 +413,7 @@ export default function ChatsNavigationSidebar({
   const isActive = useCallback(
     (ctx: ChatContext) => {
       if (!selectedContext) return false
-      return getChatContextPath(selectedContext) === getChatContextPath(ctx)
+      return getChatContextKey(selectedContext) === getChatContextKey(ctx)
     },
     [selectedContext],
   )
@@ -545,11 +545,7 @@ export default function ChatsNavigationSidebar({
         <div className="space-y-3">
           <div className="space-y-1">
             <div className="px-2">
-              <SectionHeader
-                title="General"
-                isOpen={true}
-                onToggle={handleToggle}
-              />
+              <SectionHeader title="General" isOpen={true} onToggle={handleToggle} />
             </div>
             <div className="px-2">
               <ConnectedChatButton
