@@ -1,0 +1,37 @@
+/* Table overflow handling in markdown content */
+.prose table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.prose table thead {
+  white-space: nowrap;
+}
+
+.prose table tbody td {
+  white-space: normal;
+  min-width: 150px;
+}
+
+/* Ensure markdown content doesn't overflow its container */
+.markdown-content {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+
+.markdown-content > * {
+  max-width: 100%;
+}
+
+/* Inline-code hardening:
+   - Allow long identifiers/paths to break in narrow chat bubbles.
+   - Preserve spacing sensibly.
+   - Do not affect fenced code blocks.
+*/
+.markdown-content :not(pre) > code {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: break-spaces;
+}

@@ -15,12 +15,21 @@ import type {
   ToolCall,
   ToolCallWithResult,
   ToolResultType,
+  ChatDynamicContext,
+  CompletionUsage,
+  CompletionAssistantMessage,
 } from 'thefactory-tools'
 import BaseManager from '../BaseManager'
 import FactoryToolsManager from './FactoryToolsManager'
 import ChatsManager from '../chat/ChatsManager'
 import FactoryLLMCostsManager from './FactoryLLMCostsManager'
-import { getChatContextKey } from 'thefactory-tools/utils'
+import {
+  getChatContextKey,
+  getEmptyUsage,
+  getLLMModel,
+  getToolCall,
+  getToolResult,
+} from 'thefactory-tools/utils'
 
 export default class FactoryCompletionManager extends BaseManager {
   private chatsManager: ChatsManager
@@ -436,39 +445,62 @@ export default class FactoryCompletionManager extends BaseManager {
 
     const promptPreparedCallback = async (_systemPrompt: string) => {}
 
+    const toolsReceivedCallback = async (
+      assistantMessage: CompletionAssistantMessage,
+      toolCalls: ToolCall[],
+    ): Promise<void> => {
+      const now = new Date().toISOString()
+
+      const toolMessages: CompletionToolMessage[] = toolCalls.map((t, i) => ({
+        role: 'tool',
+        content: '',
+        model: getLLMModel(llmConfig),
+        usage: getEmptyUsage(),
+        toolCall: getToolCall(t),
+        toolResult: {
+          result: undefined,
+          type: this.toolInitialResultType(settings, t.name),
+          durationMs: 0,
+        },
+
+        ...(t.providerState ? { providerState: t.providerState } : {}),
+        startedAt: now,
+        completedAt: now,
+        durationMs: 0,
+      }))
+
+      console.log('toolsReceivedCallback assistantMessage: ', assistantMessage)
+      const chatAfterAppend = await this.chatsManager.addChatMessages(chatContext, [
+        assistantMessage,
+        ...toolMessages,
+      ])
+      if (chatAfterAppend) {
+        currentChat = chatAfterAppend
+      }
+    }
+
     const responseReceivedCallback = async (
       _turn: number,
       response: CompletionResponse,
       agentResponse?: AgentResponse,
     ): Promise<void> => {
-      const assistant = response.assistantMessage
-      const newMessages: CompletionMessage[] = [assistant]
-
-      const now = new Date().toISOString()
-      for (const t of response.toolCalls) {
-        const toolMessage: CompletionToolMessage = {
-          role: 'tool',
-          content: '',
-          toolCall: {
-            toolCallId: t.toolCallId,
-            name: t.name,
-            arguments: t.arguments,
-          },
-          toolResult: {
-            result: undefined,
-            type: this.toolInitialResultType(settings, t.name),
-            durationMs: 0,
-          },
-          startedAt: now,
-          completedAt: now,
-          durationMs: 0,
-        }
-        newMessages.push(toolMessage)
-      }
-
-      const chatAfterAppend = await this.chatsManager.addChatMessages(chatContext, newMessages)
+      console.log('responseReceivedCallback response.raw: ', response.raw)
+      const chatAfterAppend = await this.chatsManager.addChatMessages(chatContext, [
+        response.assistantMessage,
+      ])
       if (chatAfterAppend) {
         currentChat = chatAfterAppend
+      }
+
+      if (agentResponse?.dynamicContextPatch) {
+        console.log('calling updateDynamicContext')
+        const newChat = await this.chatsManager.tools.updateDynamicContext(
+          chatContext,
+          agentResponse?.dynamicContextPatch,
+        )
+        if (newChat) {
+          currentChat = newChat
+        }
       }
     }
 
@@ -508,15 +540,22 @@ export default class FactoryCompletionManager extends BaseManager {
       )
     }
 
+    const getDynamicContext = async (): Promise<ChatDynamicContext | undefined> => {
+      const chat = await this.chatsManager.getChat(chatContext)
+      return chat.dynamicContext
+    }
+
     const c = await completion.sendCompletionWithTools(
       request,
       settings,
       callTool,
       this.factoryLLMCostsManager.getTools(),
       toolCalledCallback,
+      toolsReceivedCallback,
       promptPreparedCallback,
       responseReceivedCallback,
       turnFinishedCallback,
+      getDynamicContext,
     )
 
     if (c.resultType === 'errored') {

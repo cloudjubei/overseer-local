@@ -16,7 +16,7 @@ import BaseManager from '../BaseManager'
 import { getDefaultChatPrompt } from 'thefactory-tools/utils'
 
 export default class ChatsManager extends BaseManager {
-  private tools: ChatsTools
+  tools: ChatsTools
   private chatSettings: ChatsSettings | undefined
 
   constructor(projectRoot: string, window: BrowserWindow) {

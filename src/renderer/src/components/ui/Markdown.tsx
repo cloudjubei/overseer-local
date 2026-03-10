@@ -8,6 +8,7 @@ import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
 import 'katex/dist/katex.min.css'
 import { cn } from '../../utils/utils'
+import './Markdown.css'
 
 export const components: Partial<Components> = {
   pre: ({ node, children, ...props }) => {
@@ -20,13 +21,10 @@ export const components: Partial<Components> = {
   },
   code: (props) => {
     const { node, children, className, ...rest } = props
-    // Handle code blocks within pre tags
-    // Check if the parent is a 'pre' element
+
+    // If this code node has a language class, it's a fenced code block.
     const match = /language-(\w+)/.exec(className || '')
     if (match) {
-      // We are inside a pre block, potentially with a language
-      // Syntax highlighting could be added here later if needed
-      // For now, just render the children without extra styling
       return (
         <code className={className} {...rest}>
           {children}
@@ -34,11 +32,14 @@ export const components: Partial<Components> = {
       )
     }
 
-    // Fallback for standalone code tags not inside 'pre'
-    // This case is less common in standard Markdown
+    // Inline code: should be inline, not a block. Making it `display: block`
+    // causes odd wrapping/line breaks inside chat bubbles.
     return (
       <code
-        className={cn(className, 'bg-muted p-1 rounded text-sm font-mono block break-words')}
+        className={cn(
+          className,
+          'bg-muted px-1 py-[1px] rounded text-[0.9em] font-mono inline break-words align-baseline',
+        )}
         {...rest}
       >
         {children}
@@ -46,11 +47,11 @@ export const components: Partial<Components> = {
     )
   },
   p: ({ node, children, ...props }) => {
-    // Add consistent bottom margin to paragraphs
+    // Use a paragraph-like element (not div) to preserve inline semantics.
     return (
-      <div className="my-1 leading-relaxed" {...props}>
+      <p className="my-1 leading-relaxed" {...props}>
         {children}
-      </div>
+      </p>
     )
   },
   ol: ({ node, children, ...props }) => {
@@ -203,7 +204,13 @@ const sanitizeSchema: any = {
   },
 }
 
-export default function Markdown({ text, allowHtml = false }: { text: string; allowHtml?: boolean }) {
+export default function Markdown({
+  text,
+  allowHtml = false,
+}: {
+  text: string
+  allowHtml?: boolean
+}) {
   const containsLaTeX = useMemo(() => isContainingLaTeX(text), [text])
   const processedText = useMemo(
     () => (containsLaTeX ? preprocessLaTeX(text || '') : text),
@@ -221,7 +228,10 @@ export default function Markdown({ text, allowHtml = false }: { text: string; al
     return plugins
   }, [allowHtml, containsLaTeX])
 
-  const remarkPlugins = useMemo(() => [remarkGfm, ...(containsLaTeX ? [remarkMath] : [])], [containsLaTeX])
+  const remarkPlugins = useMemo(
+    () => [remarkGfm, ...(containsLaTeX ? [remarkMath] : [])],
+    [containsLaTeX],
+  )
   return (
     <MemoizedReactMarkdown
       rehypePlugins={rehypePlugins}

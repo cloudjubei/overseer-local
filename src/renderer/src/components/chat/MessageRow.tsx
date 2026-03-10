@@ -355,17 +355,17 @@ function MessageRow({
               >
                 {isUser ? (
                   <CollapsibleContent maxHeight={600}>
-                    <RichText text={String((msg as any).content || '')} />
+                    <RichText text={msg.content} />
                   </CollapsibleContent>
                 ) : globalIndex === animateAssistantIdx ? (
-                  <TypewriterText text={String((msg as any).content || '')} renderer="markdown" />
+                  <TypewriterText text={msg.content} renderer="markdown" />
                 ) : isSystem ? (
                   <CollapsibleContent maxHeight={600}>
-                    <Markdown text={String((msg as any).content || '')} />
+                    <Markdown text={msg.content} />
                   </CollapsibleContent>
                 ) : (
                   <CollapsibleContent maxHeight={600}>
-                    <Markdown text={String((msg as any).content || '')} />
+                    <Markdown text={msg.content} />
                   </CollapsibleContent>
                 )}
               </div>

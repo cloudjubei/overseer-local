@@ -65,7 +65,7 @@ export default class DatabaseManager extends BaseManager {
     try {
       const { connectionString } = await createReusableDatabase()
 
-      this._dbClient = await openDatabase({ connectionString })
+      this._dbClient = await openDatabase({ connectionString, logLevel: 'warn' })
       this._connectionString = connectionString
       this._setConnected(true)
       console.log('[db] thefactory-db client initialized at ', connectionString)

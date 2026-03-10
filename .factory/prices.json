@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-02-26T00:15:16.892Z",
+  "updatedAt": "2026-03-05T10:17:06.381Z",
   "prices": [
     {
       "provider": "openai",
@@ -1662,8 +1662,8 @@
     {
       "provider": "azure_ai",
       "model": "azure_ai/mistral-small-2503",
-      "inputPerMTokensUSD": 1,
-      "outputPerMTokensUSD": 3,
+      "inputPerMTokensUSD": 0.09999999999999999,
+      "outputPerMTokensUSD": 0.3,
       "currency": "USD"
     },
     {
@@ -1921,8 +1921,8 @@
     {
       "provider": "mistral",
       "model": "mistral/mistral-small-latest",
-      "inputPerMTokensUSD": 0.09999999999999999,
-      "outputPerMTokensUSD": 0.3,
+      "inputPerMTokensUSD": 0.06,
+      "outputPerMTokensUSD": 0.18,
       "currency": "USD"
     },
     {
@@ -1956,8 +1956,8 @@
     {
       "provider": "mistral",
       "model": "mistral/mistral-large-latest",
-      "inputPerMTokensUSD": 2,
-      "outputPerMTokensUSD": 6,
+      "inputPerMTokensUSD": 0.5,
+      "outputPerMTokensUSD": 1.5,
       "currency": "USD"
     },
     {
@@ -5321,14 +5321,16 @@
       "model": "anthropic.claude-3-sonnet-20240229-v1:0",
       "inputPerMTokensUSD": 3,
       "outputPerMTokensUSD": 15,
-      "currency": "USD"
+      "currency": "USD",
+      "cacheReadInputPerMTokensUSD": 0.3
     },
     {
       "provider": "bedrock",
       "model": "bedrock/invoke/anthropic.claude-3-5-sonnet-20240620-v1:0",
       "inputPerMTokensUSD": 3,
       "outputPerMTokensUSD": 15,
-      "currency": "USD"
+      "currency": "USD",
+      "cacheReadInputPerMTokensUSD": 0.3
     },
     {
       "provider": "bedrock",
@@ -5397,7 +5399,8 @@
       "model": "anthropic.claude-3-haiku-20240307-v1:0",
       "inputPerMTokensUSD": 0.25,
       "outputPerMTokensUSD": 1.25,
-      "currency": "USD"
+      "currency": "USD",
+      "cacheReadInputPerMTokensUSD": 0.024999999999999998
     },
     {
       "provider": "bedrock",
@@ -5412,21 +5415,24 @@
       "model": "anthropic.claude-3-opus-20240229-v1:0",
       "inputPerMTokensUSD": 15,
       "outputPerMTokensUSD": 75,
-      "currency": "USD"
+      "currency": "USD",
+      "cacheReadInputPerMTokensUSD": 1.5
     },
     {
       "provider": "bedrock",
       "model": "us.anthropic.claude-3-sonnet-20240229-v1:0",
       "inputPerMTokensUSD": 3,
       "outputPerMTokensUSD": 15,
-      "currency": "USD"
+      "currency": "USD",
+      "cacheReadInputPerMTokensUSD": 0.3
     },
     {
       "provider": "bedrock",
       "model": "us.anthropic.claude-3-5-sonnet-20240620-v1:0",
       "inputPerMTokensUSD": 3,
       "outputPerMTokensUSD": 15,
-      "currency": "USD"
+      "currency": "USD",
+      "cacheReadInputPerMTokensUSD": 0.3
     },
     {
       "provider": "bedrock",
@@ -5473,7 +5479,8 @@
       "model": "us.anthropic.claude-3-haiku-20240307-v1:0",
       "inputPerMTokensUSD": 0.25,
       "outputPerMTokensUSD": 1.25,
-      "currency": "USD"
+      "currency": "USD",
+      "cacheReadInputPerMTokensUSD": 0.024999999999999998
     },
     {
       "provider": "bedrock",
@@ -5488,42 +5495,48 @@
       "model": "us.anthropic.claude-3-opus-20240229-v1:0",
       "inputPerMTokensUSD": 15,
       "outputPerMTokensUSD": 75,
-      "currency": "USD"
+      "currency": "USD",
+      "cacheReadInputPerMTokensUSD": 1.5
     },
     {
       "provider": "bedrock",
       "model": "eu.anthropic.claude-3-sonnet-20240229-v1:0",
       "inputPerMTokensUSD": 3,
       "outputPerMTokensUSD": 15,
-      "currency": "USD"
+      "currency": "USD",
+      "cacheReadInputPerMTokensUSD": 0.3
     },
     {
       "provider": "bedrock",
       "model": "eu.anthropic.claude-3-5-sonnet-20240620-v1:0",
       "inputPerMTokensUSD": 3,
       "outputPerMTokensUSD": 15,
-      "currency": "USD"
+      "currency": "USD",
+      "cacheReadInputPerMTokensUSD": 0.3
     },
     {
       "provider": "bedrock",
       "model": "eu.anthropic.claude-3-5-sonnet-20241022-v2:0",
       "inputPerMTokensUSD": 3,
       "outputPerMTokensUSD": 15,
-      "currency": "USD"
+      "currency": "USD",
+      "cacheReadInputPerMTokensUSD": 0.3
     },
     {
       "provider": "bedrock",
       "model": "eu.anthropic.claude-3-7-sonnet-20250219-v1:0",
       "inputPerMTokensUSD": 3,
       "outputPerMTokensUSD": 15,
-      "currency": "USD"
+      "currency": "USD",
+      "cacheReadInputPerMTokensUSD": 0.3
     },
     {
       "provider": "bedrock",
       "model": "eu.anthropic.claude-3-haiku-20240307-v1:0",
       "inputPerMTokensUSD": 0.25,
       "outputPerMTokensUSD": 1.25,
-      "currency": "USD"
+      "currency": "USD",
+      "cacheReadInputPerMTokensUSD": 0.024999999999999998
     },
     {
       "provider": "bedrock_converse",
@@ -5554,21 +5567,24 @@
       "model": "apac.anthropic.claude-3-haiku-20240307-v1:0",
       "inputPerMTokensUSD": 0.25,
       "outputPerMTokensUSD": 1.25,
-      "currency": "USD"
+      "currency": "USD",
+      "cacheReadInputPerMTokensUSD": 0.024999999999999998
     },
     {
       "provider": "bedrock",
       "model": "apac.anthropic.claude-3-sonnet-20240229-v1:0",
       "inputPerMTokensUSD": 3,
       "outputPerMTokensUSD": 15,
-      "currency": "USD"
+      "currency": "USD",
+      "cacheReadInputPerMTokensUSD": 0.3
     },
     {
       "provider": "bedrock",
       "model": "apac.anthropic.claude-3-5-sonnet-20240620-v1:0",
       "inputPerMTokensUSD": 3,
       "outputPerMTokensUSD": 15,
-      "currency": "USD"
+      "currency": "USD",
+      "cacheReadInputPerMTokensUSD": 0.3
     },
     {
       "provider": "bedrock",
@@ -5591,14 +5607,16 @@
       "model": "eu.anthropic.claude-3-5-haiku-20241022-v1:0",
       "inputPerMTokensUSD": 0.25,
       "outputPerMTokensUSD": 1.25,
-      "currency": "USD"
+      "currency": "USD",
+      "cacheReadInputPerMTokensUSD": 0.024999999999999998
     },
     {
       "provider": "bedrock",
       "model": "eu.anthropic.claude-3-opus-20240229-v1:0",
       "inputPerMTokensUSD": 15,
       "outputPerMTokensUSD": 75,
-      "currency": "USD"
+      "currency": "USD",
+      "cacheReadInputPerMTokensUSD": 1.5
     },
     {
       "provider": "bedrock",
@@ -6295,7 +6313,7 @@
     },
     {
       "provider": "together_ai",
-      "model": "together_ai/OpenAI/gpt-oss-20B",
+      "model": "together_ai/openai/gpt-oss-20b",
       "inputPerMTokensUSD": 0.049999999999999996,
       "outputPerMTokensUSD": 0.19999999999999998,
       "currency": "USD"
@@ -8590,14 +8608,16 @@
       "model": "bedrock/us-gov-east-1/anthropic.claude-3-5-sonnet-20240620-v1:0",
       "inputPerMTokensUSD": 3.5999999999999996,
       "outputPerMTokensUSD": 18,
-      "currency": "USD"
+      "currency": "USD",
+      "cacheReadInputPerMTokensUSD": 0.36
     },
     {
       "provider": "bedrock",
       "model": "bedrock/us-gov-east-1/anthropic.claude-3-haiku-20240307-v1:0",
       "inputPerMTokensUSD": 0.3,
       "outputPerMTokensUSD": 1.5,
-      "currency": "USD"
+      "currency": "USD",
+      "cacheReadInputPerMTokensUSD": 0.03
     },
     {
       "provider": "bedrock",
@@ -8653,14 +8673,16 @@
       "model": "bedrock/us-gov-west-1/anthropic.claude-3-5-sonnet-20240620-v1:0",
       "inputPerMTokensUSD": 3.5999999999999996,
       "outputPerMTokensUSD": 18,
-      "currency": "USD"
+      "currency": "USD",
+      "cacheReadInputPerMTokensUSD": 0.36
     },
     {
       "provider": "bedrock",
       "model": "bedrock/us-gov-west-1/anthropic.claude-3-haiku-20240307-v1:0",
       "inputPerMTokensUSD": 0.3,
       "outputPerMTokensUSD": 1.5,
-      "currency": "USD"
+      "currency": "USD",
+      "cacheReadInputPerMTokensUSD": 0.03
     },
     {
       "provider": "bedrock",
@@ -9582,13 +9604,6 @@
       "cacheReadInputPerMTokensUSD": 0.08
     },
     {
-      "provider": "together_ai",
-      "model": "together_ai/openai/gpt-oss-20b",
-      "inputPerMTokensUSD": 0.049999999999999996,
-      "outputPerMTokensUSD": 0.19999999999999998,
-      "currency": "USD"
-    },
-    {
       "provider": "dashscope",
       "model": "dashscope/qwen-max",
       "inputPerMTokensUSD": 1.5999999999999999,
@@ -10364,13 +10379,6 @@
       "outputPerMTokensUSD": 15,
       "currency": "USD",
       "cacheReadInputPerMTokensUSD": 0.3
-    },
-    {
-      "provider": "together_ai",
-      "model": "together_ai/baai/bge-base-en-v1.5",
-      "inputPerMTokensUSD": 0.008,
-      "outputPerMTokensUSD": 0,
-      "currency": "USD"
     },
     {
       "provider": "together_ai",
@@ -11388,14 +11396,16 @@
       "model": "bedrock/us-gov-east-1/claude-sonnet-4-5-20250929-v1:0",
       "inputPerMTokensUSD": 3.3000000000000003,
       "outputPerMTokensUSD": 16.5,
-      "currency": "USD"
+      "currency": "USD",
+      "cacheReadInputPerMTokensUSD": 0.33
     },
     {
       "provider": "bedrock",
       "model": "bedrock/us-gov-west-1/claude-sonnet-4-5-20250929-v1:0",
       "inputPerMTokensUSD": 3.3000000000000003,
       "outputPerMTokensUSD": 16.5,
-      "currency": "USD"
+      "currency": "USD",
+      "cacheReadInputPerMTokensUSD": 0.33
     },
     {
       "provider": "cerebras",
@@ -16455,6 +16465,524 @@
       "outputPerMTokensUSD": 1.1,
       "currency": "USD",
       "cacheReadInputPerMTokensUSD": 0.15
+    },
+    {
+      "provider": "azure",
+      "model": "azure/gpt-audio-1.5-2026-02-23",
+      "inputPerMTokensUSD": 2.5,
+      "outputPerMTokensUSD": 10,
+      "currency": "USD"
+    },
+    {
+      "provider": "azure",
+      "model": "azure/gpt-realtime-1.5-2026-02-23",
+      "inputPerMTokensUSD": 4,
+      "outputPerMTokensUSD": 16,
+      "currency": "USD",
+      "cacheReadInputPerMTokensUSD": 4
+    },
+    {
+      "provider": "azure",
+      "model": "azure/gpt-5.3-codex",
+      "inputPerMTokensUSD": 1.75,
+      "outputPerMTokensUSD": 14,
+      "currency": "USD",
+      "cacheReadInputPerMTokensUSD": 0.175
+    },
+    {
+      "provider": "dashscope",
+      "model": "dashscope/qwen3-next-80b-a3b-instruct",
+      "inputPerMTokensUSD": 0.15,
+      "outputPerMTokensUSD": 1.2,
+      "currency": "USD"
+    },
+    {
+      "provider": "dashscope",
+      "model": "dashscope/qwen3-next-80b-a3b-thinking",
+      "inputPerMTokensUSD": 0.15,
+      "outputPerMTokensUSD": 1.2,
+      "currency": "USD"
+    },
+    {
+      "provider": "dashscope",
+      "model": "dashscope/qwen3-vl-235b-a22b-instruct",
+      "inputPerMTokensUSD": 0.39999999999999997,
+      "outputPerMTokensUSD": 1.5999999999999999,
+      "currency": "USD"
+    },
+    {
+      "provider": "dashscope",
+      "model": "dashscope/qwen3-vl-235b-a22b-thinking",
+      "inputPerMTokensUSD": 0.39999999999999997,
+      "outputPerMTokensUSD": 4,
+      "currency": "USD"
+    },
+    {
+      "provider": "dashscope",
+      "model": "dashscope/qwen3-vl-32b-instruct",
+      "inputPerMTokensUSD": 0.16,
+      "outputPerMTokensUSD": 0.64,
+      "currency": "USD"
+    },
+    {
+      "provider": "dashscope",
+      "model": "dashscope/qwen3-vl-32b-thinking",
+      "inputPerMTokensUSD": 0.16,
+      "outputPerMTokensUSD": 2.87,
+      "currency": "USD"
+    },
+    {
+      "provider": "vertex_ai-language-models",
+      "model": "gemini-3.1-flash-image-preview",
+      "inputPerMTokensUSD": 0.5,
+      "outputPerMTokensUSD": 3,
+      "currency": "USD"
+    },
+    {
+      "provider": "vertex_ai-language-models",
+      "model": "gemini-3.1-flash-lite-preview",
+      "inputPerMTokensUSD": 0.25,
+      "outputPerMTokensUSD": 1.5,
+      "currency": "USD",
+      "cacheReadInputPerMTokensUSD": 0.024999999999999998
+    },
+    {
+      "provider": "gemini",
+      "model": "gemini/gemini-2.5-flash-image",
+      "inputPerMTokensUSD": 0.3,
+      "outputPerMTokensUSD": 2.5,
+      "currency": "USD",
+      "cacheReadInputPerMTokensUSD": 0.03
+    },
+    {
+      "provider": "gemini",
+      "model": "gemini/gemini-3.1-flash-lite-preview",
+      "inputPerMTokensUSD": 0.25,
+      "outputPerMTokensUSD": 1.5,
+      "currency": "USD",
+      "cacheReadInputPerMTokensUSD": 0.024999999999999998
+    },
+    {
+      "provider": "openai",
+      "model": "gpt-audio-1.5",
+      "inputPerMTokensUSD": 2.5,
+      "outputPerMTokensUSD": 10,
+      "currency": "USD"
+    },
+    {
+      "provider": "openai",
+      "model": "gpt-5.3-chat-latest",
+      "inputPerMTokensUSD": 1.75,
+      "outputPerMTokensUSD": 14,
+      "currency": "USD",
+      "cacheReadInputPerMTokensUSD": 0.175
+    },
+    {
+      "provider": "openai",
+      "model": "gpt-realtime-1.5",
+      "inputPerMTokensUSD": 4,
+      "outputPerMTokensUSD": 16,
+      "currency": "USD",
+      "cacheReadInputPerMTokensUSD": 0.39999999999999997
+    },
+    {
+      "provider": "bedrock_converse",
+      "model": "mistral.devstral-2-123b",
+      "inputPerMTokensUSD": 0.39999999999999997,
+      "outputPerMTokensUSD": 2,
+      "currency": "USD"
+    },
+    {
+      "provider": "mistral",
+      "model": "mistral/magistral-medium-1-2-2509",
+      "inputPerMTokensUSD": 2,
+      "outputPerMTokensUSD": 5,
+      "currency": "USD"
+    },
+    {
+      "provider": "mistral",
+      "model": "mistral/magistral-small-1-2-2509",
+      "inputPerMTokensUSD": 0.5,
+      "outputPerMTokensUSD": 1.5,
+      "currency": "USD"
+    },
+    {
+      "provider": "mistral",
+      "model": "mistral/mistral-large-2512",
+      "inputPerMTokensUSD": 0.5,
+      "outputPerMTokensUSD": 1.5,
+      "currency": "USD"
+    },
+    {
+      "provider": "mistral",
+      "model": "mistral/mistral-medium-3-1-2508",
+      "inputPerMTokensUSD": 0.39999999999999997,
+      "outputPerMTokensUSD": 2,
+      "currency": "USD"
+    },
+    {
+      "provider": "mistral",
+      "model": "mistral/mistral-small-3-2-2506",
+      "inputPerMTokensUSD": 0.06,
+      "outputPerMTokensUSD": 0.18,
+      "currency": "USD"
+    },
+    {
+      "provider": "mistral",
+      "model": "mistral/ministral-3-3b-2512",
+      "inputPerMTokensUSD": 0.09999999999999999,
+      "outputPerMTokensUSD": 0.09999999999999999,
+      "currency": "USD"
+    },
+    {
+      "provider": "mistral",
+      "model": "mistral/ministral-3-8b-2512",
+      "inputPerMTokensUSD": 0.15,
+      "outputPerMTokensUSD": 0.15,
+      "currency": "USD"
+    },
+    {
+      "provider": "mistral",
+      "model": "mistral/ministral-3-14b-2512",
+      "inputPerMTokensUSD": 0.19999999999999998,
+      "outputPerMTokensUSD": 0.19999999999999998,
+      "currency": "USD"
+    },
+    {
+      "provider": "nebius",
+      "model": "nebius/deepseek-ai/DeepSeek-R1",
+      "inputPerMTokensUSD": 0.7999999999999999,
+      "outputPerMTokensUSD": 2.4,
+      "currency": "USD"
+    },
+    {
+      "provider": "nebius",
+      "model": "nebius/deepseek-ai/DeepSeek-R1-0528",
+      "inputPerMTokensUSD": 0.7999999999999999,
+      "outputPerMTokensUSD": 2.4,
+      "currency": "USD"
+    },
+    {
+      "provider": "nebius",
+      "model": "nebius/deepseek-ai/DeepSeek-R1-Distill-Llama-70B",
+      "inputPerMTokensUSD": 0.25,
+      "outputPerMTokensUSD": 0.75,
+      "currency": "USD"
+    },
+    {
+      "provider": "nebius",
+      "model": "nebius/deepseek-ai/DeepSeek-V3",
+      "inputPerMTokensUSD": 0.5,
+      "outputPerMTokensUSD": 1.5,
+      "currency": "USD"
+    },
+    {
+      "provider": "nebius",
+      "model": "nebius/deepseek-ai/DeepSeek-V3-0324",
+      "inputPerMTokensUSD": 0.5,
+      "outputPerMTokensUSD": 1.5,
+      "currency": "USD"
+    },
+    {
+      "provider": "nebius",
+      "model": "nebius/google/gemma-3-27b-it",
+      "inputPerMTokensUSD": 0.06,
+      "outputPerMTokensUSD": 0.19999999999999998,
+      "currency": "USD"
+    },
+    {
+      "provider": "nebius",
+      "model": "nebius/meta-llama/Llama-3.3-70B-Instruct",
+      "inputPerMTokensUSD": 0.13,
+      "outputPerMTokensUSD": 0.39999999999999997,
+      "currency": "USD"
+    },
+    {
+      "provider": "nebius",
+      "model": "nebius/meta-llama/Llama-Guard-3-8B",
+      "inputPerMTokensUSD": 0.02,
+      "outputPerMTokensUSD": 0.06,
+      "currency": "USD"
+    },
+    {
+      "provider": "nebius",
+      "model": "nebius/meta-llama/Meta-Llama-3.1-8B-Instruct",
+      "inputPerMTokensUSD": 0.02,
+      "outputPerMTokensUSD": 0.06,
+      "currency": "USD"
+    },
+    {
+      "provider": "nebius",
+      "model": "nebius/meta-llama/Meta-Llama-3.1-70B-Instruct",
+      "inputPerMTokensUSD": 0.13,
+      "outputPerMTokensUSD": 0.39999999999999997,
+      "currency": "USD"
+    },
+    {
+      "provider": "nebius",
+      "model": "nebius/meta-llama/Meta-Llama-3.1-405B-Instruct",
+      "inputPerMTokensUSD": 1,
+      "outputPerMTokensUSD": 3,
+      "currency": "USD"
+    },
+    {
+      "provider": "nebius",
+      "model": "nebius/mistralai/Mistral-Nemo-Instruct-2407",
+      "inputPerMTokensUSD": 0.04,
+      "outputPerMTokensUSD": 0.12,
+      "currency": "USD"
+    },
+    {
+      "provider": "nebius",
+      "model": "nebius/NousResearch/Hermes-3-Llama-3.1-405B",
+      "inputPerMTokensUSD": 1,
+      "outputPerMTokensUSD": 3,
+      "currency": "USD"
+    },
+    {
+      "provider": "nebius",
+      "model": "nebius/nvidia/Llama-3.1-Nemotron-Ultra-253B-v1",
+      "inputPerMTokensUSD": 0.6,
+      "outputPerMTokensUSD": 1.7999999999999998,
+      "currency": "USD"
+    },
+    {
+      "provider": "nebius",
+      "model": "nebius/nvidia/Llama-3.3-Nemotron-Super-49B-v1",
+      "inputPerMTokensUSD": 0.09999999999999999,
+      "outputPerMTokensUSD": 0.39999999999999997,
+      "currency": "USD"
+    },
+    {
+      "provider": "nebius",
+      "model": "nebius/Qwen/Qwen3-235B-A22B",
+      "inputPerMTokensUSD": 0.19999999999999998,
+      "outputPerMTokensUSD": 0.6,
+      "currency": "USD"
+    },
+    {
+      "provider": "nebius",
+      "model": "nebius/Qwen/Qwen3-32B",
+      "inputPerMTokensUSD": 0.09999999999999999,
+      "outputPerMTokensUSD": 0.3,
+      "currency": "USD"
+    },
+    {
+      "provider": "nebius",
+      "model": "nebius/Qwen/Qwen3-30B-A3B",
+      "inputPerMTokensUSD": 0.09999999999999999,
+      "outputPerMTokensUSD": 0.3,
+      "currency": "USD"
+    },
+    {
+      "provider": "nebius",
+      "model": "nebius/Qwen/Qwen3-14B",
+      "inputPerMTokensUSD": 0.08,
+      "outputPerMTokensUSD": 0.24,
+      "currency": "USD"
+    },
+    {
+      "provider": "nebius",
+      "model": "nebius/Qwen/Qwen3-4B",
+      "inputPerMTokensUSD": 0.08,
+      "outputPerMTokensUSD": 0.24,
+      "currency": "USD"
+    },
+    {
+      "provider": "nebius",
+      "model": "nebius/Qwen/QwQ-32B",
+      "inputPerMTokensUSD": 0.15,
+      "outputPerMTokensUSD": 0.44999999999999996,
+      "currency": "USD"
+    },
+    {
+      "provider": "nebius",
+      "model": "nebius/Qwen/Qwen2.5-72B-Instruct",
+      "inputPerMTokensUSD": 0.13,
+      "outputPerMTokensUSD": 0.39999999999999997,
+      "currency": "USD"
+    },
+    {
+      "provider": "nebius",
+      "model": "nebius/Qwen/Qwen2.5-32B-Instruct",
+      "inputPerMTokensUSD": 0.06,
+      "outputPerMTokensUSD": 0.19999999999999998,
+      "currency": "USD"
+    },
+    {
+      "provider": "nebius",
+      "model": "nebius/Qwen/Qwen2.5-Coder-7B",
+      "inputPerMTokensUSD": 0.01,
+      "outputPerMTokensUSD": 0.03,
+      "currency": "USD"
+    },
+    {
+      "provider": "nebius",
+      "model": "nebius/Qwen/Qwen2.5-VL-72B-Instruct",
+      "inputPerMTokensUSD": 0.13,
+      "outputPerMTokensUSD": 0.39999999999999997,
+      "currency": "USD"
+    },
+    {
+      "provider": "nebius",
+      "model": "nebius/Qwen/Qwen2-VL-72B-Instruct",
+      "inputPerMTokensUSD": 0.13,
+      "outputPerMTokensUSD": 0.39999999999999997,
+      "currency": "USD"
+    },
+    {
+      "provider": "nebius",
+      "model": "nebius/Qwen/Qwen2-VL-7B-Instruct",
+      "inputPerMTokensUSD": 0.02,
+      "outputPerMTokensUSD": 0.06,
+      "currency": "USD"
+    },
+    {
+      "provider": "nebius",
+      "model": "nebius/BAAI/bge-en-icl",
+      "inputPerMTokensUSD": 0.01,
+      "outputPerMTokensUSD": 0,
+      "currency": "USD"
+    },
+    {
+      "provider": "nebius",
+      "model": "nebius/BAAI/bge-multilingual-gemma2",
+      "inputPerMTokensUSD": 0.01,
+      "outputPerMTokensUSD": 0,
+      "currency": "USD"
+    },
+    {
+      "provider": "nebius",
+      "model": "nebius/intfloat/e5-mistral-7b-instruct",
+      "inputPerMTokensUSD": 0.01,
+      "outputPerMTokensUSD": 0,
+      "currency": "USD"
+    },
+    {
+      "provider": "openrouter",
+      "model": "openrouter/anthropic/claude-sonnet-4.6",
+      "inputPerMTokensUSD": 3,
+      "outputPerMTokensUSD": 15,
+      "currency": "USD",
+      "cacheReadInputPerMTokensUSD": 0.3
+    },
+    {
+      "provider": "openrouter",
+      "model": "openrouter/anthropic/claude-opus-4.6",
+      "inputPerMTokensUSD": 5,
+      "outputPerMTokensUSD": 25,
+      "currency": "USD",
+      "cacheReadInputPerMTokensUSD": 0.5
+    },
+    {
+      "provider": "openrouter",
+      "model": "openrouter/google/gemini-3.1-pro-preview",
+      "inputPerMTokensUSD": 2,
+      "outputPerMTokensUSD": 12,
+      "currency": "USD",
+      "cacheReadInputPerMTokensUSD": 0.19999999999999998
+    },
+    {
+      "provider": "openrouter",
+      "model": "openrouter/openai/gpt-5.1-codex-max",
+      "inputPerMTokensUSD": 1.25,
+      "outputPerMTokensUSD": 10,
+      "currency": "USD",
+      "cacheReadInputPerMTokensUSD": 0.125
+    },
+    {
+      "provider": "openrouter",
+      "model": "openrouter/qwen/qwen3-coder-plus",
+      "inputPerMTokensUSD": 1,
+      "outputPerMTokensUSD": 5,
+      "currency": "USD"
+    },
+    {
+      "provider": "openrouter",
+      "model": "openrouter/z-ai/glm-5",
+      "inputPerMTokensUSD": 0.7999999999999999,
+      "outputPerMTokensUSD": 2.56,
+      "currency": "USD"
+    },
+    {
+      "provider": "openrouter",
+      "model": "openrouter/openrouter/auto",
+      "inputPerMTokensUSD": 0,
+      "outputPerMTokensUSD": 0,
+      "currency": "USD"
+    },
+    {
+      "provider": "openrouter",
+      "model": "openrouter/openrouter/free",
+      "inputPerMTokensUSD": 0,
+      "outputPerMTokensUSD": 0,
+      "currency": "USD"
+    },
+    {
+      "provider": "openrouter",
+      "model": "openrouter/openrouter/bodybuilder",
+      "inputPerMTokensUSD": 0,
+      "outputPerMTokensUSD": 0,
+      "currency": "USD"
+    },
+    {
+      "provider": "perplexity",
+      "model": "perplexity/pplx-embed-v1-0.6b",
+      "inputPerMTokensUSD": 0.004,
+      "outputPerMTokensUSD": 0,
+      "currency": "USD"
+    },
+    {
+      "provider": "perplexity",
+      "model": "perplexity/pplx-embed-v1-4b",
+      "inputPerMTokensUSD": 0.03,
+      "outputPerMTokensUSD": 0,
+      "currency": "USD"
+    },
+    {
+      "provider": "together_ai",
+      "model": "together_ai/Qwen/Qwen3.5-397B-A17B",
+      "inputPerMTokensUSD": 0.6,
+      "outputPerMTokensUSD": 3.5999999999999996,
+      "currency": "USD"
+    },
+    {
+      "provider": "vertex_ai-language-models",
+      "model": "vertex_ai/gemini-3.1-flash-image-preview",
+      "inputPerMTokensUSD": 0.5,
+      "outputPerMTokensUSD": 3,
+      "currency": "USD"
+    },
+    {
+      "provider": "vertex_ai-language-models",
+      "model": "vertex_ai/gemini-3.1-flash-lite-preview",
+      "inputPerMTokensUSD": 0.25,
+      "outputPerMTokensUSD": 1.5,
+      "currency": "USD",
+      "cacheReadInputPerMTokensUSD": 0.024999999999999998
+    },
+    {
+      "provider": "bedrock_converse",
+      "model": "zai.glm-4.7-flash",
+      "inputPerMTokensUSD": 0.07,
+      "outputPerMTokensUSD": 0.39999999999999997,
+      "currency": "USD"
+    },
+    {
+      "provider": "zai",
+      "model": "zai/glm-5",
+      "inputPerMTokensUSD": 1,
+      "outputPerMTokensUSD": 3.1999999999999997,
+      "currency": "USD",
+      "cacheReadInputPerMTokensUSD": 0.19999999999999998
+    },
+    {
+      "provider": "zai",
+      "model": "zai/glm-5-code",
+      "inputPerMTokensUSD": 1.2,
+      "outputPerMTokensUSD": 5,
+      "currency": "USD",
+      "cacheReadInputPerMTokensUSD": 0.3
     }
   ]
 }
