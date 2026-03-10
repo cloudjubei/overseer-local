@@ -469,7 +469,6 @@ export default class FactoryCompletionManager extends BaseManager {
         durationMs: 0,
       }))
 
-      console.log('toolsReceivedCallback assistantMessage: ', assistantMessage)
       const chatAfterAppend = await this.chatsManager.addChatMessages(chatContext, [
         assistantMessage,
         ...toolMessages,
@@ -484,7 +483,6 @@ export default class FactoryCompletionManager extends BaseManager {
       response: CompletionResponse,
       agentResponse?: AgentResponse,
     ): Promise<void> => {
-      console.log('responseReceivedCallback response.raw: ', response.raw)
       const chatAfterAppend = await this.chatsManager.addChatMessages(chatContext, [
         response.assistantMessage,
       ])
@@ -493,7 +491,6 @@ export default class FactoryCompletionManager extends BaseManager {
       }
 
       if (agentResponse?.dynamicContextPatch) {
-        console.log('calling updateDynamicContext')
         const newChat = await this.chatsManager.tools.updateDynamicContext(
           chatContext,
           agentResponse?.dynamicContextPatch,
