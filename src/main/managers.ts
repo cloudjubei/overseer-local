@@ -1,6 +1,5 @@
 import type { BrowserWindow } from 'electron'
 import BaseManager from '../logic/BaseManager'
-import FactoryAgentRunManager from '../logic/factory/FactoryAgentRunManager'
 import FactoryToolsManager from '../logic/factory/FactoryToolsManager'
 import FilesManager from '../logic/files/FilesManager'
 import ProjectsGroupsManager from '../logic/projectsgroups/ProjectsGroupsManager'
@@ -21,7 +20,6 @@ import GitManager from '../logic/git/GitManager'
 
 export let databaseManager: DatabaseManager | undefined
 export let factoryLLMCostsManager: FactoryLLMCostsManager | undefined
-export let factoryAgentRunManager: FactoryAgentRunManager | undefined
 export let storiesManager: StoriesManager | undefined
 export let filesManager: FilesManager | undefined
 export let projectsGroupsManager: ProjectsGroupsManager | undefined
@@ -63,12 +61,6 @@ export async function initManagers(projectRoot: string, mainWindow: BrowserWindo
   factoryLLMCostsManager = new FactoryLLMCostsManager(projectRoot, mainWindow, databaseManager)
   liveDataManager = new LiveDataManager(projectRoot, mainWindow, factoryLLMCostsManager)
   factoryTestsManager = new FactoryTestsManager(projectRoot, mainWindow, projectsManager)
-  factoryAgentRunManager = new FactoryAgentRunManager(
-    projectRoot,
-    mainWindow,
-    factoryLLMCostsManager,
-    databaseManager,
-  )
   factoryToolsManager = new FactoryToolsManager(
     projectRoot,
     mainWindow,
@@ -76,6 +68,7 @@ export async function initManagers(projectRoot: string, mainWindow: BrowserWindo
     settingsManager,
     databaseManager,
     gitManager,
+    gitCredentialsManager,
   )
   factoryCompletionManager = new FactoryCompletionManager(
     projectRoot,
@@ -99,7 +92,6 @@ export async function initManagers(projectRoot: string, mainWindow: BrowserWindo
     gitManager,
     factoryLLMCostsManager,
     liveDataManager,
-    factoryAgentRunManager,
     factoryToolsManager,
     factoryCompletionManager,
     factoryTestsManager,

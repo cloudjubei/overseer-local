@@ -12,11 +12,11 @@ import type {
 } from 'thefactory-tools'
 import ContextInfoButton from '../ui/ContextInfoButton'
 import ModelChip from '../agents/ModelChip'
-import { IconSettings, IconChevron, IconScroll, IconRefreshChat } from '../ui/icons/Icons'
+import { IconSettings, IconChevron, IconScroll, IconRefreshChat, IconCode } from '../ui/icons/Icons'
 import { IconCalculator } from '../ui/icons/IconCalculator'
 import { useProjectContext } from '../../contexts/ProjectContext'
 import { useStories } from '../../contexts/StoriesContext'
-import { useAgents } from '../../contexts/AgentsContext'
+// import { useAgents } from '../../contexts/AgentsContext'
 import { ToolSchemas, ALL_CHAT_AGENT_TOOLS } from 'thefactory-tools/constants'
 import { Button } from '@renderer/components/ui/Button'
 import { Modal } from '@renderer/components/ui/Modal'
@@ -27,6 +27,7 @@ import { useNotifications } from '@renderer/hooks/useNotifications'
 import UsageModal from './UsageModal'
 import ChatSettingsDropdown, { type ToolToggle } from './ChatSettingsDropdown'
 import { useChatDraft } from './hooks/useChatDraft'
+import ChatDynamicContextModal from './ChatDynamicContextModal'
 
 export type ChatSidebarProps = {
   context: ChatContext
@@ -69,7 +70,7 @@ export default function ChatSidebar({
 
   const { getProjectById } = useProjectContext()
   const { storiesById, featuresById } = useStories()
-  const { runsHistory } = useAgents()
+  // const { runsHistory } = useAgents()
   const { activeChatConfig, isChatConfigured } = useLLMConfig()
   const { navigateView } = useNavigator()
   const { markReadByKey } = useChatUnread()
@@ -80,6 +81,7 @@ export default function ChatSidebar({
   const [effectivePrompt, setEffectivePrompt] = useState<string>('')
   const [isPromptModalOpen, setIsPromptModalOpen] = useState(false)
   const [isCostsModalOpen, setIsCostsModalOpen] = useState(false)
+  const [isDynamicContextOpen, setIsDynamicContextOpen] = useState(false)
 
   const currentSettings = useMemo(() => getSettings(context), [getSettings, context])
 
@@ -308,9 +310,9 @@ export default function ChatSidebar({
     if (context.projectId) args.project = getProjectById(context.projectId)
     if (context.storyId) args.story = storiesById[context.storyId]
     if (context.featureId) args.feature = featuresById[context.featureId]
-    if (context.agentRunId) args.run = runsHistory.find((r) => r.id === context.agentRunId)
+    // if (context.agentRunId) args.run = runsHistory.find((r) => r.id === context.agentRunId)
     return args
-  }, [context, storiesById, featuresById, runsHistory, getProjectById])
+  }, [context, storiesById, featuresById, getProjectById])
 
   useEffect(() => {
     const update = async () => {
@@ -490,6 +492,15 @@ export default function ChatSidebar({
           >
             <IconCalculator className="w-4 h-4" />
           </button>
+
+          <button
+            onClick={() => setIsDynamicContextOpen(true)}
+            className="btn-secondary btn-icon"
+            aria-label="View dynamic context"
+            title="Dynamic context"
+          >
+            <IconCode className="w-4 h-4" />
+          </button>
         </div>
         <div className="flex items-center gap-2">
           <Button
@@ -607,6 +618,12 @@ export default function ChatSidebar({
         onClose={() => setIsCostsModalOpen(false)}
         messages={chat?.chat.messages || []}
         chatKey={chatKey}
+      />
+
+      <ChatDynamicContextModal
+        isOpen={isDynamicContextOpen}
+        onClose={() => setIsDynamicContextOpen(false)}
+        dynamicContext={chat?.chat.dynamicContext}
       />
     </section>
   )

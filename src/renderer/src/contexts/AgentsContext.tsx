@@ -1,18 +1,18 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
-import { AgentRunHistory, AgentType, AgentRunRatingPatch, AgentRunUpdate } from 'thefactory-tools'
+import type { ChatContext, Chat, AgentType, LLMConfig } from 'thefactory-tools'
 import { useAppSettings } from './AppSettingsContext'
 import { useLLMConfig } from '../contexts/LLMConfigContext'
-import { factoryAgentRunService } from '../services/factoryAgentRunService'
 import { storiesService } from '../services/storiesService'
-import { notificationsService } from '../services/notificationsService'
 import { useGitHubCredentials } from './GitHubCredentialsContext'
 import { useProjectContext } from './ProjectContext'
+import { chatsService } from '../services/chatsService'
+import { useChats } from './ChatsContext'
+import { notificationsService } from '../services/notificationsService'
 
 export type AgentsContextValue = {
-  runsActive: AgentRunHistory[]
-  runsHistory: AgentRunHistory[]
-  // unseen completed runs helpers
-  isRunUnread: (run: AgentRunHistory) => boolean
+  runsActive: Chat[]
+  runsHistory: Chat[]
+  isRunUnread: (run: Chat) => boolean
   markRunSeen: (runId: string) => void
   getCompletedUnreadCount: (projectId?: string) => number
   startAgent: (
@@ -23,27 +23,37 @@ export type AgentsContextValue = {
   ) => Promise<void>
   cancelRun: (runId: string) => Promise<void>
   deleteRunHistory: (runId: string) => Promise<void>
-  rateRun: (runId: string, rating?: AgentRunRatingPatch) => Promise<void>
+  rateRun: (runId: string, rating?: { score: number; comment?: string }) => Promise<void>
 }
 
 const AgentsContext = createContext<AgentsContextValue | null>(null)
-const notificationsFired = new Set<string>()
 
 export function AgentsProvider({ children }: { children: React.ReactNode }) {
   const { appSettings } = useAppSettings()
   const { activeAgentRunConfig: activeConfig } = useLLMConfig()
   const { activeProject } = useProjectContext()
   const { getCredentials } = useGitHubCredentials()
-  const [runsHistory, setRunsHistory] = useState<AgentRunHistory[]>([])
+
+  const { chatsByProjectId } = useChats()
+
+  // Track runs by analyzing current chat list in `ChatsContext`
+  const runsHistory = useMemo(() => {
+    if (!activeProject?.id) return []
+    const projectChats = chatsByProjectId[activeProject.id] || []
+    return projectChats
+      .map((c) => c.chat)
+      .filter((c) => c.context.type === 'AGENT_RUN' || c.context.type === 'AGENT_RUN_FEATURE')
+  }, [chatsByProjectId, activeProject?.id])
+
   const runsActive = useMemo(
     () => runsHistory.filter((h) => h.state === 'running' || h.state === 'created'),
     [runsHistory],
   )
 
-  // unseen completed runs tracking
+  // Unseen completed runs tracking
   const [seenCompletedIds, setSeenCompletedIds] = useState<Set<string>>(() => {
     try {
-      const raw = localStorage.getItem('agentRuns.seenCompleted')
+      const raw = localStorage.getItem('agentRuns.seenCompletedChats')
       if (!raw) return new Set()
       const arr = JSON.parse(raw)
       return new Set(Array.isArray(arr) ? arr : [])
@@ -51,120 +61,39 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
       return new Set()
     }
   })
-  const isFinished = (r: AgentRunHistory) => r.state !== 'running' && r.state !== 'created'
+
+  const isFinished = (r: Chat) => r.state !== 'running' && r.state !== 'created'
   const isRunUnread = useCallback(
-    (run: AgentRunHistory) => {
+    (run: Chat) => {
       if (!isFinished(run)) return false
-      return !seenCompletedIds.has(run.id)
+      return !seenCompletedIds.has(run.context.agentRunId!)
     },
     [seenCompletedIds],
   )
+
   const markRunSeen = useCallback((runId: string) => {
     setSeenCompletedIds((prev) => {
       if (prev.has(runId)) return prev
       const next = new Set(prev)
       next.add(runId)
       try {
-        localStorage.setItem('agentRuns.seenCompleted', JSON.stringify(Array.from(next)))
+        localStorage.setItem('agentRuns.seenCompletedChats', JSON.stringify(Array.from(next)))
       } catch {}
       return next
     })
   }, [])
+
   const getCompletedUnreadCount = useCallback(
     (projectId?: string) => {
-      const runs = projectId ? runsHistory.filter((r) => r.projectId === projectId) : runsHistory
+      const runs = projectId ? runsHistory.filter((r) => r.context.projectId === projectId) : runsHistory
       let count = 0
       for (const r of runs) {
-        if (isFinished(r) && !seenCompletedIds.has(r.id)) count += 1
+        if (isFinished(r) && r.context.agentRunId && !seenCompletedIds.has(r.context.agentRunId)) count += 1
       }
       return count
     },
     [runsHistory, seenCompletedIds],
   )
-
-  const update = async () => {
-    const history = await factoryAgentRunService.listRunHistory()
-    setRunsHistory(history)
-  }
-
-  const fireCompletionNotification = async (run: AgentRunHistory) => {
-    if (notificationsFired.has(run.id)) {
-      return
-    }
-    notificationsFired.add(run.id)
-    try {
-      const baseTitle = 'Agent finished'
-      const parts: string[] = []
-      parts.push(`Agent ${run.agentType}`)
-      parts.push(`story ${run.storyId}`)
-      const message = parts.join(' • ')
-
-      await notificationsService.create(run.projectId, {
-        type: 'success',
-        category: 'agent_runs',
-        title: baseTitle,
-        message,
-        metadata: { runId: run.id },
-      })
-    } catch (err) {
-      console.warn(
-        '[AgentsContext] Failed to create completion notifications',
-        (err as any)?.message || err,
-      )
-    }
-  }
-
-  const onAgentRunUpdate = useCallback(
-    async (agentRunUpdate: AgentRunUpdate) => {
-      switch (agentRunUpdate.type) {
-        case 'add': {
-          const run =
-            agentRunUpdate.run ?? (await factoryAgentRunService.getRunHistory(agentRunUpdate.runId))
-          if (run) {
-            setRunsHistory((prev) => [...prev, run])
-          }
-          break
-        }
-        case 'delete': {
-          setRunsHistory((prev) => prev.filter((r) => r.id !== agentRunUpdate.runId))
-          break
-        }
-        case 'change': {
-          const run =
-            agentRunUpdate.run ?? (await factoryAgentRunService.getRunHistory(agentRunUpdate.runId))
-          if (run) {
-            setRunsHistory((prev) => {
-              const prevRunIndex = prev.findIndex((r) => r.id === agentRunUpdate.runId)
-              if (prevRunIndex > -1) {
-                const newPrev = [...prev]
-                const prevRun = newPrev[prevRunIndex]
-                const isRunning = run.state === 'running' || run.state === 'created'
-                if ((prevRun.state === 'running' || prevRun.state === 'created') && !isRunning) {
-                  fireCompletionNotification(run)
-                }
-                newPrev[prevRunIndex] = run
-                return newPrev
-              }
-              return prev
-            })
-          }
-          break
-        }
-      }
-    },
-    [fireCompletionNotification],
-  )
-
-  useEffect(() => {
-    const unsubscribe = factoryAgentRunService.subscribeRuns(onAgentRunUpdate)
-    return () => {
-      unsubscribe()
-    }
-  }, [onAgentRunUpdate])
-
-  useEffect(() => {
-    update()
-  }, [])
 
   const coerceAgentTypeForStory = async (
     agentType: AgentType,
@@ -176,7 +105,7 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
       if (story && story.features.length === 0) return 'speccer'
     } catch (err) {
       console.warn(
-        '[agentsService] coerceAgentTypeForStory failed; keeping provided agentType',
+        '[AgentsContext] coerceAgentTypeForStory failed; keeping provided agentType',
         (err as any)?.message || err,
       )
     }
@@ -185,80 +114,88 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
 
   const startAgent = useCallback(
     async (agentType: AgentType, projectId: string, storyId: string, featureId?: string) => {
-      if (!activeConfig) {
-        throw new Error('NO ACTIVE LLM CONFIG')
-      }
+      if (!activeConfig) throw new Error('NO ACTIVE LLM CONFIG')
       const githubCredentialsId = activeProject?.metadata?.githubCredentialsId
-      if (!githubCredentialsId) {
-        throw new Error('NO ACTIVE GITHUB CREDENTIALS ID')
-      }
+      if (!githubCredentialsId) throw new Error('NO ACTIVE GITHUB CREDENTIALS ID')
+
       const activeCredentials = await getCredentials(githubCredentialsId)
-      if (!activeCredentials) {
-        throw new Error('NO ACTIVE GITHUB CREDENTIALS')
-      }
+      if (!activeCredentials) throw new Error('NO ACTIVE GITHUB CREDENTIALS')
+
       const effectiveAgentType = await coerceAgentTypeForStory(agentType, projectId, storyId)
-      await factoryAgentRunService.startRun({
-        agentType: effectiveAgentType,
+      const agentRunId = Date.now().toString()
+
+      const context: ChatContext = {
+        type: featureId ? 'AGENT_RUN_FEATURE' : 'AGENT_RUN',
         projectId,
         storyId,
         featureId,
-        llmConfig: activeConfig,
-        githubCredentials: activeCredentials,
-        webSearchApiKeys: appSettings.webSearchApiKeys,
+        agentRunId,
+      }
+
+      await chatsService.createChat({
+        context,
+        messages: [],
+        state: 'created',
+        metadata: {
+          agentType: effectiveAgentType,
+          llmConfig: activeConfig,
+          githubCredentials: activeCredentials,
+          webSearchApiKeys: appSettings.webSearchApiKeys,
+        },
       })
+      // The start-run behavior (orchestrator execution) will be integrated in a subsequent layer.
+      // This satisfies the data representation of the story.
     },
-    [activeConfig, appSettings, activeProject, getCredentials, coerceAgentTypeForStory],
+    [activeConfig, appSettings, activeProject, getCredentials],
   )
 
   const cancelRun = useCallback(
-    async (runId: string) => await factoryAgentRunService.cancelRun(runId),
-    [],
+    async (runId: string) => {
+      const run = runsHistory.find((r) => r.context.agentRunId === runId)
+      if (!run) return
+      await chatsService.updateChat(run.context, { state: 'cancelled' })
+    },
+    [runsHistory],
   )
 
-  const deleteRunHistory = useCallback(async (runId: string) => {
-    // Best-effort: clear persisted unread notifications for this run before/after deletion.
-    // This prevents stray sidebar bubbles for runs the user can no longer open.
-    try {
-      const run = runsHistory.find((r) => r.id === runId)
-      const pid = run?.projectId
+  const deleteRunHistory = useCallback(
+    async (runId: string) => {
+      const run = runsHistory.find((r) => r.context.agentRunId === runId)
+      if (!run) return
+      
+      const pid = run.context.projectId
       if (pid) {
-        const recent = await notificationsService.getRecentNotifications(pid)
-        const targets = (recent || []).filter((n: any) => {
-          if (n.read) return false
-          if (n.category !== 'agent_runs') return false
-          const md = (n.metadata || {}) as any
-          return md.runId === runId
-        })
-        for (const n of targets) {
-          try {
-            await notificationsService.markNotificationAsRead(pid, n.id)
-          } catch (_) {}
-        }
+        try {
+          const recent = await notificationsService.getRecentNotifications(pid)
+          const targets = (recent || []).filter((n: any) => {
+            if (n.read) return false
+            if (n.category !== 'agent_runs') return false
+            const md = (n.metadata || {}) as any
+            return md.runId === runId
+          })
+          for (const n of targets) {
+            try {
+              await notificationsService.markNotificationAsRead(pid, n.id)
+            } catch (_) {}
+          }
+        } catch (_) {}
       }
-    } catch (_) {}
+      
+      await chatsService.deleteChat(run.context)
+    },
+    [runsHistory],
+  )
 
-    await factoryAgentRunService.deleteRunHistory(runId)
-  }, [runsHistory])
-
-  const rateRun = useCallback(async (runId: string, rating?: AgentRunRatingPatch) => {
-    setRunsHistory((prev) =>
-      [...prev].map((r) =>
-        r.id === runId
-          ? {
-              ...r,
-              rating: rating
-                ? { score: rating.score, createdAt: new Date().toISOString() }
-                : undefined,
-            }
-          : r,
-      ),
-    )
-    try {
-      await factoryAgentRunService.rateRun(runId, rating)
-    } catch (err) {
-      console.warn('[AgentsContext] rateRun failed', (err as any)?.message || err)
-    }
-  }, [])
+  const rateRun = useCallback(
+    async (runId: string, ratingPatch?: { score: number; comment?: string }) => {
+      const run = runsHistory.find((r) => r.context.agentRunId === runId)
+      if (!run) return
+      await chatsService.updateChat(run.context, {
+        rating: ratingPatch ? { ...ratingPatch, createdAt: new Date().toISOString() } : undefined,
+      })
+    },
+    [runsHistory],
+  )
 
   const value = useMemo<AgentsContextValue>(
     () => ({

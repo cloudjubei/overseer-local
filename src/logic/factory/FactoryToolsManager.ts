@@ -13,12 +13,14 @@ import {
 } from 'thefactory-tools'
 import DatabaseManager from '../db/DatabaseManager'
 import GitManager from '../git/GitManager'
+import GitCredentialsManager from '../git/GitCredentialsManager'
 
 export default class FactoryToolsManager extends BaseManager {
   private projectsManager: ProjectsManager
   private settingsManager: SettingsManager
   private databaseManager: DatabaseManager
   private gitManager: GitManager
+  private gitCredentialsManager: GitCredentialsManager
   private agentToolsMap: Record<string, AgentTools> = {}
 
   constructor(
@@ -28,12 +30,14 @@ export default class FactoryToolsManager extends BaseManager {
     settingsManager: SettingsManager,
     databaseManager: DatabaseManager,
     gitManager: GitManager,
+    credentialsManager: GitCredentialsManager,
   ) {
     super(projectRoot, window)
     this.projectsManager = projectsManager
     this.settingsManager = settingsManager
     this.databaseManager = databaseManager
     this.gitManager = gitManager
+    this.gitCredentialsManager = credentialsManager
   }
 
   async init(): Promise<void> {
@@ -90,7 +94,8 @@ export default class FactoryToolsManager extends BaseManager {
     if (!project) {
       return
     }
-    // const githubCredentialsId = project.metadata?.githubCredentialsId
+    const githubCredentialsId = project.metadata?.githubCredentialsId
+    const githubCredentials = this.gitCredentialsManager.get(githubCredentialsId)
     // const gitCredentials : GithubCredentials = { name: '', username: '', email: '', token: ''} //TODO:
 
     const appSettings = this.settingsManager.getAppSettings()
@@ -100,10 +105,10 @@ export default class FactoryToolsManager extends BaseManager {
     const tools = await createTools(
       projectId,
       projectRoot,
-      // project.repo_url,
-      // gitCredentials,
       webSearchApiKeys,
       connectionString,
+      project.repo_url,
+      githubCredentials,
     )
     const agentTools = createAgentTools(tools)
 

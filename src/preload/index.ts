@@ -128,8 +128,7 @@ const CHATS_API = {
   getChat: (chatContext) => ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_GET, { chatContext }),
   updateChat: (chatContext, patch) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_UPDATE, { chatContext, patch }),
-  clearChat: (chatContext) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_CLEAR, { chatContext }),
+  clearChat: (chatContext) => ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_CLEAR, { chatContext }),
   deleteChat: (chatContext) => ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_DELETE, { chatContext }),
   deleteLastMessage: (chatContext) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_DELETE_LAST_MESSAGE, { chatContext }),
@@ -250,27 +249,7 @@ const LIVEDATA_API = {
   getData: (serviceId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.LIVE_DATA_GET_DATA, { serviceId }),
 }
 
-const FACTORY_AGENT_RUN_API = {
-  subscribeRuns: (callback) => {
-    const listener = (_event, payload) => callback(payload)
-    ipcRenderer.on(IPC_HANDLER_KEYS.FACTORY_RUNS_SUBSCRIBE, listener)
-    return () => ipcRenderer.removeListener(IPC_HANDLER_KEYS.FACTORY_RUNS_SUBSCRIBE, listener)
-  },
-  startRun: (params) => ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_RUNS_START, params),
-  cancelRun: (runId, reason) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_RUNS_CANCEL, { runId, reason }),
-  listRunsActive: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_RUNS_LIST_ACTIVE),
-  listRunHistory: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_RUNS_LIST_HISTORY),
-  getRunHistory: (runId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_RUNS_GET, { runId }),
-  deleteRunHistory: (runId) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_RUNS_DELETE_HISTORY, { runId }),
-  rateRun: (runId, rating) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_RUNS_RATE, { runId, rating }),
 
-  listPrices: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_PRICING_LIST),
-  refreshPricing: (provider, url) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_PRICING_REFRESH, { provider, url }),
-}
 
 const PRICING_API = {
   listPrices: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_PRICING_LIST),
@@ -449,7 +428,6 @@ if (process.contextIsolated) {
     contextBridge.exposeInMainWorld('screenshot', SCREENSHOT_API)
     contextBridge.exposeInMainWorld('settingsService', SETTINGS_API)
     contextBridge.exposeInMainWorld('liveDataService', LIVEDATA_API)
-    contextBridge.exposeInMainWorld('factoryAgentRunService', FACTORY_AGENT_RUN_API)
     contextBridge.exposeInMainWorld('factoryToolsService', FACTORY_TOOLS_API)
     contextBridge.exposeInMainWorld('factoryTestsService', FACTORY_TESTS_API)
     contextBridge.exposeInMainWorld('pricingService', PRICING_API)

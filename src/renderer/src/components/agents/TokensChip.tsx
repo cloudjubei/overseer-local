@@ -1,28 +1,26 @@
 import { useMemo } from 'react'
 import Tooltip from '../ui/Tooltip'
 import { IconArrowLeftMini, IconArrowRightMini } from '../ui/icons/Icons'
-import { AgentRunHistory } from 'thefactory-tools'
+import type { Chat } from 'thefactory-tools'
 
-export default function TokensChip({ run }: { run: AgentRunHistory }) {
+export default function TokensChip({ run }: { run: Chat }) {
   const prompt = useMemo(
     () =>
-      run.conversations
-        .flatMap((c) => c.messages)
+      run.messages
         .map((m: any) => (m?.role === 'assistant' ? m?.usage?.promptTokens ?? 0 : 0))
         .reduce((acc, c) => acc + c, 0),
-    [run.conversations],
+    [run.messages],
   )
   const completion = useMemo(
     () =>
-      run.conversations
-        .flatMap((c) => c.messages)
+      run.messages
         .map((m: any) => (m?.role === 'assistant' ? m?.usage?.completionTokens ?? 0 : 0))
         .reduce((acc, c) => acc + c, 0),
-    [run.conversations],
+    [run.messages],
   )
 
   const { userCount, assistantCount, avgPromptPerMsg, avgCompletionPerMsg } = useMemo(() => {
-    const messages = run.conversations.flatMap((c) => c.messages)
+    const messages = run.messages
     const userCount = messages.filter(
       (m: any) => String(m?.role || '').toLowerCase() === 'user',
     ).length
@@ -33,7 +31,7 @@ export default function TokensChip({ run }: { run: AgentRunHistory }) {
     const avgCompletionPerMsg =
       assistantCount > 0 ? Math.round(completion / assistantCount) : undefined
     return { userCount, assistantCount, avgPromptPerMsg, avgCompletionPerMsg }
-  }, [run.conversations, prompt, completion])
+  }, [run.messages, prompt, completion])
 
   const content = (
     <div className="text-xs max-w-[360px]">

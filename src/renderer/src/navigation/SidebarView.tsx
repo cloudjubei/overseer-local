@@ -3,7 +3,6 @@ import FilesView from '../screens/FilesView'
 import SettingsView from '../screens/SettingsView'
 import ChatView from '../screens/ChatView'
 import StoriesView from '../screens/StoriesView'
-import AgentsView from '../screens/AgentsView'
 import LiveDataView from '../screens/LiveDataView'
 import ProjectTimelineView from '../screens/ProjectTimelineView'
 import ToolsScreen from '../screens/ToolsView'
@@ -245,12 +244,6 @@ export default function SidebarView({}: SidebarProps) {
       return (
         <div key="Chat" className="flex flex-col flex-1 min-h-0 view-transition">
           <ChatView />
-        </div>
-      )
-    if (currentView === 'Agents')
-      return (
-        <div key="Agents" className="flex flex-col flex-1 min-h-0 view-transition">
-          <AgentsView />
         </div>
       )
     if (currentView === 'Git')

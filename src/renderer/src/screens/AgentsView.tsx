@@ -6,14 +6,14 @@ import ModelChip from '../components/agents/ModelChip'
 import ProjectChip from '../components/agents/ProjectChip'
 import { useActiveProject } from '../contexts/ProjectContext'
 import { ChatSidebarPanel } from '../components/chat'
-import { ChatContext } from 'thefactory-tools'
+import type { Chat, LLMConfig } from 'thefactory-tools'
 import { useAppSettings } from '../contexts/AppSettingsContext'
 import StatusChip from '@renderer/components/agents/StatusChip'
 import { formatDate, formatTime } from '@renderer/utils/time'
 import { useCosts } from '@renderer/contexts/CostsContext'
 import { getChatContextKey } from 'thefactory-tools/utils'
 import { COST_GROUP_ID_ALL } from 'thefactory-tools/constants'
-// import { costsService } from '@renderer/services/costsService'
+import { useChats } from '../contexts/ChatsContext'
 
 function formatUSD(n?: number) {
   if (n == null || !isFinite(n)) return '\u2014'
@@ -53,6 +53,7 @@ const CurrentProjectView = ({ openRunId, setOpenRunId }: CurrentProjectViewProps
 
   useEffect(() => {
     let cancelled = false
+    if (!projectId) return
     getCost(getChatContextKey({ type: 'PROJECT', projectId }))
       .then((res) => {
         if (cancelled) return
@@ -66,32 +67,31 @@ const CurrentProjectView = ({ openRunId, setOpenRunId }: CurrentProjectViewProps
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [projectId, getCost])
 
   const projectKpis = useMemo(() => {
-    const projectRuns = runsHistory.filter((r) => r.projectId === projectId)
+    const projectRuns = runsHistory.filter((r) => r.context.projectId === projectId)
 
     const runCalcs = projectRuns.map((r) => {
-      const conversations = r.conversations ?? []
-      const messages = conversations.flatMap((c) => c.messages ?? [])
+      const messages = r.messages ?? []
       const prompt = messages
         .map((m: any) => (m?.role === 'assistant' ? (m?.usage?.promptTokens ?? 0) : 0))
         .reduce((a, b) => a + b, 0)
       const completion = messages
         .map((m: any) => (m?.role === 'assistant' ? (m?.usage?.completionTokens ?? 0) : 0))
         .reduce((a, b) => a + b, 0)
-      const inputPerM = r.price?.inputPerMTokensUSD ?? 0
-      const outputPerM = r.price?.outputPerMTokensUSD ?? 0
+        
+      const llmConfig = r.metadata?.llmConfig as LLMConfig | undefined
+      const inputPerM = llmConfig?.costInputPerMTokensUSD ?? 0
+      const outputPerM = llmConfig?.costOutputPerMTokensUSD ?? 0
       const costUSD = (inputPerM * prompt) / 1_000_000 + (outputPerM * completion) / 1_000_000
-      const startedMs = r.startedAt ? new Date(r.startedAt).getTime() : NaN
-      const finishedMs = r.finishedAt
-        ? new Date(r.finishedAt).getTime()
-        : r.updatedAt
-          ? new Date(r.updatedAt).getTime()
-          : Date.now()
+      
+      const startedMs = new Date(r.createdAt).getTime()
+      const finishedMs = new Date(r.updatedAt).getTime()
       const durationMs =
         isFinite(startedMs) && isFinite(finishedMs) ? Math.max(0, finishedMs - startedMs) : 0
-      const totalFeatures = conversations.length
+        
+      const totalFeatures = r.context.featureId ? 1 : 0
       return { costUSD, durationMs, totalFeatures }
     })
 
@@ -107,7 +107,7 @@ const CurrentProjectView = ({ openRunId, setOpenRunId }: CurrentProjectViewProps
     () =>
       runsHistory
         .filter(
-          (r) => r.projectId === projectId && (r.state === 'created' || r.state === 'running'),
+          (r) => r.context.projectId === projectId && (r.state === 'created' || r.state === 'running'),
         )
         .slice()
         .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
@@ -118,7 +118,7 @@ const CurrentProjectView = ({ openRunId, setOpenRunId }: CurrentProjectViewProps
     () =>
       runsHistory
         .filter(
-          (r) => r.projectId === projectId && !(r.state === 'created' || r.state === 'running'),
+          (r) => r.context.projectId === projectId && !(r.state === 'created' || r.state === 'running'),
         )
         .slice()
         .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
@@ -144,8 +144,8 @@ const CurrentProjectView = ({ openRunId, setOpenRunId }: CurrentProjectViewProps
   const selectedRun = useMemo(() => {
     if (!openRunId) return undefined
     return (
-      projectRuns.find((r) => r.id === openRunId) ||
-      activeProjectRuns.find((r) => r.id === openRunId)
+      projectRuns.find((r) => r.context.agentRunId === openRunId) ||
+      activeProjectRuns.find((r) => r.context.agentRunId === openRunId)
     )
   }, [openRunId, projectRuns, activeProjectRuns])
 
@@ -201,7 +201,7 @@ const CurrentProjectView = ({ openRunId, setOpenRunId }: CurrentProjectViewProps
                 <tbody>
                   {activeProjectRuns.map((r) => (
                     <AgentRunRow
-                      key={r.id}
+                      key={r.context.agentRunId}
                       run={r}
                       onView={(id) => setOpenRunId(id)}
                       onCancel={(id) => cancelRun(id)}
@@ -246,7 +246,7 @@ const CurrentProjectView = ({ openRunId, setOpenRunId }: CurrentProjectViewProps
                 <tbody>
                   {projectRuns.map((r) => (
                     <AgentRunRow
-                      key={r.id}
+                      key={r.context.agentRunId}
                       run={r}
                       onView={(id) => setOpenRunId(id)}
                       onCancel={(id) => cancelRun(id)}
@@ -272,13 +272,13 @@ const CurrentProjectView = ({ openRunId, setOpenRunId }: CurrentProjectViewProps
           <div className="relative bg-white dark:bg-neutral-950 rounded-lg shadow-xl w-[92vw] max-w-5xl max-h-[90vh] border border-neutral-200 dark:border-neutral-800">
             <div className="px-4 py-3 border-b border-neutral-200 dark:border-neutral-800 flex items-center justify-between">
               <div className="min-w-0">
-                <div className="font-semibold text-sm truncate">Run #{selectedRun.id}</div>
+                <div className="font-semibold text-sm truncate">Run #{selectedRun.context.agentRunId}</div>
                 <div className="text-xs text-neutral-500 truncate flex items-center gap-2">
                   <ModelChip
-                    provider={selectedRun.llmConfig.provider}
-                    model={selectedRun.llmConfig.model}
+                    provider={(selectedRun.metadata?.llmConfig as LLMConfig | undefined)?.provider || 'unknown'}
+                    model={(selectedRun.metadata?.llmConfig as LLMConfig | undefined)?.model || 'unknown'}
                   />
-                  <StatusChip state={selectedRun.state} />
+                  <StatusChip state={selectedRun.state || 'created'} />
                   <span>
                     Updated {formatDate(selectedRun.updatedAt)} •{' '}
                     {formatTime(selectedRun.updatedAt)}
@@ -289,7 +289,9 @@ const CurrentProjectView = ({ openRunId, setOpenRunId }: CurrentProjectViewProps
                 Close
               </button>
             </div>
-            <ChatConversation run={selectedRun} />
+            <div className="h-[75vh] flex overflow-hidden rounded-b-lg">
+              <ChatSidebarPanel context={selectedRun.context} />
+            </div>
           </div>
         </div>
       ) : null}
@@ -318,7 +320,7 @@ const AllProjectsView = () => {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [getCost])
 
   type ModelKey = string // provider::model
   type ProjectKey = string // projectId
@@ -328,28 +330,31 @@ const AllProjectsView = () => {
     const allRuns = runsHistory.slice()
 
     const runCalcs = allRuns.map((r) => {
-      const conversations = r.conversations ?? []
-      const messages = conversations.flatMap((c) => c.messages ?? [])
+      const messages = r.messages ?? []
       const prompt = messages
         .map((m: any) => (m?.role === 'assistant' ? (m?.usage?.promptTokens ?? 0) : 0))
         .reduce((a, b) => a + b, 0)
       const completion = messages
         .map((m: any) => (m?.role === 'assistant' ? (m?.usage?.completionTokens ?? 0) : 0))
         .reduce((a, b) => a + b, 0)
-      const inputPerM = r.price?.inputPerMTokensUSD ?? 0
-      const outputPerM = r.price?.outputPerMTokensUSD ?? 0
+        
+      const llmConfig = r.metadata?.llmConfig as LLMConfig | undefined
+      const inputPerM = llmConfig?.costInputPerMTokensUSD ?? 0
+      const outputPerM = llmConfig?.costOutputPerMTokensUSD ?? 0
       const costUSD = (inputPerM * prompt) / 1_000_000 + (outputPerM * completion) / 1_000_000
-      const startedMs = r.startedAt ? new Date(r.startedAt).getTime() : NaN
-      const finishedMs = r.finishedAt ? new Date(r.finishedAt).getTime() : Date.now()
+      
+      const startedMs = new Date(r.createdAt).getTime()
+      const finishedMs = new Date(r.updatedAt).getTime()
       const durationMs =
         isFinite(startedMs) && isFinite(finishedMs)
           ? Math.max(0, finishedMs - startedMs)
           : undefined
-      const completedFeatures = conversations.filter((c) => c.state === 'completed').length
-      const totalFeatures = conversations.length
-      const modelKey: ModelKey = `${r.llmConfig?.provider || 'unknown'}::${r.llmConfig?.model || 'unknown'}`
-      const projectKey: ProjectKey = r.projectId || 'unknown'
-      const agentTypeKey: AgentTypeKey = (r.agentType as string) || 'unknown'
+          
+      const completedFeatures = (r.state === 'completed' && r.context.featureId) ? 1 : 0
+      const totalFeatures = r.context.featureId ? 1 : 0
+      const modelKey: ModelKey = `${llmConfig?.provider || 'unknown'}::${llmConfig?.model || 'unknown'}`
+      const projectKey: ProjectKey = r.context.projectId || 'unknown'
+      const agentTypeKey: AgentTypeKey = (r.metadata?.agentType as string) || 'unknown'
       const rating = r.rating?.score // 0 or 1
       return {
         r,
@@ -798,7 +803,6 @@ const AllProjectsView = () => {
                     )}
                   </td>
                 </tr>
-
                 {stats.projectsList.map((p) => (
                   <tr
                     key={p.projectId}
@@ -877,10 +881,7 @@ const AllProjectsView = () => {
                     <td className="px-3 py-2">
                       {p.lowestRated ? (
                         <div className="flex flex-col items-start gap-1">
-                          <ModelChip
-                            provider={p.lowestRated.provider}
-                            model={p.lowestRated.model}
-                          />
+                          <ModelChip provider={p.lowestRated.provider} model={p.lowestRated.model} />
                           <span className="text-neutral-500 text-xs">{`${(p.lowestRated.avgRating! * 100).toFixed(0)}%`}</span>
                         </div>
                       ) : (
@@ -895,9 +896,61 @@ const AllProjectsView = () => {
         )}
       </div>
 
-      {/* Agents Statistics */}
+      {/* Model Statistics */}
       <div>
-        <h3 className="text-base font-semibold mb-2">Agents Statistics</h3>
+        <h3 className="text-base font-semibold mb-2">Model Statistics</h3>
+        {stats.modelsList.length === 0 ? (
+          <div className="text-sm text-neutral-500">No runs yet.</div>
+        ) : (
+          <div className="overflow-auto border rounded-md border-neutral-200 dark:border-neutral-800">
+            <table className="min-w-full text-sm">
+              <thead className="bg-neutral-50 dark:bg-neutral-800/50 text-neutral-600 dark:text-neutral-400">
+                <tr>
+                  <th className="text-left px-3 py-2">Model</th>
+                  <th className="text-left px-3 py-2">Runs</th>
+                  <th className="text-left px-3 py-2">Total Cost</th>
+                  <th className="text-left px-3 py-2">Avg Cost/Run</th>
+                  <th className="text-left px-3 py-2">Avg Tokens/Run</th>
+                  <th className="text-left px-3 py-2">
+                    <div className="leading-tight">
+                      <div>Avg Duration</div>
+                      <div className="text-[10px] text-neutral-500">(per feature)</div>
+                    </div>
+                  </th>
+                  <th className="text-left px-3 py-2">Average Rating</th>
+                </tr>
+              </thead>
+              <tbody>
+                {stats.modelsList
+                  .slice()
+                  .sort((a, b) => b.runs - a.runs)
+                  .map((m) => (
+                    <tr
+                      key={m.key}
+                      className="border-t border-neutral-200 dark:border-neutral-800"
+                    >
+                      <td className="px-3 py-2">
+                        <ModelChip provider={m.provider} model={m.model} />
+                      </td>
+                      <td className="px-3 py-2">{formatInteger(m.runs)}</td>
+                      <td className="px-3 py-2">{formatUSD(m.totalCost)}</td>
+                      <td className="px-3 py-2">{formatUSD(m.avgCost)}</td>
+                      <td className="px-3 py-2">{formatInteger(m.avgTokens)}</td>
+                      <td className="px-3 py-2">{formatDuration(m.avgPerFeatureDurationMs)}</td>
+                      <td className="px-3 py-2">
+                        {m.avgRating != null ? `${(m.avgRating * 100).toFixed(0)}%` : '\u2014'}
+                      </td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* Agent Statistics */}
+      <div>
+        <h3 className="text-base font-semibold mb-2">Agent Statistics</h3>
         {stats.agentsList.length === 0 ? (
           <div className="text-sm text-neutral-500">No runs yet.</div>
         ) : (
@@ -905,7 +958,7 @@ const AllProjectsView = () => {
             <table className="min-w-full text-sm">
               <thead className="bg-neutral-50 dark:bg-neutral-800/50 text-neutral-600 dark:text-neutral-400">
                 <tr>
-                  <th className="text-left px-3 py-2">Agent Type</th>
+                  <th className="text-left px-3 py-2">Agent</th>
                   <th className="text-left px-3 py-2">Runs</th>
                   <th className="text-left px-3 py-2">Total Cost</th>
                   <th className="text-left px-3 py-2">Avg Cost/Run</th>
@@ -933,7 +986,7 @@ const AllProjectsView = () => {
                     key={a.agentType}
                     className="border-t border-neutral-200 dark:border-neutral-800"
                   >
-                    <td className="px-3 py-2">{a.agentType}</td>
+                    <td className="px-3 py-2 font-medium capitalize">{a.agentType}</td>
                     <td className="px-3 py-2">{formatInteger(a.runs)}</td>
                     <td className="px-3 py-2">{formatUSD(a.costSum)}</td>
                     <td className="px-3 py-2">{formatUSD(a.avgCost)}</td>
@@ -1002,14 +1055,13 @@ const AllProjectsView = () => {
                       )}
                     </td>
                     <td className="px-3 py-2">
-                      {a.lowestRated && (
+                      {a.lowestRated ? (
                         <div className="flex flex-col items-start gap-1">
-                          <ModelChip
-                            provider={a.lowestRated.provider}
-                            model={a.lowestRated.model}
-                          />
+                          <ModelChip provider={a.lowestRated.provider} model={a.lowestRated.model} />
                           <span className="text-neutral-500 text-xs">{`${(a.lowestRated.avgRating! * 100).toFixed(0)}%`}</span>
                         </div>
+                      ) : (
+                        '\u2014'
                       )}
                     </td>
                   </tr>
@@ -1019,90 +1071,28 @@ const AllProjectsView = () => {
           </div>
         )}
       </div>
-
-      {/* Per-Model stats table (moved below projects and updated columns) */}
-      <div>
-        <h3 className="text-base font-semibold mb-2">Model Statistics</h3>
-        {stats.modelsList.length === 0 ? (
-          <div className="text-sm text-neutral-500">No runs yet.</div>
-        ) : (
-          <div className="overflow-auto border rounded-md border-neutral-200 dark:border-neutral-800">
-            <table className="min-w-full text-sm">
-              <thead className="bg-neutral-50 dark:bg-neutral-800/50 text-neutral-600 dark:text-neutral-400">
-                <tr>
-                  <th className="text-left px-3 py-2">Model</th>
-                  <th className="text-left px-3 py-2">Runs</th>
-                  <th className="text-left px-3 py-2">Total Cost</th>
-                  <th className="text-left px-3 py-2">Avg Cost/Run</th>
-                  <th className="text-left px-3 py-2">Avg Tokens/Run</th>
-                  <th className="text-left px-3 py-2">Avg Duration/Feature</th>
-                  <th className="text-left px-3 py-2">Avg Rating</th>
-                </tr>
-              </thead>
-              <tbody>
-                {stats.modelsList
-                  .sort((a, b) => (a.provider + a.model).localeCompare(b.provider + b.model))
-                  .map((m) => (
-                    <tr key={m.key} className="border-t border-neutral-200 dark:border-neutral-800">
-                      <td className="px-3 py-2">
-                        <ModelChip provider={m.provider} model={m.model} />
-                      </td>
-                      <td className="px-3 py-2">{formatInteger(m.runs)}</td>
-                      <td className="px-3 py-2">{formatUSD(m.totalCost)}</td>
-                      <td className="px-3 py-2">{formatUSD(m.avgCost)}</td>
-                      <td className="px-3 py-2">{formatInteger(m.avgTokens)}</td>
-                      <td className="px-3 py-2">{formatDuration(m.avgPerFeatureDurationMs)}</td>
-                      <td className="px-3 py-2">
-                        {m.avgRating != null ? `${(m.avgRating * 100).toFixed(0)}%` : '\u2014'}
-                      </td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
     </div>
   )
 }
 
-const chatContextAgentRun = (projectId: string, storyId: string, agentRunId: string) => {
-  return { type: 'AGENT_RUN', projectId, storyId, agentRunId } as ChatContext
-}
-const chatContextAgentRunFeature = (
-  projectId: string,
-  storyId: string,
-  featureId: string,
-  agentRunId: string,
-) => {
-  return { type: 'AGENT_RUN_FEATURE', projectId, storyId, featureId, agentRunId }
-}
-
 export default function AgentsView() {
   const [viewMode, setViewMode] = useState<'current' | 'all'>('current')
-  const { projectId } = useActiveProject()
-  const { appSettings, setUserPreferences } = useAppSettings()
-  const { runsHistory } = useAgents()
-
   const [openRunId, setOpenRunId] = useState<string | null>(null)
-
+  const { runsHistory } = useAgents()
+  
+  const { appSettings, setUserPreferences } = useAppSettings()
+  
   const selectedRun = useMemo(() => {
     if (!openRunId) return undefined
-    return runsHistory.find((r) => r.id === openRunId)
+    return runsHistory.find((r) => r.context.agentRunId === openRunId)
   }, [openRunId, runsHistory])
 
-  const chatContext: ChatContext | undefined = useMemo(() => {
-    if (selectedRun) {
-      return chatContextAgentRun(selectedRun.projectId, selectedRun.storyId, selectedRun.id)
-    }
-    if (!projectId) return undefined
-    return { type: 'PROJECT_TOPIC', projectId, projectTopic: 'agentRuns' }
-  }, [projectId, selectedRun])
-
+  // Instead of an overarching Agents Context that gets mutated, we display the sidebar only if
+  // a run is selected. The chat contextualization itself lives inside the run representation.
   return (
     <div className="flex flex-row flex-1 min-h-0 w-full overflow-hidden">
       <div className="flex-1 min-h-0 flex flex-col">
-        <div className="px-4 py-3 border-b border-neutral-200 dark:border-neutral-800 flex items-center justify-between">
+        <div className="px-4 py-3 border-b border-neutral-200 dark:border-neutral-800 flex items-center justify-between bg-white dark:bg-neutral-950">
           <div>
             <div className="text-lg font-semibold">Agents</div>
             <div className="text-sm text-neutral-600 dark:text-neutral-400">
@@ -1144,16 +1134,7 @@ export default function AgentsView() {
           )}
         </div>
       </div>
-      {viewMode === 'current' && chatContext && (
-        <ChatSidebarPanel
-          context={chatContext}
-          chatContextTitle={selectedRun ? `Agent Run ${selectedRun.id}` : 'Agents chat'}
-          initialWidth={appSettings.userPreferences.chatSidebarWidth || 420}
-          onWidthChange={(w, final) => {
-            if (final) setUserPreferences({ chatSidebarWidth: Math.round(w) })
-          }}
-        />
-      )}
+      {/* If we needed a persistent chat sidebar, it would go here. For now, it opens in modal. */}
     </div>
   )
 }

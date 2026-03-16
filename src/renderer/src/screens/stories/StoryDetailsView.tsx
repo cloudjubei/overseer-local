@@ -6,7 +6,13 @@ import { useActiveProject } from '@renderer/contexts/ProjectContext'
 import { useAgents } from '@renderer/contexts/AgentsContext'
 import AgentRunBullet from '@renderer/components/agents/AgentRunBullet'
 import { ChatContext, Feature, Status, Story } from 'thefactory-tools'
-import { IconBack, IconCalculator, IconChevron, IconEdit, IconPlus } from '@renderer/components/ui/icons/Icons'
+import {
+  IconBack,
+  IconCalculator,
+  IconChevron,
+  IconEdit,
+  IconPlus,
+} from '@renderer/components/ui/icons/Icons'
 import ExclamationChip from '@renderer/components/stories/ExclamationChip'
 import RunAgentButton from '@renderer/components/stories/RunAgentButton'
 import { RichText } from '@renderer/components/ui/RichText'
@@ -138,7 +144,7 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
   const isSearchFiltered = query !== ''
 
   const storyRun = useMemo(
-    () => (story ? runsActive.find((r) => r.storyId === story!.id) : undefined),
+    () => (story ? runsActive.find((r) => r.context.storyId === story!.id && !r.context.featureId) : undefined),
     [story, runsActive],
   )
 
@@ -374,11 +380,11 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
               <div className={`flex items-center ${storyHasActiveRun ? 'is-sticky-visible' : ''}`}>
                 {storyRun ? (
                   <AgentRunBullet
-                    key={storyRun.id}
+                    key={storyRun.context.agentRunId}
                     run={storyRun}
                     onClick={(e) => {
                       e.stopPropagation()
-                      navigateAgentRun(storyRun.id)
+                      navigateAgentRun(storyRun.context.agentRunId!)
                     }}
                   />
                 ) : (
@@ -598,9 +604,8 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
                   const isDropBefore = dragging && dropIndex === idx && dropPosition === 'before'
                   const isDropAfter = dragging && dropIndex === idx && dropPosition === 'after'
 
-                  const featureHasActiveRun = !!storyRun?.conversations.find(
-                    (c) => c.featureId === f.id,
-                  )
+                  const featureRun = runsActive.find((r) => r.context.featureId === f.id)
+                  const featureHasActiveRun = !!featureRun
 
                   return (
                     <li key={f.id} className="feature-item" role="listitem">
@@ -660,14 +665,14 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
                             status={f.status}
                             onChange={(next) => handleFeatureStatusChange(story.id, f.id, next)}
                           />
-                          {featureHasActiveRun && storyRun && (
+                          {featureHasActiveRun && featureRun && (
                             <div className="no-drag mt-1">
                               <AgentRunBullet
-                                key={storyRun.id}
-                                run={storyRun}
+                                key={featureRun.context.agentRunId}
+                                run={featureRun}
                                 onClick={(e) => {
                                   e.stopPropagation()
-                                  navigateAgentRun(storyRun.id)
+                                  navigateAgentRun(featureRun.context.agentRunId!)
                                 }}
                               />
                             </div>
@@ -688,13 +693,19 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
                         <div
                           className={`col col-actions ${featureHasActiveRun ? 'is-sticky-visible' : ''}`}
                         >
-                          {!storyHasActiveRun && (
-                            <RunAgentButton
-                              onClick={(agentType) => {
-                                if (!projectId || storyHasActiveRun) return
-                                startAgent(agentType, projectId, story.id, f.id)
-                              }}
-                            />
+                          {!storyHasActiveRun && !featureHasActiveRun && (
+                            <div
+                              className="no-drag"
+                              onClick={(e) => e.stopPropagation()}
+                              onPointerDown={(e) => e.stopPropagation()}
+                            >
+                              <RunAgentButton
+                                onClick={(agentType) => {
+                                  if (!projectId) return
+                                  startAgent(agentType, projectId, story.id, f.id)
+                                }}
+                              />
+                            </div>
                           )}
                         </div>
 

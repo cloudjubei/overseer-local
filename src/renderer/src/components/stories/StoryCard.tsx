@@ -26,7 +26,7 @@ export default function StoryCard({
 }) {
   const { runsHistory, startAgent } = useAgents()
   const { navigateAgentRun } = useNavigator()
-  const storyRun = runsHistory.find((r) => r.state === 'running' && r.storyId === story.id)
+  const storyRun = runsHistory.find((r) => r.state === 'running' && r.context.storyId === story.id)
 
   return (
     <div
@@ -58,11 +58,11 @@ export default function StoryCard({
         <div className="story-card__actions opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-150 ease-out flex items-center gap-2">
           {storyRun ? (
             <AgentRunBullet
-              key={storyRun.id}
+              key={storyRun.context.agentRunId}
               run={storyRun}
               onClick={(e) => {
                 e.stopPropagation()
-                navigateAgentRun(storyRun.id)
+                navigateAgentRun(storyRun.context.agentRunId!)
               }}
             />
           ) : (

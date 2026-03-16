@@ -1,4 +1,4 @@
-import { AgentRunState } from 'thefactory-tools'
+import type { ChatState } from 'thefactory-tools'
 import {
   IconCheckCircle,
   IconLightbulb,
@@ -8,7 +8,7 @@ import {
 } from '../ui/icons/Icons'
 import Tooltip from '../ui/Tooltip'
 
-export function StatusIcon({ state, className }: { state: AgentRunState; className?: string }) {
+export function StatusIcon({ state, className }: { state: ChatState; className?: string }) {
   switch (state) {
     case 'created':
       return <IconLightbulb className={className} />
@@ -25,7 +25,7 @@ export function StatusIcon({ state, className }: { state: AgentRunState; classNa
   }
 }
 
-function bgClasses(state: AgentRunState) {
+function bgClasses(state: ChatState) {
   switch (state) {
     case 'running':
       return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-100 border-blue-200 dark:border-blue-800'
@@ -40,7 +40,7 @@ function bgClasses(state: AgentRunState) {
   }
 }
 
-export default function StatusChip({ state, label }: { state: AgentRunState; label?: string }) {
+export default function StatusChip({ state, label }: { state: ChatState; label?: string }) {
   const text = label ?? state
   return (
     <Tooltip content={<span className="text-xs">{text}</span>}>

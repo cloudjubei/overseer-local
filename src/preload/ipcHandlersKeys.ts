@@ -114,16 +114,6 @@ const IPC_HANDLER_KEYS = {
   LIVE_DATA_UPDATE_CONFIG: 'live-data:update-config',
   LIVE_DATA_GET_DATA: 'live-data:get-data',
 
-  // Factory runs
-  FACTORY_RUNS_SUBSCRIBE: 'factory:runs:subscribe',
-  FACTORY_RUNS_START: 'factory:runs:start',
-  FACTORY_RUNS_CANCEL: 'factory:runs:cancel',
-  FACTORY_RUNS_RATE: 'factory:runs:rate',
-  FACTORY_RUNS_LIST_ACTIVE: 'factory:runs:list-active',
-  FACTORY_RUNS_LIST_HISTORY: 'factory:runs:list-history',
-  FACTORY_RUNS_GET: 'factory:runs:get',
-  FACTORY_RUNS_DELETE_HISTORY: 'factory:runs:delete-history',
-
   // Factory pricing
   FACTORY_PRICING_LIST: 'factory:pricing:list',
   FACTORY_PRICING_REFRESH: 'factory:pricing:refresh',

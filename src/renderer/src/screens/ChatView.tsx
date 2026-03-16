@@ -3,7 +3,6 @@ import { ChatSidebar } from '@renderer/components/chat'
 import { useProjectContext, useActiveProject } from '@renderer/contexts/ProjectContext'
 import { useStories } from '@renderer/contexts/StoriesContext'
 import { useChats } from '@renderer/contexts/ChatsContext'
-import { useAgents } from '@renderer/contexts/AgentsContext'
 import type {
   ChatContext,
   ChatContextAgentRun,
@@ -90,7 +89,6 @@ export default function ChatView() {
   const { projects } = useProjectContext()
   const { storiesById, featuresById } = useStories()
   const { getChatIfExists, chats, chatsByProjectId } = useChats()
-  const { runsHistory } = useAgents()
   const { hasUnreadForProject } = useChatUnread()
   const { markNotificationsByMetadata } = useNotifications()
 
@@ -255,40 +253,11 @@ export default function ChatView() {
   }, [selectedContext, activeProjectId, markNotificationsByMetadata])
 
   // Seed from agent run history when switching to a run context
-  useEffect(() => {
-    const maybeSeed = async () => {
-      const ctx = selectedContext
-      if (!ctx) return
-      if (ctx.type !== 'AGENT_RUN' && ctx.type !== 'AGENT_RUN_FEATURE') return
 
-      const run = runsHistory.find((r) => r.id === (ctx as any).agentRunId)
-      if (!run) return
 
-      let seedMessages: CompletionMessage[] | undefined
-      if (ctx.type === 'AGENT_RUN') {
-        seedMessages = run.conversations[0]?.messages || []
-      } else if (ctx.type === 'AGENT_RUN_FEATURE') {
-        const c = run.conversations.find((c) => c.featureId === (ctx as any).featureId)
-        if (c) seedMessages = c.messages || []
-      }
 
-      if (!seedMessages || seedMessages.length === 0) return
 
-      // IMPORTANT: Only seed if the chat already exists in memory; do not recreate deleted chats
-      const key = getChatContextPath(ctx)
-      const existing = chats[key]
-      if (!existing) return
-      const hasMessages = (existing.chat.messages || []).length > 0
-      if (hasMessages) return
 
-      try {
-        await chatsService.updateChat(ctx, { messages: seedMessages })
-      } catch (e) {
-        console.warn('Failed to seed agent run chat from history', e)
-      }
-    }
-    void maybeSeed()
-  }, [selectedContext, runsHistory, chats])
 
   // Header action: Categories | History switch with unread dot hint if any unread in project
   const headerAction = useMemo(() => {

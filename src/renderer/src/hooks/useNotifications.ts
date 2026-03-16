@@ -215,7 +215,8 @@ export function useNotifications() {
 
       for (const { projectId, agentRuns, chatMessages, gitChanges } of unreadByProject) {
         next[projectId] = {
-          agent_runs: { running: runningByProject.get(projectId) ?? 0, unread: agentRuns.length },
+          agent_runs: { running: 0, unread: 0 },
+          // agent_runs: { running: runningByProject.get(projectId) ?? 0, unread: agentRuns.length },
           chat_messages: {
             unread: chatMessages.length,
             thinking: (thinkingCountByProject.get(projectId) ?? 0) > 0,

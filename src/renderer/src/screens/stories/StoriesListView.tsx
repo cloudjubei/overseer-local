@@ -502,7 +502,7 @@ export default function StoriesListView() {
                   const blockers = getBlockers(t.id)
                   const blockersOutbound = getBlockersOutbound(t.id)
                   const hasRejectedFeatures = t.features.filter((f) => !!f.rejection).length > 0
-                  const storyRun = runsActive.find((r) => r.storyId === t.id)
+                  const storyRun = runsActive.find((r) => r.context.storyId === t.id)
 
                   return (
                     <li key={t.id} className="story-item" role="listitem">
@@ -535,16 +535,14 @@ export default function StoriesListView() {
                           <div className="col col-id">
                             <div className="flex justify-center gap-0.5 items-center">
                               {storyRun && (
-                                // <div className="no-drag">
                                 <AgentRunBullet
-                                  key={storyRun.id}
+                                  key={storyRun.context.agentRunId}
                                   run={storyRun}
                                   onClick={(e) => {
                                     e.stopPropagation()
-                                    navigateAgentRun(storyRun.id)
+                                    navigateAgentRun(storyRun.context.agentRunId!)
                                   }}
                                 />
-                                // </div>
                               )}
                               <span className="id-chip">{storyIdToDisplayIndex[t.id]}</span>
                             </div>
