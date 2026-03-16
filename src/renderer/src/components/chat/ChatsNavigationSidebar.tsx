@@ -518,7 +518,14 @@ export default function ChatsNavigationSidebar({
 
     groups.sort((a, b) => a.storyTitle.localeCompare(b.storyTitle))
     return groups
-  }, [projectChats, getProjectTitle, getStoryTitle, getFeatureTitle, activeProjectId, getStoryDisplayIndex])
+  }, [
+    projectChats,
+    getProjectTitle,
+    getStoryTitle,
+    getFeatureTitle,
+    activeProjectId,
+    getStoryDisplayIndex,
+  ])
 
   const projectTopics = useMemo(() => {
     type TopicItem = { ctx: ChatContext; label: string; key: string; updatedAt: string }

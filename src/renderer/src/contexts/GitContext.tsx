@@ -43,6 +43,11 @@ export type PendingFeatureRefsState = {
   commits?: GitCommitInfo[]
 }
 
+export type GitSelection =
+  | { kind: 'branch'; branchName: string }
+  | { kind: 'stash'; stashRef: string }
+  | null
+
 export type GitContextValue = {
   loading: boolean
   error?: string
@@ -85,6 +90,15 @@ export type GitContextValue = {
     branch: GitUnifiedBranch,
     headSha?: string,
   ) => void
+
+  // UI selection state (per project)
+  selection: {
+    byProject: Record<string, GitSelection>
+    get: (projectId?: string) => GitSelection
+    selectBranch: (projectId: string | undefined, branchName: string) => void
+    selectStash: (projectId: string | undefined, stashRef: string) => void
+    clear: (projectId?: string) => void
+  }
 }
 
 const GitContext = createContext<GitContextValue | null>(null)
@@ -183,6 +197,9 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
   const [pendingByProject, setPendingByProject] = useState<
     Record<string, Record<string, PendingFeatureRefsState>>
   >({})
+
+  // UI selection (per project)
+  const [selectionByProject, setSelectionByProject] = useState<Record<string, GitSelection>>({})
 
   // Merge preferences (persisted)
   const [autoPush, setAutoPush] = useState<boolean>(() => readBoolLS(LS_KEYS.autoPush, false))
@@ -404,10 +421,8 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
   const loadPending = React.useCallback(
     async (projectId: string | undefined, baseRef: string, headRef: string) => {
       const pid = projectId || activeProjectId
-      if (!pid || !headRef || !baseRef) return
+      if (!pid) return
       const key = `${baseRef}|${headRef}`
-
-      // Set loading state
       setPendingByProject((prev) => ({
         ...prev,
         [pid]: {
@@ -415,35 +430,30 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
           [key]: { ...(prev[pid]?.[key] || { entries: [] }), loading: true, error: undefined },
         },
       }))
-
       try {
+        // Commits between baseRef -> headRef
         const commits = await gitService.selectCommits(pid, {
           sources: [headRef],
           baseRef,
-          includeMerges: false,
-          featureInfo: { enableHeuristics: true },
-          maxCount: 200,
+          includeMerges: true,
+          maxCount: 500,
         })
-        // Build unique feature/story pairs from commits
-        const uniq = new Map<string, { storyId: string; featureId?: string }>()
-        for (const c of commits) {
-          const info = c.featureInfo
-          const storyId = info?.storyId
-          if (!storyId) continue
-          const featureId = info?.featureId
-          const dep = featureId || storyId
-          if (!uniq.has(dep)) uniq.set(dep, { storyId, featureId })
+
+        // Identify story/feature refs from commit messages (backend already sets storyId in unified branches,
+        // but this is commit-based discovery for merge modal placeholders)
+        const entriesMap = new Map<string, { storyId: string; featureId?: string }>()
+        for (const c of commits || []) {
+          const storyId = (c as any)?.storyId
+          const featureId = (c as any)?.featureId
+          if (storyId) entriesMap.set(`${storyId}.${featureId || ''}`, { storyId, featureId })
         }
+        const entries = Array.from(entriesMap.values())
+
         setPendingByProject((prev) => ({
           ...prev,
           [pid]: {
             ...(prev[pid] || {}),
-            [key]: {
-              loading: false,
-              error: undefined,
-              entries: Array.from(uniq.values()),
-              commits,
-            },
+            [key]: { loading: false, error: undefined, entries, commits },
           },
         }))
       } catch (e) {
@@ -453,8 +463,9 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
             ...(prev[pid] || {}),
             [key]: {
               loading: false,
-              error: (e as any)?.message || 'Failed to load pending commits',
+              error: (e as any)?.message || 'Failed to load pending features',
               entries: [],
+              commits: [],
             },
           },
         }))
@@ -463,49 +474,22 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
     [activeProjectId],
   )
 
-  // Version bump for last-seen changes to recompute unread-related selectors
-  const [seenVersion, setSeenVersion] = useState(0)
-  useEffect(() => {
-    const onStorage = (e: StorageEvent) => {
-      if (e.key && e.key.startsWith(GIT_LS_PREFIX)) setSeenVersion((v) => v + 1)
-    }
-    const onLocal = () => setSeenVersion((v) => v + 1)
-    window.addEventListener('storage', onStorage)
-    window.addEventListener(GIT_EVT_KEY, onLocal as EventListener)
-    return () => {
-      window.removeEventListener('storage', onStorage)
-      window.removeEventListener(GIT_EVT_KEY, onLocal as EventListener)
-    }
-  }, [])
-
-  // Refresh unified branches whenever projects change (initial load for all)
-  useEffect(() => {
-    let cancelled = false
-    const init = async () => {
-      const initial: Record<string, UnifiedBranchesState> = {}
-      for (const p of projects) initial[p.id] = { loading: true, branches: [], relToCurrent: {} }
-      setUnifiedByProject(initial)
-      // Load sequentially to avoid overloading IPC
-      for (const p of projects) {
-        if (cancelled) break
-        await loadUnified(p.id)
-      }
-    }
-    void init()
-    return () => {
-      cancelled = true
-    }
-  }, [projects, loadUnified])
-
   const unifiedApi = useMemo(
     () => ({
       byProject: unifiedByProject,
-      get: (projectId?: string): UnifiedBranchesState => {
+      get: (projectId?: string) => {
         const pid = projectId || activeProjectId
-        if (!pid) return { loading: false, branches: [] }
-        return unifiedByProject[pid] || { loading: true, branches: [], relToCurrent: {} }
+        return (
+          (pid && unifiedByProject[pid]) || {
+            loading: false,
+            branches: [],
+            error: pid ? undefined : 'No active project',
+          }
+        )
       },
-      reload: loadUnified,
+      reload: async (projectId?: string) => {
+        await loadUnified(projectId)
+      },
     }),
     [unifiedByProject, activeProjectId, loadUnified],
   )
@@ -513,74 +497,61 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
   const pendingApi = useMemo(
     () => ({
       byProject: pendingByProject,
-      get: (
-        projectId: string | undefined,
-        baseRef: string,
-        headRef: string,
-      ): PendingFeatureRefsState => {
+      get: (projectId: string | undefined, baseRef: string, headRef: string) => {
         const pid = projectId || activeProjectId
-        if (!pid) return { loading: false, entries: [] }
         const key = `${baseRef}|${headRef}`
+        if (!pid) return { loading: false, error: 'No active project', entries: [] }
         return pendingByProject[pid]?.[key] || { loading: false, entries: [] }
       },
-      load: loadPending,
+      load: async (projectId: string | undefined, baseRef: string, headRef: string) => {
+        await loadPending(projectId, baseRef, headRef)
+      },
     }),
     [pendingByProject, activeProjectId, loadPending],
   )
 
-  // Compute total sidebar badge count from unified.relToCurrent across all projects
-  const gitUpdatedBranchesCountComputed = useMemo(() => {
-    let total = 0
+  // Compute unread updated branches counts per project (based on localStorage last-seen)
+  const [seenVersion, setSeenVersion] = useState(0)
+  useEffect(() => {
+    const handler = () => setSeenVersion((v) => v + 1)
+    window.addEventListener(GIT_EVT_KEY, handler as any)
+    return () => window.removeEventListener(GIT_EVT_KEY, handler as any)
+  }, [])
+
+  const updatedBranchesCountByProject = useMemo(() => {
+    const out: Record<string, number> = {}
     for (const [pid, st] of Object.entries(unifiedByProject)) {
-      if (!st || !st.branches || st.branches.length === 0) continue
-      const currName = st.branches.find((b) => b.current)?.name
-      const rel = st.relToCurrent || {}
+      const current = st.branches.find((b) => b.current)
+      const baseRef = current?.name || 'main'
+      let count = 0
       for (const b of st.branches) {
         if (b.current) continue
+        if (!b.isLocal) continue
+        if ((st.relToCurrent?.[getHeadRef(b) || '']?.ahead || 0) <= 0) continue
         const headRef = getHeadRef(b)
-        if (!headRef || headRef === currName) continue
-        const delta = rel[headRef]
-        if (delta && (delta.ahead || 0) > 0) {
-          const headSha = getHeadSha(b)
-          const lastSeen = pid && currName && headRef ? readLastSeen(pid, currName, headRef) : undefined
-          if (!headSha || !lastSeen || lastSeen !== headSha) total += 1
+        if (!headRef) continue
+        const sha = getHeadSha(b)
+        if (!sha) {
+          count++
+          continue
         }
+        const lastSeen = readLastSeen(pid, baseRef, headRef)
+        if (lastSeen !== sha) count++
       }
+      out[pid] = count
     }
-    return total
+    return out
   }, [unifiedByProject, seenVersion])
 
-  // Per-project unread updated branches counts
-  const updatedBranchesCountByProject = useMemo<Record<string, number>>(() => {
-    const result: Record<string, number> = {}
-    for (const [pid, st] of Object.entries(unifiedByProject)) {
-      let count = 0
-      if (!st || !st.branches || st.branches.length === 0) {
-        result[pid] = 0
-        continue
-      }
-      const currName = st.branches.find((b) => b.current)?.name
-      const rel = st.relToCurrent || {}
-      for (const b of st.branches) {
-        if (b.current) continue
-        const headRef = getHeadRef(b)
-        if (!headRef || headRef === currName) continue
-        const delta = rel[headRef]
-        if (!delta || (delta.ahead || 0) <= 0) continue
-        const headSha = getHeadSha(b)
-        const lastSeen = pid && currName && headRef ? readLastSeen(pid, currName, headRef) : undefined
-        if (!headSha || !lastSeen || lastSeen !== headSha) count += 1
-      }
-      result[pid] = count
-    }
-    return result
-  }, [unifiedByProject, seenVersion])
+  const gitUpdatedBranchesCountComputed = useMemo(() => {
+    return Object.values(updatedBranchesCountByProject).reduce((acc, n) => acc + (n || 0), 0)
+  }, [updatedBranchesCountByProject])
 
   const getProjectUpdatedBranchesCount = React.useCallback(
-    (projectId?: string): number => {
+    (projectId?: string) => {
       const pid = projectId || activeProjectId
       if (!pid) return 0
-      return updatedBranchesCountByProject[pid] ?? 0
+      return updatedBranchesCountByProject[pid] || 0
     },
     [updatedBranchesCountByProject, activeProjectId],
   )
@@ -613,6 +584,38 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
     [],
   )
 
+  const selectionApi = useMemo(
+    () => ({
+      byProject: selectionByProject,
+      get: (projectId?: string): GitSelection => {
+        const pid = projectId || activeProjectId
+        if (!pid) return null
+        return selectionByProject[pid] || null
+      },
+      selectBranch: (projectId: string | undefined, branchName: string) => {
+        const pid = projectId || activeProjectId
+        if (!pid) return
+        setSelectionByProject((prev) => ({ ...prev, [pid]: { kind: 'branch', branchName } }))
+      },
+      selectStash: (projectId: string | undefined, stashRef: string) => {
+        const pid = projectId || activeProjectId
+        if (!pid) return
+        setSelectionByProject((prev) => ({ ...prev, [pid]: { kind: 'stash', stashRef } }))
+      },
+      clear: (projectId?: string) => {
+        const pid = projectId || activeProjectId
+        if (!pid) return
+        setSelectionByProject((prev) => {
+          if (!prev[pid]) return prev
+          const next = { ...prev }
+          delete next[pid]
+          return next
+        })
+      },
+    }),
+    [selectionByProject, activeProjectId],
+  )
+
   const value = useMemo<GitContextValue>(
     () => ({
       loading,
@@ -627,6 +630,7 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
       mergePreferences,
       isBranchUnread,
       markBranchSeen,
+      selection: selectionApi,
     }),
     [
       loading,
@@ -641,6 +645,7 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
       mergePreferences,
       isBranchUnread,
       markBranchSeen,
+      selectionApi,
     ],
   )
 

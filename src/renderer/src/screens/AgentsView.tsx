@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useAgents } from '../contexts/AgentsContext'
-import ChatConversation from '../components/agents/ChatConversation'
 import AgentRunRow from '../components/agents/AgentRunRow'
 import ModelChip from '../components/agents/ModelChip'
 import ProjectChip from '../components/agents/ProjectChip'
@@ -13,7 +12,6 @@ import { formatDate, formatTime } from '@renderer/utils/time'
 import { useCosts } from '@renderer/contexts/CostsContext'
 import { getChatContextKey } from 'thefactory-tools/utils'
 import { COST_GROUP_ID_ALL } from 'thefactory-tools/constants'
-import { useChats } from '../contexts/ChatsContext'
 
 function formatUSD(n?: number) {
   if (n == null || !isFinite(n)) return '\u2014'
@@ -80,17 +78,17 @@ const CurrentProjectView = ({ openRunId, setOpenRunId }: CurrentProjectViewProps
       const completion = messages
         .map((m: any) => (m?.role === 'assistant' ? (m?.usage?.completionTokens ?? 0) : 0))
         .reduce((a, b) => a + b, 0)
-        
+
       const llmConfig = r.metadata?.llmConfig as LLMConfig | undefined
       const inputPerM = llmConfig?.costInputPerMTokensUSD ?? 0
       const outputPerM = llmConfig?.costOutputPerMTokensUSD ?? 0
       const costUSD = (inputPerM * prompt) / 1_000_000 + (outputPerM * completion) / 1_000_000
-      
+
       const startedMs = new Date(r.createdAt).getTime()
       const finishedMs = new Date(r.updatedAt).getTime()
       const durationMs =
         isFinite(startedMs) && isFinite(finishedMs) ? Math.max(0, finishedMs - startedMs) : 0
-        
+
       const totalFeatures = r.context.featureId ? 1 : 0
       return { costUSD, durationMs, totalFeatures }
     })
@@ -107,7 +105,8 @@ const CurrentProjectView = ({ openRunId, setOpenRunId }: CurrentProjectViewProps
     () =>
       runsHistory
         .filter(
-          (r) => r.context.projectId === projectId && (r.state === 'created' || r.state === 'running'),
+          (r) =>
+            r.context.projectId === projectId && (r.state === 'created' || r.state === 'running'),
         )
         .slice()
         .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
@@ -118,7 +117,8 @@ const CurrentProjectView = ({ openRunId, setOpenRunId }: CurrentProjectViewProps
     () =>
       runsHistory
         .filter(
-          (r) => r.context.projectId === projectId && !(r.state === 'created' || r.state === 'running'),
+          (r) =>
+            r.context.projectId === projectId && !(r.state === 'created' || r.state === 'running'),
         )
         .slice()
         .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
@@ -272,11 +272,18 @@ const CurrentProjectView = ({ openRunId, setOpenRunId }: CurrentProjectViewProps
           <div className="relative bg-white dark:bg-neutral-950 rounded-lg shadow-xl w-[92vw] max-w-5xl max-h-[90vh] border border-neutral-200 dark:border-neutral-800">
             <div className="px-4 py-3 border-b border-neutral-200 dark:border-neutral-800 flex items-center justify-between">
               <div className="min-w-0">
-                <div className="font-semibold text-sm truncate">Run #{selectedRun.context.agentRunId}</div>
+                <div className="font-semibold text-sm truncate">
+                  Run #{selectedRun.context.agentRunId}
+                </div>
                 <div className="text-xs text-neutral-500 truncate flex items-center gap-2">
                   <ModelChip
-                    provider={(selectedRun.metadata?.llmConfig as LLMConfig | undefined)?.provider || 'unknown'}
-                    model={(selectedRun.metadata?.llmConfig as LLMConfig | undefined)?.model || 'unknown'}
+                    provider={
+                      (selectedRun.metadata?.llmConfig as LLMConfig | undefined)?.provider ||
+                      'unknown'
+                    }
+                    model={
+                      (selectedRun.metadata?.llmConfig as LLMConfig | undefined)?.model || 'unknown'
+                    }
                   />
                   <StatusChip state={selectedRun.state || 'created'} />
                   <span>
@@ -337,20 +344,20 @@ const AllProjectsView = () => {
       const completion = messages
         .map((m: any) => (m?.role === 'assistant' ? (m?.usage?.completionTokens ?? 0) : 0))
         .reduce((a, b) => a + b, 0)
-        
+
       const llmConfig = r.metadata?.llmConfig as LLMConfig | undefined
       const inputPerM = llmConfig?.costInputPerMTokensUSD ?? 0
       const outputPerM = llmConfig?.costOutputPerMTokensUSD ?? 0
       const costUSD = (inputPerM * prompt) / 1_000_000 + (outputPerM * completion) / 1_000_000
-      
+
       const startedMs = new Date(r.createdAt).getTime()
       const finishedMs = new Date(r.updatedAt).getTime()
       const durationMs =
         isFinite(startedMs) && isFinite(finishedMs)
           ? Math.max(0, finishedMs - startedMs)
           : undefined
-          
-      const completedFeatures = (r.state === 'completed' && r.context.featureId) ? 1 : 0
+
+      const completedFeatures = r.state === 'completed' && r.context.featureId ? 1 : 0
       const totalFeatures = r.context.featureId ? 1 : 0
       const modelKey: ModelKey = `${llmConfig?.provider || 'unknown'}::${llmConfig?.model || 'unknown'}`
       const projectKey: ProjectKey = r.context.projectId || 'unknown'
@@ -881,7 +888,10 @@ const AllProjectsView = () => {
                     <td className="px-3 py-2">
                       {p.lowestRated ? (
                         <div className="flex flex-col items-start gap-1">
-                          <ModelChip provider={p.lowestRated.provider} model={p.lowestRated.model} />
+                          <ModelChip
+                            provider={p.lowestRated.provider}
+                            model={p.lowestRated.model}
+                          />
                           <span className="text-neutral-500 text-xs">{`${(p.lowestRated.avgRating! * 100).toFixed(0)}%`}</span>
                         </div>
                       ) : (
@@ -925,10 +935,7 @@ const AllProjectsView = () => {
                   .slice()
                   .sort((a, b) => b.runs - a.runs)
                   .map((m) => (
-                    <tr
-                      key={m.key}
-                      className="border-t border-neutral-200 dark:border-neutral-800"
-                    >
+                    <tr key={m.key} className="border-t border-neutral-200 dark:border-neutral-800">
                       <td className="px-3 py-2">
                         <ModelChip provider={m.provider} model={m.model} />
                       </td>
@@ -1057,7 +1064,10 @@ const AllProjectsView = () => {
                     <td className="px-3 py-2">
                       {a.lowestRated ? (
                         <div className="flex flex-col items-start gap-1">
-                          <ModelChip provider={a.lowestRated.provider} model={a.lowestRated.model} />
+                          <ModelChip
+                            provider={a.lowestRated.provider}
+                            model={a.lowestRated.model}
+                          />
                           <span className="text-neutral-500 text-xs">{`${(a.lowestRated.avgRating! * 100).toFixed(0)}%`}</span>
                         </div>
                       ) : (
@@ -1079,9 +1089,9 @@ export default function AgentsView() {
   const [viewMode, setViewMode] = useState<'current' | 'all'>('current')
   const [openRunId, setOpenRunId] = useState<string | null>(null)
   const { runsHistory } = useAgents()
-  
+
   const { appSettings, setUserPreferences } = useAppSettings()
-  
+
   const selectedRun = useMemo(() => {
     if (!openRunId) return undefined
     return runsHistory.find((r) => r.context.agentRunId === openRunId)

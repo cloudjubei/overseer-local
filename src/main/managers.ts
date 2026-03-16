@@ -65,6 +65,7 @@ export async function initManagers(projectRoot: string, mainWindow: BrowserWindo
     projectRoot,
     mainWindow,
     projectsManager,
+    storiesManager,
     settingsManager,
     databaseManager,
     gitManager,

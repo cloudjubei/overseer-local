@@ -181,8 +181,7 @@ function MessageRow({
       msgs[start]?.role === 'tool' &&
       (msgs[start]?.toolResult?.type === 'require_confirmation' ||
         msgs[start]?.toolResult?.type === 'pending' ||
-        msgs[start]?.toolResult?.type === 'running' ||
-        msgs[start]?.toolResult?.type === 'ignored')
+        msgs[start]?.toolResult?.type === 'running')
     ) {
       start--
     }
@@ -207,7 +206,7 @@ function MessageRow({
       const message = messagesToDisplay[i]
       if (message.role !== 'tool') continue
       const m = message as CompletionToolMessage
-      if (!(m.toolResult.type === 'require_confirmation' || m.toolResult.type === 'ignored'))
+      if (!(m.toolResult.type === 'require_confirmation' || m.toolResult.type === 'not_allowed'))
         continue
       const id = m.toolCall.toolCallId
       if (id) set.add(id)
@@ -380,7 +379,7 @@ function MessageRow({
                 const toolCallId = String(tm.toolCall?.toolCallId || '')
                 const type = tm.toolResult?.type as ToolResultType | undefined
                 const selectable =
-                  (type === 'require_confirmation' || type === 'ignored') &&
+                  (type === 'require_confirmation' || type === 'not_allowed') &&
                   isConfirmableToolId.has(toolCallId)
 
                 return (

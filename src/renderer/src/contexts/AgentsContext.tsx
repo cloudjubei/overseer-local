@@ -85,10 +85,13 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
 
   const getCompletedUnreadCount = useCallback(
     (projectId?: string) => {
-      const runs = projectId ? runsHistory.filter((r) => r.context.projectId === projectId) : runsHistory
+      const runs = projectId
+        ? runsHistory.filter((r) => r.context.projectId === projectId)
+        : runsHistory
       let count = 0
       for (const r of runs) {
-        if (isFinished(r) && r.context.agentRunId && !seenCompletedIds.has(r.context.agentRunId)) count += 1
+        if (isFinished(r) && r.context.agentRunId && !seenCompletedIds.has(r.context.agentRunId))
+          count += 1
       }
       return count
     },
@@ -162,7 +165,7 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
     async (runId: string) => {
       const run = runsHistory.find((r) => r.context.agentRunId === runId)
       if (!run) return
-      
+
       const pid = run.context.projectId
       if (pid) {
         try {
@@ -180,7 +183,7 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
           }
         } catch (_) {}
       }
-      
+
       await chatsService.deleteChat(run.context)
     },
     [runsHistory],

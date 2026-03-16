@@ -28,6 +28,7 @@ import UsageModal from './UsageModal'
 import ChatSettingsDropdown, { type ToolToggle } from './ChatSettingsDropdown'
 import { useChatDraft } from './hooks/useChatDraft'
 import ChatDynamicContextModal from './ChatDynamicContextModal'
+import { useToast } from '../ui/Toast'
 
 export type ChatSidebarProps = {
   context: ChatContext
@@ -67,6 +68,8 @@ export default function ChatSidebar({
     deleteLastMessage,
     deleteChat,
   } = useChats()
+
+  const { toast } = useToast()
 
   const { getProjectById } = useProjectContext()
   const { storiesById, featuresById } = useStories()
@@ -187,6 +190,13 @@ export default function ChatSidebar({
 
       flushPersist()
 
+      // Optimistically clear the persisted draft before the async gap.
+      // If send fails, we restore (below).
+      const shouldManageDraft = meta?.reason === 'user' || meta?.reason === undefined
+      if (shouldManageDraft) {
+        clear()
+      }
+
       tryResumeAudioContext()
       playSendSound()
 
@@ -194,17 +204,28 @@ export default function ChatSidebar({
         setScrollSignal((s) => s + 1)
       }
 
-      await sendMessage(
-        context,
-        message,
-        effectivePrompt,
-        currentSettings,
-        activeChatConfig,
-        attachments,
-      )
+      try {
+        await sendMessage(
+          context,
+          message,
+          effectivePrompt,
+          currentSettings,
+          activeChatConfig,
+          attachments,
+        )
+      } catch (e) {
+        if (shouldManageDraft) {
+          setLocalText(message)
+          setLocalAttachments(attachments)
+        }
 
-      if (meta?.reason === 'user' || meta?.reason === undefined) {
-        clear()
+        toast({
+          variant: 'error',
+          title: 'Message failed to send',
+          description: 'Please check your connection / configuration and try again.',
+        })
+
+        throw e
       }
     },
     [
@@ -212,10 +233,13 @@ export default function ChatSidebar({
       activeChatConfig,
       currentSettings,
       flushPersist,
+      clear,
       sendMessage,
       context,
       effectivePrompt,
-      clear,
+      toast,
+      setLocalText,
+      setLocalAttachments,
     ],
   )
 

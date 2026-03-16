@@ -254,11 +254,6 @@ export default function ChatView() {
 
   // Seed from agent run history when switching to a run context
 
-
-
-
-
-
   // Header action: Categories | History switch with unread dot hint if any unread in project
   const headerAction = useMemo(() => {
     const seg = (

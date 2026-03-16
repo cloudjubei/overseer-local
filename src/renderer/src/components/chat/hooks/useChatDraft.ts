@@ -3,13 +3,6 @@ import { useChats } from '@renderer/contexts/ChatsContext'
 
 type SelectionPatch = { selectionStart?: number; selectionEnd?: number }
 
-type DraftState = {
-  text: string
-  attachments: string[]
-  selectionStart?: number
-  selectionEnd?: number
-}
-
 export type UseChatDraftReturn = {
   text: string
   setText: (text: string) => void
@@ -41,7 +34,7 @@ export function useChatDraft(chatKey: string): UseChatDraftReturn {
   const draftPersistTimerRef = useRef<number | null>(null)
   const selectionPersistTimerRef = useRef<number | null>(null)
 
-  const initial = useMemo(() => getDraft(chatKey) as DraftState, [getDraft, chatKey])
+  const initial = useMemo(() => getDraft(chatKey), [getDraft, chatKey])
 
   const [text, _setText] = useState<string>(initial.text)
   const [attachments, _setAttachments] = useState<string[]>(initial.attachments)
@@ -65,7 +58,8 @@ export function useChatDraft(chatKey: string): UseChatDraftReturn {
       selectionPersistTimerRef.current = null
     }
 
-    const d = getDraft(chatKey) as DraftState
+    const d = getDraft(chatKey)
+    console.log('useEffect draft chatKey: ', chatKey, ' setText PRE: ', text, ' POST: ', d.text)
     _setText(d.text)
     _setAttachments(d.attachments)
     selectionStartRef.current = d.selectionStart

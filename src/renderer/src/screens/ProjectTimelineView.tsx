@@ -108,6 +108,7 @@ function mapFeatureToTimelineLabel(projectId: string, feature: Feature): Timelin
     createdAt: feature.createdAt,
     updatedAt: feature.updatedAt,
     metadata: feature,
+    shouldEmbed: false,
   }
 }
 
@@ -137,6 +138,7 @@ function mapStoryToTimelineLabel(projectId: string, story: Story): TimelineLabel
     createdAt: (story as any)?.createdAt,
     updatedAt: (story as any)?.updatedAt,
     metadata: story,
+    shouldEmbed: false,
   }
 }
 
@@ -246,14 +248,9 @@ export default function ProjectTimelineView() {
   }, [projectId])
 
   const displayedStories = useMemo(() => {
-    if (showAllProjects) {
-      return Object.values(storiesById)
-    }
-    if (!project) {
-      return []
-    }
-    const projectStoryIds = project.stories || Object.keys(project.storyIdToDisplayIndex || {})
-    return projectStoryIds.map((id) => storiesById[id]).filter(Boolean)
+    if (showAllProjects) return Object.values(storiesById)
+    if (!project) return []
+    return project.storyIds.map((id) => storiesById[id]).filter(Boolean)
   }, [storiesById, project, showAllProjects])
 
   const displayedFeatures = useMemo(() => {
@@ -585,7 +582,7 @@ export default function ProjectTimelineView() {
           description: newDescription.trim() || undefined,
         },
       }
-      const created = await dbService.createEntity(input)
+      const created = await dbService.addEntity(input)
       setLabels((prev) => [...prev, normalizeLabels([created])[0]])
       setIsAdding(false)
       setNewLabel('')
@@ -618,24 +615,25 @@ export default function ProjectTimelineView() {
     setSavingEdit(true)
     try {
       const pid = editScope === '__global__' ? '__global__' : (projectId ?? 'noproj')
-      const targetLabels = await dbService.matchEntities(undefined, { entityIds: [editingId] })
+      const targetLabels = await dbService.matchEntities(undefined, { ids: [editingId] })
       if (!targetLabels.length) throw new Error('Label not found')
       const target = targetLabels[0]
 
-      const nextMeta = { ...target.metadata }
       if (pid !== target.projectId) {
         // Change project id? DB updateEntity currently respects patch.
       }
       const updated = await dbService.updateEntity(editingId, {
         projectId: pid,
         content: {
-          ...target.content,
+          ...(target.content as Record<string, any>),
           timestamp: new Date(editTimestamp).toISOString(),
           label: editLabel.trim(),
           description: editDescription.trim() || undefined,
         },
       })
-      setLabels((prev) => prev.map((x) => (x.id === editingId ? normalizeLabels([updated])[0] : x)))
+      setLabels((prev) =>
+        prev.map((x) => (x.id === editingId ? normalizeLabels([updated!])[0] : x)),
+      )
       closeEdit()
     } catch (err: any) {
       alert(`Failed to save edit: ${err?.message || err}`)
@@ -691,7 +689,11 @@ export default function ProjectTimelineView() {
             <label htmlFor="allProjectsSwitch" className="text-sm font-medium cursor-pointer">
               All projects
             </label>
-            <Switch id="allProjectsSwitch" checked={showAllProjects} onCheckedChange={setShowAllProjects} />
+            <Switch
+              key="allProjectsSwitch"
+              checked={showAllProjects}
+              onCheckedChange={setShowAllProjects}
+            />
           </div>
           <button
             onClick={() => setIsAdding(!isAdding)}

@@ -31,7 +31,7 @@ export default class StoriesManager extends BaseManager {
   }
 
   async init(): Promise<void> {
-    await this.__getTools('main')
+    await this.getTools('main')
 
     await super.init()
   }
@@ -68,19 +68,28 @@ export default class StoriesManager extends BaseManager {
     return handlers
   }
 
+  async getTools(projectId: string): Promise<StoryTools | undefined> {
+    await this.toolsLock.lock()
+    if (!this.tools[projectId]) {
+      await this.updateTool(projectId)
+    }
+    this.toolsLock.unlock()
+    return this.tools[projectId]
+  }
+
   async listStories(projectId: string): Promise<Story[]> {
-    const tools = await this.__getTools(projectId)
+    const tools = await this.getTools(projectId)
     return (await tools?.listStories()) ?? []
   }
   async getStory(projectId: string, storyId: string): Promise<Story | undefined> {
-    const tools = await this.__getTools(projectId)
+    const tools = await this.getTools(projectId)
     return tools?.getStory(storyId)
   }
   async createStory(projectId: string, storyData: StoryCreateInput): Promise<Story | undefined> {
     const project = await this.projectsManager.getProject(projectId)
     if (!project) return
 
-    const tools = await this.__getTools(projectId)
+    const tools = await this.getTools(projectId)
     if (!tools) return
 
     const newStory = await tools.addStory(storyData)
@@ -95,7 +104,7 @@ export default class StoriesManager extends BaseManager {
     storyId: string,
     patch: StoryEditInput,
   ): Promise<Story | undefined> {
-    const tools = await this.__getTools(projectId)
+    const tools = await this.getTools(projectId)
     return await tools?.updateStory(storyId, patch)
   }
   async updateStoryStatus(
@@ -103,7 +112,7 @@ export default class StoriesManager extends BaseManager {
     storyId: string,
     status: Status,
   ): Promise<Story | undefined> {
-    const tools = await this.__getTools(projectId)
+    const tools = await this.getTools(projectId)
     return await tools?.updateStoryStatus(storyId, status)
   }
 
@@ -111,7 +120,7 @@ export default class StoriesManager extends BaseManager {
     const project = await this.projectsManager.getProject(projectId)
     if (!project) return
 
-    const tools = await this.__getTools(projectId)
+    const tools = await this.getTools(projectId)
     if (!tools) return
 
     await tools.deleteStory(storyId)
@@ -123,7 +132,7 @@ export default class StoriesManager extends BaseManager {
     storyId: string,
     featureId: string,
   ): Promise<Feature | undefined> {
-    const tools = await this.__getTools(projectId)
+    const tools = await this.getTools(projectId)
     if (!tools) return
     return await tools.getFeature(storyId, featureId)
   }
@@ -132,7 +141,7 @@ export default class StoriesManager extends BaseManager {
     storyId: string,
     input: FeatureCreateInput,
   ): Promise<Story | undefined> {
-    const tools = await this.__getTools(projectId)
+    const tools = await this.getTools(projectId)
     if (!tools) return
     return await tools.addFeature(storyId, input)
   }
@@ -142,7 +151,7 @@ export default class StoriesManager extends BaseManager {
     featureId: string,
     patch: FeatureEditInput,
   ): Promise<Story | undefined> {
-    const tools = await this.__getTools(projectId)
+    const tools = await this.getTools(projectId)
     if (!tools) return
     return await tools.updateFeature(storyId, featureId, patch)
   }
@@ -151,7 +160,7 @@ export default class StoriesManager extends BaseManager {
     storyId: string,
     featureId: string,
   ): Promise<Story | undefined> {
-    const tools = await this.__getTools(projectId)
+    const tools = await this.getTools(projectId)
     if (!tools) return
     return await tools.deleteFeature(storyId, featureId)
   }
@@ -160,13 +169,13 @@ export default class StoriesManager extends BaseManager {
     storyId: string,
     payload: ReorderPayload,
   ): Promise<Story | undefined> {
-    const tools = await this.__getTools(projectId)
+    const tools = await this.getTools(projectId)
     if (!tools) return
     return await tools.reorderFeatures(storyId, payload)
   }
 
   async addChangeHandler(projectId: string, handler: StoryChangeHandler): Promise<void> {
-    const tools = await this.__getTools(projectId)
+    const tools = await this.getTools(projectId)
     if (!tools) return
     tools.subscribe(handler)
   }
@@ -185,14 +194,5 @@ export default class StoriesManager extends BaseManager {
       }
     })
     return tools
-  }
-
-  private async __getTools(projectId: string): Promise<StoryTools | undefined> {
-    await this.toolsLock.lock()
-    if (!this.tools[projectId]) {
-      await this.updateTool(projectId)
-    }
-    this.toolsLock.unlock()
-    return this.tools[projectId]
   }
 }

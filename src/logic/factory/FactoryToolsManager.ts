@@ -14,9 +14,11 @@ import {
 import DatabaseManager from '../db/DatabaseManager'
 import GitManager from '../git/GitManager'
 import GitCredentialsManager from '../git/GitCredentialsManager'
+import StoriesManager from '../stories/StoriesManager'
 
 export default class FactoryToolsManager extends BaseManager {
   private projectsManager: ProjectsManager
+  private storiesManager: StoriesManager
   private settingsManager: SettingsManager
   private databaseManager: DatabaseManager
   private gitManager: GitManager
@@ -27,6 +29,7 @@ export default class FactoryToolsManager extends BaseManager {
     projectRoot: string,
     window: BrowserWindow,
     projectsManager: ProjectsManager,
+    storiesManager: StoriesManager,
     settingsManager: SettingsManager,
     databaseManager: DatabaseManager,
     gitManager: GitManager,
@@ -34,6 +37,7 @@ export default class FactoryToolsManager extends BaseManager {
   ) {
     super(projectRoot, window)
     this.projectsManager = projectsManager
+    this.storiesManager = storiesManager
     this.settingsManager = settingsManager
     this.databaseManager = databaseManager
     this.gitManager = gitManager
@@ -101,10 +105,12 @@ export default class FactoryToolsManager extends BaseManager {
     const appSettings = this.settingsManager.getAppSettings()
     const webSearchApiKeys = appSettings?.webSearchApiKeys
     const connectionString = this.databaseManager.getConnectionString()
+    const storyTools = await this.storiesManager.getTools(projectId)
 
     const tools = await createTools(
       projectId,
       projectRoot,
+      storyTools,
       webSearchApiKeys,
       connectionString,
       project.repo_url,

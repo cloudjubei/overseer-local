@@ -99,7 +99,6 @@ out/
 dist/
 
 # APP SPECIFIC
-chats/
 .factory/
 
 # Vendorized build artifacts
