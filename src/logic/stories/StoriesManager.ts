@@ -52,8 +52,6 @@ export default class StoriesManager extends BaseManager {
       this.deleteStory(projectId, storyId)
     handlers[IPC_HANDLER_KEYS.STORIES_FEATURE_GET] = ({ projectId, storyId, featureId }) =>
       this.getFeature(projectId, storyId, featureId)
-    handlers[IPC_HANDLER_KEYS.STORIES_REINDEX] = ({ projectId }) =>
-      this.reindexStories(projectId)
     handlers[IPC_HANDLER_KEYS.STORIES_FEATURE_ADD] = ({ projectId, storyId, input }) =>
       this.addFeature(projectId, storyId, input)
     handlers[IPC_HANDLER_KEYS.STORIES_FEATURE_UPDATE] = ({
@@ -80,24 +78,17 @@ export default class StoriesManager extends BaseManager {
   }
   async createStory(projectId: string, storyData: StoryCreateInput): Promise<Story | undefined> {
     const project = await this.projectsManager.getProject(projectId)
-    if (!project) {
-      return
-    }
+    if (!project) return
 
     const tools = await this.__getTools(projectId)
-    if (!tools) {
-      return
-    }
+    if (!tools) return
 
     const newStory = await tools.addStory(storyData)
     if (newStory) {
-      await this.ensureStoryIndex(projectId, newStory.id)
+      await this.projectsManager.addStory(projectId, newStory.id)
       return newStory
     }
     return
-
-    // const tools = await this.__getTools(projectId)
-    // return await tools?.addStory(storyData)
   }
   async updateStory(
     projectId: string,
@@ -118,29 +109,13 @@ export default class StoriesManager extends BaseManager {
 
   async deleteStory(projectId: string, storyId: string): Promise<ProjectSpec | undefined> {
     const project = await this.projectsManager.getProject(projectId)
-    if (!project) {
-      return
-    }
+    if (!project) return
 
     const tools = await this.__getTools(projectId)
-    if (!tools) {
-      return
-    }
+    if (!tools) return
+
     await tools.deleteStory(storyId)
-
-    const newProject = { ...project }
-    const index = newProject.storyIdToDisplayIndex[storyId]
-    delete newProject.storyIdToDisplayIndex[storyId]
-    for (const key of Object.keys(newProject.storyIdToDisplayIndex)) {
-      if (newProject.storyIdToDisplayIndex[key] > index) {
-        newProject.storyIdToDisplayIndex[key] = newProject.storyIdToDisplayIndex[key] - 1
-      }
-    }
-    await this.projectsManager.updateProject(projectId, newProject)
-    return newProject
-
-    // const tools = await this.__getTools(projectId)
-    // return await tools?.deleteStory(storyId)
+    return await this.projectsManager.deleteStory(projectId, storyId)
   }
 
   async getFeature(
@@ -149,9 +124,7 @@ export default class StoriesManager extends BaseManager {
     featureId: string,
   ): Promise<Feature | undefined> {
     const tools = await this.__getTools(projectId)
-    if (!tools) {
-      return
-    }
+    if (!tools) return
     return await tools.getFeature(storyId, featureId)
   }
   async addFeature(
@@ -160,9 +133,7 @@ export default class StoriesManager extends BaseManager {
     input: FeatureCreateInput,
   ): Promise<Story | undefined> {
     const tools = await this.__getTools(projectId)
-    if (!tools) {
-      return
-    }
+    if (!tools) return
     return await tools.addFeature(storyId, input)
   }
   async updateFeature(
@@ -172,9 +143,7 @@ export default class StoriesManager extends BaseManager {
     patch: FeatureEditInput,
   ): Promise<Story | undefined> {
     const tools = await this.__getTools(projectId)
-    if (!tools) {
-      return
-    }
+    if (!tools) return
     return await tools.updateFeature(storyId, featureId, patch)
   }
   async deleteFeature(
@@ -183,9 +152,7 @@ export default class StoriesManager extends BaseManager {
     featureId: string,
   ): Promise<Story | undefined> {
     const tools = await this.__getTools(projectId)
-    if (!tools) {
-      return
-    }
+    if (!tools) return
     return await tools.deleteFeature(storyId, featureId)
   }
   async reorderFeatures(
@@ -194,54 +161,13 @@ export default class StoriesManager extends BaseManager {
     payload: ReorderPayload,
   ): Promise<Story | undefined> {
     const tools = await this.__getTools(projectId)
-    if (!tools) {
-      return
-    }
+    if (!tools) return
     return await tools.reorderFeatures(storyId, payload)
   }
 
-  async ensureStoryIndex(projectId: string, storyId: string): Promise<void> {
-    const project = await this.projectsManager.getProject(projectId)
-    if (!project) return
-
-    if (project.storyIdToDisplayIndex[storyId] === undefined) {
-      const newProject = { ...project }
-      newProject.storyIdToDisplayIndex = { ...(newProject.storyIdToDisplayIndex || {}) }
-      newProject.storyIdToDisplayIndex[storyId] =
-        Object.keys(newProject.storyIdToDisplayIndex).length + 1
-      await this.projectsManager.updateProject(project.id, newProject)
-    }
-  }
-
-  async reindexStories(projectId: string): Promise<void> {
-    const project = await this.projectsManager.getProject(projectId)
-    if (!project) return
-
-    const tools = await this.__getTools(projectId)
-    if (!tools) return
-
-    const stories = await tools.listStories()
-    const missingStories = stories.filter(
-      (story) => project.storyIdToDisplayIndex[story.id] === undefined
-    )
-
-    if (missingStories.length > 0) {
-      const newProject = { ...project }
-      newProject.storyIdToDisplayIndex = { ...(newProject.storyIdToDisplayIndex || {}) }
-      let nextIndex = Object.keys(newProject.storyIdToDisplayIndex).length + 1
-
-      for (const story of missingStories) {
-        newProject.storyIdToDisplayIndex[story.id] = nextIndex
-        nextIndex++
-      }
-      await this.projectsManager.updateProject(project.id, newProject)
-    }
-  }
   async addChangeHandler(projectId: string, handler: StoryChangeHandler): Promise<void> {
     const tools = await this.__getTools(projectId)
-    if (!tools) {
-      return
-    }
+    if (!tools) return
     tools.subscribe(handler)
   }
 
@@ -260,6 +186,7 @@ export default class StoriesManager extends BaseManager {
     })
     return tools
   }
+
   private async __getTools(projectId: string): Promise<StoryTools | undefined> {
     await this.toolsLock.lock()
     if (!this.tools[projectId]) {

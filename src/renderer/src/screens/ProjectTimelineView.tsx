@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Feature, Story } from 'thefactory-tools'
 import { useStories } from '../contexts/StoriesContext'
-import { useActiveProject } from '../contexts/ProjectContext'
+import { useActiveProject, useProjectContext } from '../contexts/ProjectContext'
 import { dbService } from '../services/dbService'
 import type { Entity, EntityInput } from 'thefactory-db'
 import StorySummaryCallout from '../components/stories/StorySummaryCallout'
@@ -199,7 +199,8 @@ type HoverInfo =
 
 export default function ProjectTimelineView() {
   const { projectId, project } = useActiveProject()
-  const { storiesById } = useStories()
+  const { getStoryDisplayIndex } = useProjectContext()
+  const { storiesById, getFeatureDisplayIndex } = useStories()
   const { navigateStoryDetails } = useNavigator()
 
   const [labels, setLabels] = useState<TimelineLabel[]>([])
@@ -248,10 +249,10 @@ export default function ProjectTimelineView() {
     if (showAllProjects) {
       return Object.values(storiesById)
     }
-    if (!project?.storyIdToDisplayIndex) {
+    if (!project) {
       return []
     }
-    const projectStoryIds = Object.keys(project.storyIdToDisplayIndex)
+    const projectStoryIds = project.stories || Object.keys(project.storyIdToDisplayIndex || {})
     return projectStoryIds.map((id) => storiesById[id]).filter(Boolean)
   }, [storiesById, project, showAllProjects])
 
@@ -525,477 +526,446 @@ export default function ProjectTimelineView() {
     })
   }, [labels, projectId])
 
-  const dataRows = useMemo(
-    () => (zoom === 'day' ? featureRows : storyRows),
-    [featureRows, storyRows, zoom],
-  )
+  const rows = useMemo(() => {
+    if (zoom === 'day') return [...featureRows, ...labelRows]
+    return [...storyRows, ...labelRows]
+  }, [zoom, featureRows, storyRows, labelRows])
 
-  const allRows = useMemo(() => {
-    // User label rows at the top; features or stories row below depending on zoom
-    return [...labelRows, ...dataRows]
-  }, [dataRows, labelRows])
+  // Refs for scrolling logic
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const headerContainerRef = useRef<HTMLDivElement>(null)
+  const initialScrollTargetRef = useRef<HTMLDivElement>(null)
 
-  const onAddLabel = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!projectId) return
-    try {
-      const input: EntityInput = {
-        projectId: scope === 'project' ? projectId : '__global__',
-        type: ENTITY_TYPE,
-        content: {
-          timestamp: newTimestamp,
-          label: newLabel.trim() || 'Label',
-          description: newDescription.trim() || undefined,
-        } as TimestampContent,
-      }
-      const created = await dbService.addEntity(input)
-      const normalized: TimelineLabel = normalizeLabels([created])[0]
-      setLabels((prev) => [...prev, normalized])
-      setIsAdding(false)
-      setNewLabel('')
-      setNewDescription('')
-      setNewTimestamp(new Date().toISOString().slice(0, 16))
-      setScope('project')
-    } catch (err: any) {
-      console.error('Failed to add label', err)
-      setError(err?.message || 'Failed to add label')
+  // Sync horizontal scroll between body and sticky header
+  const handleScroll = () => {
+    if (scrollContainerRef.current && headerContainerRef.current) {
+      headerContainerRef.current.scrollLeft = scrollContainerRef.current.scrollLeft
     }
   }
 
-  const openEditFor = (id: string) => {
-    const lbl = labels.find((l) => l.id === id)
-    if (!lbl) return
-    setEditingId(id)
-    setEditLabel(lbl.content.label || '')
-    setEditDescription(lbl.content.description || '')
-    setEditTimestamp(tsToInput(lbl.content.timestamp))
-    setEditScope(lbl.projectId === projectId ? 'project' : '__global__')
+  // Auto-scroll to current day (or appropriate view) on initial load or zoom change
+  useEffect(() => {
+    if (loading || units.length === 0) return
+
+    if (!hasInitialAutoScrolledRef.current || prevZoomRef.current !== zoom) {
+      // Small timeout to let DOM render sizes
+      setTimeout(() => {
+        if (scrollContainerRef.current && initialScrollTargetRef.current) {
+          const container = scrollContainerRef.current
+          const target = initialScrollTargetRef.current
+          // Calculate offset to center the target
+          const targetLeft = target.offsetLeft
+          const targetWidth = target.offsetWidth
+          const containerWidth = container.offsetWidth
+          const targetScrollLeft = targetLeft - containerWidth / 2 + targetWidth / 2
+
+          container.scrollTo({
+            left: Math.max(0, targetScrollLeft),
+            behavior: 'auto',
+          })
+          hasInitialAutoScrolledRef.current = true
+          prevZoomRef.current = zoom
+        }
+      }, 50)
+    }
+  }, [loading, units, zoom, labels, displayedFeatures])
+
+  // Interactions
+  const onAddLabel = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!newLabel.trim()) return
+    try {
+      setLoading(true)
+      const input: EntityInput = {
+        projectId: scope === '__global__' ? '__global__' : (projectId ?? 'noproj'),
+        type: ENTITY_TYPE,
+        content: {
+          timestamp: new Date(newTimestamp).toISOString(),
+          label: newLabel.trim(),
+          description: newDescription.trim() || undefined,
+        },
+      }
+      const created = await dbService.createEntity(input)
+      setLabels((prev) => [...prev, normalizeLabels([created])[0]])
+      setIsAdding(false)
+      setNewLabel('')
+      setNewDescription('')
+    } catch (err: any) {
+      alert(`Failed to create label: ${err?.message || err}`)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const openEdit = (l: TimelineLabel) => {
+    setEditingId(l.id)
+    setEditLabel(l.content.label)
+    setEditDescription(l.content.description || '')
+    setEditTimestamp(tsToInput(l.content.timestamp))
+    setEditScope(l.projectId === '__global__' ? '__global__' : 'project')
   }
 
   const closeEdit = () => {
     setEditingId(null)
-    setSavingEdit(false)
+    setEditLabel('')
+    setEditDescription('')
+    setEditTimestamp('')
   }
 
   const onSaveEdit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!editingId) return
+    if (!editingId || !editLabel.trim()) return
     setSavingEdit(true)
     try {
-      const patch: Partial<EntityInput> = {
-        projectId: editScope === 'project' ? projectId : '__global__',
+      const pid = editScope === '__global__' ? '__global__' : (projectId ?? 'noproj')
+      const targetLabels = await dbService.matchEntities(undefined, { entityIds: [editingId] })
+      if (!targetLabels.length) throw new Error('Label not found')
+      const target = targetLabels[0]
+
+      const nextMeta = { ...target.metadata }
+      if (pid !== target.projectId) {
+        // Change project id? DB updateEntity currently respects patch.
+      }
+      const updated = await dbService.updateEntity(editingId, {
+        projectId: pid,
         content: {
-          label: editLabel.trim() || 'Label',
+          ...target.content,
+          timestamp: new Date(editTimestamp).toISOString(),
+          label: editLabel.trim(),
           description: editDescription.trim() || undefined,
-          timestamp: editTimestamp,
-        } as TimestampContent,
-      }
-      const updated = await dbService.updateEntity(editingId, patch)
-      if (updated) {
-        const norm = normalizeLabels([updated])[0]
-        setLabels((prev) => prev.map((l) => (l.id === norm.id ? norm : l)))
-      }
+        },
+      })
+      setLabels((prev) => prev.map((x) => (x.id === editingId ? normalizeLabels([updated])[0] : x)))
       closeEdit()
     } catch (err: any) {
-      console.error('Failed to update label', err)
-      setError(err?.message || 'Failed to update label')
+      alert(`Failed to save edit: ${err?.message || err}`)
+    } finally {
       setSavingEdit(false)
     }
   }
 
   const onDeleteEdit = async () => {
     if (!editingId) return
-    const lbl = labels.find((l) => l.id === editingId)
-    const name = lbl?.content.label || 'this label'
-    const ok = window.confirm(`Delete ${name}? This cannot be undone.`)
-    if (!ok) return
+    if (!window.confirm('Are you sure you want to delete this timeline label?')) return
+    setSavingEdit(true)
     try {
-      const success = await dbService.deleteEntity(editingId)
-      if (success) setLabels((prev) => prev.filter((l) => l.id !== editingId))
+      await dbService.deleteEntity(editingId)
+      setLabels((prev) => prev.filter((x) => x.id !== editingId))
       closeEdit()
     } catch (err: any) {
-      console.error('Failed to delete label', err)
-      setError(err?.message || 'Failed to delete label')
+      alert(`Failed to delete: ${err?.message || err}`)
+    } finally {
+      setSavingEdit(false)
     }
-  }
-
-  const scrollToToday = () => {
-    const container = document.getElementById('project-timeline-scroll')
-    if (!container) return
-
-    const todayIdx = getUnitIndex(zoom, startAligned, unitCount, new Date().toISOString())
-
-    const cell = container.querySelector<HTMLElement>(`[data-unit-index="${todayIdx}"]`)
-    if (!cell) {
-      // Fallback approximate scroll if we cannot find the header cell
-      const approxCell = cellMinWidth
-      container.scrollTo({ left: todayIdx * approxCell, behavior: 'smooth' })
-      return
-    }
-
-    const unitsRow = cell.closest<HTMLElement>('[data-units-row="true"]') || undefined
-    const leftCol = unitsRow?.querySelector<HTMLElement>('[data-left-col="true"]') || undefined
-
-    const leftColWidth = leftCol?.getBoundingClientRect().width ?? 0
-    const containerRect = container.getBoundingClientRect()
-    const cellRect = cell.getBoundingClientRect()
-
-    const visibleRightWidth = Math.max(0, container.clientWidth - leftColWidth)
-    const relativeLeft = cellRect.left - containerRect.left
-
-    // Delta required to center the cell within the right-hand scrollable area
-    const delta = relativeLeft - leftColWidth + cellRect.width / 2 - visibleRightWidth / 2
-    const target = Math.max(0, Math.min(container.scrollWidth, container.scrollLeft + delta))
-
-    container.scrollTo({ left: target, behavior: 'smooth' })
-  }
-
-  // Clear hover on scroll/resize to avoid stale positioning
-  useEffect(() => {
-    const onScrollOrResize = () => setHover(null)
-    window.addEventListener('scroll', onScrollOrResize, true)
-    window.addEventListener('resize', onScrollOrResize)
-    return () => {
-      window.removeEventListener('scroll', onScrollOrResize, true)
-      window.removeEventListener('resize', onScrollOrResize)
-    }
-  }, [])
-
-  // Auto-scroll to make today visible on initial load and when switching zoom modes
-  useEffect(() => {
-    if (loading) return
-    const isZoomChange = prevZoomRef.current !== zoom
-
-    if (!hasInitialAutoScrolledRef.current || isZoomChange) {
-      // Wait for DOM to paint updated units before measuring/scanning
-      requestAnimationFrame(() => {
-        scrollToToday()
-      })
-      hasInitialAutoScrolledRef.current = true
-      prevZoomRef.current = zoom
-    }
-  }, [loading, zoom, unitCount, startAligned, cellMinWidth])
-
-  if (loading) {
-    return <div className="p-4 text-secondary">Loading timeline...</div>
   }
 
   return (
-    <div className="h-full flex flex-col" id="project-timeline-view">
-      {/* Toolbar */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-subtle bg-base sticky top-0 z-20">
-        <div className="min-w-0">
-          <div className="text-lg font-semibold text-primary truncate">Project timeline</div>
-          <div className="text-xs text-muted truncate">Project: {projectId}</div>
+    <div className="flex flex-col h-full bg-base text-primary overflow-hidden">
+      {/* Top Toolbar */}
+      <div className="shrink-0 border-b border-default p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-raised">
+        <div className="flex items-center gap-3">
+          <h2 className="text-lg font-semibold tracking-tight">Timeline</h2>
+          <div className="flex items-center bg-base border border-subtle rounded-md p-1">
+            <button
+              onClick={() => setZoom('day')}
+              className={`px-3 py-1 text-xs font-medium rounded-sm ${zoom === 'day' ? 'bg-accent-primary text-inverted shadow-sm' : 'text-muted hover:text-primary hover:bg-raised'}`}
+            >
+              Day
+            </button>
+            <button
+              onClick={() => setZoom('week')}
+              className={`px-3 py-1 text-xs font-medium rounded-sm ${zoom === 'week' ? 'bg-accent-primary text-inverted shadow-sm' : 'text-muted hover:text-primary hover:bg-raised'}`}
+            >
+              Week
+            </button>
+            <button
+              onClick={() => setZoom('month')}
+              className={`px-3 py-1 text-xs font-medium rounded-sm ${zoom === 'month' ? 'bg-accent-primary text-inverted shadow-sm' : 'text-muted hover:text-primary hover:bg-raised'}`}
+            >
+              Month
+            </button>
+          </div>
         </div>
         <div className="flex items-center gap-4">
-          <Switch
-            label="Show all projects"
-            checked={showAllProjects}
-            onCheckedChange={setShowAllProjects}
-          />
-          <div className="hidden sm:flex items-center rounded border border-subtle overflow-hidden">
-            {(['day', 'week', 'month'] as Zoom[]).map((z) => (
-              <button
-                key={z}
-                onClick={() => setZoom(z)}
-                className={
-                  'px-2.5 py-1.5 text-sm focus:outline-none focus-visible:ring-2 ring-offset-1 ' +
-                  (zoom === z
-                    ? 'bg-accent-primary text-inverted'
-                    : 'bg-raised text-secondary hover:text-primary')
-                }
-                aria-pressed={zoom === z}
-              >
-                {z.charAt(0).toUpperCase() + z.slice(1)}
-              </button>
-            ))}
+          <div className="flex items-center gap-2">
+            <label htmlFor="allProjectsSwitch" className="text-sm font-medium cursor-pointer">
+              All projects
+            </label>
+            <Switch id="allProjectsSwitch" checked={showAllProjects} onCheckedChange={setShowAllProjects} />
           </div>
           <button
-            onClick={scrollToToday}
-            className="px-3 py-1.5 text-sm rounded border border-subtle bg-raised hover:bg-base text-primary"
+            onClick={() => setIsAdding(!isAdding)}
+            className="px-3 py-1.5 text-sm font-medium border border-default rounded bg-base hover:bg-raised shadow-sm"
           >
-            Today
+            {isAdding ? 'Cancel' : 'Add label…'}
           </button>
-          {!isAdding ? (
-            <button
-              className="px-3 py-1.5 text-sm rounded bg-accent-primary text-inverted hover:bg-accent-hover focus:outline-none focus-visible:ring-2 ring-offset-1"
-              onClick={() => setIsAdding(true)}
-            >
-              + Add label
-            </button>
-          ) : (
-            <button
-              className="px-3 py-1.5 text-sm rounded border border-subtle bg-raised hover:bg-base text-primary"
-              onClick={() => setIsAdding(false)}
-            >
-              Cancel
-            </button>
-          )}
-          {error && <div className="text-xs text-red-600">{error}</div>}
         </div>
       </div>
 
       {isAdding && (
         <form
           onSubmit={onAddLabel}
-          className="px-4 pt-3 pb-2 grid gap-2 sm:grid-cols-5 items-end bg-base border-b border-subtle"
+          className="shrink-0 border-b border-default bg-raised p-4 flex flex-col gap-3"
         >
-          <div className="flex flex-col gap-1 sm:col-span-1">
-            <label className="text-xs text-muted">Row label</label>
-            <input
-              className="h-9 rounded border border-default bg-raised px-2 text-sm text-primary focus:outline-none focus-visible:ring-2 ring-offset-1"
-              value={newLabel}
-              onChange={(e) => setNewLabel(e.target.value)}
-              placeholder="e.g. Milestone A"
-              required
-            />
-          </div>
-          <div className="flex flex-col gap-1 sm:col-span-2">
-            <label className="text-xs text-muted">Description (optional)</label>
-            <input
-              className="h-9 rounded border border-default bg-raised px-2 text-sm text-primary focus:outline-none focus-visible:ring-2 ring-offset-1"
-              value={newDescription}
-              onChange={(e) => setNewDescription(e.target.value)}
-              placeholder="Short note"
-            />
-          </div>
-          <div className="flex flex-col gap-1 sm:col-span-1">
-            <label className="text-xs text-muted">When</label>
-            <input
-              type="datetime-local"
-              className="h-9 rounded border border-default bg-raised px-2 text-sm text-primary focus:outline-none focus-visible:ring-2 ring-offset-1"
-              value={newTimestamp}
-              onChange={(e) => setNewTimestamp(e.target.value)}
-              required
-            />
-          </div>
-          <div className="flex flex-col gap-1 sm:col-span-1">
-            <label className="text-xs text-muted">Scope</label>
-            <select
-              className="h-9 rounded border border-default bg-raised px-2 text-sm text-primary focus:outline-none focus-visible:ring-2 ring-offset-1"
-              value={scope}
-              onChange={(e) => setScope(e.target.value as any)}
-            >
-              <option value="project">This project</option>
-              <option value="__global__">All projects (global)</option>
-            </select>
-          </div>
-          <div className="sm:col-span-5 flex justify-end">
-            <button
-              type="submit"
-              className="px-3 py-1.5 text-sm rounded bg-accent-primary text-inverted hover:bg-accent-hover focus:outline-none focus-visible:ring-2 ring-offset-1"
-            >
-              Save label
-            </button>
+          <div className="text-sm font-medium text-primary">New timeline label</div>
+          <div className="grid gap-2 sm:grid-cols-5 items-end">
+            <div className="flex flex-col gap-1 sm:col-span-2">
+              <label className="text-xs text-muted">Row label</label>
+              <input
+                className="h-9 rounded border border-default bg-base px-2 text-sm text-primary focus:outline-none focus-visible:ring-2 ring-offset-1"
+                value={newLabel}
+                onChange={(e) => setNewLabel(e.target.value)}
+                placeholder="e.g. Milestone A"
+                required
+              />
+            </div>
+            <div className="flex flex-col gap-1 sm:col-span-3">
+              <label className="text-xs text-muted">Description (optional)</label>
+              <input
+                className="h-9 rounded border border-default bg-base px-2 text-sm text-primary focus:outline-none focus-visible:ring-2 ring-offset-1"
+                value={newDescription}
+                onChange={(e) => setNewDescription(e.target.value)}
+                placeholder="Short note"
+              />
+            </div>
+            <div className="flex flex-col gap-1 sm:col-span-2">
+              <label className="text-xs text-muted">When</label>
+              <input
+                type="datetime-local"
+                className="h-9 rounded border border-default bg-base px-2 text-sm text-primary focus:outline-none focus-visible:ring-2 ring-offset-1"
+                value={newTimestamp}
+                onChange={(e) => setNewTimestamp(e.target.value)}
+                required
+              />
+            </div>
+            <div className="flex flex-col gap-1 sm:col-span-2">
+              <label className="text-xs text-muted">Scope</label>
+              <select
+                className="h-9 rounded border border-default bg-base px-2 text-sm text-primary focus:outline-none focus-visible:ring-2 ring-offset-1"
+                value={scope}
+                onChange={(e) => setScope(e.target.value as any)}
+              >
+                <option value="project">This project</option>
+                <option value="__global__">All projects (global)</option>
+              </select>
+            </div>
+            <div className="sm:col-span-1">
+              <button
+                type="submit"
+                className="h-9 w-full rounded bg-accent-primary text-inverted hover:bg-accent-hover text-sm font-medium focus:outline-none focus-visible:ring-2 ring-offset-1"
+                disabled={loading}
+              >
+                Save
+              </button>
+            </div>
           </div>
         </form>
       )}
 
-      {/* Scrollable timeline grid */}
-      <div id="project-timeline-scroll" className="flex-1 overflow-auto bg-base">
-        <div className="min-w-max">
-          <div className="rounded border border-subtle overflow-hidden">
-            {/* Header: groups + units */}
-            <div className="sticky top-[var(--header-offset,0px)] z-10 bg-base">
-              {/* Groups row */}
-              <div
-                className="grid border-b border-subtle"
-                style={{ gridTemplateColumns: gridTemplate }}
-              >
-                <div className="sticky left-0 z-10 bg-base px-3 py-2 text-sm font-medium text-primary flex items-center">
-                  Rows
-                </div>
+      {error && (
+        <div className="shrink-0 p-4 m-4 border border-red-200 bg-red-50 text-red-600 rounded">
+          {error}
+        </div>
+      )}
+
+      <div className="flex-1 min-h-0 relative flex flex-col bg-base overflow-hidden">
+        {/* Sticky Header Grid Container */}
+        <div
+          ref={headerContainerRef}
+          className="shrink-0 w-full overflow-hidden border-b border-default bg-raised pointer-events-none"
+        >
+          <div
+            className="grid text-xs text-muted pointer-events-auto"
+            style={{ gridTemplateColumns: gridTemplate }}
+          >
+            {/* Top-left empty block */}
+            <div className="sticky left-0 z-20 bg-raised border-r border-default h-[3.5rem]" />
+
+            {/* Units header (2 rows of grouping + column headers) */}
+            <div className="col-start-2 relative h-[3.5rem]" style={{ gridColumnEnd: -1 }}>
+              {/* Grouping row (Months / Years) */}
+              <div className="absolute top-0 left-0 w-full flex h-6 border-b border-subtle">
                 {headerGroups.map((g, idx) => (
                   <div
-                    key={`g-${idx}`}
-                    className="px-2 py-2 text-xs text-secondary border-l border-subtle flex items-center"
-                    style={{ gridColumnStart: 2 + g.startIdx, gridColumnEnd: `span ${g.len}` }}
+                    key={idx}
+                    className="flex-none px-2 py-1 font-semibold text-[11px] uppercase tracking-wider overflow-hidden text-ellipsis whitespace-nowrap"
+                    style={{
+                      width: `calc(${g.len} * (100% / ${unitCount}))`,
+                      borderLeft: idx > 0 ? '1px solid var(--border-subtle)' : 'none',
+                    }}
                   >
                     {g.label}
                   </div>
                 ))}
               </div>
-              {/* Units row */}
-              <div
-                className="grid bg-raised/50 border-b border-subtle"
-                style={{ gridTemplateColumns: gridTemplate }}
-                data-units-row="true"
-              >
-                <div
-                  className="sticky left-0 z-10 bg-base px-3 py-2 text-xs font-medium text-secondary flex items-center"
-                  data-left-col="true"
-                ></div>
+
+              {/* Individual unit columns */}
+              <div className="absolute top-6 left-0 w-full flex h-8">
                 {units.map((u, i) => {
-                  const isToday =
-                    zoom === 'day'
-                      ? startOfDay(u.start).getTime() === startOfDay(new Date()).getTime()
-                      : zoom === 'week'
-                        ? startOfWeek(u.start).getTime() === startOfWeek(new Date()).getTime()
-                        : startOfMonth(u.start).getTime() === startOfMonth(new Date()).getTime()
+                  const isCurrentDay =
+                    zoom === 'day' && diffInDays(u.start, startOfDay(new Date())) === 0
                   return (
                     <div
-                      key={`h-${u.key}`}
-                      className={`px-2 py-1.5 text-[11px] leading-4 text-secondary border-l border-subtle flex flex-col items-start ${
-                        isToday ? 'bg-status-review-soft-bg/30' : ''
-                      }`}
-                      data-unit-index={i}
+                      key={u.key}
+                      className={`flex-none flex flex-col items-center justify-center border-subtle ${isCurrentDay ? 'bg-accent-primary/10 text-accent-primary font-bold' : ''}`}
+                      style={{
+                        width: `calc(100% / ${unitCount})`,
+                        borderLeft: i > 0 ? '1px solid var(--border-subtle)' : 'none',
+                      }}
                     >
-                      <span className="font-medium text-primary">{u.labelTop}</span>
-                      {u.labelBottom ? <span>{u.labelBottom}</span> : null}
+                      <div className="text-[11px] leading-tight">{u.labelTop}</div>
+                      {u.labelBottom && (
+                        <div className="text-[9px] opacity-75">{u.labelBottom}</div>
+                      )}
                     </div>
                   )
                 })}
               </div>
             </div>
+          </div>
+        </div>
 
-            {/* Rows */}
-            {allRows.map((row) => (
-              <div key={row.key} className="relative">
-                <div className="grid relative" style={{ gridTemplateColumns: gridTemplate }}>
-                  {/* Row label */}
-                  <div className="sticky left-0 z-10 bg-base px-3 py-2 text-sm font-medium text-primary flex items-start border-b border-subtle">
-                    {row.title}
+        {/* Scrollable Body Grid Container */}
+        <div
+          ref={scrollContainerRef}
+          onScroll={handleScroll}
+          className="flex-1 w-full overflow-auto relative"
+        >
+          {loading && labels.length === 0 ? (
+            <div className="p-4 text-sm text-muted">Loading timeline...</div>
+          ) : (
+            <div className="grid pb-12" style={{ gridTemplateColumns: gridTemplate }}>
+              {rows.map((row, rIdx) => (
+                <React.Fragment key={row.key}>
+                  {/* Left row header (Sticky) */}
+                  <div
+                    className="sticky left-0 z-10 flex items-center bg-base border-r border-default border-b px-3 py-2"
+                    style={{ gridRow: rIdx + 1 }}
+                  >
+                    <div className="text-sm font-medium text-primary truncate" title={row.title}>
+                      {row.title}
+                    </div>
                   </div>
 
-                  {/* Build buckets per unit for this row so items can stack from top */}
-                  {(() => {
-                    const buckets: RowItem[][] = Array.from({ length: unitCount }, () => [])
-                    for (const it of row.items as RowItem[]) {
-                      const idx = getUnitIndex(zoom, startAligned, unitCount, it.timestamp)
-                      if (idx < 0 || idx >= unitCount) continue
-                      buckets[idx].push(it)
-                    }
-                    // sort each bucket by timestamp ascending
-                    for (let i = 0; i < buckets.length; i++) {
-                      buckets[i].sort(
-                        (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
-                      )
-                    }
+                  {/* Row background cells and content */}
+                  <div
+                    className="relative border-b border-subtle"
+                    style={{ gridColumn: `2 / -1`, gridRow: rIdx + 1 }}
+                  >
+                    {/* Background grid lines */}
+                    <div className="absolute inset-0 flex pointer-events-none">
+                      {units.map((u, i) => {
+                        const isCurrentDay =
+                          zoom === 'day' && diffInDays(u.start, startOfDay(new Date())) === 0
+                        return (
+                          <div
+                            key={i}
+                            className={`flex-none h-full border-subtle ${isCurrentDay ? 'bg-accent-primary/[0.03]' : ''}`}
+                            style={{
+                              width: `calc(100% / ${unitCount})`,
+                              borderLeft: i > 0 ? '1px solid var(--border-subtle)' : 'none',
+                            }}
+                          />
+                        )
+                      })}
+                    </div>
 
-                    // Render one cell per unit with items stacked from the top
-                    return buckets.map((itemsInCell, i) => (
-                      <div
-                        key={`c-${row.key}-${i}`}
-                        className="border-l border-b border-subtle px-1 py-1 flex flex-col items-stretch gap-1"
-                      >
-                        {itemsInCell.map((it) => {
-                          const kind = it.kind
-                          const isLabel = kind === 'label'
-                          const isFeature = kind === 'feature'
+                    {/* Timeline items mapped to positions */}
+                    <div className="relative h-12 w-full">
+                      {row.items.map((item, iIdx) => {
+                        const isGlobal = item.scope === '__global__'
+                        const uIdx = getUnitIndex(zoom, startAligned, unitCount, item.timestamp)
+                        // Target day (approx 50% through the column cell width)
+                        const leftPct = (uIdx + 0.5) * (100 / unitCount)
+                        const isCurrentDay =
+                          zoom === 'day' &&
+                          diffInDays(units[uIdx].start, startOfDay(new Date())) === 0
 
-                          const pillBase =
-                            'pointer-events-auto rounded-md px-2 py-1 text-xs shadow-sm border whitespace-nowrap max-w-[12rem] relative group truncate'
+                        // Stagger items vertically if multiple on same unit
+                        // Using modulo index to loosely distribute
+                        const topOffsets = ['top-2', 'top-4', 'top-6', 'top-1']
+                        const topClass = topOffsets[iIdx % topOffsets.length]
 
-                          const labelProjectStyles =
-                            'bg-status-review-soft-bg text-status-review-soft-fg border-status-review-soft-border'
-                          const labelGlobalStyles =
-                            'bg-status-on_hold-soft-bg text-status-on_hold-soft-fg border-status-on_hold-soft-border'
-
-                          const className = `${pillBase} ${
-                            isLabel
-                              ? (it as any).scope === 'project'
-                                ? labelProjectStyles
-                                : labelGlobalStyles
-                              : ''
-                          }`
-
-                          const style = !isLabel
-                            ? storyColorStyles(isFeature ? it.storyId : it.id)
-                            : undefined
-
-                          const onMouseEnter: React.MouseEventHandler<HTMLDivElement> = (e) => {
-                            const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
-                            if (kind === 'story') {
-                              setHover({ kind: 'story', storyId: it.id, rect })
-                            } else if (kind === 'feature') {
-                              setHover({
-                                kind: 'feature',
-                                storyId: (it as any).storyId!,
-                                featureId: it.id,
-                                rect,
-                              })
-                            } else {
-                              setHover(null)
-                            }
-                          }
-                          const onMouseLeave: React.MouseEventHandler<HTMLDivElement> = () => {
-                            setHover((prev) => (prev ? null : prev))
-                          }
-
-                          const onClick: React.MouseEventHandler<HTMLDivElement> = () => {
-                            if (kind === 'story') {
-                              navigateStoryDetails(it.id, undefined, true)
-                            } else if (kind === 'feature') {
-                              navigateStoryDetails((it as any).storyId!, it.id)
-                            }
-                          }
-
-                          return (
-                            <div
-                              key={it.id}
-                              className={className}
-                              style={style}
-                              title={`${it.title}\n${new Date(it.timestamp).toLocaleString()}`}
-                              onMouseEnter={onMouseEnter}
-                              onMouseLeave={onMouseLeave}
-                              onClick={onClick}
-                            >
-                              {/* Hover edit button for user labels */}
-                              {isLabel && (
-                                <button
-                                  type="button"
-                                  onClick={() => openEditFor(it.id)}
-                                  className="absolute -top-1.5 -right-1.5 hidden group-hover:flex items-center justify-center h-5 w-5 rounded-full bg-base border border-subtle text-secondary hover:text-primary shadow-sm"
-                                  title="Edit label"
-                                >
-                                  ✎
-                                </button>
-                              )}
-                              <div className="truncate font-medium pr-4">{it.title}</div>
-                              <div className="opacity-80 text-[10px]">
-                                {new Date(it.timestamp).toLocaleDateString()}
-                              </div>
+                        let contentEl = null
+                        if (item.kind === 'label') {
+                          // Milestone marker
+                          contentEl = (
+                            <div className={`absolute ${topClass} flex items-center gap-1`}>
+                              <div
+                                className={`w-3 h-3 rotate-45 border cursor-pointer hover:scale-110 transition-transform ${isGlobal ? 'bg-purple-200 border-purple-500' : 'bg-emerald-200 border-emerald-500'}`}
+                                onClick={() => {
+                                  const l = labels.find((x) => x.id === item.id)
+                                  if (l) openEdit(l)
+                                }}
+                                title="Click to edit"
+                              />
                             </div>
                           )
-                        })}
-                      </div>
-                    ))
-                  })()}
-                </div>
+                        } else {
+                          // Story or Feature (dot or chip)
+                          const style = storyColorStyles(item.storyId)
+                          contentEl = (
+                            <div
+                              className={`absolute ${topClass} flex flex-col items-center cursor-pointer hover:z-10`}
+                              onClick={() => {
+                                if (item.storyId) navigateStoryDetails(item.storyId)
+                                else if (item.kind === 'story')
+                                  navigateStoryDetails(item.id.replace('story-', ''))
+                              }}
+                              onMouseEnter={(e) => {
+                                const rect = e.currentTarget.getBoundingClientRect()
+                                if (item.kind === 'story') {
+                                  setHover({
+                                    kind: 'story',
+                                    storyId: item.id.replace('story-', ''),
+                                    rect,
+                                  })
+                                } else if (item.kind === 'feature') {
+                                  setHover({
+                                    kind: 'feature',
+                                    storyId: item.storyId!,
+                                    featureId: item.id,
+                                    rect,
+                                  })
+                                }
+                              }}
+                              onMouseLeave={() => setHover(null)}
+                            >
+                              {zoom === 'day' ? (
+                                <div
+                                  className="w-3 h-3 rounded-full border shadow-sm transition-transform hover:scale-125"
+                                  style={style}
+                                />
+                              ) : (
+                                <div
+                                  className="px-1.5 py-0.5 rounded text-[10px] font-medium border shadow-sm max-w-[80px] truncate"
+                                  style={style}
+                                  title={item.title}
+                                >
+                                  {item.title}
+                                </div>
+                              )}
+                            </div>
+                          )
+                        }
 
-                {/* Today marker line */}
-                {(() => {
-                  let idx = 0
-                  if (zoom === 'day')
-                    idx = clamp(diffInDays(startAligned, new Date()), 0, unitCount - 1)
-                  else if (zoom === 'week')
-                    idx = clamp(diffInWeeks(startAligned, new Date()), 0, unitCount - 1)
-                  else idx = clamp(diffInMonths(startAligned, new Date()), 0, unitCount - 1)
-                  return (
-                    <div
-                      className="pointer-events-none absolute inset-y-0"
-                      style={{ gridArea: '1 / 1 / 1 / 1' }}
-                    >
-                      <div
-                        className="absolute inset-y-0 w-0.5 bg-accent-primary/60"
-                        style={{
-                          left: `calc(${LEFT_COL_WIDTH} + ${(idx + 0.5) * Math.max(cellMinWidth, 1)}px)`,
-                        }}
-                        aria-hidden
-                      />
+                        return (
+                          <div
+                            key={item.id}
+                            className="absolute h-full w-0 flex justify-center z-10"
+                            style={{ left: `${leftPct}%` }}
+                            ref={isCurrentDay ? initialScrollTargetRef : null}
+                          >
+                            {contentEl}
+                          </div>
+                        )
+                      })}
                     </div>
-                  )
-                })()}
-              </div>
-            ))}
-
-            {allRows.length === 0 && (
-              <div className="p-6 text-sm text-secondary">
-                No timeline items yet. Add your first label above.
-              </div>
-            )}
-          </div>
+                  </div>
+                </React.Fragment>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -1015,7 +985,7 @@ export default function ProjectTimelineView() {
             ? (() => {
                 const t = storiesById[hover.storyId]
                 if (!t) return null
-                const displayId = String(project?.storyIdToDisplayIndex?.[t.id] ?? t.id)
+                const displayId = String(getStoryDisplayIndex(projectId, t.id) ?? t.id)
                 return (
                   <StorySummaryCallout
                     title={t.title}
@@ -1030,7 +1000,7 @@ export default function ProjectTimelineView() {
                   const t = storiesById[hover.storyId]
                   const f = t?.features.find((x) => x.id === hover.featureId)
                   if (!t || !f) return null
-                  const displayId = String(t.featureIdToDisplayIndex?.[f.id] ?? f.id)
+                  const displayId = String(getFeatureDisplayIndex(t.id, f.id) ?? f.id)
                   return (
                     <FeatureSummaryCallout
                       title={f.title}

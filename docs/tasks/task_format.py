@@ -32,7 +32,6 @@ class Story(TypedDict):
     features: List[Feature]
     blockers: NotRequired[List[str]] # ["{storyId}.{featureId}","{storyId}"]
     rejection: NotRequired[str]
-    featureIdToDisplayIndex: Dict[str,int]
 
 class ProjectRequirement(TypedDict):
     id: int
@@ -47,4 +46,4 @@ class ProjectSpec(TypedDict):
     path: str
     repo_url: str
     requirements: List[ProjectRequirement]
-    storyIdToDisplayIndex: Dict[str,int]
+    storyIds: List[str]

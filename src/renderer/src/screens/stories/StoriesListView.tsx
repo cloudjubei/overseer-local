@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigator } from '@renderer/navigation/Navigator'
 import BoardView from './BoardView'
 import SegmentedControl from '@renderer/components/ui/SegmentedControl'
-import { useActiveProject } from '@renderer/contexts/ProjectContext'
+import { useActiveProject, useProjectContext } from '@renderer/contexts/ProjectContext'
 import DependencyBullet from '@renderer/components/stories/DependencyBullet'
 import StatusControl, {
   STATUS_LABELS,
@@ -90,6 +90,7 @@ export default function StoriesListView() {
   const statusFilterRef = useRef<HTMLDivElement>(null)
 
   const { project, projectId } = useActiveProject()
+  const { getStoryDisplayIndex } = useProjectContext()
 
   const [isCostsModalOpen, setIsCostsModalOpen] = useState(false)
   const chatKey = useMemo(() => {
@@ -132,31 +133,41 @@ export default function StoriesListView() {
     return () => window.removeEventListener('keydown', onKey)
   }, [openModal, view, setView])
 
-  const storyIdToDisplayIndex: Record<string, number> = useMemo(() => {
-    return project?.storyIdToDisplayIndex ?? {}
-  }, [project])
-
   const sorted = useMemo(() => {
     let stories = [...allStories]
     if (project) {
       if (sortBy === 'index_asc') {
-        stories.sort((a, b) => storyIdToDisplayIndex[a.id] - storyIdToDisplayIndex[b.id])
+        stories.sort(
+          (a, b) =>
+            (getStoryDisplayIndex(projectId, a.id) || 0) -
+            (getStoryDisplayIndex(projectId, b.id) || 0),
+        )
       } else if (sortBy === 'index_desc') {
-        stories.sort((a, b) => storyIdToDisplayIndex[b.id] - storyIdToDisplayIndex[a.id])
+        stories.sort(
+          (a, b) =>
+            (getStoryDisplayIndex(projectId, b.id) || 0) -
+            (getStoryDisplayIndex(projectId, a.id) || 0),
+        )
       } else if (sortBy === 'status_asc') {
         const sVal = (t: Story) => STATUS_ORDER.indexOf(t.status)
         stories.sort(
-          (a, b) => sVal(a) - sVal(b) || storyIdToDisplayIndex[a.id] - storyIdToDisplayIndex[b.id],
+          (a, b) =>
+            sVal(a) - sVal(b) ||
+            (getStoryDisplayIndex(projectId, a.id) || 0) -
+              (getStoryDisplayIndex(projectId, b.id) || 0),
         )
       } else if (sortBy === 'status_desc') {
         const sVal = (t: Story) => STATUS_ORDER.indexOf(t.status)
         stories.sort(
-          (a, b) => sVal(b) - sVal(a) || storyIdToDisplayIndex[b.id] - storyIdToDisplayIndex[a.id],
+          (a, b) =>
+            sVal(b) - sVal(a) ||
+            (getStoryDisplayIndex(projectId, b.id) || 0) -
+              (getStoryDisplayIndex(projectId, a.id) || 0),
         )
       }
     }
     return stories
-  }, [storyIdToDisplayIndex, allStories, sortBy, project])
+  }, [allStories, sortBy, project, projectId, getStoryDisplayIndex])
 
   const filtered = useMemo(
     () => filterStories(sorted, { query, status: statusFilter }),
@@ -253,16 +264,20 @@ export default function StoriesListView() {
 
   const onListDrop = () => {
     if (project != null && dragStoryId != null && dropIndex != null && dropPosition != null) {
-      const fromIndex = project.storyIdToDisplayIndex[dragStoryId]
+      const fromIndex = getStoryDisplayIndex(projectId, dragStoryId)
+      if (fromIndex === undefined) {
+        clearDndState()
+        return
+      }
       // Use the item from the currently rendered list (filtered), not from the full sorted list by index
       const toStory = filtered[dropIndex]
       if (!toStory) {
         clearDndState()
         return
       }
-      let toIndex = project.storyIdToDisplayIndex[toStory.id] ?? 1
+      let toIndex = getStoryDisplayIndex(projectId, toStory.id) ?? 1
       if (toIndex !== fromIndex) {
-        handleMoveStory(fromIndex, toIndex)
+        handleMoveStory(fromIndex - 1, toIndex - 1)
       }
     }
     clearDndState()
@@ -544,7 +559,9 @@ export default function StoriesListView() {
                                   }}
                                 />
                               )}
-                              <span className="id-chip">{storyIdToDisplayIndex[t.id]}</span>
+                              <span className="id-chip">
+                                {getStoryDisplayIndex(projectId, t.id)}
+                              </span>
                             </div>
                             <StatusControl
                               status={t.status}

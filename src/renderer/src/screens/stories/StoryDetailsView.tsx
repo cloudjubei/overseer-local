@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigator } from '@renderer/navigation/Navigator'
 import DependencyBullet from '@renderer/components/stories/DependencyBullet'
 import StatusControl from '@renderer/components/stories/StatusControl'
-import { useActiveProject } from '@renderer/contexts/ProjectContext'
+import { useActiveProject, useProjectContext } from '@renderer/contexts/ProjectContext'
 import { useAgents } from '@renderer/contexts/AgentsContext'
 import AgentRunBullet from '@renderer/components/agents/AgentRunBullet'
 import { ChatContext, Feature, Status, Story } from 'thefactory-tools'
@@ -41,6 +41,12 @@ function featureMatchesQuery(f: Feature, q: string) {
   )
 }
 
+function getFeatureIndex(story: Story | null, featureId: string): number {
+  if (!story || !story.features) return 0
+  const idx = story.features.findIndex((f) => f.id === featureId)
+  return idx >= 0 ? idx + 1 : 0
+}
+
 export default function StoryDetailsView({ storyId }: { storyId: string }) {
   const [story, setStory] = useState<Story | null>(null)
   const [saving, setSaving] = useState(false)
@@ -56,7 +62,7 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null)
   const [dropIndex, setDropIndex] = useState<number | null>(null)
   const [dropPosition, setDropPosition] = useState<'before' | 'after' | null>(null)
-  const { project, projectId } = useActiveProject()
+  const { activeProjectId: projectId, getStoryDisplayIndex } = useProjectContext()
   const {
     storiesById,
     updateStoryStatus,
@@ -96,14 +102,16 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
     }
   }, [storyId, storiesById])
 
+  const storyDisplayIndex = useMemo(() => {
+    return getStoryDisplayIndex(projectId, storyId)
+  }, [projectId, storyId, getStoryDisplayIndex])
+
   const sortedFeaturesBase = useMemo(() => {
     if (!story) {
       return []
     }
-    return [...story.features].sort(
-      (a, b) => story.featureIdToDisplayIndex[a.id] - story.featureIdToDisplayIndex[b.id],
-    )
-  }, [story, storiesById])
+    return [...story.features]
+  }, [story])
 
   const featuresSorted = useMemo(() => {
     let arr = [...sortedFeaturesBase]
@@ -116,14 +124,14 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
       return arr.sort(
         (a, b) =>
           sVal(a) - sVal(b) ||
-          (story ? story.featureIdToDisplayIndex[a.id] - story.featureIdToDisplayIndex[b.id] : 0),
+          (story ? getFeatureIndex(story, a.id) - getFeatureIndex(story, b.id) : 0),
       )
     } else if (sortBy === 'status_desc') {
       const sVal = (f: Feature) => STATUS_ORDER.indexOf(f.status)
       return arr.sort(
         (a, b) =>
           sVal(b) - sVal(a) ||
-          (story ? story.featureIdToDisplayIndex[b.id] - story.featureIdToDisplayIndex[a.id] : 0),
+          (story ? getFeatureIndex(story, b.id) - getFeatureIndex(story, a.id) : 0),
       )
     }
     return arr
@@ -144,7 +152,10 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
   const isSearchFiltered = query !== ''
 
   const storyRun = useMemo(
-    () => (story ? runsActive.find((r) => r.context.storyId === story!.id && !r.context.featureId) : undefined),
+    () =>
+      story
+        ? runsActive.find((r) => r.context.storyId === story!.id && !r.context.featureId)
+        : undefined,
     [story, runsActive],
   )
 
@@ -302,14 +313,14 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
       dropIndex != null &&
       dropPosition != null
     ) {
-      const fromIndex = story.featureIdToDisplayIndex[dragFeatureId] ?? 1
+      const fromIndex = getFeatureIndex(story, dragFeatureId) || 1
       const targetFeature = featuresFiltered[dropIndex]
       if (!targetFeature) {
         clearDndState()
         return
       }
-      let toIndex = story.featureIdToDisplayIndex[targetFeature.id] ?? 1
-      handleMoveFeature(fromIndex, toIndex)
+      let toIndex = getFeatureIndex(story, targetFeature.id) || 1
+      handleMoveFeature(fromIndex - 1, toIndex - 1)
     }
     clearDndState()
   }
@@ -319,7 +330,6 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
 
   const storyHasActiveRun = !!storyRun
   const hasRejectedFeatures = story.features.filter((f) => !!f.rejection).length > 0
-  const storyDisplayIndex = project?.storyIdToDisplayIndex[story.id] ?? 0
 
   const currentFilterLabel =
     statusFilter === 'all'
@@ -607,6 +617,8 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
                   const featureRun = runsActive.find((r) => r.context.featureId === f.id)
                   const featureHasActiveRun = !!featureRun
 
+                  const featureDisplayIndex = getFeatureIndex(story, f.id)
+
                   return (
                     <li key={f.id} className="feature-item" role="listitem">
                       {isDropBefore && <div className="drop-indicator" aria-hidden="true"></div>}
@@ -660,7 +672,7 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
                         aria-label={`Feature ${f.id}: ${f.title}. Status ${STATUS_LABELS[f.status as Status] || f.status}. ${blockers.length} items this feature is blocked by, ${blockersOutbound.length} items this feature is blocking.  Press Enter to edit.`}
                       >
                         <div className="col col-id">
-                          <span className="id-chip">{story.featureIdToDisplayIndex[f.id]}</span>
+                          <span className="id-chip">{featureDisplayIndex}</span>
                           <StatusControl
                             status={f.status}
                             onChange={(next) => handleFeatureStatusChange(story.id, f.id, next)}

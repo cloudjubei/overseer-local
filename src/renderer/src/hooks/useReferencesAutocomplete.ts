@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useStories } from '../contexts/StoriesContext'
-import { useActiveProject } from '../contexts/ProjectContext'
+import { useActiveProject, useProjectContext } from '../contexts/ProjectContext'
 
 type RefItem = {
   ref: string
@@ -19,9 +19,10 @@ export function useReferencesAutocomplete(params: {
   textareaRef: React.RefObject<HTMLTextAreaElement | null>
   mirrorRef: React.RefObject<HTMLDivElement | null>
 }) {
-  const { project } = useActiveProject()
+  const { project, projectId } = useActiveProject()
+  const { getStoryDisplayIndex } = useProjectContext()
   const { input, setInput, textareaRef, mirrorRef } = params
-  const { storiesById } = useStories()
+  const { storiesById, getFeatureDisplayIndex } = useStories()
 
   // Build a reference index and pre-normalize search fields.
   // NOTE: This can still be sizable, but it only recomputes when stories/project change.
@@ -30,7 +31,7 @@ export function useReferencesAutocomplete(params: {
 
     const refs: RefItem[] = []
     for (const story of Object.values(storiesById)) {
-      const storyDisplay = `${project.storyIdToDisplayIndex[story.id]}`
+      const storyDisplay = `${getStoryDisplayIndex(projectId, story.id)}`
       const storyTitle = story.title || ''
       refs.push({
         ref: `${story.id}`,
@@ -42,7 +43,7 @@ export function useReferencesAutocomplete(params: {
       })
 
       for (const f of story.features || []) {
-        const featureDisplay = `${story.featureIdToDisplayIndex[f.id]}`
+        const featureDisplay = `${getFeatureDisplayIndex(story.id, f.id)}`
         const display = `${storyDisplay}.${featureDisplay}`
         const title = f.title || ''
         refs.push({
@@ -59,7 +60,7 @@ export function useReferencesAutocomplete(params: {
     // Sorting is fine here (rare) but keep it stable.
     refs.sort((a, b) => a.ref.localeCompare(b.ref))
     return refs
-  }, [storiesById, project])
+  }, [storiesById, project, projectId, getStoryDisplayIndex, getFeatureDisplayIndex])
 
   const [isOpen, setIsOpen] = useState(false)
   const [matches, setMatches] = useState<RefItem[]>([])

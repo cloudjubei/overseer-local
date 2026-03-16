@@ -71,4 +71,10 @@ export default class ProjectsManager extends BaseManager {
   async reorderStory(projectId: string, payload: ReorderPayload): Promise<ProjectSpec | undefined> {
     return await this.tools.reorderStory(projectId, payload)
   }
+  async addStory(projectId: string, storyId: string): Promise<ProjectSpec | undefined> {
+    return await this.tools.addProjectStory(projectId, storyId)
+  }
+  async deleteStory(projectId: string, storyId: string): Promise<ProjectSpec | undefined> {
+    return await this.tools.deleteProjectStory(projectId, storyId)
+  }
 }

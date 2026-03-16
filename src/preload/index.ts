@@ -50,8 +50,6 @@ const STORIES_API = {
     ipcRenderer.invoke(IPC_HANDLER_KEYS.STORIES_UPDATE_STATUS, { projectId, storyId, status }),
   deleteStory: (projectId, storyId) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.STORIES_DELETE, { projectId, storyId }),
-  reindexStories: (projectId) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.STORIES_REINDEX, { projectId }),
   getFeature: (projectId, featureId) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.STORIES_FEATURE_GET, { projectId, featureId }),
   addFeature: (projectId, storyId, input) =>
@@ -248,8 +246,6 @@ const LIVEDATA_API = {
     ipcRenderer.invoke(IPC_HANDLER_KEYS.LIVE_DATA_UPDATE_CONFIG, { serviceId, updates }),
   getData: (serviceId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.LIVE_DATA_GET_DATA, { serviceId }),
 }
-
-
 
 const PRICING_API = {
   listPrices: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_PRICING_LIST),

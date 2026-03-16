@@ -54,7 +54,6 @@ export type StoriesService = {
     status: Status,
   ) => Promise<Story | undefined>
   deleteStory: (projectId: string, storyId: string) => Promise<void>
-  reindexStories: (projectId: string) => Promise<void>
   getFeature: (projectId: string, featureId: string) => Promise<Feature | undefined>
   addFeature: (
     projectId: string,

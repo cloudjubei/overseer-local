@@ -8,7 +8,7 @@ import type {
 import { settingsService } from '@renderer/services/settingsService'
 import { useProjectContext } from '@renderer/contexts/ProjectContext'
 import { useProjectsGroups } from '@renderer/contexts/ProjectsGroupsContext'
-import { useAgents } from '@renderer/contexts/AgentsContext'
+// import { useAgents } from '@renderer/contexts/AgentsContext'
 import { useChats } from '@renderer/contexts/ChatsContext'
 import { useChatThinking } from '@renderer/hooks/useChatThinking'
 import { useNavigator } from '@renderer/navigation/Navigator'
@@ -30,7 +30,7 @@ const DEFAULT_PROJECT_BADGE_STATE: ProjectBadgeState = {
 export function useNotifications() {
   const { activeProject, projects } = useProjectContext()
   const { groups } = useProjectsGroups()
-  const { runsActive, runsHistory } = useAgents()
+  // const { runsActive, runsHistory } = useAgents()
   const { chatsByProjectId } = useChats()
   const { thinkingCountByProject } = useChatThinking(500)
 
@@ -97,14 +97,14 @@ export function useNotifications() {
     [activeProject?.id, prefsByProject],
   )
 
-  const runningByProject = useMemo(() => {
-    const map = new Map<string, number>()
-    for (const r of runsActive) {
-      const k = r.projectId
-      map.set(k, (map.get(k) || 0) + 1)
-    }
-    return map
-  }, [runsActive])
+  // const runningByProject = useMemo(() => {
+  //   const map = new Map<string, number>()
+  //   for (const r of runsActive) {
+  //     const k = r.projectId
+  //     map.set(k, (map.get(k) || 0) + 1)
+  //   }
+  //   return map
+  // }, [runsActive])
 
   const [badgeStateByProject, setBadgeStateByProject] = useState<Record<string, ProjectBadgeState>>(
     {},
@@ -126,9 +126,9 @@ export function useNotifications() {
   // AgentsContext doesn't expose an explicit loaded flag; infer it after we observe any runs history.
   // This prevents pruning agent_run notifications prematurely on cold start.
   const runsLoadedRef = useRef(false)
-  useEffect(() => {
-    if ((runsHistory || []).length > 0) runsLoadedRef.current = true
-  }, [runsHistory?.length])
+  // useEffect(() => {
+  //   if ((runsHistory || []).length > 0) runsLoadedRef.current = true
+  // }, [runsHistory?.length])
 
   const validateNotification = useCallback(
     (
@@ -151,18 +151,18 @@ export function useNotifications() {
           return exists ? { valid: true } : { valid: false, reason: 'missing_chat' }
         }
 
-        if (n.category === 'agent_runs') {
-          const runId = md.runId as string | undefined
-          if (!runId) return { valid: false, reason: 'missing_metadata' }
+        // if (n.category === 'agent_runs') {
+        //   const runId = md.runId as string | undefined
+        //   if (!runId) return { valid: false, reason: 'missing_metadata' }
 
-          // If runs are not loaded yet, do not prune.
-          if (!runsLoadedRef.current) return { valid: true }
+        //   // If runs are not loaded yet, do not prune.
+        //   if (!runsLoadedRef.current) return { valid: true }
 
-          const exists = (runsHistory || []).some(
-            (r: any) => r.id === runId && r.projectId === projectId,
-          )
-          return exists ? { valid: true } : { valid: false, reason: 'missing_run' }
-        }
+        //   const exists = (runsHistory || []).some(
+        //     (r: any) => r.id === runId && r.projectId === projectId,
+        //   )
+        //   return exists ? { valid: true } : { valid: false, reason: 'missing_run' }
+        // }
 
         // git_changes and any future categories without a direct entity reference are considered valid.
         return { valid: true }
@@ -171,7 +171,8 @@ export function useNotifications() {
         return { valid: true }
       }
     },
-    [chatsByProjectId, runsHistory, chatsLoadedForProject],
+    [chatsByProjectId, chatsLoadedForProject],
+    // [chatsByProjectId, runsHistory, chatsLoadedForProject],
   )
 
   const pruneNotifications = useCallback(async (projectId: string, toPrune: Notification[]) => {
@@ -228,7 +229,7 @@ export function useNotifications() {
     } catch (_) {}
   }, [
     projects.map((p) => p.id).join('|'),
-    runningByProject,
+    // runningByProject,
     thinkingCountByProject,
     validateNotification,
     pruneNotifications,

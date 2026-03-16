@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import type { Status, Story } from 'thefactory-tools'
-import { useActiveProject } from '@renderer/contexts/ProjectContext'
+import { useActiveProject, useProjectContext } from '@renderer/contexts/ProjectContext'
 import StatusControl, { STATUS_LABELS } from '@renderer/components/stories/StatusControl'
 import { useNavigator } from '@renderer/navigation/Navigator'
 import StoryCard from '@renderer/components/stories/StoryCard'
@@ -26,7 +26,8 @@ export default function BoardView({ stories }: Props) {
   const viewportRef = useRef<HTMLDivElement | null>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(false)
-  const { project } = useActiveProject()
+  const { project, projectId } = useActiveProject()
+  const { getStoryDisplayIndex } = useProjectContext()
   const { navigateStoryDetails } = useNavigator()
   const { updateStory, updateStoryStatus } = useStories()
 
@@ -38,11 +39,11 @@ export default function BoardView({ stories }: Props) {
     for (const k of Object.keys(map) as Status[]) {
       map[k].sort(
         (a, b) =>
-          (project?.storyIdToDisplayIndex[a.id] || 0) - (project?.storyIdToDisplayIndex[b.id] || 0),
+          (getStoryDisplayIndex(projectId, a.id) || 0) - (getStoryDisplayIndex(projectId, b.id) || 0),
       )
     }
     return map
-  }, [stories, project])
+  }, [stories, projectId, getStoryDisplayIndex])
 
   const totals = useMemo(() => {
     const res: Record<Status, number> = { '+': 0, '~': 0, '-': 0, '?': 0, '=': 0 }

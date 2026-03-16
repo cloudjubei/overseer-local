@@ -14,6 +14,8 @@ export type ProjectContextValue = {
   setActiveProjectId: (id: string) => void
   getProjectById: (id: string) => ProjectSpec | undefined
   reorderStory: (projectId: string, payload: ReorderPayload) => Promise<ProjectSpec | undefined>
+
+  getStoryDisplayIndex: (projectId: string, storyId: string) => number | undefined
 }
 
 const ProjectContext = createContext<ProjectContextValue | null>(null)
@@ -116,6 +118,18 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
     return newProject
   }
 
+  const getStoryDisplayIndex = useCallback(
+    (projectId: string, storyId: string): number | undefined => {
+      const p = projects.find((p) => p.id === projectId)
+      if (!p) return undefined
+
+      const index = p.storyIds.indexOf(storyId)
+      if (index !== -1) return index + 1 // 1-based index
+      return
+    },
+    [projects],
+  )
+
   const value = useMemo<ProjectContextValue>(
     () => ({
       activeProjectId,
@@ -124,8 +138,17 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
       projects,
       getProjectById,
       reorderStory,
+      getStoryDisplayIndex,
     }),
-    [activeProjectId, activeProject, setActiveProjectId, projects, getProjectById, reorderStory],
+    [
+      activeProjectId,
+      activeProject,
+      setActiveProjectId,
+      projects,
+      getProjectById,
+      reorderStory,
+      getStoryDisplayIndex,
+    ],
   )
 
   return <ProjectContext.Provider value={value}>{children}</ProjectContext.Provider>

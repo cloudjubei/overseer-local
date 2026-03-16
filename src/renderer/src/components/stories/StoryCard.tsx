@@ -6,6 +6,7 @@ import RunAgentButton from './RunAgentButton'
 import AgentRunBullet from '../agents/AgentRunBullet'
 import { useAgents } from '../../contexts/AgentsContext'
 import { useNavigator } from '../../navigation/Navigator'
+import { useProjectContext } from '../../contexts/ProjectContext'
 
 export default function StoryCard({
   project,
@@ -26,6 +27,7 @@ export default function StoryCard({
 }) {
   const { runsHistory, startAgent } = useAgents()
   const { navigateAgentRun } = useNavigator()
+  const { getStoryDisplayIndex } = useProjectContext()
   const storyRun = runsHistory.find((r) => r.state === 'running' && r.context.storyId === story.id)
 
   return (
@@ -53,7 +55,7 @@ export default function StoryCard({
       aria-label={`Story ${story.id} ${story.title}`}
     >
       <div className="story-card__header">
-        <span className="id-chip">{project.storyIdToDisplayIndex[story.id]}</span>
+        <span className="id-chip">{getStoryDisplayIndex(project.id, story.id)}</span>
         <div className="flex-spacer" />
         <div className="story-card__actions opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-150 ease-out flex items-center gap-2">
           {storyRun ? (

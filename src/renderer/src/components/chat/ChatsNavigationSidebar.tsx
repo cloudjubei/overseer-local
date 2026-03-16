@@ -292,7 +292,7 @@ export default function ChatsNavigationSidebar({
   mode,
 }: ChatsNavigationSidebarProps) {
   const { projectId: activeProjectId, project } = useActiveProject()
-  const { projects } = useProjectContext()
+  const { projects, getStoryDisplayIndex } = useProjectContext()
   const { storiesById, featuresById } = useStories()
   const { chatsByProjectId } = useChats()
 
@@ -340,12 +340,12 @@ export default function ChatsNavigationSidebar({
       if (type === 'STORY' || type === 'FEATURE' || type === 'STORY_TOPIC') {
         const sid: string | undefined = ctx.storyId
         if (!sid) return false
-        return !!project?.storyIdToDisplayIndex?.[sid]
+        return getStoryDisplayIndex(activeProjectId, sid) !== undefined
       }
       return false
     })
     return filtered.slice()
-  }, [chatsByProjectId, activeProjectId, project])
+  }, [chatsByProjectId, activeProjectId, getStoryDisplayIndex])
 
   // Hash of timestamps for the active project's chats to trigger re-sorting when they change
   const chatsTimeHash = useMemo(() => {
@@ -453,7 +453,7 @@ export default function ChatsNavigationSidebar({
         const sid = (ctx as any).storyId as string | undefined
         if (!sid) continue
         const storyTitle = getStoryTitle(sid)
-        const storyIndex = project?.storyIdToDisplayIndex?.[sid]
+        const storyIndex = getStoryDisplayIndex(activeProjectId, sid)
         let group = byStory.get(sid)
         if (!group) {
           group = {
@@ -518,7 +518,7 @@ export default function ChatsNavigationSidebar({
 
     groups.sort((a, b) => a.storyTitle.localeCompare(b.storyTitle))
     return groups
-  }, [projectChats, getProjectTitle, getStoryTitle, getFeatureTitle, project])
+  }, [projectChats, getProjectTitle, getStoryTitle, getFeatureTitle, activeProjectId, getStoryDisplayIndex])
 
   const projectTopics = useMemo(() => {
     type TopicItem = { ctx: ChatContext; label: string; key: string; updatedAt: string }
