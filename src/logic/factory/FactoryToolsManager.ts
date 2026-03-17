@@ -47,6 +47,17 @@ export default class FactoryToolsManager extends BaseManager {
   }
 
   async init(): Promise<void> {
+    // Subscribe to project lifecycle events to evict cached tools when a project
+    // is deactivated or deleted, preventing stale tool instances from accumulating.
+    this.projectsManager.getTools().subscribe(async (update) => {
+      const projectId = update.project?.id ?? (update as any).projectId
+      if (!projectId) return
+      if (update.type === 'delete' || (update.type === 'change' && update.project?.active === false)) {
+        await this.toolsLock.lock()
+        delete this.agentToolsMap[projectId]
+        this.toolsLock.unlock()
+      }
+    })
     await super.init()
   }
 

@@ -77,6 +77,7 @@ export function GitRightActionsPanel({
   onSwitchToBranch,
   onOpenMerge,
   currentBranchName,
+  onStashAppliedOrDeleted,
 }: {
   selectedBranch?: GitUnifiedBranch
   selectedStashRef?: string
@@ -87,6 +88,7 @@ export function GitRightActionsPanel({
   onSwitchToBranch: (name: string) => void
   onOpenMerge: (baseRef: string, headRef: string) => void
   currentBranchName?: string
+  onStashAppliedOrDeleted?: () => void
 }) {
   const { activeProjectId } = useProjectContext()
   const { unified } = useGit()
@@ -160,6 +162,14 @@ export function GitRightActionsPanel({
       const res = await gitService.applyStash(activeProjectId, { stashRef: selectedStashRef })
       if (!res?.ok) {
         alert(`Apply stash failed: ${res?.error || 'Unknown error'}`)
+      } else {
+        if (window.confirm(`Stash applied successfully. Do you want to drop it now?`)) {
+          const dropRes = await gitService.removeStash(activeProjectId, { stashRef: selectedStashRef })
+          if (!dropRes?.ok) {
+            alert(`Drop stash failed: ${dropRes?.error || 'Unknown error'}`)
+          }
+        }
+        onStashAppliedOrDeleted?.()
       }
       onRefresh()
     } catch (e: any) {
@@ -177,6 +187,8 @@ export function GitRightActionsPanel({
       const res = await gitService.removeStash(activeProjectId, { stashRef: selectedStashRef })
       if (!res?.ok) {
         alert(`Drop stash failed: ${res?.error || 'Unknown error'}`)
+      } else {
+        onStashAppliedOrDeleted?.()
       }
       onRefresh()
     } catch (e: any) {
@@ -188,10 +200,10 @@ export function GitRightActionsPanel({
 
   return (
     <div
-      className="shrink-0 border-l border-neutral-200 dark:border-neutral-800 flex flex-col min-h-0 items-center py-2"
+      className="shrink-0 border-l border-neutral-200 dark:border-neutral-800 flex flex-col min-h-0 items-center py-2 overflow-x-hidden"
       style={{ width: ACTIONS_RAIL_WIDTH }}
     >
-      <div className="flex flex-col gap-2 items-center w-full px-2 overflow-y-auto hide-scrollbar">
+      <div className="flex flex-col gap-2 items-center w-full px-2 overflow-y-auto overflow-x-hidden hide-scrollbar">
         <GitActionButton
           icon={<IconRefresh className="w-5 h-5" />}
           label="Refresh"
@@ -320,6 +332,7 @@ export function GitRightActionsPanel({
           onSuccess={() => {
             onRefresh()
             unified.reload(activeProjectId)
+            onStashAppliedOrDeleted?.()
           }}
         />
       )}

@@ -156,6 +156,12 @@ export default function GitView() {
     [selection, projectId],
   )
 
+  const handleStashAppliedOrDeleted = React.useCallback(() => {
+    if (projectId && current?.name) {
+      selection.selectBranch(projectId, current.name)
+    }
+  }, [projectId, current?.name, selection])
+
   const switchToBranch = React.useCallback(
     async (name: string) => {
       if (!projectId) return
@@ -249,6 +255,7 @@ export default function GitView() {
         onSwitchToBranch={switchToBranch}
         onOpenMerge={openMerge}
         currentBranchName={current?.name}
+        onStashAppliedOrDeleted={handleStashAppliedOrDeleted}
       />
 
       {showCommit && projectId && commitBranch ? (

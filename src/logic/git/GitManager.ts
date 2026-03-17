@@ -26,6 +26,8 @@ import {
   GitApplyStashOptions,
   GitRemoveStashOptions,
   GitAddStashOptions,
+  GitLogOptions,
+  GitLogResult,
 } from 'thefactory-tools'
 import ProjectsManager from '../projects/ProjectsManager'
 import Mutex from '../utils/Mutex'
@@ -106,6 +108,8 @@ export default class GitManager extends BaseManager {
 
     handlers[IPC_HANDLER_KEYS.GIT_GET_FILE_CONTENT] = ({ projectId, path, ref }) =>
       this.getFileContent(projectId, path, ref)
+    handlers[IPC_HANDLER_KEYS.GIT_GET_LOG] = ({ projectId, options }) =>
+      this.getGitLog(projectId, options)
     handlers[IPC_HANDLER_KEYS.GIT_RESET_ALL] = ({ projectId }) => this.resetAll(projectId)
 
     handlers[IPC_HANDLER_KEYS.GIT_STAGE] = ({ projectId, paths }) => this.stage(projectId, paths)
@@ -345,6 +349,15 @@ export default class GitManager extends BaseManager {
     const tools = await this.getTools(projectId)
     if (!tools) return
     return tools.getFileContent(path, ref)
+  }
+
+  private async getGitLog(
+    projectId: string,
+    options?: GitLogOptions,
+  ): Promise<GitLogResult | undefined> {
+    const tools = await this.getTools(projectId)
+    if (!tools) return
+    return tools.getGitLog(options)
   }
 
   private async resetAll(projectId: string): Promise<GitOpResult | undefined> {

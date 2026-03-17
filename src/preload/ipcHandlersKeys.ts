@@ -181,6 +181,7 @@ const IPC_HANDLER_KEYS = {
   GIT_CHECKOUT: 'git:checkout',
   GIT_GET_LOCAL_DIFF_SUMMARY: 'git:local-diff-summary',
   GIT_GET_FILE_CONTENT: 'git:get-file-content',
+  GIT_GET_LOG: 'git:get-log',
   GIT_RESET_ALL: 'git:reset-all',
   GIT_ADD_STASH: 'git:add-stash',
   GIT_LIST_STASHES: 'git:list-stashes',

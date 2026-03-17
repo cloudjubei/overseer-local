@@ -243,6 +243,15 @@ export function ProjectEditorForm({
         placeholder="https://github.com/org/repo"
       />
 
+      <div className="form-row flex items-center gap-4">
+        <label htmlFor="active-project-switch">Active Project</label>
+        <Switch
+          id="active-project-switch"
+          checked={form.active ?? true}
+          onCheckedChange={(checked) => setForm((s: any) => ({ ...s, active: checked }))}
+        />
+      </div>
+
       <div className="form-row">
         <label>GitHub Credentials (optional)</label>
         <Select
@@ -271,6 +280,7 @@ export function ProjectEditorForm({
       <div className="form-row flex items-center gap-4">
         <label htmlFor="coding-project-switch">Coding Project</label>
         <Switch
+          id="coding-project-switch"
           checked={!!form.codeInfo}
           onCheckedChange={(checked) => {
             if (checked) {

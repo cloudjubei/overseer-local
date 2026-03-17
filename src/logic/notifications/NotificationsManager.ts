@@ -8,6 +8,7 @@ import type {
   NotificationCategory,
   Notification as AppNotification,
 } from '../../types/notifications'
+import ProjectsManager from '../projects/ProjectsManager'
 
 // If true, read notifications are removed from storage instead of kept as read
 const DELETE_READ_NOTIFICATIONS = true
@@ -15,16 +16,37 @@ const DELETE_READ_NOTIFICATIONS = true
 export default class NotificationsManager extends BaseManager {
   private storages: Record<string, NotificationsStorage>
   private settingsManager: SettingsManager
+  private projectsManager?: ProjectsManager
 
-  constructor(projectRoot: string, window: BrowserWindow, settingsManager: SettingsManager) {
+  constructor(
+    projectRoot: string,
+    window: BrowserWindow,
+    settingsManager: SettingsManager,
+    projectsManager?: ProjectsManager
+  ) {
     super(projectRoot, window)
 
     this.storages = {}
     this.settingsManager = settingsManager
+    this.projectsManager = projectsManager
   }
 
   async init(): Promise<void> {
     await this.__getStorage('main')
+
+    if (this.projectsManager) {
+      this.projectsManager.getTools().subscribe((update) => {
+        const projectId = update.project?.id ?? (update as any).projectId
+        if (!projectId) return
+        if (update.type === 'delete' || (update.type === 'change' && update.project?.active === false)) {
+          this.markAllNotificationsAsRead(projectId)
+          if (this.storages[projectId]) {
+            delete this.storages[projectId]
+            this._updateAppBadgeCount()
+          }
+        }
+      })
+    }
 
     await super.init()
     // Ensure dock/app badge reflects persisted unread notifications on startup

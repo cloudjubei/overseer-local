@@ -6,6 +6,7 @@ import { gitService } from '@renderer/services/gitService'
 import { GitLocalChanges } from './GitLocalChanges'
 import { ResizeHandle } from '../../components/ui/ResizeHandle'
 import { StructuredUnifiedDiff } from '@renderer/components/chat/tool-popups/diffUtils'
+import { GitCommitGraph } from './GitCommitGraph'
 
 export function GitBranchDetailsPanel({
   projectId,
@@ -41,7 +42,7 @@ export function GitBranchDetailsPanel({
 
   // Vertical resizer for branch view: top graph stub / bottom local changes
   const rootRef = useRef<HTMLDivElement | null>(null)
-  const [topHeightPx, setTopHeightPx] = useState<number>(200)
+  const [topHeightPx, setTopHeightPx] = useState<number>(250)
   const resizeRef = useRef<{ startY: number; startH: number; containerH: number } | null>(null)
 
   const onTopResizeStart = (e: React.PointerEvent) => {
@@ -56,7 +57,7 @@ export function GitBranchDetailsPanel({
       const dy = ev.clientY - st.startY
       const next = st.startH + dy
       const minTop = 60
-      const maxTop = Math.max(minTop, Math.floor(st.containerH * 0.7))
+      const maxTop = Math.max(minTop, Math.floor(st.containerH * 0.8))
       setTopHeightPx(Math.max(minTop, Math.min(maxTop, next)))
     }
     const onUp = () => {
@@ -73,7 +74,7 @@ export function GitBranchDetailsPanel({
     const clamp = () => {
       const h = rootRef.current?.clientHeight || window.innerHeight
       const minTop = 60
-      const maxTop = Math.max(minTop, Math.floor(h * 0.7))
+      const maxTop = Math.max(minTop, Math.floor(h * 0.8))
       setTopHeightPx((v) => Math.max(minTop, Math.min(maxTop, v)))
     }
     clamp()
@@ -165,26 +166,23 @@ export function GitBranchDetailsPanel({
           selectedBranch.current ? (
             // Branch main view (current branch): top stub graph + bottom local changes
             <div className="flex flex-col min-h-0 h-full w-full">
-              {/* Top graph stub */}
+              {/* Top graph */}
               <div
                 className="bg-neutral-50 dark:bg-neutral-900/40 overflow-hidden flex flex-col"
                 style={{ height: topHeightPx }}
               >
-                <div className="px-3 py-2 border-b border-neutral-200 dark:border-neutral-800 flex items-center justify-between bg-white dark:bg-neutral-900">
+                <div className="px-3 py-2 border-b border-neutral-200 dark:border-neutral-800 flex items-center justify-between bg-white dark:bg-neutral-900 flex-shrink-0">
                   <div className="text-xs font-semibold text-neutral-700 dark:text-neutral-200 uppercase tracking-wide">
                     Commit graph
                   </div>
-                  <div className="text-[11px] text-neutral-500 dark:text-neutral-400">Stub (coming soon)</div>
                 </div>
-                <div className="p-3 text-sm text-neutral-600 dark:text-neutral-300">
-                  Graph overview area placeholder.
-                </div>
+                <GitCommitGraph projectId={projectId} />
               </div>
 
               {/* Resize handle */}
               <ResizeHandle
                 orientation="horizontal"
-                className="relative z-10"
+                className="relative z-10 flex-shrink-0"
                 onResizeStart={onTopResizeStart}
                 hitBoxSize={4}
               />

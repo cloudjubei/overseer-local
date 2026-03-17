@@ -51,6 +51,7 @@ export default function ProjectManagerModal({
     description: '',
     path: '',
     repo_url: '',
+    active: true,
     requirements: [],
     metadata: { icon: 'folder', githubCredentialsId: '' },
     codeInfo: undefined,
@@ -86,6 +87,7 @@ export default function ProjectManagerModal({
         const normalizedIcon = existingIcon && PROJECT_ICONS[existingIcon] ? existingIcon : 'folder'
         setForm({
           ...p,
+          active: p.active ?? true,
           requirements: Array.isArray(p.requirements) ? p.requirements : [],
           metadata: {
             ...(p.metadata ?? {}),
@@ -112,6 +114,7 @@ export default function ProjectManagerModal({
       description: '',
       path: '',
       repo_url: '',
+      active: true,
       requirements: [],
       metadata: { icon: 'folder', githubCredentialsId: '' },
       codeInfo: undefined,
@@ -137,6 +140,7 @@ export default function ProjectManagerModal({
     const normalizedIcon = existingIcon && PROJECT_ICONS[existingIcon] ? existingIcon : 'folder'
     setForm({
       ...p,
+      active: p.active ?? true,
       requirements: Array.isArray(p.requirements) ? p.requirements : [],
       metadata: {
         ...(p.metadata ?? {}),
@@ -335,12 +339,15 @@ export default function ProjectManagerModal({
                       justifyContent: 'space-between',
                       borderBottom: '1px solid var(--border-subtle)',
                       padding: '8px 0',
+                      opacity: p.active === false ? 0.5 : 1,
                     }}
                   >
                     <div className="flex items-center gap-2">
                       <div aria-hidden>{renderProjectIcon(p.metadata?.icon)}</div>
                       <div>
-                        <div style={{ fontWeight: 600 }}>{p.title}</div>
+                        <div style={{ fontWeight: 600 }}>
+                          {p.title} {p.active === false && <span className="text-xs text-text-secondary font-normal ml-2">(Inactive)</span>}
+                        </div>
                         <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
                           {p.id} · {p.path}
                         </div>

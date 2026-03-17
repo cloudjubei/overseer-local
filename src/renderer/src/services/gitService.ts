@@ -20,9 +20,15 @@ import type {
   GitApplyStashOptions,
   GitRemoveStashOptions,
   GitAddStashOptions,
+  GitLogOptions,
+  GitLogResult,
 } from 'thefactory-tools'
 
 export type GitService = {
+  getGitLog: (
+    projectId: string,
+    options?: Omit<GitLogOptions, 'repoPath'>,
+  ) => Promise<GitLogResult>
   getMergePlan: (
     projectId: string,
     options: Omit<GitMergePlanOptions, 'repoPath'>,

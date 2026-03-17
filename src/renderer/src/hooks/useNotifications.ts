@@ -8,8 +8,6 @@ import type {
 import { settingsService } from '@renderer/services/settingsService'
 import { useProjectContext } from '@renderer/contexts/ProjectContext'
 import { useProjectsGroups } from '@renderer/contexts/ProjectsGroupsContext'
-// import { useAgents } from '@renderer/contexts/AgentsContext'
-// import { useChats } from '@renderer/contexts/ChatsContext'
 import { useChats } from '@renderer/contexts/chats/ChatsContext'
 import { useChatThinking } from '@renderer/hooks/useChatThinking'
 import { useNavigator } from '@renderer/navigation/Navigator'
@@ -31,7 +29,6 @@ const DEFAULT_PROJECT_BADGE_STATE: ProjectBadgeState = {
 export function useNotifications() {
   const { activeProject, projects } = useProjectContext()
   const { groups } = useProjectsGroups()
-  // const { runsActive, runsHistory } = useAgents()
   const { chatsByProjectId } = useChats()
   const { thinkingCountByProject } = useChatThinking(500)
 
@@ -98,14 +95,28 @@ export function useNotifications() {
     [activeProject?.id, prefsByProject],
   )
 
-  // const runningByProject = useMemo(() => {
-  //   const map = new Map<string, number>()
-  //   for (const r of runsActive) {
-  //     const k = r.projectId
-  //     map.set(k, (map.get(k) || 0) + 1)
-  //   }
-  //   return map
-  // }, [runsActive])
+  const runningByProject = useMemo(() => {
+    const map = new Map<string, number>()
+    if (!chatsByProjectId) return map
+
+    for (const [projectId, list] of Object.entries(chatsByProjectId)) {
+      let activeRuns = 0
+      for (const c of list) {
+        const type = c.chat.context.type
+        const state = c.chat.state
+        if (
+          (type === 'AGENT_RUN' || type === 'AGENT_RUN_FEATURE') &&
+          (state === 'running' || state === 'created')
+        ) {
+          activeRuns++
+        }
+      }
+      if (activeRuns > 0) {
+        map.set(projectId, activeRuns)
+      }
+    }
+    return map
+  }, [chatsByProjectId])
 
   const [badgeStateByProject, setBadgeStateByProject] = useState<Record<string, ProjectBadgeState>>(
     {},
@@ -123,13 +134,6 @@ export function useNotifications() {
     },
     [chatsByProjectId],
   )
-
-  // AgentsContext doesn't expose an explicit loaded flag; infer it after we observe any runs history.
-  // This prevents pruning agent_run notifications prematurely on cold start.
-  const runsLoadedRef = useRef(false)
-  // useEffect(() => {
-  //   if ((runsHistory || []).length > 0) runsLoadedRef.current = true
-  // }, [runsHistory?.length])
 
   const validateNotification = useCallback(
     (
@@ -173,7 +177,6 @@ export function useNotifications() {
       }
     },
     [chatsByProjectId, chatsLoadedForProject],
-    // [chatsByProjectId, runsHistory, chatsLoadedForProject],
   )
 
   const pruneNotifications = useCallback(async (projectId: string, toPrune: Notification[]) => {
@@ -203,7 +206,7 @@ export function useNotifications() {
           }
 
           // Only prune when we have enough loaded state to make an existence decision.
-          const safeToPrune = chatsLoadedForProject(projectId) && runsLoadedRef.current
+          const safeToPrune = chatsLoadedForProject(projectId)
           if (safeToPrune) void pruneNotifications(projectId, invalid)
 
           const agentRuns = validUnread.filter((n) => n.category === 'agent_runs')
