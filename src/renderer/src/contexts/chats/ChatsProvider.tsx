@@ -6,6 +6,8 @@ import type {
   ChatSettings,
   CompletionSettings,
   LLMConfig,
+  ChatUpdate,
+  CompletionMessage,
 } from 'thefactory-tools'
 import { getChatContextKey } from 'thefactory-tools/utils'
 
@@ -37,8 +39,6 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
   const chatKeyToProjectIdRef = useRef<Record<string, string>>({})
 
   // Track recently-deleted chat keys so we don't resurrect via late updates.
-  // IMPORTANT: this must be a short-lived tombstone (NOT permanent), otherwise the user
-  // cannot delete a chat and later create a new one for the same context without restarting.
   const deletedAtByKeyRef = useRef<Map<string, number>>(new Map())
 
   const isTombstoned = useCallback((chatKey: string): boolean => {
@@ -101,6 +101,29 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
     })
   }, [])
 
+  const updateChatState = useCallback(
+    (key: string, updates: Partial<ChatState>) => {
+      setChats((prev) => {
+        const current = prev[key]
+        const base: ChatState =
+          current ||
+          ({
+            key,
+            chat: (updates as any).chat,
+            isLoading: false,
+            isThinking: false,
+          } as ChatState)
+
+        const next: ChatState = { ...base, ...updates }
+        if (next.chat) {
+          upsertChatsByProject(next)
+        }
+        return { ...prev, [key]: next }
+      })
+    },
+    [upsertChatsByProject],
+  )
+
   // --- settings + initial load (legacy parity) ---
   useEffect(() => {
     const loadAll = async () => {
@@ -131,7 +154,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
               all[st.key] = st
               chatKeyToProjectIdRef.current[st.key] = project.id
 
-              // Seed notification baseline to avoid firing notifications on boot.
+              // Seed notification baseline
               try {
                 const msgs = st.chat?.messages || []
                 let lastAssistantIdx = -1
@@ -161,225 +184,335 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
     void loadAll()
   }, [])
 
-  const getSettings = useMemo(
-    () => (context: ChatContext) => extractSettingsForContext(allChatSettings, context),
+  const getSettings = useCallback(
+    (context: ChatContext) => extractSettingsForContext(allChatSettings, context),
     [allChatSettings],
   )
 
   // --- chat lifecycle ---
-  const getChatIfExists = async (context: ChatContext): Promise<ChatState | undefined> => {
-    const key = getChatContextKey(context)
-    if (isTombstoned(key)) return undefined
+  const getChatIfExists = useCallback(
+    async (context: ChatContext): Promise<ChatState | undefined> => {
+      const key = getChatContextKey(context)
+      if (isTombstoned(key)) return undefined
 
-    const existing = chats[key]
-    if (existing) return existing
+      const existing = chats[key]
+      if (existing) return existing
 
-    try {
-      // Old behavior: chatsService.getChat throws if missing.
-      const chat = await chatsService.getChat(context)
-      const st: ChatState = { key, chat, isLoading: false, isThinking: false }
-      setChats((prev) => ({ ...prev, [key]: st }))
-      upsertChatsByProject(st)
+      try {
+        const chat = await chatsService.getChat(context)
+        const chatState: ChatState = { key, chat, isLoading: false, isThinking: false }
+        updateChatState(key, chatState)
+        try {
+          const pid = chat.context?.projectId
+          if (pid) chatKeyToProjectIdRef.current[key] = pid
+        } catch {
+          // ignore
+        }
+        return chatState
+      } catch {
+        return undefined
+      }
+    },
+    [chats, isTombstoned, updateChatState],
+  )
+
+  const getChat = useCallback(
+    async (context: ChatContext): Promise<ChatState> => {
+      const chatState = await getChatIfExists(context)
+      if (!chatState) throw new Error('Chat does not exist')
+      return chatState
+    },
+    [getChatIfExists],
+  )
+
+  const restartChat = useCallback(
+    async (context: ChatContext): Promise<ChatState> => {
+      const key = getChatContextKey(context)
+      clearDeleted(key)
+
+      const now = new Date().toISOString()
+      const optimistic: ChatState = {
+        key,
+        chat: { context, messages: [], createdAt: now, updatedAt: now } as any,
+        isLoading: false,
+        isThinking: false,
+      }
+
+      updateChatState(key, optimistic)
+
+      let chat = await chatsService.clearChat(context)
+      if (!chat) chat = await chatsService.getChat(context)
+
+      const st: ChatState = { key, chat: chat!, isLoading: false, isThinking: false }
+      updateChatState(key, st)
+      try {
+        const pid = chat?.context?.projectId
+        if (pid) chatKeyToProjectIdRef.current[key] = pid
+      } catch {
+        // ignore
+      }
       return st
-    } catch {
-      return undefined
-    }
-  }
+    },
+    [clearDeleted, updateChatState],
+  )
 
-  const getChat = async (context: ChatContext): Promise<ChatState> => {
-    const existing = await getChatIfExists(context)
-    if (existing) return existing
-    throw new Error('Chat does not exist')
-  }
+  const deleteChat = useCallback(
+    async (context: ChatContext): Promise<void> => {
+      const key = getChatContextKey(context)
+      markDeleted(key)
 
-  const restartChat = async (context: ChatContext): Promise<ChatState> => {
-    const key = getChatContextKey(context)
-    clearDeleted(key)
+      setChats((prev) => {
+        const next = { ...prev }
+        const existing = next[key]
+        if (existing) removeFromChatsByProject(existing)
+        delete next[key]
+        return next
+      })
 
-    const now = new Date().toISOString()
-    const optimistic: ChatState = {
-      key,
-      chat: { context, messages: [], createdAt: now, updatedAt: now } as any,
-      isLoading: false,
-      isThinking: false,
-    }
+      try {
+        clearDraft(key)
+      } catch {
+        // ignore
+      }
 
-    setChats((prev) => ({ ...prev, [key]: optimistic }))
-    upsertChatsByProject(optimistic)
+      try {
+        delete chatKeyToProjectIdRef.current[key]
+      } catch {
+        // ignore
+      }
 
-    let chat = await chatsService.clearChat(context)
-    if (!chat) chat = await chatsService.getChat(context)
+      await chatsService.deleteChat(context)
+    },
+    [markDeleted, removeFromChatsByProject, clearDraft],
+  )
 
-    const st: ChatState = { key, chat: chat!, isLoading: false, isThinking: false }
-    setChats((prev) => ({ ...prev, [key]: st }))
-    upsertChatsByProject(st)
-    return st
-  }
-
-  const deleteChat = async (context: ChatContext): Promise<void> => {
-    const key = getChatContextKey(context)
-    markDeleted(key)
-
-    await chatsService.deleteChat(context)
-
-    setChats((prev) => {
-      const next = { ...prev }
-      delete next[key]
-      return next
-    })
-
-    try {
-      clearDraft(key)
-    } catch {
-      // ignore
-    }
-  }
-
-  const deleteLastMessage = async (context: ChatContext): Promise<void> => {
-    const key = getChatContextKey(context)
-    const updated = await chatsService.deleteLastMessage(context)
-    if (!updated) return
-
-    setChats((prev) => {
-      const existing = prev[key]
-      if (!existing) return prev
-      const next: ChatState = { ...existing, chat: updated }
-      return { ...prev, [key]: next }
-    })
-  }
+  const deleteLastMessage = useCallback(
+    async (context: ChatContext): Promise<void> => {
+      const key = getChatContextKey(context)
+      const chatState = await getChat(context)
+      if (chatState.isThinking) return
+      
+      try {
+        const updated = await chatsService.deleteLastMessage(context)
+        if (updated) {
+          updateChatState(key, { chat: updated })
+        }
+      } catch (e) {
+        console.error('Failed to delete last message', e)
+      }
+    },
+    [getChat, updateChatState],
+  )
 
   // --- actions ---
-  const abortMessage = async (context: ChatContext) => {
-    await completionService.abortCompletion(context)
-  }
-
-  const sendMessage: ChatsContextValue['sendMessage'] = async (
-    context,
-    message,
-    prompt,
-    settings,
-    config,
-    files,
-  ) => {
-    const key = getChatContextKey(context)
-    const chatState = await getChat(context)
-    if (chatState.isThinking) return
-
-    const now = new Date().toISOString()
-    const userMessage = {
-      role: 'user',
-      content: message,
-      files: files && files.length ? files : undefined,
-      startedAt: now,
-      completedAt: now,
-      durationMs: 0,
-    } as any
-
-    const prevMessages = chatState.chat.messages || []
-    const chatMessages = [...prevMessages, userMessage]
-
-    setChats((prev) => {
-      const existing = prev[key]
-      if (!existing) return prev
-      const next: ChatState = {
-        ...existing,
-        chat: { ...existing.chat, messages: chatMessages } as any,
-        isThinking: true,
-      }
-      return { ...prev, [key]: next }
-    })
-
-    const chatProjectId = context.projectId ?? projectId
+  const abortMessage = useCallback(async (context: ChatContext) => {
     try {
-      await completionService.sendCompletionTools(
-        chatProjectId,
-        context,
-        userMessage,
-        prompt,
-        settings.completionSettings,
-        config as LLMConfig,
-      )
-    } finally {
-      setChats((prev) => {
-        const existing = prev[key]
-        if (!existing) return prev
-        return { ...prev, [key]: { ...existing, isThinking: false } }
-      })
+      await completionService.abortCompletion(context)
+    } catch (e) {
+      console.warn('Abort failed or not available for chat', e)
     }
-  }
+  }, [])
 
-  const resumeTools: ChatsContextValue['resumeTools'] = async (
-    context,
-    toolsGranted,
-    prompt,
-    settings,
-    config,
-  ) => {
-    const chatProjectId = context.projectId ?? projectId
-    await completionService.resumeCompletionTools(
-      chatProjectId,
-      context,
-      toolsGranted,
-      prompt,
-      settings.completionSettings,
-      config as LLMConfig,
-    )
-  }
+  const sendMessage = useCallback(
+    async (
+      context: ChatContext,
+      message: string,
+      prompt: string,
+      settings: ChatSettings,
+      config: LLMConfig,
+      files?: string[],
+    ) => {
+      const key = getChatContextKey(context)
+      const chatState = await getChat(context)
+      if (chatState.isThinking) return
 
-  const retryCompletion: ChatsContextValue['retryCompletion'] = async (context, prompt, settings, config) => {
-    const chatProjectId = context.projectId ?? projectId
-    await completionService.retryCompletionTools(
-      chatProjectId,
-      context,
-      prompt,
-      settings.completionSettings,
-      config as LLMConfig,
-    )
-  }
+      const now = new Date().toISOString()
+      const userMessage: CompletionMessage = {
+        role: 'user',
+        content: message,
+        files: files && files.length ? files : undefined,
+        startedAt: now,
+        completedAt: now,
+        durationMs: 0,
+      } as any
+
+      const prevMessages = chatState.chat.messages || []
+      const chatMessages = [...prevMessages, userMessage]
+
+      updateChatState(key, {
+        ...chatState,
+        chat: { ...chatState.chat, messages: chatMessages } as any,
+        isThinking: true,
+      })
+
+      const chatProjectId = context.projectId ?? projectId
+      try {
+        await completionService.sendCompletionTools(
+          chatProjectId,
+          context,
+          userMessage,
+          prompt,
+          settings.completionSettings,
+          config as LLMConfig,
+        )
+      } catch (e) {
+        console.error('completionService.sendCompletionTools:', e)
+      } finally {
+        updateChatState(key, { isThinking: false })
+      }
+    },
+    [projectId, getChat, updateChatState],
+  )
+
+  const resumeTools = useCallback(
+    async (
+      context: ChatContext,
+      toolsGranted: string[],
+      prompt: string,
+      settings: ChatSettings,
+      config: LLMConfig,
+    ) => {
+      const key = getChatContextKey(context)
+      const chatState = await getChat(context)
+      if (chatState.isThinking) return
+
+      updateChatState(key, { ...chatState, isThinking: true })
+
+      const chatProjectId = context.projectId ?? projectId
+      try {
+        await completionService.resumeCompletionTools(
+          chatProjectId,
+          context,
+          toolsGranted,
+          prompt,
+          settings.completionSettings,
+          config as LLMConfig,
+        )
+      } catch (e) {
+        console.error('completionService.resumeCompletionTools:', e)
+      } finally {
+        updateChatState(key, { isThinking: false })
+      }
+    },
+    [projectId, getChat, updateChatState],
+  )
+
+  const retryCompletion = useCallback(
+    async (
+      context: ChatContext,
+      prompt: string,
+      settings: ChatSettings,
+      config: LLMConfig,
+    ) => {
+      const key = getChatContextKey(context)
+      const chatState = await getChat(context)
+      if (chatState.isThinking) return
+
+      updateChatState(key, { ...chatState, isThinking: true })
+
+      const chatProjectId = context.projectId ?? projectId
+      try {
+        await completionService.retryCompletionTools(
+          chatProjectId,
+          context,
+          prompt,
+          settings.completionSettings,
+          config as LLMConfig,
+        )
+      } catch (e) {
+        console.error('completionService.retryCompletionTools:', e)
+      } finally {
+        updateChatState(key, { isThinking: false })
+      }
+    },
+    [projectId, getChat, updateChatState],
+  )
 
   // --- prompts ---
-  const getDefaultPrompt = async (chatContext: ChatContext): Promise<string> => {
-    return chatsService.getDefaultPrompt(chatContext)
-  }
+  const getDefaultPrompt = useCallback(async (chatContext: ChatContext): Promise<string> => {
+    try {
+      return await chatsService.getDefaultPrompt(chatContext)
+    } catch (e) {
+      console.error('Failed to get default prompt', e)
+      return ''
+    }
+  }, [])
 
-  const getSettingsPrompt = async (contextArguments: ChatContextArguments): Promise<string> => {
-    return chatsService.getSettingsPrompt(contextArguments)
-  }
+  const getSettingsPrompt = useCallback(
+    async (contextArguments: ChatContextArguments): Promise<string> => {
+      try {
+        return await chatsService.getSettingsPrompt(contextArguments)
+      } catch (e) {
+        console.error('Failed to get settings prompt', e)
+        return ''
+      }
+    },
+    [],
+  )
 
-  const updateSettingsPrompt = async (
-    context: ChatContext,
-    prompt: string,
-  ): Promise<string | undefined> => {
-    const updated = await chatsService.updateSettingsPrompt(context, prompt)
-    setAllChatSettings(updated)
-    return extractSettingsForContext(updated, context)?.systemPrompt
-  }
+  const updateSettingsPrompt = useCallback(
+    async (context: ChatContext, prompt: string): Promise<string | undefined> => {
+      try {
+        const updated = await chatsService.updateSettingsPrompt(context, prompt)
+        setAllChatSettings(updated)
+        return extractSettingsForContext(updated, context)?.systemPrompt
+      } catch (e) {
+        console.error('Failed to update settings prompt', e)
+      }
+      return undefined
+    },
+    [],
+  )
 
-  const resetSettingsPrompt = async (context: ChatContext): Promise<string | undefined> => {
-    const updated = await chatsService.resetSettingsPrompt(context)
-    setAllChatSettings(updated)
-    return extractSettingsForContext(updated, context)?.systemPrompt
-  }
+  const resetSettingsPrompt = useCallback(
+    async (context: ChatContext): Promise<string | undefined> => {
+      try {
+        const updated = await chatsService.resetSettingsPrompt(context)
+        setAllChatSettings(updated)
+        return extractSettingsForContext(updated, context)?.systemPrompt
+      } catch (e) {
+        console.error('Failed to reset settings prompt', e)
+      }
+      return undefined
+    },
+    [],
+  )
 
   // --- completion settings ---
-  const updateCompletionSettings = async (
-    context: ChatContext,
-    patch: Partial<CompletionSettings>,
-  ): Promise<ChatSettings | undefined> => {
-    const updated = await chatsService.updateChatCompletionSettings(context, patch)
-    setAllChatSettings(updated)
-    return extractSettingsForContext(updated, context)
-  }
+  const updateCompletionSettings = useCallback(
+    async (
+      context: ChatContext,
+      patch: Partial<CompletionSettings>,
+    ): Promise<ChatSettings | undefined> => {
+      try {
+        const updated = await chatsService.updateChatCompletionSettings(context, patch)
+        setAllChatSettings(updated)
+        return extractSettingsForContext(updated, context)
+      } catch (e) {
+        console.error('Failed to update chat settings', e)
+        return extractSettingsForContext(allChatSettings, context)
+      }
+    },
+    [allChatSettings],
+  )
 
-  const resetSettings = async (context: ChatContext): Promise<ChatSettings | undefined> => {
-    const updated = await chatsService.resetChatSettings(context)
-    setAllChatSettings(updated)
-    return extractSettingsForContext(updated, context)
-  }
+  const resetSettings = useCallback(
+    async (context: ChatContext): Promise<ChatSettings | undefined> => {
+      try {
+        const updated = await chatsService.resetChatSettings(context)
+        setAllChatSettings(updated)
+        return extractSettingsForContext(updated, context)
+      } catch (e) {
+        console.error('Failed to reset chat settings', e)
+        return extractSettingsForContext(allChatSettings, context)
+      }
+    },
+    [allChatSettings],
+  )
 
   // --- subscription (legacy parity) ---
   useEffect(() => {
-    const unsubscribe = chatsService.subscribe((chatUpdate) => {
+    const unsubscribe = chatsService.subscribe((chatUpdate: ChatUpdate) => {
       const key = getChatContextKey(chatUpdate.context)
 
       setChats((prev) => {
@@ -477,7 +610,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
             // ignore
           }
 
-          // Notify on new assistant messages (legacy baseline logic)
+          // Notify on new assistant messages
           try {
             const msgs = chatUpdate.chat?.messages || []
             let lastAssistantIdx = -1
@@ -569,7 +702,15 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
     })
 
     return () => unsubscribe()
-  }, [clearDraft, isTombstoned, markDeleted, projectId, removeFromChatsByProject, removeLastOpenedChatKey, upsertChatsByProject])
+  }, [
+    clearDraft,
+    isTombstoned,
+    markDeleted,
+    projectId,
+    removeFromChatsByProject,
+    removeLastOpenedChatKey,
+    upsertChatsByProject,
+  ])
 
   const value = useMemo<ChatsContextValue>(
     () => ({
@@ -607,8 +748,23 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       getDraft,
       setDraft,
       clearDraft,
+      sendMessage,
+      resumeTools,
+      retryCompletion,
+      abortMessage,
+      getChatIfExists,
+      getChat,
+      restartChat,
+      deleteChat,
+      deleteLastMessage,
       allChatSettings,
       getSettings,
+      resetSettings,
+      updateCompletionSettings,
+      getDefaultPrompt,
+      getSettingsPrompt,
+      updateSettingsPrompt,
+      resetSettingsPrompt,
     ],
   )
 

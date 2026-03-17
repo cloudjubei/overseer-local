@@ -12,11 +12,13 @@ import {
   ToolCallContext,
 } from 'thefactory-tools'
 import DatabaseManager from '../db/DatabaseManager'
+import Mutex from '../utils/Mutex'
 import GitManager from '../git/GitManager'
 import GitCredentialsManager from '../git/GitCredentialsManager'
 import StoriesManager from '../stories/StoriesManager'
 
 export default class FactoryToolsManager extends BaseManager {
+  private toolsLock = new Mutex()
   private projectsManager: ProjectsManager
   private storiesManager: StoriesManager
   private settingsManager: SettingsManager
@@ -91,13 +93,11 @@ export default class FactoryToolsManager extends BaseManager {
 
   private async updateTool(projectId: string): Promise<AgentTools | undefined> {
     const projectRoot = await this.projectsManager.getProjectDir(projectId)
-    if (!projectRoot) {
-      return
-    }
+    if (!projectRoot) return
+
     const project = await this.projectsManager.getProject(projectId)
-    if (!project) {
-      return
-    }
+    if (!project) return
+
     const githubCredentialsId = project.metadata?.githubCredentialsId
     const githubCredentials = this.gitCredentialsManager.get(githubCredentialsId)
     // const gitCredentials : GithubCredentials = { name: '', username: '', email: '', token: ''} //TODO:
@@ -121,10 +121,13 @@ export default class FactoryToolsManager extends BaseManager {
     this.agentToolsMap[projectId] = agentTools
     return agentTools
   }
+
   private async __getTools(projectId: string): Promise<AgentTools | undefined> {
+    await this.toolsLock.lock()
     if (!this.agentToolsMap[projectId]) {
       await this.updateTool(projectId)
     }
+    this.toolsLock.unlock()
     return this.agentToolsMap[projectId]
   }
 }

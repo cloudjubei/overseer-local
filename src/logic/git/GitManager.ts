@@ -370,6 +370,7 @@ export default class GitManager extends BaseManager {
       return
     }
     const project = await this.projectsManager.getProject(projectId)
+
     if (!project) {
       console.log('GitManager updateTool has no project: ', projectId)
       return
@@ -395,9 +396,8 @@ export default class GitManager extends BaseManager {
     await this.toolsLock.lock()
     if (!this.tools[projectId]) {
       await this.updateTool(projectId)
-      this.toolsLock.unlock()
-      return this.tools[projectId]
     }
-    return undefined
+    this.toolsLock.unlock()
+    return this.tools[projectId]
   }
 }
