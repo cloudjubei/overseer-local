@@ -22,6 +22,9 @@ import {
   GitCommitInput,
   GitLocalDiffOptions,
   GitFileChange,
+  GitListStashesResult,
+  GitApplyStashOptions,
+  GitRemoveStashOptions,
 } from 'thefactory-tools'
 import ProjectsManager from '../projects/ProjectsManager'
 import Mutex from '../utils/Mutex'
@@ -105,6 +108,12 @@ export default class GitManager extends BaseManager {
       this.unstage(projectId, paths)
     handlers[IPC_HANDLER_KEYS.GIT_RESET] = ({ projectId, paths }) => this.reset(projectId, paths)
     handlers[IPC_HANDLER_KEYS.GIT_COMMIT] = ({ projectId, input }) => this.commit(projectId, input)
+
+    handlers[IPC_HANDLER_KEYS.GIT_LIST_STASHES] = ({ projectId }) => this.listStashes(projectId)
+    handlers[IPC_HANDLER_KEYS.GIT_APPLY_STASH] = ({ projectId, options }) =>
+      this.applyStash(projectId, options)
+    handlers[IPC_HANDLER_KEYS.GIT_REMOVE_STASH] = ({ projectId, options }) =>
+      this.removeStash(projectId, options)
 
     return handlers
   }
@@ -318,44 +327,61 @@ export default class GitManager extends BaseManager {
     return tools.resetAll()
   }
 
-  private async updateTool(projectId: string): Promise<GitTools | undefined> {
-    const projectRoot = await this.projectsManager.getProjectDir(projectId)
-    if (!projectRoot) {
-      console.log('GitManager updateTool has no projectRoot: ', projectId)
-      return
-    }
-    const project = await this.projectsManager.getProject(projectId)
-    if (!project) {
-      console.log('GitManager updateTool has no project: ', projectId)
-      return
-    }
-    const repoUrl = project.repo_url
-
-    const githubCredentialsId = project.metadata?.githubCredentialsId
-    if (!githubCredentialsId) {
-      console.log('GitManager updateTool has no githubCredentialsId: ', projectId)
-      return
-    }
-
-    const githubCredentials = this.gitCredentialsManager.get(githubCredentialsId)
-    if (!githubCredentials) {
-      console.log('GitManager updateTool has no githubCredentials: ', projectId)
-      return
-    }
-
-    const tools = createGitTools(projectRoot, repoUrl, githubCredentials)
-    await tools.init()
-    this.tools[projectId] = tools
-
-    return tools
+  private async listStashes(projectId: string): Promise<GitListStashesResult | undefined> {
+    const tools = await this.getTools(projectId)
+    if (!tools) return
+    return tools.listStashes()
   }
 
-  async getTools(projectId: string): Promise<GitTools | undefined> {
-    await this.toolsLock.lock()
-    if (!this.tools[projectId]) {
-      await this.updateTool(projectId)
+  private async applyStash(
+    projectId: string,
+    options: Omit<GitApplyStashOptions, 'repoPath'>,
+  ): Promise<GitOpResult | undefined> {
+    const tools = await this.getTools(projectId)
+    if (!tools) return
+    return tools.applyStash(options)
+  }
+
+  private async removeStash(
+    projectId: string,
+    options: Omit<GitRemoveStashOptions, 'repoPath'>,
+  ): Promise<GitOpResult | undefined> {
+    const tools = await this.getTools(projectId)
+    if (!tools) return
+    return tools.removeStash(options)
+  }
+
+  private async getTools(projectId: string): Promise<GitTools | undefined> {
+    const release = await this.toolsLock.acquire()
+    try {
+      if (this.tools[projectId]) {
+        return this.tools[projectId]
+      }
+      const project = await this.projectsManager.getProject(projectId)
+      if (!project) return undefined
+
+      const tools = createGitTools(project.path)
+
+      const credentials = await this.gitCredentialsManager.getCredentialsForUrl(projectId)
+      if (credentials) {
+        if (credentials.type === 'ssh' && credentials.privateKey) {
+          tools.setCredentials({
+            type: 'ssh',
+            privateKey: credentials.privateKey,
+          })
+        } else if (credentials.type === 'http' && credentials.username && credentials.password) {
+          tools.setCredentials({
+            type: 'http',
+            username: credentials.username,
+            password: credentials.password,
+          })
+        }
+      }
+
+      this.tools[projectId] = tools
+      return tools
+    } finally {
+      release()
     }
-    this.toolsLock.unlock()
-    return this.tools[projectId]
   }
 }

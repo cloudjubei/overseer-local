@@ -59,7 +59,6 @@ export function useChatDraft(chatKey: string): UseChatDraftReturn {
     }
 
     const d = getDraft(chatKey)
-    console.log('useEffect draft chatKey: ', chatKey, ' setText PRE: ', text, ' POST: ', d.text)
     _setText(d.text)
     _setAttachments(d.attachments)
     selectionStartRef.current = d.selectionStart

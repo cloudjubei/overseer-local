@@ -16,6 +16,9 @@ import type {
   GitSelectCommitsOptions,
   GitCommitInput,
   GitFileChange,
+  GitListStashesResult,
+  GitApplyStashOptions,
+  GitRemoveStashOptions,
 } from 'thefactory-tools'
 
 export type GitService = {
@@ -76,6 +79,16 @@ export type GitService = {
   commit: (projectId: string, input: GitCommitInput) => Promise<GitOpResult | undefined>
   getFileContent: (projectId: string, path: string, ref: string) => Promise<string>
   resetAll: (projectId: string) => Promise<GitOpResult | undefined>
+
+  listStashes: (projectId: string) => Promise<GitListStashesResult | undefined>
+  applyStash: (
+    projectId: string,
+    options: Omit<GitApplyStashOptions, 'repoPath'>,
+  ) => Promise<GitOpResult | undefined>
+  removeStash: (
+    projectId: string,
+    options: Omit<GitRemoveStashOptions, 'repoPath'>,
+  ) => Promise<GitOpResult | undefined>
 }
 
 export const gitService: GitService = {

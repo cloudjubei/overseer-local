@@ -106,12 +106,6 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
     Record<string, Record<string, string>>
   >({})
 
-  useEffect(() => {
-    if (Object.keys(storyIdsByProject).length == 0) {
-      console.log('LLELELE storyIdsByProject GOT RESET!!!!')
-    }
-  }, [storyIdsByProject])
-
   const getFeatureDisplayIndex = useCallback(
     (storyId: string, featureId: string): number | undefined => {
       const story = storiesById[storyId]
@@ -125,7 +119,6 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
 
   const updateStories = useCallback(
     (stories: InternalStoryUpdate[]) => {
-      console.log('updateStories stories: ', stories, ' storyIdsByProject: ', storyIdsByProject)
       const newStoryIdsByProject: Record<string, string[]> = { ...storyIdsByProject }
       const newStoriesById: Record<string, Story> = { ...storiesById }
       const newFeaturesById: Record<string, Feature> = { ...featuresById }
@@ -175,7 +168,6 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
         }
       }
 
-      console.log('newStoryIdsByProject: ', newStoryIdsByProject)
       setStoryIdsByProject(newStoryIdsByProject)
       setStoriesById(newStoriesById)
       setFeaturesById(newFeaturesById)
@@ -382,7 +374,6 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
 
   const addFeature = useCallback(
     async (storyId: string, updates: FeatureCreateInput): Promise<Story | undefined> => {
-      console.log('addFeature storyId: ', storyId, ' updates: ', updates)
       if (activeProject) {
         const normalized: any = { ...updates }
         if (Array.isArray((updates as any).blockers)) {

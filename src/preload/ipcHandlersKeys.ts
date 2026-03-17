@@ -179,6 +179,9 @@ const IPC_HANDLER_KEYS = {
   GIT_GET_LOCAL_DIFF_SUMMARY: 'git:local-diff-summary',
   GIT_GET_FILE_CONTENT: 'git:get-file-content',
   GIT_RESET_ALL: 'git:reset-all',
+  GIT_LIST_STASHES: 'git:list-stashes',
+  GIT_APPLY_STASH: 'git:apply-stash',
+  GIT_REMOVE_STASH: 'git:remove-stash',
 
   // Local commit workflow
   GIT_STAGE: 'git:stage-paths',
