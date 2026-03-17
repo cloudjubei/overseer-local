@@ -1,12 +1,11 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
-import type { ChatContext, Chat, AgentType, LLMConfig } from 'thefactory-tools'
+import React, { createContext, useCallback, useContext, useMemo, useState } from 'react'
+import type { ChatContext, Chat, AgentType } from 'thefactory-tools'
 import { useAppSettings } from './AppSettingsContext'
 import { useLLMConfig } from '../contexts/LLMConfigContext'
 import { storiesService } from '../services/storiesService'
 import { useGitHubCredentials } from './GitHubCredentialsContext'
 import { useProjectContext } from './ProjectContext'
 import { chatsService } from '../services/chatsService'
-// import { useChats } from './ChatsContext'
 import { useChats } from './chats/ChatsContext'
 import { notificationsService } from '../services/notificationsService'
 
@@ -15,6 +14,7 @@ export type AgentsContextValue = {
   runsHistory: Chat[]
   isRunUnread: (run: Chat) => boolean
   markRunSeen: (runId: string) => void
+  getProjectRunningCount: (projectId?: string) => number
   getCompletedUnreadCount: (projectId?: string) => number
   startAgent: (
     agentType: AgentType,
@@ -84,11 +84,35 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
     })
   }, [])
 
+  const getProjectRunningCount = useCallback(
+    (projectId?: string) => {
+      const pId = projectId || activeProject?.id
+      if (!pId) return 0
+      const projectChats = chatsByProjectId[pId] || []
+      let count = 0
+      for (const c of projectChats) {
+        const type = c.chat.context.type
+        const state = c.chat.state
+        if (
+          (type === 'AGENT_RUN' || type === 'AGENT_RUN_FEATURE') &&
+          (state === 'running' || state === 'created')
+        ) {
+          count++
+        }
+      }
+      return count
+    },
+    [chatsByProjectId, activeProject?.id],
+  )
+
   const getCompletedUnreadCount = useCallback(
     (projectId?: string) => {
-      const runs = projectId
-        ? runsHistory.filter((r) => r.context.projectId === projectId)
-        : runsHistory
+      const pId = projectId || activeProject?.id
+      if (!pId) return 0
+      const projectChats = chatsByProjectId[pId] || []
+      const runs = projectChats
+        .map((c) => c.chat)
+        .filter((c) => c.context.type === 'AGENT_RUN' || c.context.type === 'AGENT_RUN_FEATURE')
       let count = 0
       for (const r of runs) {
         if (isFinished(r) && r.context.agentRunId && !seenCompletedIds.has(r.context.agentRunId))
@@ -96,7 +120,7 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
       }
       return count
     },
-    [runsHistory, seenCompletedIds],
+    [chatsByProjectId, activeProject?.id, seenCompletedIds],
   )
 
   const coerceAgentTypeForStory = async (
@@ -147,8 +171,6 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
           webSearchApiKeys: appSettings.webSearchApiKeys,
         },
       })
-      // The start-run behavior (orchestrator execution) will be integrated in a subsequent layer.
-      // This satisfies the data representation of the story.
     },
     [activeConfig, appSettings, activeProject, getCredentials],
   )
@@ -207,6 +229,7 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
       runsHistory,
       isRunUnread,
       markRunSeen,
+      getProjectRunningCount,
       getCompletedUnreadCount,
       startAgent,
       cancelRun,
@@ -218,6 +241,7 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
       runsHistory,
       isRunUnread,
       markRunSeen,
+      getProjectRunningCount,
       getCompletedUnreadCount,
       startAgent,
       cancelRun,

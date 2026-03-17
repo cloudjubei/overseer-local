@@ -125,53 +125,59 @@ function CommitGraphRow({
 
       {/* Commit Info */}
       <div className="flex-1 min-w-0 flex items-center px-2 text-xs gap-3">
-        <div
-          className="flex-shrink-0 min-w-0 truncate text-neutral-800 dark:text-neutral-200 pr-2"
-          style={{ width: colWidths.description }}
-        >
-          {commit.refs && commit.refs.length > 0 && (
-            <span className="inline-flex gap-1 mr-2">
-              {commit.refs.map((r, idx) => (
-                <span
-                  key={idx}
-                  className={`px-1 rounded text-[9px] uppercase tracking-wider ${
-                    r.type === 'HEAD'
-                      ? 'bg-sky-100 text-sky-800 border border-sky-200 dark:bg-sky-900/50 dark:text-sky-300 dark:border-sky-800'
-                      : r.type === 'branch'
-                        ? 'bg-green-100 text-green-800 border border-green-200 dark:bg-green-900/50 dark:text-green-300 dark:border-green-800'
-                        : r.type === 'remote'
-                          ? 'bg-orange-100 text-orange-800 border border-orange-200 dark:bg-orange-900/50 dark:text-orange-300 dark:border-orange-800'
-                          : 'bg-neutral-100 text-neutral-800 border border-neutral-200 dark:bg-neutral-800 dark:text-neutral-300 dark:border-neutral-700'
-                  }`}
-                >
-                  {r.name}
+        {isUncommitted ? (
+          <div className="flex-1 italic font-semibold text-neutral-600 dark:text-neutral-400">
+            Uncommitted changes
+          </div>
+        ) : (
+          <>
+            <div
+              className="flex-shrink-0 min-w-0 truncate text-neutral-800 dark:text-neutral-200 pr-2"
+              style={{ width: colWidths.description }}
+            >
+              {commit.refs && commit.refs.length > 0 && (
+                <span className="inline-flex gap-1 mr-2">
+                  {commit.refs.map((r, idx) => (
+                    <span
+                      key={idx}
+                      className={`px-1 rounded text-[9px] uppercase tracking-wider ${
+                        r.type === 'HEAD'
+                          ? 'bg-sky-100 text-sky-800 border border-sky-200 dark:bg-sky-900/50 dark:text-sky-300 dark:border-sky-800'
+                          : r.type === 'branch'
+                            ? 'bg-green-100 text-green-800 border border-green-200 dark:bg-green-900/50 dark:text-green-300 dark:border-green-800'
+                            : r.type === 'remote'
+                              ? 'bg-orange-100 text-orange-800 border border-orange-200 dark:bg-orange-900/50 dark:text-orange-300 dark:border-orange-800'
+                              : 'bg-neutral-100 text-neutral-800 border border-neutral-200 dark:bg-neutral-800 dark:text-neutral-300 dark:border-neutral-700'
+                      }`}
+                    >
+                      {r.name}
+                    </span>
+                  ))}
                 </span>
-              ))}
-            </span>
-          )}
-          {isUncommitted ? <span className="italic font-semibold text-neutral-600 dark:text-neutral-400">Uncommitted changes</span> : commit.subject}
-        </div>
-        <div
-          className="flex-shrink-0 truncate text-neutral-500 text-[10px]"
-          style={{ width: colWidths.author }}
-        >
-          {commit.authorName}
-        </div>
-        <div
-          className="flex-shrink-0 text-neutral-500 font-mono text-[10px]"
-          style={{ width: colWidths.commit }}
-        >
-          {isUncommitted ? '' : commit.hash.substring(0, 7)}
-        </div>
-        <div className="flex-1 min-w-0 text-right text-neutral-400 text-[10px] truncate">
-          {isUncommitted
-            ? ''
-            : new Date(commit.authorDate).toLocaleDateString(undefined, {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric',
+              )}
+              {commit.subject}
+            </div>
+            <div
+              className="flex-shrink-0 truncate text-neutral-500 text-[10px]"
+              style={{ width: colWidths.author }}
+            >
+              {commit.authorName}
+            </div>
+            <div
+              className="flex-shrink-0 text-neutral-500 font-mono text-[10px]"
+              style={{ width: colWidths.commit }}
+            >
+              {commit.hash.substring(0, 7)}
+            </div>
+            <div className="flex-1 min-w-0 text-right text-neutral-400 text-[10px] truncate">
+              {new Date(commit.authorDate).toLocaleDateString(undefined, {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric',
               })}
-        </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   )
@@ -269,7 +275,8 @@ export function GitCommitGraph({
         const isStashCommit = (c: GitLogCommit) =>
           c.refs.some((r) => r.name.includes('stash')) ||
           c.subject.startsWith('WIP on ') ||
-          c.subject.startsWith('On ')
+          c.subject.startsWith('On ') ||
+          c.subject.startsWith('index on ')
 
         const filtered = res.commits.filter((c) => !isStashCommit(c))
         
@@ -344,52 +351,54 @@ export function GitCommitGraph({
 
   return (
     <div className="flex-1 overflow-auto bg-white dark:bg-neutral-900 relative flex flex-col">
-      {/* Header */}
-      <div className="flex items-stretch sticky top-0 z-20 shadow-sm border-b border-neutral-200 dark:border-neutral-800">
-        <ResizableHeader
-          title="Graph"
-          width={colWidths.graph}
-          minWidth={50}
-          maxWidth={300}
-          onResize={(w) => setColWidths((p) => ({ ...p, graph: w }))}
-        />
-        <ResizableHeader
-          title="Description"
-          width={colWidths.description}
-          minWidth={100}
-          maxWidth={800}
-          onResize={(w) => setColWidths((p) => ({ ...p, description: w }))}
-        />
-        <ResizableHeader
-          title="Author"
-          width={colWidths.author}
-          minWidth={50}
-          maxWidth={200}
-          onResize={(w) => setColWidths((p) => ({ ...p, author: w }))}
-        />
-        <ResizableHeader
-          title="Commit"
-          width={colWidths.commit}
-          minWidth={50}
-          maxWidth={120}
-          onResize={(w) => setColWidths((p) => ({ ...p, commit: w }))}
-        />
-        <ResizableHeader
-          title="Date"
-          flex1
-        />
-      </div>
-
-      <div className="min-w-[600px] flex-1">
-        {graphNodes.map((node) => (
-          <CommitGraphRow
-            key={node.commit.hash}
-            node={node}
-            isSelected={selectedCommitSha === node.commit.hash}
-            onClick={() => onSelectCommit?.(node.commit.hash)}
-            colWidths={colWidths}
+      <div className="min-w-fit min-h-full flex flex-col">
+        {/* Header */}
+        <div className="flex items-stretch sticky top-0 z-20 bg-neutral-100 dark:bg-neutral-900 shadow-sm border-b border-neutral-200 dark:border-neutral-800">
+          <ResizableHeader
+            title="Graph"
+            width={colWidths.graph}
+            minWidth={50}
+            maxWidth={300}
+            onResize={(w) => setColWidths((p) => ({ ...p, graph: w }))}
           />
-        ))}
+          <ResizableHeader
+            title="Description"
+            width={colWidths.description}
+            minWidth={100}
+            maxWidth={800}
+            onResize={(w) => setColWidths((p) => ({ ...p, description: w }))}
+          />
+          <ResizableHeader
+            title="Author"
+            width={colWidths.author}
+            minWidth={50}
+            maxWidth={200}
+            onResize={(w) => setColWidths((p) => ({ ...p, author: w }))}
+          />
+          <ResizableHeader
+            title="Commit"
+            width={colWidths.commit}
+            minWidth={50}
+            maxWidth={120}
+            onResize={(w) => setColWidths((p) => ({ ...p, commit: w }))}
+          />
+          <ResizableHeader
+            title="Date"
+            flex1
+          />
+        </div>
+
+        <div className="flex-1">
+          {graphNodes.map((node) => (
+            <CommitGraphRow
+              key={node.commit.hash}
+              node={node}
+              isSelected={selectedCommitSha === node.commit.hash}
+              onClick={() => onSelectCommit?.(node.commit.hash)}
+              colWidths={colWidths}
+            />
+          ))}
+        </div>
       </div>
     </div>
   )

@@ -2,9 +2,10 @@ import React, { useEffect, useRef, useState } from 'react'
 import Spinner from '../../components/ui/Spinner'
 import { gitService } from '@renderer/services/gitService'
 import { GitDiffSummary } from 'thefactory-tools'
-import { StructuredUnifiedDiff } from '@renderer/components/chat/tool-popups/diffUtils'
 import { ResizeHandle } from '../../components/ui/ResizeHandle'
 import { IconFileAdded, IconFileDeleted, IconFileModified } from '../../components/ui/icons/Icons'
+import { PathDisplay } from '../../components/ui/PathDisplay'
+import { DiffViewer } from '../../components/ui/DiffViewer'
 
 function StatusIcon({ status, className = 'w-4 h-4 flex-none' }: { status?: string; className?: string }) {
   if (status === 'A') return <IconFileAdded className={className} />
@@ -48,6 +49,7 @@ export function GitCommitChanges({
 
   const containerRef = useRef<HTMLDivElement>(null)
   const [leftWidth, setLeftWidth] = useState(300)
+  const [vertHandleY, setVertHandleY] = useState<number | null>(null)
   const resizeRef = useRef<{ startX: number; startW: number } | null>(null)
 
   const [wrap, setWrap] = useState(false)
@@ -122,7 +124,7 @@ export function GitCommitChanges({
       ) : error ? (
         <div className="p-4 text-sm text-red-700 dark:text-red-200">Failed to load diff: {error}</div>
       ) : diff ? (
-        <div className="flex min-h-0 h-full">
+        <div className="flex min-h-0 h-full relative">
           <div
             className="flex flex-col min-h-0 border-r border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950/50"
             style={{ width: leftWidth }}
@@ -143,59 +145,41 @@ export function GitCommitChanges({
                     }`}
                     onClick={() => setSelectedFile(f.path)}
                   >
-                    <StatusIcon status={f.status} />
-                    <span className="truncate flex-1">{f.path}</span>
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                      <StatusIcon status={f.status} />
+                      <PathDisplay path={f.path} />
+                    </div>
                   </div>
                 )
               })}
             </div>
           </div>
 
-          <ResizeHandle orientation="vertical" onResizeStart={onResizeStart} />
+          {/* Vertical Divider with handle under cursor */}
+          <ResizeHandle
+            orientation="vertical"
+            className="absolute top-0 bottom-0 z-10"
+            style={{ left: leftWidth - 6 }}
+            hitBoxSize={12}
+            onResizeStart={onResizeStart}
+            handlePos={vertHandleY ?? undefined}
+            onMouseMove={(e) => {
+              const r = (e.currentTarget as HTMLDivElement).getBoundingClientRect()
+              setVertHandleY(e.clientY - r.top)
+            }}
+          />
 
-          <div className="flex-1 min-w-0 flex flex-col min-h-0 bg-white dark:bg-neutral-900">
-            <div className="bg-neutral-100 dark:bg-neutral-800/50 px-3 py-2 border-b border-neutral-200 dark:border-neutral-800 text-xs font-semibold text-neutral-700 dark:text-neutral-200 flex justify-between items-center shrink-0">
-              <span className="truncate flex-1 mr-4">{activeFile?.path || 'No file selected'}</span>
-              {activeFile && (
-                <div className="flex items-center gap-3 shrink-0 font-normal">
-                  <label className="inline-flex items-center gap-1 cursor-pointer">
-                    <input type="checkbox" checked={wrap} onChange={(e) => setWrap(e.target.checked)} />
-                    <span>Wrap</span>
-                  </label>
-                  <label className="inline-flex items-center gap-1 cursor-pointer">
-                    <input type="checkbox" checked={ignoreWS} onChange={(e) => setIgnoreWS(e.target.checked)} />
-                    <span>Ignore WS</span>
-                  </label>
-                  <label className="inline-flex items-center gap-1 cursor-pointer">
-                    <span>Intra</span>
-                    <select
-                      className="border border-neutral-200 dark:border-neutral-800 bg-transparent rounded px-1 py-0.5"
-                      value={intra}
-                      onChange={(e) => setIntra(e.target.value as any)}
-                    >
-                      <option value="none">none</option>
-                      <option value="word">word</option>
-                      <option value="char">char</option>
-                    </select>
-                  </label>
-                </div>
-              )}
-            </div>
-            {activeFile ? (
-              filePatch ? (
-                <div className="flex-1 min-h-0 overflow-auto">
-                  <StructuredUnifiedDiff patch={filePatch} wrap={wrap} ignoreWhitespace={ignoreWS} intraline={intra} />
-                </div>
-              ) : (
-                <div className="p-4 text-sm text-neutral-600 dark:text-neutral-400 flex items-center justify-center h-full">
-                  No diff available (possibly binary or identical).
-                </div>
-              )
-            ) : (
-              <div className="p-4 text-sm text-neutral-600 dark:text-neutral-400 flex items-center justify-center h-full">
-                Select a file to view its diff.
-              </div>
-            )}
+          <div className="flex-1 min-w-0 flex flex-col min-h-0 bg-white dark:bg-neutral-900" style={{ width: `calc(100% - ${leftWidth}px)` }}>
+            <DiffViewer
+              path={activeFile?.path}
+              patch={filePatch}
+              wrap={wrap}
+              ignoreWS={ignoreWS}
+              intra={intra}
+              onWrapChange={setWrap}
+              onIgnoreWSChange={setIgnoreWS}
+              onIntraChange={setIntra}
+            />
           </div>
         </div>
       ) : null}

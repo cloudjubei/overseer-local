@@ -3,7 +3,7 @@ import Spinner from '@renderer/components/ui/Spinner'
 import Tooltip from '@renderer/components/ui/Tooltip'
 import { gitService } from '@renderer/services/gitService'
 import { filesService } from '@renderer/services/filesService'
-import { StructuredUnifiedDiff, IntraMode } from '@renderer/components/chat/tool-popups/diffUtils'
+import { IntraMode } from '@renderer/components/chat/tool-popups/diffUtils'
 import { ResizeHandle } from '@renderer/components/ui/ResizeHandle'
 import {
   IconDelete,
@@ -12,6 +12,8 @@ import {
   IconFileModified,
 } from '@renderer/components/ui/icons/Icons'
 import { IconRevert } from '@renderer/components/ui/icons/IconRevert'
+import { PathDisplay } from '@renderer/components/ui/PathDisplay'
+import { DiffViewer } from '@renderer/components/ui/DiffViewer'
 
 export type LocalFileEntry = { path: string; status?: string; patch?: string; binary?: boolean }
 
@@ -20,12 +22,6 @@ export type LocalStatus = {
   unstaged: LocalFileEntry[]
   untracked: LocalFileEntry[]
   conflicts?: any[]
-}
-
-function splitPath(p: string): { dir: string; name: string } {
-  const idx = Math.max(p.lastIndexOf('/'), p.lastIndexOf('\\'))
-  if (idx === -1) return { dir: '', name: p }
-  return { dir: p.slice(0, idx + 1), name: p.slice(idx + 1) }
 }
 
 function StatusIcon({
@@ -38,34 +34,6 @@ function StatusIcon({
   if (status === 'A') return <IconFileAdded className={className} />
   if (status === 'D') return <IconFileDeleted className={className} />
   return <IconFileModified className={className} />
-}
-
-// Left aligned path with bold filename; directory left-truncated (RTL trick)
-// The flex layout here ensures sequential shrinking:
-// 1. Directory path shrinks down to 0 first.
-// 2. Only when directory is fully collapsed does filename start shrinking.
-function PathDisplay({ path }: { path: string }) {
-  const { dir, name } = splitPath(path)
-  return (
-    <div className="flex items-baseline min-w-0 w-full overflow-hidden">
-      {dir ? (
-        <span
-          className="truncate text-neutral-500"
-          style={{ flexShrink: 1, minWidth: 0, direction: 'rtl', textAlign: 'left' }}
-        >
-          <span style={{ direction: 'ltr' }}>
-            {`/${dir}`}
-          </span>
-        </span>
-      ) : null}
-      <span
-        className="font-mono font-semibold truncate"
-        style={{ flexShrink: 0, maxWidth: '100%' }}
-      >
-        {dir ? `\u00A0${name}` : name}
-      </span>
-    </div>
-  )
 }
 
 function parseAddDel(patch?: string): { add: number; del: number } {
@@ -766,77 +734,16 @@ export const GitLocalChanges = forwardRef<GitLocalChangesRef, GitLocalChangesPro
 
         {/* Right panel */}
         <div className="min-w-0 min-h-0 flex flex-col h-full" style={{ width: rightWidth }}>
-          <div className="px-2 py-1 text-[11px] uppercase tracking-wide text-neutral-600 dark:text-neutral-400 border-b border-neutral-200 dark:border-neutral-800 shrink-0">
-            Diff
-          </div>
-          <div className="px-2 py-2 text-xs text-neutral-600 dark:text-neutral-400 border-b border-neutral-200 dark:border-neutral-800 flex flex-col gap-2 w-full shrink-0 min-h-0">
-            <div className="flex items-center justify-between min-w-0">
-              {selectedPath ? (
-                <>
-                  <div className="flex-1 min-w-0 mr-4">
-                    <PathDisplay path={selectedPath} />
-                  </div>
-                  <div className="shrink-0 flex items-center">
-                    <FileChangesPills patch={selectedPatch} />
-                  </div>
-                </>
-              ) : (
-                <span className="opacity-70">No file selected</span>
-              )}
-            </div>
-            {selectedPath ? (
-              <div className="flex items-center gap-3 shrink-0">
-                <label className="inline-flex items-center gap-1">
-                  <input
-                    type="checkbox"
-                    checked={wrap}
-                    onChange={(e) => setWrap(e.target.checked)}
-                  />
-                  <span>Wrap</span>
-                </label>
-                <label className="inline-flex items-center gap-1">
-                  <input
-                    type="checkbox"
-                    checked={ignoreWS}
-                    onChange={(e) => setIgnoreWS(e.target.checked)}
-                  />
-                  <span>Ignore WS</span>
-                </label>
-                <label className="inline-flex items-center gap-1">
-                  <span>Intra</span>
-                  <select
-                    className="border border-neutral-200 dark:border-neutral-800 bg-transparent rounded px-1 py-0.5"
-                    value={intra}
-                    onChange={(e) => setIntra(e.target.value as IntraMode)}
-                  >
-                    <option value="none">none</option>
-                    <option value="word">word</option>
-                    <option value="char">char</option>
-                  </select>
-                </label>
-              </div>
-            ) : null}
-          </div>
-          <div className="flex-1 overflow-x-auto overflow-y-auto p-2 w-full min-h-0">
-            {selectedPath ? (
-              selectedPatch ? (
-                <StructuredUnifiedDiff
-                  patch={selectedPatch}
-                  wrap={wrap}
-                  ignoreWhitespace={ignoreWS}
-                  intraline={intra}
-                />
-              ) : (
-                <div className="text-xs text-neutral-600 dark:text-neutral-400">
-                  No patch available for {selectedPath}.
-                </div>
-              )
-            ) : (
-              <div className="text-xs text-neutral-600 dark:text-neutral-400">
-                Select a file to view its diff.
-              </div>
-            )}
-          </div>
+          <DiffViewer
+            path={selectedPath}
+            patch={selectedPatch}
+            wrap={wrap}
+            ignoreWS={ignoreWS}
+            intra={intra}
+            onWrapChange={setWrap}
+            onIgnoreWSChange={setIgnoreWS}
+            onIntraChange={setIntra}
+          />
         </div>
       </div>
     )
