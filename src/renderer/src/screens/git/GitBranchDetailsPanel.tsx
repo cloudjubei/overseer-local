@@ -1,12 +1,19 @@
 import React, { useEffect, useRef, useState } from 'react'
 import Spinner from '../../components/ui/Spinner'
-import { Button } from '../../components/ui/Button'
 import { GitUnifiedBranch, GitDiffSummary } from 'thefactory-tools'
 import { gitService } from '@renderer/services/gitService'
 import { GitLocalChanges } from './GitLocalChanges'
 import { ResizeHandle } from '../../components/ui/ResizeHandle'
 import { StructuredUnifiedDiff } from '@renderer/components/chat/tool-popups/diffUtils'
 import { GitCommitGraph } from './GitCommitGraph'
+import { GitCommitChanges, getFilePatch } from './GitCommitChanges'
+import { IconFileAdded, IconFileDeleted, IconFileModified } from '../../components/ui/icons/Icons'
+
+function StatusIcon({ status, className = 'w-4 h-4 flex-none' }: { status?: string; className?: string }) {
+  if (status === 'A') return <IconFileAdded className={className} />
+  if (status === 'D') return <IconFileDeleted className={className} />
+  return <IconFileModified className={className} />
+}
 
 export function GitBranchDetailsPanel({
   projectId,
@@ -39,6 +46,9 @@ export function GitBranchDetailsPanel({
   const [stashDiff, setStashDiff] = useState<GitDiffSummary | undefined>(undefined)
   const [stashError, setStashError] = useState<string | undefined>(undefined)
   const [selectedStashFile, setSelectedStashFile] = useState<string | null>(null)
+
+  // Track the currently selected commit in the graph
+  const [selectedCommitSha, setSelectedCommitSha] = useState<string | undefined>(undefined)
 
   // Vertical resizer for branch view: top graph stub / bottom local changes
   const rootRef = useRef<HTMLDivElement | null>(null)
@@ -149,7 +159,13 @@ export function GitBranchDetailsPanel({
     window.addEventListener('pointerup', onUp)
   }
 
+  // Reset selected commit when branch changes so it defaults to top
+  useEffect(() => {
+    setSelectedCommitSha(undefined)
+  }, [selectedBranch?.name])
+
   const activeStashFile = stashDiff?.files.find((f) => f.path === selectedStashFile)
+  const stashFilePatch = activeStashFile?.patch || getFilePatch(stashDiff?.patch, activeStashFile?.path || '')
 
   return (
     <div className="flex-1 min-w-0 flex flex-col min-h-0" ref={rootRef}>
@@ -163,70 +179,44 @@ export function GitBranchDetailsPanel({
         ) : error ? (
           <div className="p-4 text-sm text-red-700 dark:text-red-200">Failed to load branches: {error}</div>
         ) : selectedBranch ? (
-          selectedBranch.current ? (
-            // Branch main view (current branch): top stub graph + bottom local changes
-            <div className="flex flex-col min-h-0 h-full w-full">
-              {/* Top graph */}
-              <div
-                className="bg-neutral-50 dark:bg-neutral-900/40 overflow-hidden flex flex-col"
-                style={{ height: topHeightPx }}
-              >
-                <div className="px-3 py-2 border-b border-neutral-200 dark:border-neutral-800 flex items-center justify-between bg-white dark:bg-neutral-900 flex-shrink-0">
-                  <div className="text-xs font-semibold text-neutral-700 dark:text-neutral-200 uppercase tracking-wide">
-                    Commit graph
-                  </div>
-                </div>
-                <GitCommitGraph projectId={projectId} />
-              </div>
-
-              {/* Resize handle */}
-              <ResizeHandle
-                orientation="horizontal"
-                className="relative z-10 flex-shrink-0"
-                onResizeStart={onTopResizeStart}
-                hitBoxSize={4}
-              />
-
-              {/* Bottom local changes (existing staged/unstaged + preview with resizer) */}
-              <div className="flex-1 min-h-0 overflow-hidden flex flex-col w-full">
-                <GitLocalChanges projectId={projectId} className="flex-1 min-h-0" />
-              </div>
-            </div>
-          ) : (
-            <div className="flex flex-col h-full">
-              <div className="p-4 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900/40 text-sm">
-                <div className="font-medium text-neutral-800 dark:text-neutral-200">{selectedBranch.name}</div>
-                <div className="text-xs text-neutral-600 dark:text-neutral-400 mt-1">
-                  {selectedBranch.current
-                    ? 'You are currently on this branch.'
-                    : `Base: ${currentBranch?.name || 'main'} → Head: ${selectedBranch.name}`}
-                </div>
-              </div>
-
-              <div className="p-4 flex-1">
+          <div className="flex flex-col min-h-0 h-full w-full">
+            {/* Top graph */}
+            <div
+              className="bg-neutral-50 dark:bg-neutral-900/40 overflow-hidden flex flex-col"
+              style={{ height: topHeightPx }}
+            >
+              <div className="px-3 py-2 border-b border-neutral-200 dark:border-neutral-800 flex items-center justify-between bg-white dark:bg-neutral-900 flex-shrink-0">
                 <div className="text-xs font-semibold text-neutral-700 dark:text-neutral-200 uppercase tracking-wide">
-                  Merge preview
-                </div>
-                <div className="mt-2 text-xs text-neutral-600 dark:text-neutral-400">
-                  Diffs and analyses placeholders are shown in the merge modal.
-                </div>
-                <div className="mt-4">
-                  <Button
-                    variant="primary"
-                    onClick={() => onOpenMerge(currentBranch?.name || 'main', selectedBranch.name)}
-                  >
-                    Open merge…
-                  </Button>
+                  Commit graph
                 </div>
               </div>
+              <GitCommitGraph 
+                projectId={projectId} 
+                uncommittedChanges={changedCount > 0}
+                selectedCommitSha={selectedCommitSha} 
+                onSelectCommit={setSelectedCommitSha} 
+              />
             </div>
-          )
+
+            {/* Resize handle */}
+            <ResizeHandle
+              orientation="horizontal"
+              className="relative z-10 flex-shrink-0"
+              onResizeStart={onTopResizeStart}
+              hitBoxSize={4}
+            />
+
+            {/* Bottom panel: either commit diffs or local changes */}
+            <div className="flex-1 min-h-0 overflow-hidden flex flex-col w-full relative">
+              {!selectedCommitSha || selectedCommitSha === 'UNCOMMITTED' ? (
+                <GitLocalChanges projectId={projectId} className="flex-1 min-h-0" />
+              ) : (
+                <GitCommitChanges projectId={projectId} commitSha={selectedCommitSha} className="flex-1 min-h-0" />
+              )}
+            </div>
+          </div>
         ) : selectedStashRef ? (
           <div className="flex flex-col h-full min-h-0">
-            <div className="p-3 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900/40 font-medium text-sm text-neutral-800 dark:text-neutral-200">
-              Stash: {selectedStashRef}
-            </div>
-
             <div className="flex-1 min-h-0" ref={containerRef}>
               {stashLoading ? (
                 <div className="p-4 flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-300">
@@ -256,9 +246,7 @@ export function GitBranchDetailsPanel({
                             }`}
                             onClick={() => setSelectedStashFile(f.path)}
                           >
-                            <span className="text-[10px] font-mono px-1 bg-neutral-200/50 dark:bg-neutral-700 rounded text-neutral-600 dark:text-neutral-400">
-                              {f.status}
-                            </span>
+                            <StatusIcon status={f.status} />
                             <span className="truncate flex-1">{f.path}</span>
                           </div>
                         )
@@ -270,10 +258,10 @@ export function GitBranchDetailsPanel({
                   
                   <div className="flex-1 min-w-0 flex flex-col min-h-0 bg-white dark:bg-neutral-900">
                     {activeStashFile ? (
-                      activeStashFile.patch ? (
+                      stashFilePatch ? (
                         <div className="flex-1 min-h-0 overflow-auto">
                           <StructuredUnifiedDiff
-                            patch={activeStashFile.patch}
+                            patch={stashFilePatch}
                             intraline="word"
                           />
                         </div>

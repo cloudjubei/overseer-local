@@ -23,16 +23,19 @@ function CommitGraphRow({
   node,
   isSelected,
   onClick,
+  colWidths,
 }: {
   node: GraphNode
   isSelected: boolean
   onClick: () => void
+  colWidths: { graph: number; description: number; author: number; commit: number }
 }) {
   const { commit, nodeLane, incomingLanes, outgoingLanes, maxLanes } = node
-  const width = Math.max(1, maxLanes + 1) * LANE_WIDTH
   const halfH = ROW_HEIGHT / 2
 
   const getColor = (laneIndex: number) => LANE_COLORS[laneIndex % LANE_COLORS.length]
+
+  const isUncommitted = commit.hash === 'UNCOMMITTED'
 
   return (
     <div
@@ -43,98 +46,90 @@ function CommitGraphRow({
       onClick={onClick}
     >
       {/* The Graph Canvas */}
-      <div className="flex-shrink-0" style={{ width, height: ROW_HEIGHT }}>
-        <svg width="100%" height="100%">
-          {/* Draw incoming lines (top half) */}
-          {incomingLanes.map((hash, i) => {
-            if (hash === commit.hash) {
-              // Line merging into node
-              return (
-                <path
-                  key={`in-${i}`}
-                  d={`M ${i * LANE_WIDTH + LANE_WIDTH} 0 Q ${i * LANE_WIDTH + LANE_WIDTH} ${halfH} ${
-                    nodeLane * LANE_WIDTH + LANE_WIDTH
-                  } ${halfH}`}
-                  fill="none"
-                  stroke={getColor(i)}
-                  strokeWidth="2"
-                />
-              )
-            } else if (hash !== null) {
-              // Pass-through line (top half)
-              return (
-                <line
-                  key={`in-${i}`}
-                  x1={i * LANE_WIDTH + LANE_WIDTH}
-                  y1={0}
-                  x2={i * LANE_WIDTH + LANE_WIDTH}
-                  y2={halfH}
-                  stroke={getColor(i)}
-                  strokeWidth="2"
-                />
-              )
-            }
-            return null
-          })}
-
-          {/* Draw outgoing lines (bottom half) */}
-          {outgoingLanes.map((hash, i) => {
-            if (hash !== null) {
-              const isParentOfNode = commit.parents.includes(hash)
-              // If this outgoing lane was spawned or continued from this node
-              if (isParentOfNode) {
-                // If it's a pass-through that ALSO happens to be a parent, it would be weird but possible.
-                // Normally it originates from nodeLane
+      <div className="flex-shrink-0" style={{ width: colWidths.graph, height: ROW_HEIGHT }}>
+        {!isUncommitted && (
+          <svg width="100%" height="100%">
+            {incomingLanes.map((hash, i) => {
+              if (hash === commit.hash) {
                 return (
                   <path
-                    key={`out-${i}`}
-                    d={`M ${nodeLane * LANE_WIDTH + LANE_WIDTH} ${halfH} Q ${
-                      i * LANE_WIDTH + LANE_WIDTH
-                    } ${halfH} ${i * LANE_WIDTH + LANE_WIDTH} ${ROW_HEIGHT}`}
+                    key={`in-${i}`}
+                    d={`M ${i * LANE_WIDTH + LANE_WIDTH} 0 Q ${i * LANE_WIDTH + LANE_WIDTH} ${halfH} ${
+                      nodeLane * LANE_WIDTH + LANE_WIDTH
+                    } ${halfH}`}
                     fill="none"
                     stroke={getColor(i)}
                     strokeWidth="2"
                   />
                 )
-              } else {
-                // Pass-through line (bottom half)
-                // wait, if it's a pass-through, we just connect it from halfH to bottom
+              } else if (hash !== null) {
                 return (
                   <line
-                    key={`out-${i}`}
+                    key={`in-${i}`}
                     x1={i * LANE_WIDTH + LANE_WIDTH}
-                    y1={halfH}
+                    y1={0}
                     x2={i * LANE_WIDTH + LANE_WIDTH}
-                    y2={ROW_HEIGHT}
+                    y2={halfH}
                     stroke={getColor(i)}
                     strokeWidth="2"
                   />
                 )
               }
-            }
-            return null
-          })}
+              return null
+            })}
 
-          {/* Draw the commit dot */}
-          <circle
-            cx={nodeLane * LANE_WIDTH + LANE_WIDTH}
-            cy={halfH}
-            r={RADIUS}
-            fill={getColor(nodeLane)}
-            stroke="#fff"
-            strokeWidth="2"
-            className="dark:stroke-neutral-900"
-          />
-        </svg>
+            {outgoingLanes.map((hash, i) => {
+              if (hash !== null) {
+                const isParentOfNode = commit.parents.includes(hash)
+                if (isParentOfNode) {
+                  return (
+                    <path
+                      key={`out-${i}`}
+                      d={`M ${nodeLane * LANE_WIDTH + LANE_WIDTH} ${halfH} Q ${
+                        i * LANE_WIDTH + LANE_WIDTH
+                      } ${halfH} ${i * LANE_WIDTH + LANE_WIDTH} ${ROW_HEIGHT}`}
+                      fill="none"
+                      stroke={getColor(i)}
+                      strokeWidth="2"
+                    />
+                  )
+                } else {
+                  return (
+                    <line
+                      key={`out-${i}`}
+                      x1={i * LANE_WIDTH + LANE_WIDTH}
+                      y1={halfH}
+                      x2={i * LANE_WIDTH + LANE_WIDTH}
+                      y2={ROW_HEIGHT}
+                      stroke={getColor(i)}
+                      strokeWidth="2"
+                    />
+                  )
+                }
+              }
+              return null
+            })}
+
+            <circle
+              cx={nodeLane * LANE_WIDTH + LANE_WIDTH}
+              cy={halfH}
+              r={RADIUS}
+              fill={getColor(nodeLane)}
+              stroke="#fff"
+              strokeWidth="2"
+              className="dark:stroke-neutral-900"
+            />
+          </svg>
+        )}
       </div>
 
       {/* Commit Info */}
       <div className="flex-1 min-w-0 flex items-center px-2 text-xs gap-3">
-        <div className="w-16 flex-shrink-0 text-neutral-500 font-mono text-[10px]">
-          {commit.hash.substring(0, 7)}
-        </div>
-        <div className="flex-1 min-w-0 truncate text-neutral-800 dark:text-neutral-200">
-          {commit.refs.length > 0 && (
+        <div
+          className="flex-shrink-0 min-w-0 truncate text-neutral-800 dark:text-neutral-200 pr-2"
+          style={{ width: colWidths.description }}
+        >
+          {commit.refs && commit.refs.length > 0 && (
             <span className="inline-flex gap-1 mr-2">
               {commit.refs.map((r, idx) => (
                 <span
@@ -154,19 +149,86 @@ function CommitGraphRow({
               ))}
             </span>
           )}
-          {commit.subject}
+          {isUncommitted ? <span className="italic font-semibold text-neutral-600 dark:text-neutral-400">Uncommitted changes</span> : commit.subject}
         </div>
-        <div className="w-24 flex-shrink-0 truncate text-neutral-500 text-[10px]">
+        <div
+          className="flex-shrink-0 truncate text-neutral-500 text-[10px]"
+          style={{ width: colWidths.author }}
+        >
           {commit.authorName}
         </div>
-        <div className="w-20 flex-shrink-0 text-right text-neutral-400 text-[10px]">
-          {new Date(commit.authorDate).toLocaleDateString(undefined, {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric',
-          })}
+        <div
+          className="flex-shrink-0 text-neutral-500 font-mono text-[10px]"
+          style={{ width: colWidths.commit }}
+        >
+          {isUncommitted ? '' : commit.hash.substring(0, 7)}
+        </div>
+        <div className="flex-1 min-w-0 text-right text-neutral-400 text-[10px] truncate">
+          {isUncommitted
+            ? ''
+            : new Date(commit.authorDate).toLocaleDateString(undefined, {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+              })}
         </div>
       </div>
+    </div>
+  )
+}
+
+function ResizableHeader({
+  title,
+  width,
+  minWidth = 50,
+  maxWidth = 500,
+  onResize,
+  flex1,
+}: {
+  title: string
+  width?: number
+  minWidth?: number
+  maxWidth?: number
+  onResize?: (newWidth: number) => void
+  flex1?: boolean
+}) {
+  const handlePointerDown = (e: React.PointerEvent) => {
+    if (!onResize || !width) return
+    e.preventDefault()
+    const startX = e.clientX
+    const startW = width
+    const el = e.currentTarget as HTMLElement
+    el.setPointerCapture(e.pointerId)
+
+    const onMove = (ev: PointerEvent) => {
+      const dx = ev.clientX - startX
+      onResize(Math.max(minWidth, Math.min(maxWidth, startW + dx)))
+    }
+
+    const onUp = () => {
+      window.removeEventListener('pointermove', onMove)
+      window.removeEventListener('pointerup', onUp)
+    }
+
+    window.addEventListener('pointermove', onMove)
+    window.addEventListener('pointerup', onUp)
+  }
+
+  return (
+    <div
+      className={`relative px-2 py-1 flex items-center border-r border-neutral-200 dark:border-neutral-800 text-xs font-semibold text-neutral-600 dark:text-neutral-400 bg-neutral-100 dark:bg-neutral-800/50 ${
+        flex1 ? 'flex-1 min-w-0' : 'flex-shrink-0'
+      }`}
+      style={!flex1 && width ? { width } : undefined}
+    >
+      <span className="truncate">{title}</span>
+      {!flex1 && onResize && (
+        <div
+          onPointerDown={handlePointerDown}
+          className="absolute right-0 top-0 bottom-0 w-2 cursor-col-resize hover:bg-sky-500/50"
+          style={{ right: -1, zIndex: 10 }}
+        />
+      )}
     </div>
   )
 }
@@ -174,15 +236,24 @@ function CommitGraphRow({
 export function GitCommitGraph({
   projectId,
   selectedCommitSha,
+  uncommittedChanges,
   onSelectCommit,
 }: {
   projectId: string
   selectedCommitSha?: string
+  uncommittedChanges?: boolean
   onSelectCommit?: (sha: string) => void
 }) {
   const [commits, setCommits] = useState<GitLogCommit[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string>()
+
+  const [colWidths, setColWidths] = useState({
+    graph: 140,
+    description: 400,
+    author: 100,
+    commit: 70,
+  })
 
   useEffect(() => {
     let mounted = true
@@ -192,7 +263,29 @@ export function GitCommitGraph({
     gitService
       .getGitLog(projectId, { all: true, maxCount: 300 })
       .then((res) => {
-        if (mounted) setCommits(res.commits)
+        if (!mounted) return
+        // Filter out stash commits (usually messages start with "WIP on " or "On " and lack normal refs)
+        // A safer heuristic: we remove them if they look like typical stash commits.
+        const isStashCommit = (c: GitLogCommit) =>
+          c.refs.some((r) => r.name.includes('stash')) ||
+          c.subject.startsWith('WIP on ') ||
+          c.subject.startsWith('On ')
+
+        const filtered = res.commits.filter((c) => !isStashCommit(c))
+        
+        // Let's ensure parent references that pointed to stash commits are removed?
+        // Actually stash commits usually don't have children in normal branches, so just removing them is fine.
+
+        setCommits(filtered)
+        
+        // Auto-select logic
+        if (!selectedCommitSha && onSelectCommit) {
+          if (uncommittedChanges) {
+            onSelectCommit('UNCOMMITTED')
+          } else if (filtered.length > 0) {
+            onSelectCommit(filtered[0].hash)
+          }
+        }
       })
       .catch((e) => {
         if (mounted) setError(e.message || 'Failed to load graph')
@@ -203,9 +296,31 @@ export function GitCommitGraph({
     return () => {
       mounted = false
     }
-  }, [projectId])
+  }, [projectId, uncommittedChanges])
 
-  const graphNodes = useMemo(() => computeCommitGraph(commits), [commits])
+  const graphNodes = useMemo(() => {
+    let nodes = computeCommitGraph(commits)
+    if (uncommittedChanges) {
+      // Prepend virtual node
+      const uncommittedNode: GraphNode = {
+        commit: {
+          hash: 'UNCOMMITTED',
+          parents: commits.length > 0 ? [commits[0].hash] : [],
+          subject: 'Uncommitted changes',
+          authorName: '',
+          authorEmail: '',
+          authorDate: Date.now(),
+          refs: [],
+        },
+        nodeLane: 0,
+        maxLanes: 0,
+        incomingLanes: [],
+        outgoingLanes: [],
+      }
+      nodes = [uncommittedNode, ...nodes]
+    }
+    return nodes
+  }, [commits, uncommittedChanges])
 
   if (loading && !commits.length) {
     return (
@@ -228,14 +343,51 @@ export function GitCommitGraph({
   }
 
   return (
-    <div className="flex-1 overflow-auto bg-white dark:bg-neutral-900 relative">
-      <div className="min-w-[600px]">
+    <div className="flex-1 overflow-auto bg-white dark:bg-neutral-900 relative flex flex-col">
+      {/* Header */}
+      <div className="flex items-stretch sticky top-0 z-20 shadow-sm border-b border-neutral-200 dark:border-neutral-800">
+        <ResizableHeader
+          title="Graph"
+          width={colWidths.graph}
+          minWidth={50}
+          maxWidth={300}
+          onResize={(w) => setColWidths((p) => ({ ...p, graph: w }))}
+        />
+        <ResizableHeader
+          title="Description"
+          width={colWidths.description}
+          minWidth={100}
+          maxWidth={800}
+          onResize={(w) => setColWidths((p) => ({ ...p, description: w }))}
+        />
+        <ResizableHeader
+          title="Author"
+          width={colWidths.author}
+          minWidth={50}
+          maxWidth={200}
+          onResize={(w) => setColWidths((p) => ({ ...p, author: w }))}
+        />
+        <ResizableHeader
+          title="Commit"
+          width={colWidths.commit}
+          minWidth={50}
+          maxWidth={120}
+          onResize={(w) => setColWidths((p) => ({ ...p, commit: w }))}
+        />
+        <ResizableHeader
+          title="Date"
+          flex1
+        />
+      </div>
+
+      <div className="min-w-[600px] flex-1">
         {graphNodes.map((node) => (
           <CommitGraphRow
             key={node.commit.hash}
             node={node}
             isSelected={selectedCommitSha === node.commit.hash}
             onClick={() => onSelectCommit?.(node.commit.hash)}
+            colWidths={colWidths}
           />
         ))}
       </div>

@@ -92,7 +92,7 @@ export default function GitCommitModal({ projectId, currentBranch, onRequestClos
         </div>
 
         <textarea
-          className='textarea textarea-bordered w-full min-h-[120px] text-sm resize-none'
+          className='w-full min-h-[120px] text-sm resize-none border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 rounded-md p-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500'
           placeholder={amend ? 'Leave blank to keep existing commit message' : 'Commit message...'}
           value={commitMsg}
           onChange={(e) => setCommitMsg(e.target.value)}

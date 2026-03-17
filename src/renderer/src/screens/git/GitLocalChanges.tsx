@@ -7,11 +7,11 @@ import { StructuredUnifiedDiff, IntraMode } from '@renderer/components/chat/tool
 import { ResizeHandle } from '@renderer/components/ui/ResizeHandle'
 import {
   IconDelete,
-  IconRefresh,
   IconFileAdded,
   IconFileDeleted,
   IconFileModified,
 } from '@renderer/components/ui/icons/Icons'
+import { IconRevert } from '@renderer/components/ui/icons/IconRevert'
 
 export type LocalFileEntry = { path: string; status?: string; patch?: string; binary?: boolean }
 
@@ -152,14 +152,14 @@ function FileRow({
         <div className="col-start-1 row-start-1 flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
           <Tooltip content={'Reset (discard local changes)'} placement="bottom">
             <button
-              className="btn-secondary btn-icon"
+              className="btn-secondary btn-icon text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
               aria-label="Reset file changes"
               onClick={(e) => {
                 e.stopPropagation()
                 onReset(file)
               }}
             >
-              <IconRefresh className="w-4 h-4" />
+              <IconRevert className="w-4 h-4" />
             </button>
           </Tooltip>
           <Tooltip content={'Remove (delete file)'} placement="bottom">

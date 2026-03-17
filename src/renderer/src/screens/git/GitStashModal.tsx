@@ -41,14 +41,20 @@ export function GitStashModal({ projectId, onRequestClose, onSuccess }: GitStash
       title={<div className="text-base font-semibold">Stash Changes</div>}
       panelClassName="w-[420px]"
     >
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 p-4">
+        {error && (
+          <div className='text-sm text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-900/20 p-2 rounded'>
+            {error}
+          </div>
+        )}
+        
         <div className="flex flex-col gap-1">
           <label className="text-xs font-semibold text-neutral-700 dark:text-neutral-300">
             Stash Message
           </label>
           <input
             autoFocus
-            className="input input-bordered w-full text-sm"
+            className="w-full text-sm border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 rounded-md p-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500"
             placeholder="e.g. WIP: feature implementation"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
@@ -61,13 +67,14 @@ export function GitStashModal({ projectId, onRequestClose, onSuccess }: GitStash
         <label className="flex items-center gap-2 text-sm text-neutral-700 dark:text-neutral-300 cursor-pointer">
           <input
             type="checkbox"
+            className="checkbox checkbox-sm rounded"
             checked={keepStagedChanges}
             onChange={(e) => setKeepStagedChanges(e.target.checked)}
             disabled={busy}
           />
           Keep staged files (keep-index)
         </label>
-        {error && <div className="text-xs text-red-600 dark:text-red-400">{error}</div>}
+        
         <div className="flex justify-end gap-2 mt-4">
           <Button variant="secondary" onClick={onRequestClose} disabled={busy}>
             Cancel

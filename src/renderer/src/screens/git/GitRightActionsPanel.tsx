@@ -10,6 +10,7 @@ import { IconPullRequest } from '../../components/ui/icons/IconPullRequest'
 import { IconDoubleUp } from '../../components/ui/icons/IconDoubleUp'
 import { IconArchive } from '../../components/ui/icons/IconArchive'
 import { IconDelete } from '../../components/ui/icons/Icons'
+import { IconChevronDown } from '../../components/ui/icons/IconChevronDown'
 
 import { useProjectContext } from '../../contexts/ProjectContext'
 import { useGit } from '../../contexts/GitContext'
@@ -218,8 +219,8 @@ export function GitRightActionsPanel({
               icon={<IconCommit className="w-5 h-5" />}
               label="Commit"
               onClick={() => setCommitModalOpen(true)}
-              disabled={busy}
-              tooltip="Commit changes"
+              disabled={busy || isClean}
+              tooltip={isClean ? "No changes to commit" : "Commit changes"}
             />
             <GitActionButton
               icon={<IconPullRequest className="w-5 h-5" />}
@@ -237,7 +238,7 @@ export function GitRightActionsPanel({
               tooltip={canPush ? `Push ${pushCount} commit(s)` : 'No outgoing commits'}
             />
             <GitActionButton
-              icon={<IconRefresh className="w-5 h-5" />}
+              icon={<IconChevronDown className="w-5 h-5" />}
               label="Fetch"
               onClick={handleFetch}
               disabled={busy}
@@ -275,8 +276,8 @@ export function GitRightActionsPanel({
               icon={<IconArchive className="w-5 h-5" />}
               label="Stash"
               onClick={() => setStashModalOpen(true)}
-              disabled={busy}
-              tooltip="Stash changes"
+              disabled={busy || isClean}
+              tooltip={isClean ? "No changes to stash" : "Stash changes"}
             />
           </>
         ) : null}
