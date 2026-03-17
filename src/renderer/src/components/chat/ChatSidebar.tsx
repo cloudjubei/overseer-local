@@ -265,7 +265,7 @@ export default function ChatSidebar({
     const mapped: ToolToggle[] = allTools
       .filter((t) => allAllowedSet.has(t))
       .map((t) => {
-        const schema = (ToolSchemas as any)[t]
+        const schema = ToolSchemas[t]
         const toolName = schema.name
         return {
           name: toolName,
