@@ -1,0 +1,56 @@
+{
+  "id": "0f518a52-2d7a-4467-8cab-912e81424556",
+  "status": "-",
+  "title": "Agent Runs as Special Chats",
+  "description": "Migrate agent runs to match the updated thefactory-tools model: runs are represented as special chats (not separate run entities/folders). Re-enable the disabled agent-run plumbing (main/preload/renderer) and restore all UI entry points (ChatView category + story list/details/cards). While a run is executing, its chat is read-only (no sending messages; no editing run settings). After completion, the conversation can be continued like a normal chat. Starting a run must use the new orchestrator semantics and stream updates into the run chat.",
+  "features": [
+    {
+      "id": "c427da17-9997-4f96-b2a6-32e58c250636",
+      "status": "+",
+      "title": "Define and persist agent-run chat representation",
+      "description": "Define how a chat represents an agent run in our app, aligned with thefactory-tools. Verify current ChatContext usage (AGENT_RUN / AGENT_RUN_FEATURE exist) and decide minimal metadata needed to distinguish runs, store lifecycle status (running/finished/failed/cancelled), and link to story/feature/project. Ensure we can list run chats by project and by story/feature without relying on legacy run folders/files.",
+      "context": [],
+      "createdAt": "2026-03-13T14:33:32.269Z",
+      "updatedAt": "2026-03-16T15:14:00.477Z",
+      "completedAt": "2026-03-16T15:14:00.477Z"
+    },
+    {
+      "id": "f28b0336-58e5-493d-b246-2515a86934c2",
+      "status": "-",
+      "title": "Refactor FactoryAgentRunManager to start runs via orchestrator and write to chats",
+      "description": "Update src/logic/factory/FactoryAgentRunManager.ts to follow new thefactory-tools semantics: starting a run creates/uses a special run chat (AGENT_RUN / AGENT_RUN_FEATURE context) and invokes the orchestrator to execute. Orchestrator updates must append into that chat (streaming) and update run status on completion. Remove reliance on legacy run entities and ensure any in-flight restrictions (read-only while running) can be derived from chat state.",
+      "context": [],
+      "createdAt": "2026-03-13T14:41:36.320Z",
+      "updatedAt": "2026-03-13T14:41:36.320Z"
+    },
+    {
+      "id": "0c6704d6-4ab6-4d63-ad51-227d1593009a",
+      "status": "-",
+      "title": "Re-enable and migrate IPC, Preload, and Renderer Agent Services",
+      "description": "Re-enable disabled IPC keys and agent services (`main/managers.ts`, `preload/ipcHandlersKeys.ts`, `renderer/services/factoryAgentRunService.ts`, `contexts/AgentsContext.tsx`). Update their interfaces to interact with chat-backed run data instead of legacy run structures. Ensure UI components can fetch the project's runs, listen to run updates, and submit run start requests via IPC cleanly.",
+      "context": [],
+      "createdAt": "2026-03-13T14:42:49.729Z",
+      "updatedAt": "2026-03-13T14:42:49.729Z"
+    },
+    {
+      "id": "da01a92e-6471-42bb-b028-1b9939218817",
+      "status": "-",
+      "title": "Enforce UI restrictions for running agent chats",
+      "description": "Update ChatContext and ChatSidebar implementations to lock down running agent chats. When a run is in 'running' state, hide or disable the ChatInput so messages cannot be sent, and block or remove the 'Chat Settings' and 'System Prompt' buttons. Wait for completion to restore normal chat interactions. Ensure ChatSidebar detects when a run is finished and becomes interactive again.",
+      "context": [],
+      "createdAt": "2026-03-13T14:44:33.822Z",
+      "updatedAt": "2026-03-13T14:44:33.822Z"
+    },
+    {
+      "id": "ad77cc29-7bf5-4fe7-b172-b7f5ee2a5012",
+      "status": "-",
+      "title": "Restore run displays in Chat navigation and Story UI",
+      "description": "Update navigation and story UI to reflect the new agent-run chat model. Modify ChatNavigationSidebar to display agent run chats in their own category under the project. Restore run listings in StoriesListView, StoryDetailsView, and StoryCard by filtering the chat list for runs belonging to the given story.",
+      "context": [],
+      "createdAt": "2026-03-13T14:44:44.500Z",
+      "updatedAt": "2026-03-13T14:44:44.500Z"
+    }
+  ],
+  "createdAt": "2026-03-13T14:31:13.825Z",
+  "updatedAt": "2026-03-13T14:31:13.825Z"
+}

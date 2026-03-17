@@ -1,0 +1,296 @@
+{
+  "id": "9eccbb8c-2c9e-44bb-a695-4deeac8d7f26",
+  "status": "+",
+  "title": "Story handling",
+  "description": "Implement all features that allow proper handling of stories. docs/stories/story_format.py is the source of truth for the interfaces for a Story, Feature, ProjectSpec & ProjectRequirement. docs/stories/story_example.json holds an example story json file.",
+  "features": [
+    {
+      "id": "831c12f4-7539-4d19-9b08-bb5c20f7920c",
+      "status": "+",
+      "title": "Story schema definition",
+      "description": "Generate TypeScript interfaces from the schema into @src/types/stories.ts",
+      "plan": "",
+      "context": [
+        "src/",
+        "src/types/stories.ts",
+        "docs/stories/story_format.py",
+        "tests/stories/test_story_schema.py"
+      ],
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.980Z",
+      "completedAt": "2025-09-08T05:29:18.815Z",
+      "updatedAt": "2025-09-16T13:05:37.980Z"
+    },
+    {
+      "id": "84c2e0e5-d2cc-4f62-be80-d2133fef2c60",
+      "status": "+",
+      "title": "Logical Stories indexer and file watcher",
+      "description": "Scan `.stories/{id}/` directories under the selected project root to build an in-memory index of stories and features. Implement a file watcher to refresh the index on changes (create/modify/delete). Acceptance: Indexing handles 100+ stories; watcher reliably updates on file changes; performance measured and documented;.",
+      "plan": "",
+      "context": [
+        "src/",
+        "src/types/stories.ts",
+        "docs/stories/story_format.py",
+        "tests/stories/test_story_schema.py"
+      ],
+      "acceptance": [],
+      "blockers": [
+        "831c12f4-7539-4d19-9b08-bb5c20f7920c"
+      ],
+      "createdAt": "2025-09-16T13:05:37.980Z",
+      "completedAt": "2025-09-08T05:07:05.078Z",
+      "updatedAt": "2025-09-16T13:05:37.980Z"
+    },
+    {
+      "id": "5d36db7c-d4b0-41be-adbc-e677b275f532",
+      "status": "+",
+      "title": "Stories list UI with filtering and search - view only",
+      "description": "Build a React view listing stories with id, title, status, and counts of features (done/total). Provide text search and filters (e.g., status). Filtering/search applied client-side; empty states handled; accessibility basics (labels, keyboard nav) covered.",
+      "plan": "",
+      "context": [
+        "src/",
+        "docs/stories/story_format.py",
+        "tests/stories/test_story_schema.py"
+      ],
+      "acceptance": [],
+      "blockers": [
+        "84c2e0e5-d2cc-4f62-be80-d2133fef2c60"
+      ],
+      "createdAt": "2025-09-16T13:05:37.980Z",
+      "completedAt": "2025-09-08T07:23:34.152Z",
+      "updatedAt": "2025-09-16T13:05:37.980Z"
+    },
+    {
+      "id": "86a09709-f809-4df5-bc85-319040884346",
+      "status": "+",
+      "title": "Story details view with feature list - view only",
+      "description": "Create a detail page showing the story metadata and its features with statuses.",
+      "plan": "",
+      "context": [
+        "src/",
+        "docs/stories/story_format.py",
+        "tests/stories/test_story_schema.py"
+      ],
+      "acceptance": [],
+      "blockers": [
+        "5d36db7c-d4b0-41be-adbc-e677b275f532"
+      ],
+      "createdAt": "2025-09-16T13:05:37.980Z",
+      "completedAt": "2025-09-08T03:44:15.196Z",
+      "updatedAt": "2025-09-16T13:05:37.980Z"
+    },
+    {
+      "id": "635fb525-fc57-4d89-986e-0ba7a09c66e9",
+      "status": "+",
+      "title": "Edit mode - feature details",
+      "description": "Allow editing of a feature's parameters. The status dropdown defaults to the current status. The string list edits show rows of editable strings. Blockers allow matching features by name and working out the id from it.",
+      "plan": "",
+      "context": [
+        "src/",
+        "docs/stories/story_format.py",
+        "tests/stories/test_story_schema.py"
+      ],
+      "acceptance": [],
+      "blockers": [
+        "86a09709-f809-4df5-bc85-319040884346"
+      ],
+      "createdAt": "2025-09-16T13:05:37.980Z",
+      "completedAt": "2025-09-08T07:11:05.092Z",
+      "updatedAt": "2025-09-16T13:05:37.980Z"
+    },
+    {
+      "id": "92f72aa1-5855-4c69-b67e-84adbbe454e7",
+      "status": "+",
+      "title": "Create mode - new feature",
+      "description": "Allow adding a new feature to a story in a new popup window - make this the same pattern as edit mode.",
+      "plan": "",
+      "context": [
+        "src/",
+        "docs/stories/story_format.py",
+        "tests/stories/test_story_schema.py"
+      ],
+      "acceptance": [],
+      "blockers": [
+        "635fb525-fc57-4d89-986e-0ba7a09c66e9"
+      ],
+      "createdAt": "2025-09-16T13:05:37.980Z",
+      "completedAt": "2025-09-08T01:40:27.533Z",
+      "updatedAt": "2025-09-16T13:05:37.980Z"
+    },
+    {
+      "id": "ce8bfbac-c934-45cd-ab9d-2990f61d4a84",
+      "status": "+",
+      "title": "Edit mode - story details",
+      "description": "Allow editing of a story's title and description.",
+      "plan": "",
+      "context": [
+        "src/",
+        "docs/stories/story_format.py",
+        "tests/stories/test_story_schema.py"
+      ],
+      "acceptance": [],
+      "blockers": [
+        "86a09709-f809-4df5-bc85-319040884346"
+      ],
+      "createdAt": "2025-09-16T13:05:37.980Z",
+      "completedAt": "2025-09-07T22:24:36.237Z",
+      "updatedAt": "2025-09-16T13:05:37.980Z"
+    },
+    {
+      "id": "ca12d5f7-ff91-4fd0-924f-30cb349be4ce",
+      "status": "+",
+      "title": "Create mode - new story",
+      "description": "Allow adding a new story in a new popup window - make this the same pattern as story edit mode and create feature.",
+      "plan": "",
+      "context": [
+        "src/",
+        "docs/stories/story_format.py",
+        "tests/stories/test_story_schema.py"
+      ],
+      "acceptance": [],
+      "blockers": [
+        "ce8bfbac-c934-45cd-ab9d-2990f61d4a84"
+      ],
+      "createdAt": "2025-09-16T13:05:37.980Z",
+      "completedAt": "2025-09-07T23:08:38.681Z",
+      "updatedAt": "2025-09-16T13:05:37.980Z"
+    },
+    {
+      "id": "b5e79f3e-efe0-4ad5-9e32-6067666ddb19",
+      "status": "+",
+      "title": "Common functions and libraries",
+      "description": "We need to have common components for popups, alerts, toasts etc. Especially the create/edit feature and create/edit story popups should stem from a common popup component.",
+      "plan": "",
+      "context": [
+        "src/",
+        "docs/stories/story_format.py",
+        "tests/stories/test_story_schema.py"
+      ],
+      "acceptance": [],
+      "blockers": [
+        "ca12d5f7-ff91-4fd0-924f-30cb349be4ce"
+      ],
+      "createdAt": "2025-09-16T13:05:37.980Z",
+      "completedAt": "2025-09-07T23:48:36.051Z",
+      "updatedAt": "2025-09-16T13:05:37.980Z"
+    },
+    {
+      "id": "4b91ec2d-66ad-4b58-b253-f7b6ae7e7921",
+      "status": "+",
+      "title": "Use shadcn and tailwind",
+      "description": "For any reusable UI components we should use`shadcn` and tailwind styling. As a first showcase of this, we need a settings screen (an item in the sidebar) where it must be possible to change themes.",
+      "plan": "",
+      "context": [
+        "src/",
+        "docs/stories/story_format.py",
+        "tests/stories/test_story_schema.py"
+      ],
+      "acceptance": [],
+      "blockers": [
+        "b5e79f3e-efe0-4ad5-9e32-6067666ddb19"
+      ],
+      "createdAt": "2025-09-16T13:05:37.980Z",
+      "completedAt": "2025-09-08T08:33:20.201Z",
+      "updatedAt": "2025-09-16T13:05:37.980Z"
+    },
+    {
+      "id": "3c8f0eb1-cfcd-4daa-98a8-c6c76a1f984a",
+      "status": "+",
+      "title": "Edit mode - moving features around",
+      "description": "Allow editing the order of features for a story - thus changing the underlying id everywhere where it's referenced. Pay attention to blockers.",
+      "plan": "",
+      "context": [
+        "src/",
+        "docs/stories/story_format.py",
+        "tests/stories/test_story_schema.py"
+      ],
+      "acceptance": [],
+      "blockers": [
+        "86a09709-f809-4df5-bc85-319040884346",
+        "4b91ec2d-66ad-4b58-b253-f7b6ae7e7921"
+      ],
+      "createdAt": "2025-09-16T13:05:37.980Z",
+      "completedAt": "2025-09-08T09:23:26.301Z",
+      "updatedAt": "2025-09-16T13:05:37.980Z"
+    },
+    {
+      "id": "d5b9599d-f7da-4e3f-b018-6bcb03684255",
+      "status": "+",
+      "title": "Edit mode - moving stories around",
+      "description": "Allow editing the order of stories - thus changing the underlying id everywhere where it's referenced. Pay attention to blockers of features.",
+      "plan": "",
+      "context": [
+        "src/",
+        "docs/stories/story_format.py",
+        "tests/stories/test_story_schema.py"
+      ],
+      "acceptance": [],
+      "blockers": [
+        "86a09709-f809-4df5-bc85-319040884346",
+        "3c8f0eb1-cfcd-4daa-98a8-c6c76a1f984a"
+      ],
+      "createdAt": "2025-09-16T13:05:37.980Z",
+      "completedAt": "2025-09-07T21:42:08.964Z",
+      "updatedAt": "2025-09-16T13:05:37.980Z"
+    },
+    {
+      "id": "7ff88ed2-214e-4732-9426-60d28915c3fc",
+      "status": "+",
+      "title": "Delete mode - delete feature",
+      "description": "Allow deleting a feature from a story.",
+      "plan": "",
+      "context": [
+        "src/",
+        "docs/stories/story_format.py",
+        "tests/stories/test_story_schema.py"
+      ],
+      "acceptance": [],
+      "blockers": [
+        "86a09709-f809-4df5-bc85-319040884346",
+        "d5b9599d-f7da-4e3f-b018-6bcb03684255"
+      ],
+      "createdAt": "2025-09-16T13:05:37.980Z",
+      "completedAt": "2025-09-08T05:45:08.146Z",
+      "updatedAt": "2025-09-16T13:05:37.980Z"
+    },
+    {
+      "id": "8f086bff-fa83-4409-91de-9d05c3f63c3c",
+      "status": "+",
+      "title": "Delete mode - delete story",
+      "description": "Allow deleting a story.",
+      "plan": "",
+      "context": [
+        "src/",
+        "docs/stories/story_format.py",
+        "tests/stories/test_story_schema.py"
+      ],
+      "acceptance": [],
+      "blockers": [
+        "86a09709-f809-4df5-bc85-319040884346",
+        "7ff88ed2-214e-4732-9426-60d28915c3fc"
+      ],
+      "createdAt": "2025-09-16T13:05:37.980Z",
+      "completedAt": "2025-09-08T03:06:12.889Z",
+      "updatedAt": "2025-09-16T13:05:37.980Z"
+    }
+  ],
+  "featureIdToDisplayIndex": {
+    "831c12f4-7539-4d19-9b08-bb5c20f7920c": 0,
+    "84c2e0e5-d2cc-4f62-be80-d2133fef2c60": 1,
+    "5d36db7c-d4b0-41be-adbc-e677b275f532": 2,
+    "86a09709-f809-4df5-bc85-319040884346": 3,
+    "635fb525-fc57-4d89-986e-0ba7a09c66e9": 4,
+    "92f72aa1-5855-4c69-b67e-84adbbe454e7": 5,
+    "ce8bfbac-c934-45cd-ab9d-2990f61d4a84": 6,
+    "ca12d5f7-ff91-4fd0-924f-30cb349be4ce": 7,
+    "b5e79f3e-efe0-4ad5-9e32-6067666ddb19": 8,
+    "4b91ec2d-66ad-4b58-b253-f7b6ae7e7921": 9,
+    "3c8f0eb1-cfcd-4daa-98a8-c6c76a1f984a": 10,
+    "d5b9599d-f7da-4e3f-b018-6bcb03684255": 11,
+    "7ff88ed2-214e-4732-9426-60d28915c3fc": 12,
+    "8f086bff-fa83-4409-91de-9d05c3f63c3c": 13
+  },
+  "createdAt": "2025-09-16T13:05:37.980Z",
+  "completedAt": "2025-09-08T09:23:26.301Z",
+  "updatedAt": "2025-09-16T13:05:37.980Z"
+}

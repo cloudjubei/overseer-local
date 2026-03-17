@@ -1,0 +1,145 @@
+{
+  "id": "ef63de20-fc75-421c-9cb8-10f8287961af",
+  "status": "+",
+  "title": "Refactor Story.id and Feature.id into UUIDs.",
+  "description": "Write a script that will go over all the stories and features and will update them with this new UUID.\nThis means that all dependency references must be updated to be matching:\n'{storyId}.{featureId}' or '{storyId}'\n\nThe display index of a feature is its position in the story's feature list.\nThe display index of a story in the main list must be stored - in the ProjectSpec.\nThere needs to be some way of looking these indices up quickly - as whenever a dependency is shown to the user it should shown as:\n'{storyIndex}.{featureIndex}' \n\nThe dependencyResolver should be updated accordingly too.",
+  "features": [
+    {
+      "id": "6fce6c41-fd1b-4124-a6f4-4013b343fb61",
+      "status": "+",
+      "title": "Update Story and Feature type definitions to use UUIDs",
+      "description": "Modify the TypeScript type definitions for Story and Feature to replace the numeric 'id' field with a UUID string field. Update related types and interfaces that reference these IDs throughout the codebase, including dependency reference formats.",
+      "plan": "",
+      "context": [
+        "src/types/stories.ts",
+        "src/types/external.d.ts",
+        "src/renderer/services/dependencyResolver.ts"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.983Z",
+      "completedAt": "2025-09-09T07:51:23.056Z",
+      "updatedAt": "2025-09-16T13:05:37.983Z"
+    },
+    {
+      "id": "a10c08b8-86dd-4afb-b9c9-3ef4c5c0e529",
+      "status": "+",
+      "title": "Add display index tracking to ProjectSpec and Story types",
+      "description": "Extend the ProjectSpec type to include a mapping of story UUIDs to their display indices (position in the main story list). Add display index fields to track feature positions within stories. This enables fast lookup of user-friendly indices for UI display.",
+      "plan": "",
+      "context": [
+        "src/types/stories.ts"
+      ],
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.983Z",
+      "completedAt": "2025-09-09T05:58:33.708Z",
+      "updatedAt": "2025-09-16T13:05:37.983Z"
+    },
+    {
+      "id": "0aa6d826-fb70-476a-b5fb-200d3c546a98",
+      "status": "+",
+      "title": "Create UUID migration script for existing stories and features",
+      "description": "Write a migration script that reads all existing stories and features, generates UUIDs for each, updates all dependency references from numeric format (storyId.featureId) to UUID format, and preserves display indices based on current ordering.",
+      "plan": "",
+      "context": [
+        "src/types/stories.ts",
+        "src/types/external.d.ts",
+        "src/renderer/services/dependencyResolver.ts",
+        "scripts/migrate-uuids.ts"
+      ],
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.983Z",
+      "completedAt": "2025-09-09T12:47:25.653Z",
+      "updatedAt": "2025-09-16T13:05:37.983Z"
+    },
+    {
+      "id": "4822c949-26fd-417e-9598-8b82816bcd97",
+      "status": "+",
+      "title": "Update dependencyResolver service for UUID-based blockers",
+      "description": "Modify the dependencyResolver service to handle UUID-based story and feature references instead of numeric IDs. Update dependency resolution, validation, cycle detection, and reverse dependency tracking to work with UUID strings while maintaining the same API surface.",
+      "plan": "",
+      "context": [],
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.983Z",
+      "completedAt": "2025-09-09T10:48:55.445Z",
+      "updatedAt": "2025-09-16T13:05:37.983Z"
+    },
+    {
+      "id": "bf41dff7-c0c8-4d42-8084-c7e864449b90",
+      "status": "+",
+      "title": "Add index lookup utilities for display formatting",
+      "description": "Create utility functions that can quickly resolve UUID-based blockers back to user-friendly display indices (e.g., '3.2' for the 2nd feature of the 3rd story). These utilities should use the display index mappings for fast lookups when rendering dependency references in the UI.",
+      "plan": "",
+      "context": [],
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.983Z",
+      "completedAt": "2025-09-09T04:47:31.827Z",
+      "updatedAt": "2025-09-16T13:05:37.983Z"
+    },
+    {
+      "id": "604fdd8b-8b73-44a8-88f1-d2feca69a8f7",
+      "status": "+",
+      "title": "Update dependency display components to use display indices",
+      "description": "Modify DependencyBullet, StorySummaryCallout, FeatureSummaryCallout and other components that display dependency references to show user-friendly display indices ('3.2') instead of UUIDs, while maintaining UUID-based navigation and resolution internally.",
+      "plan": "",
+      "context": [],
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.983Z",
+      "completedAt": "2025-09-09T09:02:14.303Z",
+      "updatedAt": "2025-09-16T13:05:37.983Z"
+    },
+    {
+      "id": "1a9969ff-4fb8-469e-9d79-7b2c091fcf70",
+      "status": "+",
+      "title": "Update reference autocomplete and chat to handle UUID blockers",
+      "description": "Modify useReferencesAutocomplete hook and ChatView components to work with UUID-based blockers while still showing display indices to users. Ensure # references are properly resolved and inserted as UUID-based tokens that display as friendly indices.",
+      "plan": "",
+      "context": [],
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.983Z",
+      "completedAt": "2025-09-09T12:03:44.780Z",
+      "updatedAt": "2025-09-16T13:05:37.983Z"
+    },
+    {
+      "id": "80b08887-d107-47a8-9ae9-a59f8ecdda6e",
+      "status": "+",
+      "title": "Update stories service and related hooks for UUID operations",
+      "description": "Modify storyService, useStoriesIndex, and related data management hooks to work with UUID-based story and feature identification while maintaining display index tracking and providing backwards compatibility during the transition.",
+      "plan": "",
+      "context": [],
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.983Z",
+      "completedAt": "2025-09-09T07:21:19.105Z",
+      "updatedAt": "2025-09-16T13:05:37.983Z"
+    },
+    {
+      "id": "ea14cf4b-1450-48ed-ac7d-60bc96056e11",
+      "status": "+",
+      "title": "Update the migration script",
+      "description": "Use the current version and extend it so it can be run via command line passing in a path to project's @config.json (i.e. in this project there's 'thefactory.json' - referenced here).",
+      "plan": "",
+      "context": [
+        "scripts/migrate-uuids.ts",
+        "projects/thefactory.json"
+      ],
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.983Z",
+      "completedAt": "2025-09-09T03:00:03.801Z",
+      "updatedAt": "2025-09-16T13:05:37.983Z"
+    }
+  ],
+  "featureIdToDisplayIndex": {
+    "6fce6c41-fd1b-4124-a6f4-4013b343fb61": 0,
+    "a10c08b8-86dd-4afb-b9c9-3ef4c5c0e529": 1,
+    "0aa6d826-fb70-476a-b5fb-200d3c546a98": 2,
+    "4822c949-26fd-417e-9598-8b82816bcd97": 3,
+    "bf41dff7-c0c8-4d42-8084-c7e864449b90": 4,
+    "604fdd8b-8b73-44a8-88f1-d2feca69a8f7": 5,
+    "1a9969ff-4fb8-469e-9d79-7b2c091fcf70": 6,
+    "80b08887-d107-47a8-9ae9-a59f8ecdda6e": 7,
+    "ea14cf4b-1450-48ed-ac7d-60bc96056e11": 8
+  },
+  "createdAt": "2025-09-16T13:05:37.983Z",
+  "completedAt": "2025-09-09T12:47:25.653Z",
+  "updatedAt": "2025-09-16T13:05:37.983Z"
+}

@@ -1,0 +1,47 @@
+{
+  "id": "bc33ac7d-3975-47a4-9b07-b1286632c7a0",
+  "status": "-",
+  "title": "Project & Group Activation, SCOPE Groups, and Sidebar Enhancements",
+  "description": "Introduces activation/deactivation toggles for projects and groups, adds a new 'SCOPE' group type for chat aggregation, and enhances the Sidebar to support group-level selections (Home, Chat, Tools) and custom topic creation.",
+  "features": [
+    {
+      "id": "5630ea11-7ab5-41cf-a384-49b1625cc54a",
+      "status": "+",
+      "title": "Project Activation Toggle & Lifecycle Management",
+      "description": "Add activate/deactivate toggles to projects in ProjectManagerModal. Deactivating hides them from the sidebar, hides parent groups if empty, and triggers tool/badge cleanup via managers. Includes blocking spinner UI.",
+      "context": [],
+      "createdAt": "2026-03-17T14:03:16.344Z",
+      "updatedAt": "2026-03-17T23:38:58.283Z",
+      "completedAt": "2026-03-17T23:38:58.283Z"
+    },
+    {
+      "id": "659f1623-976f-4f50-8c7b-ec4f2ba0fd25",
+      "status": "-",
+      "title": "Group Activation & SCOPE Groups",
+      "description": "Add activate/deactivate toggles to ProjectsGroup items in ProjectManagerModal. Introduces SCOPE group type for chat/scoping, alongside MAIN groups for strict hierarchical display.",
+      "context": [],
+      "createdAt": "2026-03-17T14:03:16.368Z",
+      "updatedAt": "2026-03-17T14:03:16.368Z"
+    },
+    {
+      "id": "9c892cb6-44f8-4cfb-96e4-56911491cc2d",
+      "status": "-",
+      "title": "Sidebar Enhancements for Group Selection",
+      "description": "Update SidebarView to split chevron interactions (collapse/expand) from row click (select group). Add Home, Chat, and Tools views for group-level selection. Home lists projects within the group. Tools view operates with a groupId.",
+      "context": [],
+      "createdAt": "2026-03-17T14:03:16.387Z",
+      "updatedAt": "2026-03-17T14:03:16.387Z"
+    },
+    {
+      "id": "2e071165-75f1-4bd4-a554-75ca67cbeb60",
+      "status": "-",
+      "title": "Group Chat & Topic Creation",
+      "description": "Add a '+' button next to the Categories/History switch in Chat to allow users to create new chat topics for Groups, Projects, and Stories. Ensure the Group Chat view lists the main group chat and any custom group topics.",
+      "context": [],
+      "createdAt": "2026-03-17T14:03:16.408Z",
+      "updatedAt": "2026-03-17T14:03:16.408Z"
+    }
+  ],
+  "createdAt": "2026-03-17T14:01:48.628Z",
+  "updatedAt": "2026-03-17T14:01:48.628Z"
+}

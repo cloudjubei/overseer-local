@@ -1,0 +1,185 @@
+{
+  "id": "c24f7c54-65c9-441b-abf2-2a9c80fac333",
+  "status": "+",
+  "title": "Calendar view",
+  "description": "For each project, based on the stories and features that were completed - it must be possible to view a timeline of features when they were done in a scrollable timeline view.\nThe user must be able to also define their own labels/nodes to the timeline as extra rows - these need to be stored.\nIt must be also possible to view an overall timeline - that will show all projects and their stories (rather than features) - so a higher level view.",
+  "features": [
+    {
+      "id": "ce6b03da-c050-49c5-b2f0-41410d9e15cb",
+      "status": "+",
+      "title": "Implement Data Model and Storage for User-Defined Timeline Labels",
+      "description": "Define a new data model (entity) for user-defined timeline labels/nodes. This entity should include fields such as `id: string`, `projectId: string | null` (to associate with a specific project or for a global label), `timestamp: Date`, `label: string`, and `description: string | undefined`. Implement the necessary `add`, `get`, `update`, and `delete` operations for these timeline labels using `thefactory-db`'s entity management within the main process (`src/db/DatabaseManager.ts` or a new dedicated service). Expose these operations via IPC handlers so the renderer process can manage them.",
+      "context": [],
+      "createdAt": "2025-09-16T13:05:37.982Z",
+      "updatedAt": "2025-09-16T15:24:08.476Z",
+      "completedAt": "2025-09-15T21:40:48.525Z"
+    },
+    {
+      "id": "1760db6f-b604-4835-af0d-c5fa83630a4c",
+      "status": "+",
+      "title": "Implement Project-Specific Feature Timeline View",
+      "description": "Develop the front-end components and backend data fetching logic for a project-specific timeline view. This feature should:\n1.  Create new IPC handlers (or extend existing ones) in the main process to fetch all completed `Feature` entities for a given `projectId`, ordered by their `completedAt` timestamp.\n2.  Extend the IPC handlers for user-defined timeline labels to fetch labels associated with a specific `projectId` or global labels.\n3.  Implement a `timelineService` in `src/renderer/services/` to consolidate calls for completed features and relevant user-defined labels for a project.\n4.  Develop a new React UI component (e.g., `ProjectTimelineView.tsx` in `src/renderer/screens/` or `src/renderer/components/`) that consumes the `timelineService` data and displays a scrollable timeline of completed features and user-defined labels.",
+      "context": [],
+      "createdAt": "2025-09-16T13:05:37.982Z",
+      "updatedAt": "2025-09-16T15:29:43.292Z",
+      "completedAt": "2025-09-15T21:57:57.488Z"
+    },
+    {
+      "id": "db5e244f-b362-438d-9912-4577fa507ef3",
+      "status": "+",
+      "title": "Add TimeLineView to the sidebar",
+      "description": "@src/renderer/screens/ProjectTimelineView.tsx should be added to the @src/renderer/navigation/SidebarView.tsx between LiveData and Notifications.",
+      "context": [
+        "src/renderer/screens/ProjectTimelineView.tsx",
+        "src/renderer/navigation/SidebarView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-16T15:44:40.413Z",
+      "updatedAt": "2025-09-16T15:47:52.270Z",
+      "completedAt": "2025-09-15T22:23:27.389Z"
+    },
+    {
+      "id": "b9d641d0-1306-412f-ab7a-60b120cb29ba",
+      "status": "+",
+      "title": "ProjectTimelineView shows nothing",
+      "description": "Currently when accessing the @src/renderer/screens/ProjectTimelineView.tsx from the @src/renderer/navigation/SidebarView.tsx - it displays blank - nothing.\nIt should show a calendar view that a user can add their labels to and all the features that were completed for this project should be added to it as tiles across the timeline.",
+      "context": [
+        "src/renderer/screens/ProjectTimelineView.tsx",
+        "src/renderer/navigation/SidebarView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-16T16:01:19.427Z",
+      "updatedAt": "2025-09-16T16:04:44.133Z",
+      "completedAt": "2025-09-15T22:35:31.586Z"
+    },
+    {
+      "id": "0619e80f-d523-4842-810b-ba5be81fcbe6",
+      "status": "+",
+      "title": "ProjectTimelineView needs a design update",
+      "description": "The @src/renderer/screens/ProjectTimelineView.tsx doesn't look great.\nTake inspiration from Notion's Timeline view as explained here:\nhttps://www.notion.com/help/guides/timeline-view-unlocks-high-output-planning-for-your-team\nAs well as Airtable's :\nhttps://blog.airtable.com/introducing-airtables-new-timeline-view/\n\nThese are two standard looking Timeline views that we want to emulate here.\nMak sure you maintain our design principles and colors as defined in @docs/design/MONDAY_PALETTE_REFERENCE.md , @docs/design/DESIGN_TOKENS.md , @docs/design/DESIGN_SYSTEM.md , @docs/design/COMPONENTS.md , @docs/ux/LINEAR_UX_GUIDELINES.md",
+      "context": [
+        "docs/design/MONDAY_PALETTE_REFERENCE.md",
+        "docs/design/DESIGN_TOKENS.md",
+        "docs/design/DESIGN_SYSTEM.md",
+        "docs/design/COMPONENTS.md",
+        "docs/ux/LINEAR_UX_GUIDELINES.md",
+        "src/renderer/screens/ProjectTimelineView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-16T16:18:10.138Z",
+      "updatedAt": "2025-09-16T16:22:27.595Z",
+      "completedAt": "2025-09-15T23:39:23.188Z"
+    },
+    {
+      "id": "cb90c00d-4376-432d-bbb6-66d2995d24bd",
+      "status": "+",
+      "title": "Adding a label to the calendar errors",
+      "description": "When trying to add a user label to the @src/renderer/screens/ProjectTimelineView.tsx it errors.",
+      "context": [
+        "src/renderer/screens/ProjectTimelineView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-16T16:29:32.078Z",
+      "updatedAt": "2025-09-16T17:24:24.243Z",
+      "completedAt": "2025-09-16T01:19:03.247Z"
+    },
+    {
+      "id": "dd66ff2a-a01e-4def-9269-059f5f581b3d",
+      "status": "+",
+      "title": "Selecting the Day | Week | Month buttons does nothing",
+      "description": "In @src/renderer/screens/ProjectTimelineView.tsx choosing the different view mode should alter the view.",
+      "context": [
+        "src/renderer/screens/ProjectTimelineView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-16T16:30:02.117Z",
+      "updatedAt": "2025-09-16T16:34:19.770Z",
+      "completedAt": "2025-09-16T01:00:51.301Z"
+    },
+    {
+      "id": "7f5ba22e-7e22-4a04-994f-25af10c138a7",
+      "status": "+",
+      "title": "User labels should be always at the top and the feature ones below",
+      "description": "In @src/renderer/screens/ProjectTimelineView.tsx .\nGlobal labels should also be above the current project ones.",
+      "context": [
+        "src/renderer/screens/ProjectTimelineView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-16T17:24:43.752Z",
+      "updatedAt": "2025-09-16T17:33:17.591Z",
+      "completedAt": "2025-09-16T01:50:55.010Z"
+    },
+    {
+      "id": "f07b6313-732c-471f-ad22-031e50a25613",
+      "status": "+",
+      "title": "Must be possible to edit and delete user created timeline labels",
+      "description": "In @src/renderer/screens/ProjectTimelineView.tsx - create a little edit button that shows on label hover. When clicked, it opens a similar popup to the one that is used for Label creation. There needs to be a delete option.",
+      "context": [
+        "src/renderer/screens/ProjectTimelineView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-16T17:43:36.272Z",
+      "updatedAt": "2025-09-16T18:09:31.091Z",
+      "completedAt": "2025-09-16T18:09:31.091Z"
+    },
+    {
+      "id": "671d02a9-29b7-4273-bfa8-fb7101de95af",
+      "status": "+",
+      "title": "For week and monthly views show stories not features",
+      "description": "Only show features in the Day view in @src/renderer/screens/ProjectTimelineView.tsx",
+      "context": [
+        "src/renderer/screens/ProjectTimelineView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-16T17:57:05.367Z",
+      "updatedAt": "2025-09-16T18:17:28.676Z",
+      "completedAt": "2025-09-16T18:17:28.676Z"
+    },
+    {
+      "id": "edfb3fca-07a2-4e6d-b4d9-30dd1178afe9",
+      "status": "+",
+      "title": "Color code features/stories - always start showing them from the topmost point",
+      "description": "In @src/renderer/screens/ProjectTimelineView.tsx make sure that all features/stories show starting at the top and then go down for a given day/week/month . As long as they are color coded (by story) then they will be distinguishable from one another. Otherwise they take up too much vertical space.\nEach day/week/month should simply order all features/stories in a column by the timestamp.",
+      "context": [
+        "src/renderer/screens/ProjectTimelineView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-16T17:59:48.328Z",
+      "updatedAt": "2025-09-16T18:24:25.271Z",
+      "completedAt": "2025-09-16T18:24:25.271Z"
+    },
+    {
+      "id": "7edbc5f3-10b4-446c-976a-0a0df1c5fbc9",
+      "status": "+",
+      "title": "Show Story/Feature cards on hover",
+      "description": "In @src/renderer/screens/ProjectTimelineView.tsx when hovering a story or feature - show the @src/renderer/components/stories/StorySummaryCallout.tsx  and @src/renderer/components/stories/FeatureSummaryCallout.tsx respectively. Clicking on a given Story/Feature takes the user to that Story's detail view - @src/renderer/stories/StoryDetailsView.tsx",
+      "context": [
+        "src/renderer/screens/ProjectTimelineView.tsx",
+        "src/renderer/components/stories/FeatureSummaryCallout.tsx",
+        "src/renderer/components/stories/StorySummaryCallout.tsx",
+        "src/renderer/stories/StoryDetailsView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-16T18:00:22.978Z",
+      "updatedAt": "2025-09-16T18:30:46.720Z",
+      "completedAt": "2025-09-16T18:30:46.720Z"
+    }
+  ],
+  "featureIdToDisplayIndex": {
+    "ce6b03da-c050-49c5-b2f0-41410d9e15cb": 1,
+    "1760db6f-b604-4835-af0d-c5fa83630a4c": 2,
+    "db5e244f-b362-438d-9912-4577fa507ef3": 3,
+    "b9d641d0-1306-412f-ab7a-60b120cb29ba": 4,
+    "0619e80f-d523-4842-810b-ba5be81fcbe6": 5,
+    "dd66ff2a-a01e-4def-9269-059f5f581b3d": 6,
+    "cb90c00d-4376-432d-bbb6-66d2995d24bd": 7,
+    "7f5ba22e-7e22-4a04-994f-25af10c138a7": 8,
+    "f07b6313-732c-471f-ad22-031e50a25613": 9,
+    "671d02a9-29b7-4273-bfa8-fb7101de95af": 10,
+    "edfb3fca-07a2-4e6d-b4d9-30dd1178afe9": 11,
+    "7edbc5f3-10b4-446c-976a-0a0df1c5fbc9": 12
+  },
+  "createdAt": "2025-09-16T13:05:37.982Z",
+  "updatedAt": "2025-09-16T16:36:30.045Z",
+  "completedAt": "2025-09-16T18:30:46.720Z"
+}

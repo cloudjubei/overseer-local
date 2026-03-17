@@ -1,0 +1,3255 @@
+{
+  "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
+  "status": "+",
+  "title": "UI Improvements",
+  "description": "Various UI improvements to the app",
+  "features": [
+    {
+      "id": "27156e19-3aeb-41de-adc2-75b1c7ca9774",
+      "status": "+",
+      "title": "Agents require a search-files tool",
+      "description": "The agent calls the tool with a list of keywords, the whole project file system is searched and if any of them are found in a given file it will be returned in a final list.\nThe result is the list of relative file paths.",
+      "plan": "",
+      "context": [],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-06T19:56:47.333Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "8ed1e913-44e2-4321-a631-f1c2c9033177",
+      "status": "+",
+      "title": "For standard agent suppliers - discover the latest prices",
+      "description": "It must be possible to view the latest prices per model and refresh them via a configurable link to the given supplier's website. Store the latest ones in a local file that is read on app start.\nRight now the costs are always 0 - the tokens are not counted anywhere, they should be.",
+      "plan": "",
+      "context": [
+        "src/tools/factory/mainOrchestrator.js",
+        "packages/factory-ts/src/orchestrator.ts"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-05T00:12:07.956Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "a480aa54-f697-409d-95a7-1b369c3da9ff",
+      "status": "+",
+      "title": "the word dependencies in Features and Stories should be changed to 'blockers'",
+      "description": "This change should be reflected in any file that uses 'dependencies'",
+      "plan": "",
+      "context": [],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-04T17:53:47.848Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "0964b90b-396a-43b0-9f4a-a60d0034360e",
+      "status": "+",
+      "title": "Make an Agent run chat display prettier",
+      "description": "make the message as a bubble, and then the tool calls as expandable rows to view the details (mainly for read_files & write_file - the rest of the tools are short enough that they can always display).\nSame goes for the responses to the LLM - apply a similar view as above.",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/AgentsView.tsx",
+        "src/renderer/screens/AllAgentsView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-07T05:22:35.870Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "98c76bd6-8c5c-4aaf-a778-54f5f57f679a",
+      "status": "+",
+      "title": "Agent run costs and times are always empty",
+      "description": "It seems these are either not recorded correctly or not passed, so that they cannot be viewed properly inside @AgentsView.tsx and @AllAgentsView.tsx",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/AgentsView.tsx",
+        "src/renderer/screens/AllAgentsView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-04T21:50:50.642Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "c2192f2a-9151-4615-b376-986bb0540042",
+      "status": "+",
+      "title": "The \"Run Agent\" button should be standardised",
+      "description": "The views that should have it updated are:\n@StoriesListView.tsx, @StoryDetailsView.tsx.\nIt should be a round play button as is common in music players.",
+      "plan": "",
+      "context": [
+        "src/renderer/stories/StoriesListView.tsx",
+        "src/renderer/stories/StoryDetailsView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-04T06:27:26.640Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "0ce98597-907f-4bdf-a5a8-c8e8b253e612",
+      "status": "+",
+      "title": "Persist locally agent runs",
+      "description": "Make sure the history of agent runs is persisted and read when app is started",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/AgentsView.tsx",
+        "src/renderer/screens/AllAgentsView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-07T04:57:19.607Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "3a11fceb-bb37-4570-a159-2f39622ca364",
+      "status": "+",
+      "title": "IconDelete",
+      "description": "`IconDelete` inside @Icons.tsx needs to actually be a proper delete icon",
+      "plan": "",
+      "context": [
+        "src/renderer/components/ui/Icons.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-06T08:07:52.234Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "4df75808-637f-4841-9d31-b8630b1ac8bf",
+      "status": "+",
+      "title": "running an agent causes an error when it tries to make a local copy of the project",
+      "description": "shouldIgnoreCopy inside @orchestrator.ts should ignore all sorts of files and folders specific to typescript, node, electron.",
+      "plan": "",
+      "context": [
+        "packages/factory-ts/src/orchestrator.ts"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-05T23:35:02.915Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "56b114e3-daee-481b-9c33-329c8eace503",
+      "status": "+",
+      "title": "Make the Context Files selection better",
+      "description": "1) the Add chip becomes huge once there's even just 1 file (it scales in height to match it). That shouldn't be the case.\n2) when the FileSelector opens - it should auto focus into the search input box so a user can start typing right away\n3) in the FileDisplay and FileSelector - instead of showing a generic document icon, let's try to use a meaningful type extension icon - if need be, create a folder with such common icons to use.\n4) The FileDisplay - should show the icon centered to the left. The name in the middle. \nThe file size small at the bottom.\nThe last modification date at the top right.\nAnd the delete button is correct where it is now.",
+      "plan": "",
+      "context": [
+        "src/renderer/components/ui/FileSelector.tsx",
+        "src/renderer/components/ui/FileDisplay.tsx",
+        "src/renderer/components/ui/FileDisplay.preview.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-05T21:11:18.493Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "ba3e0af6-3a04-4523-90c7-b90b0d37514b",
+      "status": "+",
+      "title": "If any of a story's features are rejected (showing the exclamation circle) so should the story",
+      "description": "The way this displays should follow exactly how Features are displayed inside StoryDetailsView",
+      "plan": "",
+      "context": [
+        "src/renderer/stories/StoryDetailsView.tsx",
+        "src/renderer/stories/StoriesListView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-04T09:58:54.508Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "b2ad0ce4-b71a-40bc-baa7-3550153bef88",
+      "status": "+",
+      "title": "When running the orchestrator, finding the next feature for a story should be based on the feature index",
+      "description": "the Story.featureIdToDisplayIndex is the means by which the features should be sorted for this.",
+      "plan": "",
+      "context": [
+        "packages/factory-ts/src/orchestrator.ts",
+        "packages/factory-ts/src/storyUtils.ts"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-04T12:28:26.852Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "67edb097-edf3-4988-939d-30e3fc3007c1",
+      "status": "+",
+      "title": "Go over all the stories in this project and update inline file references",
+      "description": "in a lot of the stories a file could've been referenced as:\n@StoriesListView.tsx \nor simply\n@StoriesListView.tsx\n\nMake sure that these are transformed into the format:\n@Filepath\n\nThen inside @StoriesListView.tsx and @StoryDetailsView.tsx, make sure that titles and descriptions for stories and features show a nice hoverable ui that shows a tooltip about the file. Inside all forms it should just show @Filename so it's easy to edit.",
+      "plan": "",
+      "context": [
+        "src/renderer/stories/StoryDetailsView.tsx",
+        "src/renderer/stories/StoriesListView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-05T15:28:06.100Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "f46696d7-3eee-4f9d-8aee-9419dcee20c9",
+      "status": "+",
+      "title": "Standardise the Delete, Edit, Add, Create buttons",
+      "description": "wherever there's a button that just says Delete we should have it use the standard `DeleteIcon`\nwherever there's a button that just says Add or Create we should have it use the standard `PlusIcon`\nwherever there's a button that just says Edit we should have it use the standard `EditIcon`",
+      "plan": "",
+      "context": [
+        "src/renderer/components/ui/Icons.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-03T13:07:15.157Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "d8361748-2f05-4cd4-bb35-80f40db0ff32",
+      "status": "+",
+      "title": "Agents - run histories UI improvements",
+      "description": "@src/renderer/components/agents/ChatConversation.tsx used inside @src/renderer/screens/AgentsView.tsx should have overly large message texts put in a scrollable textbox.\n\nThe currently running agents in @src/renderer/screens/AgentsView.tsx should follow a similar format as the history of agent runs.\n\n@src/renderer/screens/AllAgentsView.tsx should follow a similar style to @src/renderer/screens/AgentsView.tsx \nTo make things more manageable - a component for the agent row display should be made so it can be reused.",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/AgentsView.tsx",
+        "src/renderer/stories/StoriesListView.tsx",
+        "src/renderer/components/stories/DependencyBullet.tsx",
+        "src/renderer/components/ui/Icons.tsx",
+        "src/renderer/components/agents/ChatConversation.tsx",
+        "src/renderer/screens/AllAgentsView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-04T02:24:17.642Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "6e24f575-cf4d-451f-994f-7190d45ebaaa",
+      "status": "+",
+      "title": "Toasts should animate",
+      "description": "Toasts need to slide down with an animation when appearing and slide up when hiding.\nThey need to be snappy. It should also be possible to flick them up to make them disappear (like notifications on a mobile device).",
+      "plan": "",
+      "context": [
+        "src/renderer/components/ui/Toast.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-05T12:58:11.509Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "bbc90ba1-4348-4a17-9921-18b6c0ece863",
+      "status": "+",
+      "title": "Run agent button long press",
+      "description": "When the new Run Agent button is long pressed it should show an agent type selector - upon selection it runs with that selected agent. Normal click runs the 'developer' agent like now.",
+      "plan": "",
+      "context": [
+        "src/renderer/components/stories/RunAgentButton.tsx",
+        "src/renderer/stories/StoryDetailsView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-04T09:06:46.930Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "493c32f2-94ab-4677-8cc4-a776249c91e5",
+      "status": "+",
+      "title": "StoryCard missing RunAgent on hover",
+      "description": "@src/renderer/components/stories/StoryCard.tsx should have the \"Run Agent\" button in the top right.\nSame as in @src/renderer/stories/StoriesListView.tsx if the story has a running agent - show the status.",
+      "plan": "",
+      "context": [
+        "src/renderer/stories/StoriesListView.tsx",
+        "src/renderer/components/stories/StoryCard.tsx",
+        "src/renderer/components/stories/RunAgentButton.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-06T01:33:28.225Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "6a8066ee-230f-4f31-b531-3d8cadff4178",
+      "status": "+",
+      "title": "ChatsManager should not have any agentic tools - everything should be routed through factory-ts",
+      "description": "the factory-ts package should be the one place where all agentic tools are placed - currently @src/chat/manager.js has its own functions. Those should be cleaned up and used appropriately from factory-ts - @packages/factory-ts/src/fileTools.ts or @packages/factory-ts/src/storyUtils.ts for instance.",
+      "plan": "",
+      "context": [
+        "src/chat/manager.js",
+        "packages/factory-ts/src/fileTools.ts",
+        "packages/factory-ts/src/storyUtils.ts"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-05T14:40:47.833Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "abefc7ba-3098-4aee-a01b-694a5a2a9d43",
+      "status": "+",
+      "title": "When running an agent - all the GIT credentials are not found in the @.env",
+      "description": "There is a .env file both in this project and in factory-ts.\nJust like in the python counterpart ( the files @packages/factory-ts/blueprint/run_local_agent.py and @packages/factory-ts/blueprint/git_manager.py ) the GIT credentials must be loaded from the workspaces `.env` file in the root of the project.",
+      "plan": "",
+      "context": [
+        "packages/factory-ts/src/gitManager.ts",
+        "packages/factory-ts/blueprint/run_local_agent.py",
+        "packages/factory-ts/blueprint/git_manager.py"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-04T14:57:18.171Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "e9e526e8-576a-448b-9359-db97475db485",
+      "status": "+",
+      "title": "Agent Run - UI fix",
+      "description": "When viewing an agent run inside @src/renderer/screens/AgentsView.tsx it doesn't show the whole conversation. Just the last message. This needs to be fixed to show the full conversation.",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/AllAgentsView.tsx",
+        "src/renderer/screens/AgentsView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-03T16:41:52.910Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "22793b7c-0bfa-4da4-8b3a-ae07fbe2a0ce",
+      "status": "+",
+      "title": "FileMentions should be renamed RichText",
+      "description": "This component should then be used inside Chat and inside agent runs where messages are displayed.",
+      "plan": "",
+      "context": [
+        "src/renderer/components/ui/FileMentions.tsx",
+        "src/renderer/components/agents/ChatConversation.tsx",
+        "src/renderer/screens/AllAgentsView.tsx",
+        "src/renderer/screens/AgentsView.tsx",
+        "src/renderer/screens/ChatView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-06T22:24:10.064Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "894453ef-c700-4128-b714-4ec94498498c",
+      "status": "+",
+      "title": "No edit button in Stories and Features",
+      "description": "In @src/renderer/stories/StoryDetailsView.tsx Clicking a feature should open the edit feature form - the edit button shouldn't show.\nIn @src/renderer/screens/StoriesView.tsx Stories already open on click - there should just be no edit button present.",
+      "plan": "",
+      "context": [
+        "src/renderer/components/stories/FeatureForm.tsx",
+        "src/renderer/stories/FeatureEditView.tsx",
+        "src/renderer/stories/FeatureCreateView.tsx",
+        "src/renderer/stories/StoryDetailsView.tsx",
+        "src/renderer/screens/StoriesView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-05T05:43:02.691Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "0fea71a8-c0da-48a1-b4ea-c0db2196c902",
+      "status": "+",
+      "title": "When an agent runs - there's a duplicate history run",
+      "description": "The Electron app has its own local history run, but when the agent runs on the copy of the project - it also produces a history run. This shouldn't happen - only the original app where the agent was started should create the history run. To avoid this - the agent should simply have an extra line for these files in its .gitignore file. The histories shouldn't be removed (they were as a first fix attempt).",
+      "plan": "",
+      "context": [
+        "src/tools/factory/mainOrchestrator.js",
+        "src/tools/factory/orchestratorBridge.ts",
+        "packages/factory-ts/src/orchestrator.ts"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-07T03:59:07.432Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "d5b4852d-df73-4818-8db0-f7d6954c0108",
+      "status": "+",
+      "title": "The agent persona markdown files are too bloated.",
+      "description": "These files contain the tool specs, but those are yet again repeated in the overall tool spec in the orchestrator.\nThese files shouldn't have the list of tools available, but the tool descriptions provided by the orchestrator should contain extra comments as to what each tool does (similarly to how each agent's markdown persona file has it).",
+      "plan": "",
+      "context": [
+        "packages/factory-ts/docs/AGENT_CONTEXTER.md",
+        "packages/factory-ts/docs/AGENT_DEVELOPER.md",
+        "packages/factory-ts/docs/AGENT_PLANNER.md",
+        "packages/factory-ts/docs/AGENT_SPECCER.md",
+        "packages/factory-ts/docs/AGENT_TESTER.md",
+        "packages/factory-ts/src/orchestrator.ts",
+        "src/tools/factory/mainOrchestrator.js"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-04T03:17:48.049Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "b8d93d1d-5c66-4628-8a85-9da0197e97e2",
+      "status": "+",
+      "title": "The main FILE_ORGANISATION.md is bloated",
+      "description": "This file is always included and it contains irrelevant information.\nAgents are asked to update this file, but they seem to always add extra unimportant info.\nThis needs to be tightened and made sure that the instructions for editing the file are clear, and all edits are succinct and precise.\nThe file should contain overall pointers to the project - not detailed descriptions of each file.\nIt should not be a log of changes.",
+      "plan": "",
+      "context": [
+        "packages/factory-ts/docs/AGENT_CONTEXTER.md",
+        "packages/factory-ts/docs/AGENT_DEVELOPER.md",
+        "packages/factory-ts/docs/AGENT_PLANNER.md",
+        "packages/factory-ts/docs/AGENT_SPECCER.md",
+        "packages/factory-ts/docs/AGENT_TESTER.md"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-04T11:33:57.816Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "d05e6082-c27c-487f-bacd-837f7f5b7f73",
+      "status": "+",
+      "title": "Cancelled agent runs are not recorded properly",
+      "description": "They don't change any files and are not recorded. They always show as in progress.",
+      "plan": "",
+      "context": [
+        "packages/factory-ts/src/orchestrator.ts",
+        "src/tools/factory/mainOrchestrator.js"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-04T04:43:23.523Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "352e49dd-37f2-428c-a85c-da7a2c1bd66a",
+      "status": "+",
+      "title": "Agent runs should show the model",
+      "description": "Create a reusable component - a nice display chip - that shows the provider and model.",
+      "plan": "",
+      "context": [],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-06T09:55:02.555Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "9244467b-e3d1-475a-a1f0-bf35d8482629",
+      "status": "+",
+      "title": "The status display for an Agent run inside StoriesView.tsx and StoryDetailsView.tsx should match the display from AgentsView.tsx",
+      "description": "Reuse the StatusChip inside AgentsView.tsx",
+      "plan": "",
+      "context": [
+        "src/renderer/stories/StoriesListView.tsx",
+        "src/renderer/stories/StoryDetailsView.tsx",
+        "src/renderer/screens/AgentsView.tsx",
+        "src/renderer/components/agents/StatusChip.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-05T00:00:50.055Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "37730047-f692-48c0-b6e7-9093564596a9",
+      "status": "+",
+      "title": "In StoryDetailsView.tsx next to the play button show the Agent Model control",
+      "description": "This control should show the current active LLM configuration and allow to quickly pick a configuration from the last 5 recent ones + a last option that would take the user to the LLM Configuration settings.",
+      "plan": "",
+      "context": [
+        "src/renderer/stories/StoryDetailsView.tsx",
+        "src/renderer/screens/SettingsView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-06T08:34:50.896Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "82b9481c-7129-4bea-8029-0e41a56531fe",
+      "status": "+",
+      "title": "StatusChip improvements",
+      "description": "@src/renderer/components/agents/StatusChip.tsx should only have the badge with an icon inside displaying. The status text should only show on hover as a small tooltip.",
+      "plan": "",
+      "context": [
+        "src/renderer/components/agents/StatusChip.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-05T07:08:58.342Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "2d607668-7481-4d8f-89cc-5afebb89e67b",
+      "status": "+",
+      "title": "An active run should only show inside Active not History",
+      "description": "",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/AgentsView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-06T13:37:30.236Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "5fcbee8a-2734-4fa5-b404-6d9155a01053",
+      "status": "+",
+      "title": "Status and sort preferences are not stored",
+      "description": "Whenever the user changes preferences for what to display in the StoriesView.tsx in the 'list' mode - it should store that, so at the next session it can be resumed in the same exact state.",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/StoriesView.tsx",
+        "src/renderer/components/stories/StatusControl.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-05T16:29:30.498Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "76ff2065-cd03-4815-b36b-8dfabd278b2b",
+      "status": "+",
+      "title": "Use the StatusChip inside AgentRunBullet",
+      "description": "We should reuse this nice component that we have.",
+      "plan": "",
+      "context": [
+        "src/renderer/components/agents/StatusChip.tsx",
+        "src/renderer/components/agents/AgentRunBullet.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-05T09:57:34.418Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "46fbca0c-0fd5-4b92-aeae-5e8488cfd192",
+      "status": "+",
+      "title": "The ModelChip should be slimmer",
+      "description": "Have the provider on one row and the modle name on a second row.",
+      "plan": "",
+      "context": [
+        "src/renderer/components/agents/ModelChip.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-06T02:40:14.745Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "5f2a9d3e-dfa3-4e79-ba0b-8b2252556681",
+      "status": "+",
+      "title": "When editing/creating a feature allow quick file lookups",
+      "description": "When a user types in the description and starts typing \"@\" a file lookup search tooltip should show above that will filter files based on what the user types. The user can then select the appropriate file. It should also automatically add this file into the Context Files list.\n\nThis feature is currently implemented seperately inside @src/renderer/screens/ChatView.tsx  and @src/renderer/components/stories/FeatureForm.tsx \nthe files responsible are:\n@src/renderer/components/ui/FileMentionsTextarea.tsx and @src/renderer/hooks/useFilesAutocomplete.ts   \n\n@src/renderer/screens/ChatView.tsx actually also uses @src/renderer/hooks/useReferencesAutocomplete.ts which allows the text input to display references. Both of these ideas are relevant for @src/renderer/components/stories/FeatureForm.tsx and @src/renderer/screens/ChatView.tsx . Both should allow the display of references lookup and file lookup - they simply must be able to have callbacks so that they can do extra things with them (FeatureForm needs to add/remove files to/from the context and add/remove blockers to/from the feature - this is missing right now).",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/ChatView.tsx",
+        "src/renderer/components/ui/FileMentionsTextarea.tsx",
+        "src/renderer/hooks/useFilesAutocomplete.ts",
+        "src/renderer/hooks/useReferencesAutocomplete.ts",
+        "src/renderer/components/stories/FeatureForm.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-05T17:32:57.885Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "7dd2e06b-32aa-418b-9e32-5efc0ecd94dd",
+      "status": "+",
+      "title": "The search and sort bar for features should be placed at the top",
+      "description": "StoryDetailsView.tsx should follow StoriesView.tsx",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/StoriesView.tsx",
+        "src/renderer/stories/StoryDetailsView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-05T07:25:18.133Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "274eb915-a7b3-4eed-b71d-e7888f1340fb",
+      "status": "+",
+      "title": "ChatConversation improvements",
+      "description": "@src/renderer/components/agents/ChatConversation.tsx  is currently broken - there was a new type AgentFeatureRunLog introduced inside AgentRun in the file @src/renderer/services/agentsService.ts . Adapt everything in ChatConversation to make it work. Display a list of features in an AgentRun, each Feature run showing the 'turns'. After the first initial message, each turn is a series of 2 messages - 1 from the LLM and 1 a response with tool calls. The final message is a single one from the LLM. Make sure the orchestrator works correctly too.",
+      "plan": "",
+      "context": [
+        "src/renderer/components/agents/ChatConversation.tsx",
+        "packages/factory-ts/src/types.ts",
+        "src/renderer/services/agentsService.ts",
+        "src/renderer/screens/ChatView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-06T17:01:07.778Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "26d01bef-ce79-498a-9cc8-7a6ada530002",
+      "status": "+",
+      "title": "Reference and File lookup usability improvements",
+      "description": "When the user types # for references and @ for files to be looked up in the @src/renderer/components/ui/FileMentionsTextarea.tsx if the user presses space while the lookup is showing - auto pick the top result.\nAlso, for references - they should always display in the text as #{story_index}.{feature_index} - the user will most likely search for the features by these indices.",
+      "plan": "",
+      "context": [
+        "src/renderer/components/ui/FileMentionsTextarea.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-06T21:26:16.900Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "5f13e562-bbd6-4f67-97c9-00ba79ddb138",
+      "status": "+",
+      "title": "After running a first agent, running any more stalls",
+      "description": "Any consecutive agent after the first never starts.\nCancelling an agent from the @src/renderer/screens/AgentsView.tsx   screen doesn't help either.\n\nThe last message in the log is:\n[factory] SUBSCRIBE\n\nI can see this message in the agent run log:\n\"message\": \"Error: ENOENT: no such file or directory, open '/var/folders/25/4dns7s115_q13z992np622qw0000gn/T/factory-ts-A3L8P3/workspace/projects/main.json'\\n    at async open (node:internal/fs/promises:639:25)\\n    at async Object.readFile (node:internal/fs/promises:1243:14)\\n    at async Object.getProjectDir (file:///packages/factory-ts/dist/storyUtils.js:18:17)\\n    at async runIsolatedOrchestrator (file:///Users/cloud/Documents/Work/TheFactory/projects/overseer-local/packages/factory-ts/dist/orchestrator.js:489:24)\\n    at async file:///packages/factory-ts/dist/index.js:197:17\",\n\n\nAnd I can see a warning in the console:\nMaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 files:subscribe listeners added.",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/AgentsView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-05T18:47:11.518Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "57988106-364d-4e52-8b50-94d18839c319",
+      "status": "+",
+      "title": "ChatConversation improvements",
+      "description": "@src/renderer/components/agents/ChatConversation.tsx  doesn't update while an agent is running. I have to close the popup and open it to see the latest messages. This shouldn't be the case - it should keep on scrolling down the messages if the user is at the bottom, and if not - keep on adding them.",
+      "plan": "",
+      "context": [
+        "src/renderer/components/agents/ChatConversation.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-05T20:40:23.701Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "dc067730-dede-40a5-affe-e04410170819",
+      "status": "+",
+      "title": "AgentsView and AllAgentsView improvements",
+      "description": "In  @src/renderer/screens/AgentsView.tsx  the active and history runs should be sorted by date - the most recent at the top\n\nAlso, both in @src/renderer/screens/AgentsView.tsx and in @src/renderer/screens/AllAgentsView.tsx it shouldn't show the Turn column, but instead show how many features were completed out of how many.\n\nIn @src/renderer/screens/AgentsView.tsx in the active runs, there should be no Status column, but an additional Thinking column before duration that should update with the time the agent is taking to answer the last message.",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/AgentsView.tsx",
+        "src/renderer/screens/AllAgentsView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-04T01:03:24.305Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "fd101477-cb98-4d87-90c4-efb87f39c5e6",
+      "status": "+",
+      "title": "Allow moving stories when in 'not-done'",
+      "description": "Pay close attention to what the index should be (remember the display index is always +1 due to starting at 1)\n@src/renderer/screens/StoriesView.tsx\n\nIt should be also possible to move features in @src/renderer/stories/StoryDetailsView.tsx also pay attention to the indices.",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/StoriesView.tsx",
+        "src/renderer/stories/StoryDetailsView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-03T09:24:45.387Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "e3d6999d-3dcd-4f28-8452-77daa5b9cab2",
+      "status": "+",
+      "title": "After closing the app and coming back none of the agent run histories show messages properly",
+      "description": "It seems there's an issue with the way the messages are serialized in @packages/factory-ts/src/orchestrator.ts , the display is in @src/renderer/components/agents/ChatConversation.tsx . Remember, the messages that are passed onto the LLM are in a strict format - they have to specify role as 'user'. For history purposes, the serialisation should add appropraite metadata information to make it easier to display later.",
+      "plan": "",
+      "context": [
+        "packages/factory-ts/src/orchestrator.ts",
+        "src/renderer/components/agents/ChatConversation.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-03T18:41:06.557Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "306733d4-26cb-49c0-a0ff-c34dc7699baa",
+      "status": "+",
+      "title": "Shortcuts in the app were disabled because they interfered with typing in the \"/\" character",
+      "description": "A user must be able to specify which key is the modifier key in settings - @src/renderer/screens/SettingsView.tsx . Bring back the shortcuts - @src/renderer/App.tsx",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/SettingsView.tsx",
+        "src/renderer/App.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-06T12:08:47.925Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "5e9f9a8e-0a8b-44d3-936d-05ca62f981f6",
+      "status": "+",
+      "title": "When no features are in a story - the default agent type is \"speccer\"",
+      "description": "This should be true no matter where it is run from, right now it's only via @src/renderer/components/stories/RunAgentButton.tsx",
+      "plan": "",
+      "context": [
+        "src/renderer/components/stories/RunAgentButton.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-05T19:26:59.024Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "f9eef18e-818e-427d-82ab-8d990bb199c4",
+      "status": "+",
+      "title": "This feature is index 1 - we should have a special quick command wherever in the app for adding a feature to this story only",
+      "description": "",
+      "plan": "",
+      "context": [],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-03T11:21:00.855Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "df22d856-9aa3-4c10-9e91-04291697e0b8",
+      "status": "+",
+      "title": "Notifications should fire when an agent finishes work",
+      "description": "Also when a feature is completed (i.e. a commit is made).\nThe @src/renderer/services/notificationsService.ts is responsible as well @src/notifications/manager.js    \n\nThese should be toggle'able in @src/renderer/screens/SettingsView.tsx",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/SettingsView.tsx",
+        "src/renderer/services/notificationsService.ts",
+        "src/notifications/manager.js"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-03T23:51:40.910Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "9b65af17-0a3d-42e4-bcd2-81b65277651c",
+      "status": "+",
+      "title": "It must be possible to remove agent runs from history",
+      "description": "The agent runs in @src/renderer/screens/AgentsView.tsx or in @src/renderer/screens/AllAgentsView.tsx",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/AgentsView.tsx",
+        "src/renderer/screens/AllAgentsView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-04T19:35:22.527Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "583f4582-9495-46cc-bd49-19c957b9b0a3",
+      "status": "+",
+      "title": "There needs to be an edit button next to the button for new story",
+      "description": "This is inside @src/renderer/stories/StoryDetailsView.tsx - it must be possible to edit a story from within this view. Deleting a story here, would take the user back to Home.",
+      "plan": "",
+      "context": [
+        "src/renderer/stories/StoryDetailsView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-05T20:21:49.849Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "065ff2fe-ac0a-4b31-b57f-8918dcb4057c",
+      "status": "+",
+      "title": "Show a summary of running agents per project in the sidebar",
+      "description": "This should also be visible when the sidebar is minimized - it should show the project icon and this new chip that would display the number of agents.\n@src/renderer/navigation/SidebarView.tsx",
+      "plan": "",
+      "context": [
+        "src/renderer/navigation/SidebarView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-07T08:34:25.596Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "3c0c391d-fe56-4add-a756-793dd2dc6246",
+      "status": "+",
+      "title": "It must be possible to select the icon for a given project",
+      "description": "Create a directory of helpful icons and allow a user to pick from one when they create or edit a project @src/renderer/projects/ProjectManagerModal.tsx - this is then shown in the @src/renderer/navigation/SidebarView.tsx",
+      "plan": "",
+      "context": [
+        "src/renderer/navigation/SidebarView.tsx",
+        "src/renderer/projects/ProjectManagerModal.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-06T06:35:46.515Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "6deecb2f-1e0c-4e0c-8f4d-349a18c02e18",
+      "status": "+",
+      "title": "AgentsView shows the thinking time incorrectly",
+      "description": "When the 'run/heartbeat' event is received from @packages/factory-ts/src/orchestrator.ts it seems to make the display reset the thinking time counter. The counter should be purely based on the time the last message was received and the time now. This is for @src/renderer/components/agents/AgentRunRow.tsx",
+      "plan": "",
+      "context": [
+        "packages/factory-ts/src/orchestrator.ts",
+        "src/renderer/components/agents/AgentRunRow.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-05T13:58:57.299Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "1e6d13dd-e154-4612-8751-7182a7d660e6",
+      "status": "+",
+      "title": "Lookup fix",
+      "description": "When using the file lookup when typing in @ in the description of a feature, the user has to type in space twice or more for it to allow to type further. One space should be enough, and it should put the caret one space further than the filename. This logic is in @src/renderer/hooks/useFilesAutocomplete.ts and displayed in @src/renderer/components/ui/RichText.tsx",
+      "plan": "",
+      "context": [
+        "src/renderer/hooks/useFilesAutocomplete.ts",
+        "src/renderer/components/ui/RichText.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-07T00:18:16.591Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "7cd60fb3-fe0f-478f-ac17-915b824f7f65",
+      "status": "+",
+      "title": "Story lookup fix",
+      "description": "When using story lookup, it doesn't allow the user to search by typing in \"1.1\" for instance. The moment the user types in the \".\" the dropdown disappears. The logic is in @src/renderer/hooks/useReferencesAutocomplete.ts and used inside @src/renderer/components/ui/RichText.tsx \n\nAlso, when typing in \"#8\" for instance - it incorrectly references the blocker - the user types in the reference, but the blocker should actually hold the proper id information (so reverse lookup must be done).",
+      "plan": "",
+      "context": [
+        "src/renderer/hooks/useReferencesAutocomplete.ts",
+        "src/renderer/components/ui/RichText.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-05T08:29:50.308Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "8d6c71e6-f74b-4155-bdd2-56baa2bbd40a",
+      "status": "+",
+      "title": "when switching views - the prefs for which view is stored in StoriesView is lost",
+      "description": "When switching screens from the @src/renderer/screens/StoriesView.tsx to any other of the screens in the @src/renderer/navigation/SidebarView.tsx it resets the previous status selection and sorting selection. This shouldn't happen - these preferences must be kept.",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/StoriesView.tsx",
+        "src/renderer/navigation/SidebarView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-05T03:14:38.492Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "006bc18d-88c6-4257-9d76-69ad87c9c502",
+      "status": "+",
+      "title": "Typing in \"?\" shows the help menu",
+      "description": "The user has to click Shift+\"?\" and it shows the help menu - it should do that for Shift+\"H\".\nAll these shortcuts, along the modifier key should be configurable in @src/renderer/screens/SettingsView.tsx",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/SettingsView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-07T11:41:35.154Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "75e8b34f-8e44-4bac-9c9a-26c0dfb17224",
+      "status": "+",
+      "title": "when searching commands in the search input box in CommandMenu.tsx it must be possible to use arrows to go up/down and select the appropriate command",
+      "description": "The input box inside @src/renderer/components/ui/CommandMenu.tsx \n should be a single line input - so the user cannot go up and down in there. Using up and down arrows selects different items in the results list below the input box.\nSo the user types in \"Go\", the results filter all the results for that and its possible to select whichever result the user wants and hit enter to activate it.\nThe first time up is pressed - the bottom result should be selected.\nThe first time down is pressed - the top result should be selected.\nOnce something is selected, but the user types more - just keep the selection within min/max of 0 and results length -1",
+      "plan": "",
+      "context": [
+        "src/renderer/components/ui/CommandMenu.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-05T10:39:51.434Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "35d46d98-8f89-483a-9470-e2e615fd41a9",
+      "status": "+",
+      "title": "Tooltip accessibility and robustness improvements",
+      "description": "Make Tooltip component ARIA-correct and safe for multiple instances.\n\nImplementation details (src/renderer/components/ui/Tooltip.tsx):\n- Generate a unique id per tooltip instance (e.g., useId) and assign it to the tooltip element; set anchor 'aria-describedby' to that id when open.\n- Remove hardcoded 'aria-describedby'='tooltip'.\n- Add Escape key handling to hide when focused on the anchor.\n- Ensure role=tooltip and correct z-index are preserved.\n\nAcceptance criteria:\n- Two adjacent buttons using Tooltip both show their own content and 'aria-describedby' points to their unique tooltip id when open.\n- Pressing Escape while the anchor has focus hides the tooltip.\n- No duplicate id usage across multiple tooltip instances.",
+      "plan": "",
+      "context": [],
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-06T09:30:13.207Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "e358e778-5d29-492a-8943-e67e31b45833",
+      "status": "+",
+      "title": "Modal accessibility: aria-labelledby/aria-describedby and scroll lock",
+      "description": "Improve Modal semantics and body scroll behavior.\n\nImplementation details (src/renderer/components/ui/Modal.tsx):\n- Give the title element a unique id and wire 'aria-labelledby' on the dialog to that id when title exists.\n- Allow optional description id wiring via 'aria-describedby' (useful from AlertDialog when description is provided).\n- Lock body scrolling while a modal is open (set document.body.style.overflow='hidden') and restore on close/unmount.\n\nAcceptance criteria:\n- Screen readers announce the modal title and description upon opening.\n- While a modal is open, the page behind it cannot scroll; once closed, body scrolling returns to its previous state.\n- Existing focus trapping and Escape behavior remain intact.",
+      "plan": "",
+      "context": [],
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-03T20:27:03.746Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "27201172-7e31-4e3b-bf06-eb1737ddfadb",
+      "status": "+",
+      "title": "Dynamic modifier glyphs in shortcuts UI and command menu",
+      "description": "Render keyboard shortcuts using the user-selected modifier (Cmd vs Ctrl) consistently.\n\nImplementation details:\n- Enhance src/renderer/hooks/useShortcuts.tsx to expose a read-only getter for the current modifier (e.g., export function getShortcutsModifier(): 'meta' | 'ctrl').\n- Update src/renderer/components/ui/ShortcutsHelp.tsx and src/renderer/components/ui/CommandMenu.tsx to format displayed shortcuts based on the current modifier, replacing hardcoded 'Cmd/Ctrl' strings (e.g., show '⌘K' on mac modifier and 'Ctrl+K' otherwise).\n\nAcceptance criteria:\n- Changing the shortcuts modifier in app settings (after reload, consistent with current provider behavior) updates the displayed shortcut glyphs in ShortcutsHelp and CommandMenu.\n- All visible shortcut hints reflect the correct modifier (no \"Cmd/Ctrl\" placeholders).",
+      "plan": "",
+      "context": [],
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-06T18:09:37.245Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "98cc6216-a675-40cb-b763-5ac3ccc98b65",
+      "status": "+",
+      "title": "CollapsibleSidebar semantics: use buttons for actionable items",
+      "description": "Improve navigation item semantics for better accessibility.\n\nImplementation details (src/renderer/components/ui/CollapsibleSidebar.tsx):\n- Replace the inner div with role=\"button\" for each clickable nav item with an actual <button> element, preserving current classes and event handlers.\n- Keep roving tabindex behavior and keyboard activation (Enter/Space) intact, but rely on native button semantics.\n- Ensure aria-current or aria-selected is still used appropriately.\n\nAcceptance criteria:\n- Keyboard navigation (ArrowUp/ArrowDown/Home/End + Enter/Space activation) works as before.\n- Screen readers announce items as buttons within navigation; no loss of functionality.\n- No regression in compact/collapsed behavior and badges/actions rendering.",
+      "plan": "",
+      "context": [],
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-04T21:11:24.627Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "a940d772-c613-427c-9dd4-88984e9f24ec",
+      "status": "+",
+      "title": "StoriesListView: skeletons for initial loading state",
+      "description": "Replace text-only loading state with skeleton placeholders for a smoother UX.\n\nImplementation details (src/renderer/stories/StoriesListView.tsx):\n- When isAppSettingsLoaded is false, render a list of ~6 skeleton rows using src/renderer/components/ui/Skeleton.tsx to approximate story rows' layout (id/status area, title/desc lines, and actions area blocks).\n- Keep current \"Loading settings…\" live region messaging accessible (aria-live politely) in the count area.\n\nAcceptance criteria:\n- Before settings are loaded, story area shows skeleton placeholders instead of a static 'Loading...' string.\n- Once loaded, skeletons disappear and the real content renders.\n- No layout shift beyond expected content replacement.",
+      "plan": "",
+      "context": [],
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-04T16:52:10.747Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "50188f39-ce56-4087-90fb-70a107a7357f",
+      "status": "+",
+      "title": "Consistent focus-visible styling on interactive elements",
+      "description": "Ensure keyboard users see a consistent focus outline across buttons, nav items, and inputs.\n\nImplementation details:\n- Update CSS (src/index.css) to provide a consistent :focus-visible ring/outline for .btn, .btn-secondary, .btn-icon, .nav-item, .nav-toggle, .nav-trigger, .ui-select trigger, inputs, and other clickable UI controls.\n- Do not override focus when using mouse; rely on :focus-visible.\n\nAcceptance criteria:\n- Tabbing through the UI shows clear, consistent focus outlines on all interactive controls mentioned.\n- Mouse users do not see focus outlines unless they keyboard-focus an element (focus-visible behavior).",
+      "plan": "",
+      "context": [],
+      "acceptance": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-05T22:46:51.521Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "9fb948d2-235d-4322-9462-93a9ca8ce283",
+      "status": "+",
+      "title": "New section in settings - configuring WebSearch Api keys for exa, serpapi and tavily",
+      "description": "This must be a new options section in @src/renderer/screens/SettingsView.tsx .\nIt must be persisted and the user can put in a key for each of the tools and save it.",
+      "context": [
+        "src/renderer/screens/SettingsView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-04T18:28:11.511Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "8acda51f-97c8-4614-8800-cb2d7607bf16",
+      "status": "+",
+      "title": "Use the configuration of WebSearch api keys - exa, serpapi and tavily",
+      "description": "We are storing the api keys to these inside @src/renderer/screens/SettingsView.tsx - we need to use them in  'thefactory-tools' that has webSearch tooling.\nThe places where these new apiKeys can be provided is inside @src/chat/ChatsManager.js when calling 'buildChatTools' inside 'getCompletion'; and in @src/tools/factory/mainOrchestrator.js when calling 'orchestrator.startRun' .",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/SettingsView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-05T04:43:47.504Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "bb3a99c3-4e37-47ae-b3df-4b6f5317faed",
+      "status": "+",
+      "title": "New Section in Settings - configuring github credentials",
+      "description": "This must be a new options section in @src/renderer/screens/SettingsView.tsx .\nIt must be persisted and the user can put in a username and a personal token.\nIt has to be persisted across sessions.",
+      "plan": "",
+      "context": [],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-04T09:25:05.320Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "ada1bb79-e120-493b-b0ba-13d11951b42b",
+      "status": "+",
+      "title": "LiveData providers are project specific or global",
+      "description": "Make it possible to configure a LiveDataProvider as global or targeting  the project it's being made in - the views are in @src/renderer/screens/LiveDataView.tsx .\nCurrently we have the Agent prices provider - this should be global, as it gets the prices that all LLM agent runs use to show the cost per token.\nThere's a 2nd provider currently configured for this project - the BTC price getter - that one should be specific to this project (Overseer Local).\nResponsible classes are:\n@src/renderer/hooks/useLiveData.tsx and @src/renderer/services/liveDataService.ts",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/LiveDataView.tsx",
+        "src/renderer/hooks/useLiveData.tsx",
+        "src/renderer/services/liveDataService.ts"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-04T14:31:02.882Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "270271e3-5a53-45ed-9c31-131e9bb4f36b",
+      "status": "+",
+      "title": "Loading screen",
+      "description": "We need a loading screen that will show at the beginning of app launch, while all necessary things are being loaded. This needs to be a separate screen - placed under `src/renderer/screens` just like @src/renderer/screens/StoriesView.tsx . The app entry is in @src/renderer/App.tsx .\nFor the time being - make sure the loading screen loads the user preferences and app settings - @src/renderer/hooks/useAppSettings.ts",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/StoriesView.tsx",
+        "src/renderer/App.tsx",
+        "src/renderer/hooks/useAppSettings.ts"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-06T20:47:41.598Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "8eb99cfc-6aeb-4f17-ae04-73621bdd63ce",
+      "status": "+",
+      "title": "when switching projects - go to the base of a given screen",
+      "description": "Right now when viewing a story and switching projects - it shows that story from the new project's perspective which isn't found.\nWe need to make sure that in such cases we go to the main sidebar screen - in the story example - @src/renderer/stories/StoriesListView.tsx .\n@src/renderer/navigation/SidebarView.tsx is where we switch projects.",
+      "plan": "",
+      "context": [
+        "src/renderer/stories/StoriesListView.tsx",
+        "src/renderer/navigation/SidebarView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-05T01:39:46.956Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "943be0ce-0c96-48ab-a820-37b919b9a150",
+      "status": "+",
+      "title": "AppSettings needs an AppSettingsContext",
+      "description": "Same as @src/renderer/contexts/ProjectContext.tsx , created in @src/renderer/App.tsx ; and then used in @src/renderer/hooks/useProjectSettings.ts we need the same exact approach for @src/renderer/hooks/useAppSettings.ts . It essentially needs to be a singleton used across the project and this will make sure that's the case.\nAppSettings should be such a context of the first level.",
+      "plan": "",
+      "context": [
+        "src/renderer/contexts/ProjectContext.tsx",
+        "src/renderer/hooks/useProjectSettings.ts",
+        "src/renderer/App.tsx",
+        "src/renderer/hooks/useAppSettings.ts"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-04T22:56:33.707Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "76a35a14-e633-4f4a-827f-f7521123176d",
+      "status": "+",
+      "title": "useLLMConfig should be an app wide context",
+      "description": "Make @src/renderer/hooks/useLLMConfig.ts follow the same pattern as @src/renderer/contexts/AppSettingsContext.tsx and @src/renderer/contexts/ProjectContext.tsx to turn it into a context initialised once in @src/renderer/App.tsx",
+      "plan": "",
+      "context": [
+        "src/renderer/hooks/useLLMConfig.ts",
+        "src/renderer/contexts/AppSettingsContext.tsx",
+        "src/renderer/contexts/ProjectContext.tsx",
+        "src/renderer/App.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-05T10:22:18.755Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "032e4535-7d44-4654-bc6d-811d395b0285",
+      "status": "+",
+      "title": "turn useAgents into a context",
+      "description": "Make @src/renderer/hooks/useAgents.ts .ts follow the same pattern as @src/renderer/contexts/AppSettingsContext.tsx  and @src/renderer/contexts/ProjectContext.tsx  to turn it into a context initialised once in @src/renderer/App.tsx",
+      "plan": "",
+      "context": [
+        "src/renderer/hooks/useAgents.ts",
+        "src/renderer/contexts/AppSettingsContext.tsx",
+        "src/renderer/contexts/ProjectContext.tsx",
+        "src/renderer/App.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-07T11:25:15.431Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "d621c45b-3c4c-4814-81bd-7f1a1e25f6f0",
+      "status": "+",
+      "title": "turn useFiles into context",
+      "description": "Make @src/renderer/hooks/useFiles.tsx follow the same pattern as @src/renderer/contexts/AppSettingsContext.tsx   and @src/renderer/contexts/ProjectContext.tsx   to turn it into a context initialised once in @src/renderer/App.tsx .",
+      "plan": "",
+      "context": [
+        "src/renderer/hooks/useFiles.tsx",
+        "src/renderer/App.tsx",
+        "src/renderer/contexts/ProjectContext.tsx",
+        "src/renderer/contexts/AppSettingsContext.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-04T02:53:09.962Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "0f44a2c4-5988-4b86-94d9-38b2ade0a037",
+      "status": "+",
+      "title": "turn useStories into a context",
+      "description": "Make @src/renderer/hooks/useStories.tsx follow the same pattern as @src/renderer/contexts/AppSettingsContext.tsx    and @src/renderer/contexts/ProjectContext.tsx    to turn it into a context initialised once in @src/renderer/App.tsx  .",
+      "plan": "",
+      "context": [
+        "src/renderer/hooks/useStories.tsx",
+        "src/renderer/contexts/AppSettingsContext.tsx",
+        "src/renderer/contexts/ProjectContext.tsx",
+        "src/renderer/App.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-07T04:45:56.045Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "f8dbb257-f348-48ec-8af2-bbb92fc6a1e0",
+      "status": "+",
+      "title": "Allow rating of runs",
+      "description": "In @src/renderer/screens/AgentsView.tsx there needs to be a new column 'rating' left to the actions buttons.\nIf an 'AgentRunHistory' doesn't have a rating, it shows two buttons (vertically stacked) - a thumbs up and a thumbs down - that are hollow icons. On hover, they are filled with color (green for up and red for down). When clicking, it needs to call via @src/renderer/contexts/AgentsContext.tsx the 'rateRun' functions from @src/renderer/services/factoryService.ts . Once a run has a rating (1 for up, 0 for down), it should only show the filled in button displaying the rating. If a user clicks a rating that was done - it will remove the rating.",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/AgentsView.tsx",
+        "src/renderer/contexts/AgentsContext.tsx",
+        "src/renderer/services/factoryService.ts"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-03T11:58:55.790Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "12e26fae-357e-44cb-b1d6-ac8b9ba2c439",
+      "status": "+",
+      "title": "Model statistics",
+      "description": "In @src/renderer/screens/AllAgentsView.tsx we need to display statistics per model and per project. We don't need to display all the runs like it is showing right now - that's already shown in each project's individual @src/renderer/screens/AgentsView.tsx .\n\nStatistics we require - overall average costs that are shown now.\n\nOverall cheapest model on average, overall most expensive model on average, overall fastest model on average (per feature duration), overall slowest model on average (per feature duration), overall model with highest average rating, overall model with lowest average rating.\n\nJust the same as all these overall stats - we want to display the same per project.\n\nAll in a nice scrollable table similar to what's already shown right now.",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/AllAgentsView.tsx",
+        "src/renderer/screens/AgentsView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-07T02:04:23.111Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "60237404-0b90-4663-9ed3-de9db2d77354",
+      "status": "+",
+      "title": "Apply formatter on save",
+      "description": "When using VSCode and saving a file the project needs to auto apply a formatter so that all code is always in the same style.\nWe also need to have a script under /scripts that can be run on all files to make sure they have the format applied.",
+      "plan": "",
+      "context": [],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-05T15:43:48.371Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "2c41b67b-2bd2-4a6a-b7ef-5b2bd97380cb",
+      "status": "+",
+      "title": "Apply formatter on git commit",
+      "description": "Whenever a commit happens - it needs to have a formatter be applied before the code ends up being pushed or seen by other users.",
+      "plan": "",
+      "context": [],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-06T15:25:45.530Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "af06b354-ef07-4764-8be3-2f731e9aad33",
+      "status": "+",
+      "title": "AllAgents statistics rework",
+      "description": "In @src/renderer/screens/AllAgentsView.tsx there needs to be a few improvements:\n1) the overall section should be the top row of the \"Projects statistics\" section. It should have a blueish background to make it stand out from the project ones.\n2) Move the \"Projects statistics\" above \"Model statistics\"\n3) Make the \"Model statistics\" match \"Projects statistics in terms of columns as much as possible\n4) Add a section \"Agents statistics\" that similarly to per project stats will have the same breakdown but per agentType.\n5) Replace the active runs item from the top with a total time spent by agents.",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/AllAgentsView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-04T13:36:16.991Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "34c83d4f-078d-45c3-b85a-e701f1d82f3a",
+      "status": "+",
+      "title": "AllAgentsView rework",
+      "description": "In @src/renderer/screens/AllAgentsView.tsx we need to rework the following:\n1) remove the Overall highlights\n2) the projects statistics:\n- the Overall row (the 1st one) needs to have a light blue background.\n3) all sections:\n - Fastest (per feature), Slowest (per feature) columns, should have the text on 2 lines. The second line saying \"(pre feature)\"\n- The values for columns showing a model chip + cost should have them vertically stacked, so the model chip first and below it the cost.\n4) at the top, remove the avg cost per run - add instead a total stories/features worked on",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/AllAgentsView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-06T10:05:58.824Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "05393210-77ab-4301-8243-accf0edac8d5",
+      "status": "+",
+      "title": "Make the app icon work",
+      "description": "There's an icon included 'icon.jpeg' in the root of this project.\nMake it work as the app's icon.",
+      "plan": "",
+      "context": [],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-07T09:36:30.388Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "ea8dc9a0-203e-42c6-ab4d-70db372c0003",
+      "status": "+",
+      "title": "Cleanup the SettingsView",
+      "description": "The @src/renderer/screens/SettingsView.tsx is currently overloaded by its sub views.\nEach subview should be in its own separate folder as it serves as a separate main view. Refactor it cleanly.",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/SettingsView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-03T15:15:53.143Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "85914410-3864-43fa-8317-b90dedc12ce0",
+      "status": "+",
+      "title": "Managers.js could be typed",
+      "description": "@src/managers.js could be turned into a typescript file so that we can use all the typing niceties also in all of the managers:\n@src/chat/ChatsManager.js , @src/db/DatabaseManager.js , @src/document_ingestion/DocumentIngestionManager.js , @src/factory-tools/FactoryToolsManager.js , @src/files/FilesManager.js , @src/git-monitor/GitMonitorManager.js , @src/live-data/liveDataManager.js , @src/notifications/NotificationsManager.js , @src/stories/StoriesManager.js  , @src/projects/ProjectsManager.js  , @src/settings/SettingsManager.js",
+      "plan": "",
+      "context": [
+        "src/managers.js",
+        "src/chat/ChatsManager.js",
+        "src/db/DatabaseManager.js",
+        "src/document_ingestion/DocumentIngestionManager.js",
+        "src/factory-tools/FactoryToolsManager.js",
+        "src/files/FilesManager.js",
+        "src/git-monitor/GitMonitorManager.js",
+        "src/live-data/liveDataManager.js",
+        "src/notifications/NotificationsManager.js",
+        "src/settings/SettingsManager.js",
+        "src/stories/StoriesManager.js",
+        "src/projects/ProjectsManager.js"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-05T06:38:03.907Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "74d5f63b-8797-43f5-b571-fd5bebf56550",
+      "status": "+",
+      "title": "Replace all the emoji icons in the Sidebar with icons specific to this project",
+      "description": "They should all reside alongside other icons in @src/renderer/components/ui/Icons.tsx .\nUpdate @src/renderer/components/ui/CollapsibleSidebar.tsx and @src/renderer/navigation/SidebarView.tsx .\nKeep it according to style defined in @docs/styleguide/README.md  and @docs/design/DESIGN_SYSTEM.md , @docs/design/DESIGN_TOKENS.md , @docs/design/MONDAY_PALETTE_REFERENCE.md  and @docs/ux/LINEAR_UX_GUIDELINES.md",
+      "plan": "",
+      "context": [
+        "src/renderer/components/ui/Icons.tsx",
+        "docs/styleguide/README.md",
+        "docs/design/DESIGN_SYSTEM.md",
+        "docs/design/DESIGN_TOKENS.md",
+        "docs/design/MONDAY_PALETTE_REFERENCE.md",
+        "docs/ux/LINEAR_UX_GUIDELINES.md",
+        "src/renderer/components/ui/CollapsibleSidebar.tsx",
+        "src/renderer/navigation/SidebarView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-05T12:00:49.016Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "53ab6181-9034-47f0-a6a9-a8b8eca0e504",
+      "status": "+",
+      "title": "All the domain managers could be typed",
+      "description": "All of the managers could be typed and extend the base defined in @src/managers.ts . The managers:\n@src/chat/ChatsManager.js  , @src/db/DatabaseManager.js  , @src/document_ingestion/DocumentIngestionManager.js  , @src/factory-tools/FactoryToolsManager.js  , @src/files/FilesManager.js  , @src/git-monitor/GitMonitorManager.js  , @src/live-data/liveDataManager.js  , @src/notifications/NotificationsManager.js  , @src/stories/StoriesManager.js   , @src/projects/ProjectsManager.js   , @src/settings/SettingsManager.js",
+      "plan": "",
+      "context": [
+        "src/managers.ts",
+        "src/chat/ChatsManager.js",
+        "src/db/DatabaseManager.js",
+        "src/document_ingestion/DocumentIngestionManager.js",
+        "src/factory-tools/FactoryToolsManager.js",
+        "src/files/FilesManager.js",
+        "src/git-monitor/GitMonitorManager.js",
+        "src/live-data/liveDataManager.js",
+        "src/notifications/NotificationsManager.js",
+        "src/stories/StoriesManager.js",
+        "src/projects/ProjectsManager.js",
+        "src/settings/SettingsManager.js"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-05T22:01:00.773Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "40322d85-bc35-4b45-89db-b5e3a393a8e9",
+      "status": "+",
+      "title": "Icons need to be more colorful",
+      "description": "All the icons used in the @src/renderer/components/ui/CollapsibleSidebar.tsx and @src/renderer/navigation/SidebarView.tsx from @src/renderer/components/ui/Icons.tsx need to be more colorful.",
+      "plan": "",
+      "context": [
+        "src/renderer/components/ui/CollapsibleSidebar.tsx",
+        "src/renderer/navigation/SidebarView.tsx",
+        "src/renderer/components/ui/Icons.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-06T04:39:01.567Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "32ec2d90-3244-40a0-a74b-d120f6d512e0",
+      "status": "+",
+      "title": "ProjectsModal must match icon style of new icons",
+      "description": "The icons for projects inside @src/projects/ProjectsManager.ts that are set per project must match the new icons in @src/renderer/components/ui/Icons.tsx that are used in @src/renderer/navigation/SidebarView.tsx",
+      "plan": "",
+      "context": [
+        "src/renderer/components/ui/Icons.tsx",
+        "src/renderer/navigation/SidebarView.tsx",
+        "src/projects/ProjectsManager.ts"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-06T10:49:30.741Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "06c24df0-01ba-4d83-b7ad-f4a5f40175d1",
+      "status": "+",
+      "title": "We need more project icons",
+      "description": "There should be at least 20 various icons in @src/renderer/projects/projectIcons.ts . Also, when a project's icon is set - it should be reflected in @src/renderer/components/ui/CollapsibleSidebar.tsx and @src/renderer/navigation/SidebarView.tsx",
+      "plan": "",
+      "context": [
+        "src/renderer/projects/projectIcons.ts",
+        "src/renderer/components/ui/CollapsibleSidebar.tsx",
+        "src/renderer/navigation/SidebarView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-07T06:46:56.143Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "c20fbc93-7910-4612-a275-95a3d722955c",
+      "status": "+",
+      "title": "Emoji icons",
+      "description": "There are old emojis inside @src/renderer/components/ui/Icons.tsx - they need to be translated into the svg icons in that file, and then used in the list for project icons inside @src/renderer/projects/projectIcons.tsx",
+      "plan": "",
+      "context": [
+        "src/renderer/components/ui/Icons.tsx",
+        "src/renderer/projects/projectIcons.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-04T07:23:52.085Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "4673bd96-c874-4b92-8779-d81af432c032",
+      "status": "+",
+      "title": "When a feature has a rejection then a story is not-done",
+      "description": "No matter what the status of the Story, if there's any feature with a rejection - the Story should also show in the @src/renderer/screens/StoriesView.tsx when \"not-done\" is selected",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/StoriesView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-06T04:13:42.320Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "fac00d4a-01a5-4012-8481-bb920ac502db",
+      "status": "+",
+      "title": "Icons need to be more colorful",
+      "description": "All icons in @src/renderer/components/ui/Icons.tsx that are black and white - i.e. ones that don't have 'stroke'/'fill' directly set in their svg lines/circles/rects need to be reworked to be colorful like the sidebar icons \"IconHome\", \"IconFiles\" or \"IconChat\" for example.",
+      "plan": "",
+      "context": [
+        "src/renderer/components/ui/Icons.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-03T10:35:51.018Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "f3b465a1-09be-45e9-80b2-70c84145ce5f",
+      "status": "+",
+      "title": "Show the notifications badge in the Sidebar",
+      "description": "Right now, next to the project in the @src/renderer/navigation/SidebarView.tsx it only shows a running agent badge. It must also show the notifications badge next to it.\nWhen the Sidebar is collapsed - it should shrink both badges and show them vertically stacked - making sure that the project icon is still clearly visible.\n\nThe Notifications button also has a NotificationBadge but it's wrapped in a Tooltip - @src/renderer/components/ui/Tooltip.tsx and it doesn't get centred correctly like the project buttons do.\n\nAll the project buttons should also be wrapped in this Tooltip when collapsed and display the project name in the tooltip.",
+      "plan": "",
+      "context": [
+        "src/renderer/navigation/SidebarView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-03T13:29:49.624Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "e2ac9811-94ae-4088-b00b-546f358b370e",
+      "status": "+",
+      "title": "In all modals - the footer/bottom section is sticky just like the top/header section",
+      "description": "Right now, for instance in @src/renderer/components/stories/FeatureForm.tsx there are buttons at the bottom that get hidden if the form is too big - these need to be sticky at the bottom so they always show (just like the top section).\nThis needs to be true for all modals - so that any place using a modal can define the bottom sticky section. Then only the middle section scrolls.\n@src/renderer/projects/ProjectManagerModal.tsx also should have the sticky bottom buttons.\nThe interface for doing so should be clean and consistent.",
+      "plan": "",
+      "context": [
+        "src/renderer/components/stories/FeatureForm.tsx",
+        "src/renderer/projects/ProjectManagerModal.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:05:37.984Z",
+      "completedAt": "2025-09-03T22:11:49.060Z",
+      "updatedAt": "2025-09-16T13:05:37.984Z"
+    },
+    {
+      "id": "d0647493-d214-40cd-bb93-c12a7a99ef36",
+      "status": "+",
+      "title": "When a feature is modified or added to a story the story status should update",
+      "description": "In @src/renderer/stories/StoryDetailsView.tsx when a new feature is added, the Story's status might still be \"Done\" even though the underlying Story data has changed - the view should update accordingly (by getting the latest story data).",
+      "plan": "",
+      "context": [
+        "src/renderer/stories/StoryDetailsView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "updatedAt": "2025-09-16T13:57:09.140Z",
+      "completedAt": "2025-09-07T12:14:29.815Z"
+    },
+    {
+      "id": "7520ce51-621d-4dfc-8686-1b7806b53aca",
+      "status": "+",
+      "title": "Error when opening AllAgentsView when an agent is running",
+      "description": "When opening @src/renderer/screens/AllAgentsView.tsx  while an agent is running this error occurs:\n\nAllAgentsView.tsx:42 Uncaught TypeError: Cannot read properties of undefined (reading 'flatMap')\n    at AllAgentsView.tsx:42:10\n    at Array.map (<anonymous>)\n    at AllAgentsView.tsx:40:30\n    at AllAgentsView (AllAgentsView.tsx:37:17)\n(anonymous)\t@\tAllAgentsView.tsx:42\n(anonymous)\t@\tAllAgentsView.tsx:40\nAllAgentsView\t@\tAllAgentsView.tsx:37\nhashchange\t\t\n(anonymous)\t@\tNavigator.tsx:133\n(anonymous)\t@\tSidebarView.tsx:211\nonClick\t@\tSidebarView.tsx:365",
+      "plan": "",
+      "context": [
+        "src/renderer/screens/AllAgentsView.tsx"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "updatedAt": "2025-09-16T15:15:43.576Z",
+      "completedAt": "2025-09-07T13:03:56.445Z"
+    },
+    {
+      "id": "f8eb8466-4457-49ca-8c65-9b812aec8a26",
+      "status": "+",
+      "title": "Settings inner sidebar needs to have icons updated",
+      "description": "Just like everywhere else - we are using icons from @src/renderer/components/ui/Icons.tsx or @src/renderer/projects/projectIcons.tsx . Make sure the icons used for categories or anywhere else in @src/renderer/screens/SettingsView.tsx are used from @src/renderer/components/ui/Icons.tsx  (if they don't exist - create one).",
+      "context": [
+        "src/renderer/components/ui/Icons.tsx",
+        "src/renderer/projects/projectIcons.tsx",
+        "src/renderer/screens/SettingsView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-16T15:31:13.926Z",
+      "updatedAt": "2025-09-16T15:48:43.902Z",
+      "completedAt": "2025-09-07T14:21:55.848Z"
+    },
+    {
+      "id": "8ea2946d-0305-4f96-8e42-0f9d9a684de0",
+      "status": "+",
+      "title": "Notifications need to update their icons",
+      "description": "The inner sidebar in @src/renderer/screens/NotificationsView.tsx need to have their icons updated and used from @src/renderer/components/ui/Icons.tsx . If an icon doesn't exist - it should be created according to design.",
+      "context": [
+        "src/renderer/screens/NotificationsView.tsx",
+        "src/renderer/components/ui/Icons.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-16T15:32:02.314Z",
+      "updatedAt": "2025-09-16T15:49:29.864Z",
+      "completedAt": "2025-09-07T15:44:28.252Z"
+    },
+    {
+      "id": "c4236f01-9f8d-4a9a-bd8a-3489a23316d5",
+      "status": "+",
+      "title": "ChatsView needs to have icons updated",
+      "description": "The inner sidebar in @src/renderer/screens/ChatView.tsx need to have their icons updated and used from @src/renderer/components/ui/Icons.tsx  . If an icon doesn't exist - it should be created according to design.",
+      "context": [
+        "src/renderer/screens/ChatView.tsx",
+        "src/renderer/components/ui/Icons.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-16T15:32:32.903Z",
+      "updatedAt": "2025-09-16T15:52:09.662Z",
+      "completedAt": "2025-09-07T16:33:48.525Z"
+    },
+    {
+      "id": "b7716b85-8e3d-4a91-9729-4fca7aab51e9",
+      "status": "+",
+      "title": "Update icons in FilesView",
+      "description": "The inner sidebar in @src/renderer/screens/FilesView.tsx  need to have their icons updated and used from @src/renderer/components/ui/Icons.tsx   . If an icon doesn't exist - it should be created according to design.",
+      "context": [
+        "src/renderer/screens/FilesView.tsx",
+        "src/renderer/components/ui/Icons.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-16T15:32:48.254Z",
+      "updatedAt": "2025-09-16T15:58:09.300Z",
+      "completedAt": "2025-09-07T17:48:27.907Z"
+    },
+    {
+      "id": "cb7d825c-b1ad-4a3f-a164-7e036765b93c",
+      "status": "+",
+      "title": "Write a script under /scripts that will alter the dates of stories/features",
+      "description": "We need a scripts @scripts/alter_dates.ts that will accept two paths as a parameter - first for the stories folder and second for the project.json. When run, will get all the story.json files from  that folder. Put all the features that are completed (have a completedAt) in an array - sort them by story display id (from the project.json - that is a ProjectSpec ) and starting from the one with the highest id, start offsetting each next feature's completedAt by a random amount between 10min and 2hr back in time. Then go over all the story files and update the features by their new completedAt - and also the story should have its completedAt set to value that is the highest amongst its features (if all the features are completed).",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T17:36:04.090Z",
+      "updatedAt": "2025-09-16T17:40:03.645Z",
+      "completedAt": "2025-09-07T18:14:30.707Z"
+    },
+    {
+      "id": "d8a25ca6-5f26-4957-a2ac-7c9f4291a04f",
+      "status": "+",
+      "title": "The Timeline icon in Icons needs to be improved",
+      "description": "In @src/renderer/components/ui/Icons.tsx fix the TimelineIcon - always follow the same designs as the rest of the icons",
+      "context": [
+        "src/renderer/components/ui/Icons.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-16T18:05:04.834Z",
+      "updatedAt": "2025-09-16T18:56:28.441Z",
+      "completedAt": "2025-09-16T18:56:28.441Z"
+    },
+    {
+      "id": "fcfceb8f-d4af-4411-9a5b-7c059338b4a1",
+      "status": "+",
+      "title": "Make it possible to configure github credentials per project",
+      "description": "Just like with LLM settings in @src/renderer/screens/settings/llms/LLMSettings.tsx we want to store multiple github credentials and then each project when being created or edited (in @src/renderer/projects/ProjectManagerModal.tsx ) can optionally have them set (the id of the credentials would be stored in the ProjectSpec metadata). \nSo the @src/renderer/screens/settings/github/GitHubSettings.tsx  needs to be reworked to accomodate too.",
+      "context": [
+        "src/renderer/screens/settings/llms/LLMSettings.tsx",
+        "src/renderer/screens/settings/github/GitHubSettings.tsx",
+        "src/renderer/projects/ProjectManagerModal.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-17T10:22:57.121Z",
+      "updatedAt": "2025-09-17T10:31:34.500Z",
+      "completedAt": "2025-09-17T10:31:34.500Z"
+    },
+    {
+      "id": "5a9ae0d2-7711-4149-bd57-1c43303613f6",
+      "status": "+",
+      "title": "Show the same topbar in AgentsView as in AllAgentsView",
+      "description": "@src/renderer/screens/AllAgentsView.tsx has this bar at the top with run statistics - we want to display the exact same per project inside @src/renderer/screens/AgentsView.tsx",
+      "context": [
+        "src/renderer/screens/AllAgentsView.tsx",
+        "src/renderer/screens/AgentsView.tsx"
+      ],
+      "createdAt": "2025-09-17T15:37:46.138Z",
+      "updatedAt": "2025-09-17T15:41:20.741Z",
+      "completedAt": "2025-09-17T15:41:20.741Z"
+    },
+    {
+      "id": "f07cc494-56fa-45c9-9c12-40fbbce37a86",
+      "status": "+",
+      "title": "In Timeline the Today button doesn't work correctly",
+      "description": "In @src/renderer/screens/ProjectTimelineView.tsx the Today button needs to scroll the user to the correct spot in each timeline (Day | Week | Month) - currently it's broken.",
+      "context": [
+        "src/renderer/screens/ProjectTimelineView.tsx"
+      ],
+      "createdAt": "2025-09-18T11:24:14.814Z",
+      "updatedAt": "2025-09-18T11:28:29.480Z",
+      "completedAt": "2025-09-18T11:28:29.480Z"
+    },
+    {
+      "id": "fccb9bc5-1ca8-46ad-9702-6376d55de3fa",
+      "status": "+",
+      "title": "When switching view modes always show today's date",
+      "description": "In @src/renderer/screens/ProjectTimelineView.tsx when the app opens and when switching modes between DAY | WEEK | MONTH - always make sure today's date is visible (so as if the user pressed the \"Today\" button).",
+      "context": [
+        "src/renderer/screens/ProjectTimelineView.tsx"
+      ],
+      "createdAt": "2025-09-18T11:47:16.170Z",
+      "updatedAt": "2025-09-18T11:55:22.476Z",
+      "completedAt": "2025-09-18T11:55:22.476Z"
+    },
+    {
+      "id": "18cbcc94-0531-4534-936c-7c7fa5efda8c",
+      "status": "+",
+      "title": "When there are any changes in creating/editing a story or feature confirm",
+      "description": "In @src/renderer/components/stories/FeatureForm.tsx and @src/renderer/components/stories/StoryForm.tsx that are used in @src/renderer/stories/FeatureCreateView.tsx , @src/renderer/stories/FeatureEditView.tsx , @src/renderer/stories/StoryCreateView.tsx and @src/renderer/stories/StoryEditView.tsx - make sure that if there are any changes whatsoever to the form, and the user clicks out or in some way tries to close the popup - an alert is displayed saying that there are pending changes and if the user really wants to discard them all and close the popup. The Alert must have a red/destructive \"DISCARD ALL\" button and a standard \"Go Back\" button - only clicking either of these buttons can close the alert.",
+      "context": [
+        "src/renderer/components/stories/FeatureForm.tsx",
+        "src/renderer/components/stories/StoryForm.tsx",
+        "src/renderer/stories/FeatureCreateView.tsx",
+        "src/renderer/stories/FeatureEditView.tsx",
+        "src/renderer/stories/StoryCreateView.tsx",
+        "src/renderer/stories/StoryEditView.tsx"
+      ],
+      "createdAt": "2025-09-18T11:49:51.503Z",
+      "updatedAt": "2025-09-18T12:01:14.795Z",
+      "completedAt": "2025-09-18T12:01:14.795Z"
+    },
+    {
+      "id": "11b7fc32-af7f-409c-a3f0-12a414749e12",
+      "status": "+",
+      "title": "The spinner doesn't spin",
+      "description": "Whenever the user is presented with a spinner it doesn't animate",
+      "context": [],
+      "createdAt": "2025-09-18T22:45:19.736Z",
+      "updatedAt": "2025-09-18T22:48:16.776Z",
+      "completedAt": "2025-09-18T22:48:16.776Z"
+    },
+    {
+      "id": "47590194-5f78-4d06-8aac-62cf60f5fc86",
+      "status": "+",
+      "title": "In StoriesListView when a Story has an agent running - always show it",
+      "description": "The agent running should show always - not just on hover on a story row in @src/renderer/stories/StoriesListView.tsx  in @src/renderer/stories/StoryDetailsView.tsx it's also slightly wrong, as the @src/renderer/components/agents/AgentRunBullet.tsx should replace @src/renderer/components/stories/RunAgentButton.tsx - i.e. it should occupy the same space - it should simply NEVER disappear when there's a task running.",
+      "context": [
+        "src/renderer/stories/StoriesListView.tsx",
+        "src/renderer/stories/StoryDetailsView.tsx",
+        "src/renderer/components/agents/AgentRunBullet.tsx",
+        "src/renderer/components/stories/RunAgentButton.tsx"
+      ],
+      "createdAt": "2025-09-23T00:09:45.531Z",
+      "updatedAt": "2025-09-23T22:02:15.128Z",
+      "blockers": [],
+      "completedAt": "2025-09-23T22:02:15.128Z"
+    },
+    {
+      "id": "a571d64e-213b-4f0e-b641-51678b5c26b5",
+      "status": "+",
+      "title": "when clicking Start Run on a Story row in StoriesListView - don't go to StoryDetailsView",
+      "description": "Currently when clicking start run in @src/renderer/stories/StoriesListView.tsx it will go to the @src/renderer/stories/StoryDetailsView.tsx screen. Clearly the click is somehow propagating - it shouldn't.",
+      "context": [
+        "src/renderer/stories/StoriesListView.tsx",
+        "src/renderer/stories/StoryDetailsView.tsx"
+      ],
+      "createdAt": "2025-09-23T00:11:02.070Z",
+      "updatedAt": "2025-09-23T00:29:20.602Z",
+      "completedAt": "2025-09-23T00:29:20.602Z"
+    },
+    {
+      "id": "b951665d-139c-4761-94f1-c259b36dab42",
+      "status": "+",
+      "title": "Improve the time display in ChatConversation to show a time display similar to AgentRows",
+      "description": "In @src/renderer/components/agents/ChatConversation.tsx it always shows the time taken to respond in seconds - we want it to be more human friendly, so it should always show it in the h:mm:ss format, and now show h or mm if the time is small enough - it should be done similarly in @src/renderer/components/agents/AgentRunRow.tsx",
+      "context": [
+        "src/renderer/components/agents/ChatConversation.tsx",
+        "src/renderer/components/agents/AgentRunRow.tsx"
+      ],
+      "createdAt": "2025-09-23T09:53:32.603Z",
+      "updatedAt": "2025-09-23T13:03:26.543Z",
+      "blockers": [],
+      "completedAt": "2025-09-23T12:27:19.728Z"
+    },
+    {
+      "id": "70889fe4-d1cd-4718-9cf1-f11739204e42",
+      "status": "+",
+      "title": "The Sidebar has grown - make the top with the title stay stick and only the rest scroll",
+      "description": "@src/renderer/navigation/SidebarView.tsx",
+      "context": [
+        "src/renderer/navigation/SidebarView.tsx"
+      ],
+      "createdAt": "2025-09-23T09:56:28.943Z",
+      "updatedAt": "2025-09-23T10:39:42.169Z",
+      "completedAt": "2025-09-23T10:39:42.169Z"
+    },
+    {
+      "id": "995dbbc4-cf40-4749-9cd7-1721cae3e4b6",
+      "status": "+",
+      "title": "Sometimes when a running agent finishes it hangs",
+      "description": "A 'finishFeature' tool call can be seen as received and the agent has finished (all the commits have gone through) but yet, in @src/renderer/screens/AgentsView.tsx there is a running agent showing. After restarting this app - the agent no longer shows as running. It seems there's an issue in @src/renderer/contexts/AgentsContext.tsx with how it stores finished agents?",
+      "context": [
+        "src/renderer/screens/AgentsView.tsx",
+        "src/renderer/contexts/AgentsContext.tsx"
+      ],
+      "createdAt": "2025-09-23T14:46:35.238Z",
+      "updatedAt": "2025-09-23T14:49:31.093Z",
+      "completedAt": "2025-09-23T14:49:31.093Z"
+    },
+    {
+      "id": "0162e2f8-2275-4b51-a5c7-2a91dfc0cde6",
+      "status": "+",
+      "title": "when a file is added while the app is running it's not picked up",
+      "description": "when using @src/renderer/hooks/useFilesAutocomplete.ts a new file doesn't show - there must be some disconnect with @src/renderer/contexts/FilesContext.tsx",
+      "context": [
+        "src/renderer/hooks/useFilesAutocomplete.ts",
+        "src/renderer/contexts/FilesContext.tsx"
+      ],
+      "createdAt": "2025-09-23T17:02:30.318Z",
+      "updatedAt": "2025-09-23T20:13:11.361Z",
+      "completedAt": "2025-09-23T20:13:11.361Z"
+    },
+    {
+      "id": "72945db3-a39d-422d-95c1-23123a9ef01a",
+      "status": "+",
+      "title": "The timeline doesn't filter by projectId",
+      "description": "When switching to different projects while having the @src/renderer/screens/ProjectTimelineView.tsx open it keeps on showing stories/features for all projects.\nIt should only show the stories/feature for the given project.\nDisplaying stories/features for all proejcts should be controlled by a toggle left to the Day|Week|Month buttons. When switching projects, the timeline should show today (i.e. same behaviour as if the Today button was clicked).",
+      "context": [
+        "src/renderer/screens/ProjectTimelineView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-24T16:40:57.363Z",
+      "updatedAt": "2025-09-24T22:43:44.226Z",
+      "completedAt": "2025-09-24T21:59:38.768Z"
+    },
+    {
+      "id": "362f2ca1-0fc2-4076-a70b-3581cd73bd66",
+      "status": "+",
+      "title": "The AllAgentsView should be merged into Agents",
+      "description": "We need to have a toggle at the top right of the @src/renderer/screens/AgentsView.tsx that will either show the current project's runs (what @src/renderer/screens/AgentsView.tsx is currently showing) or for all projects (what @src/renderer/screens/AllAgentsView.tsx is showing) . The All Agents option from the sidebar can be removed",
+      "context": [
+        "src/renderer/screens/AgentsView.tsx",
+        "src/renderer/screens/AllAgentsView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-24T16:42:05.556Z",
+      "updatedAt": "2025-09-24T18:41:36.860Z",
+      "completedAt": "2025-09-24T18:41:36.860Z"
+    },
+    {
+      "id": "12ca6f4f-ef0e-4e14-8f8d-93d5c84598cc",
+      "status": "+",
+      "title": "The settings should be in a footer at the bottom of the sidebar",
+      "description": "Same as the header - it shouldn't scroll - only the button in between should.",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-09-24T16:44:41.298Z",
+      "updatedAt": "2025-09-24T18:48:59.642Z",
+      "completedAt": "2025-09-24T18:48:59.642Z"
+    },
+    {
+      "id": "93772c3c-639f-4110-a2e2-7d5d7f9e91df",
+      "status": "+",
+      "title": "when an agent is running move the spinner",
+      "description": "In @src/renderer/stories/StoriesListView.tsx when an agent is running for a story and showing the @src/renderer/components/agents/AgentRunBullet.tsx - place the bullet to the left of the Story's Id chip (similarly to how the blocked indicator is placed next to the feature's chip).\nMake the action buttons show on hover always (when an agent is running do not show the Run agent button).\nWe need a very similar layout update in @src/renderer/stories/StoryDetailsView.tsx where the @src/renderer/components/agents/AgentRunBullet.tsx needs to move below the status chip for a given feature.",
+      "context": [
+        "src/renderer/stories/StoriesListView.tsx",
+        "src/renderer/components/agents/AgentRunBullet.tsx",
+        "src/renderer/stories/StoryDetailsView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-24T17:27:06.560Z",
+      "updatedAt": "2025-09-24T21:44:29.851Z",
+      "completedAt": "2025-09-24T21:44:29.851Z"
+    },
+    {
+      "id": "4c1c2af8-b8dd-4bdc-8857-eac4b21ec98d",
+      "status": "+",
+      "title": "'thefactory-tools' exposes a new ProjectCodeInfo - use it",
+      "description": "Essentially, each ProjectSpec has a new field `codeInfo` that should be configurable via @src/renderer/projects/ProjectManagerModal.tsx . The new types are referenced in a comment in @src/renderer/services/projectsService.ts .\nIf `codeInfo` is present in a ProjectSpect it means it's a coding project. We must allow users to toggle to a coding project via a switch - then a small popup with dropdowns for language, framework and test framework should appear. If the user exits this popup (with no items selected) - the project gets switched back to a non-coding project one. If there is `codeInfo` in a ProjectSpec then 3 chips need to show with the appropriate info side-by-side in a row. Clicking on any of the chips will open the selector popup mentioned previously but this time with some values preselected.",
+      "context": [
+        "src/renderer/projects/ProjectManagerModal.tsx",
+        "src/renderer/services/projectsService.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-24T21:29:44.028Z",
+      "updatedAt": "2025-09-24T21:56:30.143Z",
+      "completedAt": "2025-09-24T21:56:30.143Z"
+    },
+    {
+      "id": "fae23bb4-639b-41c1-ab9a-a9ab8f56ea29",
+      "status": "+",
+      "title": "ProjectManagerModal codeInfo improvements",
+      "description": "The Chip inside @src/renderer/projects/ProjectManagerModal.tsx was never implemented (I simply wired it to a button). So the modal itself looks bad.\nThis chip needs to be implemented for each item of `codeInfo` .\nFor the languages it should display the image of the language. These icons should be stored somewhere - similarly to @src/renderer/projects/projectIcons.tsx we can have @src/renderer/projects/codeInfoIcons.tsx .\n\nAlso, when editing the items inside @src/renderer/projects/ProjectCodeInfoModal.tsx - some of the lists are so long they end up being clipped by the edge of the app. The list should always be placed below the buttons, be scrollable and of some manageable max size.",
+      "context": [
+        "src/renderer/projects/ProjectManagerModal.tsx",
+        "src/renderer/projects/projectIcons.tsx",
+        "src/renderer/projects/ProjectCodeInfoModal.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-24T23:02:43.623Z",
+      "updatedAt": "2025-09-25T00:34:20.189Z",
+      "completedAt": "2025-09-25T00:34:20.189Z"
+    },
+    {
+      "id": "36a5ae63-4c86-48d3-b7ca-788cd5327671",
+      "status": "+",
+      "title": "the sidebar hide/show button needs improving",
+      "description": "When it is showing the arrow needs to point down, when hidden like now pointing right.\nThe transition needs to animate.",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-09-25T13:31:18.592Z",
+      "updatedAt": "2025-09-25T23:51:04.545Z",
+      "completedAt": "2025-09-25T23:51:04.545Z"
+    },
+    {
+      "id": "23e11a4c-977b-4c11-9088-34103071ba5c",
+      "status": "+",
+      "title": "the coverage table in TestsView should be horizontally scrollable",
+      "description": "Right now the table in @src/renderer/screens/TestsView.tsx - so the @src/renderer/components/tests/CoverageReport.tsx - expands the whole screen to the right - it shouldn't. it should scroll to the right if it grows too big.\nIt's the first column that grows wildly - because some names can be long - but still, the table should have a set size, and only the content within should scroll - the header and the rows.",
+      "context": [
+        "src/renderer/screens/TestsView.tsx",
+        "src/renderer/components/tests/CoverageReport.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-26T01:09:29.374Z",
+      "updatedAt": "2025-09-26T13:38:56.924Z",
+      "completedAt": "2025-09-26T12:55:30.539Z"
+    },
+    {
+      "id": "77c96d8b-6cdd-4f6a-8e73-dcce83e8b431",
+      "status": "+",
+      "title": "after upgrading to new Electron version - modal css/colors are missing",
+      "description": "When displaying a popup like @src/renderer/src/screens/stories/FeatureCreateView.tsx the background is missing the right color (whitish). Inside the \n@src/renderer/src/components/stories/FeatureForm.tsx the file chips are also not displaying properly like they used to.",
+      "context": [
+        "src/renderer/src/screens/stories/FeatureCreateView.tsx",
+        "src/renderer/src/components/stories/FeatureForm.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-28T01:10:09.731Z",
+      "updatedAt": "2025-09-28T01:46:47.076Z",
+      "completedAt": "2025-09-28T01:46:47.076Z"
+    },
+    {
+      "id": "ce6dcda2-3c44-4c9e-9d91-0bb75ea1ec34",
+      "status": "+",
+      "title": "Mobile/Small UI improvements",
+      "description": "In @src/renderer/src/screens/stories/StoryDetailsView.tsx some things need to be shifted.\nThe blockers incoming/outgoing at the top should be in a section between the title section and the search section (so an entirely new section). This should only show if there's a blocker either outgoing or incoming.\nThe add feature button (with the plus) should be in the top right of the `Features` section - horizontally leveled with the title of that section. The edit button (for the whole story) should be in the top right of the `Overview` section - horizontally leveled with the tile of that section.\nNow the search secton will have 3 elements left - the search bar, that status filter and the ordering selection. The latter 2 should be pushed to a 2nd row if the screen becomes small enough so that in the mobile version it shows the search bar at the top and status filter + ordering selection below it.",
+      "context": [
+        "src/renderer/src/screens/stories/StoryDetailsView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-29T10:09:33.896Z",
+      "updatedAt": "2025-09-29T12:52:44.345Z",
+      "completedAt": "2025-09-29T12:31:46.383Z"
+    },
+    {
+      "id": "898404db-c466-4a60-8bd3-52e33785c563",
+      "status": "+",
+      "title": "StoriesListView UI update",
+      "description": "When the screen becomes small @src/renderer/src/screens/stories/StoriesListView.tsx gets a menu bar at the top. We actually want that to be visible all the time, and to show Home to the left like it does in the mobile version.\nThe bar should have the List | Board switch in the middle of it and the model selection chip + chat button to the right.\nThe search section will then contain 3 elements - the search bar, the status filer and the ordering selection. When the screen becomes small enough ,the latter two need to be pushed to a 2nd row, so in the mobile version there will be the search bar visible on one row and the status filer and ordering selection visible on the 2nd row.",
+      "context": [
+        "src/renderer/src/screens/stories/StoriesListView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-29T10:13:41.477Z",
+      "updatedAt": "2025-09-29T12:52:50.659Z",
+      "completedAt": "2025-09-29T12:35:23.003Z"
+    },
+    {
+      "id": "1d8e24a8-ca9e-4e85-b852-800d1350a6dd",
+      "status": "+",
+      "title": "The Files don't display",
+      "description": "For instance in @src/renderer/src/components/stories/FeatureForm.tsx it uses the @src/renderer/src/components/stories/ContextFileChip.tsx which in turn uses @src/renderer/src/components/ui/FileDisplay.tsx , which is a `FilePreviewCard` wrapped in a @src/renderer/src/components/ui/Tooltip.tsx . When these are displayed in the @src/renderer/src/components/stories/FeatureForm.tsx for some files - they don't show at all - just the 'x' (the delete button) shows.\nWhen debugging it seems that the Tooltip never gets to render the `FilePreviewCard` so there must be some bug in there.",
+      "context": [
+        "src/renderer/src/components/stories/FeatureForm.tsx",
+        "src/renderer/src/components/stories/ContextFileChip.tsx",
+        "src/renderer/src/components/ui/FileDisplay.tsx",
+        "src/renderer/src/components/ui/Tooltip.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-29T10:15:39.638Z",
+      "updatedAt": "2025-09-29T12:36:13.973Z",
+      "completedAt": "2025-09-29T12:28:07.232Z"
+    },
+    {
+      "id": "c7cf3d3f-b368-4c00-8e79-1072f213b2c0",
+      "status": "+",
+      "title": "The Feature form is not scrollable",
+      "description": "The @src/renderer/src/components/stories/FeatureForm.tsx inside @src/renderer/src/screens/stories/FeatureCreateView.tsx and @src/renderer/src/screens/stories/FeatureEditView.tsx is not scrollable - it should be.",
+      "context": [
+        "src/renderer/src/components/stories/FeatureForm.tsx",
+        "src/renderer/src/screens/stories/FeatureCreateView.tsx",
+        "src/renderer/src/screens/stories/FeatureEditView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-29T11:40:32.221Z",
+      "updatedAt": "2025-09-29T23:22:33.614Z",
+      "completedAt": "2025-09-29T20:31:51.962Z"
+    },
+    {
+      "id": "9770df69-0ac3-4fcd-99ea-c3af72bfe37b",
+      "status": "+",
+      "title": "When rating an agent run - make it an optimistic local update and show an animation",
+      "description": "In @src/renderer/src/screens/AgentsView.tsx , when clicking one of the ratings on an @src/renderer/src/components/agents/AgentRunRow.tsx - this operation might take a while to complete, which means that right now it takes a while before the UI updates.\nWe need to make it be an optimistic update (so ui updates immediately) and show a nice popping animation of the icon with it rotating and emitting sparks. There are many references to a similar animation to how games do it - this should be similar.\nWhile animating - the rating buttons should be disabled.",
+      "context": [
+        "src/renderer/src/screens/AgentsView.tsx",
+        "src/renderer/src/components/agents/AgentRunRow.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-29T13:30:00.678Z",
+      "updatedAt": "2025-09-29T14:02:14.369Z",
+      "completedAt": "2025-09-29T14:02:14.369Z"
+    },
+    {
+      "id": "d15eda55-d79c-4dff-8228-8a7e745a1fac",
+      "status": "+",
+      "title": "DocumentIngestionManager should check for text files",
+      "description": "When calling `ingestProject` @src/logic/document_ingestion/DocumentIngestionManager.ts should make sure that only text files are passed onto the database manager as only those are processed.",
+      "context": [
+        "src/logic/document_ingestion/DocumentIngestionManager.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-29T13:53:17.464Z",
+      "updatedAt": "2025-09-29T14:04:36.354Z",
+      "completedAt": "2025-09-29T14:04:36.354Z"
+    },
+    {
+      "id": "cc444241-f834-463f-bf98-91c98dd1b706",
+      "status": "+",
+      "title": "Deleting/updating/creating features/stories should be optimistic",
+      "description": "When using @src/renderer/src/components/stories/FeatureForm.tsx in @src/renderer/src/screens/stories/FeatureCreateView.tsx and @src/renderer/src/screens/stories/FeatureEditView.tsx , as well as @src/renderer/src/components/stories/StoryForm.tsx in @src/renderer/src/screens/stories/StoryCreateView.tsx and @src/renderer/src/screens/stories/StoryEditView.tsx - all the changes should be optimistic as the backend changes might take a a little bit of time to update, whereas the user should have immediate visual feedback.",
+      "context": [
+        "src/renderer/src/components/stories/FeatureForm.tsx",
+        "src/renderer/src/screens/stories/FeatureCreateView.tsx",
+        "src/renderer/src/screens/stories/FeatureEditView.tsx",
+        "src/renderer/src/components/stories/StoryForm.tsx",
+        "src/renderer/src/screens/stories/StoryCreateView.tsx",
+        "src/renderer/src/screens/stories/StoryEditView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-29T13:55:24.590Z",
+      "updatedAt": "2025-09-29T13:55:24.590Z"
+    },
+    {
+      "id": "ba50781e-aa29-4dfe-b159-825f9ed88f88",
+      "status": "+",
+      "title": "The AlertDialog when showing the destructiveConfirm doesn't display anything",
+      "description": "The button in AlertDialog (which is in @src/renderer/src/components/ui/Modal.tsx ) is not visible.",
+      "context": [
+        "src/renderer/src/components/ui/Modal.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-29T14:08:52.851Z",
+      "updatedAt": "2025-09-29T18:08:24.188Z",
+      "completedAt": "2025-09-29T15:51:35.680Z"
+    },
+    {
+      "id": "02c446d1-4969-4057-8fb6-2e957b2205aa",
+      "status": "+",
+      "title": "when an agent finishes two notifications show",
+      "description": "there must be a bug somewhere in @src/renderer/src/contexts/AgentsContext.tsx",
+      "context": [
+        "src/renderer/src/contexts/AgentsContext.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-29T14:09:50.870Z",
+      "updatedAt": "2025-09-29T15:40:20.522Z",
+      "completedAt": "2025-09-29T15:40:20.522Z"
+    },
+    {
+      "id": "31bad08b-59b0-468b-a154-7814251bd4cb",
+      "status": "+",
+      "title": "File context chips show \"file not found\" and wrong time and size",
+      "description": "The @src/renderer/src/components/stories/ContextFileChip.tsx shows file not found - even though a correct file path is being fed to it that came from @src/renderer/src/hooks/useFilesAutocomplete.ts .\nAlso, when displaying the full one in a form like @src/renderer/src/components/stories/FeatureForm.tsx - it doesn't show the size or last update time correctly.",
+      "context": [
+        "src/renderer/src/components/stories/ContextFileChip.tsx",
+        "src/renderer/src/hooks/useFilesAutocomplete.ts",
+        "src/renderer/src/components/stories/FeatureForm.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-29T20:10:01.766Z",
+      "updatedAt": "2025-09-29T20:33:30.257Z",
+      "completedAt": "2025-09-29T20:33:30.257Z"
+    },
+    {
+      "id": "888e6d6a-8be0-4ba7-9275-c1e5b364dadc",
+      "status": "+",
+      "title": "Clicking an open ModelChip should close it",
+      "description": "A @src/renderer/src/components/agents/ModelChip.tsx that is clicked once it's been opened should close.",
+      "context": [
+        "src/renderer/src/components/agents/ModelChip.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-29T23:49:38.336Z",
+      "updatedAt": "2025-09-30T00:24:43.193Z",
+      "completedAt": "2025-09-30T00:24:43.193Z"
+    },
+    {
+      "id": "bb76a798-869f-45ba-9902-25812ab58166",
+      "status": "+",
+      "title": "Test tools allow running e2e tests",
+      "description": "@src/renderer/src/services/factoryTestsService.ts exposes a new interface to run E2E tests and to get the latest result of those.\nThese should be able to be triggered via @src/renderer/src/screens/TestsView.tsx just like normal tests. There should be another option in the toggle to switch to E2E and then run them.\nthe `command` parameter in the `runTestsE2E` function is for the user to be able to supply their own command to pass to the run tests execution command. By default the system finds out the command assigned in `package.json` to `tests:e2e` - information about this should be provided to the user and in this new E2E section they should be shown an in put where they can provide a different command (if not provided undefined should be passed to the function).",
+      "context": [
+        "src/renderer/src/services/factoryTestsService.ts",
+        "src/renderer/src/screens/TestsView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-30T13:19:11.943Z",
+      "updatedAt": "2025-09-30T13:21:09.619Z",
+      "completedAt": "2025-09-30T13:21:09.619Z"
+    },
+    {
+      "id": "fb5a75f9-a460-4382-b369-420836ca265e",
+      "status": "+",
+      "title": "StoryCreateView and StoryEditView should use footer buttons",
+      "description": "Following @src/renderer/src/screens/stories/FeatureEditView.tsx , @src/renderer/src/screens/stories/StoryCreateView.tsx and @src/renderer/src/screens/stories/StoryEditView.tsx should have it use the modal footer in the same way instead of creating their own buttons in the form.",
+      "context": [
+        "src/renderer/src/screens/stories/FeatureEditView.tsx",
+        "src/renderer/src/screens/stories/StoryCreateView.tsx",
+        "src/renderer/src/screens/stories/StoryEditView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-30T14:01:58.314Z",
+      "updatedAt": "2025-09-30T14:19:01.769Z",
+      "completedAt": "2025-09-30T14:19:01.769Z"
+    },
+    {
+      "id": "c713a8f1-d3af-428d-9f29-f03250b2db5c",
+      "status": "+",
+      "title": "Add ProjectChip + StoryChip to forms",
+      "description": "There are 2 story forms @src/renderer/src/components/stories/StoryForm.tsx  used in @src/renderer/src/screens/stories/StoryCreateView.tsx , @src/renderer/src/screens/stories/StoryEditView.tsx , and and 2 feature forms @src/renderer/src/components/stories/FeatureForm.tsx used in @src/renderer/src/screens/stories/FeatureEditView.tsx and @src/renderer/src/screens/stories/FeatureCreateView.tsx .\nUnder the title all of these need to display a project chip info (that cannot be clicked) aligned to the left with the title. The project chip is @src/renderer/src/components/agents/ProjectChip.tsx .\n\nThe feature views also need to display a @src/renderer/src/components/stories/DependencyBullet.tsx where the dependency is the `storyId` to the right of the form aligned with the Status display.",
+      "context": [
+        "src/renderer/src/components/stories/StoryForm.tsx",
+        "src/renderer/src/screens/stories/StoryCreateView.tsx",
+        "src/renderer/src/screens/stories/StoryEditView.tsx",
+        "src/renderer/src/components/stories/FeatureForm.tsx",
+        "src/renderer/src/screens/stories/FeatureEditView.tsx",
+        "src/renderer/src/screens/stories/FeatureCreateView.tsx",
+        "src/renderer/src/components/agents/ProjectChip.tsx",
+        "src/renderer/src/components/stories/DependencyBullet.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-03T08:51:12.257Z",
+      "updatedAt": "2025-10-03T09:12:46.169Z",
+      "completedAt": "2025-10-03T09:12:46.169Z"
+    },
+    {
+      "id": "76b04544-7d06-4f64-8648-95a46b569056",
+      "status": "+",
+      "title": "In chats there should be a small indicator to the side showing the cut off point for assistant messages",
+      "description": "in @src/renderer/src/components/chat/ChatSidebar.tsx the ChatSettings and the CompletionSettings inside, have a `numberMessagesToSend` which is the amount of messages the LLM will be given. This could be nicely indicated to the user as a little notch on the side, that when hovered will explain that this is the cut off point. The notch must take into account that a user will probably send a message - so it should be always -1 from the number (this should also be explaind in the tooltip).",
+      "context": [
+        "src/renderer/src/components/chat/ChatSidebar.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-03T21:28:33.845Z",
+      "updatedAt": "2025-10-04T00:40:14.818Z",
+      "completedAt": "2025-10-04T00:40:14.818Z"
+    },
+    {
+      "id": "4eb23f4e-deba-496d-9c27-ee4c052da03c",
+      "status": "+",
+      "title": "Show the actual system prompt",
+      "description": "In the @src/renderer/src/components/chat/ChatSidebar.tsx next to the info button, we want to show another button that will have a scroll icon, that will show the current system prompt that the agent will get - this is the effective prompt with arguments placed in - not the template.",
+      "context": [
+        "src/renderer/src/components/chat/ChatSidebar.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-03T21:30:52.373Z",
+      "updatedAt": "2025-10-03T22:38:47.930Z",
+      "completedAt": "2025-10-03T22:38:47.930Z"
+    },
+    {
+      "id": "64b6f2c1-f5b4-4ef5-b108-0d5f94857ad1",
+      "status": "+",
+      "title": "the title in modals isn't centered vertically with the close button",
+      "description": "@src/renderer/src/components/ui/Modal.tsx doesn't correctly vertically center the title to be exactly aligned with the close button - it should.",
+      "context": [
+        "src/renderer/src/components/ui/Modal.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-03T21:48:18.571Z",
+      "updatedAt": "2025-10-03T22:09:55.804Z",
+      "completedAt": "2025-10-03T22:09:55.804Z"
+    },
+    {
+      "id": "2dc1b4b3-8376-44d0-937f-f6c18778622b",
+      "status": "+",
+      "title": "ChatConversation doesn't display tool results",
+      "description": "in @src/renderer/src/components/agents/ChatConversation.tsx strangely doesn't display the tool results. This only seems to not work in a ChatConversation for a running agent - even though, that's absolutely no different than for one that has finished.\n\nIf you find anything interesting create a doc about it.",
+      "context": [
+        "src/renderer/src/components/agents/ChatConversation.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-04T02:22:58.355Z",
+      "updatedAt": "2025-10-04T02:31:21.633Z",
+      "completedAt": "2025-10-04T02:31:21.633Z"
+    },
+    {
+      "id": "c989b117-412c-4645-add9-57a9d426f054",
+      "status": "+",
+      "title": "Allow chatting i.e. continuing the conversation on an Agent Run",
+      "description": "Right now in @src/renderer/src/screens/AgentsView.tsx there's a way of viewing each agent run in a @src/renderer/src/components/agents/ChatConversation.tsx . Each AgentRun actually stores the ChatMessages which can be directly used in a chat via @src/renderer/src/components/chat/ChatSidebar.tsx .\n\nThe appropriate contexts for agent runs that are for stories is included in @src/renderer/src/screens/AgentsView.tsx - `chatContextAgentRun` and the one for agent feature runs is: `chatContextAgentRunFeature`.\n\nWhen clicking the button, the user is taken to the ChatView, inside ChatView - `agentRunId` also needs to be passed. When in ChatView the conversation (`AgentRunConversation`) from inside the `AgentRunHistory` holds `messages: ChatMessage[]` which need to be taken and used to start the chat.\n\n\nWhat we need is in @src/renderer/src/components/agents/ChatConversation.tsx is to have the possibility of redirecting to ChatView with the correct chat being open, when clicking a chat button that should show to the left of the name of each Agent Feature Run and the single Agent Story Run. The Agent Story Run chat should only show if this run was ONLY for a story (i.e. there were no features specified - this can be checked by seeing that the first conversation had no featureId)",
+      "context": [
+        "src/renderer/src/screens/AgentsView.tsx",
+        "src/renderer/src/components/agents/ChatConversation.tsx",
+        "src/renderer/src/components/chat/ChatSidebar.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-08T22:56:24.172Z",
+      "updatedAt": "2025-10-15T12:43:55.924Z",
+      "completedAt": "2025-10-15T12:34:52.555Z"
+    },
+    {
+      "id": "cd613bac-52f7-4f5d-a81a-4bacf77203b3",
+      "status": "+",
+      "title": "The icon selector in ProjectEditorForm should be different",
+      "description": "In @src/renderer/src/screens/projects/ProjectEditorForm.tsx  the icon selection should be different.\nIt should just show the current icon on a button that the user can click - when clicking it should show the whole icons pallette in a scrollable window.",
+      "context": [
+        "src/renderer/src/screens/projects/ProjectEditorForm.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-15T09:23:25.404Z",
+      "updatedAt": "2025-10-16T18:00:33.646Z",
+      "completedAt": "2025-10-16T18:00:33.646Z"
+    },
+    {
+      "id": "940b5550-9f7a-463b-8621-1909e796ad60",
+      "status": "+",
+      "title": "The manage projects modal needs updating",
+      "description": "The @src/renderer/src/screens/projects/ProjectManagerModal.tsx needs to update in the following way:\n- we need to add a header section that won't be scrollable. This section will have 'group control'. There needs to be a dropdown selector that allows selecting which group to show, by default a special ALL selection is on. To the right there should be an \"Edit\" button (Icon only). The Edit button takes the user to another view \"within\" the same modal that will allow the user to move the groups' orders around, delete groups, add a group (very simple alert with name entry) and edit a group's name (same alert as Add - just prefilled). This needs to work the same as editing a project.\n- the add project button needs to be in a footer at the bottom of the modal that isn't scrollable.\n- The middle section shows the current group's projects. They can be moved around to change their order within the group.\n- Apart from the \"ALL\" dropdown option, there needs to be a \"--uncategorized--\" one, which shows right after ALL (the first 2 options). All projects that don't have a group assigned need to be shown here.\n- The @src/renderer/src/screens/projects/ProjectManagerModal.tsx should have the actual project configuration view split away from it into a separate file. There needs to be a new dropdown under the ID that allows the selection of a group for a given project.\n\nThere's @src/renderer/src/contexts/ProjectsGroupsContext.tsx that should be used for this feature. If anything is missing from that file it should be updated so that it's the interface to talk with @src/renderer/src/services/projectsGroupsService.ts .\n\nAll the types needed from 'thefactory-tools' are listed at the bottom of @src/renderer/src/contexts/ProjectsGroupsContext.tsx",
+      "context": [
+        "src/renderer/src/screens/projects/ProjectManagerModal.tsx",
+        "src/renderer/src/contexts/ProjectsGroupsContext.tsx",
+        "src/renderer/src/services/projectsGroupsService.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-15T09:34:24.331Z",
+      "updatedAt": "2025-10-16T18:32:22.922Z",
+      "completedAt": "2025-10-16T18:32:22.922Z"
+    },
+    {
+      "id": "b4a93fc1-cfa9-4cee-bd31-be25d35bee5c",
+      "status": "+",
+      "title": "There needs to be a ProjectsGroupsContext",
+      "description": "Just like we have @src/renderer/src/contexts/ProjectContext.tsx we need a @src/renderer/src/contexts/ProjectsGroupsContext.tsx that interfaces with @src/renderer/src/services/projectsGroupsService.ts . It needs to follow the same exact patterns as ProjectContext.",
+      "context": [
+        "src/renderer/src/contexts/ProjectContext.tsx",
+        "src/renderer/src/services/projectsGroupsService.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-15T11:11:23.073Z",
+      "updatedAt": "2025-10-15T11:14:23.187Z",
+      "completedAt": "2025-10-15T11:14:23.187Z"
+    },
+    {
+      "id": "93dfac0e-95c0-4d3b-8ce6-3fd6e29380a9",
+      "status": "+",
+      "title": "New icons1",
+      "description": "We need new icons in @src/renderer/src/components/ui/icons/Icons.tsx . We need at least 10 new programming ones that don't exist.\nMake sure to match the style to the current icons!!!\n\nThey need to be made accessible via @src/renderer/src/screens/projects/projectIcons.tsx .",
+      "context": [
+        "src/renderer/src/screens/projects/projectIcons.tsx",
+        "src/renderer/src/components/ui/icons/Icons.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-15T12:45:33.201Z",
+      "updatedAt": "2025-10-16T19:47:49.313Z",
+      "completedAt": "2025-10-16T19:47:49.313Z"
+    },
+    {
+      "id": "9b25e0f0-32d5-4320-b429-46120b06fbf3",
+      "status": "+",
+      "title": "Allow toggling all tool calls at once",
+      "description": "In @src/renderer/src/screens/ChatView.tsx  when agent is asking to trigger tools, show a toggle that allows toggling all tools if there are more than 1 tool to toggle.",
+      "context": [
+        "src/renderer/src/screens/ChatView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-16T17:46:39.648Z",
+      "updatedAt": "2025-10-16T18:07:00.691Z",
+      "completedAt": "2025-10-16T18:07:00.691Z"
+    },
+    {
+      "id": "bd197ab9-1da8-4e17-81e8-46c0e3b86290",
+      "status": "+",
+      "title": "Fix chat bottom scroll",
+      "description": "In @src/renderer/src/screens/ChatView.tsx  when the user sends a chat message, there's a spinner showing for the assistant, but it's not fully scrolled down (there's a gap and the user can still scroll) - it should be. When opening a chat and the assistant is still thinking, the same thing happens.",
+      "context": [
+        "src/renderer/src/screens/ChatView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-16T17:47:54.765Z",
+      "updatedAt": "2025-10-27T16:24:14.995Z",
+      "completedAt": "2025-10-22T12:43:51.761Z"
+    },
+    {
+      "id": "92593266-d2ae-4d86-915a-0e82d71f625d",
+      "status": "+",
+      "title": "Chat settings fix",
+      "description": "In @src/renderer/src/screens/ChatView.tsx when changing the `Max turns per run` setting in Chat Settings, the `Number of messages to send` setting also changes (or gets reset to the default). This shouldn't happen - they should be independent of one another.",
+      "context": [
+        "src/renderer/src/screens/ChatView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-16T17:48:45.055Z",
+      "updatedAt": "2025-10-16T18:17:24.026Z",
+      "completedAt": "2025-10-16T18:17:24.026Z"
+    },
+    {
+      "id": "a9a277d4-6662-4862-a11f-812af7355e20",
+      "status": "+",
+      "title": "ProjectManagerModal update",
+      "description": "In @src/renderer/src/screens/projects/ProjectManagerModal.tsx a user can click edit group to look at all the groups and add new ones. This should be refactored into a separate file (similarly to how @src/renderer/src/screens/projects/ProjectEditorForm.tsx is).\nCurrently, when clicking add group inside this view nothing shows - we should use the same idea as when editing `project code info` inside ProjectEditorForm.\n\nAdditionally both ProjectEditorForm and this view this whole feature is about should have its own header with a title - so that all views within the ProjectManager flow have a header and footer.",
+      "context": [
+        "src/renderer/src/screens/projects/ProjectManagerModal.tsx",
+        "src/renderer/src/screens/projects/ProjectEditorForm.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-16T18:33:41.556Z",
+      "updatedAt": "2025-10-16T18:44:49.493Z",
+      "completedAt": "2025-10-16T18:44:49.493Z"
+    },
+    {
+      "id": "f1796a15-4b5a-4c05-a2bc-7559b7fdb54e",
+      "status": "+",
+      "title": "All icons are accessible via projecticons",
+      "description": "We need all icons in @src/renderer/src/components/ui/icons/Icons.tsx  to be made accessible via @src/renderer/src/screens/projects/projectIcons.tsx .\nThat means that all icons can be referenced by name like in projectIcons.\nThere should be a directive about it in @docs/FILE_ORGANISATION.md",
+      "context": [
+        "docs/FILE_ORGANISATION.md",
+        "src/renderer/src/components/ui/icons/Icons.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-16T18:35:49.831Z",
+      "updatedAt": "2025-10-16T19:38:46.481Z",
+      "completedAt": "2025-10-16T19:38:46.481Z"
+    },
+    {
+      "id": "f4564269-341e-482e-9aa5-e06698cdb326",
+      "status": "+",
+      "title": "New Icons2",
+      "description": "We need new icons in @src/renderer/src/components/ui/icons/Icons.tsx . We need at least 10 finance related ones.\nMake sure to match the style to the current icons!!!\n\nThey need to be made accessible via @src/renderer/src/screens/projects/projectIcons.tsx .",
+      "context": [
+        "src/renderer/src/components/ui/icons/Icons.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-16T18:36:18.938Z",
+      "updatedAt": "2025-10-16T22:18:20.109Z",
+      "completedAt": "2025-10-16T22:18:20.109Z"
+    },
+    {
+      "id": "4999628b-5040-40bc-b269-e6cf0823a07c",
+      "status": "+",
+      "title": "New Icons3",
+      "description": "We need new icons in @src/renderer/src/components/ui/icons/Icons.tsx . We need at least 10 medical ones.\nMake sure to match the style to the current icons!!!\n\nThey need to be made accessible via @src/renderer/src/screens/projects/projectIcons.tsx .",
+      "context": [
+        "src/renderer/src/components/ui/icons/Icons.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-16T18:36:44.073Z",
+      "updatedAt": "2025-10-16T22:20:12.652Z",
+      "completedAt": "2025-10-16T22:20:12.652Z"
+    },
+    {
+      "id": "5da79673-ef5c-4c84-93d7-a715b5492bc0",
+      "status": "+",
+      "title": "New Icons4",
+      "description": "We need new icons in @src/renderer/src/components/ui/icons/Icons.tsx . We need at least 10 business ones.\nMake sure to match the style to the current icons!!!\n\nThey need to be made accessible via @src/renderer/src/screens/projects/projectIcons.tsx .",
+      "context": [
+        "src/renderer/src/components/ui/icons/Icons.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-16T18:37:12.028Z",
+      "updatedAt": "2025-10-16T22:24:50.244Z",
+      "completedAt": "2025-10-16T22:24:50.244Z"
+    },
+    {
+      "id": "b5615d52-f0b8-4630-910a-e47f4b7db811",
+      "status": "+",
+      "title": "New Icons5",
+      "description": "We need new icons in @src/renderer/src/components/ui/icons/Icons.tsx . We need at least 10 sport ones.\nMake sure to match the style to the current icons!!!\n\nThey need to be made accessible via @src/renderer/src/screens/projects/projectIcons.tsx .",
+      "context": [
+        "src/renderer/src/components/ui/icons/Icons.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-16T18:37:31.850Z",
+      "updatedAt": "2025-10-16T22:30:01.792Z",
+      "completedAt": "2025-10-16T22:30:01.792Z"
+    },
+    {
+      "id": "afa9c03a-f251-410b-9510-3ea34b3eb374",
+      "status": "+",
+      "title": "New Icons6",
+      "description": "We need new icons in @src/renderer/src/components/ui/icons/Icons.tsx . We need at least 10 construction ones.\nMake sure to match the style to the current icons!!!\n\nThey need to be made accessible via @src/renderer/src/screens/projects/projectIcons.tsx .",
+      "context": [
+        "src/renderer/src/components/ui/icons/Icons.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-16T18:37:51.777Z",
+      "updatedAt": "2025-10-16T22:34:46.230Z",
+      "completedAt": "2025-10-16T22:34:46.230Z"
+    },
+    {
+      "id": "ad551afc-2b74-45e7-ac7b-9eac1faa8e26",
+      "status": "+",
+      "title": "Continue refactor of Icons",
+      "description": "In @src/renderer/src/components/ui/icons/Icons.tsx we just need the exports for individual icons. Some of them have already been moved to their files. Do the rest.",
+      "context": [
+        "src/renderer/src/components/ui/icons/Icons.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-16T19:28:18.570Z",
+      "updatedAt": "2025-10-16T22:57:53.885Z",
+      "completedAt": "2025-10-16T19:42:32.625Z"
+    },
+    {
+      "id": "67302df0-716b-46ed-aee1-828cb60373d2",
+      "status": "+",
+      "title": "Display groups of projects in sidebar",
+      "description": "In the @src/renderer/src/navigation/SidebarView.tsx we want to display all the projects as ordered via their groups, as is specified in @src/renderer/src/contexts/ProjectsGroupsContext.tsx and controlled via @src/renderer/src/screens/projects/ProjectManagerModal.tsx .\nAll uncategorized projects are at the top.\nThen each group must have its own dropdown section that can be opened or closed.\nWhen opened it displays the list of all projects in that group.\nAll groups start being closed.\nWhen a project is active in a group - that group tab needs to be selected with the same colour as that project.\nAdditionally, the group tab shows an aggregate of all badges on the right (so agents running and notificatiions) for all projects under it.",
+      "context": [
+        "src/renderer/src/navigation/SidebarView.tsx",
+        "src/renderer/src/contexts/ProjectsGroupsContext.tsx",
+        "src/renderer/src/screens/projects/ProjectManagerModal.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-16T19:30:09.420Z",
+      "updatedAt": "2025-10-16T23:29:56.203Z",
+      "completedAt": "2025-10-16T23:29:56.203Z"
+    },
+    {
+      "id": "4cd9f6a6-4be9-4e76-b436-507636a05bfb",
+      "status": "+",
+      "title": "Show a working agent in the Sidebar next to agents",
+      "description": "In the @src/renderer/src/navigation/SidebarView.tsx just like we show a notification badge next to \"Notifications\", we need to show the same next to \"Agents\" when an agent is running. This is already showing in the Projects list - but we need it here too - same exact style.",
+      "context": [
+        "src/renderer/src/navigation/SidebarView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-16T22:12:53.921Z",
+      "updatedAt": "2025-10-16T23:29:06.611Z",
+      "completedAt": "2025-10-16T23:13:29.099Z"
+    },
+    {
+      "id": "c2f26371-082b-4b31-812a-e8c5955a4d4a",
+      "status": "+",
+      "title": "Update projectIcons",
+      "description": "Make sure that the const `PROJECT_ICONS` in @src/renderer/src/screens/projects/projectIcons.tsx is an object and not a list, so that it can be used more efficiently in @src/renderer/src/screens/projects/ProjectEditorForm.tsx and @src/renderer/src/screens/projects/ProjectManagerModal.tsx .",
+      "context": [
+        "src/renderer/src/screens/projects/ProjectEditorForm.tsx",
+        "src/renderer/src/screens/projects/ProjectManagerModal.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-16T22:58:32.510Z",
+      "updatedAt": "2025-10-16T23:28:07.551Z",
+      "completedAt": "2025-10-16T23:10:23.823Z"
+    },
+    {
+      "id": "c7a825c8-9791-4893-9b98-f89a9681e376",
+      "status": "+",
+      "title": "Chats sidebar update",
+      "description": "In @src/renderer/src/screens/ChatView.tsx the sidebar needs to be updated:\n- it should only show the single General chat for the active project\n- when first opening the ChatView, all the categories and all sub categories should be closed. This should also be the case when switching projects (cos it's a complete context switch).\n- there needs to be a stronger visual distinction between the categories,subcategories and chats.\n- for now we need to get rid off the \"plus/add\" button at the top right, we simply should always show the General chat tile for the given project and if the user clicks it but it wasn't yet created then it should be.\n- There needs to be a switch (similar to the one in @src/renderer/src/screens/stories/StoriesListView.tsx  for changing modes) that will allow switching between \"Categories\" and \"History\". Categories is the current view and History will simply show all chats in chronological order. If there are none then display an appropriate message.\n- it would be a very good idea for the whole sidebar to be a separate component in its own file, unfortunately there's already @src/renderer/src/components/chat/ChatSidebar.tsx  and @src/renderer/src/components/chat/ChatSidebarPanel.tsx so a new meaningful name needs to be created for this.\n- when the sidebar is collapsed, it should show a different view: a vertical label with the name of the current mode, so either CATEGORIES or HISTORY.",
+      "context": [
+        "src/renderer/src/screens/ChatView.tsx",
+        "src/renderer/src/screens/stories/StoriesListView.tsx",
+        "src/renderer/src/components/chat/ChatSidebarPanel.tsx",
+        "src/renderer/src/components/chat/ChatSidebar.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-16T23:24:04.989Z",
+      "updatedAt": "2025-10-21T16:03:02.642Z",
+      "completedAt": "2025-10-17T11:52:47.519Z"
+    },
+    {
+      "id": "dd9bb459-5225-4604-8d2f-6e50feaba098",
+      "status": "+",
+      "title": "Clicking a notification doesn't take the user to the correct place",
+      "description": "In @src/renderer/src/screens/NotificationsView.tsx when clicking a notification (for an agent finished) it doesn't take the user to the Agents page and the appropriate run.",
+      "context": [
+        "src/renderer/src/screens/NotificationsView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-21T16:01:35.170Z",
+      "updatedAt": "2025-10-22T11:38:07.864Z",
+      "completedAt": "2025-10-22T11:38:07.864Z"
+    },
+    {
+      "id": "8a6f2df4-3f7d-45da-b100-e216d46598e9",
+      "status": "+",
+      "title": "Make it possible to delete the last chat message.",
+      "description": "In @src/renderer/src/components/chat/ChatSidebar.tsx .\nThe button should be right under the icon for the sender (so User or Assistant).\nIt should only appear when hovering over that area.",
+      "context": [
+        "src/renderer/src/components/chat/ChatSidebar.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-22T11:21:27.351Z",
+      "updatedAt": "2025-10-24T14:16:59.981Z",
+      "completedAt": "2025-10-22T11:48:18.608Z"
+    },
+    {
+      "id": "be0848f1-c6cf-446f-b6ab-08042d7825c5",
+      "status": "+",
+      "title": "The tile should be 2 lines max",
+      "description": "In @src/renderer/src/screens/stories/StoryDetailsView.tsx the title in the header should be constrained",
+      "context": [
+        "src/renderer/src/screens/stories/StoryDetailsView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-27T11:13:20.749Z",
+      "updatedAt": "2025-10-27T11:22:22.530Z",
+      "completedAt": "2025-10-27T11:22:22.530Z"
+    },
+    {
+      "id": "63d893a3-845f-4557-b2a6-d30d38a8c24a",
+      "status": "+",
+      "title": "Chat notifications",
+      "description": "In the @src/renderer/src/navigation/SidebarView.tsx we need to show notifications next to the project and next to the Chat button when there is an unread message. \nThere should be also a little dot (without a number inside) shown on the chat navigation in @src/renderer/src/screens/ChatView.tsx leading the user to the chat that has the unread message .",
+      "context": [
+        "src/renderer/src/navigation/SidebarView.tsx",
+        "src/renderer/src/screens/ChatView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-28T00:20:01.644Z",
+      "updatedAt": "2025-10-29T11:23:25.650Z",
+      "completedAt": "2025-10-29T10:52:02.237Z"
+    },
+    {
+      "id": "98ff6ca9-38bd-4828-bcba-f555033945fe",
+      "status": "+",
+      "title": "Chat history should only show the current project's chats",
+      "description": "in @src/renderer/src/screens/ChatView.tsx it should ONLY show the chats for the given active project - never for other ones. Right now I can see other projects in History.",
+      "context": [
+        "src/renderer/src/screens/ChatView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-28T00:20:52.916Z",
+      "updatedAt": "2025-10-28T10:41:43.228Z",
+      "completedAt": "2025-10-28T10:41:43.228Z"
+    },
+    {
+      "id": "724a4b85-c9cd-4d61-ab60-a455da3482f7",
+      "status": "+",
+      "title": "If a story/feature is missing show *DELETED* instead of id",
+      "description": "In @src/renderer/src/screens/ChatView.tsx in the sidebar - don't show the id of the story/feature that no longer exists - just inform the user that this has been deleted.",
+      "context": [
+        "src/renderer/src/screens/ChatView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-28T00:22:27.483Z",
+      "updatedAt": "2025-10-28T10:45:20.962Z",
+      "completedAt": "2025-10-28T10:45:20.962Z"
+    },
+    {
+      "id": "beea43a0-839b-4f9b-8215-73a8fd39f3cb",
+      "status": "+",
+      "title": "Delete chat becomes refresh chat + actual delete chat in settings",
+      "description": "The current 'Delete chat' button in the header of @src/renderer/src/screens/ChatView.tsx should become \"Refresh Chat\" - so still a red button, but with a different icon inside - a new one needs to be created and added to @src/renderer/src/components/ui/icons/Icons.tsx .\nAt the very bottom of chat settings there should be a red button that says \"Delete this chat\", which will ask the user for confirmation for doing so. This should actually delete the chat for good (at this moment taking the user to the \"General\" chat which is always available).",
+      "context": [
+        "src/renderer/src/screens/ChatView.tsx",
+        "src/renderer/src/components/ui/icons/Icons.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-28T00:26:15.441Z",
+      "updatedAt": "2025-10-29T12:07:30.836Z",
+      "completedAt": "2025-10-29T11:34:38.105Z"
+    },
+    {
+      "id": "1784ec92-6612-4d1b-a8e9-41fb10c3557f",
+      "status": "+",
+      "title": "In GitView main branch has special buttons and is at top",
+      "description": "The current branch in @src/renderer/src/screens/GitView.tsx shouldn't have a \"FastMerge\" and \"Delete\" buttons. It should have a push button if there's pending changes that haven't been pushed to remote and a pull button if there's changes on remote that haven't been pulled.\nThis branch should also be in a separate section at the top - not mixing in with the other branches.",
+      "context": [
+        "src/renderer/src/screens/GitView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-28T12:44:29.335Z",
+      "updatedAt": "2025-10-29T01:05:28.984Z",
+      "completedAt": "2025-10-29T01:05:28.984Z"
+    },
+    {
+      "id": "b81fe5fc-0b19-4fe7-9b41-5ae564e5e908",
+      "status": "+",
+      "title": "In GitView the status chip shouldn't show the branch name",
+      "description": "In @src/renderer/src/screens/GitView.tsx the status chips should show if it's local, remote, both - not re-displaying the branch id/name",
+      "context": [
+        "src/renderer/src/screens/GitView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-28T12:45:20.540Z",
+      "updatedAt": "2025-10-29T01:06:28.117Z",
+      "completedAt": "2025-10-29T01:06:28.117Z"
+    },
+    {
+      "id": "41e29168-8387-44a3-8052-a80b3098088b",
+      "status": "+",
+      "title": "In GitMergeModal the diffs are not showing just incoming",
+      "description": "In @src/renderer/src/screens/git/GitMergeModal.tsx the diffs that are displayed are showing both outgoing and incoming changes against each other. But the user should only be shown the incoming changes against the current branch.\nThere should be appropriate data from `thefactory-tools` for this - all the types are in @src/logic/git/gitTypes.copy.ts . If something is missing, then describe a feature request in `docs/GIT_DIFFS.md` so that `thefactory-tools` can be updated to include it.",
+      "context": [
+        "src/renderer/src/screens/git/GitMergeModal.tsx",
+        "src/logic/git/gitTypes.copy.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-28T12:47:48.778Z",
+      "updatedAt": "2025-10-29T11:22:24.154Z",
+      "completedAt": "2025-10-29T11:22:24.154Z"
+    },
+    {
+      "id": "6ef71ce5-6bcd-407a-b9e7-1f3e44e2a626",
+      "status": "+",
+      "title": "In GitView show story chips that when clicking take the user to that story",
+      "description": "In @src/renderer/src/screens/GitView.tsx currently just a storyId is shown - but it should be replaced with a @src/renderer/src/components/stories/DependencyBullet.tsx that when clicking will open the appropriate story.",
+      "context": [
+        "src/renderer/src/screens/GitView.tsx",
+        "src/renderer/src/components/stories/DependencyBullet.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-28T12:49:51.490Z",
+      "updatedAt": "2025-10-29T10:57:39.605Z",
+      "completedAt": "2025-10-29T10:57:39.605Z"
+    },
+    {
+      "id": "ae8f8bd5-6062-4238-bc93-00994debfad0",
+      "status": "+",
+      "title": "Each commit that is pending in GitView is for stories and features - they should be displayed as chips",
+      "description": "Most of the commits are implementing features and have the id inside the commit message. That id should be extracted and displayed as @src/renderer/src/components/stories/DependencyBullet.tsx to show the user which features are part of this pending merge.\n\nThe `thefactory-tools` now exposes all the necessary values for this - check @src/logic/git/gitTypes.copy.ts to see.",
+      "context": [
+        "src/renderer/src/components/stories/DependencyBullet.tsx",
+        "src/logic/git/gitTypes.copy.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-28T12:52:21.487Z",
+      "updatedAt": "2025-10-30T23:12:11.965Z",
+      "completedAt": "2025-10-30T21:52:47.194Z"
+    },
+    {
+      "id": "e5ab58da-63e1-4869-8fc0-b18016f0dba6",
+      "status": "+",
+      "title": "the chats in the history view should be ordered by last message received/sent",
+      "description": "In @src/renderer/src/screens/ChatView.tsx the history should sort the chats by 'last update' - it seems they are ordered by that on open, but after some messages trickle in - that's no longer the case.",
+      "context": [
+        "src/renderer/src/screens/ChatView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-28T20:31:02.699Z",
+      "updatedAt": "2025-10-29T09:42:38.430Z",
+      "completedAt": "2025-10-29T09:42:38.430Z"
+    },
+    {
+      "id": "fcf25987-8aaa-4454-8b39-1f7abf3774ef",
+      "status": "+",
+      "title": "ctrl/command+shift+n should open a new special create feature modal",
+      "description": "the difference is that it should have a dropdown for selecting the story that this feature will belong to.\nIn fact - the \"UI Improvements\" feature that gets created via cmd+shift+f should open this exact popup but with the \"UI Improvements\" story pre-selected.\nWhen clicking the dropdown it should also allow to search to make it easier to find the relevant story.",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-10-29T00:49:23.964Z",
+      "updatedAt": "2025-10-29T09:47:12.334Z",
+      "completedAt": "2025-10-29T09:47:12.334Z"
+    },
+    {
+      "id": "84a438a8-912f-41f2-b1b4-5d4661ffbe3c",
+      "status": "+",
+      "title": "Chat tool call change popups",
+      "description": "Goal: When viewing tool call cards in chat, hovering (or focusing) on a card shows a contextual popup summarizing the change(s) that the tool produced. Clicking the card toggles a pinned view.\n\nTriggers & behavior:\n- Hover: show a popup next to the tool call card with a concise summary.\n- Click: pin/unpin the popup to remain visible.\n- Keyboard: focus on the card shows the popup; Esc closes; Enter toggles pin.\n- Mobile: tap once to show, tap outside to dismiss; a small 'i' icon appears on small screens.\n\nTool-specific displays:\n- update_story_title: show 'Title: old → new' with highlights.\n- update_story_description: inline or side-by-side diff emphasizing added and removed text.\n- update_feature_title: 'Title: old → new' with highlights.\n- update_feature_description: inline or side-by-side diff of description.\n- write_file: show the path and a unified diff of changes; collapse large hunks with a 'view more' affordance.\n- create_feature: show the new feature's title and description in a clean summary card.\n- create_story: show the new story's title and description in a clean summary card.\n- reorder_feature: show the resulting feature order list with indices; highlight moved items.\n- reorder_story: show the resulting story order list with indices; highlight moved items.\n\nUX details:\n- The popup title includes the tool name and a status icon.\n- Show timestamps and a compact identifier for the operation if available.\n- Provide a 'view details' action to expand into a larger modal for long diffs.\n- For diffs, prefer a readable unified diff with syntax highlighting for code when possible.\n\nEdge cases:\n- If prior content is unavailable, show 'new content only' and a note that diff is unavailable.\n- For very large files, show only the first N changed hunks with an expandable control.\n- If the tool failed or partially executed, show an error state in the popup.\n\nAccessibility:\n- Fully keyboard navigable; meets color contrast guidelines for highlights.\n- ARIA roles for popovers and labels for action buttons.\n\nAcceptance criteria:\n- Hovering or focusing on a tool call card shows a popup within 150ms with the tool-specific summary.\n- update_* and create_* tools display the exact new values; descriptions show textual diffs for updates and full text for creates.\n- write_file shows a unified diff for changed files, including path and line numbers.\n- reorder_* popups display the final order with indices, clearly marking moved items.\n- Popups are responsive and accessible, with keyboard and mobile behaviors working as described.\n- Large content gracefully collapses with an option to expand.\n\nIMPORTANT:\nThe code for this should be well organised in a folder and each specific tool handling approach should be isolated to make it readable.",
+      "context": [],
+      "createdAt": "2025-10-29T00:55:40.474Z",
+      "updatedAt": "2025-10-29T15:55:40.932Z",
+      "blockers": [],
+      "completedAt": "2025-10-29T12:56:45.320Z"
+    },
+    {
+      "id": "ea6227a4-4b63-41ad-a334-79102a5f5619",
+      "status": "+",
+      "title": "ChatView info callout with navigable story/feature chips",
+      "description": "Goal: Improve the info button in @src/renderer/src/screens/ChatView.tsx so that clicking it opens a callout showing contextual, clickable story/feature chips via @src/renderer/src/components/stories/DependencyBullet.tsx.\n\nTrigger & behavior:\n- Click on the info button toggles the callout open/closed.\n- Clicking outside the callout (or pressing Esc) closes it.\n- The callout auto-closes on route/project change and when ChatView unmounts.\n- Replace any hover tooltip with this click-activated callout.\n\nContent rules:\n- If the current chat has an associated story, render a DependencyBullet for the story.\n- If the current chat has associated feature(s), render a DependencyBullet for each feature.\n- If an associated story/feature no longer exists, display the deleted state used elsewhere (e.g., *DELETED*), consistent with ChatView.\n- Chips are interactive: clicking navigates to the destination using DependencyBullet default navigation behavior.\n\nUX details:\n- Position the callout anchored to the info button with an arrow; keep within viewport bounds.\n- Lazy-mount contents only when opened; unmount on close.\n- Maintain z-index above the header and chat scroll container.\n\nAccessibility:\n- The info button uses aria-haspopup='dialog' and aria-expanded to reflect state; aria-controls points to the callout id.\n- The callout uses role='dialog' with an aria-label (e.g., 'Chat context'). Esc closes. Focus remains on the button; tabbing into the callout supports chip interaction.\n\nAcceptance criteria:\n- Clicking the info button opens the callout within 150ms; clicking it again, pressing Esc, or clicking outside closes it.\n- When a story/feature context exists, corresponding DependencyBullet chips render and navigate correctly on click.\n- When context is missing, no chips are shown; deleted items display as deleted-state chips.\n- Callout closes on route/project change and on ChatView unmount without errors.\n- Meets ARIA requirements as described and works with keyboard and mouse.",
+      "context": [
+        "src/renderer/src/components/stories/DependencyBullet.tsx"
+      ],
+      "createdAt": "2025-10-29T00:58:11.800Z",
+      "updatedAt": "2025-10-29T11:23:14.172Z",
+      "blockers": [],
+      "completedAt": "2025-10-29T11:11:46.494Z"
+    },
+    {
+      "id": "0559292b-fad1-4585-b319-37c653e68bd8",
+      "status": "+",
+      "title": "the \"fast merge\" button improvement",
+      "description": "the \"fast merge\" button in @src/renderer/src/screens/GitView.tsx  should do the same as the confirmation \"fast merge\" in @src/renderer/src/screens/git/GitMergeModal.tsx - i.e. it should show the confirmation dialog and then proceed.",
+      "context": [
+        "src/renderer/src/screens/GitView.tsx",
+        "src/renderer/src/screens/git/GitMergeModal.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-29T09:12:13.859Z",
+      "updatedAt": "2025-10-29T11:42:27.188Z",
+      "completedAt": "2025-10-29T11:42:27.188Z"
+    },
+    {
+      "id": "8ba96fe8-c07a-44e5-a2b0-2fab5c056c78",
+      "status": "+",
+      "title": "Deleting the last chat message must also work for assistant messages",
+      "description": "In @src/renderer/src/components/chat/ChatSidebar.tsx  we currently only allow to delete the last user message if it's the last. We should allow deleting ANY last message (as long as the assistant isn't working), and simply for the assistant we must also delete the corresponding tool results if there are any. The delete button needs to show on the last assistant message so to clarify that the tool results will also delete.",
+      "context": [
+        "src/renderer/src/components/chat/ChatSidebar.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-29T10:02:54.119Z",
+      "updatedAt": "2025-10-29T11:49:33.086Z",
+      "completedAt": "2025-10-29T11:49:33.086Z"
+    },
+    {
+      "id": "0a96daaf-26a2-4dcd-995a-77be216824d6",
+      "status": "+",
+      "title": "File suggestions get clipped/cropped",
+      "description": "The @src/renderer/src/components/ui/FileMentionsTextarea.tsx when showing the file suggestions can go completely outside the view and get clipped/cropped.\nTo make sure this doesn't happen - the suggestions should show within the left right borders of the parent (i.e. they shouldn't move as the user is typing). The y location is great.",
+      "context": [
+        "src/renderer/src/components/ui/FileMentionsTextarea.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-29T10:21:07.274Z",
+      "updatedAt": "2025-10-29T11:50:56.637Z",
+      "completedAt": "2025-10-29T11:50:56.637Z"
+    },
+    {
+      "id": "3bfbcd7e-2016-401a-b1d7-466ccb53d7c0",
+      "status": "+",
+      "title": "the create new feature popup needs updating",
+      "description": "Here are the improvements:\n1) if @src/renderer/src/screens/stories/FeatureCreateView.tsx is triggered from a story - then the current story should be selected\n2) the selected story needs to be in a regular font like the rest of the inputs - right now its faded (gray)\n3) when tapping out of the story selection dropdown - close it and leave the currently selected story\n4) when a project that isn't main is invoked - then select the latest story (cos that project won't have \"ui improvements\")\n5) if a project has no stories - show a toast saying that the user should first create a story to start creating features.",
+      "context": [
+        "src/renderer/src/screens/stories/FeatureCreateView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-29T10:43:41.842Z",
+      "updatedAt": "2025-10-29T11:54:38.453Z",
+      "completedAt": "2025-10-29T11:54:38.453Z"
+    },
+    {
+      "id": "0a224aec-8933-4c9a-8910-33048809e451",
+      "status": "+",
+      "title": "when getting an error in chat show a retry button",
+      "description": "In @src/renderer/src/components/chat/ChatSidebar.tsx when getting an error the only thing the user can do right now is to write a message to retry - we should have a retry button next to the message, that will remove the last message and proceed as if it never happened.\nThe error message should have an (i) button in the top right to display the error that occurred.\n\nUpdate @src/renderer/src/contexts/ChatsContext.tsx and @src/renderer/src/services/completionService.ts and @src/logic/factory/FactoryCompletionManager.ts to have an appropriate retry method.",
+      "context": [
+        "src/renderer/src/components/chat/ChatSidebar.tsx",
+        "src/renderer/src/contexts/ChatsContext.tsx",
+        "src/renderer/src/services/completionService.ts",
+        "src/logic/factory/FactoryCompletionManager.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-29T15:05:58.043Z",
+      "updatedAt": "2025-10-30T23:11:53.813Z",
+      "completedAt": "2025-10-30T21:47:18.549Z"
+    },
+    {
+      "id": "380133df-e68d-433c-a208-fa1c59915b93",
+      "status": "+",
+      "title": "when the user posts a message to chat automatically scroll to the very bottom",
+      "description": "In @src/renderer/src/components/chat/ChatSidebar.tsx when a user adds a new message and it appears in @src/renderer/src/components/chat/MessageList.tsx it doesn't get fully shown (i.e. the chat doesn't scroll to the bottom) - it should.",
+      "context": [
+        "src/renderer/src/components/chat/ChatSidebar.tsx",
+        "src/renderer/src/components/chat/MessageList.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-29T15:15:23.655Z",
+      "updatedAt": "2025-10-30T11:01:44.207Z",
+      "completedAt": "2025-10-30T11:01:44.207Z"
+    },
+    {
+      "id": "4c176bb4-549e-4a6c-a59d-f8690c4819b5",
+      "status": "+",
+      "title": "the typewriter effect in chat swallows some first letters",
+      "description": "whenever the typewriter effect kicks in it always omits the first or second letter in @src/renderer/src/components/chat/ChatSidebar.tsx when displaying a message in @src/renderer/src/components/chat/MessageList.tsx",
+      "context": [
+        "src/renderer/src/components/chat/ChatSidebar.tsx",
+        "src/renderer/src/components/chat/MessageList.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-29T16:24:36.140Z",
+      "updatedAt": "2025-10-30T11:15:36.023Z",
+      "completedAt": "2025-10-30T00:14:46.566Z"
+    },
+    {
+      "id": "720ef1b6-1461-4ea9-8417-ce6955ba566e",
+      "status": "+",
+      "title": "each message should show the timestamp in a human friendly way",
+      "description": "In @src/renderer/src/components/chat/MessageList.tsx all messages should show these at the top. For users it's at the top left, and for assistants or system messages it's at the top right.\nThis should be a very small piece of text.\nIf the message was 'today' then just show the time. If it was on a different day also show the date.",
+      "context": [
+        "src/renderer/src/components/chat/MessageList.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-29T16:30:28.066Z",
+      "updatedAt": "2025-10-29T17:37:17.935Z",
+      "completedAt": "2025-10-29T17:37:17.935Z"
+    },
+    {
+      "id": "eb960fe5-b811-4119-8aa9-e9d420b54024",
+      "status": "+",
+      "title": "The `finish_feature` popup when hovering the tool message needs updating",
+      "description": "in @src/renderer/src/components/chat/ToolCallChangePopup.tsx when it's `finish_feature` we shouldn't show the time nor the feature id in the 'header' - the summary card covers all the info needed.",
+      "context": [
+        "src/renderer/src/components/chat/ToolCallChangePopup.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-29T16:31:26.593Z",
+      "updatedAt": "2025-10-29T17:39:59.421Z",
+      "completedAt": "2025-10-29T17:39:59.421Z"
+    },
+    {
+      "id": "ad71c0b9-e555-4653-a600-af5efd1db0f1",
+      "status": "+",
+      "title": "`search_files` should say '+ X more at the bottom'",
+      "description": "In @src/renderer/src/components/chat/ToolCallChangePopup.tsx for the `search_files` tool if there are truncated results, there should be a one line message saying how many were ommitted.",
+      "context": [
+        "src/renderer/src/components/chat/ToolCallChangePopup.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-29T16:32:34.177Z",
+      "updatedAt": "2025-10-29T17:42:55.772Z",
+      "completedAt": "2025-10-29T17:42:55.772Z"
+    },
+    {
+      "id": "e086f202-7b49-4317-bf1c-9ac4ab60a520",
+      "status": "+",
+      "title": "the `write_file` popup needs updating",
+      "description": "in @src/renderer/src/components/chat/ToolCallChangePopup.tsx for the `write_file` tool call - with a result it can show Path(unknown) even though the path is included in the tool call args under 'name' .\nWithout the tool result, the popup never shows the diff (we never got it) - this needs to be computed so it can be displayed.",
+      "context": [
+        "src/renderer/src/components/chat/ToolCallChangePopup.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-29T16:34:09.408Z",
+      "updatedAt": "2025-10-29T17:50:05.033Z",
+      "completedAt": "2025-10-29T17:50:05.033Z"
+    },
+    {
+      "id": "16745e78-fa85-4d82-986a-1a5c3f8630c1",
+      "status": "+",
+      "title": "Chat sidebar spinner + unread dot with project aggregation",
+      "description": "Goal: Show ongoing chats (spinner) and new messages in the sidebar for both the chat list and the projects list area in SidebarView, with aggregation at the project level.\n\nBehavior:\n- Chat row: While an assistant response is streaming, display a small spinner in place of the unread badge. If there are unread messages for that chat, show a tiny red dot at the spinner’s top-right corner (spinner has precedence over number badges during streaming).\n- Project row aggregation (in SidebarView): If any chat within the project is streaming, show a small spinner on the project tile. If any chat within the project has unread messages, aggregate the unread count and display it. When both streaming and unread exist, show spinner with a small red dot at top-right. When not streaming, show the numeric unread badge only. Counts cap at 99+.\n- No hover preview.\n- Unread is already tracked per chat; leverage existing unread state and last-seen logic.\n- Spinner clears within ~500ms of stream end to avoid flicker.\n\nImplementation notes:\n- Use existing UI primitives: Spinner and DotBadge. Introduce a spinner-with-dot composition for the red unread dot overlay.\n- Ensure the new logic coexists cleanly with the already completed 'Chat notifications' feature.\n- Respect collapsed sidebar visuals; badges/spinners should remain legible and positioned consistently.\n\nContext:\n- @src/renderer/src/navigation/SidebarView.tsx\n- @src/renderer/src/components/ui/CollapsibleSidebar.tsx\n- @src/renderer/src/components/ui/Spinner.tsx\n- @src/renderer/src/components/ui/DotBadge.tsx\n- @src/renderer/src/components/chat/ChatSidebar.tsx\n- @src/renderer/src/services/chatsService.ts\n\nAcceptance criteria:\n- When a chat is actively streaming, its chat row shows a spinner instead of a numeric unread badge. If unread exists, a small red dot appears on the spinner’s top-right.\n- At the project level in SidebarView, if any chat is streaming, a spinner shows on the project tile. If any chat has unread messages, an aggregated unread indicator shows. If both, spinner shows with a small red dot. Counts cap at '99+'.\n- No hover preview is shown. Unread and streaming states update in near-real-time.\n- Spinner and badge positions align and remain accessible/legible in both expanded and collapsed sidebar modes.\n- No regressions to existing chat notification badges elsewhere (e.g., Chat nav entry).",
+      "context": [
+        "src/renderer/src/navigation/SidebarView.tsx"
+      ],
+      "createdAt": "2025-10-29T16:42:29.014Z",
+      "updatedAt": "2025-10-30T23:12:07.251Z",
+      "blockers": [],
+      "completedAt": "2025-10-30T14:49:21.119Z"
+    },
+    {
+      "id": "9dc96025-d7ee-4798-aeab-0ffac36c54c7",
+      "status": "+",
+      "title": "Git change badges in Sidebar (green) via GitContext",
+      "description": "Goal: Show Git notifications whenever there is a branch with feature changes as a green badge, consistent with existing badge styling.\n\nBehavior:\n- Placement: Show a green badge next to the 'Git' nav entry in SidebarView, following the same visual/placement pattern as existing chat badges.\n- Count: Aggregate branches with feature changes into a numeric badge (cap at 99+). If zero, no badge is shown.\n- Live updates: Badge updates as GitContext changes based on the git monitor.\n\nImplementation notes:\n- Use @src/renderer/src/contexts/GitContext.tsx as the authoritative source. It should already surface branch status based on the git monitor.\n- Define 'feature changes' using the data provided by GitContext (e.g., branches that include story/feature modifications), without re-implementing diff logic in the UI.\n- Use the same DotBadge component with a green/success styling token consistent with the design system.\n\nContext:\n- @src/renderer/src/navigation/SidebarView.tsx\n- @src/renderer/src/contexts/GitContext.tsx\n- @src/renderer/src/components/ui/DotBadge.tsx\n- @src/renderer/src/services/gitService.ts\n- @src/logic/git/gitTypes.copy.ts\n\nAcceptance criteria:\n- When one or more branches have feature changes (as exposed by GitContext), a green numeric badge appears next to the 'Git' item in SidebarView, capped at '99+'.\n- The badge updates automatically as GitContext state changes; removing/merging changes clears or reduces the count correspondingly.\n- Styling and placement match existing sidebar badges (padding, size, alignment).",
+      "context": [],
+      "createdAt": "2025-10-29T16:42:29.031Z",
+      "updatedAt": "2025-10-29T23:37:27.757Z",
+      "completedAt": "2025-10-29T23:37:27.757Z"
+    },
+    {
+      "id": "5d593b43-f456-4b1e-97e6-cb53476197e8",
+      "status": "+",
+      "title": "Push notifications for Git and Chat (parity with agents)",
+      "description": "Goal: Provide push notifications for Git and Chat using the exact same logic and UX we already use for agent run notifications.\n\nBehavior:\n- Chat: When a new assistant message arrives (under the same conditions currently used for agent notifications), send a native OS notification. Clicking the notification opens ChatView focused on the correct chat.\n- Git: When a branch with feature changes appears or updates (per GitContext/monitor events, under the same conditions as agent notifications), send a native OS notification. Clicking the notification opens GitView focused on that branch/diff context.\n- Deep linking follows the same patterns as agents; reuse existing navigation/deep-link helpers.\n\nImplementation notes:\n- Reuse existing notification pipeline used for agents in notificationsService and notifications manager. Mirror conditions and throttling/rate-limiting semantics already present for agent notifications.\n- No new settings pane work for now; follow the exact pathways and toggles agents use today.\n\nContext:\n- @src/renderer/src/services/notificationsService.ts\n- @src/notifications/manager.js\n- @src/renderer/src/services/chatsService.ts\n- @src/renderer/src/services/gitService.ts\n- @src/renderer/src/contexts/GitContext.tsx\n- @src/renderer/src/screens/ChatView.tsx\n- @src/renderer/src/screens/GitView.tsx\n\nAcceptance criteria:\n- New chat message triggers an OS push notification under the same conditions as agent notifications. Clicking it takes the user directly to the relevant chat in ChatView.\n- Git branch feature-change event triggers an OS push notification under the same conditions as agent notifications. Clicking it takes the user to GitView focused on the relevant branch.\n- No additional settings are necessary; behavior mirrors agent notification toggles and logic exactly.\n- Notifications are properly debounced/rate limited if the agent pipeline already enforces this (parity).",
+      "context": [],
+      "createdAt": "2025-10-29T16:42:29.048Z",
+      "updatedAt": "2025-10-30T00:35:51.425Z",
+      "blockers": [],
+      "completedAt": "2025-10-30T00:35:51.425Z"
+    },
+    {
+      "id": "38e1f4bc-07fa-42cc-990d-da75a62151a6",
+      "status": "+",
+      "title": "Distinct sounds per notification type (agent, chat, git)",
+      "description": "Goal: Play distinct sounds per notification/badge type. For now, reuse the agent-run notification logic and add new sound assets for chat and git. No new settings work yet.\n\nBehavior:\n- Notification types and sounds:\n  - Agent events: existing sound (or migrate to a named asset if needed)\n  - Chat new message: new distinct sound\n  - Git feature-change: new distinct sound\n- Sounds play via the same code path used by agent notifications today and only when a notification is triggered (parity with agents). No additional settings UI in this phase.\n\nImplementation notes:\n- Add new placeholder audio assets under a dedicated folder (e.g., @src/renderer/src/assets/sounds/agent.mp3, chat.mp3, git.mp3) and wire a simple type-to-sound mapping in notificationsService.\n- Preload sounds to minimize lag and debounce to avoid overwhelming audio on bursts (follow any existing debounce in agent notifications if present).\n- Ensure sounds do not overlap excessively (simple last-sound cutoff or short cooldown is acceptable for this phase).\n\nContext:\n- @src/renderer/src/services/notificationsService.ts\n- @src/renderer/src/services/settingsService.ts (only if needed for current agent parity)\n- @src/renderer/src/screens/SettingsView.tsx (no UI changes planned yet; reference for parity)\n- @src/renderer/src/assets/sounds/ (new assets folder)\n\nAcceptance criteria:\n- Triggering an agent notification plays the agent sound; triggering a chat notification plays the chat sound; triggering a git notification plays the git sound.\n- Sounds are audibly distinct across the three types.\n- Sounds play through the same logic as agent notifications (no bespoke pathways), and respect any existing mutes/rate limits already applied to agent notifications.\n- No new settings are introduced in this phase.",
+      "context": [],
+      "createdAt": "2025-10-29T16:42:29.050Z",
+      "updatedAt": "2025-10-30T21:49:39.945Z",
+      "blockers": [],
+      "completedAt": "2025-10-30T21:49:39.945Z"
+    },
+    {
+      "id": "dfa8e00c-f58c-4ae6-ba13-3dff5dc4f961",
+      "status": "+",
+      "title": "the llm model name should be positioned on the left",
+      "description": "in @src/renderer/src/components/chat/MessageList.tsx ,\nright now there's the date/time label on the right of the assistant message and the model name displays below it. The model name should display at the same level as the timestamp but on the opposite end (i.e. on the left).",
+      "context": [
+        "src/renderer/src/components/chat/MessageList.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-29T23:05:20.696Z",
+      "updatedAt": "2025-10-30T14:02:27.674Z",
+      "completedAt": "2025-10-30T14:02:27.674Z"
+    },
+    {
+      "id": "aad2f8db-1ad1-4529-b824-a4403aee54cc",
+      "status": "+",
+      "title": "the `create_feature` popup should show the feature title",
+      "description": "currently in @src/renderer/src/components/chat/ToolCallChangePopup.tsx it only shows the description for `create_feature` - the `title` field should show above it.",
+      "context": [
+        "src/renderer/src/components/chat/ToolCallChangePopup.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-30T00:03:33.927Z",
+      "updatedAt": "2025-10-30T14:37:38.058Z",
+      "completedAt": "2025-10-30T14:37:38.058Z"
+    },
+    {
+      "id": "6ef2cf47-0c7e-4f4a-a7c9-af483afeb452",
+      "status": "+",
+      "title": "The `run_test` popup should show the name of the test file",
+      "description": "in @src/renderer/src/components/chat/ToolCallChangePopup.tsx for the `run_test` tool - we need to show the name of the test file above the passed/failed tests.",
+      "context": [
+        "src/renderer/src/components/chat/ToolCallChangePopup.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-30T12:04:34.260Z",
+      "updatedAt": "2025-10-30T14:43:08.664Z",
+      "completedAt": "2025-10-30T14:43:08.664Z"
+    },
+    {
+      "id": "6829118d-a87e-4423-85d5-97dd40fc0291",
+      "status": "+",
+      "title": "If there are no other branches - don't display the section",
+      "description": "In @src/renderer/src/screens/GitView.tsx",
+      "context": [
+        "src/renderer/src/screens/GitView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-11-04T19:18:17.503Z",
+      "updatedAt": "2025-11-04T23:46:08.103Z",
+      "completedAt": "2025-11-04T23:46:08.103Z"
+    },
+    {
+      "id": "aad70d9c-e986-4150-b898-3d97fb8ebca6",
+      "status": "+",
+      "title": "After doing a fast-merge branch doesn't disappear",
+      "description": "In @src/renderer/src/screens/GitView.tsx when doing the fast-merge via @src/renderer/src/screens/git/GitMergeModal.tsx , the option for `Delete remote branch after merge` was ticked in the alert and yet, after the merge the branch still shows.\nWhen hovering over it there's an error showing too:\n\"Cannot read properties of undefined (reading 'files')\"",
+      "context": [
+        "src/renderer/src/screens/GitView.tsx",
+        "src/renderer/src/screens/git/GitMergeModal.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-11-05T00:01:13.581Z",
+      "updatedAt": "2025-11-05T00:06:40.030Z",
+      "completedAt": "2025-11-05T00:06:40.030Z"
+    },
+    {
+      "id": "b201fd32-d554-49e2-b3f8-1560a3e99787",
+      "status": "+",
+      "title": "Merge conflicts detected",
+      "description": "In @src/renderer/src/screens/GitView.tsx when there are merge conflicts - we should offer the user to resolve them within the app.\nwe need to have a new git merge view that will allow resolving such issues.",
+      "context": [
+        "src/renderer/src/screens/GitView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-11-05T00:25:34.116Z",
+      "updatedAt": "2025-11-05T00:54:51.918Z",
+      "completedAt": "2025-11-05T00:54:51.918Z"
+    },
+    {
+      "id": "1d14164a-85c8-489a-a41c-b2103c227c45",
+      "status": "+",
+      "title": "Not all branches are feature/story related",
+      "description": "In @src/renderer/src/screens/GitView.tsx if a branch has no story id or a story cannot be resolved from a given id, then don't show any story info - treat it as non-story related.",
+      "context": [
+        "src/renderer/src/screens/GitView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-11-05T00:30:43.231Z",
+      "updatedAt": "2025-11-05T00:57:05.028Z",
+      "completedAt": "2025-11-05T00:57:05.028Z"
+    },
+    {
+      "id": "bb551aac-d29c-4b27-bcc4-84634db7d41c",
+      "status": "+",
+      "title": "when in chat and running `runAllTests` which produces a lot of files info the app crashes",
+      "description": "In @src/renderer/src/components/chat/ChatSidebar.tsx and waiting for the tool result to show in @src/renderer/src/components/chat/MessageList.tsx .\nThe only thing I can see in the console is this error, but i'm not sure it's related:\n\nFileMentionsTextarea.tsx:45 Uncaught TypeError: Cannot read properties of undefined (reading 'map')\n    at FileMentionsTextarea.tsx:45:41\n    at updateMemo (react-dom_client.js?v=624470c6:5070:21)\n    at Object.useMemo (react-dom_client.js?v=624470c6:16763:20)\n    at exports.useMemo (chunk-BQYK6RGN.js?v=624470c6:918:36)\n    at FileMentionsTextarea (FileMentionsTextarea.tsx:45:21)",
+      "context": [
+        "src/renderer/src/components/chat/ChatSidebar.tsx",
+        "src/renderer/src/components/chat/MessageList.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-11-05T00:33:00.503Z",
+      "updatedAt": "2025-11-05T00:57:54.587Z",
+      "completedAt": "2025-11-05T00:57:54.587Z"
+    },
+    {
+      "id": "96900adf-6346-4780-a5dd-7202f8eb9a5d",
+      "status": "+",
+      "title": "when coming back to chat - first open the least recently opened chat",
+      "description": "In @src/renderer/src/screens/ChatView.tsx - it needs to work when going from chat to any other screen (and then back), and when switching projects but staying inside @src/renderer/src/screens/ChatView.tsx .\nIt also needs to select the chat so that it's obvious which one it is (i.e. it has to become highlighted - blue as it does now when clicking a chat).\nIt also needs to scroll to the last message (if it's unread, then to the top of it so the user can start reading the beginning - or to the very bottom otherwise, i.e. when read).\nCurrently the opening behaviour even interferes with deleting a chat (cos it has to switch to a new one - i.e. project chat if nothing is available as that one is always available) - because it immediately recreates the chat after it gets deleted - this shouldn't happen.",
+      "context": [
+        "src/renderer/src/screens/ChatView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-11-05T08:32:59.874Z",
+      "updatedAt": "2025-11-06T10:00:48.739Z",
+      "completedAt": "2025-11-06T10:00:48.739Z"
+    },
+    {
+      "id": "9a74d29d-8267-4fae-99c1-aa34c2ab45a5",
+      "status": "+",
+      "title": "the renamePath tool needs to show the change",
+      "description": "in @src/renderer/src/components/chat/ToolCallChangePopup.tsx for the `renamePath` show that `src` changes into `dst` (these are both arguments).",
+      "context": [
+        "src/renderer/src/components/chat/ToolCallChangePopup.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-11-05T11:34:07.150Z",
+      "updatedAt": "2025-11-05T14:02:51.223Z",
+      "completedAt": "2025-11-05T14:02:51.223Z"
+    },
+    {
+      "id": "a7a3b52c-c22a-40d1-b443-ac0dfa1036cf",
+      "status": "+",
+      "title": "deletePath shows the `path` that is deleted",
+      "description": "In @src/renderer/src/components/chat/ToolCallChangePopup.tsx when `deletePath` is the tool, the arg `path` holds the path to be deleted. It needs to be shown and if the File is not found (i.e. there is a result) then that needs to show too",
+      "context": [
+        "src/renderer/src/components/chat/ToolCallChangePopup.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-11-05T11:42:50.134Z",
+      "updatedAt": "2025-11-05T14:03:45.171Z",
+      "completedAt": "2025-11-05T14:03:45.171Z"
+    },
+    {
+      "id": "e7dfd19e-3d61-41d0-b21b-28b462d1d8f1",
+      "status": "+",
+      "title": "keep writeFile same width",
+      "description": "in @src/renderer/src/components/chat/ToolCallChangePopup.tsx for the `writeFile` tool, when clicking `View more changes` the popup can grow in width, which creates a horizontal scrollbar.\nThe popup should ALWAYS have a horizontal scrollbar to make sure that each line doesn't bleed over multiple lines.\nMake sure that the backgrounds etc inside scale properly, as now when clicking the `View more changes` they remain stuck to the previous width (whereas the text overflows).",
+      "context": [
+        "src/renderer/src/components/chat/ToolCallChangePopup.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-11-05T11:47:57.841Z",
+      "updatedAt": "2025-11-05T14:08:11.035Z",
+      "completedAt": "2025-11-05T14:08:11.035Z"
+    },
+    {
+      "id": "7afbce8e-a17a-4d16-9ae2-1ff5589ff36c",
+      "status": "+",
+      "title": "in chat when resuming some tools, the tools that were not run must be marked as 'aborted'",
+      "description": "this needs to go from @src/renderer/src/components/chat/MessageList.tsx all the way to @src/logic/factory/FactoryCompletionManager.ts where `resumeCompletionTools` is called - there the chat needs to save the not chosen tools as 'aborted'",
+      "context": [
+        "src/renderer/src/components/chat/MessageList.tsx",
+        "src/logic/factory/FactoryCompletionManager.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-11-05T15:07:06.118Z",
+      "updatedAt": "2025-11-05T15:07:06.118Z"
+    },
+    {
+      "id": "c913dc2e-9b2a-4974-aaee-b86046608f99",
+      "status": "+",
+      "title": "Current notifications show as app badge notifications (iOS)",
+      "description": "when any push notification is sent and until it is cleared - it shows as a badge on the app icon",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-11-05T15:27:34.450Z",
+      "updatedAt": "2025-11-05T20:13:10.165Z",
+      "completedAt": "2025-11-05T20:13:10.165Z"
+    },
+    {
+      "id": "0c94352d-002a-4b31-86e9-20bf9306a7cf",
+      "status": "+",
+      "title": "delete story doesn't refresh the ui (story is still shown)",
+      "description": "when in @src/renderer/src/screens/stories/StoriesListView.tsx or in @src/renderer/src/screens/stories/StoryDetailsView.tsx   and deleting a story - it still shows in StoriesListView . The cache or context - @src/renderer/src/contexts/StoriesContext.tsx - must not clear it correctly.\nAfter an app restart it doesn't show (i.e. the story is correctly removed).",
+      "context": [
+        "src/renderer/src/screens/stories/StoriesListView.tsx",
+        "src/renderer/src/screens/stories/StoryDetailsView.tsx",
+        "src/renderer/src/contexts/StoriesContext.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-11-07T12:58:44.015Z",
+      "updatedAt": "2025-11-07T13:02:33.600Z",
+      "completedAt": "2025-11-07T13:02:33.600Z"
+    },
+    {
+      "id": "ce54cb8f-62f4-4f2e-8674-c65a881196a0",
+      "status": "+",
+      "title": "Cost ledger totals UI via LLMCostsTools.getCost (Chat/Agents/Stories)",
+      "description": "Implement durable, append-only LLM cost totals in the UI by reading persisted aggregates from `thefactory-tools` via `LLMCostsTools.getCost(chatKey)`.\n\nBackground\n- Costs are already appended per LLM call into the DB (append-only ledger) by `thefactory-tools`.\n- `Overseer Local` already initializes `LLMCostsTools` via `@src/logic/factory/FactoryLLMCostsManager.ts`.\n- Missing piece is exposing `getCost` to the renderer and using it everywhere we show costs.\n\nCanonical scope model\n- Every LLM exchange/run can be represented by a `chatKey`.\n- Any agentRun maps to a `chatKey` (same idea as chats in `ChatView`).\n- Project-wide total cost is the `chatKey` `COST_GROUP_ID_ALL` (from `thefactory-tools`).\n\nWork items\n1) IPC + preload surface\n- Add IPC handler(s) to call `LLMCostsTools.getCost(chatKey)`.\n- Expose a renderer service (via preload) to fetch `LLMCostAggregateContent | undefined`.\n- (Optional) add batching/caching to avoid N IPC calls in lists.\n\n2) Chat durable totals (UsageModal)\n- Update `@src/renderer/src/components/chat/UsageModal.tsx` to display:\n  - current running/session totals (existing behavior)\n  - durable ledger totals fetched via `getCost(currentChatKey)` (new)\n- This ensures clearing/restarting/deleting a chat does not remove the shown durable totals.\n\n3) Stories screens: reuse UsageModal near ModelChip\n- Add a `UsageModal` (or a small wrapper around it) next to `@src/renderer/src/components/agents/ModelChip.tsx` in:\n  - `@src/renderer/src/screens/StoriesView.tsx`\n  - `@src/renderer/src/screens/stories/StoryDetailsView.tsx`\n- The modal should use the appropriate `chatKey` for the context (or fall back to `COST_GROUP_ID_ALL` when only project totals make sense).\n\n4) AgentsView: replace heavy calculations with ledger totals\n- Replace current heavy cost computations in `@src/renderer/src/screens/AgentsView.tsx` with ledger totals:\n  - per agentRun: `getCost(agentRunChatKey)`\n  - project KPIs: `getCost(COST_GROUP_ID_ALL)`\n- If we need split totals (e.g. chats vs agentRuns), use distinct `chatKey` groupings if already available; otherwise implement split as a follow-up once grouping support is clarified.\n\nAcceptance criteria\n- Deleting an agent run does not reduce project total cost.\n- Restarting/clearing/deleting a chat does not reduce the durable totals shown for that `chatKey`.\n- AgentsView project KPIs use `getCost(COST_GROUP_ID_ALL)`.\n- Chat UsageModal shows durable totals from `getCost(chatKey)` alongside running totals.\n- Totals remain stable across pricing updates because entries store pricing snapshots (handled by `thefactory-tools`).",
+      "context": [],
+      "createdAt": "2026-02-11T18:53:43.938Z",
+      "updatedAt": "2026-03-03T23:11:46.762Z",
+      "completedAt": "2026-03-03T23:11:46.762Z"
+    }
+  ],
+  "featureIdToDisplayIndex": {
+    "0964b90b-396a-43b0-9f4a-a60d0034360e": 1,
+    "56b114e3-daee-481b-9c33-329c8eace503": 2,
+    "ba3e0af6-3a04-4523-90c7-b90b0d37514b": 3,
+    "98c76bd6-8c5c-4aaf-a778-54f5f57f679a": 4,
+    "4df75808-637f-4841-9d31-b8630b1ac8bf": 5,
+    "8ed1e913-44e2-4321-a631-f1c2c9033177": 6,
+    "a480aa54-f697-409d-95a7-1b369c3da9ff": 7,
+    "b2ad0ce4-b71a-40bc-baa7-3550153bef88": 8,
+    "0ce98597-907f-4bdf-a5a8-c8e8b253e612": 9,
+    "3a11fceb-bb37-4570-a159-2f39622ca364": 10,
+    "c2192f2a-9151-4615-b376-986bb0540042": 11,
+    "f46696d7-3eee-4f9d-8aee-9419dcee20c9": 12,
+    "67edb097-edf3-4988-939d-30e3fc3007c1": 13,
+    "493c32f2-94ab-4677-8cc4-a776249c91e5": 14,
+    "e9e526e8-576a-448b-9359-db97475db485": 15,
+    "abefc7ba-3098-4aee-a01b-694a5a2a9d43": 16,
+    "22793b7c-0bfa-4da4-8b3a-ae07fbe2a0ce": 17,
+    "d8361748-2f05-4cd4-bb35-80f40db0ff32": 18,
+    "bbc90ba1-4348-4a17-9921-18b6c0ece863": 19,
+    "6e24f575-cf4d-451f-994f-7190d45ebaaa": 20,
+    "894453ef-c700-4128-b714-4ec94498498c": 21,
+    "d5b4852d-df73-4818-8db0-f7d6954c0108": 22,
+    "b8d93d1d-5c66-4628-8a85-9da0197e97e2": 23,
+    "9244467b-e3d1-475a-a1f0-bf35d8482629": 24,
+    "352e49dd-37f2-428c-a85c-da7a2c1bd66a": 25,
+    "37730047-f692-48c0-b6e7-9093564596a9": 26,
+    "0fea71a8-c0da-48a1-b4ea-c0db2196c902": 27,
+    "d05e6082-c27c-487f-bacd-837f7f5b7f73": 28,
+    "2d607668-7481-4d8f-89cc-5afebb89e67b": 29,
+    "5fcbee8a-2734-4fa5-b404-6d9155a01053": 30,
+    "76ff2065-cd03-4815-b36b-8dfabd278b2b": 31,
+    "7dd2e06b-32aa-418b-9e32-5efc0ecd94dd": 32,
+    "46fbca0c-0fd5-4b92-aeae-5e8488cfd192": 33,
+    "5f2a9d3e-dfa3-4e79-ba0b-8b2252556681": 34,
+    "274eb915-a7b3-4eed-b71d-e7888f1340fb": 35,
+    "26d01bef-ce79-498a-9cc8-7a6ada530002": 36,
+    "6a8066ee-230f-4f31-b531-3d8cadff4178": 37,
+    "57988106-364d-4e52-8b50-94d18839c319": 38,
+    "82b9481c-7129-4bea-8029-0e41a56531fe": 39,
+    "dc067730-dede-40a5-affe-e04410170819": 40,
+    "5f13e562-bbd6-4f67-97c9-00ba79ddb138": 41,
+    "fd101477-cb98-4d87-90c4-efb87f39c5e6": 42,
+    "306733d4-26cb-49c0-a0ff-c34dc7699baa": 43,
+    "5e9f9a8e-0a8b-44d3-936d-05ca62f981f6": 44,
+    "f9eef18e-818e-427d-82ab-8d990bb199c4": 45,
+    "df22d856-9aa3-4c10-9e91-04291697e0b8": 46,
+    "9b65af17-0a3d-42e4-bcd2-81b65277651c": 47,
+    "583f4582-9495-46cc-bd49-19c957b9b0a3": 48,
+    "065ff2fe-ac0a-4b31-b57f-8918dcb4057c": 49,
+    "3c0c391d-fe56-4add-a756-793dd2dc6246": 50,
+    "6deecb2f-1e0c-4e0c-8f4d-349a18c02e18": 51,
+    "1e6d13dd-e154-4612-8751-7182a7d660e6": 52,
+    "7cd60fb3-fe0f-478f-ac17-915b824f7f65": 53,
+    "8d6c71e6-f74b-4155-bdd2-56baa2bbd40a": 54,
+    "006bc18d-88c6-4257-9d76-69ad87c9c502": 55,
+    "75e8b34f-8e44-4bac-9c9a-26c0dfb17224": 56,
+    "e3d6999d-3dcd-4f28-8452-77daa5b9cab2": 57,
+    "50188f39-ce56-4087-90fb-70a107a7357f": 58,
+    "35d46d98-8f89-483a-9470-e2e615fd41a9": 59,
+    "e358e778-5d29-492a-8943-e67e31b45833": 60,
+    "27201172-7e31-4e3b-bf06-eb1737ddfadb": 61,
+    "98cc6216-a675-40cb-b763-5ac3ccc98b65": 62,
+    "a940d772-c613-427c-9dd4-88984e9f24ec": 63,
+    "bb3a99c3-4e37-47ae-b3df-4b6f5317faed": 64,
+    "9fb948d2-235d-4322-9462-93a9ca8ce283": 65,
+    "8acda51f-97c8-4614-8800-cb2d7607bf16": 66,
+    "ada1bb79-e120-493b-b0ba-13d11951b42b": 67,
+    "8eb99cfc-6aeb-4f17-ae04-73621bdd63ce": 68,
+    "270271e3-5a53-45ed-9c31-131e9bb4f36b": 69,
+    "943be0ce-0c96-48ab-a820-37b919b9a150": 70,
+    "76a35a14-e633-4f4a-827f-f7521123176d": 71,
+    "032e4535-7d44-4654-bc6d-811d395b0285": 72,
+    "d621c45b-3c4c-4814-81bd-7f1a1e25f6f0": 73,
+    "0f44a2c4-5988-4b86-94d9-38b2ade0a037": 74,
+    "f8dbb257-f348-48ec-8af2-bbb92fc6a1e0": 75,
+    "12e26fae-357e-44cb-b1d6-ac8b9ba2c439": 76,
+    "af06b354-ef07-4764-8be3-2f731e9aad33": 77,
+    "60237404-0b90-4663-9ed3-de9db2d77354": 78,
+    "34c83d4f-078d-45c3-b85a-e701f1d82f3a": 79,
+    "2c41b67b-2bd2-4a6a-b7ef-5b2bd97380cb": 80,
+    "05393210-77ab-4301-8243-accf0edac8d5": 81,
+    "ea8dc9a0-203e-42c6-ab4d-70db372c0003": 82,
+    "85914410-3864-43fa-8317-b90dedc12ce0": 83,
+    "74d5f63b-8797-43f5-b571-fd5bebf56550": 84,
+    "27156e19-3aeb-41de-adc2-75b1c7ca9774": 85,
+    "53ab6181-9034-47f0-a6a9-a8b8eca0e504": 86,
+    "40322d85-bc35-4b45-89db-b5e3a393a8e9": 87,
+    "32ec2d90-3244-40a0-a74b-d120f6d512e0": 88,
+    "06c24df0-01ba-4d83-b7ad-f4a5f40175d1": 89,
+    "c20fbc93-7910-4612-a275-95a3d722955c": 90,
+    "4673bd96-c874-4b92-8779-d81af432c032": 91,
+    "fac00d4a-01a5-4012-8481-bb920ac502db": 92,
+    "f3b465a1-09be-45e9-80b2-70c84145ce5f": 93,
+    "e2ac9811-94ae-4088-b00b-546f358b370e": 94,
+    "d0647493-d214-40cd-bb93-c12a7a99ef36": 95,
+    "7520ce51-621d-4dfc-8686-1b7806b53aca": 96,
+    "f8eb8466-4457-49ca-8c65-9b812aec8a26": 97,
+    "8ea2946d-0305-4f96-8e42-0f9d9a684de0": 98,
+    "c4236f01-9f8d-4a9a-bd8a-3489a23316d5": 99,
+    "b7716b85-8e3d-4a91-9729-4fca7aab51e9": 100,
+    "cb7d825c-b1ad-4a3f-a164-7e036765b93c": 101,
+    "d8a25ca6-5f26-4957-a2ac-7c9f4291a04f": 102,
+    "fcfceb8f-d4af-4411-9a5b-7c059338b4a1": 103,
+    "5a9ae0d2-7711-4149-bd57-1c43303613f6": 104,
+    "f07cc494-56fa-45c9-9c12-40fbbce37a86": 105,
+    "fccb9bc5-1ca8-46ad-9702-6376d55de3fa": 106,
+    "18cbcc94-0531-4534-936c-7c7fa5efda8c": 107,
+    "11b7fc32-af7f-409c-a3f0-12a414749e12": 108,
+    "47590194-5f78-4d06-8aac-62cf60f5fc86": 109,
+    "a571d64e-213b-4f0e-b641-51678b5c26b5": 110,
+    "b951665d-139c-4761-94f1-c259b36dab42": 111,
+    "70889fe4-d1cd-4718-9cf1-f11739204e42": 112,
+    "995dbbc4-cf40-4749-9cd7-1721cae3e4b6": 113,
+    "0162e2f8-2275-4b51-a5c7-2a91dfc0cde6": 114,
+    "4c1c2af8-b8dd-4bdc-8857-eac4b21ec98d": 115,
+    "72945db3-a39d-422d-95c1-23123a9ef01a": 116,
+    "362f2ca1-0fc2-4076-a70b-3581cd73bd66": 117,
+    "12ca6f4f-ef0e-4e14-8f8d-93d5c84598cc": 118,
+    "93772c3c-639f-4110-a2e2-7d5d7f9e91df": 119,
+    "fae23bb4-639b-41c1-ab9a-a9ab8f56ea29": 120,
+    "36a5ae63-4c86-48d3-b7ca-788cd5327671": 121,
+    "23e11a4c-977b-4c11-9088-34103071ba5c": 122,
+    "77c96d8b-6cdd-4f6a-8e73-dcce83e8b431": 123,
+    "1d8e24a8-ca9e-4e85-b852-800d1350a6dd": 124,
+    "ce6dcda2-3c44-4c9e-9d91-0bb75ea1ec34": 125,
+    "898404db-c466-4a60-8bd3-52e33785c563": 126,
+    "c7cf3d3f-b368-4c00-8e79-1072f213b2c0": 127,
+    "9770df69-0ac3-4fcd-99ea-c3af72bfe37b": 128,
+    "d15eda55-d79c-4dff-8228-8a7e745a1fac": 129,
+    "cc444241-f834-463f-bf98-91c98dd1b706": 130,
+    "ba50781e-aa29-4dfe-b159-825f9ed88f88": 131,
+    "02c446d1-4969-4057-8fb6-2e957b2205aa": 132,
+    "31bad08b-59b0-468b-a154-7814251bd4cb": 133,
+    "888e6d6a-8be0-4ba7-9275-c1e5b364dadc": 134,
+    "bb76a798-869f-45ba-9902-25812ab58166": 135,
+    "fb5a75f9-a460-4382-b369-420836ca265e": 136,
+    "c713a8f1-d3af-428d-9f29-f03250b2db5c": 137,
+    "4eb23f4e-deba-496d-9c27-ee4c052da03c": 138,
+    "76b04544-7d06-4f64-8648-95a46b569056": 139,
+    "64b6f2c1-f5b4-4ef5-b108-0d5f94857ad1": 140,
+    "2dc1b4b3-8376-44d0-937f-f6c18778622b": 141,
+    "b4a93fc1-cfa9-4cee-bd31-be25d35bee5c": 142,
+    "c989b117-412c-4645-add9-57a9d426f054": 143,
+    "940b5550-9f7a-463b-8621-1909e796ad60": 144,
+    "cd613bac-52f7-4f5d-a81a-4bacf77203b3": 145,
+    "9b25e0f0-32d5-4320-b429-46120b06fbf3": 146,
+    "c2f26371-082b-4b31-812a-e8c5955a4d4a": 147,
+    "4cd9f6a6-4be9-4e76-b436-507636a05bfb": 148,
+    "bd197ab9-1da8-4e17-81e8-46c0e3b86290": 149,
+    "92593266-d2ae-4d86-915a-0e82d71f625d": 150,
+    "a9a277d4-6662-4862-a11f-812af7355e20": 151,
+    "f1796a15-4b5a-4c05-a2bc-7559b7fdb54e": 152,
+    "ad551afc-2b74-45e7-ac7b-9eac1faa8e26": 153,
+    "93dfac0e-95c0-4d3b-8ce6-3fd6e29380a9": 154,
+    "f4564269-341e-482e-9aa5-e06698cdb326": 155,
+    "4999628b-5040-40bc-b269-e6cf0823a07c": 156,
+    "5da79673-ef5c-4c84-93d7-a715b5492bc0": 157,
+    "b5615d52-f0b8-4630-910a-e47f4b7db811": 158,
+    "afa9c03a-f251-410b-9510-3ea34b3eb374": 159,
+    "67302df0-716b-46ed-aee1-828cb60373d2": 160,
+    "dd9bb459-5225-4604-8d2f-6e50feaba098": 161,
+    "c7a825c8-9791-4893-9b98-f89a9681e376": 162,
+    "8a6f2df4-3f7d-45da-b100-e216d46598e9": 163,
+    "be0848f1-c6cf-446f-b6ab-08042d7825c5": 164,
+    "63d893a3-845f-4557-b2a6-d30d38a8c24a": 165,
+    "98ff6ca9-38bd-4828-bcba-f555033945fe": 166,
+    "724a4b85-c9cd-4d61-ab60-a455da3482f7": 167,
+    "beea43a0-839b-4f9b-8215-73a8fd39f3cb": 168,
+    "1784ec92-6612-4d1b-a8e9-41fb10c3557f": 169,
+    "b81fe5fc-0b19-4fe7-9b41-5ae564e5e908": 170,
+    "41e29168-8387-44a3-8052-a80b3098088b": 171,
+    "6ef71ce5-6bcd-407a-b9e7-1f3e44e2a626": 172,
+    "380133df-e68d-433c-a208-fa1c59915b93": 173,
+    "e5ab58da-63e1-4869-8fc0-b18016f0dba6": 174,
+    "fcf25987-8aaa-4454-8b39-1f7abf3774ef": 175,
+    "84a438a8-912f-41f2-b1b4-5d4661ffbe3c": 176,
+    "ea6227a4-4b63-41ad-a334-79102a5f5619": 177,
+    "0559292b-fad1-4585-b319-37c653e68bd8": 178,
+    "8ba96fe8-c07a-44e5-a2b0-2fab5c056c78": 179,
+    "0a96daaf-26a2-4dcd-995a-77be216824d6": 180,
+    "3bfbcd7e-2016-401a-b1d7-466ccb53d7c0": 181,
+    "4c176bb4-549e-4a6c-a59d-f8690c4819b5": 182,
+    "720ef1b6-1461-4ea9-8417-ce6955ba566e": 183,
+    "eb960fe5-b811-4119-8aa9-e9d420b54024": 184,
+    "ad71c0b9-e555-4653-a600-af5efd1db0f1": 185,
+    "e086f202-7b49-4317-bf1c-9ac4ab60a520": 186,
+    "9dc96025-d7ee-4798-aeab-0ffac36c54c7": 187,
+    "5d593b43-f456-4b1e-97e6-cb53476197e8": 188,
+    "dfa8e00c-f58c-4ae6-ba13-3dff5dc4f961": 189,
+    "aad2f8db-1ad1-4529-b824-a4403aee54cc": 190,
+    "6ef2cf47-0c7e-4f4a-a7c9-af483afeb452": 191,
+    "16745e78-fa85-4d82-986a-1a5c3f8630c1": 192,
+    "0a224aec-8933-4c9a-8910-33048809e451": 193,
+    "38e1f4bc-07fa-42cc-990d-da75a62151a6": 194,
+    "ae8f8bd5-6062-4238-bc93-00994debfad0": 195,
+    "6829118d-a87e-4423-85d5-97dd40fc0291": 196,
+    "aad70d9c-e986-4150-b898-3d97fb8ebca6": 197,
+    "b201fd32-d554-49e2-b3f8-1560a3e99787": 198,
+    "1d14164a-85c8-489a-a41c-b2103c227c45": 199,
+    "bb551aac-d29c-4b27-bcc4-84634db7d41c": 200,
+    "96900adf-6346-4780-a5dd-7202f8eb9a5d": 201,
+    "9a74d29d-8267-4fae-99c1-aa34c2ab45a5": 202,
+    "a7a3b52c-c22a-40d1-b443-ac0dfa1036cf": 203,
+    "e7dfd19e-3d61-41d0-b21b-28b462d1d8f1": 204,
+    "7afbce8e-a17a-4d16-9ae2-1ff5589ff36c": 205,
+    "c913dc2e-9b2a-4974-aaee-b86046608f99": 206,
+    "0c94352d-002a-4b31-86e9-20bf9306a7cf": 207,
+    "ce54cb8f-62f4-4f2e-8674-c65a881196a0": 208
+  },
+  "createdAt": "2025-09-16T13:05:37.984Z",
+  "updatedAt": "2025-11-05T00:22:06.741Z",
+  "completedAt": "2026-03-03T23:11:46.762Z"
+}

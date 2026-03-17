@@ -1,0 +1,46 @@
+{
+  "id": "7e1d55aa-c7c6-4fb6-9676-5c6e9ba8b125",
+  "status": "-",
+  "title": "Initial User Onboarding & Dynamic Project Selection",
+  "description": "As a user, when I open the app for the first time, I want to be guided to create my first project so that I can start using the application immediately. When I return to the app, I want it to automatically select my most recently used project instead of relying on a hardcoded 'MAIN' placeholder. This story covers the full removal of the hardcoded 'MAIN' project, dynamic active project resolution on startup, and a dedicated onboarding flow for first-time users.",
+  "features": [
+    {
+      "id": "2a07590c-b438-423c-8e07-1c26c7e9197d",
+      "status": "-",
+      "title": "Deprecate Hardcoded 'MAIN' Project Initialization",
+      "description": "Remove all startup logic, database seeding, and state management defaults that force the existence or selection of a 'MAIN' project. The app no longer creates a 'MAIN' project on startup. The data layer supports a state where zero projects exist.",
+      "context": [],
+      "createdAt": "2026-03-17T19:26:21.667Z",
+      "updatedAt": "2026-03-17T19:26:21.667Z"
+    },
+    {
+      "id": "8fb56664-55ed-4fb7-a442-4e1a01b26f16",
+      "status": "-",
+      "title": "Dynamic Active Project Resolution",
+      "description": "Implement logic on application startup to query existing projects. If projects exist, determine the 'top' project (e.g., by 'lastAccessed' or 'createdAt' timestamp) and automatically set it as the active project in the global state. Returning users are automatically placed into their most relevant project. The active project state dynamically reflects the 'top' project from the database.",
+      "context": [],
+      "createdAt": "2026-03-17T19:26:21.671Z",
+      "updatedAt": "2026-03-17T19:26:21.671Z"
+    },
+    {
+      "id": "c39ae1c6-9de4-455b-9935-3f288990f65c",
+      "status": "-",
+      "title": "First-Time User Onboarding Flow",
+      "description": "Create a routing mechanism that detects when zero projects exist in the database. When this happens, redirect the user to a dedicated Onboarding Flow. Users with no projects see the onboarding screen. The main dashboard is inaccessible until at least one project is created.",
+      "context": [],
+      "createdAt": "2026-03-17T19:26:21.673Z",
+      "updatedAt": "2026-03-17T19:26:21.673Z"
+    },
+    {
+      "id": "4f68a2b4-c81a-4bdd-a988-f5f41e9fd4d2",
+      "status": "-",
+      "title": "Integrate Project Wizard into Onboarding",
+      "description": "Connect the newly drafted 'Project Manager Wizard' directly into the Onboarding Flow. Completing the wizard creates the first project and transitions the user into the main application, setting that newly created project as active. The onboarding flow smoothly utilizes the Project Wizard. Upon completion, the app navigates to the main workspace with the new project active.",
+      "context": [],
+      "createdAt": "2026-03-17T19:26:21.675Z",
+      "updatedAt": "2026-03-17T19:26:21.675Z"
+    }
+  ],
+  "createdAt": "2026-03-17T19:21:19.928Z",
+  "updatedAt": "2026-03-17T19:21:19.928Z"
+}

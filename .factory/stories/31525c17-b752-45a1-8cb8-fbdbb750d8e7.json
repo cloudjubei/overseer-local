@@ -1,0 +1,590 @@
+{
+  "id": "31525c17-b752-45a1-8cb8-fbdbb750d8e7",
+  "status": "-",
+  "title": "Create Sourcetree replacement - a popular version control management app",
+  "description": "Goal Provide built-in Git workflows so users do not need external tools (e.g., SourceTree) for routine tasks: viewing repo status and branches, reviewing diffs (working tree, staged, and branch-to-base), running focused tests, merging, and resolving conflicts. Scope for this iteration - Navigation and views: - Add a Git section with two subviews: 'Current project' and 'All projects'. - Current project shows pending operations for the active repo; All projects aggregates across all known projects from ProjectContext (src/renderer/src/contexts/ProjectContext.tsx). - Pending operations definition: - A pending operation is a feature branch with commits ahead of the base branch (default base is the current branch). Feature branches follow the existing convention 'features/<storyId>' where storyId is a UUID. We may later extend to 'features/<storyId>.<featureId>' but uniqueness is already guaranteed by storyId. - Merge flow: - Clicking a pending item opens a Git Merge popup that shows context (project/story/branch), per-file diffs, and analysis placeholders: compilation impact, tests impact, and diff coverage across changed lines. These analyses start as stubs/adapters and should degrade gracefully when not available. On conflicts, the flow should transition into the conflict resolution UI. - Integration notes: - Reuse GitMonitor for status and add aggregation to compute ahead/behind and feature branches across projects. - Reuse/extend existing functions in src/logic/git-monitor/storyBranchNaming.js to resolve story IDs from branch names and expose this mapping to the renderer. - Respect current behavior where agents run from the branch they started; do not force checkouts. All operations must be safe-by-default with timeouts and clear error surfacing. - Included in scope for this iteration - Remote PR management, stash workflows, and hunk/line-level staging. Acceptance (high level) - Users can navigate to a Git panel, see pending branches grouped appropriately, open a merge popup with diffs and analysis placeholders, execute a merge, and resolve conflicts without leaving the app.",
+  "features": [
+    {
+      "id": "e507c3e6-bef1-48d3-a746-446a0f099584",
+      "status": "+",
+      "title": "Refactor Git credentials management to the main process",
+      "description": "Move Git credentials logic from the renderer (`GitHubCredentialsContext.tsx`, `utils/GitHubCredentialsManager.ts`) to the main process. Create a new `CredentialsManager.ts` in `src/logic/git/` similar to `SettingsManager.ts`. This manager will handle storing and retrieving Git credentials securely. Expose its functionality to the renderer via IPC.",
+      "context": [],
+      "createdAt": "2025-10-24T14:04:15.877Z",
+      "updatedAt": "2025-10-24T14:47:00.620Z",
+      "completedAt": "2025-10-24T14:47:00.620Z"
+    },
+    {
+      "id": "d318f7e4-4116-4f31-8813-15004bd380ff",
+      "status": "+",
+      "title": "Implement Backend Git Service for Repository Monitoring",
+      "description": "Develop the core logic within `src/logic/git/GitManager.ts`. This service will monitor all project repositories. It will implement a `StoryResolver` function that parses branch names following the `features/<storyId>` convention to extract story IDs. This resolver will be used with the `resolveChangesToStories` method from `GitTools` to identify feature branches, calculate their ahead/behind status, and aggregate this data for the renderer.",
+      "context": [],
+      "createdAt": "2025-10-24T14:06:40.308Z",
+      "updatedAt": "2025-10-24T14:50:21.444Z",
+      "completedAt": "2025-10-24T14:50:21.444Z"
+    },
+    {
+      "id": "5c721227-f437-4766-8160-addfc5fe08db",
+      "status": "+",
+      "title": "Establish IPC Layer for Git Service Communication",
+      "description": "Create the necessary IPC channels to connect the backend `GitManager` service with the renderer. This involves defining channel keys in `src/preload/ipcHandlersKeys.ts`, implementing main process handlers, exposing the interface in `src/preload/index.ts`, and defining the service type in `src/renderer/src/services/gitService.ts`.",
+      "context": [],
+      "createdAt": "2025-10-24T14:06:40.311Z",
+      "updatedAt": "2025-10-24T14:51:47.921Z",
+      "completedAt": "2025-10-24T14:51:47.921Z"
+    },
+    {
+      "id": "37dd96d8-3be1-46d0-a038-37a0901af4f7",
+      "status": "+",
+      "title": "Create Frontend State Management for Git Data",
+      "description": "Implement frontend state management for Git data by creating a `GitContext.tsx` in `src/renderer/src/contexts/` and a `useGit.tsx` hook in `src/renderer/src/hooks/`. The hook will use the `gitService` to fetch and provide data to the context, following the pattern of existing hooks like `useLiveData.tsx`.",
+      "context": [],
+      "createdAt": "2025-10-24T14:06:40.312Z",
+      "updatedAt": "2025-10-24T14:52:47.353Z",
+      "completedAt": "2025-10-24T14:52:47.353Z"
+    },
+    {
+      "id": "2f65bc15-c493-44bb-82be-83c661e00b9b",
+      "status": "+",
+      "title": "Implement Git Panel UI with Project Views",
+      "description": "Build the main UI components for the Git feature. Add a 'Git' section to the navigation with two subviews: 'Current project' and 'All projects'. These views will display pending feature branches for the active project and all projects, respectively, using data from the `useGit` hook.",
+      "context": [],
+      "createdAt": "2025-10-24T14:06:40.313Z",
+      "updatedAt": "2025-10-24T14:58:56.020Z",
+      "completedAt": "2025-10-24T14:58:56.020Z"
+    },
+    {
+      "id": "e37e222e-2727-4240-baf7-c336b087c4bf",
+      "status": "+",
+      "title": "Design and Implement Git Merge Popup",
+      "description": "Create a modal component for the Git merge workflow. This popup will show contextual information (Project, Story, Branch), a per-file diff viewer, and placeholders for future analysis features like 'Compilation Impact', 'Tests Impact', and 'Diff Coverage'.",
+      "context": [],
+      "createdAt": "2025-10-24T14:06:40.314Z",
+      "updatedAt": "2025-10-24T15:04:52.932Z",
+      "completedAt": "2025-10-24T15:04:52.932Z"
+    },
+    {
+      "id": "d08e8344-e4bd-4552-8a87-d41e7a4ce814",
+      "status": "+",
+      "title": "Implement Merge and Conflict Resolution Logic",
+      "description": "Develop the backend logic in `GitManager.ts` and the frontend UI flow for handling merges and conflicts. The backend method must be robust with timeouts and clear error handling. If a merge results in conflicts, the UI will transition to a dedicated conflict resolution view.",
+      "context": [],
+      "createdAt": "2025-10-24T14:06:40.315Z",
+      "updatedAt": "2025-10-24T15:11:43.480Z",
+      "completedAt": "2025-10-24T15:11:43.480Z"
+    },
+    {
+      "id": "da291627-6b44-4e5d-a19a-30d923410493",
+      "status": "+",
+      "title": "Expose GitManager Methods via IPC",
+      "description": "Update `src/preload/ipcHandlersKeys.ts` to define a comprehensive set of IPC channels for Git operations. Ensure the following keys are present, adding them if they are missing: `GIT_TODO` (for fetching pending branches), `GIT_GET_BRANCH_DIFF_SUMMARY`, `GIT_GET_MERGE_PLAN`, `GIT_APPLY_MERGE`, and `GIT_GET_LOCAL_STATUS`. These keys will create a complete contract between the main and renderer processes for the required Git functionality.",
+      "context": [],
+      "createdAt": "2025-10-24T15:36:03.838Z",
+      "updatedAt": "2025-10-24T15:41:35.371Z",
+      "completedAt": "2025-10-24T15:41:35.371Z"
+    },
+    {
+      "id": "39bc8bed-a411-4e3b-ac83-00da808e5a5c",
+      "status": "+",
+      "title": "Implement GitManager Methods using GitTools",
+      "description": "Implement the corresponding handler methods in `src/logic/git/GitManager.ts` for the IPC keys defined in `ipcHandlersKeys.ts`. Each handler should invoke the appropriate method from the `GitTools` instance. For example, the handler for `GIT_GET_BRANCH_DIFF_SUMMARY` should call `tools.getBranchDiffSummary`, and the handler for `GIT_APPLY_MERGE` should call `tools.applyMerge`. Ensure that all arguments are passed correctly and results are returned to the renderer.",
+      "context": [],
+      "createdAt": "2025-10-24T15:36:03.840Z",
+      "updatedAt": "2025-10-27T09:59:55.884Z",
+      "blockers": [],
+      "completedAt": "2025-10-27T09:59:55.884Z"
+    },
+    {
+      "id": "b39ea9e9-306e-459c-9a8e-c17b277e2d5a",
+      "status": "+",
+      "title": "Connect Renderer Git Service to Main Process",
+      "description": "Bridge the main and renderer processes. First, in `src/preload/index.ts`, update the `GIT_API` object to expose all the new Git methods, mapping them to their respective `IPC_HANDLER_KEYS`. Second, update the `GitService` type definition in `src/renderer/src/services/gitService.ts` to include the signatures for all the newly exposed methods, ensuring type safety in the renderer.",
+      "context": [],
+      "createdAt": "2025-10-24T15:36:03.840Z",
+      "updatedAt": "2025-10-24T15:45:51.531Z",
+      "completedAt": "2025-10-24T15:45:51.531Z"
+    },
+    {
+      "id": "4bba9a50-5e90-45a4-b69e-55cec5d9c236",
+      "status": "+",
+      "title": "Implement GitContext for UI State Management",
+      "description": "Refactor the frontend state management for Git. First, delete the redundant hook file at `src/renderer/src/hooks/useGit.tsx`. Second, enhance `src/renderer/src/contexts/GitContext.tsx` to manage all Git state and actions. The context should not only provide data (e.g., `allProjects`) but also expose action functions (e.g., `applyMerge`, `getDiff`) that call the corresponding methods from `gitService`. Move any derived state logic (like `pendingAll` and `pendingCurrent`) into the context provider. Finally, ensure the `useGit` hook is exported from the context file itself for convenient access.",
+      "context": [],
+      "createdAt": "2025-10-24T15:36:03.841Z",
+      "updatedAt": "2025-10-24T15:48:47.261Z",
+      "completedAt": "2025-10-24T15:48:47.261Z"
+    },
+    {
+      "id": "93aa7e98-7cb8-4426-8842-c1a2c200c5bb",
+      "status": "+",
+      "title": "Fix GitView Compilation and Implement Data Fetching in GitContext",
+      "description": "`src/renderer/src/screens/GitView.tsx` has compilation errors because it expects git status data (`currentProject`, `allProjects`) and a `refresh` function from the `useGit` hook, but `GitContext` does not provide them. This feature will implement the necessary data fetching and state management logic within `GitContext.tsx`. It will fetch the git status for both the current project and all projects, manage loading/error states, and expose the data and a `refresh` function to the `GitView` component, thereby fixing the compilation errors and making the view functional.",
+      "context": [],
+      "createdAt": "2025-10-27T11:12:37.255Z",
+      "updatedAt": "2025-10-27T11:17:25.063Z",
+      "completedAt": "2025-10-27T11:17:25.063Z"
+    },
+    {
+      "id": "af235bbc-3a5d-42ad-8eea-1d77c65caa04",
+      "status": "+",
+      "title": "Remove Refresh Button from GitView",
+      "description": "The 'Refresh' button in '@src/renderer/src/screens/GitView.tsx' is no longer necessary as the view is now updated automatically by the GitMonitor service. This feature involves removing the button and any associated logic from the component.",
+      "context": [],
+      "createdAt": "2025-10-27T14:22:25.551Z",
+      "updatedAt": "2025-10-27T14:32:34.235Z",
+      "completedAt": "2025-10-27T14:32:34.235Z"
+    },
+    {
+      "id": "284a207d-b6ac-421e-8199-6d02ccbe9ea6",
+      "status": "+",
+      "title": "Add Action Buttons to Branch Rows in GitView",
+      "description": "Implement an actions section at the end of each branch row in the GitView. This section will contain three buttons:\n- **Quick Merge**: Merges the feature branch into its base branch using a default merge strategy.\n- **View**: On hover, a tooltip will display a summary of the changes in the branch.\n- **Delete**: Deletes the branch after a confirmation prompt.",
+      "context": [],
+      "createdAt": "2025-10-27T14:22:25.554Z",
+      "updatedAt": "2025-10-27T14:36:33.276Z",
+      "completedAt": "2025-10-27T14:36:33.276Z"
+    },
+    {
+      "id": "6edc73b1-b1fa-4541-9d45-a71128a2e775",
+      "status": "+",
+      "title": "Refactor GitMergeModal to Use GitContext",
+      "description": "The `GitMergeModal.tsx` component at '@src/renderer/src/screens/git/GitMergeModal.tsx' currently interacts directly with `gitService`. This should be refactored to use the `GitContext` for all Git operations and state management, aligning it with the application's architecture.",
+      "context": [],
+      "createdAt": "2025-10-27T14:22:25.556Z",
+      "updatedAt": "2025-10-27T14:37:33.760Z",
+      "completedAt": "2025-10-27T14:37:33.760Z"
+    },
+    {
+      "id": "85ba3de7-7c40-4e6f-ac77-8f7f9ce2ad35",
+      "status": "+",
+      "title": "Implement Merge Functionality in GitMergeModal",
+      "description": "Add the logic to the `GitMergeModal` to execute a merge operation. This will involve calling the appropriate function from the `GitContext`, handling the success and failure states of the merge, and transitioning to the conflict resolution UI if necessary.",
+      "context": [],
+      "createdAt": "2025-10-27T14:22:25.557Z",
+      "updatedAt": "2025-10-27T14:38:47.451Z",
+      "completedAt": "2025-10-27T14:38:47.451Z"
+    },
+    {
+      "id": "70a7778e-a8fb-46fd-be5f-5dc1738b4881",
+      "status": "+",
+      "title": "Add Color-Coded Diffs to GitMergeModal",
+      "description": "Enhance the diff viewer within `GitMergeModal.tsx`. The view should visually distinguish between code insertions and deletions by color-coding them. Insertions should be highlighted in green, and deletions in red.",
+      "context": [],
+      "createdAt": "2025-10-27T14:22:25.559Z",
+      "updatedAt": "2025-10-27T14:39:40.433Z",
+      "completedAt": "2025-10-27T14:39:40.433Z"
+    },
+    {
+      "id": "2d942460-1b9d-409b-9b22-b692a7eea38a",
+      "status": "+",
+      "title": "Implement Analysis Tabs in GitMergeModal",
+      "description": "The bottom section of the `GitMergeModal` currently shows placeholders ('Not available') for 'Compilation Impact', 'Tests Impact', and 'Diff Coverage'. This feature is dedicated to implementing the underlying analysis for these sections and displaying the results. Each analysis will be presented in its own tab.",
+      "context": [],
+      "createdAt": "2025-10-27T14:22:25.560Z",
+      "updatedAt": "2025-10-27T14:42:24.077Z",
+      "completedAt": "2025-10-27T14:42:24.077Z"
+    },
+    {
+      "id": "df27b5ca-a8b3-4a65-a05c-595db51743ff",
+      "status": "+",
+      "title": "Redesign GitMergeModal Layout with Sticky Tabs",
+      "description": "Rework the layout of `GitMergeModal.tsx`. The main sections (Changes, Compilation Impact, Tests Impact, Diff Coverage) should be organized into a tabbed interface. The tab headers must remain fixed at the top of the modal, while the content of the selected tab should be scrollable.",
+      "context": [],
+      "createdAt": "2025-10-27T14:22:25.561Z",
+      "updatedAt": "2025-10-27T14:44:14.370Z",
+      "completedAt": "2025-10-27T14:44:14.370Z"
+    },
+    {
+      "id": "d1eb355f-334e-4f85-85d6-ecaccfc35978",
+      "status": "+",
+      "title": "Chevron controls showing hiding of diff files in Merge Modal",
+      "description": "In @src/renderer/src/screens/git/GitMergeModal.tsx there should be a standard chevron icon to the right when a diff is closed and pointing down when a diff is open. All diffs start closed.",
+      "context": [
+        "src/renderer/src/screens/git/GitMergeModal.tsx"
+      ],
+      "createdAt": "2025-10-27T16:06:12.501Z",
+      "updatedAt": "2025-10-27T18:25:18.655Z",
+      "blockers": [],
+      "completedAt": "2025-10-27T18:25:18.655Z"
+    },
+    {
+      "id": "54ca5933-b89b-4392-8250-aaf479dfedc0",
+      "status": "+",
+      "title": "Implement Pre-Merge Confirmation Dialog with Push/Delete Options",
+      "description": "When a user clicks the 'Merge' button in the Git Merge Modal, display a confirmation dialog. This dialog should summarize the changes and provide two persistent options: 1) 'Automatically push to origin' and 2) 'Delete remote branch after merge'. The state of these checkboxes should be saved locally. If checked, the corresponding Git operations should be executed after a successful merge.",
+      "context": [],
+      "createdAt": "2025-10-27T16:11:00.852Z",
+      "updatedAt": "2025-10-27T21:58:55.950Z",
+      "blockers": [],
+      "completedAt": "2025-10-27T18:30:07.219Z"
+    },
+    {
+      "id": "bfa3d487-d173-4126-9789-68bb323dac38",
+      "status": "+",
+      "title": "Update the View button in GitView",
+      "description": "In @src/renderer/src/screens/GitView.tsx use the @src/renderer/src/components/ui/icons/IconEye.tsx as the icon for the \"view\" button.\nThe icon needs to be updated to match better in style to all the other icons.",
+      "context": [
+        "src/renderer/src/screens/GitView.tsx",
+        "src/renderer/src/components/ui/icons/IconEye.tsx"
+      ],
+      "createdAt": "2025-10-27T16:13:12.146Z",
+      "updatedAt": "2025-10-27T18:31:10.228Z",
+      "blockers": [],
+      "completedAt": "2025-10-27T18:31:10.228Z"
+    },
+    {
+      "id": "8ca56f99-3f26-4f70-8dd2-d2dcf73b75b8",
+      "status": "+",
+      "title": "Enhance Merge Button with Icon and Tooltip",
+      "description": "Update the fast merge button in the @src/renderer/src/screens/GitView.tsx . Add a tooltip that clearly states 'fast merge'. The button should also display an icon with an arrow originating from two dots and a tick for better visual identification.",
+      "context": [
+        "src/renderer/src/screens/GitView.tsx"
+      ],
+      "createdAt": "2025-10-27T16:13:12.147Z",
+      "updatedAt": "2025-10-28T00:12:40.710Z",
+      "blockers": [],
+      "completedAt": "2025-10-27T22:41:13.152Z"
+    },
+    {
+      "id": "ad99e5f3-073f-4cf8-a679-828c97bb2c97",
+      "status": "+",
+      "title": "Replace 'eye' button with hover tooltip for branch details in Git View",
+      "description": "In @src/renderer/src/screens/GitView.tsx, the 'eye' icon button for viewing branch details should be removed. Instead, a tooltip containing the same information should appear when a user hovers over the branch row. This will make the UI cleaner and the information more accessible.\nIt must be always possible to click the row to open up the @src/renderer/src/screens/git/GitMergeModal.tsx .",
+      "context": [
+        "src/renderer/src/screens/git/GitMergeModal.tsx"
+      ],
+      "createdAt": "2025-10-27T21:58:01.075Z",
+      "updatedAt": "2025-10-27T22:44:28.283Z",
+      "blockers": [],
+      "completedAt": "2025-10-27T22:44:28.283Z"
+    },
+    {
+      "id": "0bd09bd2-6a09-43c7-9aff-b67cf3ee24c8",
+      "status": "+",
+      "title": "Use icons for file status (Added, Modified, Deleted) in diff view",
+      "description": "Replace the text indicators 'A', 'M', 'D' with intuitive icons for Added, Deleted, and Modified files. These icons should be added to @src/renderer/src/components/ui/icons/Icons.tsx and styled consistently with the existing icon set. For files that are Added or Deleted, the line change statistics should be hidden, as the change is wholesale. The line counts are only relevant for Modified files.",
+      "context": [],
+      "createdAt": "2025-10-27T21:58:01.076Z",
+      "updatedAt": "2025-10-27T22:48:53.362Z",
+      "completedAt": "2025-10-27T22:48:53.362Z"
+    },
+    {
+      "id": "5240a857-d8f7-4afb-94fb-8c6b36fed3d0",
+      "status": "+",
+      "title": "Request Structured Diffs and Analyses in Merge Modal",
+      "description": "Update the `useEffect` hook in `GitMergeModal.tsx` that fetches the merge report. Modify the call to `gitService.buildMergeReport` to include the `includeStructuredDiff: true` and `analyses: ['compilation', 'tests', 'coverage']` options. This will enable the backend to compute and return parsed diffs and analysis reports.",
+      "context": [],
+      "createdAt": "2025-10-28T00:14:23.703Z",
+      "updatedAt": "2025-10-28T01:37:02.986Z",
+      "blockers": [],
+      "completedAt": "2025-10-28T01:37:02.986Z"
+    },
+    {
+      "id": "791f6f40-71c1-4057-937d-771841eb0039",
+      "status": "+",
+      "title": "Integrate Backend Analyses into Merge Modal UI",
+      "description": "Refactor the analysis sections (Compilation, Tests, Coverage) in `GitMergeModal.tsx`. Update the `useEffect` hooks to first check for the presence of `report.analysis.compilation`, `report.analysis.tests`, and `report.analysis.coverage`. If this data is available, use it to populate the UI state. Retain the existing client-side heuristic calculations as a fallback mechanism to ensure the UI remains functional if the backend analysis is unavailable.",
+      "context": [],
+      "createdAt": "2025-10-28T00:14:23.704Z",
+      "updatedAt": "2025-10-28T01:44:02.173Z",
+      "completedAt": "2025-10-28T01:44:02.173Z"
+    },
+    {
+      "id": "0c46912f-d4ee-4e2f-9368-b09da8ae8ea3",
+      "status": "+",
+      "title": "Render Structured Diffs in File Change View",
+      "description": "Create a new `StructuredDiff` component in `GitMergeModal.tsx` that accepts a `structuredDiff` prop (an array of `DiffHunk`). This component will render a line-by-line view of the changes, applying appropriate styling for added, deleted, and context lines based on the parsed data. Update the `FileDiffItem` component to use this new `StructuredDiff` component when `file.structuredDiff` is available on the `MergeReportFile` object, falling back to the existing raw patch rendering otherwise.",
+      "context": [],
+      "createdAt": "2025-10-28T00:14:23.705Z",
+      "updatedAt": "2025-10-28T01:46:29.134Z",
+      "completedAt": "2025-10-28T01:46:29.134Z"
+    },
+    {
+      "id": "59e7d2e8-be68-410f-81ed-0ebeaf994e95",
+      "status": "+",
+      "title": "Integrate Unified Branch Data Model in Git View",
+      "description": "Refactor the 'GitView' to handle the enhanced branch data structure from `thefactory-tools`. The view should now display a single, de-duplicated list of branches, clearly indicating their local and remote status (e.g., local only, remote only, tracked). This resolves the issue of seeing the same branch listed twice if it exists both locally and on the remote. The UI should correctly parse and display metadata like the Story ID for all branches, regardless of their origin.\n\n@src/logic/git/gitTypes.copy.ts has the latest type information",
+      "context": [
+        "src/logic/git/gitTypes.copy.ts"
+      ],
+      "createdAt": "2025-10-28T09:29:48.355Z",
+      "updatedAt": "2025-10-29T00:24:18.819Z",
+      "blockers": [],
+      "completedAt": "2025-10-28T12:35:00.862Z"
+    },
+    {
+      "id": "60d81fdb-96e6-46f2-901b-dc3a441460f0",
+      "status": "+",
+      "title": "Implement Merge-Base Diffing in Merge Modal",
+      "description": "Modify the 'GitMergeModal' to use the new merge-base diffing API from `thefactory-tools`. When viewing changes for a pending merge, the diff should be calculated against the common ancestor of the source and target branches. This will accurately display only the incoming changes from the feature branch, eliminating the confusing 'deletions' that appear when the target branch has diverged. This aligns the diff view with standard pull request behavior.\n\n\n@src/logic/git/gitTypes.copy.ts  has the latest type information",
+      "context": [
+        "src/logic/git/gitTypes.copy.ts"
+      ],
+      "createdAt": "2025-10-28T09:29:48.358Z",
+      "updatedAt": "2025-10-28T12:09:12.634Z",
+      "blockers": [],
+      "completedAt": "2025-10-28T12:09:12.634Z"
+    },
+    {
+      "id": "70da62da-7742-4bd4-b7a9-b82b1750e58e",
+      "status": "+",
+      "title": "Fix remote branch deletion after merge in GitMergeModal",
+      "description": "Files: src/renderer/src/screens/git/GitMergeModal.tsx\n\nContext:\n- doMergeWithPostActions currently calls gitService.deleteRemoteBranch(projectId, branch). When the modal is opened from a remote-only branch (e.g., origin/features/<id>), the call uses the remote-qualified name and fails.\n\nImplementation notes:\n- Before calling deleteRemoteBranch, derive short branch name by stripping the remote prefix (e.g., origin/):\n  - const short = branch.replace(/^[^\\/]+\\//, '')\n  - await gitService.deleteRemoteBranch(projectId, short)\n- Preserve error surfacing including stderr where available.\n\nAcceptance:\n- Given a remote-only branch origin/features/<id>, when merge succeeds and the option Delete remote branch after merge is enabled, the remote branch is deleted without error.\n- Given a local+remote branch features/<id>, when merge succeeds and Delete remote branch after merge is enabled, the remote branch is deleted without error.\n- If deletion fails, the modal shows a clear error message including stderr when available.",
+      "context": [],
+      "createdAt": "2025-10-30T00:20:42.289Z",
+      "updatedAt": "2025-10-30T00:24:54.196Z",
+      "completedAt": "2025-10-30T00:24:54.196Z"
+    },
+    {
+      "id": "ec98a5a1-4bcc-45f5-be19-eb73d5b06268",
+      "status": "+",
+      "title": "Prompt to delete remote when deleting a branch that exists both locally and remotely (GitView)",
+      "description": "Files: src/renderer/src/screens/GitView.tsx\n\nContext:\n- UnifiedBranchItem.onDelete only deletes local or remote depending on state. It does not offer the option to also delete the remote when both exist.\n\nImplementation notes:\n- When branch.isLocal && branch.isRemote, present a confirmation that allows deleting local and optionally also deleting the remote ref origin/<name>.\n- Use branch.remoteName to compute the short name: const short = (branch.remoteName || branch.name).replace(/^[^\\/]+\\//, '')\n- Sequence: delete local first, then (if chosen) delete remote. Surface any errors independently.\n- Respect protected branches (see Feature: Protect main/master from deletion).\n\nAcceptance:\n- For a branch present locally and remotely, clicking delete prompts to delete local and optionally remote. Choosing both deletes both with separate error handling.\n- For local-only branches, prompt and delete local only.\n- For remote-only branches, prompt and delete remote only.",
+      "context": [],
+      "createdAt": "2025-10-30T00:20:42.291Z",
+      "updatedAt": "2025-10-30T00:28:56.703Z",
+      "completedAt": "2025-10-30T00:28:56.703Z"
+    },
+    {
+      "id": "bae6b72c-4b52-45ba-98c8-bdb04da4670a",
+      "status": "+",
+      "title": "Ahead/behind visual update and incoming stats on rows",
+      "description": "Files: src/renderer/src/screens/GitView.tsx\n\nContext:\n- AheadBehind currently shows neutral text; rows do not surface per-row file stats except in tooltip.\n\nImplementation notes:\n- Update AheadBehind to color-code counts: ahead (↑) in green, behind (↓) in red; hide section when both are zero.\n- For mode === 'current': compute incoming-only diffs vs upstream and expose +insertions/-deletions inline next to the arrows.\n  - Use gitService.getBranchDiffSummary with baseRef = local branch, headRef = `${branch.upstreamRemote || 'origin'}/${branch.upstreamBranch || branch.name}`, incomingOnly: true, includePatch: false.\n  - Fallback: if no upstream is configured, do not show incoming stats.\n- For non-current rows: keep existing baseRef → headRef summary but also show +insertions/-deletions inline when summary has loaded.\n\nAcceptance:\n- Rows display X↑ in green and Y↓ in red when non-zero.\n- Current branch row shows incoming file-level totals +ins/-del when remote has commits to pull.\n- Tooltip continues to show per-file breakdown; inline summary surfaces totals for quick scan.\n- Row shows (EQUAL) as a chip if the branch is the same as current",
+      "context": [],
+      "createdAt": "2025-10-30T00:20:42.292Z",
+      "updatedAt": "2025-11-04T19:19:25.081Z",
+      "blockers": [],
+      "completedAt": "2025-11-04T19:19:25.081Z"
+    },
+    {
+      "id": "717444ff-e3cd-41cf-9cc2-605ef38e0ce3",
+      "status": "+",
+      "title": "Show branch behind status relative to current and disable merge when applicable",
+      "description": "Files: @src/logic/git/GitManager.ts , @src/renderer/src/services/gitService.ts , @src/renderer/src/screens/GitView.tsx \n\nContext:\n- We need to detect when the base branch (e.g., main) is behind the current feature branch and reflect this on that row, disabling merge interactions.\n\nImplementation notes:\n- Add IPC handler in GitManager for GIT_SELECT_COMMITS to proxy tools.selectCommits(options) so the renderer can compute commit count between branches.\n- Extend gitService with selectCommits(projectId, options) to call the IPC handler.\n- In GitView UnifiedBranchItem (when rendering the base branch while a different current branch exists), compute commits that the current has ahead of that base: selectCommits({ sources: [current.name], baseRef: b.name, maxCount: a sane cap }) and display N commits behind on the base branch row.\n- For such behind-of-current rows: do not show the fast-merge button and ignore row click (no-op). Provide tooltip explaining that the base branch is behind current and cannot be fast-merged here.\n\nAcceptance:\n- When the current branch is ahead of main by N commits, the main row shows N commits behind.\n- The main row in this state does not show a fast-merge action and clicking the row does nothing.\n- No regressions for other rows or actions; existing merge flows remain functional.",
+      "context": [
+        "src/logic/git/GitManager.ts",
+        "src/renderer/src/services/gitService.ts",
+        "src/renderer/src/screens/GitView.tsx"
+      ],
+      "createdAt": "2025-10-30T00:20:42.292Z",
+      "updatedAt": "2025-11-05T00:06:15.957Z",
+      "blockers": [],
+      "completedAt": "2025-11-05T00:06:15.957Z"
+    },
+    {
+      "id": "e3bfa56f-432c-44a4-bd04-a3e7d1af926a",
+      "status": "+",
+      "title": "Protect main/master from deletion across views",
+      "description": "Files: @src/renderer/src/screens/GitView.tsx \n\nContext:\n- The UI should not allow deletion of protected branches.\n\nImplementation notes:\n- Define a predicate isProtected = (name) => name === 'main' || name === 'master'.\n- Hide or disable the delete button for protected branches; tooltip reads protected branch.\n- Guard in onDelete to early-return with an alert if invoked via any means.\n\nAcceptance:\n- main and master never present an enabled delete action whether local, remote, or both.\n- Attempts to delete via any fallback path are blocked with a clear message.",
+      "context": [
+        "src/renderer/src/screens/GitView.tsx"
+      ],
+      "createdAt": "2025-10-30T00:20:42.293Z",
+      "updatedAt": "2025-11-05T00:08:49.255Z",
+      "blockers": [],
+      "completedAt": "2025-11-05T00:08:49.255Z"
+    },
+    {
+      "id": "36ef0b80-71f0-4964-a283-1526d7cacd56",
+      "status": "+",
+      "title": "Sidebar Git notifications: green badge for updated feature branches",
+      "description": "Add a green notification badge to the Git button in @src/renderer/src/navigation/SidebarView.tsx that mirrors the existing notifications pattern.\n\n- Badge behavior: displays the count of branches across all known projects that currently have commits ahead of the current branch. A branch is counted if (ahead > 0) relative to the project’s current branch. The current branch itself is never counted.\n- Base branch selection and switching: the default base is the repo’s current branch (dynamic). Monitors must track divergence relative to the current base and be switchable when the base changes (e.g., after a branch switch). Pending entries should reflect the actual base (the current branch at the time of counting).\n- Initialization (LoadingScreen): during @src/renderer/src/screens/LoadingScreen.tsx, initialize git tools per project and start monitors with the repo’s current branch as the base so the app begins in a correct state.\n- Initial snapshot: seed the initial badge count from GitContext via listUnifiedBranches (loadUnified), which also computes relToCurrent using selectCommits. Monitor events then keep the count in sync by triggering reloads.\n- Branch identification: the badge is not limited to features/*; it considers any branch. For feature branches following 'features/<storyId>', identify both local and remote-qualified refs (e.g., 'origin/features/...', 'refs/heads/features/...') using the permissive regex '(?:^|/)features/([0-9a-fA-F-]{8,})' for story resolution used elsewhere in the UI.\n- Remote-only branches: include remote-only branches if they are ahead > 0 relative to the current base.\n- Data source: derive the badge count from GitContext unified.relToCurrent; reuse GitMonitor via GitManager → gitService to emit updates and trigger unified refreshes.\n- Renderer: extend GitContext to compute and expose 'gitUpdatedBranchesCount' from unified.relToCurrent; errors should be surfaced non-blockingly and never block UI.\n- UI: update SidebarView to render a green badge for the Git nav item when count > 0; tooltip reads '<n> updated branch/branches'.\n- Constraints: read-only for this feature. No automatic checkouts. Safe-by-default with timeouts.\n- Acceptance: when any branch in any project has commits ahead of the current base, the Git button shows a green badge with the correct count; otherwise the badge is hidden. On app start, the initial count appears from the unified snapshot even before monitor events.",
+      "context": [
+        "src/renderer/src/navigation/SidebarView.tsx"
+      ],
+      "createdAt": "2025-11-05T00:48:55.631Z",
+      "updatedAt": "2025-11-05T15:23:30.828Z",
+      "blockers": [],
+      "completedAt": "2025-11-05T15:06:08.623Z"
+    },
+    {
+      "id": "46a65cb3-4b56-4448-97f8-4f9a0975a413",
+      "status": "+",
+      "title": "getting branch summaries after loading branches",
+      "description": "In @src/renderer/src/contexts/GitContext.tsx there's a TODO on line 250.\nFor each branch (that isn't the current) we need to have this branch diff summary computed so that information about the divergence between current and that branch can be shown.\nThis means that for each branch in @src/renderer/src/screens/GitView.tsx we want to show its status against its upstream (this is already provided via `listUnifiedBranches` ) and its status against the current branch (this is the new functionality that can be gotten via `getBranchDiffSummary` ). \nFor the two displays, there should be a chip that should say \"Δ Current ↑X ↓Y\" and  \"Δ Remote ↑A ↓B\" where X/Y and A/B should show how many commits ahead/behind it is.\nThe actual file summary is still shown in the hover popup in @src/renderer/src/screens/GitView.tsx .\nFor the arrows (↑↓) - make sure we use the same green/red arrows as currently the `AheadBehind` component does.",
+      "context": [
+        "src/renderer/src/contexts/GitContext.tsx",
+        "src/renderer/src/screens/GitView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-11-05T11:55:48.399Z",
+      "updatedAt": "2025-11-05T12:42:37.298Z",
+      "completedAt": "2025-11-05T12:42:37.298Z"
+    },
+    {
+      "id": "d43c4450-a3cd-43dd-a248-aa75f5c69233",
+      "status": "+",
+      "title": "Switch branch button: update current base and retarget Git monitors",
+      "description": "Goal Provide an explicit 'Switch branch' control to change the repo’s current branch safely from GitView; after a successful switch, monitors should track divergence relative to the new current base branch.\n\n- Location:\n  - Current project view: for each non-current branch row (in 'Other branches'), add a 'Switch' action.\n  - Optionally surface a 'Switch' action in the 'Current branch' header to open a branch picker.\n- Behavior:\n  - Pre-checks: only allow switch when the working tree is clean (no unstaged/staged changes). If not clean, show a warning/disabled state. No stash/partial staging in this iteration.\n  - Action: perform a safe checkout to the target branch (no forced checkout). Respect current behavior where agents run from the branch they started; the switch must not implicitly alter agent execution contexts.\n  - Monitor retarget: after checkout, update the monitor to use the new current branch as base. Provide an easy programmatic path (e.g., 'switchMonitorBase(projectId, baseBranch)'); if not supported natively, restart the monitor with the new base.\n- Initialization: during LoadingScreen (per project), initialize git tools and start monitors with the repo’s current branch as the base.\n- UI/State updates: refresh unified branches and re-compute 'relToCurrent' and the sidebar green badge. Pending entries must store the actual base at event time.\n- Data/IPC: extend gitService/GitManager with a safe 'checkout' operation and a 'switch monitor base' operation or equivalent restart. Use timeouts and clear error surfacing; no destructive operations.\n- Constraints: safe-by-default, no automatic stash or force. No PR/remote management in this iteration.\n- Acceptance:\n  - User can switch to a different branch from GitView when the working tree is clean.\n  - After switching, the monitors immediately reflect the new base, unified view updates, and the sidebar badge count recalculates accordingly.\n  - On startup, monitors track the actual current branch.",
+      "context": [],
+      "createdAt": "2025-11-05T14:58:25.851Z",
+      "updatedAt": "2025-11-05T15:30:17.532Z",
+      "completedAt": "2025-11-05T15:30:17.532Z"
+    },
+    {
+      "id": "ca8eec49-6c42-4e2f-860d-606b056baf4f",
+      "status": "+",
+      "title": "only show action buttons on row hover",
+      "description": "in @src/renderer/src/screens/GitView.tsx  for each branch row",
+      "context": [
+        "src/renderer/src/screens/GitView.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-11-05T15:02:13.962Z",
+      "updatedAt": "2025-11-05T15:03:59.536Z",
+      "completedAt": "2025-11-05T15:03:59.536Z"
+    },
+    {
+      "id": "afdb5f6a-978d-44b4-9995-03f69feb1b01",
+      "status": "+",
+      "title": "Add a commit button if there are pending changes",
+      "description": "In @src/renderer/src/screens/GitView.tsx for any branch that has changes pending (staged or not) show a commit button that will open a commit review modal showing a similar view as the @src/renderer/src/screens/git/GitMergeModal.tsx but showing the new pending changes for all files. It should work exactly the same as SourceTree - showing a split view with Staged/Unstaged files on the left and then the file diff on the right (for whichever file is selected). Then the user can either drag files from staged<->unstaged, or tick them (there's a checkbox to the left of the name). \nThere should also be a RESET and REMOVE button that will show on hover for each file (reset discards all the changes and remove deletes the file).\nThe user must be able to drag the vertical divider between the staged/unstaged and file diff view (similarly to how we have it in @src/renderer/src/components/chat/ChatSidebar.tsx ) but show the drag handle on hover.\n\nAfter the user confirms the staging/unstaging and there is at least 1 staged file allow them to click proceed, which shows a final alert where the user should put the commit message.\nit should also show a tickbox to push immediately to origin.",
+      "context": [
+        "src/renderer/src/screens/GitView.tsx",
+        "src/renderer/src/screens/git/GitMergeModal.tsx",
+        "src/renderer/src/components/chat/ChatSidebar.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-11-05T22:14:51.710Z",
+      "updatedAt": "2025-11-06T11:19:43.999Z",
+      "completedAt": "2025-11-06T11:19:43.999Z"
+    },
+    {
+      "id": "2efcd766-e423-4f70-ad84-77c35a6c1f44",
+      "status": "+",
+      "title": "update the icons for the file statuses",
+      "description": "currently the file status icons, i.e. @src/renderer/src/components/ui/icons/IconFileAdded.tsx , @src/renderer/src/components/ui/icons/IconFileDeleted.tsx , @src/renderer/src/components/ui/icons/IconFileModified.tsx are unreadable because the status circle is tiny compared to the file underneath. There should be no file and the status icon should fill the whole canvas.",
+      "context": [
+        "src/renderer/src/components/ui/icons/IconFileAdded.tsx",
+        "src/renderer/src/components/ui/icons/IconFileDeleted.tsx",
+        "src/renderer/src/components/ui/icons/IconFileModified.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-11-05T22:16:01.525Z",
+      "updatedAt": "2025-11-05T23:26:53.533Z",
+      "completedAt": "2025-11-05T23:26:53.533Z"
+    },
+    {
+      "id": "8c824dc4-24d7-4d6b-81b6-133bcd933506",
+      "status": "+",
+      "title": "Sidebar Git badges per project: active-only top badge and per-project list indicators",
+      "description": "Goal: Adjust Git unread badges to be project-aware in the Sidebar.\n\nTop Git nav badge (SidebarView):\n- Shows unread updated branches count only for the active project (current project), not all projects.\n- Tooltip: '<n> updated branch/branches'. Hidden when 0.\n\nProjects list badges (SidebarView bottom list):\n- For each project entry, render a green badge showing that project’s unread updated branches count.\n- Follow the same rendering rules/pattern as chat and agent badges; hide when 0.\n- Tooltip: '<n> updated branch/branches'.\n\nData and context changes:\n- Extend GitContext to expose:\n  - updatedBranchesCountByProject: Record<string, number>\n  - getProjectUpdatedBranchesCount(projectId?): number\n- Counts reflect unread updates as defined by the existing unread model (ahead > 0 vs current branch and last‑seen != head sha), scoped per project.\n\nSync behavior:\n- Badge values seed from the initial unified snapshot and update via monitor-driven unified refreshes.\n- Base branch changes automatically recompute unread state per project.\n\nConstraints:\n- Read-only UI change. No checkouts/merges triggered. Errors are non-blocking.\n\nAcceptance criteria:\n- Top Git badge reflects only the active project’s unread count.\n- Each project row in the Sidebar shows its own unread count badge; hidden when 0.\n- Counts remain accurate across base changes and monitor updates.",
+      "context": [],
+      "createdAt": "2025-11-05T22:34:04.837Z",
+      "updatedAt": "2025-11-05T23:26:15.666Z",
+      "completedAt": "2025-11-05T23:26:15.666Z"
+    },
+    {
+      "id": "6678c4ec-5585-4297-8ce1-d43340bff417",
+      "status": "+",
+      "title": "In‑app FileMerge‑style conflict resolver – Phase 1 (MVP)",
+      "description": "Goal\n- Replicate Apple FileMerge.app interaction patterns inside the app, cross‑platform, to resolve merge conflicts without leaving the app.\nTrigger and flow\n- When a merge from Git Merge modal returns conflicts, open a new modal: Merge Conflict Resolution.\n- Modal persists for the session; users resolve conflicted files and stage as they go.\n- When all files are resolved, show a confirmation to finalize the merge with a prefilled, editable message and optional push.\nUI structure\n- Left sidebar: conflicted files only; badges for unresolved/resolved; search; quick actions on hover: accept ours, accept theirs, reset file.\n- Main area: 3‑pane editor\n  - Left: Theirs (incoming, stage 3)\n  - Right: Ours (current, stage 2)\n  - Center: Result (editable)\n  - Per‑hunk controls: pick ours, pick theirs, pick both; manual editing.\n  - Hunk navigation: next/previous.\n- Bottom bar: abort merge with confirmation, continue enabled only when all resolved; status like 'x/y files resolved'.\nInteractions and behaviors\n- Save & Stage: writes center content to working tree and stages file (mark resolved).\n- Accept ours/theirs for file level; reset file to conflicted state from index.\n- Binary files: only ours/theirs actions; no inline editing.\nCommit message and push\n- Final confirmation prefilled with 'Merge branch {branch_name_incoming}' (editable) and 'Push immediately to origin' checkbox (default off).\nGit integration and APIs (via GitManager → gitService → GitContext)\n- listConflicts(repoPath)\n- getConflictTriples(repoPath, path) -> { base, ours, theirs, isBinary }\n- writeResolution(repoPath, path, content)\n- acceptOurs(repoPath, path), acceptTheirs(repoPath, path)\n- resetFile(repoPath, path)\n- abortMerge(repoPath)\n- finalizeMerge(repoPath, message, pushImmediately)\nSafety and integration\n- No auto‑checkout; timeouts and error surfacing; graceful degradation when base or triples unavailable.\n- GitMergeModal launches this modal on conflicts; resizable dividers reuse ChatSidebar pattern.\nAcceptance criteria\n- Conflicted merge opens resolver; selecting a file shows 3‑pane diff with per‑hunk controls.\n- Saving & staging marks file resolved; binary files limited to ours/theirs.\n- Continue enabled only when all resolved; final step creates the merge commit with default message and optional push.",
+      "context": [],
+      "createdAt": "2025-11-12T16:01:35.396Z",
+      "updatedAt": "2025-11-12T16:20:02.038Z",
+      "completedAt": "2025-11-12T16:20:02.038Z"
+    },
+    {
+      "id": "2c16ee82-88a4-44d6-8bd7-4c49230bd1c0",
+      "status": "+",
+      "title": "FileMerge parity and performance – Phase 2",
+      "description": "Scope\n- Base panel (stage 1) toggle for extra context.\n- Diff UX enhancements: whitespace‑ignore toggle, word/char diff toggle, wrap lines, polished synced scrolling.\n- Apply to all remaining hunks in current file for chosen action.\n- Badges and correct handling for renames and mode or symlink conflicts.\n- Large file strategy: virtualized rendering; fallback to file‑level actions if too large.\n- Keyboard shortcuts: up/down navigate hunks; cmd/ctrl+1 ours, +2 theirs, +3 both; cmd/ctrl+S save & stage; cmd/ctrl+Enter continue.\nAcceptance criteria\n- Users can toggle base, whitespace, word/char, wrap.\n- Apply‑to‑all for file works.\n- Large files remain responsive with virtualization or guarded fallback.\n- Shortcuts work cross‑platform.",
+      "context": [],
+      "createdAt": "2025-11-12T16:01:35.399Z",
+      "updatedAt": "2025-11-12T16:44:34.780Z",
+      "completedAt": "2025-11-12T16:44:34.780Z"
+    },
+    {
+      "id": "2bde8cff-8bd0-4dae-a51e-844d666730b9",
+      "status": "+",
+      "title": "Advanced productivity, robustness, and accessibility – Phase 3",
+      "description": "Scope\n- Preferences: default order for 'pick both'; default whitespace and wrap; remember per repo.\n- Concurrency: detect external edits while modal open and prompt to reload.\n- EOL and encoding: preserve ours by default; option to normalize EOL; warnings on mixed encodings.\n- Accessibility: ARIA roles and labels for hunk controls, strong focus management, high‑contrast themes.\n- Optional external tool fallback button; on return, refresh conflicted state.\n- Telemetry and error logging (non‑PII) around conflict sessions and failures.\nAcceptance criteria\n- Preferences persist and apply; concurrency prompts trigger appropriately.\n- EOL and encoding options behave correctly.\n- Accessibility improvements present and verifiable.\n- External tool fallback works without breaking in‑app flow.",
+      "context": [],
+      "createdAt": "2025-11-12T16:01:35.400Z",
+      "updatedAt": "2025-11-12T16:50:10.598Z",
+      "completedAt": "2025-11-12T16:50:10.598Z"
+    },
+    {
+      "id": "97ea0a6d-c60a-4046-a9a7-f8262198ff98",
+      "status": "+",
+      "title": "GitView redesign: current-project only + Sourcetree layout skeleton (left sidebar, main area, right actions sidebar)",
+      "description": "Update @src/renderer/src/screens/GitView.tsx to remove Current/All projects segmentation and always operate on the active project.\n\nImplement a new layout:\n- Left sidebar with collapsible sections: Branches, Stashes (open by default).\n- Main content switches by selection (branch vs stash).\n- Right sidebar reserved for context actions (buttons vary by selection but location is consistent).\n\nSelection model:\n- selectedBranchName OR selectedStashRef; default selection is current branch.\n\nAcceptance:\n- GitView never shows an All Projects view or segmented control.\n- Left sidebar renders Branches and Stashes sections (collapsible, open by default).\n- Branch selection updates the main view and right actions panel accordingly.\n- Stashes section may be a UI skeleton in this iteration: it must render and be collapsible, but may show an explicit \"Not implemented\" / empty-state and does not need to support real stash listing or stash selection until stash APIs are added.\n- Layout is responsive and main content is scrollable (no horizontal scroll for whole screen).",
+      "context": [],
+      "createdAt": "2026-03-16T16:08:07.548Z",
+      "updatedAt": "2026-03-16T17:30:52.258Z",
+      "completedAt": "2026-03-16T17:30:52.258Z"
+    },
+    {
+      "id": "86901516-70ac-426d-859c-620b1a98d438",
+      "status": "+",
+      "title": "Branches sidebar: show local branches and highlight current; selection drives Branch view",
+      "description": "Implement Branches section in new GitView sidebar.\n\nBehavior:\n- Display all local branches (deduped) for the active project.\n- Highlight the current branch.\n- Clicking a branch selects it and shows the Branch main view.\n\nAcceptance:\n- Sidebar list includes current branch and other local branches.\n- Current branch is visually highlighted.\n- Clicking a branch updates main view + right actions context.\n\nNotes:\n- Reuse data from GitContext.unified.get(activeProjectId).branches and filter to isLocal.\n- Degrade gracefully if branches are loading/error.",
+      "context": [],
+      "createdAt": "2026-03-16T16:08:15.937Z",
+      "updatedAt": "2026-03-16T18:29:31.810Z",
+      "completedAt": "2026-03-16T18:29:31.810Z"
+    },
+    {
+      "id": "5b349737-859c-4b4e-ab54-30f12ebe721e",
+      "status": "+",
+      "title": "Stashes sidebar + stash detail view with file diffs + Apply/Delete actions (identify missing git APIs)",
+      "description": "Implement Stashes section in left sidebar and stash detail main view.\n\nUI:\n- Left sidebar section: list stashes.\n- Selecting a stash shows:\n  - Top buttons: Apply Stash, Delete Stash\n  - Scrollable vertical list of files and their diffs contained in the stash.\n\nAcceptance:\n- User can select a stash and see its file list + diffs.\n- Apply and Delete perform the operation and refresh stash list.\n- Errors surface in UI and do not crash.\n\nDependencies / likely missing APIs:\n- Need gitService + GitManager IPC methods for:\n  - listStashes()\n  - getStashDiff(stashRef, includePatch/includeStructured)\n  - applyStash(stashRef, options?)\n  - dropStash(stashRef)\nIf thefactory-tools lacks stash operations, we must request them.",
+      "context": [],
+      "createdAt": "2026-03-16T16:13:37.486Z",
+      "updatedAt": "2026-03-17T04:05:04.991Z",
+      "completedAt": "2026-03-17T04:05:04.991Z"
+    },
+    {
+      "id": "afa160a9-942a-42da-915a-26ceb4bb23f0",
+      "status": "+",
+      "title": "Branch main view: resizable commit-graph area stub + resizable staged/unstaged + diff preview panes",
+      "description": "When a branch is selected in GitView, show a Branch main view composed of:\n- Top: commit/branch graph overview area (same placement as SourceTree) — for now empty stub.\n- Bottom: existing local changes UI: staged/unstaged lists on left and file preview on right.\n\nResizing:\n- The top graph area must be vertically resizable (expand/shrink within limits).\n- The bottom section must allow resizing between file lists and preview (like current behavior).\n- Prefer reusing existing split/resizer patterns already used in commit/merge modals.\n\nAcceptance:\n- Branch view renders for selected branch.\n- Graph stub renders and can be resized.\n- Bottom staged/unstaged and preview panes render and can be resized.\n- No regressions to existing diff rendering.\n\nNotes:\n- Graph implementation is separate feature; this feature creates the container + resizing primitives integration.",
+      "context": [],
+      "createdAt": "2026-03-16T16:41:04.360Z",
+      "updatedAt": "2026-03-17T11:18:04.500Z",
+      "completedAt": "2026-03-17T11:18:04.500Z"
+    },
+    {
+      "id": "fa357103-c623-4f72-b9a7-f76243a6a064",
+      "status": "+",
+      "title": "Right actions sidebar: implement branch context actions (Commit, Pull, Push badge/enablement, Fetch, Create Branch, Merge, Stash)",
+      "description": "Implement a consistent right sidebar actions area in GitView.\n\nWhen a branch is selected, show buttons:\n- Commit: opens commit popup with message + confirmation of staged items.\n- Pull: performs git pull; on conflicts show popup and proceed to merge conflict resolution.\n- Push: enabled only if local commits not pushed to remote; show badge with count.\n- Fetch: always enabled.\n- Branch: open popup to create new local branch.\n- Merge: visible only when selected branch is not the active/current branch; merges selected branch into current and transitions to conflict resolution if needed.\n- Stash: open popup to create stash with name + checkbox 'preserve staged files' (keep-index).\n\nAcceptance:\n- Actions render in right sidebar (consistent placement) and reflect enable/visibility rules.\n- Push button shows badge and is disabled when no outgoing commits.\n- All operations surface errors clearly and refresh relevant data.\n\nDependencies / potentially missing APIs:\n- Fetch: tools.fetch() or equivalent (NOT currently exposed via IPC).\n- Create branch: tools.createBranch(name, ...) (NOT currently exposed).\n- Merge selected->current: tools.merge(...) or reuse existing getMergePlan/applyMerge flow.\n- Stash create with keep-index: stashCreate(message, keepIndex).\n- Push badge requires outgoing count: ideally provided by GitUnifiedBranch.ahead when upstream is configured; if missing upstream, need API to compute ahead/behind vs remote tracking.\n",
+      "context": [],
+      "createdAt": "2026-03-16T16:43:36.737Z",
+      "updatedAt": "2026-03-17T21:14:45.679Z",
+      "completedAt": "2026-03-17T21:14:45.679Z"
+    },
+    {
+      "id": "ad5f00e5-353b-49d6-9fe0-6632c1565c7e",
+      "status": "+",
+      "title": "Commit graph/branch visualization (SourceTree-like) for Branch view — requirements + thefactory-tools gaps",
+      "description": "Implement the SourceTree-like commit graph/branch visualization shown above the staged/unstaged panes in the Branch view.\n\nThis feature is intentionally deferred; initial Branch view will show an empty stub (see separate feature).\n\nAcceptance:\n- Graph area renders commit list with branch/merge visualization.\n- Selecting a commit updates the lower diff panes to show that commit’s changes (or commit-to-parent diff).\n\nData required (to request/add if missing in thefactory-tools):\n- A graph-friendly log API returning commits with DAG parent relationships:\n  - { hash, parents[], authorName/email, date, subject }\n  - decorations/refs: local branches, remote branches, tags pointing to commits\n- Ability to query a range and limit:\n  - getLog({ ref, maxCount, includeMerges, path? })\n- Optional: upstream tracking info and ahead/behind counts vs upstream.\n- Optional: per-commit file stats and/or patch retrieval.\n\nNotes:\n- If thefactory-tools only provides linear log without parents/refs, we cannot accurately draw a graph; we’d need a new API.",
+      "context": [],
+      "createdAt": "2026-03-16T16:44:30.325Z",
+      "updatedAt": "2026-03-17T21:43:28.270Z",
+      "completedAt": "2026-03-17T21:43:28.270Z"
+    },
+    {
+      "id": "45abaa36-3d20-488c-b631-d1255e11654b",
+      "status": "-",
+      "title": "Implement Hunk/Line-level Staging UI in GitView",
+      "description": "Implement UI functionality in GitView to allow selecting lines and hunks in the diff view. When lines/hunks are selected, the user should be able to stage or unstage just those selected changes. This will require generating a unified patch from the selected lines and sending it to the future applyPatch endpoint. Temporary mocked implementation in GitManager can be used until the backend is ready.",
+      "context": [],
+      "createdAt": "2026-03-17T19:37:41.301Z",
+      "updatedAt": "2026-03-17T19:37:41.301Z"
+    },
+    {
+      "id": "196a8ad8-a3f5-4bab-b069-735157f25886",
+      "status": "-",
+      "title": "Browser-based Remote PR Management",
+      "description": "Instead of full API integration for remote Pull Requests, adopt SourceTree's approach of opening PR URLs in the browser. Parse the current repository's remote URL (GitHub, GitLab, Bitbucket), construct the appropriate 'Create PR' or 'View PR' URL based on the current branch and base branch, and open it via Electron's shell.openExternal.",
+      "context": [],
+      "createdAt": "2026-03-17T19:58:21.962Z",
+      "updatedAt": "2026-03-17T19:58:21.962Z"
+    }
+  ],
+  "createdAt": "2025-10-21T17:28:55.063Z",
+  "updatedAt": "2026-03-17T19:37:00.897Z",
+  "completedAt": "2025-11-12T16:50:10.598Z"
+}

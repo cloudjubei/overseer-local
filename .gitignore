@@ -99,7 +99,9 @@ out/
 dist/
 
 # APP SPECIFIC
-.factory/
+.factory/.temp
+.factory/chats
+.factory/runs
 
 # Vendorized build artifacts
 vendor/
