@@ -39,11 +39,23 @@ export interface UserPreferences {
 export type StoryViewMode = 'list' | 'board'
 export type StoryListViewSorting = 'index_asc' | 'index_desc' | 'status_asc' | 'status_desc'
 
+/**
+ * Sub-toggles for git badge types.
+ * - incoming_commits: show a badge for commits available to pull on the current branch (behind remote)
+ * - uncommitted_changes: show a badge when the working tree is dirty
+ */
+export interface GitBadgeSubToggles {
+  incoming_commits: boolean
+  uncommitted_changes: boolean
+}
+
 export interface NotificationProjectSettings {
   // Controls whether notifications of a category are created at all
   notificationsEnabled: Record<NotificationCategory, boolean>
   // Controls whether badges for a category are shown in the UI
   badgesEnabled: Record<NotificationCategory, boolean>
+  // Fine-grained sub-toggles for git badges (only applies when badgesEnabled.git_changes is true)
+  gitBadgeSubToggles?: GitBadgeSubToggles
 }
 export interface ProjectSettings {
   notifications: NotificationProjectSettings

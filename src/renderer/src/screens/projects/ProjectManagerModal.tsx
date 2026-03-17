@@ -4,6 +4,7 @@ import { projectsService } from '@renderer/services/projectsService'
 import { useProjectContext } from '@renderer/contexts/ProjectContext'
 import { Button } from '@renderer/components/ui/Button'
 import { PROJECT_ICONS, renderProjectIcon } from './projectIcons'
+import Spinner from '@renderer/components/ui/Spinner'
 import {
   IconDelete,
   IconEdit,
@@ -319,105 +320,116 @@ export default function ProjectManagerModal({
         footer={footer}
         hideHeader={false}
       >
-        {error && (
-          <div role="alert" style={{ color: 'var(--status-stuck-fg)' }}>
-            Error: {error}
-          </div>
-        )}
+        <div className="relative min-h-[300px]">
+          {saving && (
+            <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/60 dark:bg-neutral-900/60 backdrop-blur-[2px] rounded-lg">
+              <Spinner size={32} />
+              <div className="mt-4 font-medium text-neutral-900 dark:text-neutral-100">
+                Saving changes...
+              </div>
+            </div>
+          )}
 
-        {mode === 'list' && (
-          <div className="flex flex-col" style={{ gap: 12 }}>
-            <div>
-              {visibleProjects.length === 0 && <div className="empty">No projects.</div>}
-              <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                {visibleProjects.map((p, idx) => (
-                  <li
-                    key={p.id}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      borderBottom: '1px solid var(--border-subtle)',
-                      padding: '8px 0',
-                      opacity: p.active === false ? 0.5 : 1,
-                    }}
-                  >
-                    <div className="flex items-center gap-2">
-                      <div aria-hidden>{renderProjectIcon(p.metadata?.icon)}</div>
-                      <div>
-                        <div style={{ fontWeight: 600 }}>
-                          {p.title} {p.active === false && <span className="text-xs text-text-secondary font-normal ml-2">(Inactive)</span>}
-                        </div>
-                        <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
-                          {p.id} · {p.path}
+          {error && (
+            <div role="alert" style={{ color: 'var(--status-stuck-fg)' }}>
+              Error: {error}
+            </div>
+          )}
+
+          {mode === 'list' && (
+            <div className="flex flex-col" style={{ gap: 12 }}>
+              <div>
+                {visibleProjects.length === 0 && <div className="empty">No projects.</div>}
+                <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                  {visibleProjects.map((p, idx) => (
+                    <li
+                      key={p.id}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        borderBottom: '1px solid var(--border-subtle)',
+                        padding: '8px 0',
+                        opacity: p.active === false ? 0.5 : 1,
+                      }}
+                    >
+                      <div className="flex items-center gap-2">
+                        <div aria-hidden>{renderProjectIcon(p.metadata?.icon)}</div>
+                        <div>
+                          <div style={{ fontWeight: 600 }}>
+                            {p.title} {p.active === false && <span className="text-xs text-text-secondary font-normal ml-2">(Inactive)</span>}
+                          </div>
+                          <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
+                            {p.id} · {p.path}
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    <div className="flex items-center" style={{ gap: 8 }}>
-                      {/* Reorder controls only when a specific group is selected */}
-                      {currentGroupId !== ALL_GROUP_ID && currentGroupId !== UNCATEGORIZED_ID && (
-                        <div className="flex items-center gap-1">
-                          <Button
-                            variant="secondary"
-                            size="icon"
-                            title="Move up"
-                            onClick={() => onMoveProjectInGroup(idx, -1)}
-                            disabled={idx === 0}
-                          >
-                            <IconArrowLeftMini className="w-4 h-4 rotate-90" />
-                          </Button>
-                          <Button
-                            variant="secondary"
-                            size="icon"
-                            title="Move down"
-                            onClick={() => onMoveProjectInGroup(idx, +1)}
-                            disabled={idx === visibleProjects.length - 1}
-                          >
-                            <IconArrowRightMini className="w-4 h-4 rotate-90" />
-                          </Button>
-                        </div>
-                      )}
+                      <div className="flex items-center" style={{ gap: 8 }}>
+                        {/* Reorder controls only when a specific group is selected */}
+                        {currentGroupId !== ALL_GROUP_ID && currentGroupId !== UNCATEGORIZED_ID && (
+                          <div className="flex items-center gap-1">
+                            <Button
+                              variant="secondary"
+                              size="icon"
+                              title="Move up"
+                              onClick={() => onMoveProjectInGroup(idx, -1)}
+                              disabled={idx === 0}
+                            >
+                              <IconArrowLeftMini className="w-4 h-4 rotate-90" />
+                            </Button>
+                            <Button
+                              variant="secondary"
+                              size="icon"
+                              title="Move down"
+                              onClick={() => onMoveProjectInGroup(idx, +1)}
+                              disabled={idx === visibleProjects.length - 1}
+                            >
+                              <IconArrowRightMini className="w-4 h-4 rotate-90" />
+                            </Button>
+                          </div>
+                        )}
 
-                      <Button
-                        variant="secondary"
-                        size="icon"
-                        onClick={() => startEdit(p)}
-                        title="Edit project"
-                      >
-                        <IconEdit className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="danger"
-                        size="icon"
-                        disabled={saving}
-                        onClick={() => handleDelete(p.id)}
-                        title="Delete project"
-                      >
-                        <IconDelete className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </li>
-                ))}
-              </ul>
+                        <Button
+                          variant="secondary"
+                          size="icon"
+                          onClick={() => startEdit(p)}
+                          title="Edit project"
+                        >
+                          <IconEdit className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="danger"
+                          size="icon"
+                          disabled={saving}
+                          onClick={() => handleDelete(p.id)}
+                          title="Delete project"
+                        >
+                          <IconDelete className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {mode === 'groups' && <ProjectGroupsEditor />}
+          {mode === 'groups' && <ProjectGroupsEditor />}
 
-        {(mode === 'create' || mode === 'edit') && (
-          <ProjectEditorForm
-            mode={mode}
-            form={form}
-            setForm={setForm}
-            formErrors={formErrors}
-            formId={formId}
-            onSubmit={handleSubmit}
-            selectedGroupId={selectedGroupId}
-            onSelectedGroupIdChange={setSelectedGroupId}
-          />
-        )}
+          {(mode === 'create' || mode === 'edit') && (
+            <ProjectEditorForm
+              mode={mode}
+              form={form}
+              setForm={setForm}
+              formErrors={formErrors}
+              formId={formId}
+              onSubmit={handleSubmit}
+              selectedGroupId={selectedGroupId}
+              onSelectedGroupIdChange={setSelectedGroupId}
+            />
+          )}
+        </div>
       </Modal>
     </>
   )

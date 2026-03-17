@@ -279,8 +279,9 @@ function TestsInner() {
 }
 
 export default function TestsView() {
+  const { projectId } = useActiveProject()
   return (
-    <TestsProvider>
+    <TestsProvider key={projectId}>
       <TestsInner />
     </TestsProvider>
   )

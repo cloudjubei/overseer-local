@@ -10,27 +10,41 @@ import { useProjectContext } from '@renderer/contexts/ProjectContext'
 import { useProjectsGroups } from '@renderer/contexts/ProjectsGroupsContext'
 import { useChats } from '@renderer/contexts/chats/ChatsContext'
 import { useChatThinking } from '@renderer/hooks/useChatThinking'
+import { useChatUnread } from '@renderer/hooks/useChatUnread'
 import { useNavigator } from '@renderer/navigation/Navigator'
 import { useAppSettings } from '@renderer/contexts/AppSettingsContext'
 import { NotificationSoundService } from '@renderer/services/notificationSoundService'
+import { useAgents } from '@renderer/contexts/AgentsContext'
+import { useGit } from '@renderer/contexts/GitContext'
 
 export type ProjectBadgeState = {
   agent_runs: { running: number; unread: number }
   chat_messages: { unread: number; thinking: boolean }
-  git_changes: { unread: number }
+  git_changes: {
+    /** Unread feature-branch updates (branches ahead of current) */
+    unread: number
+    /** Commits available to pull on the current branch (behind remote) */
+    incoming: number
+    /** Whether the working tree has uncommitted changes */
+    uncommitted: boolean
+  }
 }
 
 const DEFAULT_PROJECT_BADGE_STATE: ProjectBadgeState = {
   agent_runs: { running: 0, unread: 0 },
   chat_messages: { unread: 0, thinking: false },
-  git_changes: { unread: 0 },
+  git_changes: { unread: 0, incoming: 0, uncommitted: false },
 }
 
 export function useNotifications() {
   const { activeProject, projects } = useProjectContext()
   const { groups } = useProjectsGroups()
   const { chatsByProjectId } = useChats()
+  
   const { thinkingCountByProject } = useChatThinking(500)
+  const { unreadCountByProject } = useChatUnread()
+  const { getProjectRunningCount, getCompletedUnreadCount } = useAgents()
+  const { getProjectUpdatedBranchesCount, getGitDerivedBadges } = useGit()
 
   type CategoryPrefs = Record<NotificationCategory, boolean>
   type NotificationPrefs = { notificationsEnabled: CategoryPrefs; badgesEnabled: CategoryPrefs }
@@ -59,8 +73,6 @@ export function useNotifications() {
     if (activeProject?.id) void loadPrefs(activeProject.id)
   }, [activeProject?.id, loadPrefs])
 
-  // Ensure per-project notification/badge preferences are available even when a project is not active.
-  // This keeps sidebar badges (e.g. MAIN_PROJECT) rendering consistently regardless of which project/group is active.
   useEffect(() => {
     if (!projects || projects.length === 0) return
     for (const p of projects) {
@@ -95,165 +107,37 @@ export function useNotifications() {
     [activeProject?.id, prefsByProject],
   )
 
-  const runningByProject = useMemo(() => {
-    const map = new Map<string, number>()
-    if (!chatsByProjectId) return map
-
-    for (const [projectId, list] of Object.entries(chatsByProjectId)) {
-      let activeRuns = 0
-      for (const c of list) {
-        const type = c.chat.context.type
-        const state = c.chat.state
-        if (
-          (type === 'AGENT_RUN' || type === 'AGENT_RUN_FEATURE') &&
-          (state === 'running' || state === 'created')
-        ) {
-          activeRuns++
-        }
-      }
-      if (activeRuns > 0) {
-        map.set(projectId, activeRuns)
+  const badgeStateByProject = useMemo(() => {
+    const state: Record<string, ProjectBadgeState> = {}
+    for (const p of projects) {
+      const pid = p.id
+      const gitDerived = getGitDerivedBadges(pid)
+      state[pid] = {
+        agent_runs: {
+          running: getProjectRunningCount(pid),
+          unread: getCompletedUnreadCount(pid),
+        },
+        chat_messages: {
+          unread: unreadCountByProject.get(pid) ?? 0,
+          thinking: (thinkingCountByProject.get(pid) ?? 0) > 0,
+        },
+        git_changes: {
+          unread: getProjectUpdatedBranchesCount(pid),
+          incoming: gitDerived.incomingCommits,
+          uncommitted: gitDerived.hasUncommittedChanges,
+        },
       }
     }
-    return map
-  }, [chatsByProjectId])
-
-  const [badgeStateByProject, setBadgeStateByProject] = useState<Record<string, ProjectBadgeState>>(
-    {},
-  )
-
-  // Hardening: avoid pruning on cold start before chats/runs have loaded.
-  // ChatsContext loads per-project; treat chats as 'loaded for project' if the key exists in chatsByProjectId.
-  const chatsLoadedForProject = useCallback(
-    (projectId: string): boolean => {
-      try {
-        return Object.prototype.hasOwnProperty.call(chatsByProjectId || {}, projectId)
-      } catch {
-        return false
-      }
-    },
-    [chatsByProjectId],
-  )
-
-  const validateNotification = useCallback(
-    (
-      n: Notification,
-      projectId: string,
-    ): { valid: boolean; reason?: 'missing_metadata' | 'missing_chat' | 'missing_run' } => {
-      try {
-        if (!n || n.read) return { valid: false, reason: 'missing_metadata' }
-        const md: any = n.metadata || {}
-
-        if (n.category === 'chat_messages') {
-          const chatKey = md.chatKey as string | undefined
-          if (!chatKey) return { valid: false, reason: 'missing_metadata' }
-
-          // If chats are not loaded for this project yet, do not prune.
-          if (!chatsLoadedForProject(projectId)) return { valid: true }
-
-          const list = chatsByProjectId?.[projectId] || []
-          const exists = list.some((c: any) => c.key === chatKey)
-          return exists ? { valid: true } : { valid: false, reason: 'missing_chat' }
-        }
-
-        // if (n.category === 'agent_runs') {
-        //   const runId = md.runId as string | undefined
-        //   if (!runId) return { valid: false, reason: 'missing_metadata' }
-
-        //   // If runs are not loaded yet, do not prune.
-        //   if (!runsLoadedRef.current) return { valid: true }
-
-        //   const exists = (runsHistory || []).some(
-        //     (r: any) => r.id === runId && r.projectId === projectId,
-        //   )
-        //   return exists ? { valid: true } : { valid: false, reason: 'missing_run' }
-        // }
-
-        // git_changes and any future categories without a direct entity reference are considered valid.
-        return { valid: true }
-      } catch {
-        // Fail closed: if we cannot validate, keep it to avoid accidentally hiding legitimate notifications.
-        return { valid: true }
-      }
-    },
-    [chatsByProjectId, chatsLoadedForProject],
-  )
-
-  const pruneNotifications = useCallback(async (projectId: string, toPrune: Notification[]) => {
-    if (!projectId || !toPrune || toPrune.length === 0) return
-    for (const n of toPrune) {
-      try {
-        await notificationsService.markNotificationAsRead(projectId, n.id)
-      } catch (_) {}
-    }
-  }, [])
-
-  const recomputeBadgeStates = useCallback(async () => {
-    try {
-      const unreadByProject = await Promise.all(
-        projects.map(async (p) => {
-          const projectId = p.id
-          const unread = await notificationsService.getUnreadNotifications(projectId)
-
-          // Only count notifications the user can still open/see.
-          // Orphaned notifications (e.g. chat deleted, run deleted) are auto-pruned.
-          const invalid: Notification[] = []
-          const validUnread: Notification[] = []
-          for (const n of unread || []) {
-            const res = validateNotification(n, projectId)
-            if (res.valid) validUnread.push(n)
-            else invalid.push(n)
-          }
-
-          // Only prune when we have enough loaded state to make an existence decision.
-          const safeToPrune = chatsLoadedForProject(projectId)
-          if (safeToPrune) void pruneNotifications(projectId, invalid)
-
-          const agentRuns = validUnread.filter((n) => n.category === 'agent_runs')
-          const chatMessages = validUnread.filter((n) => n.category === 'chat_messages')
-          const gitChanges = validUnread.filter((n) => n.category === 'git_changes')
-
-          return { projectId, agentRuns, chatMessages, gitChanges }
-        }),
-      )
-      const next: Record<string, ProjectBadgeState> = {}
-
-      for (const { projectId, agentRuns, chatMessages, gitChanges } of unreadByProject) {
-        next[projectId] = {
-          agent_runs: { running: 0, unread: 0 },
-          // agent_runs: { running: runningByProject.get(projectId) ?? 0, unread: agentRuns.length },
-          chat_messages: {
-            unread: chatMessages.length,
-            thinking: (thinkingCountByProject.get(projectId) ?? 0) > 0,
-          },
-          git_changes: { unread: gitChanges.length },
-        }
-      }
-      setBadgeStateByProject(next)
-    } catch (_) {}
+    return state
   }, [
-    projects.map((p) => p.id).join('|'),
-    // runningByProject,
+    projects,
+    getProjectRunningCount,
+    getCompletedUnreadCount,
+    unreadCountByProject,
     thinkingCountByProject,
-    validateNotification,
-    pruneNotifications,
-    chatsLoadedForProject,
-    chatsByProjectId,
+    getProjectUpdatedBranchesCount,
+    getGitDerivedBadges,
   ])
-
-  // Refresh on notifications broadcast
-  useEffect(() => {
-    const unsub = notificationsService.subscribe(() => {
-      void recomputeBadgeStates()
-    })
-    return () => {
-      unsub?.()
-    }
-  }, [recomputeBadgeStates])
-
-  useEffect(() => {
-    void recomputeBadgeStates()
-  }, [recomputeBadgeStates])
 
   const getProjectBadgeState = useCallback(
     (projectId?: string): ProjectBadgeState => {
@@ -270,7 +154,7 @@ export function useNotifications() {
       const agg: ProjectBadgeState = {
         agent_runs: { running: 0, unread: 0 },
         chat_messages: { unread: 0, thinking: false },
-        git_changes: { unread: 0 },
+        git_changes: { unread: 0, incoming: 0, uncommitted: false },
       }
       for (const pid of g.projects || []) {
         const st = badgeStateByProject[pid]
@@ -280,13 +164,14 @@ export function useNotifications() {
         agg.chat_messages.unread += st.chat_messages.unread
         agg.chat_messages.thinking = agg.chat_messages.thinking || st.chat_messages.thinking
         agg.git_changes.unread += st.git_changes.unread
+        agg.git_changes.incoming += st.git_changes.incoming
+        agg.git_changes.uncommitted = agg.git_changes.uncommitted || st.git_changes.uncommitted
       }
       return agg
     },
-    [groups.map((g) => `${g.id}:${(g.projects || []).join(',')}`).join('|'), badgeStateByProject],
+    [groups, badgeStateByProject],
   )
 
-  // Simple helper to prompt OS notifications (best-effort)
   const enableNotifications = useCallback(async () => {
     try {
       await notificationsService.sendOs({
@@ -301,7 +186,8 @@ export function useNotifications() {
     }
   }, [])
 
-  // Generic helpers to mark notifications as read
+  // Generic helpers to mark notifications as read - kept for backward compatibility if used elsewhere, 
+  // but badges now use derived state so this only affects the OS level notifications service history.
   const markNotificationsByIds = useCallback(
     async (ids: string[], opts?: { projectId?: string }) => {
       const pid = opts?.projectId || activeProject?.id
@@ -414,7 +300,6 @@ export function NotificationClickHandler() {
   return null
 }
 
-// Notification sounds handled here so everything is under one hood
 export function NotificationSoundBootstrap() {
   const { appSettings } = useAppSettings()
   const { activeProject } = useProjectContext()
@@ -453,7 +338,6 @@ export function NotificationSoundBootstrap() {
   useEffect(() => {
     const off = notificationsService.onOpenNotification?.(() => {
       try {
-        // placeholder for possible audio unlock on user interaction
       } catch (_) {}
     })
     return () => {

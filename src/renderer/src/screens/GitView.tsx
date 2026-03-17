@@ -13,6 +13,7 @@ import MergeConflictResolver from './git/MergeConflictResolver'
 import { GitSidebarBranches } from './git/GitSidebarBranches'
 import { GitBranchDetailsPanel } from './git/GitBranchDetailsPanel'
 import { GitRightActionsPanel } from './git/GitRightActionsPanel'
+import { GitCheckoutRemoteModal } from './git/GitCheckoutRemoteModal'
 
 function dedupeByName(list: GitUnifiedBranch[]): GitUnifiedBranch[] {
   const m = new Map<string, GitUnifiedBranch>()
@@ -31,9 +32,13 @@ export default function GitView() {
 
   const { branches: unifiedBranches, stashes, loading, error } = unified.get(projectId)
 
-  // Feature requirement: show local branches only (deduped)
   const localBranches = React.useMemo(
     () => dedupeByName((unifiedBranches || []).filter((b) => b.isLocal)),
+    [unifiedBranches],
+  )
+  // Remote section: branches that exist remotely (may or may not have a local)
+  const remoteBranches = React.useMemo(
+    () => dedupeByName((unifiedBranches || []).filter((b) => b.isRemote)),
     [unifiedBranches],
   )
 
@@ -41,8 +46,7 @@ export default function GitView() {
   const [checkingClean, setCheckingClean] = React.useState(false)
   const [changedCount, setChangedCount] = React.useState<number>(0)
 
-  const current = React.useMemo(() => localBranches?.find((b) => b.current), [localBranches])
-  const others = React.useMemo(() => (localBranches || []).filter((b) => !b.current), [localBranches])
+  const current = React.useMemo(() => localBranches.find((b) => b.current), [localBranches])
 
   const sel = selection.get(projectId)
   const selectedBranchName = sel?.kind === 'branch' ? sel.branchName : undefined
@@ -64,7 +68,8 @@ export default function GitView() {
         if (typeof v === 'number') return v > 0
         return !!v
       }
-      const num = (v: any): number => (Array.isArray(v) ? v.length : typeof v === 'number' ? v : 0)
+      const num = (v: any): number =>
+        Array.isArray(v) ? v.length : typeof v === 'number' ? v : 0
       const dirty = [
         (s as any).isClean === false,
         any((s as any).unstaged),
@@ -81,7 +86,7 @@ export default function GitView() {
         num((s as any).changed)
       setIsClean(!dirty)
       setChangedCount(count)
-    } catch (e) {
+    } catch {
       setIsClean(undefined)
       setChangedCount(0)
     } finally {
@@ -89,11 +94,8 @@ export default function GitView() {
     }
   }, [projectId])
 
-  React.useEffect(() => {
-    void loadCleanStatus()
-  }, [projectId, loadCleanStatus])
+  React.useEffect(() => { void loadCleanStatus() }, [projectId, loadCleanStatus])
 
-  // Immediate refresh listener after commit/merge
   React.useEffect(() => {
     const handler = (ev: any) => {
       const pid = ev?.detail?.projectId
@@ -105,82 +107,104 @@ export default function GitView() {
     return () => window.removeEventListener('git:refresh-now' as any, handler as any)
   }, [projectId, unified, loadCleanStatus])
 
-  // Default selection: current branch (when it becomes known)
+  // Default selection: current branch on first load
   React.useEffect(() => {
-    if (!projectId) return
-    if (!current?.name) return
+    if (!projectId || !current?.name) return
     if (!selection.get(projectId)) {
       selection.selectBranch(projectId, current.name)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projectId, current?.name])
 
-  // If selected branch disappears, fall back to current.
+  // Clear stale selection when branches change
   React.useEffect(() => {
     if (!projectId) return
-    if (!localBranches || localBranches.length === 0) return
-    if (selectedBranchName && !localBranches.some((b) => b.name === selectedBranchName)) {
+    if (!localBranches.length && !remoteBranches.length) return
+    if (
+      selectedBranchName &&
+      !localBranches.some((b) => b.name === selectedBranchName) &&
+      !remoteBranches.some((b) => b.name === selectedBranchName)
+    ) {
       if (current?.name) selection.selectBranch(projectId, current.name)
       else selection.clear(projectId)
     }
-  }, [projectId, localBranches, selectedBranchName, current?.name, selection])
+  }, [projectId, localBranches, remoteBranches, selectedBranchName, current?.name, selection])
 
   const isEqualToCurrent = React.useCallback(
     (b: GitUnifiedBranch): boolean => {
       if (!current) return false
-      const currSha = current.localSha
-      if (!currSha) return false
-      if (b.localSha && b.localSha === currSha) return true
-      if (b.remoteSha && b.remoteSha === currSha) return true
-      return false
+      const sha = current.localSha
+      if (!sha) return false
+      return b.localSha === sha || b.remoteSha === sha
     },
     [current],
   )
 
+  // Resolved selected branch object (local preferred over remote)
   const selectedBranch = React.useMemo(() => {
     if (!selectedBranchName) return undefined
-    return (localBranches || []).find((b) => b.name === selectedBranchName)
-  }, [localBranches, selectedBranchName])
+    return (
+      localBranches.find((b) => b.name === selectedBranchName) ??
+      remoteBranches.find((b) => b.name === selectedBranchName)
+    )
+  }, [localBranches, remoteBranches, selectedBranchName])
 
+  // ─── Sidebar callbacks ─────────────────────────────────────────────────────
   const onSelectBranch = React.useCallback(
-    (name: string) => {
-      selection.selectBranch(projectId, name)
-    },
+    (b: GitUnifiedBranch) => selection.selectBranch(projectId, b.name),
+    [selection, projectId],
+  )
+  const onSelectStash = React.useCallback(
+    (ref: string) => selection.selectStash(projectId, ref),
     [selection, projectId],
   )
 
-  const onSelectStash = React.useCallback(
-    (ref: string) => {
-      selection.selectStash(projectId, ref)
+  // ─── Commit graph → select branch ─────────────────────────────────────────
+  // When the user clicks a commit row, try to select whichever branch tip
+  // matches that SHA. Prefer local over remote to avoid accidental remote-only
+  // selection when a branch exists in both places.
+  const onSelectBranchBySha = React.useCallback(
+    (sha: string) => {
+      const local = localBranches.find((b) => b.localSha === sha)
+      if (local) { selection.selectBranch(projectId, local.name); return }
+      const remote = remoteBranches.find((b) => b.remoteSha === sha)
+      if (remote) selection.selectBranch(projectId, remote.name)
     },
-    [selection, projectId],
+    [localBranches, remoteBranches, selection, projectId],
   )
 
   const handleStashAppliedOrDeleted = React.useCallback(() => {
-    if (projectId && current?.name) {
-      selection.selectBranch(projectId, current.name)
-    }
+    if (projectId && current?.name) selection.selectBranch(projectId, current.name)
   }, [projectId, current?.name, selection])
 
+  // ─── Switch / checkout ─────────────────────────────────────────────────────
+  const [checkoutRemoteBranch, setCheckoutRemoteBranch] = React.useState<GitUnifiedBranch | undefined>()
+
   const switchToBranch = React.useCallback(
-    async (name: string) => {
+    async (b: GitUnifiedBranch) => {
       if (!projectId) return
       await loadCleanStatus()
       if (isClean === false) {
-        alert('Working tree not clean. Commit or discard changes before switching.')
+        alert('Working tree is not clean. Please commit or stash your changes before switching branches.')
         return
       }
-      const res = await gitService.checkout(projectId, name)
-      if (!res?.ok) {
-        alert(`Switch failed: ${res?.error || 'unknown error'}`)
+      if (b.isLocal) {
+        const res = await gitService.checkout(projectId, b.name)
+        if (!res?.ok) {
+          alert(`Switch failed: ${res?.error || 'unknown error'}`)
+        } else {
+          await unified.reload(projectId)
+          await loadCleanStatus()
+        }
       } else {
-        await unified.reload(projectId)
-        await loadCleanStatus()
+        // Remote-only branch: open checkout modal
+        setCheckoutRemoteBranch(b)
       }
     },
     [projectId, loadCleanStatus, isClean, unified],
   )
 
+  // ─── Modals ────────────────────────────────────────────────────────────────
   const [showCommit, setShowCommit] = React.useState(false)
   const [commitBranch, setCommitBranch] = React.useState<string | undefined>(undefined)
 
@@ -190,18 +214,8 @@ export default function GitView() {
 
   const [conflict, setConflict] = React.useState<
     | undefined
-    | {
-        projectId: string
-        baseRef: string
-        headRef: string
-        mergeMessage?: string
-      }
+    | { projectId: string; baseRef: string; headRef: string; mergeMessage?: string }
   >(undefined)
-
-  const openCommit = (branchName: string) => {
-    setCommitBranch(branchName)
-    setShowCommit(true)
-  }
 
   const openMerge = (baseRef: string, headRef: string) => {
     setMergeBase(baseRef)
@@ -217,13 +231,14 @@ export default function GitView() {
         loading={loading}
         error={error}
         localBranches={localBranches}
+        remoteBranches={remoteBranches}
         stashes={stashes}
         current={current}
-        others={others}
         selectedBranchName={selectedBranchName}
         selectedStashRef={selectedStashRef}
         isEqualToCurrent={isEqualToCurrent}
         onSelectBranch={onSelectBranch}
+        onDoubleClickBranch={switchToBranch}
         onSelectStash={onSelectStash}
       />
 
@@ -240,6 +255,7 @@ export default function GitView() {
         onRefresh={reload}
         onGoProject={() => nav.navigate('Projects')}
         onOpenMerge={openMerge}
+        onSelectBranchBySha={onSelectBranchBySha}
       />
 
       <GitRightActionsPanel
@@ -248,10 +264,7 @@ export default function GitView() {
         checkingClean={checkingClean}
         isClean={isClean}
         changedCount={changedCount}
-        onRefresh={() => {
-          void loadCleanStatus()
-          reload()
-        }}
+        onRefresh={() => { void loadCleanStatus(); reload() }}
         onSwitchToBranch={switchToBranch}
         onOpenMerge={openMerge}
         currentBranchName={current?.name}
@@ -295,6 +308,18 @@ export default function GitView() {
           mergeMessage={conflict.mergeMessage}
           onClose={() => {
             setConflict(undefined)
+            window.dispatchEvent(new CustomEvent('git:refresh-now', { detail: { projectId } }))
+          }}
+        />
+      ) : null}
+
+      {checkoutRemoteBranch && projectId ? (
+        <GitCheckoutRemoteModal
+          projectId={projectId}
+          remoteBranchName={checkoutRemoteBranch.name}
+          onRequestClose={() => setCheckoutRemoteBranch(undefined)}
+          onSuccess={() => {
+            setCheckoutRemoteBranch(undefined)
             window.dispatchEvent(new CustomEvent('git:refresh-now', { detail: { projectId } }))
           }}
         />

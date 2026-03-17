@@ -22,6 +22,7 @@ import type {
   GitAddStashOptions,
   GitLogOptions,
   GitLogResult,
+  GitApplyPatchOptions,
 } from 'thefactory-tools'
 
 export type GitService = {
@@ -101,6 +102,11 @@ export type GitService = {
   removeStash: (
     projectId: string,
     options: Omit<GitRemoveStashOptions, 'repoPath'>,
+  ) => Promise<GitOpResult | undefined>
+  
+  applyPatch: (
+    projectId: string,
+    options: Omit<GitApplyPatchOptions, 'repoPath'>,
   ) => Promise<GitOpResult | undefined>
 }
 

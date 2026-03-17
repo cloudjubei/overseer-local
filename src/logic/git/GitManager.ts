@@ -28,6 +28,7 @@ import {
   GitAddStashOptions,
   GitLogOptions,
   GitLogResult,
+  GitApplyPatchOptions,
 } from 'thefactory-tools'
 import ProjectsManager from '../projects/ProjectsManager'
 import Mutex from '../utils/Mutex'
@@ -125,8 +126,20 @@ export default class GitManager extends BaseManager {
       this.applyStash(projectId, options)
     handlers[IPC_HANDLER_KEYS.GIT_REMOVE_STASH] = ({ projectId, options }) =>
       this.removeStash(projectId, options)
+    
+    handlers[IPC_HANDLER_KEYS.GIT_APPLY_PATCH] = ({ projectId, options }) =>
+      this.applyPatch(projectId, options)
 
     return handlers
+  }
+
+  private async applyPatch(
+    projectId: string,
+    options: Omit<GitApplyPatchOptions, 'repoPath'>,
+  ): Promise<GitOpResult | undefined> {
+    const tools = await this.getTools(projectId)
+    if (!tools) return
+    return tools.gitApplyPatch(options)
   }
 
   private async startMonitor(

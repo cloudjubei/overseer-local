@@ -375,6 +375,7 @@ const GIT_API = {
   listStashes: (projectId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_LIST_STASHES, { projectId }),
   applyStash: (projectId, options) => ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_APPLY_STASH, { projectId, options }),
   removeStash: (projectId, options) => ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_REMOVE_STASH, { projectId, options }),
+  applyPatch: (projectId, options) => ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_APPLY_PATCH, { projectId, options }),
   subscribeToMonitorUpdates: (callback) => {
     const listener = (_event, payload) => callback(payload)
     ipcRenderer.on(IPC_HANDLER_KEYS.GIT_MONITOR_UPDATE, listener)

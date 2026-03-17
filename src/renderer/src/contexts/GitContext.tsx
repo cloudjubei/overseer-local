@@ -49,6 +49,16 @@ export type GitSelection =
   | { kind: 'stash'; stashRef: string }
   | null
 
+/**
+ * Derived git badge state for a single project's current branch.
+ * - incomingCommits: how many commits the current branch is behind its remote (pulls available)
+ * - hasUncommittedChanges: whether the working tree is dirty
+ */
+export type GitDerivedBadgeState = {
+  incomingCommits: number
+  hasUncommittedChanges: boolean
+}
+
 export type GitContextValue = {
   loading: boolean
   error?: string
@@ -62,6 +72,10 @@ export type GitContextValue = {
   // Per-project unread updated branches count map and accessor
   updatedBranchesCountByProject: Record<string, number>
   getProjectUpdatedBranchesCount: (projectId?: string) => number
+
+  // Derived git badge state per project (incoming commits + uncommitted changes on the current branch)
+  gitDerivedBadgesByProject: Record<string, GitDerivedBadgeState>
+  getGitDerivedBadges: (projectId?: string) => GitDerivedBadgeState
 
   // Unified branches API
   unified: {
@@ -180,6 +194,11 @@ function getHeadSha(b: GitUnifiedBranch): string | undefined {
   return b.isLocal ? b.localSha || b.remoteSha || undefined : b.remoteSha || b.localSha || undefined
 }
 
+const DEFAULT_GIT_DERIVED_BADGE: GitDerivedBadgeState = {
+  incomingCommits: 0,
+  hasUncommittedChanges: false,
+}
+
 export function GitProvider({ children }: { children: React.ReactNode }) {
   const { activeProjectId, projects } = useProjectContext()
 
@@ -215,11 +234,29 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
     [autoPush, deleteRemote],
   )
 
+  // Derived git badge state per project: tracks current branch's incoming commits & uncommitted changes
+  // Updated reactively from monitor events (GitBranchEvent on the current branch).
+  const [gitDerivedBadgesByProject, setGitDerivedBadgesByProject] = useState<
+    Record<string, GitDerivedBadgeState>
+  >({})
+
   // Debounce timers per project for unified.reload on monitor updates
   const reloadTimersRef = useRef<Record<string, number | ReturnType<typeof setTimeout>>>({})
 
   const onMonitorUpdate = async (update: { projectId: string; state: GitBranchEvent }) => {
     const { projectId, state: branchUpdate } = update
+
+    // Update derived badge state when the monitor reports on the current branch
+    // GitBranchEvent includes `behind` (incoming commits) and `hasUncommittedChanges`
+    if (branchUpdate.current) {
+      setGitDerivedBadgesByProject((prev) => ({
+        ...prev,
+        [projectId]: {
+          incomingCommits: typeof branchUpdate.behind === 'number' ? branchUpdate.behind : 0,
+          hasUncommittedChanges: branchUpdate.hasUncommittedChanges === true,
+        },
+      }))
+    }
 
     setAllProjects((current) => {
       const projectIndex = current.findIndex((p) => p.projectId === projectId)
@@ -400,6 +437,25 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
           }
         }
 
+        // Seed derived badge state from the current branch's remote divergence if not yet populated
+        if (current) {
+          const remoteName = current.remoteName
+          if (remoteName) {
+            const behind = relToCurrent[remoteName]?.behind ?? 0
+            setGitDerivedBadgesByProject((prev) => {
+              // Only seed if there's no live monitor data yet
+              if (prev[pid] !== undefined) return prev
+              return {
+                ...prev,
+                [pid]: {
+                  incomingCommits: behind,
+                  hasUncommittedChanges: false,
+                },
+              }
+            })
+          }
+        }
+
         const hydrated = list.map((b) => ({
           ...b,
           storyId: b.storyId || parseStoryIdFromUnified(b),
@@ -565,6 +621,15 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
     [updatedBranchesCountByProject, activeProjectId],
   )
 
+  const getGitDerivedBadges = React.useCallback(
+    (projectId?: string): GitDerivedBadgeState => {
+      const pid = projectId || activeProjectId
+      if (!pid) return DEFAULT_GIT_DERIVED_BADGE
+      return gitDerivedBadgesByProject[pid] || DEFAULT_GIT_DERIVED_BADGE
+    },
+    [gitDerivedBadgesByProject, activeProjectId],
+  )
+
   const isBranchUnread = React.useCallback(
     (projectId: string, baseRef: string, branch: GitUnifiedBranch): boolean => {
       const st = unifiedByProject[projectId]
@@ -634,6 +699,8 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
       gitUpdatedBranchesCount: gitUpdatedBranchesCountComputed,
       updatedBranchesCountByProject,
       getProjectUpdatedBranchesCount,
+      gitDerivedBadgesByProject,
+      getGitDerivedBadges,
       unified: unifiedApi,
       pending: pendingApi,
       mergePreferences,
@@ -649,6 +716,8 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
       gitUpdatedBranchesCountComputed,
       updatedBranchesCountByProject,
       getProjectUpdatedBranchesCount,
+      gitDerivedBadgesByProject,
+      getGitDerivedBadges,
       unifiedApi,
       pendingApi,
       mergePreferences,

@@ -171,7 +171,7 @@ export const GitLocalChanges = forwardRef<GitLocalChangesRef, GitLocalChangesPro
     })
 
     const [selectedPath, setSelectedPath] = React.useState<string | undefined>(undefined)
-    const [selectedPatch, setSelectedPatch] = React.useState<string>('')
+    const [selectedArea, setSelectedArea] = React.useState<'staged' | 'unstaged' | undefined>(undefined)
 
     // Vertical divider (left/right)
     const rootRef = React.useRef<HTMLDivElement | null>(null)
@@ -250,10 +250,10 @@ export const GitLocalChanges = forwardRef<GitLocalChangesRef, GitLocalChangesPro
         }
         setStatus(next)
         if (onStatusChange) onStatusChange(next)
-        // Preserve multi-selection across refresh; default to first available
-        const stagedPaths = next.staged.map((f) => f.path)
-        const unPaths = [...next.unstaged, ...next.untracked].map((f) => f.path)
+        // Preserve selection across refresh; keep the same path/area selected if still present
         setSelection((prev) => {
+          const stagedPaths = next.staged.map((f) => f.path)
+          const unPaths = [...next.unstaged, ...next.untracked].map((f) => f.path)
           const nextSel = new Set<string>()
           for (const k of prev) {
             const [area, ...rest] = k.split(':')
@@ -283,7 +283,7 @@ export const GitLocalChanges = forwardRef<GitLocalChangesRef, GitLocalChangesPro
       void load()
     }, [load])
 
-    // Primary selection (staged first) and reflect into selectedPath/patch
+    // Primary selection (staged first) and reflect into selectedPath/area
     const primarySelected = React.useMemo(() => {
       const staged = status.staged.map((f) => f.path)
       const un = [...status.unstaged, ...status.untracked].map((f) => f.path)
@@ -294,12 +294,21 @@ export const GitLocalChanges = forwardRef<GitLocalChangesRef, GitLocalChangesPro
       return null
     }, [status, selection, makeKey])
 
+    // Derive the patch to show: look only in the area the user selected from
+    const selectedPatch = React.useMemo(() => {
+      if (!primarySelected) return ''
+      const list =
+        primarySelected.area === 'staged'
+          ? status.staged
+          : [...status.unstaged, ...status.untracked]
+      const f = list.find((x) => x.path === primarySelected.path)
+      return f?.patch || ''
+    }, [primarySelected, status])
+
     React.useEffect(() => {
-      const all = [...status.staged, ...status.unstaged, ...status.untracked]
-      const f = primarySelected ? all.find((x) => x.path === primarySelected.path) : undefined
-      setSelectedPatch(f?.patch || '')
       setSelectedPath(primarySelected?.path)
-    }, [status, primarySelected])
+      setSelectedArea(primarySelected?.area)
+    }, [primarySelected])
 
     const notifyBusy = (busy: boolean) => {
       if (onBusyChange) onBusyChange(busy)
@@ -557,6 +566,49 @@ export const GitLocalChanges = forwardRef<GitLocalChangesRef, GitLocalChangesPro
     const [ignoreWS, setIgnoreWS] = React.useState<boolean>(false)
     const [intra, setIntra] = React.useState<IntraMode>('none')
 
+    /** Apply a partial/hunk patch: cached=true always (we apply to index). reverse=true to unstage. */
+    const handleApplyPatch = async (patch: string, reverse: boolean) => {
+      if (!selectedPath) return
+      notifyBusy(true)
+      notifyError(undefined)
+      try {
+        const res = await gitService.applyPatch(projectId, {
+          patch,
+          cached: true,
+          reverse,
+        })
+        if (!res?.ok) notifyError(res?.error || 'Failed to apply patch')
+      } catch (e: any) {
+        notifyError(e?.message || String(e))
+      } finally {
+        notifyBusy(false)
+        void load()
+      }
+    }
+
+    /** Discard a partial/hunk patch from the working tree (no confirm needed for hunks). */
+    const handleDiscardPatch = async (patch: string) => {
+      if (!selectedPath) return
+      const ok = window.confirm('Discard these changes from the working tree? This cannot be undone.')
+      if (!ok) return
+      notifyBusy(true)
+      notifyError(undefined)
+      try {
+        // Apply the patch in reverse to the working tree (cached=false, reverse=true)
+        const res = await gitService.applyPatch(projectId, {
+          patch,
+          cached: false,
+          reverse: true,
+        })
+        if (!res?.ok) notifyError(res?.error || 'Failed to discard patch')
+      } catch (e: any) {
+        notifyError(e?.message || String(e))
+      } finally {
+        notifyBusy(false)
+        void load()
+      }
+    }
+
     return (
       <div ref={rootRef} className={`relative flex w-full min-h-0 h-full ${className}`}>
         {/* Left panel */}
@@ -743,6 +795,9 @@ export const GitLocalChanges = forwardRef<GitLocalChangesRef, GitLocalChangesPro
             onWrapChange={setWrap}
             onIgnoreWSChange={setIgnoreWS}
             onIntraChange={setIntra}
+            isStaged={selectedArea === 'staged'}
+            onApplyPatch={handleApplyPatch}
+            onDiscardPatch={handleDiscardPatch}
           />
         </div>
       </div>

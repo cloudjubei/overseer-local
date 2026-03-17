@@ -36,5 +36,9 @@ export const DEFAULT_PROJECT_SETTINGS: ProjectSettings = {
       chat_messages: true,
       git_changes: true,
     },
+    gitBadgeSubToggles: {
+      incoming_commits: true,
+      uncommitted_changes: true,
+    },
   },
 }

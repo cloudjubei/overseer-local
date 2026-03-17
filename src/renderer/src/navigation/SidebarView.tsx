@@ -289,27 +289,42 @@ export default function SidebarView({}: SidebarProps) {
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({})
   const { projects: allProjects } = useProjectContext()
   const { groups: allGroups } = useProjectsGroups()
+
+  // Filter out inactive projects (p.active === false) for sidebar display
+  const activeProjects = useMemo(
+    () => projects.filter((p) => (p as any).active !== false),
+    [projects],
+  )
+  // Filter out groups where all member projects are inactive (no visible members)
+  const activeGroups = useMemo(
+    () =>
+      groups.filter((g) =>
+        (g.projects || []).some((pid) => activeProjects.some((p) => p.id === pid)),
+      ),
+    [groups, activeProjects],
+  )
+
   useEffect(() => {
     setOpenGroups((prev) => {
       const next: Record<string, boolean> = { ...prev }
-      for (const g of groups) {
+      for (const g of activeGroups) {
         if (!(g.id in next)) next[g.id] = false
       }
-      const validIds = new Set(groups.map((g) => g.id))
+      const validIds = new Set(activeGroups.map((g) => g.id))
       for (const k of Object.keys(next)) {
         if (!validIds.has(k)) delete next[k]
       }
       return next
     })
-  }, [groups.map((g) => g.id).join('|')])
+  }, [activeGroups.map((g) => g.id).join('|')])
 
   const groupedProjectIds = useMemo(
-    () => new Set(groups.flatMap((g) => g.projects || [])),
-    [groups],
+    () => new Set(activeGroups.flatMap((g) => g.projects || [])),
+    [activeGroups],
   )
   const uncategorizedProjects = useMemo(
-    () => projects.filter((p) => !groupedProjectIds.has(p.id)),
-    [projects, groupedProjectIds],
+    () => activeProjects.filter((p) => !groupedProjectIds.has(p.id)),
+    [activeProjects, groupedProjectIds],
   )
 
   const cap99 = (n: number) => (n > 99 ? '99+' : `${n}`)
@@ -328,10 +343,11 @@ export default function SidebarView({}: SidebarProps) {
     const iconKey = p.metadata?.icon || (isMainProject(p.id) ? 'collection' : 'folder')
     const projectIcon = renderProjectIcon(iconKey)
 
-    const showAgents = isBadgeEnabled('agent_runs', p.id) && activeCount > 0
-    const showAgentsCompleted = isBadgeEnabled('agent_runs', p.id) && completedUnread > 0
-    const showChat = isBadgeEnabled('chat_messages', p.id) && (chatUnread > 0 || chatThinking)
-    const showGit = isBadgeEnabled('git_changes', p.id) && gitUnread > 0
+    // Only show badges on non-selected projects
+    const showAgents = isBadgeEnabled('agent_runs', p.id) && activeCount > 0 && !active
+    const showAgentsCompleted = isBadgeEnabled('agent_runs', p.id) && completedUnread > 0 && !active
+    const showChat = isBadgeEnabled('chat_messages', p.id) && (chatUnread > 0 || chatThinking) && !active
+    const showGit = isBadgeEnabled('git_changes', p.id) && gitUnread > 0 && !active
     const hasAnyBadge = showAgents || showAgentsCompleted || showChat || showGit
 
     const Btn = (
@@ -374,13 +390,13 @@ export default function SidebarView({}: SidebarProps) {
                 tooltipLabel={`${completedUnread} completed agent runs`}
               />
             )}
-            {isBadgeEnabled('chat_messages', p.id) && chatThinking && !active ? (
+            {showChat && chatThinking ? (
               <SpinnerWithDot
                 size={effectiveCollapsed ? 14 : 16}
                 showDot={chatUnread > 0}
                 dotTitle={chatUnread > 0 ? `${chatUnread} unread chats` : undefined}
               />
-            ) : isBadgeEnabled('chat_messages', p.id) && chatUnread > 0 ? (
+            ) : showChat && chatUnread > 0 ? (
               <NotificationBadge
                 className={effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''}
                 text={cap99(chatUnread)}
@@ -604,7 +620,7 @@ export default function SidebarView({}: SidebarProps) {
             >
               <span>Projects</span>
               <div style={{ display: 'inline-flex', gap: 6, alignItems: 'center' }}>
-                <span>{projects.length}</span>
+                <span>{activeProjects.length}</span>
                 <button
                   className="btn-secondary"
                   style={{ padding: '0 8px', height: 24, fontSize: 12 }}
@@ -618,7 +634,7 @@ export default function SidebarView({}: SidebarProps) {
         )}
 
         <ul className="nav-list" aria-label="Projects">
-          {projects.length == 0 && (
+          {activeProjects.length == 0 && (
             <li className="nav-li">
               <div
                 className={classNames('nav-item', effectiveCollapsed && 'nav-item--compact')}
@@ -632,11 +648,11 @@ export default function SidebarView({}: SidebarProps) {
             </li>
           )}
 
-          {projects.filter((p) => !groupedProjectIds.has(p.id)).map((p) => renderProjectItem(p))}
+          {activeProjects.filter((p) => !groupedProjectIds.has(p.id)).map((p) => renderProjectItem(p))}
 
           {!effectiveCollapsed &&
-            groups.map((g) => {
-              const projectById = new Map(projects.map((p) => [p.id, p]))
+            activeGroups.map((g) => {
+              const projectById = new Map(activeProjects.map((p) => [p.id, p]))
               const groupProjects = (g.projects || [])
                 .map((pid) => projectById.get(pid))
                 .filter(Boolean) as ProjectSpec[]
@@ -648,6 +664,13 @@ export default function SidebarView({}: SidebarProps) {
                 : ''
 
               const groupBadge = getGroupBadgeState(g.id)
+              
+              // If group is open and has active project, should we subtract the active project's badges from the group total?
+              // Let's keep the group total as-is for now, but in a refined version we might subtract them if the active project is expanded.
+              // Actually, wait, if the active project's badges are hidden inside the group because it's active,
+              // then the group badge will show a count that is larger than the sum of visible badges inside it.
+              // We'll leave it simple for now, as it's an aggregate of the group.
+
               const aggActive = groupBadge.agent_runs.running
               const aggAgentsCompletedUnread = groupBadge.agent_runs.unread
               const aggChatUnread = groupBadge.chat_messages.unread

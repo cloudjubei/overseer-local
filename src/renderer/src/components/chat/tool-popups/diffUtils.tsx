@@ -39,7 +39,7 @@ export function parseUnifiedDiff(patch: string): ParsedHunk[] {
           oldLines: m[2] ? parseInt(m[2], 10) : undefined,
           newStart: newLine + 1,
           newLines: m[4] ? parseInt(m[4], 10) : undefined,
-          lines: [{ type: 'meta', text: ln } as any],
+          lines: [],
         }
         continue
       }
@@ -169,13 +169,40 @@ function annotateHunks(
   return out
 }
 
+/** Compute the line range covered by a hunk (first to last actual line number touched) */
+function hunkLineRange(hunk: ParsedHunk): { start: number; end: number } {
+  const nums: number[] = []
+  for (const l of hunk.lines) {
+    if (l.oldLine !== undefined) nums.push(l.oldLine)
+    if (l.newLine !== undefined) nums.push(l.newLine)
+  }
+  if (nums.length === 0) {
+    return { start: hunk.oldStart, end: hunk.oldStart }
+  }
+  return { start: Math.min(...nums), end: Math.max(...nums) }
+}
+
 export type StructuredUnifiedDiffProps = {
   patch: string
   ignoreWhitespace?: boolean
   wrap?: boolean
   intraline?: IntraMode
   sideBySide?: boolean
-  largeGuardLines?: number // if exceeded, render a guard instead of full diff
+  largeGuardLines?: number
+  /** Whether selection checkboxes are active */
+  selectable?: boolean
+  selectedLines?: Set<string>
+  onToggleLineSelection?: (hunkIndex: number, lineIndex: number) => void
+  onToggleHunkSelection?: (hunkIndex: number) => void
+  isStaged?: boolean
+  /**
+   * Whether edit-mode actions (Stage/Unstage/Discard hunk buttons) should be shown.
+   * Independent of `selectable` — buttons show whenever isEditable=true.
+   */
+  isEditable?: boolean
+  onStageHunk?: (hunkIndex: number) => void
+  onUnstageHunk?: (hunkIndex: number) => void
+  onDiscardHunk?: (hunkIndex: number) => void
 }
 
 function renderCell(item: { line: any; markup?: any } | undefined, side: 'left' | 'right', wrap: boolean) {
@@ -223,7 +250,6 @@ function renderCell(item: { line: any; markup?: any } | undefined, side: 'left' 
 }
 
 function SideBySideContent({ hunks, wrap }: { hunks: ParsedHunk[]; wrap: boolean }) {
-  // Pre-calculate all rows to ensure alignment across both columns
   const allRows: Array<{
     left?: { line: any; markup?: any }
     right?: { line: any; markup?: any }
@@ -232,7 +258,6 @@ function SideBySideContent({ hunks, wrap }: { hunks: ParsedHunk[]; wrap: boolean
   }> = []
 
   hunks.forEach((hunk) => {
-    // Add header row
     const left = `-${hunk.oldStart}${typeof hunk.oldLines === 'number' ? ',' + hunk.oldLines : ''}`
     const right = `+${hunk.newStart}${typeof hunk.newLines === 'number' ? ',' + hunk.newLines : ''}`
     const header = `@@ ${left} ${right} @@${hunk.header ? ' ' + hunk.header : ''}`
@@ -268,7 +293,6 @@ function SideBySideContent({ hunks, wrap }: { hunks: ParsedHunk[]; wrap: boolean
     }
   })
 
-  // Render two separate columns
   return (
     <div className='grid grid-cols-2 divide-x divide-neutral-100 dark:divide-neutral-800 h-full w-full'>
       {/* Left Column */}
@@ -276,7 +300,6 @@ function SideBySideContent({ hunks, wrap }: { hunks: ParsedHunk[]; wrap: boolean
         <div className='min-w-fit'>
           {allRows.map((row, idx) => (
             <div key={idx} className='border-b border-neutral-100 dark:border-neutral-800/50 last:border-b-0 h-[22px]'>
-              {/* Fixed height for alignment */}
               {row.isHeader ? (
                 <div className='bg-[var(--surface-overlay)] text-[var(--text-secondary)] px-2 py-0.5 text-[10px] border-b border-[var(--border-subtle)] border-t first:border-t-0 sticky top-0 z-20 whitespace-nowrap overflow-hidden text-ellipsis h-full'>
                   {row.headerText}
@@ -294,7 +317,6 @@ function SideBySideContent({ hunks, wrap }: { hunks: ParsedHunk[]; wrap: boolean
         <div className='min-w-fit'>
           {allRows.map((row, idx) => (
             <div key={idx} className='border-b border-neutral-100 dark:border-neutral-800/50 last:border-b-0 h-[22px]'>
-              {/* Fixed height for alignment */}
               {row.isHeader ? (
                 <div className='bg-[var(--surface-overlay)] text-[var(--text-secondary)] px-2 py-0.5 text-[10px] border-b border-[var(--border-subtle)] border-t first:border-t-0 sticky top-0 z-20 whitespace-nowrap overflow-hidden text-ellipsis h-full'>
                   {row.headerText}
@@ -318,6 +340,15 @@ export function StructuredUnifiedDiff(props: StructuredUnifiedDiffProps) {
     intraline = 'none',
     sideBySide = false,
     largeGuardLines = 5000,
+    selectable = false,
+    selectedLines,
+    onToggleLineSelection,
+    onToggleHunkSelection,
+    isStaged = false,
+    isEditable = false,
+    onStageHunk,
+    onUnstageHunk,
+    onDiscardHunk,
   } = props
 
   const hunksRaw = React.useMemo(() => parseUnifiedDiff(patch), [patch])
@@ -332,12 +363,6 @@ export function StructuredUnifiedDiff(props: StructuredUnifiedDiffProps) {
     ignoreWhitespace,
     intraline,
   ])
-
-  const headerText = (h: ParsedHunk) => {
-    const left = `-${h.oldStart}${typeof h.oldLines === 'number' ? ',' + h.oldLines : ''}`
-    const right = `+${h.newStart}${typeof h.newLines === 'number' ? ',' + h.newLines : ''}`
-    return `@@ ${left} ${right} @@${h.header ? ' ' + h.header : ''}`
-  }
 
   if (!guardBypass && totalRenderableLines > largeGuardLines) {
     return (
@@ -354,83 +379,249 @@ export function StructuredUnifiedDiff(props: StructuredUnifiedDiffProps) {
   }
 
   if (sideBySide) {
-    // Scroll container wraps the SideBySideContent
-    // But we need vertical scrolling to be sync, and horizontal async.
-    // SideBySideContent renders two columns. We put the vertical scroll on the wrapper.
     return (
-      <div className='font-mono text-xs text-[var(--text-primary)] bg-[var(--surface-base)] rounded border border-[var(--border-subtle)] overflow-y-auto max-h-[60vh]'>
+      <div className='font-mono text-xs text-[var(--text-primary)] bg-[var(--surface-base)] rounded border border-[var(--border-subtle)]'>
         <SideBySideContent hunks={hunks} wrap={wrap} />
       </div>
     )
   }
 
-  // Unified view
+  // Unified view.
+  // Layout strategy: each hunk has a sticky header that spans the full visible width (no horizontal
+  // scroll on the header). The lines body scrolls horizontally independently per-hunk via
+  // overflow-x-auto on a min-w-max inner div. The parent DiffViewer container owns vertical scroll.
   return (
-    <div className='font-mono text-xs text-neutral-800 dark:text-neutral-200 bg-white dark:bg-[#1e1e1e] rounded border border-neutral-200 dark:border-neutral-800 overflow-auto max-h-[60vh]'>
-      <div className={wrap ? 'min-w-0' : 'min-w-max'}>
-        {hunks.map((h, i) => (
-          <div key={i}>
-            <div className='bg-neutral-100 dark:bg-neutral-900 text-neutral-500 dark:text-neutral-500 px-2 py-1 text-[10px] border-b border-neutral-200 dark:border-neutral-800 border-t first:border-t-0 sticky top-0 z-20 w-full'>
-              {headerText(h)}
+    <div className='font-mono text-xs text-neutral-800 dark:text-neutral-200 bg-white dark:bg-[#1e1e1e]'>
+      {hunks.map((h, i) => {
+        const modLines = h.lines.filter(l => l.type === 'add' || l.type === 'del')
+        const isHunkFullySelected = modLines.length > 0 && modLines.every((l) => selectedLines?.has(`${i}:${h.lines.indexOf(l)}`))
+        const isHunkPartiallySelected = !isHunkFullySelected && modLines.some((l) => selectedLines?.has(`${i}:${h.lines.indexOf(l)}`))
+        const { start, end } = hunkLineRange(h)
+
+        return (
+          <div key={i} className='border-b border-neutral-200 dark:border-neutral-800 last:border-b-0'>
+            {/* Hunk header — sticky, full visible width, never scrolls horizontally */}
+            <div className='sticky top-0 z-20 flex items-center gap-2 bg-neutral-100 dark:bg-neutral-800/80 border-b border-neutral-200 dark:border-neutral-800 px-2 h-8 shrink-0 w-full'>
+              {selectable && (
+                <input
+                  type="checkbox"
+                  className="cursor-pointer flex-none"
+                  checked={isHunkFullySelected}
+                  ref={el => { if (el) el.indeterminate = isHunkPartiallySelected }}
+                  onChange={() => onToggleHunkSelection?.(i)}
+                />
+              )}
+              <span className='font-semibold text-neutral-600 dark:text-neutral-300 text-[10px] flex-none'>
+                Hunk {i + 1}:
+              </span>
+              <span className='text-neutral-500 dark:text-neutral-400 text-[10px] flex-none'>
+                Lines {start}–{end}
+              </span>
+              {/* Spacer pushes buttons to the right */}
+              <div className='flex-1 min-w-0' />
+              {/* Per-hunk action buttons — always visible when isEditable, regardless of selectable */}
+              {isEditable && (
+                <div className='flex items-center gap-1 flex-none'>
+                  <button
+                    className={`px-2 py-0.5 rounded text-[10px] font-medium text-white transition-colors ${
+                      isStaged
+                        ? 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800'
+                        : 'bg-teal-600 hover:bg-teal-700 active:bg-teal-800'
+                    }`}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      if (isStaged) {
+                        onUnstageHunk?.(i)
+                      } else {
+                        onStageHunk?.(i)
+                      }
+                    }}
+                  >
+                    {isStaged ? 'Unstage Hunk' : 'Stage Hunk'}
+                  </button>
+                  <button
+                    className='px-2 py-0.5 rounded text-[10px] font-medium bg-red-600 hover:bg-red-700 active:bg-red-800 text-white transition-colors'
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onDiscardHunk?.(i)
+                    }}
+                  >
+                    Discard Hunk
+                  </button>
+                </div>
+              )}
             </div>
-            <div className='text-[10px] leading-relaxed divide-y divide-neutral-100 dark:divide-neutral-800/50'>
-              {h.lines
-                .filter((l) => !l._hidden)
-                .map((ln, j) => {
-                  if (ln.type === 'meta') return null
-                  let bgCls = ''
-                  let marker = ' '
-                  if (ln.type === 'add') {
-                    bgCls = 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300'
-                    marker = '+'
-                  } else if (ln.type === 'del') {
-                    bgCls = 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300'
-                    marker = '-'
-                  }
 
-                  return (
-                    <div key={j} className={`flex ${bgCls} group ${wrap ? 'min-w-0' : 'min-w-max'}`}>
-                      {/* Line numbers */}
-                      <div className='w-[60px] flex-none flex text-right select-none text-neutral-400 dark:text-neutral-600 border-r border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/30 text-[10px]'>
-                        <span className='w-1/2 pr-1'>{ln.oldLine !== undefined ? ln.oldLine : ''}</span>
-                        <span className='w-1/2 pr-1'>{ln.newLine !== undefined ? ln.newLine : ''}</span>
-                      </div>
+            {/* Lines body — scrolls horizontally; vertical scroll is owned by parent */}
+            <div className='overflow-x-auto'>
+              <div className={wrap ? 'min-w-0' : 'min-w-max'}>
+                <div className='text-[10px] leading-relaxed divide-y divide-neutral-100 dark:divide-neutral-800/50'>
+                  {h.lines
+                    .filter((l) => !l._hidden)
+                    .map((ln, j) => {
+                      if (ln.type === 'meta') return null
+                      let bgCls = ''
+                      let marker = ' '
+                      if (ln.type === 'add') {
+                        bgCls = 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300'
+                        marker = '+'
+                      } else if (ln.type === 'del') {
+                        bgCls = 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300'
+                        marker = '-'
+                      }
 
-                      <div className='w-4 flex-none text-center select-none opacity-50 text-[10px]'>{marker}</div>
-                      <div className={`flex-1 min-w-0 py-0.5 pr-2 ${wrap ? 'whitespace-pre-wrap break-words' : 'whitespace-pre'}`}>
-                        {ln._markup ? (
-                          <>
-                            {ln._markup.map((seg, si) =>
-                              seg.t === 'text' ? (
-                                <span key={si}>{seg.v}</span>
-                              ) : seg.t === 'ins' ? (
-                                <span
-                                  key={si}
-                                  className='bg-green-300/60 dark:bg-green-700/45 rounded-[2px] px-[1px]'
-                                >
-                                  {seg.v}
-                                </span>
-                              ) : (
-                                <span
-                                  key={si}
-                                  className='bg-red-300/55 dark:bg-red-700/45 rounded-[2px] px-[1px] line-through decoration-red-600/70 decoration-[1px]'
-                                >
-                                  {seg.v}
-                                </span>
-                              ),
+                      const isSelectableLine = ln.type === 'add' || ln.type === 'del'
+
+                      return (
+                        <div key={j} className={`flex ${bgCls}`}>
+                          {selectable && (
+                            <div className='w-[24px] flex-none flex items-center justify-center border-r border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/30'>
+                              {isSelectableLine && (
+                                <input
+                                  type="checkbox"
+                                  className="cursor-pointer"
+                                  checked={selectedLines?.has(`${i}:${j}`)}
+                                  onChange={() => onToggleLineSelection?.(i, j)}
+                                />
+                              )}
+                            </div>
+                          )}
+                          {/* Line numbers */}
+                          <div className='w-[60px] flex-none flex text-right select-none text-neutral-400 dark:text-neutral-600 border-r border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/30 text-[10px]'>
+                            <span className='w-1/2 pr-1'>{ln.oldLine !== undefined ? ln.oldLine : ''}</span>
+                            <span className='w-1/2 pr-1'>{ln.newLine !== undefined ? ln.newLine : ''}</span>
+                          </div>
+
+                          <div className='w-4 flex-none text-center select-none opacity-50 text-[10px]'>{marker}</div>
+                          <div className={`flex-1 min-w-0 py-0.5 pr-2 ${wrap ? 'whitespace-pre-wrap break-words' : 'whitespace-pre'}`}>
+                            {ln._markup ? (
+                              <>
+                                {ln._markup.map((seg, si) =>
+                                  seg.t === 'text' ? (
+                                    <span key={si}>{seg.v}</span>
+                                  ) : seg.t === 'ins' ? (
+                                    <span
+                                      key={si}
+                                      className='bg-green-300/60 dark:bg-green-700/45 rounded-[2px] px-[1px]'
+                                    >
+                                      {seg.v}
+                                    </span>
+                                  ) : (
+                                    <span
+                                      key={si}
+                                      className='bg-red-300/55 dark:bg-red-700/45 rounded-[2px] px-[1px] line-through decoration-red-600/70 decoration-[1px]'
+                                    >
+                                      {seg.v}
+                                    </span>
+                                  ),
+                                )}
+                              </>
+                            ) : (
+                              <>{ln.text?.length ? ln.text : ' '}</>
                             )}
-                          </>
-                        ) : (
-                          <>{ln.text?.length ? ln.text : ' '}</>
-                        )}
-                      </div>
-                    </div>
-                  )
-                })}
+                          </div>
+                        </div>
+                      )
+                    })}
+                </div>
+              </div>
             </div>
           </div>
-        ))}
-      </div>
+        )
+      })}
     </div>
   )
+}
+
+export function generateSelectedPatch(
+  patch: string,
+  selectedLines: Set<string>, // format: "hunkIndex:lineIndex"
+): string {
+  const hunks = parseUnifiedDiff(patch)
+
+  let out = ''
+  const lines = patch.replace(/\r\n/g, '\n').split('\n')
+  for (const l of lines) {
+    if (l.startsWith('@@')) break
+    out += l + '\n'
+  }
+
+  for (let hIdx = 0; hIdx < hunks.length; hIdx++) {
+    const hunk = hunks[hIdx]
+    let oldLinesCount = 0
+    let newLinesCount = 0
+    let hunkBody = ''
+    let hasModifications = false
+
+    for (let lIdx = 0; lIdx < hunk.lines.length; lIdx++) {
+      const line = hunk.lines[lIdx]
+      if (line.type === 'meta') continue
+      const isSelected = selectedLines.has(`${hIdx}:${lIdx}`)
+
+      if (line.type === 'ctx') {
+        hunkBody += ' ' + line.text + '\n'
+        oldLinesCount++
+        newLinesCount++
+      } else if (line.type === 'add') {
+        if (isSelected) {
+          hunkBody += '+' + line.text + '\n'
+          newLinesCount++
+          hasModifications = true
+        }
+      } else if (line.type === 'del') {
+        if (isSelected) {
+          hunkBody += '-' + line.text + '\n'
+          oldLinesCount++
+          hasModifications = true
+        } else {
+          hunkBody += ' ' + line.text + '\n'
+          oldLinesCount++
+          newLinesCount++
+        }
+      }
+    }
+
+    if (hasModifications) {
+      out += `@@ -${hunk.oldStart},${oldLinesCount} +${hunk.newStart},${newLinesCount} @@${hunk.header ? ' ' + hunk.header : ''}\n`
+      out += hunkBody
+    }
+  }
+  return out.trimEnd() + '\n'
+}
+
+/** Generate a patch for a single hunk by index */
+export function generateHunkPatch(patch: string, hunkIndex: number): string {
+  const hunks = parseUnifiedDiff(patch)
+  const hunk = hunks[hunkIndex]
+  if (!hunk) return ''
+
+  let out = ''
+  const lines = patch.replace(/\r\n/g, '\n').split('\n')
+  for (const l of lines) {
+    if (l.startsWith('@@')) break
+    out += l + '\n'
+  }
+
+  let oldLinesCount = 0
+  let newLinesCount = 0
+  let hunkBody = ''
+
+  for (const line of hunk.lines) {
+    if (line.type === 'meta') continue
+    if (line.type === 'ctx') {
+      hunkBody += ' ' + line.text + '\n'
+      oldLinesCount++
+      newLinesCount++
+    } else if (line.type === 'add') {
+      hunkBody += '+' + line.text + '\n'
+      newLinesCount++
+    } else if (line.type === 'del') {
+      hunkBody += '-' + line.text + '\n'
+      oldLinesCount++
+    }
+  }
+
+  out += `@@ -${hunk.oldStart},${oldLinesCount} +${hunk.newStart},${newLinesCount} @@${hunk.header ? ' ' + hunk.header : ''}\n`
+  out += hunkBody
+  return out.trimEnd() + '\n'
 }

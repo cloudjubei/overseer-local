@@ -187,6 +187,7 @@ const IPC_HANDLER_KEYS = {
   GIT_LIST_STASHES: 'git:list-stashes',
   GIT_APPLY_STASH: 'git:apply-stash',
   GIT_REMOVE_STASH: 'git:remove-stash',
+  GIT_APPLY_PATCH: 'git:apply-patch',
 
   // Local commit workflow
   GIT_STAGE: 'git:stage-paths',
