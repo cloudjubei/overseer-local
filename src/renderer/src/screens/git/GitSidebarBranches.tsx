@@ -1,139 +1,48 @@
-import React from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import Spinner from '../../components/ui/Spinner'
-import { Button } from '../../components/ui/Button'
-import Tooltip from '../../components/ui/Tooltip'
-import { IconFastMerge } from '../../components/ui/icons/IconFastMerge'
-import { IconDelete } from '../../components/ui/icons/IconDelete'
-import { IconCommit } from '../../components/ui/icons/IconCommit'
 import { GitUnifiedBranch, GitStashListItem } from 'thefactory-tools'
-
-function Pill({
-  label,
-  tone = 'neutral',
-}: {
-  label: string
-  tone?: 'neutral' | 'blue' | 'green' | 'red'
-}) {
-  const cls =
-    tone === 'blue'
-      ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-200'
-      : tone === 'green'
-        ? 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-200'
-        : tone === 'red'
-          ? 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-200'
-          : 'bg-neutral-100 text-neutral-700 dark:bg-neutral-900/40 dark:text-neutral-200'
-  return <span className={`text-[10px] px-1.5 py-0.5 rounded ${cls} whitespace-nowrap`}>{label}</span>
-}
-
-function SectionHeader({ title, subtitle }: { title: string; subtitle?: string }) {
-  return (
-    <div className="px-3 pt-3 pb-2">
-      <div className="text-xs font-semibold text-neutral-700 dark:text-neutral-200 uppercase tracking-wide">
-        {title}
-      </div>
-      {subtitle ? <div className="text-neutral-600 dark:text-neutral-400 mt-1">{subtitle}</div> : null}
-    </div>
-  )
-}
+import { BranchChip } from '../../components/ui/BranchChip'
 
 function BranchRow({
   branch,
   isSelected,
   equalToCurrent,
-  showSwitch,
-  canSwitch,
-  onSwitch,
   hasPendingChanges,
-  onCommit,
-  onMerge,
-  onDelete,
   onClick,
 }: {
   branch: GitUnifiedBranch
   isSelected: boolean
   equalToCurrent?: boolean
-  showSwitch?: boolean
-  canSwitch?: boolean
-  onSwitch?: () => void
   hasPendingChanges?: boolean
-  onCommit?: () => void
-  onMerge?: () => void
-  onDelete?: () => void
   onClick?: () => void
 }) {
   const unread = hasPendingChanges
   const rowCls =
-    'group flex items-center gap-2 px-3 py-2 rounded cursor-pointer ' +
+    'flex items-center gap-2 px-3 py-2 rounded cursor-pointer ' +
     (isSelected
       ? 'bg-blue-50/80 dark:bg-blue-900/20'
       : 'hover:bg-neutral-100 dark:hover:bg-neutral-900/40')
 
   return (
     <div className={rowCls} onClick={onClick}>
-      <div className="min-w-0 flex-1">
+      <div className="min-w-0 flex-1 flex flex-col gap-1">
         <div className="flex items-center gap-2 min-w-0">
           <div className="truncate text-sm font-medium text-neutral-800 dark:text-neutral-100">{branch.name}</div>
-          {branch.current ? <Pill label="current" tone="green" /> : null}
-          {equalToCurrent && !branch.current ? <Pill label="same" /> : null}
-          {unread ? <Pill label="updated" tone="blue" /> : null}
+          {branch.current ? <BranchChip type="current" size="xs" /> : null}
+          {equalToCurrent && !branch.current ? <BranchChip type="same" size="xs" /> : null}
+          {unread ? <BranchChip type="updated" size="xs" /> : null}
         </div>
-        <div className="text-[11px] text-neutral-500 dark:text-neutral-400 truncate">
-          {branch.isLocal ? 'local' : ''}
-          {branch.isRemote ? (branch.isLocal ? ' + remote' : 'remote') : ''}
-          {branch.storyId ? ` • story ${branch.storyId}` : ''}
+        <div className="flex items-center gap-1.5 flex-wrap min-w-0">
+          {branch.isLocal ? <BranchChip type="local" size="xs" /> : null}
+          {branch.isRemote ? <BranchChip type="remote" size="xs" /> : null}
+          {branch.storyId ? <BranchChip type="story" size="xs" label={`Story ${branch.storyId}`} /> : null}
         </div>
-      </div>
-
-      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-        {branch.current ? (
-          <>
-            {onCommit ? (
-              <Tooltip content="Commit">
-                <Button size="icon" variant="ghost" onClick={(e) => (e.stopPropagation(), onCommit())}>
-                  <IconCommit />
-                </Button>
-              </Tooltip>
-            ) : null}
-          </>
-        ) : (
-          <>
-            {showSwitch ? (
-              <Tooltip content={canSwitch ? 'Switch to branch' : 'Working tree must be clean to switch'}>
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  onClick={(e) => (e.stopPropagation(), onSwitch?.())}
-                  disabled={!canSwitch}
-                >
-                  Switch
-                </Button>
-              </Tooltip>
-            ) : null}
-
-            {onMerge ? (
-              <Tooltip content="Merge">
-                <Button size="icon" variant="ghost" onClick={(e) => (e.stopPropagation(), onMerge())}>
-                  <IconFastMerge />
-                </Button>
-              </Tooltip>
-            ) : null}
-
-            {onDelete ? (
-              <Tooltip content="Delete branch">
-                <Button size="icon" variant="ghost" onClick={(e) => (e.stopPropagation(), onDelete())}>
-                  <IconDelete />
-                </Button>
-              </Tooltip>
-            ) : null}
-          </>
-        )}
       </div>
     </div>
   )
 }
 
 export function GitSidebarBranches({
-  title,
   projectId,
   loading,
   error,
@@ -143,14 +52,9 @@ export function GitSidebarBranches({
   others,
   selectedBranchName,
   selectedStashRef,
-  canSwitch,
   isEqualToCurrent,
   onSelectBranch,
   onSelectStash,
-  onCommit,
-  onMerge,
-  onDelete,
-  onSwitch,
 }: {
   title?: string
   projectId?: string
@@ -162,25 +66,51 @@ export function GitSidebarBranches({
   others: GitUnifiedBranch[]
   selectedBranchName?: string
   selectedStashRef?: string
-  canSwitch: boolean
   isEqualToCurrent: (b: GitUnifiedBranch) => boolean
   onSelectBranch: (name: string) => void
   onSelectStash: (ref: string) => void
-  onCommit: (branchName: string) => void
-  onMerge: (baseRef: string, headRef: string) => void
-  onDelete: (branchName: string) => void
-  onSwitch: (branchName: string) => void
 }) {
+  const [widthPx, setWidthPx] = useState<number>(280)
+  const resizeRef = useRef<{ startX: number; startW: number; maxW: number } | null>(null)
+
+  const onResizeStart = (e: React.PointerEvent) => {
+    e.preventDefault()
+    ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
+    const maxW = Math.max(100, Math.floor(window.innerWidth * 0.5))
+    resizeRef.current = { startX: e.clientX, startW: widthPx, maxW }
+
+    const onMove = (ev: PointerEvent) => {
+      const st = resizeRef.current
+      if (!st) return
+      const dx = ev.clientX - st.startX
+      const next = st.startW + dx
+      setWidthPx(Math.max(100, Math.min(st.maxW, next)))
+    }
+    const onUp = () => {
+      resizeRef.current = null
+      window.removeEventListener('pointermove', onMove)
+      window.removeEventListener('pointerup', onUp)
+    }
+    window.addEventListener('pointermove', onMove)
+    window.addEventListener('pointerup', onUp)
+  }
+
+  // Clamp width on resize
+  useEffect(() => {
+    const clamp = () => {
+      const maxW = Math.max(100, Math.floor(window.innerWidth * 0.5))
+      setWidthPx((v) => Math.max(100, Math.min(maxW, v)))
+    }
+    window.addEventListener('resize', clamp)
+    return () => window.removeEventListener('resize', clamp)
+  }, [])
+
   return (
-    <div className="w-[280px] shrink-0 border-r border-neutral-200 dark:border-neutral-800 flex flex-col min-h-0">
-      <div className="px-3 py-3 border-b border-neutral-200 dark:border-neutral-800">
-        <div className="text-sm font-semibold text-neutral-800 dark:text-neutral-100">Git</div>
-        <div className="text-xs text-neutral-600 dark:text-neutral-400 truncate">{title || '—'}</div>
-      </div>
-
+    <div
+      className="relative shrink-0 border-r border-neutral-200 dark:border-neutral-800 flex flex-col min-h-0 pt-2"
+      style={{ width: widthPx }}
+    >
       <div className="flex-1 min-h-0 overflow-auto">
-        <SectionHeader title="Branches" subtitle="Local branches" />
-
         {!projectId ? (
           <div className="px-3 py-2 text-sm text-neutral-600 dark:text-neutral-300">No active project.</div>
         ) : loading ? (
@@ -202,9 +132,7 @@ export function GitSidebarBranches({
                   branch={current}
                   isSelected={selectedBranchName === current.name && !selectedStashRef}
                   equalToCurrent={false}
-                  showSwitch={false}
                   hasPendingChanges={false}
-                  onCommit={() => onCommit(current.name)}
                   onClick={() => onSelectBranch(current.name)}
                 />
                 <div className="px-2 pt-2 pb-1 text-[10px] uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
@@ -219,12 +147,7 @@ export function GitSidebarBranches({
                 branch={b}
                 isSelected={selectedBranchName === b.name && !selectedStashRef}
                 equalToCurrent={isEqualToCurrent(b)}
-                showSwitch
-                canSwitch={canSwitch}
-                onSwitch={() => onSwitch(b.name)}
                 hasPendingChanges={false}
-                onMerge={() => onMerge(current?.name || 'main', b.name)}
-                onDelete={() => onDelete(b.name)}
                 onClick={() => onSelectBranch(b.name)}
               />
             ))}
@@ -247,7 +170,6 @@ export function GitSidebarBranches({
                   >
                     <div className="min-w-0 flex-1">
                       <div className="text-sm font-medium text-neutral-800 dark:text-neutral-100 truncate">{s.message}</div>
-                      <div className="text-[11px] text-neutral-500 dark:text-neutral-400 truncate">{s.ref}</div>
                     </div>
                   </div>
                 ))}
@@ -256,6 +178,13 @@ export function GitSidebarBranches({
           </div>
         )}
       </div>
+
+      <div
+        className="absolute top-0 bottom-0 -right-[3px] w-[6px] cursor-col-resize z-10 hover:bg-neutral-300/50 dark:hover:bg-neutral-700/50 transition-colors"
+        onPointerDown={onResizeStart}
+        role="separator"
+        aria-orientation="vertical"
+      />
     </div>
   )
 }

@@ -365,6 +365,10 @@ const GIT_API = {
   getFileContent: (projectId, path, ref) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_GET_FILE_CONTENT, { projectId, path, ref }),
   resetAll: (projectId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_RESET_ALL, { projectId }),
+  addStash: (projectId, options) => ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_ADD_STASH, { projectId, options }),
+  listStashes: (projectId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_LIST_STASHES, { projectId }),
+  applyStash: (projectId, options) => ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_APPLY_STASH, { projectId, options }),
+  removeStash: (projectId, options) => ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_REMOVE_STASH, { projectId, options }),
   subscribeToMonitorUpdates: (callback) => {
     const listener = (_event, payload) => callback(payload)
     ipcRenderer.on(IPC_HANDLER_KEYS.GIT_MONITOR_UPDATE, listener)

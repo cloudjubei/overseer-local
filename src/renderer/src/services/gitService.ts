@@ -56,6 +56,8 @@ export type GitService = {
   deleteBranch: (projectId: string, name: string) => Promise<GitOpResult | undefined>
   push: (projectId: string, remote?: string, branch?: string) => Promise<GitOpResult | undefined>
   pull: (projectId: string, remote?: string, branch?: string) => Promise<GitOpResult | undefined>
+  fetch: (projectId: string, remote?: string) => Promise<GitOpResult | undefined>
+  createBranch: (projectId: string, name: string, checkoutAfter?: boolean) => Promise<GitOpResult | undefined>
   deleteRemoteBranch: (projectId: string, name: string) => Promise<GitOpResult | undefined>
 
   startMonitor: (

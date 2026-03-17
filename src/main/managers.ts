@@ -77,6 +77,7 @@ export async function initManagers(projectRoot: string, mainWindow: BrowserWindo
     chatsManager,
     factoryToolsManager,
     factoryLLMCostsManager,
+    projectsManager,
   )
 
   managers = [

@@ -156,8 +156,6 @@ export default function GitView() {
     [selection, projectId],
   )
 
-  const canSwitch = isClean === true
-
   const switchToBranch = React.useCallback(
     async (name: string) => {
       if (!projectId) return
@@ -218,16 +216,9 @@ export default function GitView() {
         others={others}
         selectedBranchName={selectedBranchName}
         selectedStashRef={selectedStashRef}
-        canSwitch={canSwitch}
         isEqualToCurrent={isEqualToCurrent}
         onSelectBranch={onSelectBranch}
         onSelectStash={onSelectStash}
-        onCommit={openCommit}
-        onMerge={openMerge}
-        onDelete={() => {
-          alert('Delete branch: stub. Wire to gitService.deleteLocalBranch when available.')
-        }}
-        onSwitch={switchToBranch}
       />
 
       <GitBranchDetailsPanel

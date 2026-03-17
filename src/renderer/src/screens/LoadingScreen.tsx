@@ -12,7 +12,7 @@ interface LoadingScreenProps {
 
 const LoadingScreen: React.FC<LoadingScreenProps> = ({ onLoaded }) => {
   const { isAppSettingsLoaded, appSettings } = useAppSettings()
-  const { projects } = useProjectContext()
+  const { isLoaded: isProjectsLoaded, projects } = useProjectContext()
   const [statusText, setStatusText] = useState<string>('Loading your settings…')
   const [isDBSetup, setIsDBSetup] = useState(false)
   const [isIngestionComplete, setIsIngestionComplete] = useState(false)
@@ -20,8 +20,8 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ onLoaded }) => {
   const doneRef = useRef(false)
 
   const isReadyToExit = useMemo(() => {
-    return isAppSettingsLoaded && isDBSetup && isIngestionComplete && isGitReady
-  }, [isAppSettingsLoaded, isDBSetup, isIngestionComplete, isGitReady])
+    return isAppSettingsLoaded && isProjectsLoaded && isDBSetup && isIngestionComplete && isGitReady
+  }, [isAppSettingsLoaded, isProjectsLoaded, isDBSetup, isIngestionComplete, isGitReady])
 
   const startDatabaseAndIngestion = async (connectionString?: string) => {
     // Connect to DB (if connection string provided)
@@ -49,7 +49,8 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ onLoaded }) => {
       setIsIngestionComplete(true)
       setStatusText('Indexing failed. Preparing Git monitors…')
     }
-
+  }
+  const startGit = async () => {
     // Initialize Git tools per project and start monitors with current branch as base
     try {
       const projectIds = projects.map((p) => p.id)
@@ -82,6 +83,12 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ onLoaded }) => {
       startDatabaseAndIngestion(appSettings.database.connectionString)
     }
   }, [isAppSettingsLoaded])
+
+  useEffect(() => {
+    if (isProjectsLoaded) {
+      startGit()
+    }
+  }, [isProjectsLoaded])
 
   useEffect(() => {
     if (isReadyToExit && !doneRef.current) {

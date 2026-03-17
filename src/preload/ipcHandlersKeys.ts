@@ -172,6 +172,8 @@ const IPC_HANDLER_KEYS = {
   GIT_DELETE_BRANCH: 'git:delete-branch',
   GIT_PUSH: 'git:push',
   GIT_PULL: 'git:pull',
+  GIT_FETCH: 'git:fetch',
+  GIT_CREATE_BRANCH: 'git:create-branch',
   GIT_DELETE_REMOTE_BRANCH: 'git:delete-remote-branch',
   GIT_LIST_UNIFIED_BRANCHES: 'git:list-unified-branches',
   GIT_SELECT_COMMITS: 'git:select-commits',

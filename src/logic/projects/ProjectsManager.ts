@@ -44,6 +44,10 @@ export default class ProjectsManager extends BaseManager {
     return handlers
   }
 
+  getTools(): ProjectTools {
+    return this.tools
+  }
+
   async getProjectDir(projectId: string): Promise<string | undefined> {
     return await this.tools.getProjectDir(projectId)
   }

@@ -16,7 +16,7 @@ import BaseManager from '../BaseManager'
 import { getDefaultChatPrompt } from 'thefactory-tools/utils'
 
 export default class ChatsManager extends BaseManager {
-  tools: ChatsTools
+  private tools: ChatsTools
   private chatSettings: ChatsSettings | undefined
 
   constructor(projectRoot: string, window: BrowserWindow) {
@@ -67,6 +67,10 @@ export default class ChatsManager extends BaseManager {
       this.resetSettingsPrompt(chatContext)
 
     return handlers
+  }
+
+  getTools(): ChatsTools {
+    return this.tools
   }
 
   async listChats(projectId?: string): Promise<Chat[]> {

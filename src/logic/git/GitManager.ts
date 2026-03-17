@@ -82,6 +82,10 @@ export default class GitManager extends BaseManager {
       this.push(projectId, remote, branch)
     handlers[IPC_HANDLER_KEYS.GIT_PULL] = ({ projectId, remote, branch }) =>
       this.pull(projectId, remote, branch)
+    handlers[IPC_HANDLER_KEYS.GIT_FETCH] = ({ projectId, remote }) =>
+      this.fetch(projectId, remote)
+    handlers[IPC_HANDLER_KEYS.GIT_CREATE_BRANCH] = ({ projectId, name, checkoutAfter }) =>
+      this.createBranch(projectId, name, checkoutAfter)
     handlers[IPC_HANDLER_KEYS.GIT_DELETE_REMOTE_BRANCH] = ({ projectId, name }) =>
       this.deleteRemoteBranch(projectId, name)
 
@@ -225,6 +229,25 @@ export default class GitManager extends BaseManager {
     const tools = await this.getTools(projectId)
     if (!tools) return
     return await tools.pull(remote, branch)
+  }
+
+  private async fetch(
+    projectId: string,
+    remote?: string,
+  ): Promise<GitOpResult | undefined> {
+    const tools = await this.getTools(projectId)
+    if (!tools) return
+    return await tools.fetch(remote)
+  }
+
+  private async createBranch(
+    projectId: string,
+    name: string,
+    checkoutAfter?: boolean,
+  ): Promise<GitOpResult | undefined> {
+    const tools = await this.getTools(projectId)
+    if (!tools) return
+    return await tools.gitCreateBranch(name, checkoutAfter)
   }
 
   private async deleteBranch(projectId: string, name: string): Promise<GitOpResult | undefined> {

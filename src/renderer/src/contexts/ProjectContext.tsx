@@ -6,6 +6,8 @@ import { useAppSettings } from '../contexts/AppSettingsContext'
 export const MAIN_PROJECT = 'main'
 
 export type ProjectContextValue = {
+  isLoaded: boolean
+
   activeProjectId: string
   activeProject?: ProjectSpec
 
@@ -22,6 +24,7 @@ const ProjectContext = createContext<ProjectContextValue | null>(null)
 
 export function ProjectsProvider({ children }: { children: React.ReactNode }) {
   const { isAppSettingsLoaded, appSettings, setUserPreferences } = useAppSettings()
+  const [isLoaded, setIsLoaded] = useState(false)
   const [initialLoad, setInitialLoad] = useState(true)
   const [activeProjectId, setActiveProjectIdState] = useState<string>(MAIN_PROJECT)
   const [projects, setProjects] = useState<ProjectSpec[]>([])
@@ -30,6 +33,7 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
   const update = async () => {
     const projects = await projectsService.listProjects()
     setProjects(projects)
+    setIsLoaded(true)
   }
   const onProjectUpdate = async (projectUpdate: ProjectUpdate) => {
     switch (projectUpdate.type) {
@@ -132,6 +136,7 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
 
   const value = useMemo<ProjectContextValue>(
     () => ({
+      isLoaded,
       activeProjectId,
       activeProject,
       setActiveProjectId,
@@ -141,6 +146,7 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
       getStoryDisplayIndex,
     }),
     [
+      isLoaded,
       activeProjectId,
       activeProject,
       setActiveProjectId,
