@@ -105,7 +105,15 @@ export default class FactoryToolsManager extends BaseManager {
     const appSettings = this.settingsManager.getAppSettings()
     const webSearchApiKeys = appSettings?.webSearchApiKeys
     const connectionString = this.databaseManager.getConnectionString()
-    const storyTools = await this.storiesManager.getTools(projectId)
+    const storyTools = (await this.storiesManager.getTools(projectId))!
+
+    //TODO: at some point we really have to consolidate this as there's this strong dependency
+    storyTools.createStory = async (title, description) => {
+      return this.storiesManager.createStory(projectId, { title, description })
+    }
+    storyTools.deleteStory = async (storyId) => {
+      await this.storiesManager.deleteStory(projectId, storyId)
+    }
 
     const tools = await createTools(
       projectId,

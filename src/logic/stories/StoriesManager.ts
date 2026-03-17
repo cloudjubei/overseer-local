@@ -186,6 +186,7 @@ export default class StoriesManager extends BaseManager {
 
     const tools = createStoryTools(projectId, projectRoot)
     await tools.init()
+
     this.tools[projectId] = tools
 
     tools.subscribe(async (storyUpdate) => {

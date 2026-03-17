@@ -347,6 +347,9 @@ const GIT_API = {
     ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_PUSH, { projectId, remote, branch }),
   pull: (projectId, remote, branch) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_PULL, { projectId, remote, branch }),
+  fetch: (projectId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_FETCH, { projectId }),
+  createBranch: (projectId, name, baseRef) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_CREATE_BRANCH, { projectId, name, baseRef }),
   deleteRemoteBranch: (projectId, name) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_DELETE_REMOTE_BRANCH, { projectId, name }),
   startMonitor: (projectId, options) =>
