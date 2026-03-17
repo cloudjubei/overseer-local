@@ -19,6 +19,7 @@ import type {
   GitListStashesResult,
   GitApplyStashOptions,
   GitRemoveStashOptions,
+  GitAddStashOptions,
 } from 'thefactory-tools'
 
 export type GitService = {
@@ -80,6 +81,10 @@ export type GitService = {
   getFileContent: (projectId: string, path: string, ref: string) => Promise<string>
   resetAll: (projectId: string) => Promise<GitOpResult | undefined>
 
+  addStash: (
+    projectId: string,
+    options: Omit<GitAddStashOptions, 'repoPath'>,
+  ) => Promise<GitListStashesResult | undefined>
   listStashes: (projectId: string) => Promise<GitListStashesResult | undefined>
   applyStash: (
     projectId: string,
