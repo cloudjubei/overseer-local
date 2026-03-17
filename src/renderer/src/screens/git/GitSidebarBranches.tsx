@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import Spinner from '../../components/ui/Spinner'
 import { GitUnifiedBranch, GitStashListItem } from 'thefactory-tools'
 import { BranchChip } from '../../components/ui/BranchChip'
+import { ResizeHandle } from '../../components/ui/ResizeHandle'
 
 function BranchRow({
   branch,
@@ -179,11 +180,11 @@ export function GitSidebarBranches({
         )}
       </div>
 
-      <div
-        className="absolute top-0 bottom-0 -right-[3px] w-[6px] cursor-col-resize z-10 hover:bg-neutral-300/50 dark:hover:bg-neutral-700/50 transition-colors"
-        onPointerDown={onResizeStart}
-        role="separator"
-        aria-orientation="vertical"
+      <ResizeHandle
+        orientation="vertical"
+        className="absolute top-0 bottom-0 -right-[3px] z-10 hover:bg-neutral-300/50 dark:hover:bg-neutral-700/50 transition-colors"
+        hitBoxSize={6}
+        onResizeStart={onResizeStart}
       />
     </div>
   )

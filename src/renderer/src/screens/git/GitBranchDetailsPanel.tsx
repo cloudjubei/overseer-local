@@ -4,6 +4,8 @@ import { Button } from '../../components/ui/Button'
 import { GitUnifiedBranch, GitDiffSummary } from 'thefactory-tools'
 import { gitService } from '@renderer/services/gitService'
 import { GitLocalChanges } from './GitLocalChanges'
+import { ResizeHandle } from '../../components/ui/ResizeHandle'
+import { StructuredUnifiedDiff } from '@renderer/components/chat/tool-popups/diffUtils'
 
 export function GitBranchDetailsPanel({
   projectId,
@@ -35,6 +37,7 @@ export function GitBranchDetailsPanel({
   const [stashLoading, setStashLoading] = useState(false)
   const [stashDiff, setStashDiff] = useState<GitDiffSummary | undefined>(undefined)
   const [stashError, setStashError] = useState<string | undefined>(undefined)
+  const [selectedStashFile, setSelectedStashFile] = useState<string | null>(null)
 
   // Vertical resizer for branch view: top graph stub / bottom local changes
   const rootRef = useRef<HTMLDivElement | null>(null)
@@ -82,12 +85,14 @@ export function GitBranchDetailsPanel({
     if (!projectId || !selectedStashRef) {
       setStashDiff(undefined)
       setStashError(undefined)
+      setSelectedStashFile(null)
       return
     }
 
     let isMounted = true
     setStashLoading(true)
     setStashError(undefined)
+    setSelectedStashFile(null)
 
     // A stash diff can be obtained by comparing its parent to itself
     gitService
@@ -99,6 +104,9 @@ export function GitBranchDetailsPanel({
       .then((diff) => {
         if (!isMounted) return
         setStashDiff(diff)
+        if (diff.files.length > 0) {
+          setSelectedStashFile(diff.files[0].path)
+        }
       })
       .catch((err) => {
         if (!isMounted) return
@@ -114,33 +122,33 @@ export function GitBranchDetailsPanel({
     }
   }, [projectId, selectedStashRef])
 
-  const handleApplyStash = async () => {
-    if (!projectId || !selectedStashRef) return
-    try {
-      const res = await gitService.applyStash(projectId, { stashRef: selectedStashRef })
-      if (!res?.ok) {
-        alert(`Apply stash failed: ${res?.error || 'Unknown error'}`)
-      } else {
-        onRefresh()
-      }
-    } catch (e: any) {
-      alert(`Apply stash failed: ${e?.message}`)
+  // Split-pane layout for Stash Details
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [leftWidth, setLeftWidth] = useState(300)
+  const stashResizeRef = useRef<{ startX: number; startW: number } | null>(null)
+
+  const onStashResizeStart = (e: React.PointerEvent) => {
+    e.preventDefault()
+    ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
+    stashResizeRef.current = { startX: e.clientX, startW: leftWidth }
+
+    const onMove = (ev: PointerEvent) => {
+      const st = stashResizeRef.current
+      if (!st) return
+      const dx = ev.clientX - st.startX
+      const newW = st.startW + dx
+      setLeftWidth(Math.max(150, Math.min(newW, 600)))
     }
+    const onUp = () => {
+      stashResizeRef.current = null
+      window.removeEventListener('pointermove', onMove)
+      window.removeEventListener('pointerup', onUp)
+    }
+    window.addEventListener('pointermove', onMove)
+    window.addEventListener('pointerup', onUp)
   }
 
-  const handleDeleteStash = async () => {
-    if (!projectId || !selectedStashRef) return
-    try {
-      const res = await gitService.removeStash(projectId, { stashRef: selectedStashRef })
-      if (!res?.ok) {
-        alert(`Delete stash failed: ${res?.error || 'Unknown error'}`)
-      } else {
-        onRefresh()
-      }
-    } catch (e: any) {
-      alert(`Delete stash failed: ${e?.message}`)
-    }
-  }
+  const activeStashFile = stashDiff?.files.find((f) => f.path === selectedStashFile)
 
   return (
     <div className="flex-1 min-w-0 flex flex-col min-h-0" ref={rootRef}>
@@ -174,16 +182,12 @@ export function GitBranchDetailsPanel({
               </div>
 
               {/* Resize handle */}
-              <div
-                className="relative h-1 cursor-row-resize group flex-shrink-0 z-10"
-                role="separator"
-                aria-orientation="horizontal"
-                aria-label="Resize commit graph"
-                onPointerDown={onTopResizeStart}
-              >
-                <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-px bg-neutral-200 dark:bg-neutral-800" />
-                <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-14 h-1.5 rounded bg-neutral-300/60 dark:bg-neutral-700/60 opacity-0 group-hover:opacity-100 transition-opacity" />
-              </div>
+              <ResizeHandle
+                orientation="horizontal"
+                className="relative z-10"
+                onResizeStart={onTopResizeStart}
+                hitBoxSize={4}
+              />
 
               {/* Bottom local changes (existing staged/unstaged + preview with resizer) */}
               <div className="flex-1 min-h-0 overflow-hidden flex flex-col w-full">
@@ -221,16 +225,11 @@ export function GitBranchDetailsPanel({
           )
         ) : selectedStashRef ? (
           <div className="flex flex-col h-full min-h-0">
-            <div className="flex items-center gap-2 p-3 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900/40">
-              <Button variant="primary" onClick={handleApplyStash} disabled={stashLoading}>
-                Apply Stash
-              </Button>
-              <Button variant="secondary" onClick={handleDeleteStash} disabled={stashLoading}>
-                Delete Stash
-              </Button>
+            <div className="p-3 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900/40 font-medium text-sm text-neutral-800 dark:text-neutral-200">
+              Stash: {selectedStashRef}
             </div>
 
-            <div className="flex-1 min-h-0 overflow-auto">
+            <div className="flex-1 min-h-0" ref={containerRef}>
               {stashLoading ? (
                 <div className="p-4 flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-300">
                   <Spinner /> Loading stash details…
@@ -238,26 +237,58 @@ export function GitBranchDetailsPanel({
               ) : stashError ? (
                 <div className="p-4 text-sm text-red-700 dark:text-red-200">Failed to load stash: {stashError}</div>
               ) : stashDiff ? (
-                <div className="flex flex-col min-h-0 h-full">
-                  <div className="bg-neutral-100 dark:bg-neutral-800/50 px-3 py-2 border-b border-neutral-200 dark:border-neutral-800 text-xs font-semibold text-neutral-700 dark:text-neutral-200 uppercase tracking-wide">
-                    Files ({stashDiff.files.length})
+                <div className="flex min-h-0 h-full">
+                  <div
+                    className="flex flex-col min-h-0 border-r border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950/50"
+                    style={{ width: leftWidth }}
+                  >
+                    <div className="bg-neutral-100 dark:bg-neutral-800/50 px-3 py-2 border-b border-neutral-200 dark:border-neutral-800 text-xs font-semibold text-neutral-700 dark:text-neutral-200 uppercase tracking-wide">
+                      Files ({stashDiff.files.length})
+                    </div>
+                    <div className="divide-y divide-neutral-200 dark:divide-neutral-800 overflow-auto flex-1 p-1">
+                      {stashDiff.files.map((f, i) => {
+                        const isSelected = f.path === selectedStashFile
+                        return (
+                          <div
+                            key={i}
+                            className={`flex items-center gap-2 px-2 py-1.5 text-xs cursor-pointer rounded-md ${
+                              isSelected
+                                ? 'bg-sky-50 dark:bg-sky-900/25 text-sky-900 dark:text-sky-100'
+                                : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800/50'
+                            }`}
+                            onClick={() => setSelectedStashFile(f.path)}
+                          >
+                            <span className="text-[10px] font-mono px-1 bg-neutral-200/50 dark:bg-neutral-700 rounded text-neutral-600 dark:text-neutral-400">
+                              {f.status}
+                            </span>
+                            <span className="truncate flex-1">{f.path}</span>
+                          </div>
+                        )
+                      })}
+                    </div>
                   </div>
-                  <div className="divide-y divide-neutral-200 dark:divide-neutral-800 overflow-auto flex-1">
-                    {stashDiff.files.map((f, i) => (
-                      <div key={i} className="px-3 py-2">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-[10px] font-mono px-1 bg-neutral-200/50 dark:bg-neutral-700 rounded text-neutral-600 dark:text-neutral-400">
-                            {f.status}
-                          </span>
-                          <span className="text-sm text-neutral-800 dark:text-neutral-200">{f.path}</span>
+                  
+                  <ResizeHandle orientation="vertical" onResizeStart={onStashResizeStart} />
+                  
+                  <div className="flex-1 min-w-0 flex flex-col min-h-0 bg-white dark:bg-neutral-900">
+                    {activeStashFile ? (
+                      activeStashFile.patch ? (
+                        <div className="flex-1 min-h-0 overflow-auto">
+                          <StructuredUnifiedDiff
+                            patch={activeStashFile.patch}
+                            intraline="word"
+                          />
                         </div>
-                        {f.patch && (
-                          <pre className="mt-2 text-[11px] font-mono whitespace-pre-wrap break-all text-neutral-600 dark:text-neutral-400 bg-neutral-50 dark:bg-neutral-900 p-2 rounded overflow-auto max-h-64 border border-neutral-200 dark:border-neutral-800">
-                            {f.patch}
-                          </pre>
-                        )}
+                      ) : (
+                        <div className="p-4 text-sm text-neutral-600 dark:text-neutral-400 flex items-center justify-center h-full">
+                          No diff available (possibly binary or identical).
+                        </div>
+                      )
+                    ) : (
+                      <div className="p-4 text-sm text-neutral-600 dark:text-neutral-400 flex items-center justify-center h-full">
+                        Select a file to view its diff.
                       </div>
-                    ))}
+                    )}
                   </div>
                 </div>
               ) : null}

@@ -2,6 +2,7 @@ import React, { useMemo, useRef, useState, useEffect } from 'react'
 import ChatSidebar from './ChatSidebar'
 import type { ChatContext } from 'thefactory-tools'
 import { IconChevron, IconChat } from '../ui/icons/Icons'
+import { ResizeHandle } from '../ui/ResizeHandle'
 
 export default function ChatSidebarPanel({
   isOpen = true,
@@ -123,28 +124,12 @@ export default function ChatSidebarPanel({
       role="complementary"
       aria-label="Chat sidebar"
     >
-      <div
-        onPointerDown={onResizeStart}
-        className="absolute left-0 top-0 bottom-0 w-5 cursor-col-resize group"
-        role="separator"
-        aria-orientation="vertical"
-        aria-label="Resize chat sidebar"
-        style={{ zIndex: 10 }}
-      >
-        <div
-          className="absolute left-0 top-1/2 -translate-y-1/2 flex items-center justify-start"
-          style={{ width: 34, height: 56 }}
-          aria-hidden
-        >
-          <div className="h-full w-[14px] rounded-r-md bg-teal-500/20 border border-teal-500 shadow-md">
-            <div className="h-full w-full flex flex-row items-center justify-center gap-[3px]">
-              <div className="w-[2px] h-[30px] rounded-sm bg-teal-600" />
-              <div className="w-[2px] h-[30px] rounded-sm bg-teal-600" />
-              <div className="w-[2px] h-[30px] rounded-sm bg-teal-600" />
-            </div>
-          </div>
-        </div>
-      </div>
+      <ResizeHandle
+        orientation="vertical"
+        className="absolute left-0 top-0 bottom-0 z-10"
+        hitBoxSize={20}
+        onResizeStart={onResizeStart}
+      />
 
       <div style={innerStyle}>
         <ChatSidebar

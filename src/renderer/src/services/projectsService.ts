@@ -20,6 +20,7 @@ export type ProjectsService = {
   ) => Promise<ProjectSpec | undefined>
   deleteProject: (projectId: string) => Promise<void>
   reorderStory: (projectId: string, payload: ReorderPayload) => Promise<ProjectSpec | undefined>
+  selectDirectory: () => Promise<string | null>
 }
 
 export const projectsService: ProjectsService = { ...window.projectsService }

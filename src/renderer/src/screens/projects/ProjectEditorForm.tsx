@@ -13,21 +13,25 @@ import {
 } from '@renderer/components/ui/Select'
 import { useProjectsGroups } from '@renderer/contexts/ProjectsGroupsContext'
 import { Modal } from '@renderer/components/ui/Modal'
+import { Button } from '@renderer/components/ui/Button'
 
-function TextInput({ label, value, onChange, placeholder, disabled, inputRef }: any) {
+function TextInput({ label, value, onChange, placeholder, disabled, inputRef, action }: any) {
   const id = React.useId()
   return (
     <div className="form-row">
       <label htmlFor={id}>{label}</label>
-      <input
-        ref={inputRef}
-        id={id}
-        className="ui-input"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        disabled={disabled}
-      />
+      <div className="flex gap-2 w-full">
+        <input
+          ref={inputRef}
+          id={id}
+          className="ui-input flex-1"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          disabled={disabled}
+        />
+        {action}
+      </div>
     </div>
   )
 }
@@ -213,10 +217,24 @@ export function ProjectEditorForm({
         placeholder="Short description"
       />
       <TextInput
-        label="Path (under projects/)"
+        label="Local Path"
         value={form.path}
         onChange={(v: string) => setForm((s: any) => ({ ...s, path: v }))}
-        placeholder="my-project"
+        placeholder="/absolute/path/to/project"
+        action={
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={async () => {
+              const p = await window.projectsService.selectDirectory()
+              if (p) {
+                setForm((s: any) => ({ ...s, path: p }))
+              }
+            }}
+          >
+            Browse...
+          </Button>
+        }
       />
       <TextInput
         label="Repository URL"

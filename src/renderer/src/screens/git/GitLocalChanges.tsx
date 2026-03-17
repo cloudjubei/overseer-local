@@ -4,6 +4,7 @@ import Tooltip from '@renderer/components/ui/Tooltip'
 import { gitService } from '@renderer/services/gitService'
 import { filesService } from '@renderer/services/filesService'
 import { StructuredUnifiedDiff, IntraMode } from '@renderer/components/chat/tool-popups/diffUtils'
+import { ResizeHandle } from '@renderer/components/ui/ResizeHandle'
 import {
   IconDelete,
   IconRefresh,
@@ -667,36 +668,17 @@ export const GitLocalChanges = forwardRef<GitLocalChangesRef, GitLocalChangesPro
             )}
           </div>
           {/* Horizontal resizer with visible divider and cursor handle under mouse */}
-          <div
-            className="relative h-2 cursor-row-resize group flex-shrink-0 border-y border-neutral-200 dark:border-neutral-800"
-            role="separator"
-            aria-orientation="horizontal"
-            aria-label="Resize staged/unstaged"
-            onPointerDown={onHorResizeStart}
+          <ResizeHandle
+            orientation="horizontal"
+            className="relative z-10 border-y border-neutral-200 dark:border-neutral-800"
+            hitBoxSize={8}
+            onResizeStart={onHorResizeStart}
+            handlePos={horHandleX ?? undefined}
             onMouseMove={(e) => {
               const r = (e.currentTarget as HTMLDivElement).getBoundingClientRect()
               setHorHandleX(e.clientX - r.left)
             }}
-          >
-            <div className="absolute inset-x-0 top-0 bottom-0" />
-            <div
-              className="absolute opacity-0 group-hover:opacity-100 transition-opacity"
-              style={{
-                width: 48,
-                height: 8,
-                left: (horHandleX ?? 24) - 24,
-                top: '50%',
-                transform: 'translateY(-50%)',
-              }}
-              aria-hidden
-            >
-              <div className="h-full w-full rounded bg-teal-500/20 border border-teal-500 shadow">
-                <div className="h-full w-full flex items-center justify-center gap-[6px]">
-                  <div className="w-[24px] h-[2px] rounded-sm bg-teal-600" />
-                </div>
-              </div>
-            </div>
-          </div>
+          />
           {/* Unstaged header */}
           <div
             ref={unstagedHeaderRef}
@@ -769,39 +751,18 @@ export const GitLocalChanges = forwardRef<GitLocalChangesRef, GitLocalChangesPro
         </div>
 
         {/* Vertical Divider with handle under cursor */}
-        <div
-          className="group absolute top-0 bottom-0 z-10"
-          style={{ left: leftWidth - 6, width: 12, cursor: 'col-resize' }}
-          onPointerDown={onVertResizeStart}
+        <ResizeHandle
+          orientation="vertical"
+          className="absolute top-0 bottom-0 z-10"
+          style={{ left: leftWidth - 6 }}
+          hitBoxSize={12}
+          onResizeStart={onVertResizeStart}
+          handlePos={vertHandleY ?? undefined}
           onMouseMove={(e) => {
             const r = (e.currentTarget as HTMLDivElement).getBoundingClientRect()
             setVertHandleY(e.clientY - r.top)
           }}
-          role="separator"
-          aria-orientation="vertical"
-          aria-label="Resize panels"
-        >
-          <div className="absolute inset-y-0 left-0 right-0" />
-          <div
-            className="absolute opacity-0 group-hover:opacity-100 transition-opacity"
-            style={{
-              width: 16,
-              height: 48,
-              left: '50%',
-              transform: 'translateX(-50%)',
-              top: (vertHandleY ?? 24) - 24,
-            }}
-            aria-hidden
-          >
-            <div className="h-full w-full rounded bg-teal-500/20 border border-teal-500 shadow">
-              <div className="h-full w-full flex items-center justify-center gap-[3px]">
-                <div className="w-[2px] h-[24px] rounded-sm bg-teal-600" />
-                <div className="w-[2px] h-[24px] rounded-sm bg-teal-600" />
-                <div className="w-[2px] h-[24px] rounded-sm bg-teal-600" />
-              </div>
-            </div>
-          </div>
-        </div>
+        />
 
         {/* Right panel */}
         <div className="min-w-0 min-h-0 flex flex-col h-full" style={{ width: rightWidth }}>

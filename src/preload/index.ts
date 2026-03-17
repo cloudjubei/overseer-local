@@ -188,6 +188,7 @@ const PROJECTS_API = {
   deleteProject: (projectId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTS_DELETE, { projectId }),
   reorderStory: (projectId, payload) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTS_STORY_REORDER, { projectId, payload }),
+  selectDirectory: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTS_SELECT_DIRECTORY),
 }
 
 const PROJECTSGROUPS_API = {

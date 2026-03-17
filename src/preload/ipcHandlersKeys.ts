@@ -7,6 +7,7 @@ const IPC_HANDLER_KEYS = {
   PROJECTS_UPDATE: 'projects:update',
   PROJECTS_DELETE: 'projects:delete',
   PROJECTS_STORY_REORDER: 'projects:reorder-story',
+  PROJECTS_SELECT_DIRECTORY: 'projects:select-directory',
 
   // ProjectsGroups
   PROJECTSGROUPS_SUBSCRIBE: 'projectsgroups:subscribe',

@@ -87,12 +87,12 @@ type InternalStoryUpdate = {
   projectId: string
   isDelete: boolean
   story: Story | undefined
-  project: ProjectSpec | undefined
 }
 
 export function StoriesProvider({ children }: { children: React.ReactNode }) {
   const {
     activeProject,
+    projects,
     reorderStory: reorderProjectStory,
     getStoryDisplayIndex,
   } = useProjectContext()
@@ -101,10 +101,29 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
   const [storiesById, setStoriesById] = useState<Record<string, Story>>({})
   const [featuresById, setFeaturesById] = useState<Record<string, Feature>>({})
   const [blockersOutboundById, _] = useState<Record<string, ResolvedRef[]>>({})
-  const [storyDisplayToId, setStoryDisplayToId] = useState<Record<string, string>>({})
-  const [featureDisplayToIdByStory, setFeatureDisplayToIdByStory] = useState<
-    Record<string, Record<string, string>>
-  >({})
+
+  // Compute display index mappings directly from all projects and stories
+  const storyDisplayToId = useMemo(() => {
+    const mapping: Record<string, string> = {}
+    projects.forEach(project => {
+      project.storyIds.forEach((storyId, idx) => {
+        mapping[`${idx + 1}`] = storyId
+      })
+    })
+    return mapping
+  }, [projects])
+
+  const featureDisplayToIdByStory = useMemo(() => {
+    const mapping: Record<string, Record<string, string>> = {}
+    Object.values(storiesById).forEach(story => {
+      const featureMap: Record<string, string> = {}
+      story.features.forEach((feature, idx) => {
+        featureMap[`${idx}`] = feature.id
+      })
+      mapping[story.id] = featureMap
+    })
+    return mapping
+  }, [storiesById])
 
   const getFeatureDisplayIndex = useCallback(
     (storyId: string, featureId: string): number | undefined => {
@@ -122,12 +141,8 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
       const newStoryIdsByProject: Record<string, string[]> = { ...storyIdsByProject }
       const newStoriesById: Record<string, Story> = { ...storiesById }
       const newFeaturesById: Record<string, Feature> = { ...featuresById }
-      const newStoryDisplayToId: Record<string, string> = { ...storyDisplayToId }
-      const newFeatureDisplayToIdByStory: Record<string, Record<string, string>> = {
-        ...featureDisplayToIdByStory,
-      }
 
-      for (const { storyId, projectId, isDelete, story, project } of stories) {
+      for (const { storyId, projectId, isDelete, story } of stories) {
         const currentStoryIds = (newStoryIdsByProject[projectId] ?? []).filter((s) => s !== storyId)
         newStoryIdsByProject[projectId] = isDelete ? currentStoryIds : [...currentStoryIds, storyId]
 
@@ -135,46 +150,22 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
         if (!isDelete && story) {
           newStoriesById[storyId] = story!
         }
-        if (project) {
-          let index: number | undefined
-          const idx = project.storyIds.indexOf(storyId)
-          if (idx !== -1) {
-            index = idx + 1
-            const sDisplay = `${index}`
-            delete newStoryDisplayToId[sDisplay]
-            if (!isDelete) {
-              newStoryDisplayToId[sDisplay] = storyId
-            }
-          }
-        }
-        delete newFeatureDisplayToIdByStory[storyId]
-        const featureMap: Record<string, string> = {}
+        
         if (story) {
-          let i = 0
           for (const f of story.features) {
             delete newFeaturesById[f.id]
             if (!isDelete) {
               newFeaturesById[f.id] = f
-              let fIndex = i++
-              if (fIndex !== undefined) {
-                const fDisplay = `${fIndex}`
-                featureMap[fDisplay] = f.id
-              }
             }
           }
-        }
-        if (!isDelete) {
-          newFeatureDisplayToIdByStory[storyId] = featureMap
         }
       }
 
       setStoryIdsByProject(newStoryIdsByProject)
       setStoriesById(newStoriesById)
       setFeaturesById(newFeaturesById)
-      setStoryDisplayToId(newStoryDisplayToId)
-      setFeatureDisplayToIdByStory(newFeatureDisplayToIdByStory)
     },
-    [storyIdsByProject, storiesById, featuresById, storyDisplayToId, featureDisplayToIdByStory],
+    [storyIdsByProject, storiesById, featuresById],
   )
 
   const onStoryUpdate = useCallback(
@@ -183,21 +174,20 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
       const projectId = storyUpdate.projectId
       const isDelete = storyUpdate.type === 'delete'
       const story = storyUpdate.story
-      const project = await projectsService.getProject(storyUpdate.projectId)
-
-      updateStories([{ storyId, projectId, isDelete, story, project }])
+      
+      updateStories([{ storyId, projectId, isDelete, story }])
     },
     [updateStories],
   )
   const update = async () => {
-    const projects = await projectsService.listProjects()
+    const projectsList = await projectsService.listProjects()
     const updates: InternalStoryUpdate[] = []
-    for (const project of projects) {
+    for (const project of projectsList) {
       const projectId = project.id
       try {
         const stories = await storiesService.listStories(projectId)
         for (const story of stories) {
-          updates.push({ storyId: story.id, projectId, isDelete: false, story, project })
+          updates.push({ storyId: story.id, projectId, isDelete: false, story })
         }
       } catch (e) {
         console.error('StoriesContext update error: ', e)
@@ -225,7 +215,7 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
         dependency,
       )
     },
-    [activeProject, storyDisplayToId, featureDisplayToIdByStory, storiesById, featuresById],
+    [activeProject, storyDisplayToId, featureDisplayToIdByStory, storiesById],
   )
 
   const resolveDependency = useCallback(
@@ -299,7 +289,6 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
             projectId: activeProject.id,
             isDelete: false,
             story,
-            project: activeProject,
           },
         ])
       }
@@ -324,7 +313,6 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
               projectId: activeProject.id,
               isDelete: false,
               story: s,
-              project: activeProject,
             },
           ])
         }
@@ -344,7 +332,6 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
               projectId: activeProject.id,
               isDelete: false,
               story: s,
-              project: activeProject,
             },
           ])
         }
@@ -364,7 +351,6 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
             projectId: activeProject.id,
             isDelete: true,
             story: undefined,
-            project: activeProject,
           },
         ])
       }
@@ -387,7 +373,6 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
               projectId: activeProject.id,
               isDelete: false,
               story: s,
-              project: activeProject,
             },
           ])
         }
@@ -421,7 +406,6 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
               projectId: activeProject.id,
               isDelete: false,
               story: s,
-              project: activeProject,
             },
           ])
         }
@@ -442,7 +426,6 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
               projectId: activeProject.id,
               isDelete: false,
               story: s,
-              project: activeProject,
             },
           ])
         }
@@ -463,7 +446,6 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
               projectId: activeProject.id,
               isDelete: false,
               story: s,
-              project: activeProject,
             },
           ])
         }

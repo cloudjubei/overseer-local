@@ -1,3 +1,4 @@
+import { dialog } from 'electron'
 import type { BrowserWindow } from 'electron'
 import IPC_HANDLER_KEYS from '../../preload/ipcHandlersKeys'
 import {
@@ -40,6 +41,15 @@ export default class ProjectsManager extends BaseManager {
       this.tools.deleteProject(projectId)
     handlers[IPC_HANDLER_KEYS.PROJECTS_STORY_REORDER] = async ({ projectId, payload }) =>
       this.reorderStory(projectId, payload)
+    handlers[IPC_HANDLER_KEYS.PROJECTS_SELECT_DIRECTORY] = async () => {
+      const result = await dialog.showOpenDialog(this.window, {
+        properties: ['openDirectory', 'createDirectory']
+      })
+      if (result.canceled || result.filePaths.length === 0) {
+        return null
+      }
+      return result.filePaths[0]
+    }
 
     return handlers
   }
