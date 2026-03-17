@@ -6,7 +6,8 @@ import { storiesService } from '../services/storiesService'
 import { useGitHubCredentials } from './GitHubCredentialsContext'
 import { useProjectContext } from './ProjectContext'
 import { chatsService } from '../services/chatsService'
-import { useChats } from './ChatsContext'
+// import { useChats } from './ChatsContext'
+import { useChats } from './chats/ChatsContext'
 import { notificationsService } from '../services/notificationsService'
 
 export type AgentsContextValue = {

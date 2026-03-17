@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useChats } from '@renderer/contexts/ChatsContext'
+// import { useChats } from '@renderer/contexts/ChatsContext'
+import { useChats } from '@renderer/contexts/chats/ChatsContext'
 import type { ChatContext, CompletionMessage } from 'thefactory-tools'
 import { getChatContextKey } from 'thefactory-tools/utils'
 

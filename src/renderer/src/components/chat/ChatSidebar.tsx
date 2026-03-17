@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useLLMConfig } from '../../contexts/LLMConfigContext'
 import { useNavigator } from '../../navigation/Navigator'
-import { useChats, type ChatState } from '../../contexts/ChatsContext'
+// import { useChats, type ChatState } from '../../contexts/ChatsContext'
+import { useChats } from '../../contexts/chats/ChatsContext'
+import { type ChatState } from '../../contexts/chats/ChatsTypes'
 import { ChatInput, MessageList } from '.'
 import { playSendSound, tryResumeAudioContext } from '../../assets/sounds'
 import type {

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useChats } from '@renderer/contexts/ChatsContext'
+// import { useChats } from '@renderer/contexts/ChatsContext'
+import { useChats } from '@renderer/contexts/chats/ChatsContext'
 
 type SelectionPatch = { selectionStart?: number; selectionEnd?: number }
 

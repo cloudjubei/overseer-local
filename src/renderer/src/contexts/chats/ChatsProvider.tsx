@@ -1,14 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import type {
-  ChatContext,
-  ChatContextArguments,
-  ChatsSettings,
-  ChatSettings,
-  CompletionSettings,
-  LLMConfig,
-  ChatUpdate,
-  CompletionMessage,
-} from 'thefactory-tools'
+import type { ChatContext, ChatUpdate, CompletionMessage, LLMConfig, ChatSettings } from 'thefactory-tools'
 import { getChatContextKey } from 'thefactory-tools/utils'
 
 import { chatsService } from '@renderer/services/chatsService'
@@ -19,7 +10,8 @@ import { useActiveProject } from '@renderer/contexts/ProjectContext'
 
 import type { ChatsContextValue, ChatState } from './ChatsTypes'
 import { useChatDrafts } from './ChatsDrafts'
-import { extractSettingsForContext } from './ChatsSettings'
+import { useChatSettings } from './ChatsSettings'
+import { getNotificationTitleForContext } from './ChatsUtils'
 import { ChatsContext } from './ChatsContext'
 
 const DELETED_TOMBSTONE_TTL_MS = 5000
@@ -27,10 +19,20 @@ const DELETED_TOMBSTONE_TTL_MS = 5000
 export function ChatsProvider({ children }: { children: React.ReactNode }) {
   const { projectId } = useActiveProject()
   const { getDraft, setDraft, clearDraft } = useChatDrafts()
+  const {
+    allChatSettings,
+    setAllChatSettings,
+    getSettings,
+    getDefaultPrompt,
+    getSettingsPrompt,
+    updateSettingsPrompt,
+    resetSettingsPrompt,
+    updateCompletionSettings,
+    resetSettings,
+  } = useChatSettings()
 
   const [chats, setChats] = useState<Record<string, ChatState>>({})
   const [chatsByProjectId, setChatsByProjectId] = useState<Record<string, ChatState[]>>({})
-  const [allChatSettings, setAllChatSettings] = useState<ChatsSettings | undefined>(undefined)
 
   // Track last assistant message index we've notified for each chat key.
   const lastAssistantNotifiedRef = useRef<Record<string, number>>({})
@@ -124,7 +126,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
     [upsertChatsByProject],
   )
 
-  // --- settings + initial load (legacy parity) ---
+  // --- initial load (legacy parity) ---
   useEffect(() => {
     const loadAll = async () => {
       try {
@@ -182,12 +184,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
     }
 
     void loadAll()
-  }, [])
-
-  const getSettings = useCallback(
-    (context: ChatContext) => extractSettingsForContext(allChatSettings, context),
-    [allChatSettings],
-  )
+  }, [setAllChatSettings])
 
   // --- chat lifecycle ---
   const getChatIfExists = useCallback(
@@ -428,88 +425,6 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
     [projectId, getChat, updateChatState],
   )
 
-  // --- prompts ---
-  const getDefaultPrompt = useCallback(async (chatContext: ChatContext): Promise<string> => {
-    try {
-      return await chatsService.getDefaultPrompt(chatContext)
-    } catch (e) {
-      console.error('Failed to get default prompt', e)
-      return ''
-    }
-  }, [])
-
-  const getSettingsPrompt = useCallback(
-    async (contextArguments: ChatContextArguments): Promise<string> => {
-      try {
-        return await chatsService.getSettingsPrompt(contextArguments)
-      } catch (e) {
-        console.error('Failed to get settings prompt', e)
-        return ''
-      }
-    },
-    [],
-  )
-
-  const updateSettingsPrompt = useCallback(
-    async (context: ChatContext, prompt: string): Promise<string | undefined> => {
-      try {
-        const updated = await chatsService.updateSettingsPrompt(context, prompt)
-        setAllChatSettings(updated)
-        return extractSettingsForContext(updated, context)?.systemPrompt
-      } catch (e) {
-        console.error('Failed to update settings prompt', e)
-      }
-      return undefined
-    },
-    [],
-  )
-
-  const resetSettingsPrompt = useCallback(
-    async (context: ChatContext): Promise<string | undefined> => {
-      try {
-        const updated = await chatsService.resetSettingsPrompt(context)
-        setAllChatSettings(updated)
-        return extractSettingsForContext(updated, context)?.systemPrompt
-      } catch (e) {
-        console.error('Failed to reset settings prompt', e)
-      }
-      return undefined
-    },
-    [],
-  )
-
-  // --- completion settings ---
-  const updateCompletionSettings = useCallback(
-    async (
-      context: ChatContext,
-      patch: Partial<CompletionSettings>,
-    ): Promise<ChatSettings | undefined> => {
-      try {
-        const updated = await chatsService.updateChatCompletionSettings(context, patch)
-        setAllChatSettings(updated)
-        return extractSettingsForContext(updated, context)
-      } catch (e) {
-        console.error('Failed to update chat settings', e)
-        return extractSettingsForContext(allChatSettings, context)
-      }
-    },
-    [allChatSettings],
-  )
-
-  const resetSettings = useCallback(
-    async (context: ChatContext): Promise<ChatSettings | undefined> => {
-      try {
-        const updated = await chatsService.resetChatSettings(context)
-        setAllChatSettings(updated)
-        return extractSettingsForContext(updated, context)
-      } catch (e) {
-        console.error('Failed to reset chat settings', e)
-        return extractSettingsForContext(allChatSettings, context)
-      }
-    },
-    [allChatSettings],
-  )
-
   // --- subscription (legacy parity) ---
   useEffect(() => {
     const unsubscribe = chatsService.subscribe((chatUpdate: ChatUpdate) => {
@@ -522,7 +437,6 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
           const existing = newChats[key]
           if (existing) removeFromChatsByProject(existing)
 
-          // Short-lived tombstone to prevent immediate late-update resurrection.
           markDeleted(key)
 
           try {
@@ -583,7 +497,6 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
         }
 
         if (chatUpdate.type === 'change') {
-          // If this key was deleted very recently, ignore late updates.
           if (isTombstoned(key)) {
             return newChats
           }
@@ -643,38 +556,18 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
               if (isLatestAssistant && lastAssistantIdx > baseline) {
                 lastAssistantNotifiedRef.current[key] = lastAssistantIdx
 
-                const ctx = chatUpdate.context
-                let title = 'New assistant message'
-                switch (ctx.type) {
-                  case 'PROJECT':
-                    title = 'Project chat update'
-                    break
-                  case 'STORY':
-                    title = 'Story chat update'
-                    break
-                  case 'FEATURE':
-                    title = 'Feature chat update'
-                    break
-                  case 'PROJECT_TOPIC':
-                  case 'STORY_TOPIC':
-                    title = 'Topic chat update'
-                    break
-                  case 'AGENT_RUN':
-                  case 'AGENT_RUN_FEATURE':
-                    title = 'Agent run chat update'
-                    break
-                }
+                const title = getNotificationTitleForContext(chatUpdate.context)
 
                 const raw = String((msgs[lastAssistantIdx] as any)?.content || '')
                 const snippet = raw.replace(/\s+/g, ' ').slice(0, 120)
                 const message = snippet || 'Assistant responded'
 
-                const actionUrl = `#chats${getChatContextKey(ctx)}`
+                const actionUrl = `#chats${getChatContextKey(chatUpdate.context)}`
 
                 const resolvedPid =
                   chatKeyToProjectIdRef.current[key] ||
                   chatUpdate.chat?.context?.projectId ||
-                  ctx.projectId ||
+                  chatUpdate.context.projectId ||
                   projectId
 
                 if (resolvedPid) {

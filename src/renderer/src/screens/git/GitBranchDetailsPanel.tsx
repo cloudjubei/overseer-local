@@ -1,7 +1,8 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import Spinner from '../../components/ui/Spinner'
 import { Button } from '../../components/ui/Button'
-import { GitUnifiedBranch } from 'thefactory-tools'
+import { GitUnifiedBranch, GitDiffSummary } from 'thefactory-tools'
+import { gitService } from '@renderer/services/gitService'
 
 export function GitBranchDetailsPanel({
   projectId,
@@ -30,6 +31,74 @@ export function GitBranchDetailsPanel({
   onGoProject: () => void
   onOpenMerge: (baseRef: string, headRef: string) => void
 }) {
+  const [stashLoading, setStashLoading] = useState(false)
+  const [stashDiff, setStashDiff] = useState<GitDiffSummary | undefined>(undefined)
+  const [stashError, setStashError] = useState<string | undefined>(undefined)
+
+  useEffect(() => {
+    if (!projectId || !selectedStashRef) {
+      setStashDiff(undefined)
+      setStashError(undefined)
+      return
+    }
+
+    let isMounted = true
+    setStashLoading(true)
+    setStashError(undefined)
+
+    // A stash diff can be obtained by comparing its parent to itself
+    gitService
+      .getBranchDiffSummary(projectId, {
+        baseRef: `${selectedStashRef}^`,
+        headRef: selectedStashRef,
+        includePatch: true,
+      })
+      .then((diff) => {
+        if (!isMounted) return
+        setStashDiff(diff)
+      })
+      .catch((err) => {
+        if (!isMounted) return
+        setStashError(err?.message || 'Failed to load stash diff')
+      })
+      .finally(() => {
+        if (!isMounted) return
+        setStashLoading(false)
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [projectId, selectedStashRef])
+
+  const handleApplyStash = async () => {
+    if (!projectId || !selectedStashRef) return
+    try {
+      const res = await gitService.applyStash(projectId, { stashRef: selectedStashRef })
+      if (!res?.ok) {
+        alert(`Apply stash failed: ${res?.error || 'Unknown error'}`)
+      } else {
+        onRefresh()
+      }
+    } catch (e: any) {
+      alert(`Apply stash failed: ${e?.message}`)
+    }
+  }
+
+  const handleDeleteStash = async () => {
+    if (!projectId || !selectedStashRef) return
+    try {
+      const res = await gitService.removeStash(projectId, { stashRef: selectedStashRef })
+      if (!res?.ok) {
+        alert(`Delete stash failed: ${res?.error || 'Unknown error'}`)
+      } else {
+        onRefresh()
+      }
+    } catch (e: any) {
+      alert(`Delete stash failed: ${e?.message}`)
+    }
+  }
+
   return (
     <div className="flex-1 min-w-0 flex flex-col min-h-0">
       <div className="px-4 py-3 border-b border-neutral-200 dark:border-neutral-800 flex items-center justify-between gap-3">
@@ -46,7 +115,7 @@ export function GitBranchDetailsPanel({
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="secondary" onClick={onRefresh} disabled={loading}>
+          <Button variant="secondary" onClick={onRefresh} disabled={loading || stashLoading}>
             Refresh
           </Button>
           <Button variant="secondary" onClick={onGoProject}>
@@ -109,8 +178,50 @@ export function GitBranchDetailsPanel({
               </div>
             )}
           </div>
+        ) : selectedStashRef ? (
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <Button variant="primary" onClick={handleApplyStash} disabled={stashLoading}>
+                Apply Stash
+              </Button>
+              <Button variant="secondary" onClick={handleDeleteStash} disabled={stashLoading}>
+                Delete Stash
+              </Button>
+            </div>
+
+            {stashLoading ? (
+              <div className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-300">
+                <Spinner /> Loading stash details…
+              </div>
+            ) : stashError ? (
+              <div className="text-sm text-red-700 dark:text-red-200">Failed to load stash: {stashError}</div>
+            ) : stashDiff ? (
+              <div className="rounded border border-neutral-200 dark:border-neutral-800 overflow-hidden">
+                <div className="bg-neutral-50 dark:bg-neutral-900/40 px-3 py-2 border-b border-neutral-200 dark:border-neutral-800 text-xs font-semibold text-neutral-700 dark:text-neutral-200 uppercase tracking-wide">
+                  Files ({stashDiff.files.length})
+                </div>
+                <div className="divide-y divide-neutral-200 dark:divide-neutral-800">
+                  {stashDiff.files.map((f, i) => (
+                    <div key={i} className="px-3 py-2">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-[10px] font-mono px-1 bg-neutral-100 dark:bg-neutral-800 rounded">
+                          {f.status}
+                        </span>
+                        <span className="text-sm text-neutral-800 dark:text-neutral-200">{f.path}</span>
+                      </div>
+                      {f.patch && (
+                        <pre className="text-[11px] font-mono whitespace-pre-wrap break-all text-neutral-600 dark:text-neutral-400 bg-neutral-50 dark:bg-neutral-900 p-2 rounded overflow-auto max-h-64">
+                          {f.patch}
+                        </pre>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+          </div>
         ) : (
-          <div className="text-sm text-neutral-600 dark:text-neutral-300">Select a branch from the sidebar.</div>
+          <div className="text-sm text-neutral-600 dark:text-neutral-300">Select a branch or stash from the sidebar.</div>
         )}
       </div>
     </div>

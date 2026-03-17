@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useChats } from '@renderer/contexts/ChatsContext'
+// import { useChats } from '@renderer/contexts/ChatsContext'
+import { useChats } from '@renderer/contexts/chats/ChatsContext'
 
 export type UseChatThinking = {
   thinkingKeys: Set<string>

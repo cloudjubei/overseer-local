@@ -2,7 +2,8 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { ChatSidebar } from '@renderer/components/chat'
 import { useProjectContext, useActiveProject } from '@renderer/contexts/ProjectContext'
 import { useStories } from '@renderer/contexts/StoriesContext'
-import { useChats } from '@renderer/contexts/ChatsContext'
+// import { useChats } from '@renderer/contexts/ChatsContext'
+import { useChats } from '@renderer/contexts/chats/ChatsContext'
 import type {
   ChatContext,
   ChatContextAgentRun,

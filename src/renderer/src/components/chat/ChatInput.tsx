@@ -536,7 +536,9 @@ export default function ChatInput({
               <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 flex items-center justify-center">
                 {!isThinking ? (
                   <button
-                    onClick={handleSend}
+                    onClick={() => {
+                      handleSend()
+                    }}
                     className="btn-icon"
                     disabled={!canSend}
                     aria-label="Send message"

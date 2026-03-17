@@ -5,7 +5,7 @@ import Tooltip from '../../components/ui/Tooltip'
 import { IconFastMerge } from '../../components/ui/icons/IconFastMerge'
 import { IconDelete } from '../../components/ui/icons/IconDelete'
 import { IconCommit } from '../../components/ui/icons/IconCommit'
-import { GitUnifiedBranch } from 'thefactory-tools'
+import { GitUnifiedBranch, GitStashListItem } from 'thefactory-tools'
 
 function Pill({
   label,
@@ -138,6 +138,7 @@ export function GitSidebarBranches({
   loading,
   error,
   localBranches,
+  stashes,
   current,
   others,
   selectedBranchName,
@@ -156,6 +157,7 @@ export function GitSidebarBranches({
   loading: boolean
   error?: string
   localBranches: GitUnifiedBranch[]
+  stashes?: GitStashListItem[]
   current?: GitUnifiedBranch
   others: GitUnifiedBranch[]
   selectedBranchName?: string
@@ -169,9 +171,6 @@ export function GitSidebarBranches({
   onDelete: (branchName: string) => void
   onSwitch: (branchName: string) => void
 }) {
-  // Stashes are not yet implemented in backend/service in this repo.
-  const stashes: Array<{ ref: string; title: string; date?: string }> = []
-
   return (
     <div className="w-[280px] shrink-0 border-r border-neutral-200 dark:border-neutral-800 flex flex-col min-h-0">
       <div className="px-3 py-3 border-b border-neutral-200 dark:border-neutral-800">
@@ -230,7 +229,7 @@ export function GitSidebarBranches({
               />
             ))}
 
-            {stashes.length ? (
+            {stashes && stashes.length > 0 ? (
               <>
                 <div className="px-2 pt-3 pb-1 text-[10px] uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
                   Stashes
@@ -247,7 +246,7 @@ export function GitSidebarBranches({
                     onClick={() => onSelectStash(s.ref)}
                   >
                     <div className="min-w-0 flex-1">
-                      <div className="text-sm font-medium text-neutral-800 dark:text-neutral-100 truncate">{s.title}</div>
+                      <div className="text-sm font-medium text-neutral-800 dark:text-neutral-100 truncate">{s.message}</div>
                       <div className="text-[11px] text-neutral-500 dark:text-neutral-400 truncate">{s.ref}</div>
                     </div>
                   </div>

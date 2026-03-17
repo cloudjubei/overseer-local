@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { gitService } from '../services/gitService'
 import { useProjectContext } from './ProjectContext'
-import { GitCommitInfo, GitBranchEvent, GitUnifiedBranch } from 'thefactory-tools'
+import { GitCommitInfo, GitBranchEvent, GitUnifiedBranch, GitStashListItem } from 'thefactory-tools'
 import { notificationsService } from '../services/notificationsService'
 
 export type PendingBranch = {
@@ -32,6 +32,7 @@ export type UnifiedBranchesState = {
   loading: boolean
   error?: string
   branches: GitUnifiedBranch[]
+  stashes?: GitStashListItem[]
   // Divergence of each branch against the current branch (by effective headRef key)
   relToCurrent?: Record<string, { ahead: number; behind: number }>
 }
@@ -318,6 +319,7 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
       reloadTimersRef.current[projectId] = t as any
     } catch {}
   }
+
   useEffect(() => {
     const unsubscribe = gitService.subscribeToMonitorUpdates(onMonitorUpdate)
     return () => {
@@ -354,10 +356,15 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
       if (!pid) return
       setUnifiedByProject((prev) => ({
         ...prev,
-        [pid]: { ...(prev[pid] || { branches: [] }), loading: true, error: undefined },
+        [pid]: { ...(prev[pid] || { branches: [], stashes: [] }), loading: true, error: undefined },
       }))
       try {
-        const list = await gitService.listUnifiedBranches(pid)
+        const [list, stashRes] = await Promise.all([
+          gitService.listUnifiedBranches(pid),
+          gitService.listStashes(pid).catch(() => ({ stashes: [] }))
+        ])
+        
+        const stashes = stashRes?.stashes || []
 
         const current = list.find((b) => b.current)
         const currentName = current?.name
@@ -400,7 +407,7 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
         const sorted = sortUnifiedBranches(hydrated)
         setUnifiedByProject((prev) => ({
           ...prev,
-          [pid]: { loading: false, error: undefined, branches: sorted, relToCurrent },
+          [pid]: { loading: false, error: undefined, branches: sorted, stashes, relToCurrent },
         }))
       } catch (e) {
         setUnifiedByProject((prev) => ({
@@ -409,6 +416,7 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
             loading: false,
             error: (e as any)?.message || 'Failed to list branches',
             branches: [],
+            stashes: [],
             relToCurrent: {},
           },
         }))
@@ -483,6 +491,7 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
           (pid && unifiedByProject[pid]) || {
             loading: false,
             branches: [],
+            stashes: [],
             error: pid ? undefined : 'No active project',
           }
         )

@@ -29,7 +29,7 @@ export default function GitView() {
   const { unified, selection } = useGit()
   const nav = useNavigator()
 
-  const { branches: unifiedBranches, loading, error } = unified.get(projectId)
+  const { branches: unifiedBranches, stashes, loading, error } = unified.get(projectId)
 
   // Feature requirement: show local branches only (deduped)
   const localBranches = React.useMemo(
@@ -213,6 +213,7 @@ export default function GitView() {
         loading={loading}
         error={error}
         localBranches={localBranches}
+        stashes={stashes}
         current={current}
         others={others}
         selectedBranchName={selectedBranchName}
