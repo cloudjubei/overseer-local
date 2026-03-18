@@ -5,7 +5,7 @@ import type {
   NotificationMetadata,
   NotificationCategory,
 } from 'src/types/notifications'
-import type { BadgeColor } from 'src/types/settings'
+import type { BadgeColor, ProjectSettings, NotificationSystemSettings } from 'src/types/settings'
 import { settingsService } from '@renderer/services/settingsService'
 import { useProjectContext } from '@renderer/contexts/ProjectContext'
 import { useProjectsGroups } from '@renderer/contexts/ProjectsGroupsContext'
@@ -16,7 +16,7 @@ import { useAppSettings } from '@renderer/contexts/AppSettingsContext'
 import { NotificationSoundService } from '@renderer/services/notificationSoundService'
 import { useAgents } from '@renderer/contexts/AgentsContext'
 import { useGit } from '@renderer/contexts/GitContext'
-import { DEFAULT_PROJECT_SETTINGS } from '@renderer/utils/utils'
+import { DEFAULT_PROJECT_SETTINGS } from './useProjectSettings'
 
 export type ProjectBadgeState = {
   agent_runs: { running: number; unread: number }
@@ -38,44 +38,24 @@ const DEFAULT_PROJECT_BADGE_STATE: ProjectBadgeState = {
 export function useNotifications() {
   const { activeProject, projects } = useProjectContext()
   const { groups } = useProjectsGroups()
-  
+  const { appSettings } = useAppSettings()
+  const systemSettings = appSettings.notificationSystemSettings
+
   const { thinkingCountByProject } = useChatThinking(500)
   const { unreadCountByProject, totalUnreadCountByProject } = useChatUnread()
   const { getProjectRunningCount, getCompletedUnreadCount } = useAgents()
   const { getGitDerivedBadges } = useGit()
 
-  type CategoryPrefs = Record<NotificationCategory, boolean>
-  type NotificationPrefs = { 
-    notificationsEnabled: CategoryPrefs; 
-    badgesEnabled: CategoryPrefs;
-    badgeColors?: Record<NotificationCategory, BadgeColor>
-    chatBadgeCountMode?: 'total_messages' | 'chats_with_unread'
-    gitBadgeSubToggles?: { incoming_commits: boolean; uncommitted_changes: boolean }
-  }
-  const DEFAULT_PREFS: NotificationPrefs = {
-    notificationsEnabled: DEFAULT_PROJECT_SETTINGS.notifications.notificationsEnabled,
-    badgesEnabled: DEFAULT_PROJECT_SETTINGS.notifications.badgesEnabled,
-    badgeColors: DEFAULT_PROJECT_SETTINGS.notifications.badgeColors,
-    chatBadgeCountMode: DEFAULT_PROJECT_SETTINGS.notifications.chatBadgeCountMode,
-    gitBadgeSubToggles: { incoming_commits: true, uncommitted_changes: true },
-  }
-  const [prefsByProject, setPrefsByProject] = useState<Record<string, NotificationPrefs>>({})
+  const [projectPrefsByPid, setProjectPrefsByPid] = useState<Record<string, ProjectSettings['notifications']>>({})
 
   const loadPrefs = useCallback(async (pid?: string) => {
     if (!pid) return
     try {
       const s = await settingsService.getProjectSettings(pid)
       const n = (s as any)?.notifications || {}
-      const next: NotificationPrefs = {
-        notificationsEnabled: n.notificationsEnabled || DEFAULT_PREFS.notificationsEnabled,
-        badgesEnabled: n.badgesEnabled || DEFAULT_PREFS.badgesEnabled,
-        badgeColors: n.badgeColors || DEFAULT_PREFS.badgeColors,
-        chatBadgeCountMode: n.chatBadgeCountMode || DEFAULT_PREFS.chatBadgeCountMode,
-        gitBadgeSubToggles: n.gitBadgeSubToggles || DEFAULT_PREFS.gitBadgeSubToggles,
-      }
-      setPrefsByProject((prev) => ({ ...prev, [pid]: next }))
+      setProjectPrefsByPid((prev) => ({ ...prev, [pid]: n }))
     } catch {
-      setPrefsByProject((prev) => ({ ...prev, [pid]: DEFAULT_PREFS }))
+      setProjectPrefsByPid((prev) => ({ ...prev, [pid]: DEFAULT_PROJECT_SETTINGS.notifications }))
     }
   }, [])
 
@@ -99,42 +79,37 @@ export function useNotifications() {
 
   const isNotificationsEnabled = useCallback(
     (category: NotificationCategory, pid?: string): boolean => {
+      // Must be enabled globally AND in the project
+      if (systemSettings.notificationsEnabled?.[category] === false) return false
+      
       const key = pid || activeProject?.id
       if (!key) return true
-      const p = prefsByProject[key] || DEFAULT_PREFS
-      return p.notificationsEnabled[category] !== false
+      const p = projectPrefsByPid[key] || DEFAULT_PROJECT_SETTINGS.notifications
+      return p.notificationsEnabled?.[category] !== false
     },
-    [activeProject?.id, prefsByProject],
+    [activeProject?.id, projectPrefsByPid, systemSettings.notificationsEnabled],
   )
 
   const isBadgeEnabled = useCallback(
-    (category: NotificationCategory, pid?: string): boolean => {
-      const key = pid || activeProject?.id
-      if (!key) return true
-      const p = prefsByProject[key] || DEFAULT_PREFS
-      return p.badgesEnabled[category] !== false
+    (category: NotificationCategory): boolean => {
+      // Badges are purely driven by global systemSettings now
+      return systemSettings.badgesEnabled?.[category] !== false
     },
-    [activeProject?.id, prefsByProject],
+    [systemSettings.badgesEnabled],
   )
 
   const getBadgeColor = useCallback(
-    (category: NotificationCategory, pid?: string): BadgeColor | undefined => {
-      const key = pid || activeProject?.id
-      if (!key) return DEFAULT_PREFS.badgeColors?.[category]
-      const p = prefsByProject[key] || DEFAULT_PREFS
-      return p.badgeColors?.[category] || DEFAULT_PREFS.badgeColors?.[category]
+    (category: NotificationCategory): BadgeColor | undefined => {
+      return systemSettings.badgeColors?.[category]
     },
-    [activeProject?.id, prefsByProject],
+    [systemSettings.badgeColors],
   )
 
   const isGitBadgeSubToggleEnabled = useCallback(
-    (subToggle: 'incoming_commits' | 'uncommitted_changes', pid?: string): boolean => {
-      const key = pid || activeProject?.id
-      if (!key) return true
-      const p = prefsByProject[key] || DEFAULT_PREFS
-      return p.gitBadgeSubToggles?.[subToggle] !== false
+    (subToggle: 'incoming_commits' | 'uncommitted_changes'): boolean => {
+      return systemSettings.gitBadgeSubToggles?.[subToggle] !== false
     },
-    [activeProject?.id, prefsByProject],
+    [systemSettings.gitBadgeSubToggles],
   )
 
   const badgeStateByProject = useMemo(() => {
@@ -142,10 +117,10 @@ export function useNotifications() {
     for (const p of projects) {
       const pid = p.id
       const gitDerived = getGitDerivedBadges(pid)
-      const prefs = prefsByProject[pid] || DEFAULT_PREFS
-      const chatUnread = prefs.chatBadgeCountMode === 'total_messages' 
-        ? (totalUnreadCountByProject.get(pid) ?? 0)
-        : (unreadCountByProject.get(pid) ?? 0)
+      const chatUnread =
+        systemSettings.chatBadgeCountMode === 'total_messages'
+          ? (totalUnreadCountByProject.get(pid) ?? 0)
+          : (unreadCountByProject.get(pid) ?? 0)
 
       state[pid] = {
         agent_runs: {
@@ -171,7 +146,7 @@ export function useNotifications() {
     totalUnreadCountByProject,
     thinkingCountByProject,
     getGitDerivedBadges,
-    prefsByProject,
+    systemSettings.chatBadgeCountMode,
   ])
 
   const getProjectBadgeState = useCallback(
@@ -220,7 +195,7 @@ export function useNotifications() {
     }
   }, [])
 
-  // Generic helpers to mark notifications as read - kept for backward compatibility if used elsewhere, 
+  // Generic helpers to mark notifications as read - kept for backward compatibility if used elsewhere,
   // but badges now use derived state so this only affects the OS level notifications service history.
   const markNotificationsByIds = useCallback(
     async (ids: string[], opts?: { projectId?: string }) => {

@@ -858,25 +858,25 @@
         "path": "src/renderer/src/contexts/AgentsContext.tsx",
         "dependencies": [
           "Promise",
-          "thefactory-tools/AgentType",
+          "thefactory-tools/AgentRunType",
           "thefactory-tools/Chat",
           "thefactory-tools/ChatContext",
-          "thefactory-tools/utils/getChatContextKey",
-          "thefactory-tools/utils"
+          "thefactory-tools/ChatContextAgentRun",
+          "thefactory-tools/ChatContextAgentRunFeature"
         ]
       },
       "AgentsProvider": {
         "path": "src/renderer/src/contexts/AgentsContext.tsx",
         "dependencies": [
           "AgentsContextValue",
-          "thefactory-tools/ChatContext",
-          "thefactory-tools/AgentType",
+          "thefactory-tools/ChatContextAgentRunFeature",
+          "thefactory-tools/ChatContextAgentRun",
+          "thefactory-tools/AgentRunType",
           "Promise",
           "thefactory-tools/Chat",
           "Set",
           "ReactNode",
-          "thefactory-tools/utils/getChatContextKey",
-          "thefactory-tools/utils"
+          "thefactory-tools/ChatContext"
         ]
       },
       "AgentsView": {
@@ -1477,10 +1477,10 @@
           "@renderer/contexts/ProjectContext",
           "@renderer/contexts/StoriesContext/useStories",
           "@renderer/contexts/StoriesContext",
-          "@renderer/contexts/ChatsContext/useChats",
-          "@renderer/contexts/ChatsContext",
           "@renderer/contexts/chats/ChatsContext/useChats",
           "@renderer/contexts/chats/ChatsContext",
+          "@renderer/contexts/ProjectsGroupsContext/useProjectsGroups",
+          "@renderer/contexts/ProjectsGroupsContext",
           "thefactory-tools/ChatContextAgentRun",
           "thefactory-tools/ChatContextAgentRunFeature",
           "thefactory-tools/ChatContextFeature",
@@ -1513,9 +1513,7 @@
           "ClassValue",
           "tailwind-merge/twMerge",
           "clsx/type ClassValue",
-          "clsx/clsx",
-          "src/types/settings/ProjectSettings",
-          "src/types/settings"
+          "clsx/clsx"
         ]
       },
       "Code": {
@@ -1815,9 +1813,13 @@
         "path": "src/logic/constants.ts",
         "dependencies": [
           "ProjectSettings",
-          "tailwind-merge/twMerge",
-          "clsx/type ClassValue",
-          "clsx/clsx",
+          "react/useEffect",
+          "react/useState",
+          "@renderer/services/settingsService/settingsService",
+          "@renderer/services/settingsService",
+          "@renderer/contexts/ProjectContext/useProjectContext",
+          "@renderer/contexts/ProjectContext",
+          "src/types/settings/NotificationProjectSettings",
           "src/types/settings/ProjectSettings",
           "src/types/settings"
         ]
@@ -3010,6 +3012,12 @@
         "path": "src/renderer/src/screens/git/graphUtils.ts",
         "dependencies": [
           "thefactory-tools/GitLogCommit"
+        ]
+      },
+      "GroupHomeView": {
+        "path": "src/renderer/src/screens/GroupHomeView.tsx",
+        "dependencies": [
+          "IconWarningTriangle"
         ]
       },
       "hasUnsavedChanges": {
@@ -4382,6 +4390,8 @@
           "src/types/notifications/NotificationCategory",
           "src/types/notifications",
           "src/types/settings/BadgeColor",
+          "src/types/settings/ProjectSettings",
+          "src/types/settings/NotificationSystemSettings",
           "src/types/settings",
           "@renderer/services/settingsService/settingsService",
           "@renderer/services/settingsService",
@@ -4402,9 +4412,7 @@
           "@renderer/contexts/AgentsContext/useAgents",
           "@renderer/contexts/AgentsContext",
           "@renderer/contexts/GitContext/useGit",
-          "@renderer/contexts/GitContext",
-          "@renderer/utils/utils/DEFAULT_PROJECT_SETTINGS",
-          "@renderer/utils/utils"
+          "@renderer/contexts/GitContext"
         ]
       },
       "NotificationCreateInput": {
@@ -4429,8 +4437,6 @@
       "NotificationProjectSettings": {
         "path": "src/types/settings.ts",
         "dependencies": [
-          "GitBadgeSubToggles",
-          "BadgeColor",
           "NotificationCategory",
           "Record",
           "thefactory-tools/WebSearchApiKeys"
@@ -4446,9 +4452,9 @@
       "NotificationSettings": {
         "path": "src/renderer/src/screens/settings/notifications/NotificationSettings.tsx",
         "dependencies": [
-          "src/types/settings/BadgeColor",
           "src/types/notifications/NotificationCategory",
           "Record",
+          "src/types/settings/BadgeColor",
           "src/types/notifications",
           "src/types/settings"
         ]
@@ -4498,6 +4504,8 @@
           "src/types/notifications/NotificationCategory",
           "src/types/notifications",
           "src/types/settings/BadgeColor",
+          "src/types/settings/ProjectSettings",
+          "src/types/settings/NotificationSystemSettings",
           "src/types/settings",
           "@renderer/services/settingsService/settingsService",
           "@renderer/services/settingsService",
@@ -4518,9 +4526,7 @@
           "@renderer/contexts/AgentsContext/useAgents",
           "@renderer/contexts/AgentsContext",
           "@renderer/contexts/GitContext/useGit",
-          "@renderer/contexts/GitContext",
-          "@renderer/utils/utils/DEFAULT_PROJECT_SETTINGS",
-          "@renderer/utils/utils"
+          "@renderer/contexts/GitContext"
         ]
       },
       "NotificationSoundService": {
@@ -4585,6 +4591,10 @@
       "NotificationSystemSettings": {
         "path": "src/types/settings.ts",
         "dependencies": [
+          "GitBadgeSubToggles",
+          "BadgeColor",
+          "NotificationCategory",
+          "Record",
           "thefactory-tools/WebSearchApiKeys"
         ]
       },
@@ -4709,6 +4719,8 @@
           "src/types/notifications/NotificationCategory",
           "src/types/notifications",
           "src/types/settings/BadgeColor",
+          "src/types/settings/ProjectSettings",
+          "src/types/settings/NotificationSystemSettings",
           "src/types/settings",
           "@renderer/services/settingsService/settingsService",
           "@renderer/services/settingsService",
@@ -4729,9 +4741,7 @@
           "@renderer/contexts/AgentsContext/useAgents",
           "@renderer/contexts/AgentsContext",
           "@renderer/contexts/GitContext/useGit",
-          "@renderer/contexts/GitContext",
-          "@renderer/utils/utils/DEFAULT_PROJECT_SETTINGS",
-          "@renderer/utils/utils"
+          "@renderer/contexts/GitContext"
         ]
       },
       "ProjectChip": {
@@ -6205,9 +6215,9 @@
           "AgentsContextValue",
           "thefactory-tools/ChatContext",
           "thefactory-tools/Chat",
-          "thefactory-tools/AgentType",
-          "thefactory-tools/utils/getChatContextKey",
-          "thefactory-tools/utils"
+          "thefactory-tools/AgentRunType",
+          "thefactory-tools/ChatContextAgentRun",
+          "thefactory-tools/ChatContextAgentRunFeature"
         ]
       },
       "useAppSettings": {
@@ -6444,7 +6454,7 @@
           "Record",
           "ProjectBadgeState",
           "src/types/settings/BadgeColor",
-          "NotificationPrefs",
+          "src/types/settings/ProjectSettings",
           "react/useState",
           "react/useEffect",
           "react/useCallback",
@@ -6454,6 +6464,7 @@
           "@renderer/services/notificationsService",
           "src/types/notifications/NotificationMetadata",
           "src/types/notifications",
+          "src/types/settings/NotificationSystemSettings",
           "src/types/settings",
           "@renderer/services/settingsService/settingsService",
           "@renderer/services/settingsService",
@@ -6474,9 +6485,7 @@
           "@renderer/contexts/AgentsContext/useAgents",
           "@renderer/contexts/AgentsContext",
           "@renderer/contexts/GitContext/useGit",
-          "@renderer/contexts/GitContext",
-          "@renderer/utils/utils/DEFAULT_PROJECT_SETTINGS",
-          "@renderer/utils/utils"
+          "@renderer/contexts/GitContext"
         ]
       },
       "useProjectContext": {
@@ -6503,9 +6512,7 @@
           "@renderer/contexts/ProjectContext",
           "src/types/settings/NotificationProjectSettings",
           "src/types/settings/ProjectSettings",
-          "src/types/settings",
-          "@renderer/utils/utils/DEFAULT_PROJECT_SETTINGS",
-          "@renderer/utils/utils"
+          "src/types/settings"
         ]
       },
       "useProjectsGroups": {
@@ -6774,25 +6781,25 @@
         "path": "renderer/src/contexts/AgentsContext.tsx",
         "dependencies": [
           "Promise",
-          "thefactory-tools/AgentType",
+          "thefactory-tools/AgentRunType",
           "thefactory-tools/Chat",
           "thefactory-tools/ChatContext",
-          "thefactory-tools/utils/getChatContextKey",
-          "thefactory-tools/utils"
+          "thefactory-tools/ChatContextAgentRun",
+          "thefactory-tools/ChatContextAgentRunFeature"
         ]
       },
       "AgentsProvider": {
         "path": "renderer/src/contexts/AgentsContext.tsx",
         "dependencies": [
           "AgentsContextValue",
-          "thefactory-tools/ChatContext",
-          "thefactory-tools/AgentType",
+          "thefactory-tools/ChatContextAgentRunFeature",
+          "thefactory-tools/ChatContextAgentRun",
+          "thefactory-tools/AgentRunType",
           "Promise",
           "thefactory-tools/Chat",
           "Set",
           "ReactNode",
-          "thefactory-tools/utils/getChatContextKey",
-          "thefactory-tools/utils"
+          "thefactory-tools/ChatContext"
         ]
       },
       "AgentsView": {
@@ -7393,10 +7400,10 @@
           "@renderer/contexts/ProjectContext",
           "@renderer/contexts/StoriesContext/useStories",
           "@renderer/contexts/StoriesContext",
-          "@renderer/contexts/ChatsContext/useChats",
-          "@renderer/contexts/ChatsContext",
           "@renderer/contexts/chats/ChatsContext/useChats",
           "@renderer/contexts/chats/ChatsContext",
+          "@renderer/contexts/ProjectsGroupsContext/useProjectsGroups",
+          "@renderer/contexts/ProjectsGroupsContext",
           "thefactory-tools/ChatContextAgentRun",
           "thefactory-tools/ChatContextAgentRunFeature",
           "thefactory-tools/ChatContextFeature",
@@ -7429,9 +7436,7 @@
           "ClassValue",
           "tailwind-merge/twMerge",
           "clsx/type ClassValue",
-          "clsx/clsx",
-          "types/settings/ProjectSettings",
-          "types/settings"
+          "clsx/clsx"
         ]
       },
       "Code": {
@@ -7731,9 +7736,13 @@
         "path": "logic/constants.ts",
         "dependencies": [
           "ProjectSettings",
-          "tailwind-merge/twMerge",
-          "clsx/type ClassValue",
-          "clsx/clsx",
+          "react/useEffect",
+          "react/useState",
+          "@renderer/services/settingsService/settingsService",
+          "@renderer/services/settingsService",
+          "@renderer/contexts/ProjectContext/useProjectContext",
+          "@renderer/contexts/ProjectContext",
+          "types/settings/NotificationProjectSettings",
           "types/settings/ProjectSettings",
           "types/settings"
         ]
@@ -8926,6 +8935,12 @@
         "path": "renderer/src/screens/git/graphUtils.ts",
         "dependencies": [
           "thefactory-tools/GitLogCommit"
+        ]
+      },
+      "GroupHomeView": {
+        "path": "renderer/src/screens/GroupHomeView.tsx",
+        "dependencies": [
+          "IconWarningTriangle"
         ]
       },
       "hasUnsavedChanges": {
@@ -10298,6 +10313,8 @@
           "types/notifications/NotificationCategory",
           "types/notifications",
           "types/settings/BadgeColor",
+          "types/settings/ProjectSettings",
+          "types/settings/NotificationSystemSettings",
           "types/settings",
           "@renderer/services/settingsService/settingsService",
           "@renderer/services/settingsService",
@@ -10318,9 +10335,7 @@
           "@renderer/contexts/AgentsContext/useAgents",
           "@renderer/contexts/AgentsContext",
           "@renderer/contexts/GitContext/useGit",
-          "@renderer/contexts/GitContext",
-          "@renderer/utils/utils/DEFAULT_PROJECT_SETTINGS",
-          "@renderer/utils/utils"
+          "@renderer/contexts/GitContext"
         ]
       },
       "NotificationCreateInput": {
@@ -10345,8 +10360,6 @@
       "NotificationProjectSettings": {
         "path": "types/settings.ts",
         "dependencies": [
-          "GitBadgeSubToggles",
-          "BadgeColor",
           "NotificationCategory",
           "Record",
           "thefactory-tools/WebSearchApiKeys"
@@ -10362,9 +10375,9 @@
       "NotificationSettings": {
         "path": "renderer/src/screens/settings/notifications/NotificationSettings.tsx",
         "dependencies": [
-          "types/settings/BadgeColor",
           "types/notifications/NotificationCategory",
           "Record",
+          "types/settings/BadgeColor",
           "types/notifications",
           "types/settings"
         ]
@@ -10414,6 +10427,8 @@
           "types/notifications/NotificationCategory",
           "types/notifications",
           "types/settings/BadgeColor",
+          "types/settings/ProjectSettings",
+          "types/settings/NotificationSystemSettings",
           "types/settings",
           "@renderer/services/settingsService/settingsService",
           "@renderer/services/settingsService",
@@ -10434,9 +10449,7 @@
           "@renderer/contexts/AgentsContext/useAgents",
           "@renderer/contexts/AgentsContext",
           "@renderer/contexts/GitContext/useGit",
-          "@renderer/contexts/GitContext",
-          "@renderer/utils/utils/DEFAULT_PROJECT_SETTINGS",
-          "@renderer/utils/utils"
+          "@renderer/contexts/GitContext"
         ]
       },
       "NotificationSoundService": {
@@ -10501,6 +10514,10 @@
       "NotificationSystemSettings": {
         "path": "types/settings.ts",
         "dependencies": [
+          "GitBadgeSubToggles",
+          "BadgeColor",
+          "NotificationCategory",
+          "Record",
           "thefactory-tools/WebSearchApiKeys"
         ]
       },
@@ -10625,6 +10642,8 @@
           "types/notifications/NotificationCategory",
           "types/notifications",
           "types/settings/BadgeColor",
+          "types/settings/ProjectSettings",
+          "types/settings/NotificationSystemSettings",
           "types/settings",
           "@renderer/services/settingsService/settingsService",
           "@renderer/services/settingsService",
@@ -10645,9 +10664,7 @@
           "@renderer/contexts/AgentsContext/useAgents",
           "@renderer/contexts/AgentsContext",
           "@renderer/contexts/GitContext/useGit",
-          "@renderer/contexts/GitContext",
-          "@renderer/utils/utils/DEFAULT_PROJECT_SETTINGS",
-          "@renderer/utils/utils"
+          "@renderer/contexts/GitContext"
         ]
       },
       "ProjectChip": {
@@ -12121,9 +12138,9 @@
           "AgentsContextValue",
           "thefactory-tools/ChatContext",
           "thefactory-tools/Chat",
-          "thefactory-tools/AgentType",
-          "thefactory-tools/utils/getChatContextKey",
-          "thefactory-tools/utils"
+          "thefactory-tools/AgentRunType",
+          "thefactory-tools/ChatContextAgentRun",
+          "thefactory-tools/ChatContextAgentRunFeature"
         ]
       },
       "useAppSettings": {
@@ -12360,7 +12377,7 @@
           "Record",
           "ProjectBadgeState",
           "types/settings/BadgeColor",
-          "NotificationPrefs",
+          "types/settings/ProjectSettings",
           "react/useState",
           "react/useEffect",
           "react/useCallback",
@@ -12370,6 +12387,7 @@
           "@renderer/services/notificationsService",
           "types/notifications/NotificationMetadata",
           "types/notifications",
+          "types/settings/NotificationSystemSettings",
           "types/settings",
           "@renderer/services/settingsService/settingsService",
           "@renderer/services/settingsService",
@@ -12390,9 +12408,7 @@
           "@renderer/contexts/AgentsContext/useAgents",
           "@renderer/contexts/AgentsContext",
           "@renderer/contexts/GitContext/useGit",
-          "@renderer/contexts/GitContext",
-          "@renderer/utils/utils/DEFAULT_PROJECT_SETTINGS",
-          "@renderer/utils/utils"
+          "@renderer/contexts/GitContext"
         ]
       },
       "useProjectContext": {
@@ -12419,9 +12435,7 @@
           "@renderer/contexts/ProjectContext",
           "types/settings/NotificationProjectSettings",
           "types/settings/ProjectSettings",
-          "types/settings",
-          "@renderer/utils/utils/DEFAULT_PROJECT_SETTINGS",
-          "@renderer/utils/utils"
+          "types/settings"
         ]
       },
       "useProjectsGroups": {

@@ -352,17 +352,17 @@ export default function SidebarView({}: SidebarProps) {
     const iconKey = p.metadata?.icon || (isMainProject(p.id) ? 'collection' : 'folder')
     const projectIcon = renderProjectIcon(iconKey)
 
-    const showAgents = isBadgeEnabled('agent_runs', p.id) && activeRuns > 0 && !active
+    const showAgents = isBadgeEnabled('agent_runs') && activeRuns > 0 && !active
     const showAgentsCompleted =
-      isBadgeEnabled('agent_runs', p.id) && agentsCompletedUnread > 0 && !active
+      isBadgeEnabled('agent_runs') && agentsCompletedUnread > 0 && !active
     const showChat =
-      isBadgeEnabled('chat_messages', p.id) && (chatUnread > 0 || thinking) && !active
+      isBadgeEnabled('chat_messages') && (chatUnread > 0 || thinking) && !active
 
-    const gitBadgesEnabled = isBadgeEnabled('git_changes', p.id) && !active
+    const gitBadgesEnabled = isBadgeEnabled('git_changes') && !active
     const showGitIncoming =
-      gitBadgesEnabled && isGitBadgeSubToggleEnabled('incoming_commits', p.id) && gitIncoming > 0
+      gitBadgesEnabled && isGitBadgeSubToggleEnabled('incoming_commits') && gitIncoming > 0
     const showGitUncommitted =
-      gitBadgesEnabled && isGitBadgeSubToggleEnabled('uncommitted_changes', p.id) && gitUncommitted
+      gitBadgesEnabled && isGitBadgeSubToggleEnabled('uncommitted_changes') && gitUncommitted
 
     const hasAnyBadge =
       showAgents || showAgentsCompleted || showChat || showGitIncoming || showGitUncommitted
@@ -496,7 +496,7 @@ export default function SidebarView({}: SidebarProps) {
             const ref = isFirst ? firstItemRef : null
 
             const BtnBadges = () => {
-              if (item.view === 'Agents' && isBadgeEnabled('agent_runs', activeProjectId)) {
+              if (item.view === 'Agents' && isBadgeEnabled('agent_runs')) {
                 const parts: React.ReactNode[] = []
                 if (activeRunsCurrentProject > 0) {
                   parts.push(
@@ -525,11 +525,11 @@ export default function SidebarView({}: SidebarProps) {
                 }
                 return parts.length ? <>{parts}</> : null
               }
-              if (item.view === 'Git' && isBadgeEnabled('git_changes', activeProjectId)) {
+              if (item.view === 'Git' && isBadgeEnabled('git_changes')) {
                 const parts: React.ReactNode[] = []
 
                 if (
-                  isGitBadgeSubToggleEnabled('incoming_commits', activeProjectId) &&
+                  isGitBadgeSubToggleEnabled('incoming_commits') &&
                   gitIncomingCurrentProject > 0
                 ) {
                   parts.push(
@@ -546,7 +546,7 @@ export default function SidebarView({}: SidebarProps) {
                 }
 
                 if (
-                  isGitBadgeSubToggleEnabled('uncommitted_changes', activeProjectId) &&
+                  isGitBadgeSubToggleEnabled('uncommitted_changes') &&
                   gitUncommittedCurrentProject
                 ) {
                   parts.push(
@@ -564,7 +564,7 @@ export default function SidebarView({}: SidebarProps) {
 
                 return parts.length ? <>{parts}</> : null
               }
-              if (item.view === 'Chat' && isBadgeEnabled('chat_messages', activeProjectId)) {
+              if (item.view === 'Chat' && isBadgeEnabled('chat_messages')) {
                 const parts: React.ReactNode[] = []
                 if (chatThinkingCurrentProject) {
                   parts.push(
@@ -716,27 +716,12 @@ export default function SidebarView({}: SidebarProps) {
               const aggGitIncoming = groupBadge.git_changes.incoming
               const aggGitUncommitted = groupBadge.git_changes.uncommitted
 
-              const aggShowAgents =
-                (g.projects || []).some((pid) => isBadgeEnabled('agent_runs', pid)) && aggActive > 0
-              const aggShowAgentsCompleted =
-                (g.projects || []).some((pid) => isBadgeEnabled('agent_runs', pid)) &&
-                aggAgentsCompletedUnread > 0
-              const aggShowChat =
-                (g.projects || []).some((pid) => isBadgeEnabled('chat_messages', pid)) &&
-                (aggChatUnread > 0 || aggThinking > 0)
+              const aggShowAgents = isBadgeEnabled('agent_runs') && aggActive > 0
+              const aggShowAgentsCompleted = isBadgeEnabled('agent_runs') && aggAgentsCompletedUnread > 0
+              const aggShowChat = isBadgeEnabled('chat_messages') && (aggChatUnread > 0 || aggThinking > 0)
 
-              const aggShowGitIncoming =
-                (g.projects || []).some(
-                  (pid) =>
-                    isBadgeEnabled('git_changes', pid) &&
-                    isGitBadgeSubToggleEnabled('incoming_commits', pid),
-                ) && aggGitIncoming > 0
-              const aggShowGitUncommitted =
-                (g.projects || []).some(
-                  (pid) =>
-                    isBadgeEnabled('git_changes', pid) &&
-                    isGitBadgeSubToggleEnabled('uncommitted_changes', pid),
-                ) && aggGitUncommitted
+              const aggShowGitIncoming = isBadgeEnabled('git_changes') && isGitBadgeSubToggleEnabled('incoming_commits') && aggGitIncoming > 0
+              const aggShowGitUncommitted = isBadgeEnabled('git_changes') && isGitBadgeSubToggleEnabled('uncommitted_changes') && aggGitUncommitted
 
               const showAnyBadge =
                 aggShowAgents ||

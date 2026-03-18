@@ -64,6 +64,7 @@ export default class DatabaseManager extends BaseManager {
   async connect(connectionString: string): Promise<{ connected: boolean; lastError?: string }> {
     try {
       const { connectionString } = await createReusableDatabase()
+      console.log('connect connectionString: ', connectionString)
 
       this._dbClient = await openDatabase({ connectionString, logLevel: 'warn' })
       this._connectionString = connectionString

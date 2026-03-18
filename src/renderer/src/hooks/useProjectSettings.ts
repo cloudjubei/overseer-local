@@ -2,8 +2,16 @@ import { useEffect, useState } from 'react'
 import { settingsService } from '@renderer/services/settingsService'
 import { useProjectContext } from '@renderer/contexts/ProjectContext'
 import { NotificationProjectSettings, ProjectSettings } from 'src/types/settings'
-import { DEFAULT_PROJECT_SETTINGS } from '@renderer/utils/utils'
 
+export const DEFAULT_PROJECT_SETTINGS: ProjectSettings = {
+  notifications: {
+    notificationsEnabled: {
+      agent_runs: true,
+      chat_messages: true,
+      git_changes: true,
+    },
+  },
+}
 export function useProjectSettings() {
   const { activeProject } = useProjectContext()
   const [projectSettings, setProjectSettings] = useState<ProjectSettings>(DEFAULT_PROJECT_SETTINGS)

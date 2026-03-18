@@ -16,12 +16,13 @@
     },
     {
       "id": "f28b0336-58e5-493d-b246-2515a86934c2",
-      "status": "-",
+      "status": "+",
       "title": "Wire up completionService.startAgentRun from AgentsContext",
       "description": "Call `completionService.startAgentRun` from within `AgentsContext.startAgent` to actually launch the run after the placeholder chat is created. Also add post-start navigation so the user is taken directly to the newly created agent run chat in the UI.",
       "context": [],
       "createdAt": "2026-03-13T14:41:36.320Z",
-      "updatedAt": "2026-03-18T02:51:12.128Z"
+      "updatedAt": "2026-03-18T10:14:14.525Z",
+      "completedAt": "2026-03-18T10:14:14.525Z"
     },
     {
       "id": "0c6704d6-4ab6-4d63-ad51-227d1593009a",

@@ -12,6 +12,12 @@ import { projectsGroupsService } from '../services/projectsGroupsService'
 export type ProjectsGroupsContextValue = {
   groups: ProjectsGroup[]
 
+  activeGroupId: string | null
+  activeSelectionType: 'project' | 'group'
+
+  setActiveGroupId: (id: string | null) => void
+  setActiveSelectionType: (type: 'project' | 'group') => void
+
   getGroupById: (id: string) => ProjectsGroup | undefined
   getGroupForProject: (projectId: string) => ProjectsGroup | undefined
 
@@ -30,6 +36,9 @@ const ProjectsGroupsContext = createContext<ProjectsGroupsContextValue | null>(n
 
 export function ProjectsGroupsProvider({ children }: { children: React.ReactNode }) {
   const [groups, setGroups] = useState<ProjectsGroups>([])
+
+  const [activeGroupId, setActiveGroupId] = useState<string | null>(null)
+  const [activeSelectionType, setActiveSelectionType] = useState<'project' | 'group'>('project')
 
   const refresh = async () => {
     const all: ProjectsGroups = await projectsGroupsService.listProjectsGroups()
@@ -184,6 +193,10 @@ export function ProjectsGroupsProvider({ children }: { children: React.ReactNode
   const value = useMemo<ProjectsGroupsContextValue>(
     () => ({
       groups,
+      activeGroupId,
+      activeSelectionType,
+      setActiveGroupId,
+      setActiveSelectionType,
       getGroupById,
       getGroupForProject,
       createGroup,
@@ -194,7 +207,15 @@ export function ProjectsGroupsProvider({ children }: { children: React.ReactNode
       reorderGroup,
       setProjectGroup,
     }),
-    [groups, getGroupById, getGroupForProject],
+    [
+      groups,
+      activeGroupId,
+      activeSelectionType,
+      setActiveGroupId,
+      setActiveSelectionType,
+      getGroupById,
+      getGroupForProject,
+    ],
   )
 
   return <ProjectsGroupsContext.Provider value={value}>{children}</ProjectsGroupsContext.Provider>

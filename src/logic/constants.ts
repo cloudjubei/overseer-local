@@ -44,4 +44,12 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
   database: {},
 }
 
-export const DEFAULT_PROJECT_SETTINGS: ProjectSettings = {}
+export const DEFAULT_PROJECT_SETTINGS: ProjectSettings = {
+  notifications: {
+    notificationsEnabled: {
+      agent_runs: true,
+      chat_messages: true,
+      git_changes: true,
+    },
+  },
+}

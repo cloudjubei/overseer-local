@@ -1,5 +1,11 @@
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react'
-import type { ChatContext, Chat, AgentType } from 'thefactory-tools'
+import type {
+  ChatContext,
+  Chat,
+  AgentRunType,
+  ChatContextAgentRun,
+  ChatContextAgentRunFeature,
+} from 'thefactory-tools'
 import { useAppSettings } from './AppSettingsContext'
 import { useLLMConfig } from '../contexts/LLMConfigContext'
 import { storiesService } from '../services/storiesService'
@@ -9,7 +15,6 @@ import { chatsService } from '../services/chatsService'
 import { useChats } from './chats/ChatsContext'
 import { notificationsService } from '../services/notificationsService'
 import { completionService } from '../services/completionService'
-import { getChatContextKey } from 'thefactory-tools/utils'
 
 export type AgentsContextValue = {
   runsActive: Chat[]
@@ -19,7 +24,7 @@ export type AgentsContextValue = {
   getProjectRunningCount: (projectId?: string) => number
   getCompletedUnreadCount: (projectId?: string) => number
   startAgent: (
-    agentType: AgentType,
+    agentType: AgentRunType,
     projectId: string,
     storyId: string,
     featureId?: string,
@@ -37,7 +42,7 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
   const { activeProject } = useProjectContext()
   const { getCredentials } = useGitHubCredentials()
 
-  const { chatsByProjectId } = useChats()
+  const { chatsByProjectId, getSettings } = useChats()
 
   // Track runs by analyzing current chat list in `ChatsContext`
   const runsHistory = useMemo(() => {
@@ -126,10 +131,10 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
   )
 
   const coerceAgentTypeForStory = async (
-    agentType: AgentType,
+    agentType: AgentRunType,
     projectId: string,
     storyId: string,
-  ): Promise<AgentType> => {
+  ): Promise<AgentRunType> => {
     try {
       const story = await storiesService.getStory(projectId, storyId)
       if (story && story.features.length === 0) return 'speccer'
@@ -143,7 +148,7 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
   }
 
   const startAgent = useCallback(
-    async (agentType: AgentType, projectId: string, storyId: string, featureId?: string) => {
+    async (agentType: AgentRunType, projectId: string, storyId: string, featureId?: string) => {
       if (!activeConfig) throw new Error('NO ACTIVE LLM CONFIG')
       const githubCredentialsId = activeProject?.metadata?.githubCredentialsId
       if (!githubCredentialsId) throw new Error('NO ACTIVE GITHUB CREDENTIALS ID')
@@ -154,13 +159,17 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
       const effectiveAgentType = await coerceAgentTypeForStory(agentType, projectId, storyId)
       const agentRunId = Date.now().toString()
 
-      const context: ChatContext = {
-        type: featureId ? 'AGENT_RUN_FEATURE' : 'AGENT_RUN',
-        projectId,
-        storyId,
-        featureId,
-        agentRunId,
-      }
+      const commonContext = { projectId, storyId, agentRunId }
+      const context: ChatContextAgentRun | ChatContextAgentRunFeature = featureId
+        ? {
+            ...commonContext,
+            type: 'AGENT_RUN_FEATURE',
+            featureId,
+          }
+        : {
+            ...commonContext,
+            type: 'AGENT_RUN',
+          }
 
       await chatsService.createChat({
         context,
@@ -173,28 +182,25 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
           webSearchApiKeys: appSettings.webSearchApiKeys,
         },
       })
+      const chatSettings = getSettings(context)!
+      const isolated = true
 
-      // Start the run via completionService (fire-and-forget so navigation isn't blocked)
       completionService
         .startAgentRun(
           {
-            agentType: effectiveAgentType as any,
-            chatContext: context as any,
+            agentType: effectiveAgentType,
+            chatContext: context,
             llmConfig: activeConfig,
             githubCredentials: activeCredentials,
             webSearchApiKeys: appSettings.webSearchApiKeys,
           },
-          {} as any,
-          false
+          chatSettings.completionSettings,
+          isolated,
         )
         .catch((err) => {
           console.error('[AgentsContext] Agent run failed to start:', err)
           chatsService.updateChat(context, { state: 'error' }).catch(() => {})
         })
-
-      // Post-start navigation: redirect user to the new run chat
-      const chatKey = getChatContextKey(context)
-      window.location.hash = `#chats${chatKey}`
     },
     [activeConfig, appSettings, activeProject, getCredentials],
   )

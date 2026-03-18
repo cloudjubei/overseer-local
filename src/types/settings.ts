@@ -26,16 +26,13 @@ export interface NotificationSystemSettings {
   osNotificationsEnabled: boolean
   soundsEnabled: boolean
   displayDuration: number
-  // Controls whether notifications of a category are created at all
+
+  // Global app controls for notification features
   notificationsEnabled: Record<NotificationCategory, boolean>
-  // Controls whether badges for a category are shown in the UI
   badgesEnabled: Record<NotificationCategory, boolean>
-  // Badge colors for each category
-  badgeColors?: Record<NotificationCategory, BadgeColor>
-  // Chat badge counting mode: counts total unread messages vs number of chats with unread messages
-  chatBadgeCountMode?: 'total_messages' | 'chats_with_unread'
-  // Fine-grained sub-toggles for git badges (only applies when badgesEnabled.git_changes is true)
-  gitBadgeSubToggles?: GitBadgeSubToggles
+  badgeColors: Record<NotificationCategory, BadgeColor>
+  chatBadgeCountMode: 'total_messages' | 'chats_with_unread'
+  gitBadgeSubToggles: GitBadgeSubToggles
 }
 
 export interface AppSettings {
@@ -58,12 +55,17 @@ export interface UserPreferences {
   shortcutsModifier: ShortcutsModifier
   shortcuts: ShortcutsConfig
 }
-
 export type StoryViewMode = 'list' | 'board'
 export type StoryListViewSorting = 'index_asc' | 'index_desc' | 'status_asc' | 'status_desc'
 
+
+export interface NotificationProjectSettings {
+  // Controls whether notifications of a category are created at all (requires App-level toggle to also be enabled)
+  notificationsEnabled: Record<NotificationCategory, boolean>
+}
+
 export interface ProjectSettings {
-  // Empty, can be extended in the future
+  notifications: NotificationProjectSettings
 }
 
 export type DatabaseSettings = {
