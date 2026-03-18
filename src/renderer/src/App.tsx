@@ -1,5 +1,4 @@
 import { useEffect, useState, useCallback } from 'react'
-import SidebarView from './navigation/SidebarView'
 import ModalHost from './navigation/ModalHost'
 import { ToastProvider } from './components/ui/Toast'
 import { NavigatorProvider } from './navigation/Navigator'
@@ -22,6 +21,7 @@ import { ChatsProvider } from './contexts/chats/ChatsProvider'
 import { GitProvider } from './contexts/GitContext'
 import { NotificationSoundBootstrap } from './hooks/useNotifications'
 import { CostsProvider } from './contexts/CostsContext'
+import MainView from './navigation/main/MainView'
 
 function ServicesBootstrap() {
   const { init } = useLiveData()
@@ -92,7 +92,7 @@ function MainApp() {
 
   return (
     <div className="flex h-full w-full overflow-hidden">
-      <SidebarView />
+      <MainView />
       <ModalHost />
     </div>
   )

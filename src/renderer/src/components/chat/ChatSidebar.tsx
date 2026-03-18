@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useLLMConfig } from '../../contexts/LLMConfigContext'
 import { useNavigator } from '../../navigation/Navigator'
-// import { useChats, type ChatState } from '../../contexts/ChatsContext'
 import { useChats } from '../../contexts/chats/ChatsContext'
 import { type ChatState } from '../../contexts/chats/ChatsTypes'
 import { ChatInput, MessageList } from '.'
@@ -12,24 +11,20 @@ import type {
   ChatContextArguments,
   CompletionSettings,
 } from 'thefactory-tools'
-import ContextInfoButton from '../ui/ContextInfoButton'
-import ModelChip from '../agents/ModelChip'
-import { IconSettings, IconChevron, IconScroll, IconRefreshChat, IconCode } from '../ui/icons/Icons'
-import { IconCalculator } from '../ui/icons/IconCalculator'
 import { useProjectContext } from '../../contexts/ProjectContext'
 import { useStories } from '../../contexts/StoriesContext'
 import { ToolSchemas, ALL_CHAT_AGENT_TOOLS } from 'thefactory-tools/constants'
-import { Button } from '@renderer/components/ui/Button'
-import { Modal } from '@renderer/components/ui/Modal'
 import { useChatUnread } from '@renderer/hooks/useChatUnread'
 import { useActiveProject } from '@renderer/contexts/ProjectContext'
 import { getChatContextKey } from 'thefactory-tools/utils'
 import { useNotifications } from '@renderer/hooks/useNotifications'
-import UsageModal from './UsageModal'
-import ChatSettingsDropdown, { type ToolToggle } from './ChatSettingsDropdown'
+import type { ToolToggle } from './ChatSettingsDropdown'
 import { useChatDraft } from './hooks/useChatDraft'
-import ChatDynamicContextModal from './ChatDynamicContextModal'
 import { useToast } from '../ui/Toast'
+
+import { ChatSidebarHeader } from './sidebar/ChatSidebarHeader'
+import { AgentRunBanner } from './sidebar/AgentRunBanner'
+import { ChatSidebarModals } from './sidebar/ChatSidebarModals'
 
 export type ChatSidebarProps = {
   context: ChatContext
@@ -74,7 +69,6 @@ export default function ChatSidebar({
 
   const { getProjectById } = useProjectContext()
   const { storiesById, featuresById } = useStories()
-  // const { runsHistory } = useAgents()
   const { activeChatConfig, isChatConfigured } = useLLMConfig()
   const { navigateView } = useNavigator()
   const { markReadByKey } = useChatUnread()
@@ -88,7 +82,6 @@ export default function ChatSidebar({
   const [isDynamicContextOpen, setIsDynamicContextOpen] = useState(false)
 
   const currentSettings = useMemo(() => getSettings(context), [getSettings, context])
-
   const chatKey = useMemo(() => getChatContextKey(context), [context])
 
   const {
@@ -116,7 +109,6 @@ export default function ChatSidebar({
   const isDeletingRef = useRef(false)
 
   useEffect(() => {
-    // New context mounted/selected; allow loading again.
     isDeletingRef.current = false
     const loadChat = async () => {
       if (isDeletingRef.current) return
@@ -181,7 +173,6 @@ export default function ChatSidebar({
   )
 
   const isThinking = chat?.isThinking || false
-
   const [draftPrompt, setDraftPrompt] = useState<string>('')
   const [scrollSignal, setScrollSignal] = useState<number>(0)
 
@@ -191,8 +182,6 @@ export default function ChatSidebar({
 
       flushPersist()
 
-      // Optimistically clear the persisted draft before the async gap.
-      // If send fails, we restore (below).
       const shouldManageDraft = meta?.reason === 'user' || meta?.reason === undefined
       if (shouldManageDraft) {
         clear()
@@ -335,7 +324,6 @@ export default function ChatSidebar({
     if (context.projectId) args.project = getProjectById(context.projectId)
     if (context.storyId) args.story = storiesById[context.storyId]
     if (context.featureId) args.feature = featuresById[context.featureId]
-    // if (context.agentRunId) args.run = runsHistory.find((r) => r.id === context.agentRunId)
     return args
   }, [context, storiesById, featuresById, getProjectById])
 
@@ -448,14 +436,13 @@ export default function ChatSidebar({
       if (window.location.hash !== targetHash) {
         window.location.hash = targetHash
       } else {
-        window.dispatchEvent(new HashChangeEvent('hashchange'))
+        window.location.reload()
       }
-      setIsSettingsOpen(false)
     }
-  }, [context, activeProjectId, deleteChat])
+  }, [context, deleteChat, activeProjectId])
 
-  const handleDeleteLastMessage = useCallback(() => {
-    deleteLastMessage(context)
+  const handleDeleteLastMessage = useCallback(async () => {
+    await deleteLastMessage(context)
   }, [deleteLastMessage, context])
 
   const onRetry = useMemo(() => {
@@ -484,95 +471,38 @@ export default function ChatSidebar({
     [setLocalAttachments],
   )
 
+  const isRunningAgent =
+    (context.type === 'AGENT_RUN' || context.type === 'AGENT_RUN_FEATURE') &&
+    (chat?.state === 'created' || chat?.state === 'running')
+
   return (
     <section className={sectionClass}>
-      <header className="relative flex-shrink-0 px-3 py-2 border-b border-[var(--border-subtle)] bg-[var(--surface-raised)] flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2 min-w-0">
-          {isCollapsible ? (
-            <button
-              type="button"
-              onClick={onCollapse}
-              className="btn-secondary btn-icon"
-              aria-label="Collapse chat sidebar"
-              title="Collapse chat sidebar"
-            >
-              <IconChevron className="w-4 h-4" style={{ transform: 'rotate(90deg)' }} />
-            </button>
-          ) : null}
-          <ContextInfoButton context={context} label={chatContextTitle} />
-          <button
-            onClick={() => setIsPromptModalOpen(true)}
-            className="btn-secondary btn-icon"
-            aria-label="View System Prompt"
-            title="View System Prompt"
-          >
-            <IconScroll className="w-4 h-4" />
-          </button>
-
-          <button
-            onClick={() => setIsCostsModalOpen(true)}
-            className="btn-secondary btn-icon"
-            aria-label="View usage costs"
-            title={totalCostUSD > 0 ? `Total cost: ${formatUSD(totalCostUSD)}` : 'Usage costs'}
-          >
-            <IconCalculator className="w-4 h-4" />
-          </button>
-
-          <button
-            onClick={() => setIsDynamicContextOpen(true)}
-            className="btn-secondary btn-icon"
-            aria-label="View dynamic context"
-            title="Dynamic context"
-          >
-            <IconCode className="w-4 h-4" />
-          </button>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            className="btn-secondary w-[34px]"
-            variant="danger"
-            aria-label="Refresh chat"
-            title="Refresh chat"
-            onClick={() => restartChat(context)}
-          >
-            <IconRefreshChat className="w-4 h-4" />
-          </Button>
-          <ModelChip editable className="border-blue-500" mode="chat" />
-
-          <button
-            ref={settingsBtnRef}
-            onClick={() => setIsSettingsOpen((v) => !v)}
-            className="btn-secondary btn-icon"
-            aria-haspopup="menu"
-            aria-expanded={isSettingsOpen}
-            aria-label="Open Chat Settings"
-            title="Chat settings"
-          >
-            <IconSettings className="w-4 h-4" />
-          </button>
-
-          <ChatSettingsDropdown
-            isOpen={isSettingsOpen}
-            onClose={() => setIsSettingsOpen(false)}
-            context={context}
-            completion={completion}
-            draftPrompt={draftPrompt}
-            setDraftPrompt={setDraftPrompt}
-            onSavePrompt={async () => {
-              await updateSettingsPrompt(context, draftPrompt)
-            }}
-            onResetPrompt={async () => {
-              await resetSettingsPrompt(context)
-            }}
-            tools={tools}
-            toggleAvailable={toggleAvailable}
-            toggleAutoCall={toggleAutoCall}
-            persistSettings={persistSettings}
-            onDeleteChat={handleDeleteChat}
-            settingsBtnRef={settingsBtnRef}
-          />
-        </div>
-      </header>
+      <ChatSidebarHeader
+        context={context}
+        chatContextTitle={chatContextTitle}
+        isCollapsible={isCollapsible}
+        onCollapse={onCollapse}
+        totalCostUSD={totalCostUSD}
+        formatUSD={formatUSD}
+        setIsPromptModalOpen={setIsPromptModalOpen}
+        setIsCostsModalOpen={setIsCostsModalOpen}
+        setIsDynamicContextOpen={setIsDynamicContextOpen}
+        restartChat={restartChat}
+        settingsBtnRef={settingsBtnRef}
+        isSettingsOpen={isSettingsOpen}
+        setIsSettingsOpen={setIsSettingsOpen}
+        completion={completion}
+        draftPrompt={draftPrompt}
+        setDraftPrompt={setDraftPrompt}
+        updateSettingsPrompt={updateSettingsPrompt}
+        resetSettingsPrompt={resetSettingsPrompt}
+        tools={tools}
+        toggleAvailable={toggleAvailable}
+        toggleAutoCall={toggleAutoCall}
+        persistSettings={persistSettings}
+        handleDeleteChat={handleDeleteChat}
+        isRunningAgent={isRunningAgent}
+      />
 
       <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
         {!isChatConfigured && (
@@ -608,47 +538,40 @@ export default function ChatSidebar({
       </div>
 
       <div className="flex-shrink-0">
-        <ChatInput
-          value={localText}
-          attachments={localAttachments}
-          clearOnSend={true}
-          clearOnSuggestedAction={false}
-          onChange={handleInputChange}
-          onChangeAttachments={handleAttachmentsChange}
-          selectionStart={selectionStart}
-          selectionEnd={selectionEnd}
-          onSelectionChange={setSelection}
-          restoreKey={chatKey}
-          autoFocus={focusNonce > 0}
-          onSend={handleSend}
-          onAbort={handleAbort}
-          isThinking={isThinking}
-          suggestedActions={suggestedActions}
-          isConfigured={isChatConfigured}
-        />
+        {isRunningAgent ? (
+          <AgentRunBanner />
+        ) : (
+          <ChatInput
+            value={localText}
+            attachments={localAttachments}
+            clearOnSend={true}
+            clearOnSuggestedAction={false}
+            onChange={handleInputChange}
+            onChangeAttachments={handleAttachmentsChange}
+            selectionStart={selectionStart}
+            selectionEnd={selectionEnd}
+            onSelectionChange={setSelection}
+            restoreKey={chatKey}
+            autoFocus={focusNonce > 0}
+            onSend={handleSend}
+            onAbort={handleAbort}
+            isThinking={isThinking}
+            suggestedActions={suggestedActions}
+            isConfigured={isChatConfigured}
+          />
+        )}
       </div>
 
-      <Modal
-        isOpen={isPromptModalOpen}
-        onClose={() => setIsPromptModalOpen(false)}
-        title="System Prompt"
-      >
-        <div className="p-4 bg-[var(--surface-base)] text-sm text-[var(--text-secondary)] max-h-[70vh] overflow-auto">
-          <pre className="whitespace-pre-wrap font-sans">{effectivePrompt}</pre>
-        </div>
-      </Modal>
-
-      <UsageModal
-        isOpen={isCostsModalOpen}
-        onClose={() => setIsCostsModalOpen(false)}
-        messages={chat?.chat.messages || []}
+      <ChatSidebarModals
+        isPromptModalOpen={isPromptModalOpen}
+        setIsPromptModalOpen={setIsPromptModalOpen}
+        effectivePrompt={effectivePrompt}
+        isCostsModalOpen={isCostsModalOpen}
+        setIsCostsModalOpen={setIsCostsModalOpen}
         chatKey={chatKey}
-      />
-
-      <ChatDynamicContextModal
-        isOpen={isDynamicContextOpen}
-        onClose={() => setIsDynamicContextOpen(false)}
-        dynamicContext={chat?.chat.dynamicContext}
+        chat={chat}
+        isDynamicContextOpen={isDynamicContextOpen}
+        setIsDynamicContextOpen={setIsDynamicContextOpen}
       />
     </section>
   )

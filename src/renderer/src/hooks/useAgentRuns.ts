@@ -16,7 +16,6 @@ import { chatsService } from '../services/chatsService'
 import { completionService } from '../services/completionService'
 import { notificationsService } from '../services/notificationsService'
 import { useChatUnread } from './useChatUnread'
-import { useNavigator } from '../navigation/Navigator'
 
 export type AgentRunsValue = {
   runsHistory: Chat[]
@@ -41,7 +40,6 @@ export function useAgentRuns(): AgentRunsValue {
   const { activeProject } = useProjectContext()
   const { getCredentials } = useGitHubCredentials()
   const { unreadKeys } = useChatUnread()
-  const { navigateAgentRun } = useNavigator()
 
   // Track runs by analyzing current chat list in `ChatsContext`
   const runsHistory = useMemo(() => {
@@ -160,11 +158,8 @@ export function useAgentRuns(): AgentRunsValue {
           console.error('[useAgentRuns] Agent run failed to start:', err)
           chatsService.updateChat(context, { state: 'error' }).catch(() => {})
         })
-        
-      // Auto-navigate to the new run via ChatView
-      navigateAgentRun(context)
     },
-    [activeConfig, appSettings, activeProject, getCredentials, getSettings, navigateAgentRun],
+    [activeConfig, appSettings, activeProject, getCredentials, getSettings],
   )
 
   const cancelRun = useCallback(

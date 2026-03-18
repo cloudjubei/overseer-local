@@ -26,21 +26,23 @@
     },
     {
       "id": "541f1df4-2e59-4ab8-a93e-ec5e662db178",
-      "status": "-",
+      "status": "+",
       "title": "Feature 3: Chat & Agent Badges",
       "description": "Implement state derivation for Chats and Agent Runs. Add toggle for total unread vs. chats with unread. Runs show active + completed unread. Default colors: Chat (Red), Agent Runs (Blue).",
       "context": [],
       "createdAt": "2026-03-17T20:05:43.659Z",
-      "updatedAt": "2026-03-17T20:05:43.659Z"
+      "updatedAt": "2026-03-18T12:22:14.402Z",
+      "completedAt": "2026-03-18T12:22:14.402Z"
     },
     {
       "id": "968e3864-6c14-41ff-81f2-bd5059535392",
-      "status": "-",
+      "status": "+",
       "title": "Feature 4: Settings UI (Notification Preferences)",
       "description": "Update SettingsView.tsx to house the new preferences. Add toggles for Git (incoming vs. uncommitted) and Chat (total vs. chat count). Add a color picker for Chat, Git, and Agent Run badges. Ensure these settings are saved per-project or globally as defined by the user settings schema.",
       "context": [],
       "createdAt": "2026-03-17T20:06:48.630Z",
-      "updatedAt": "2026-03-17T20:06:48.630Z"
+      "updatedAt": "2026-03-18T12:22:47.153Z",
+      "completedAt": "2026-03-18T12:22:47.153Z"
     },
     {
       "id": "3c3e5a88-9198-445d-ba28-9e03d464c5eb",
