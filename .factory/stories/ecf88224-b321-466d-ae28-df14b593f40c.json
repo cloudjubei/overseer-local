@@ -6,12 +6,13 @@
   "features": [
     {
       "id": "49e83f69-5c8d-4ff6-a448-7279b4082ad0",
-      "status": "-",
+      "status": "+",
       "title": "Step 1 - Initialization Type",
       "description": "A launch screen for the wizard that gives the user two main paths: Create a New Project or Import an Existing Project.",
       "context": [],
       "createdAt": "2026-03-17T16:31:40.630Z",
-      "updatedAt": "2026-03-17T16:31:40.630Z"
+      "updatedAt": "2026-03-18T20:14:48.568Z",
+      "completedAt": "2026-03-18T20:14:48.568Z"
     },
     {
       "id": "e402c2ec-0ae6-46c4-be48-8b229db21f5c",
