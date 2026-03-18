@@ -25,6 +25,7 @@ export type ChatDraft = {
 export type ChatsContextValue = {
   chats: Record<string, ChatState>
   chatsByProjectId: Record<string, ChatState[]>
+  chatsByGroupId: Record<string, ChatState[]>
 
   getDraft: (chatKey: string) => ChatDraft
   setDraft: (chatKey: string, patch: Partial<ChatDraft>) => void

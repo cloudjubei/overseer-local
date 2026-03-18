@@ -97,15 +97,6 @@ export type GitContextValue = {
 
   mergePreferences: MergePreferences
 
-  // Unread helpers for branches
-  isBranchUnread: (projectId: string, baseRef: string, branch: GitUnifiedBranch) => boolean
-  markBranchSeen: (
-    projectId: string,
-    baseRef: string,
-    branch: GitUnifiedBranch,
-    headSha?: string,
-  ) => void
-
   // UI selection state (per project)
   selection: {
     byProject: Record<string, GitSelection>
@@ -398,9 +389,9 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
       try {
         const [list, stashRes] = await Promise.all([
           gitService.listUnifiedBranches(pid),
-          gitService.listStashes(pid).catch(() => ({ stashes: [] }))
+          gitService.listStashes(pid).catch(() => ({ stashes: [] })),
         ])
-        
+
         const stashes = stashRes?.stashes || []
 
         const current = list.find((b) => b.current)
@@ -647,17 +638,6 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
     [unifiedByProject, seenVersion],
   )
 
-  const markBranchSeen = React.useCallback(
-    (projectId: string, baseRef: string, branch: GitUnifiedBranch, headSha?: string) => {
-      const headRef = getHeadRef(branch)
-      const sha = headSha || getHeadSha(branch)
-      if (!projectId || !baseRef || !headRef || !sha) return
-      writeLastSeen(projectId, baseRef, headRef, sha)
-      setSeenVersion((v) => v + 1)
-    },
-    [],
-  )
-
   const selectionApi = useMemo(
     () => ({
       byProject: selectionByProject,
@@ -704,8 +684,6 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
       unified: unifiedApi,
       pending: pendingApi,
       mergePreferences,
-      isBranchUnread,
-      markBranchSeen,
       selection: selectionApi,
     }),
     [
@@ -721,8 +699,6 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
       unifiedApi,
       pendingApi,
       mergePreferences,
-      isBranchUnread,
-      markBranchSeen,
       selectionApi,
     ],
   )

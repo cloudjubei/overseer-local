@@ -8,12 +8,12 @@ export const MAIN_PROJECT = 'main'
 export type ProjectContextValue = {
   isLoaded: boolean
 
-  activeProjectId: string
+  activeProjectId: string | undefined
   activeProject?: ProjectSpec
 
   projects: ProjectSpec[]
 
-  setActiveProjectId: (id: string) => void
+  setActiveProjectId: (id: string | undefined) => void
   getProjectById: (id: string) => ProjectSpec | undefined
   reorderStory: (projectId: string, payload: ReorderPayload) => Promise<ProjectSpec | undefined>
 
@@ -26,7 +26,7 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
   const { isAppSettingsLoaded, appSettings, setUserPreferences } = useAppSettings()
   const [isLoaded, setIsLoaded] = useState(false)
   const [initialLoad, setInitialLoad] = useState(true)
-  const [activeProjectId, setActiveProjectIdState] = useState<string>(MAIN_PROJECT)
+  const [activeProjectId, setActiveProjectIdState] = useState<string | undefined>(MAIN_PROJECT)
   const [projects, setProjects] = useState<ProjectSpec[]>([])
 
   // Load projects and subscribe to updates
@@ -79,6 +79,7 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!projects || projects.length === 0) return
+    if (activeProjectId === undefined) return
     const exists = projects.some((p) => p.id === activeProjectId)
     if (!exists) {
       setActiveProjectIdState(MAIN_PROJECT)
@@ -86,13 +87,13 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
   }, [projects, activeProjectId])
 
   const setActiveProjectId = useCallback(
-    (id: string) => {
+    (id: string | undefined) => {
       if (activeProjectId == id) {
         return
       }
       setActiveProjectIdState(id)
 
-      if (isAppSettingsLoaded) {
+      if (isAppSettingsLoaded && id) {
         setUserPreferences({ lastActiveProjectId: id })
       }
     },
@@ -108,7 +109,7 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
   )
 
   const activeProject: ProjectSpec | undefined = useMemo(() => {
-    return getProjectById(activeProjectId)
+    return activeProjectId ? getProjectById(activeProjectId) : undefined
   }, [projects, activeProjectId, getProjectById])
 
   const reorderStory = async (
