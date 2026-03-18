@@ -13,7 +13,7 @@ export type LocalStatus = {
   staged: LocalFileEntry[]
   unstaged: LocalFileEntry[]
   untracked: LocalFileEntry[]
-  conflicts?: any[]
+  conflicts?: string[]
 }
 
 export type GitLocalChangesProps = {
@@ -22,6 +22,8 @@ export type GitLocalChangesProps = {
   onStatusChange?: (status: LocalStatus) => void
   onBusyChange?: (busy: boolean) => void
   onErrorChange?: (error: string | undefined) => void
+  /** Called when the user clicks "Resolve Conflict" on a conflicted file row or in DiffViewer */
+  onResolveConflict?: (filePath: string) => void
 }
 
 export interface GitLocalChangesRef {
@@ -29,19 +31,18 @@ export interface GitLocalChangesRef {
 }
 
 export const GitLocalChanges = forwardRef<GitLocalChangesRef, GitLocalChangesProps>(
-  ({ projectId, className = '', onStatusChange, onBusyChange, onErrorChange }, ref) => {
+  ({ projectId, className = '', onStatusChange, onBusyChange, onErrorChange, onResolveConflict }, ref) => {
     const [loading, setLoading] = React.useState(true)
     const [error, setError] = React.useState<string | undefined>(undefined)
     const [status, setStatus] = React.useState<LocalStatus>({
       staged: [],
       unstaged: [],
       untracked: [],
+      conflicts: [],
     })
 
     const [selectedPath, setSelectedPath] = React.useState<string | undefined>(undefined)
-    const [selectedArea, setSelectedArea] = React.useState<'staged' | 'unstaged' | undefined>(
-      undefined,
-    )
+    const [selectedArea, setSelectedArea] = React.useState<'staged' | 'unstaged' | undefined>(undefined)
 
     // Vertical divider (left/right)
     const rootRef = React.useRef<HTMLDivElement | null>(null)

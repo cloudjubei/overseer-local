@@ -30,8 +30,11 @@
     "title": "TestScope",
     "type": "SCOPE",
     "active": true,
-    "projects": [],
+    "projects": [
+      "thefactory-tools",
+      "main"
+    ],
     "createdAt": "2026-03-18T01:03:56.476Z",
-    "updatedAt": "2026-03-18T01:03:58.111Z"
+    "updatedAt": "2026-03-18T20:46:20.266Z"
   }
 ]

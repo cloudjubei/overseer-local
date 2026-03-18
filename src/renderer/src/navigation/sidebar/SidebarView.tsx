@@ -138,21 +138,24 @@ export default function SidebarView({
   )
 
   // Filter out groups where all member projects are inactive (no visible members)
-  // Also only include active groups, and exclude SCOPE groups from main hierarchy
+  // Also only include active groups
   const activeGroups = useMemo(
     () =>
       groups.filter(
         (g) =>
           g.active !== false &&
-          g.type !== 'SCOPE' &&
           (g.projects || []).some((pid) => activeProjects.some((p) => p.id === pid)),
       ),
     [groups, activeProjects],
   )
 
+  // Only MAIN groups "own" projects in the sidebar tree — SCOPE groups are flat
+  // selectable rows and should not cause their projects to disappear from the
+  // ungrouped root list.
   const groupedProjectIds = useMemo(() => {
     const ids = new Set<string>()
     for (const g of activeGroups) {
+      if (g.type === 'SCOPE') continue
       if (g.projects) {
         for (const pid of g.projects) {
           ids.add(pid)

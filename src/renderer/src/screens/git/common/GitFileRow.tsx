@@ -2,11 +2,12 @@ import React from 'react'
 import Tooltip from '@renderer/components/ui/Tooltip'
 import { IconDelete } from '@renderer/components/ui/icons/Icons'
 import { IconRevert } from '@renderer/components/ui/icons/IconRevert'
+import { IconFastMerge } from '@renderer/components/ui/icons/IconFastMerge'
 import { PathDisplay } from '@renderer/components/ui/PathDisplay'
 import GitFileStatusIcon from './GitFileStatusIcon'
 import { GitFileChangesPills } from './GitFileChangesPills'
 
-export type LocalFileEntry = { path: string; status?: string; patch?: string; binary?: boolean }
+export type LocalFileEntry = { path: string; status?: string; patch?: string; binary?: boolean; isConflicted?: boolean }
 
 export default function GitFileRow({
   file,
@@ -15,6 +16,7 @@ export default function GitFileRow({
   onToggle,
   onReset,
   onRemove,
+  onResolveConflict,
   draggable,
   onDragStart,
   onClick,
@@ -25,13 +27,14 @@ export default function GitFileRow({
   onToggle: (file: LocalFileEntry) => void
   onReset: (file: LocalFileEntry) => void
   onRemove: (file: LocalFileEntry) => void
+  onResolveConflict?: (file: LocalFileEntry) => void
   draggable?: boolean
   onDragStart?: (e: React.DragEvent) => void
   onClick?: (e: React.MouseEvent) => void
 }) {
   return (
     <div
-      className={`group flex items-center justify-between gap-2 px-2 py-1 text-xs border-b border-neutral-200 dark:border-neutral-800 ${selected ? 'bg-sky-50 dark:bg-sky-900/25' : ''}`}
+      className={`group flex items-center justify-between gap-2 px-2 py-1 text-xs border-b border-neutral-200 dark:border-neutral-800 ${selected ? 'bg-sky-50 dark:bg-sky-900/25' : ''} ${file.isConflicted ? 'bg-red-50/50 dark:bg-red-900/10' : ''}`}
       draggable={draggable}
       onDragStart={onDragStart}
       onClick={onClick}
@@ -45,7 +48,7 @@ export default function GitFileRow({
           onClick={(e) => e.stopPropagation()}
           aria-label={checked ? 'Unstage file' : 'Stage file'}
         />
-        <GitFileStatusIcon status={file.status} />
+        <GitFileStatusIcon status={file.status} isConflicted={file.isConflicted} />
         <PathDisplay path={file.path} />
       </div>
 
@@ -56,6 +59,20 @@ export default function GitFileRow({
         </div>
         {/* Actions fade in on row hover */}
         <div className="col-start-1 row-start-1 flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          {file.isConflicted && onResolveConflict && (
+            <Tooltip content={'Resolve Conflict'} placement="bottom">
+              <button
+                className="btn-secondary btn-icon text-amber-600 hover:text-amber-700 dark:text-amber-500 dark:hover:text-amber-400"
+                aria-label="Resolve Conflict"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onResolveConflict(file)
+                }}
+              >
+                <IconFastMerge className="w-4 h-4" />
+              </button>
+            </Tooltip>
+          )}
           <Tooltip content={'Reset (discard local changes)'} placement="bottom">
             <button
               className="btn-secondary btn-icon text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"

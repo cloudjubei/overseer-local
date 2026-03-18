@@ -35,8 +35,11 @@ export default function GroupNavItem({
   const { isBadgeEnabled, isGitBadgeSubToggleEnabled, getGroupBadgeState } = useNotifications()
   const { appSettings } = useAppSettings()
 
-  // Auto-expand if the active project is in this group
+  const isScope = g.type === 'SCOPE'
+
+  // Auto-expand if the active project is in this group (MAIN only)
   const isActiveProjectInGroup =
+    !isScope &&
     activeSelectionType === 'project' &&
     activeProjectId &&
     groupProjects.some((p) => p.id === activeProjectId)
@@ -86,31 +89,40 @@ export default function GroupNavItem({
     aggShowGitIncoming ||
     aggShowGitUncommitted
 
+  // Badge visibility rules:
+  // - SCOPE groups: hide badges when this group IS active (the Chat nav item takes over)
+  // - MAIN groups: hide badges when this group IS active OR when it is expanded (projects show their own)
+  const showBadges = showAnyBadge && (isScope ? !isActiveGroup : !isActiveGroup && !isOpen)
+
   return (
     <li className="nav-li">
       <div
         className={classNames(
           'nav-item',
-          'pl-0 gap-0', // Remove left padding & gap so the chevron button spans the entire left edge
+          isScope ? 'pl-3' : 'pl-0 gap-0', // SCOPE rows have normal padding; MAIN rows use chevron layout
           accentClass,
           isActiveGroup && 'nav-item--active',
         )}
       >
-        <button
-          type="button"
-          onClick={() => setIsOpen((prev) => !prev)}
-          className="flex items-center justify-center hover:bg-black/5 dark:hover:bg-white/10 h-full w-[42px] rounded-l"
-          aria-expanded={isOpen}
-          aria-controls={`group-${g.id}`}
-        >
-          <IconChevron
-            className="w-4 h-4"
-            style={{
-              transform: isOpen ? 'rotate(90deg)' : 'none',
-              transition: 'transform 0.15s ease',
-            }}
-          />
-        </button>
+        {/* Chevron toggle — MAIN groups only */}
+        {!isScope && (
+          <button
+            type="button"
+            onClick={() => setIsOpen((prev) => !prev)}
+            className="flex items-center justify-center hover:bg-black/5 dark:hover:bg-white/10 h-full w-[42px] rounded-l"
+            aria-expanded={isOpen}
+            aria-controls={`group-${g.id}`}
+          >
+            <IconChevron
+              className="w-4 h-4"
+              style={{
+                transform: isOpen ? 'rotate(90deg)' : 'none',
+                transition: 'transform 0.15s ease',
+              }}
+            />
+          </button>
+        )}
+
         <button
           type="button"
           className="nav-item__label flex-1 text-left font-medium outline-none truncate h-full flex items-center"
@@ -119,7 +131,7 @@ export default function GroupNavItem({
           {g.title}
         </button>
 
-        {showAnyBadge && !isOpen && (
+        {showBadges && (
           <span className="nav-item__badges" aria-hidden>
             {aggShowAgents && (
               <NotificationBadge
@@ -173,7 +185,8 @@ export default function GroupNavItem({
         )}
       </div>
 
-      {isOpen && (
+      {/* Expandable project list — MAIN groups only */}
+      {!isScope && isOpen && (
         <div className="pl-3 mt-1 flex flex-col gap-1">
           <ul id={`group-${g.id}`} className="nav-list" aria-label={`${g.title} projects`}>
             {groupProjects.map((p) => (

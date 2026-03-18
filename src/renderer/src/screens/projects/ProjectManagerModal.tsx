@@ -41,7 +41,7 @@ export default function ProjectManagerModal({
   initialProjectId?: string
 }) {
   const { projects, getProjectById } = useProjectContext()
-  const { groups, getGroupForProject, reorderProject, setProjectGroup } = useProjectsGroups()
+  const { groups, getGroupForProject, updateGroup, reorderProject, setProjectGroup } = useProjectsGroups()
   const [error, _] = useState<string | null>(null)
 
   const [mode, setMode] = useState<ViewMode>(initialMode || 'list')
@@ -214,15 +214,47 @@ export default function ProjectManagerModal({
     try {
       if (mode === 'create') {
         await projectsService.createProject(payload)
-        // Also add the project into the MAIN group's projects list if one was selected
+        
+        // Add the project into the MAIN group's projects list if one was selected
         if (selectedGroupId) {
           await setProjectGroup(payload.id, selectedGroupId)
         }
+        
+        // Add the project into all selected SCOPE groups
+        for (const scopeId of payload.scopeGroupIds) {
+          const sg = groups.find(g => g.id === scopeId && g.type === 'SCOPE')
+          if (sg) {
+            const currentProj = sg.projects || []
+            if (!currentProj.includes(payload.id)) {
+               await updateGroup(scopeId, { projects: [...currentProj, payload.id] } as any)
+            }
+          }
+        }
       } else if (mode === 'edit' && editingId) {
         await projectsService.updateProject(editingId, payload)
+        
         // Update MAIN group membership in the group's projects list if it changed
         if (selectedGroupId !== initialGroupId) {
           await setProjectGroup(editingId, selectedGroupId)
+        }
+        
+        // Reconcile SCOPE groups membership:
+        const currentScopeGroups = groups.filter(g => g.type === 'SCOPE')
+        for (const sg of currentScopeGroups) {
+          const hasProject = (sg.projects || []).includes(editingId)
+          const shouldHaveProject = payload.scopeGroupIds.includes(sg.id)
+          
+          if (hasProject && !shouldHaveProject) {
+            // Remove project from this scope group
+            await updateGroup(sg.id, {
+              projects: sg.projects.filter(pid => pid !== editingId)
+            } as any)
+          } else if (!hasProject && shouldHaveProject) {
+            // Add project to this scope group
+            await updateGroup(sg.id, {
+              projects: [...(sg.projects || []), editingId]
+            } as any)
+          }
         }
       }
     } catch (e: any) {

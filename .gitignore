@@ -102,7 +102,6 @@ dist/
 .factory/.temp
 .factory/chats
 .factory/runs
-.factory/code_intel.json
 
 # Vendorized build artifacts
 vendor/

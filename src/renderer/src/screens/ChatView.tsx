@@ -101,7 +101,7 @@ export default function ChatView() {
   const { storiesById, featuresById } = useStories()
   const { getChatIfExists, chats, chatsByProjectId } = useChats()
   const { hasUnreadForProject } = useChatUnread()
-  const { markNotificationsByMetadata } = useNotifications()
+  const { markNotificationsByMetadata, getGroupBadgeState } = useNotifications()
 
   // Helpers for titles
   const getProjectTitle = (id?: string) => {
@@ -295,7 +295,9 @@ export default function ChatView() {
 
   // Seed from agent run history when switching to a run context
 
-  // Header action: Categories | History switch with unread dot hint if any unread in project
+  // Header action: Categories | History switch with unread dot hint.
+  // When a group is selected, derive unread state from the group's aggregate badge.
+  // When a project is selected, use the per-project unread check as before.
   const headerAction = useMemo(() => {
     const seg = (
       <SegmentedControl
@@ -309,14 +311,23 @@ export default function ChatView() {
         size="sm"
       />
     )
-    const showDot = hasUnreadForProject(activeProjectId)
+
+    let showDot: boolean
+    if (activeSelectionType === 'group' && activeGroupId) {
+      // Show dot when the active group has any unread chat messages across its projects
+      const groupBadge = getGroupBadgeState(activeGroupId)
+      showDot = groupBadge.chat_messages.unread > 0 || groupBadge.chat_messages.thinking
+    } else {
+      showDot = hasUnreadForProject(activeProjectId)
+    }
+
     return (
       <div className="flex items-center gap-2">
         {seg}
-        {showDot && <DotBadge title={'Unread chats in this project'} />}
+        {showDot && <DotBadge title={activeSelectionType === 'group' ? 'Unread chats in this group' : 'Unread chats in this project'} />}
       </div>
     )
-  }, [mode, activeProjectId, hasUnreadForProject])
+  }, [mode, activeProjectId, activeGroupId, activeSelectionType, hasUnreadForProject, getGroupBadgeState])
 
   const collapsedLabel = mode === 'categories' ? 'CATEGORIES' : 'HISTORY'
 

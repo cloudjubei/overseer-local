@@ -123,7 +123,10 @@ export function GitActionsPanel({
       if (!res?.ok) {
         alert(`Apply stash failed: ${res?.error || 'Unknown error'}`)
       } else {
-        if (window.confirm('Stash applied successfully. Do you want to drop it now?')) {
+        const stashes = unified.get(activeProjectId)?.stashes || []
+        const stash = stashes.find((s) => s.ref === selectedStashRef)
+        const stashName = stash?.message || selectedStashRef
+        if (window.confirm(`Stash applied successfully. Do you want to drop "${stashName}" now?`)) {
           const dropRes = await gitService.removeStash(activeProjectId, {
             stashRef: selectedStashRef,
           })
@@ -141,7 +144,10 @@ export function GitActionsPanel({
 
   const handleDeleteStash = async () => {
     if (!activeProjectId || !selectedStashRef || busy) return
-    if (!window.confirm(`Are you sure you want to drop stash ${selectedStashRef}?`)) return
+    const stashes = unified.get(activeProjectId)?.stashes || []
+    const stash = stashes.find((s) => s.ref === selectedStashRef)
+    const stashName = stash?.message || selectedStashRef
+    if (!window.confirm(`Are you sure you want to drop stash "${stashName}"?`)) return
     setBusy(true)
     try {
       const res = await gitService.removeStash(activeProjectId, { stashRef: selectedStashRef })
@@ -270,17 +276,30 @@ export function GitActionsPanel({
                   }
                 />
                 {selectedBranch.isLocal && (
-                  <GitActionButton
-                    icon={<IconFastMerge className="w-5 h-5" />}
-                    label="Merge"
-                    onClick={() => onOpenMerge(currentBranchName || 'main', selectedBranch.name)}
-                    disabled={busy || !currentBranchName}
-                    tooltip={
-                      currentBranchName
-                        ? `Merge ${selectedBranch.name} → ${currentBranchName}`
-                        : 'Current branch unknown'
-                    }
-                  />
+                  <>
+                    <GitActionButton
+                      icon={<IconFastMerge className="w-5 h-5" />}
+                      label="Merge"
+                      onClick={() => onOpenMerge(currentBranchName || 'main', selectedBranch.name)}
+                      disabled={busy || !currentBranchName}
+                      tooltip={
+                        currentBranchName
+                          ? `Merge ${selectedBranch.name} → ${currentBranchName}`
+                          : 'Current branch unknown'
+                      }
+                    />
+                    <GitActionButton
+                      icon={<IconFastMerge className="w-5 h-5 transform rotate-180" />}
+                      label="Merge In"
+                      onClick={() => onOpenMerge(selectedBranch.name, currentBranchName || 'main')}
+                      disabled={busy || !currentBranchName}
+                      tooltip={
+                        currentBranchName
+                          ? `Merge ${currentBranchName} → ${selectedBranch.name}`
+                          : 'Current branch unknown'
+                      }
+                    />
+                  </>
                 )}
               </>
             )}

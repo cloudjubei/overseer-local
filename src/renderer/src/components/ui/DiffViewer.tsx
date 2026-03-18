@@ -8,6 +8,7 @@ import {
 } from '../chat/tool-popups/diffUtils'
 import { PathDisplay } from './PathDisplay'
 import { GitFileChangesPills } from '@renderer/screens/git/common/GitFileChangesPills'
+import { IconWarningTriangle } from './icons/IconWarningTriangle'
 
 export interface DiffViewerProps {
   path?: string
@@ -23,6 +24,10 @@ export interface DiffViewerProps {
   /** Called when the user wants to discard (reset) a patch chunk — no staging, just discard. */
   onDiscardPatch?: (patch: string) => void
   isStaged?: boolean
+  /** When true the file has unresolved merge conflict markers */
+  isConflicted?: boolean
+  /** Opens the MergeConflictResolver for this file */
+  onResolveConflict?: () => void
 }
 
 export function DiffViewer({
@@ -37,8 +42,9 @@ export function DiffViewer({
   onApplyPatch,
   onDiscardPatch,
   isStaged,
+  isConflicted,
+  onResolveConflict,
 }: DiffViewerProps) {
-  // Edit mode is only available when an apply handler is provided
   const isEditable = !!onApplyPatch
 
   const [selectable, setSelectable] = useState(false)
@@ -53,11 +59,8 @@ export function DiffViewer({
   const toggleLineSelection = (hunkIndex: number, lineIndex: number) => {
     const newSelection = new Set(selectedLines)
     const key = `${hunkIndex}:${lineIndex}`
-    if (newSelection.has(key)) {
-      newSelection.delete(key)
-    } else {
-      newSelection.add(key)
-    }
+    if (newSelection.has(key)) newSelection.delete(key)
+    else newSelection.add(key)
     setSelectedLines(newSelection)
   }
 
@@ -66,23 +69,16 @@ export function DiffViewer({
     const hunks = parseUnifiedDiff(patch)
     const hunk = hunks[hunkIndex]
     if (!hunk) return
-
     const newSelection = new Set(selectedLines)
     const modLines = hunk.lines
       .map((l, idx) => ({ l, idx }))
       .filter(({ l }) => l.type === 'add' || l.type === 'del')
-
     const isAllSelected = modLines.every(({ idx }) => newSelection.has(`${hunkIndex}:${idx}`))
-
     modLines.forEach(({ idx }) => {
       const key = `${hunkIndex}:${idx}`
-      if (isAllSelected) {
-        newSelection.delete(key)
-      } else {
-        newSelection.add(key)
-      }
+      if (isAllSelected) newSelection.delete(key)
+      else newSelection.add(key)
     })
-
     setSelectedLines(newSelection)
   }
 
@@ -228,7 +224,7 @@ export function DiffViewer({
         )}
       </div>
 
-      {/* Diff area — single scrollable container (vertical only), diff fills edge-to-edge */}
+      {/* Diff area */}
       <div className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 w-full">
         {path ? (
           patch ? (

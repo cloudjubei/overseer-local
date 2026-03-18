@@ -46,7 +46,9 @@ export function useNotifications() {
   const { getProjectRunningCount, getCompletedUnreadCount } = useAgents()
   const { getGitDerivedBadges } = useGit()
 
-  const [projectPrefsByPid, setProjectPrefsByPid] = useState<Record<string, ProjectSettings['notifications']>>({})
+  const [projectPrefsByPid, setProjectPrefsByPid] = useState<
+    Record<string, ProjectSettings['notifications']>
+  >({})
 
   const loadPrefs = useCallback(async (pid?: string) => {
     if (!pid) return
@@ -81,7 +83,7 @@ export function useNotifications() {
     (category: NotificationCategory, pid?: string): boolean => {
       // Must be enabled globally AND in the project
       if (systemSettings.notificationsEnabled?.[category] === false) return false
-      
+
       const key = pid || activeProject?.id
       if (!key) return true
       const p = projectPrefsByPid[key] || DEFAULT_PROJECT_SETTINGS.notifications
@@ -161,11 +163,17 @@ export function useNotifications() {
     (groupId: string): ProjectBadgeState => {
       const g = groups.find((x) => x.id === groupId)
       if (!g) return DEFAULT_PROJECT_BADGE_STATE
+      // SCOPE groups never aggregate from member projects — they only have their own
+      // group-level chat badges which are not tracked here, so return empty state.
+      if (g.type === 'SCOPE') return DEFAULT_PROJECT_BADGE_STATE
+
+      // MAIN groups aggregate badges from all member projects
       const agg: ProjectBadgeState = {
         agent_runs: { running: 0, unread: 0 },
         chat_messages: { unread: 0, thinking: false },
         git_changes: { incoming: 0, uncommitted: false },
       }
+
       for (const pid of g.projects || []) {
         const st = badgeStateByProject[pid]
         if (!st) continue

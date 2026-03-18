@@ -2711,6 +2711,8 @@
           "@renderer/components/ui/icons/Icons",
           "@renderer/components/ui/icons/IconRevert/IconRevert",
           "@renderer/components/ui/icons/IconRevert",
+          "@renderer/components/ui/icons/IconFastMerge/IconFastMerge",
+          "@renderer/components/ui/icons/IconFastMerge",
           "@renderer/components/ui/PathDisplay/PathDisplay",
           "@renderer/components/ui/PathDisplay",
           "@renderer/components/ui/Tooltip"
@@ -2719,6 +2721,7 @@
       "GitFileStatusIcon": {
         "path": "src/renderer/src/screens/git/common/GitFileStatusIcon.tsx",
         "dependencies": [
+          "IconWarningTriangle",
           "IconFileAdded",
           "IconFileDeleted",
           "IconFileModified"
@@ -4142,6 +4145,8 @@
           "@renderer/components/ui/icons/Icons",
           "@renderer/components/ui/icons/IconRevert/IconRevert",
           "@renderer/components/ui/icons/IconRevert",
+          "@renderer/components/ui/icons/IconFastMerge/IconFastMerge",
+          "@renderer/components/ui/icons/IconFastMerge",
           "@renderer/components/ui/PathDisplay/PathDisplay",
           "@renderer/components/ui/PathDisplay",
           "@renderer/components/ui/Tooltip"
@@ -4150,6 +4155,7 @@
       "LocalStatus": {
         "path": "src/renderer/src/screens/git/GitLocalChanges.tsx",
         "dependencies": [
+          "Set",
           "LocalFileEntry",
           "@renderer/services/gitService/gitService",
           "@renderer/services/gitService",
@@ -5211,6 +5217,24 @@
           "Zoom",
           "HoverInfo",
           "thefactory-tools/Story"
+        ]
+      },
+      "ProjectWizardModal": {
+        "path": "src/renderer/src/screens/projects/wizard/ProjectWizardModal.tsx",
+        "dependencies": [
+          "WizardFlowType",
+          "ProjectWizardModalProps",
+          "@renderer/components/ui/Modal/Modal",
+          "@renderer/components/ui/Modal"
+        ]
+      },
+      "ProjectWizardTypeStep": {
+        "path": "src/renderer/src/screens/projects/wizard/ProjectWizardTypeStep.tsx",
+        "dependencies": [
+          "ProjectWizardTypeStepProps",
+          "@renderer/components/ui/icons/Icons/IconPlus",
+          "@renderer/components/ui/icons/Icons/IconFolder",
+          "@renderer/components/ui/icons/Icons"
         ]
       },
       "ReferenceKind": {
@@ -6859,6 +6883,13 @@
           "@renderer/services/gitService",
           "@renderer/services/gitCredentialsService",
           "@renderer/services/llmConfigsService"
+        ]
+      },
+      "WizardFlowType": {
+        "path": "src/renderer/src/screens/projects/wizard/ProjectWizardModal.tsx",
+        "dependencies": [
+          "@renderer/components/ui/Modal/Modal",
+          "@renderer/components/ui/Modal"
         ]
       },
       "WriteToolsPreview": {
@@ -8800,6 +8831,8 @@
           "@renderer/components/ui/icons/Icons",
           "@renderer/components/ui/icons/IconRevert/IconRevert",
           "@renderer/components/ui/icons/IconRevert",
+          "@renderer/components/ui/icons/IconFastMerge/IconFastMerge",
+          "@renderer/components/ui/icons/IconFastMerge",
           "@renderer/components/ui/PathDisplay/PathDisplay",
           "@renderer/components/ui/PathDisplay",
           "@renderer/components/ui/Tooltip"
@@ -8808,6 +8841,7 @@
       "GitFileStatusIcon": {
         "path": "renderer/src/screens/git/common/GitFileStatusIcon.tsx",
         "dependencies": [
+          "IconWarningTriangle",
           "IconFileAdded",
           "IconFileDeleted",
           "IconFileModified"
@@ -10231,6 +10265,8 @@
           "@renderer/components/ui/icons/Icons",
           "@renderer/components/ui/icons/IconRevert/IconRevert",
           "@renderer/components/ui/icons/IconRevert",
+          "@renderer/components/ui/icons/IconFastMerge/IconFastMerge",
+          "@renderer/components/ui/icons/IconFastMerge",
           "@renderer/components/ui/PathDisplay/PathDisplay",
           "@renderer/components/ui/PathDisplay",
           "@renderer/components/ui/Tooltip"
@@ -10239,6 +10275,7 @@
       "LocalStatus": {
         "path": "renderer/src/screens/git/GitLocalChanges.tsx",
         "dependencies": [
+          "Set",
           "LocalFileEntry",
           "@renderer/services/gitService/gitService",
           "@renderer/services/gitService",
@@ -11300,6 +11337,24 @@
           "Zoom",
           "HoverInfo",
           "thefactory-tools/Story"
+        ]
+      },
+      "ProjectWizardModal": {
+        "path": "renderer/src/screens/projects/wizard/ProjectWizardModal.tsx",
+        "dependencies": [
+          "WizardFlowType",
+          "ProjectWizardModalProps",
+          "@renderer/components/ui/Modal/Modal",
+          "@renderer/components/ui/Modal"
+        ]
+      },
+      "ProjectWizardTypeStep": {
+        "path": "renderer/src/screens/projects/wizard/ProjectWizardTypeStep.tsx",
+        "dependencies": [
+          "ProjectWizardTypeStepProps",
+          "@renderer/components/ui/icons/Icons/IconPlus",
+          "@renderer/components/ui/icons/Icons/IconFolder",
+          "@renderer/components/ui/icons/Icons"
         ]
       },
       "ReferenceKind": {
@@ -12950,6 +13005,13 @@
           "@renderer/services/llmConfigsService"
         ]
       },
+      "WizardFlowType": {
+        "path": "renderer/src/screens/projects/wizard/ProjectWizardModal.tsx",
+        "dependencies": [
+          "@renderer/components/ui/Modal/Modal",
+          "@renderer/components/ui/Modal"
+        ]
+      },
       "WriteToolsPreview": {
         "path": "renderer/src/components/chat/ToolCall/renderers/WriteToolsPreview.tsx",
         "dependencies": [
@@ -13789,7 +13851,6 @@
           "AgentTools",
           "AbortSignal",
           "ChatsTools",
-          "CompletionTools",
           "GitTools",
           "Tools",
           "Feature",
@@ -13807,7 +13868,6 @@
           "AbortSignal",
           "LLMCostsTools",
           "ChatsTools",
-          "CompletionTools",
           "WebSearchApiKeys",
           "GithubCredentials",
           "ChatContextAgentRunFeature",
@@ -13825,7 +13885,6 @@
           "LLMCostsTools",
           "AgentTools",
           "ChatsTools",
-          "CompletionTools",
           "GitTools",
           "Tools",
           "ChatContextAgentRunFeature",
@@ -14689,6 +14748,10 @@
           "node:fs/promises"
         ]
       },
+      "constructSystemPrompt": {
+        "path": "dist/agentRunner/AgentRunnerIsolatedTools.js",
+        "dependencies": []
+      },
       "convertFloat": {
         "path": "dist/utils.js",
         "dependencies": []
@@ -14761,7 +14824,7 @@
         "path": "dist/agentRunner/AgentRunnerTools.js",
         "description": "Wraps completion + chat persistence to provide a simple API for",
         "dependencies": [
-          "AgentRunnerIsolatedTools"
+          "node:fs/promises"
         ]
       },
       "createAgentTools": {

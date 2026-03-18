@@ -30,6 +30,7 @@ export type ProjectsGroupsContextValue = {
   reorderGroup: (payload: ReorderPayload) => Promise<ProjectsGroups>
 
   setProjectGroup: (projectId: string, groupId: string | null) => Promise<void>
+  setProjectScopeGroups: (projectId: string, scopeGroupIds: string[]) => Promise<void>
 }
 
 const ProjectsGroupsContext = createContext<ProjectsGroupsContextValue | null>(null)
@@ -190,6 +191,54 @@ export function ProjectsGroupsProvider({ children }: { children: React.ReactNode
     })
   }
 
+  // Sync a project's membership across all SCOPE groups
+  const setProjectScopeGroups = async (projectId: string, scopeGroupIds: string[]): Promise<void> => {
+    const scopes = groups.filter((g) => g.type === 'SCOPE')
+
+    for (const g of scopes) {
+      const projects = g.projects || []
+      const hasProject = projects.includes(projectId)
+      const shouldHaveProject = scopeGroupIds.includes(g.id)
+
+      if (hasProject && !shouldHaveProject) {
+        const newProjects = projects.filter((pid) => pid !== projectId)
+        await projectsGroupsService.updateProjectsGroup(
+          g.id,
+          // @ts-ignore allow projects field in patch
+          { projects: newProjects } as any,
+        )
+      } else if (!hasProject && shouldHaveProject) {
+        const newProjects = [...projects, projectId]
+        await projectsGroupsService.updateProjectsGroup(
+          g.id,
+          // @ts-ignore allow projects field in patch
+          { projects: newProjects } as any,
+        )
+      }
+    }
+
+    // optimistic local update; subscription should reconcile
+    setGroups((prev) => {
+      let next = [...prev]
+      const currentScopes = next.filter((g) => g.type === 'SCOPE')
+      for (const g of currentScopes) {
+        const projects = g.projects || []
+        const hasProject = projects.includes(projectId)
+        const shouldHaveProject = scopeGroupIds.includes(g.id)
+        if (hasProject && !shouldHaveProject) {
+          next = next.map((lg) =>
+            lg.id === g.id ? { ...lg, projects: projects.filter((pid) => pid !== projectId) } : lg,
+          )
+        } else if (!hasProject && shouldHaveProject) {
+          next = next.map((lg) =>
+            lg.id === g.id ? { ...lg, projects: [...projects, projectId] } : lg,
+          )
+        }
+      }
+      return next
+    })
+  }
+
   const value = useMemo<ProjectsGroupsContextValue>(
     () => ({
       groups,
@@ -206,6 +255,7 @@ export function ProjectsGroupsProvider({ children }: { children: React.ReactNode
       reorderProject,
       reorderGroup,
       setProjectGroup,
+      setProjectScopeGroups,
     }),
     [
       groups,
