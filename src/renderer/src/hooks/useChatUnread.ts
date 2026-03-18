@@ -51,6 +51,8 @@ export type UseChatUnread = {
   unreadKeys: Set<string>
   // Count of unread chats per project id
   unreadCountByProject: Map<string, number>
+  // Count of total unread messages per project id
+  totalUnreadCountByProject: Map<string, number>
   hasUnreadForProject: (projectId?: string) => boolean
   markReadByKey: (chatKey: string, readTime?: string) => void
   markReadByContext: (ctx: ChatContext, readTime?: string) => void
@@ -122,33 +124,43 @@ export function useChatUnread(): UseChatUnread {
     return keys
   }, [chatsByProjectId, version])
 
-  const unreadCountByProject = useMemo(() => {
-    const map = new Map<string, number>()
+  const { unreadCountByProject, totalUnreadCountByProject } = useMemo(() => {
+    const unreadChats = new Map<string, number>()
+    const totalUnread = new Map<string, number>()
+    
     for (const [projectId, arr] of Object.entries(chatsByProjectId)) {
-      let n = 0
+      let chatsCount = 0
+      let msgsCount = 0
       for (const c of arr) {
         const msgs = c.chat.messages || []
-        // Find last assistant message iso
-        let lastAssistantIso: string | undefined
-        for (let i = msgs.length - 1; i >= 0; i--) {
-          const ts = assistantTimestamp(msgs[i])
-          if (ts) {
-            lastAssistantIso = ts
-            break
-          }
-        }
-        if (!lastAssistantIso) continue
+        const assistantMsgs = msgs.filter(isAssistant)
+        if (assistantMsgs.length === 0) continue
+
         const lastRead = readLastRead(c.key)
         if (!lastRead) {
-          n += 1
+          chatsCount += 1
+          msgsCount += assistantMsgs.length
           continue
         }
-        if (lastAssistantIso.localeCompare(lastRead) > 0) n += 1
+
+        let unreadInChat = 0
+        for (const m of assistantMsgs) {
+          const ts = assistantTimestamp(m)
+          if (ts && ts.localeCompare(lastRead) > 0) {
+            unreadInChat += 1
+          }
+        }
+        
+        if (unreadInChat > 0) {
+          chatsCount += 1
+          msgsCount += unreadInChat
+        }
       }
-      map.set(projectId, n)
+      unreadChats.set(projectId, chatsCount)
+      totalUnread.set(projectId, msgsCount)
     }
-    return map
-  }, [chatsByProjectId, unreadKeys])
+    return { unreadCountByProject: unreadChats, totalUnreadCountByProject: totalUnread }
+  }, [chatsByProjectId, version])
 
   const hasUnreadForProject = useCallback(
     (projectId?: string) => {
@@ -190,6 +202,7 @@ export function useChatUnread(): UseChatUnread {
   return {
     unreadKeys,
     unreadCountByProject,
+    totalUnreadCountByProject,
     hasUnreadForProject,
     markReadByKey,
     markReadByContext,

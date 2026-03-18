@@ -45,6 +45,7 @@ const IPC_HANDLER_KEYS = {
   COMPLETION_TOOLS_RETRY: 'completion:tools-retry',
   COMPLETION_SEND: 'completion:send',
   COMPLETION_ABORT: 'complation:abort',
+  COMPLETION_START_AGENT_RUN: 'complation:start-agent-run',
 
   // Files
   FILES_UPDATE_ALL_TOOLS: 'files:update-all-tools',

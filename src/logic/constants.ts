@@ -7,7 +7,7 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
     storiesListViewSorting: 'index_desc',
     storiesListViewStatusFilter: 'all',
     sidebarCollapsed: false,
-    shortcutsModifier: navigator.userAgent.toLowerCase().includes('mac') ? 'meta' : 'ctrl',
+    shortcutsModifier: navigator.userAgent?.toLowerCase().includes('mac') ? 'meta' : 'ctrl',
     shortcuts: {
       commandMenu: 'Mod+K',
       newStory: 'Mod+N',
@@ -19,13 +19,6 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
     osNotificationsEnabled: true,
     soundsEnabled: true,
     displayDuration: 5,
-  },
-  webSearchApiKeys: {},
-  database: {},
-}
-
-export const DEFAULT_PROJECT_SETTINGS: ProjectSettings = {
-  notifications: {
     notificationsEnabled: {
       agent_runs: true,
       chat_messages: true,
@@ -36,9 +29,19 @@ export const DEFAULT_PROJECT_SETTINGS: ProjectSettings = {
       chat_messages: true,
       git_changes: true,
     },
+    badgeColors: {
+      agent_runs: 'blue',
+      chat_messages: 'red',
+      git_changes: 'orange',
+    },
+    chatBadgeCountMode: 'chats_with_unread',
     gitBadgeSubToggles: {
       incoming_commits: true,
       uncommitted_changes: true,
     },
   },
+  webSearchApiKeys: {},
+  database: {},
 }
+
+export const DEFAULT_PROJECT_SETTINGS: ProjectSettings = {}

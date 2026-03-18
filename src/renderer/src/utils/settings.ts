@@ -20,6 +20,26 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
     osNotificationsEnabled: true,
     soundsEnabled: true,
     displayDuration: 5,
+    notificationsEnabled: {
+      agent_runs: true,
+      chat_messages: true,
+      git_changes: true,
+    },
+    badgesEnabled: {
+      agent_runs: true,
+      chat_messages: true,
+      git_changes: true,
+    },
+    badgeColors: {
+      agent_runs: 'blue',
+      chat_messages: 'red',
+      git_changes: 'orange',
+    },
+    chatBadgeCountMode: 'chats_with_unread',
+    gitBadgeSubToggles: {
+      incoming_commits: true,
+      uncommitted_changes: true,
+    },
   },
   webSearchApiKeys: {},
   database: {},

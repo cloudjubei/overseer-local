@@ -2,16 +2,23 @@ import type { BrowserWindow } from 'electron'
 import IPC_HANDLER_KEYS from '../../preload/ipcHandlersKeys'
 import { createAgentRunnerTools } from 'thefactory-tools'
 import type {
+  AgentRunnerStartRunOptions,
   AgentRunnerTools,
+  AgentRunParams,
+  AgentRunType,
   ChatContext,
+  ChatContextAgentRun,
+  ChatContextAgentRunFeature,
   CompletionArgs,
   CompletionMessage,
   CompletionResponse,
   CompletionResponseTurns,
   CompletionSettings,
   CompletionToolsArgs,
+  GithubCredentials,
   LLMConfig,
   ToolCall,
+  WebSearchApiKeys,
 } from 'thefactory-tools'
 import BaseManager from '../BaseManager'
 import FactoryToolsManager from './FactoryToolsManager'
@@ -108,6 +115,12 @@ export default class FactoryCompletionManager extends BaseManager {
       config,
     }) => this.retryCompletionTools(projectId, chatContext, systemPrompt, settings, config)
 
+    handlers[IPC_HANDLER_KEYS.COMPLETION_START_AGENT_RUN] = async ({
+      params,
+      settings,
+      isolated,
+    }) => this.startAgentRun(params, settings, isolated)
+
     return handlers
   }
 
@@ -175,6 +188,28 @@ export default class FactoryCompletionManager extends BaseManager {
       return await this.agentRunnerTools.resumeCompletionTools({ ...args, toolsGranted })
     } finally {
       this.cleanupAbort(chatContext)
+    }
+  }
+  async startAgentRun(
+    params: AgentRunParams,
+    settings: CompletionSettings,
+    isolated: boolean,
+  ): Promise<void> {
+    const chatsTools = this.chatsManager.getTools()
+    const llmCostsTools = this.factoryLLMCostsManager.getTools()
+    const abortSignal = this.createAbortSignal(params.chatContext)
+    const opts: AgentRunnerStartRunOptions = {
+      params,
+      chatsTools,
+      llmCostsTools,
+      abortSignal,
+      isolated,
+    }
+
+    try {
+      await this.agentRunnerTools.startAgentRun(opts)
+    } finally {
+      this.cleanupAbort(params.chatContext)
     }
   }
 

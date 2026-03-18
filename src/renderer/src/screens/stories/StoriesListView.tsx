@@ -555,7 +555,7 @@ export default function StoriesListView() {
                                   run={storyRun}
                                   onClick={(e) => {
                                     e.stopPropagation()
-                                    navigateAgentRun(storyRun.context.agentRunId!)
+                                    navigateAgentRun(storyRun.context)
                                   }}
                                 />
                               )}

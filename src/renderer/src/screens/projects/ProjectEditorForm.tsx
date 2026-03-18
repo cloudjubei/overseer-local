@@ -146,7 +146,24 @@ export function ProjectEditorForm({
   const [isCodeInfoModalOpen, setIsCodeInfoModalOpen] = useState(false)
   const idInputRef = useRef<HTMLInputElement>(null)
 
-  const groupsOptions = useMemo(() => groups, [groups])
+  // Separate MAIN and SCOPE groups for the two distinct UI controls
+  const mainGroups = useMemo(() => groups.filter((g) => g.type === 'MAIN'), [groups])
+  const scopeGroups = useMemo(() => groups.filter((g) => g.type === 'SCOPE'), [groups])
+
+  const scopeGroupIds: string[] = useMemo(
+    () => (Array.isArray(form.scopeGroupIds) ? form.scopeGroupIds : []),
+    [form.scopeGroupIds],
+  )
+
+  function toggleScopeGroup(groupId: string) {
+    setForm((s: any) => {
+      const current: string[] = Array.isArray(s.scopeGroupIds) ? s.scopeGroupIds : []
+      const next = current.includes(groupId)
+        ? current.filter((id) => id !== groupId)
+        : [...current, groupId]
+      return { ...s, scopeGroupIds: next }
+    })
+  }
 
   return (
     <form id={formId} className="story-form" onSubmit={onSubmit}>
@@ -183,18 +200,19 @@ export function ProjectEditorForm({
         inputRef={idInputRef}
       />
 
+      {/* MAIN group — single dropdown */}
       <div className="form-row">
-        <label>Group</label>
+        <label>Main Group</label>
         <Select
           value={selectedGroupId ?? '__none__'}
           onValueChange={(v) => onSelectedGroupIdChange(v === '__none__' ? null : v)}
         >
           <SelectTrigger className="ui-select w-full max-w-md">
-            <SelectValue placeholder="Select group" />
+            <SelectValue placeholder="Select main group" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="__none__">Uncategorized</SelectItem>
-            {groupsOptions.map((g) => (
+            <SelectItem value="__none__">None</SelectItem>
+            {mainGroups.map((g) => (
               <SelectItem key={g.id} value={g.id}>
                 {g.title}
               </SelectItem>
@@ -202,6 +220,32 @@ export function ProjectEditorForm({
           </SelectContent>
         </Select>
       </div>
+
+      {/* SCOPE groups — multi-select via checkboxes */}
+      {scopeGroups.length > 0 && (
+        <div className="form-row">
+          <label>Scope Groups</label>
+          <div className="flex flex-col gap-1.5 mt-0.5">
+            {scopeGroups.map((g) => {
+              const checked = scopeGroupIds.includes(g.id)
+              return (
+                <label
+                  key={g.id}
+                  className="flex items-center gap-2 cursor-pointer text-sm select-none"
+                >
+                  <input
+                    type="checkbox"
+                    className="accent-[var(--accent-primary)] h-4 w-4 cursor-pointer"
+                    checked={checked}
+                    onChange={() => toggleScopeGroup(g.id)}
+                  />
+                  <span>{g.title}</span>
+                </label>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       <TextInput
         label="Title"
@@ -246,7 +290,7 @@ export function ProjectEditorForm({
       <div className="form-row flex items-center gap-4">
         <label htmlFor="active-project-switch">Active Project</label>
         <Switch
-          id="active-project-switch"
+          key="active-project-switch"
           checked={form.active ?? true}
           onCheckedChange={(checked) => setForm((s: any) => ({ ...s, active: checked }))}
         />
@@ -280,7 +324,7 @@ export function ProjectEditorForm({
       <div className="form-row flex items-center gap-4">
         <label htmlFor="coding-project-switch">Coding Project</label>
         <Switch
-          id="coding-project-switch"
+          key="coding-project-switch"
           checked={!!form.codeInfo}
           onCheckedChange={(checked) => {
             if (checked) {

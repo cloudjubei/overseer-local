@@ -860,7 +860,9 @@
           "Promise",
           "thefactory-tools/AgentType",
           "thefactory-tools/Chat",
-          "thefactory-tools/ChatContext"
+          "thefactory-tools/ChatContext",
+          "thefactory-tools/utils/getChatContextKey",
+          "thefactory-tools/utils"
         ]
       },
       "AgentsProvider": {
@@ -872,7 +874,9 @@
           "Promise",
           "thefactory-tools/Chat",
           "Set",
-          "ReactNode"
+          "ReactNode",
+          "thefactory-tools/utils/getChatContextKey",
+          "thefactory-tools/utils"
         ]
       },
       "AgentsView": {
@@ -992,6 +996,12 @@
           "FileDisplay",
           "thefactory-tools/utils/inferFileType",
           "thefactory-tools/utils"
+        ]
+      },
+      "BadgeColor": {
+        "path": "src/types/settings.ts",
+        "dependencies": [
+          "thefactory-tools/WebSearchApiKeys"
         ]
       },
       "BaseManager": {
@@ -1576,6 +1586,7 @@
         "path": "src/renderer/src/services/completionService.ts",
         "dependencies": [
           "CompletionService",
+          "thefactory-tools/AgentRunParams",
           "thefactory-tools/ChatContext",
           "thefactory-tools/CompletionMessage",
           "thefactory-tools/CompletionResponseTurns",
@@ -1588,9 +1599,10 @@
         "dependencies": [
           "Promise",
           "thefactory-tools/ChatContext",
+          "thefactory-tools/CompletionSettings",
+          "thefactory-tools/AgentRunParams",
           "thefactory-tools/CompletionResponseTurns",
           "thefactory-tools/LLMConfig",
-          "thefactory-tools/CompletionSettings",
           "thefactory-tools/CompletionMessage"
         ]
       },
@@ -1955,6 +1967,8 @@
           "thefactory-tools/ChatContext",
           "thefactory-tools/CompletionArgs",
           "AbortSignal",
+          "thefactory-tools/AgentRunnerStartRunOptions",
+          "thefactory-tools/AgentRunParams",
           "thefactory-tools/CompletionResponseTurns",
           "thefactory-tools/CompletionMessage",
           "thefactory-tools/CompletionResponse",
@@ -1967,6 +1981,11 @@
           "AbortController",
           "thefactory-tools/AgentRunnerTools",
           "thefactory-tools/createAgentRunnerTools",
+          "thefactory-tools/AgentRunType",
+          "thefactory-tools/ChatContextAgentRun",
+          "thefactory-tools/ChatContextAgentRunFeature",
+          "thefactory-tools/GithubCredentials",
+          "thefactory-tools/WebSearchApiKeys",
           "thefactory-tools/utils/getChatContextKey",
           "thefactory-tools/utils"
         ]
@@ -2423,6 +2442,12 @@
           "thefactory-tools/PricingState",
           "Promise",
           "thefactory-tools/ModelPrice"
+        ]
+      },
+      "getPRUrl": {
+        "path": "src/renderer/src/utils/gitPRUrl.ts",
+        "dependencies": [
+          "URL"
         ]
       },
       "getSystemPrompt": {
@@ -4231,14 +4256,20 @@
         "dependencies": [
           "FeatureFormValues",
           "Partial",
-          "@renderer/types/NavigationView"
+          "@renderer/types/NavigationView",
+          "thefactory-tools/utils/getChatContextKey",
+          "thefactory-tools/utils",
+          "thefactory-tools/ChatContext"
         ]
       },
       "ModalState": {
         "path": "src/renderer/src/navigation/Navigator.tsx",
         "dependencies": [
           "ModalRoute",
-          "@renderer/types/NavigationView"
+          "@renderer/types/NavigationView",
+          "thefactory-tools/utils/getChatContextKey",
+          "thefactory-tools/utils",
+          "thefactory-tools/ChatContext"
         ]
       },
       "ModelChip": {
@@ -4271,28 +4302,37 @@
       "NavigatorApi": {
         "path": "src/renderer/src/navigation/Navigator.tsx",
         "dependencies": [
+          "thefactory-tools/ChatContext",
           "@renderer/types/NavigationView",
           "ModalRoute",
           "ModalState",
-          "NavigatorState"
+          "NavigatorState",
+          "thefactory-tools/utils/getChatContextKey",
+          "thefactory-tools/utils"
         ]
       },
       "NavigatorProvider": {
         "path": "src/renderer/src/navigation/Navigator.tsx",
         "dependencies": [
           "NavigatorApi",
+          "thefactory-tools/ChatContext",
           "@renderer/types/NavigationView",
           "ModalRoute",
           "ModalState",
           "NavigatorState",
-          "ReactNode"
+          "ReactNode",
+          "thefactory-tools/utils/getChatContextKey",
+          "thefactory-tools/utils"
         ]
       },
       "NavigatorState": {
         "path": "src/renderer/src/navigation/Navigator.tsx",
         "dependencies": [
           "StoriesRoute",
-          "@renderer/types/NavigationView"
+          "@renderer/types/NavigationView",
+          "thefactory-tools/utils/getChatContextKey",
+          "thefactory-tools/utils",
+          "thefactory-tools/ChatContext"
         ]
       },
       "NewContentOnly": {
@@ -4341,14 +4381,14 @@
           "src/types/notifications/Notification",
           "src/types/notifications/NotificationCategory",
           "src/types/notifications",
+          "src/types/settings/BadgeColor",
+          "src/types/settings",
           "@renderer/services/settingsService/settingsService",
           "@renderer/services/settingsService",
           "@renderer/contexts/ProjectContext/useProjectContext",
           "@renderer/contexts/ProjectContext",
           "@renderer/contexts/ProjectsGroupsContext/useProjectsGroups",
           "@renderer/contexts/ProjectsGroupsContext",
-          "@renderer/contexts/chats/ChatsContext/useChats",
-          "@renderer/contexts/chats/ChatsContext",
           "@renderer/hooks/useChatThinking/useChatThinking",
           "@renderer/hooks/useChatThinking",
           "@renderer/hooks/useChatUnread/useChatUnread",
@@ -4362,7 +4402,9 @@
           "@renderer/contexts/AgentsContext/useAgents",
           "@renderer/contexts/AgentsContext",
           "@renderer/contexts/GitContext/useGit",
-          "@renderer/contexts/GitContext"
+          "@renderer/contexts/GitContext",
+          "@renderer/utils/utils/DEFAULT_PROJECT_SETTINGS",
+          "@renderer/utils/utils"
         ]
       },
       "NotificationCreateInput": {
@@ -4388,6 +4430,7 @@
         "path": "src/types/settings.ts",
         "dependencies": [
           "GitBadgeSubToggles",
+          "BadgeColor",
           "NotificationCategory",
           "Record",
           "thefactory-tools/WebSearchApiKeys"
@@ -4403,9 +4446,11 @@
       "NotificationSettings": {
         "path": "src/renderer/src/screens/settings/notifications/NotificationSettings.tsx",
         "dependencies": [
+          "src/types/settings/BadgeColor",
           "src/types/notifications/NotificationCategory",
           "Record",
-          "src/types/notifications"
+          "src/types/notifications",
+          "src/types/settings"
         ]
       },
       "NotificationsListener": {
@@ -4452,14 +4497,14 @@
           "src/types/notifications/NotificationMetadata",
           "src/types/notifications/NotificationCategory",
           "src/types/notifications",
+          "src/types/settings/BadgeColor",
+          "src/types/settings",
           "@renderer/services/settingsService/settingsService",
           "@renderer/services/settingsService",
           "@renderer/contexts/ProjectContext/useProjectContext",
           "@renderer/contexts/ProjectContext",
           "@renderer/contexts/ProjectsGroupsContext/useProjectsGroups",
           "@renderer/contexts/ProjectsGroupsContext",
-          "@renderer/contexts/chats/ChatsContext/useChats",
-          "@renderer/contexts/chats/ChatsContext",
           "@renderer/hooks/useChatThinking/useChatThinking",
           "@renderer/hooks/useChatThinking",
           "@renderer/hooks/useChatUnread/useChatUnread",
@@ -4473,7 +4518,9 @@
           "@renderer/contexts/AgentsContext/useAgents",
           "@renderer/contexts/AgentsContext",
           "@renderer/contexts/GitContext/useGit",
-          "@renderer/contexts/GitContext"
+          "@renderer/contexts/GitContext",
+          "@renderer/utils/utils/DEFAULT_PROJECT_SETTINGS",
+          "@renderer/utils/utils"
         ]
       },
       "NotificationSoundService": {
@@ -4661,14 +4708,14 @@
           "src/types/notifications/NotificationMetadata",
           "src/types/notifications/NotificationCategory",
           "src/types/notifications",
+          "src/types/settings/BadgeColor",
+          "src/types/settings",
           "@renderer/services/settingsService/settingsService",
           "@renderer/services/settingsService",
           "@renderer/contexts/ProjectContext/useProjectContext",
           "@renderer/contexts/ProjectContext",
           "@renderer/contexts/ProjectsGroupsContext/useProjectsGroups",
           "@renderer/contexts/ProjectsGroupsContext",
-          "@renderer/contexts/chats/ChatsContext/useChats",
-          "@renderer/contexts/chats/ChatsContext",
           "@renderer/hooks/useChatThinking/useChatThinking",
           "@renderer/hooks/useChatThinking",
           "@renderer/hooks/useChatUnread/useChatUnread",
@@ -4682,7 +4729,9 @@
           "@renderer/contexts/AgentsContext/useAgents",
           "@renderer/contexts/AgentsContext",
           "@renderer/contexts/GitContext/useGit",
-          "@renderer/contexts/GitContext"
+          "@renderer/contexts/GitContext",
+          "@renderer/utils/utils/DEFAULT_PROJECT_SETTINGS",
+          "@renderer/utils/utils"
         ]
       },
       "ProjectChip": {
@@ -4788,6 +4837,12 @@
         "dependencies": [
           "Button",
           "IconPlus",
+          "Select",
+          "SelectTrigger",
+          "SelectValue",
+          "SelectContent",
+          "SelectItem",
+          "Switch",
           "IconArrowLeftMini",
           "IconArrowRightMini",
           "IconEdit",
@@ -4804,7 +4859,15 @@
           "@renderer/components/ui/icons/Icons/IconDelete",
           "@renderer/components/ui/icons/Icons/IconEdit",
           "@renderer/components/ui/icons/Icons/IconPlus",
-          "@renderer/components/ui/icons/Icons"
+          "@renderer/components/ui/icons/Icons",
+          "@renderer/components/ui/Switch/Switch",
+          "@renderer/components/ui/Switch",
+          "@renderer/components/ui/Select/Select",
+          "@renderer/components/ui/Select/SelectContent",
+          "@renderer/components/ui/Select/SelectItem",
+          "@renderer/components/ui/Select/SelectTrigger",
+          "@renderer/components/ui/Select/SelectValue",
+          "@renderer/components/ui/Select"
         ]
       },
       "ProjectIcon": {
@@ -4870,8 +4933,8 @@
           "thefactory-tools/ProjectsGroups",
           "thefactory-tools/ReorderPayload",
           "thefactory-tools/ProjectsGroup",
-          "thefactory-tools/ProjectsGroupUpdate",
           "thefactory-tools/ProjectsGroupEditInput",
+          "thefactory-tools/ProjectsGroupUpdate",
           "thefactory-tools/ProjectsGroupCreateInput"
         ]
       },
@@ -5645,7 +5708,10 @@
       "StoriesRoute": {
         "path": "src/renderer/src/navigation/Navigator.tsx",
         "dependencies": [
-          "@renderer/types/NavigationView"
+          "@renderer/types/NavigationView",
+          "thefactory-tools/utils/getChatContextKey",
+          "thefactory-tools/utils",
+          "thefactory-tools/ChatContext"
         ]
       },
       "storiesService": {
@@ -6139,7 +6205,9 @@
           "AgentsContextValue",
           "thefactory-tools/ChatContext",
           "thefactory-tools/Chat",
-          "thefactory-tools/AgentType"
+          "thefactory-tools/AgentType",
+          "thefactory-tools/utils/getChatContextKey",
+          "thefactory-tools/utils"
         ]
       },
       "useAppSettings": {
@@ -6362,7 +6430,10 @@
         "path": "src/renderer/src/navigation/Navigator.tsx",
         "dependencies": [
           "NavigatorApi",
-          "@renderer/types/NavigationView"
+          "@renderer/types/NavigationView",
+          "thefactory-tools/utils/getChatContextKey",
+          "thefactory-tools/utils",
+          "thefactory-tools/ChatContext"
         ]
       },
       "useNotifications": {
@@ -6372,6 +6443,7 @@
           "src/types/notifications/NotificationCategory",
           "Record",
           "ProjectBadgeState",
+          "src/types/settings/BadgeColor",
           "NotificationPrefs",
           "react/useState",
           "react/useEffect",
@@ -6382,14 +6454,13 @@
           "@renderer/services/notificationsService",
           "src/types/notifications/NotificationMetadata",
           "src/types/notifications",
+          "src/types/settings",
           "@renderer/services/settingsService/settingsService",
           "@renderer/services/settingsService",
           "@renderer/contexts/ProjectContext/useProjectContext",
           "@renderer/contexts/ProjectContext",
           "@renderer/contexts/ProjectsGroupsContext/useProjectsGroups",
           "@renderer/contexts/ProjectsGroupsContext",
-          "@renderer/contexts/chats/ChatsContext/useChats",
-          "@renderer/contexts/chats/ChatsContext",
           "@renderer/hooks/useChatThinking/useChatThinking",
           "@renderer/hooks/useChatThinking",
           "@renderer/hooks/useChatUnread/useChatUnread",
@@ -6403,7 +6474,9 @@
           "@renderer/contexts/AgentsContext/useAgents",
           "@renderer/contexts/AgentsContext",
           "@renderer/contexts/GitContext/useGit",
-          "@renderer/contexts/GitContext"
+          "@renderer/contexts/GitContext",
+          "@renderer/utils/utils/DEFAULT_PROJECT_SETTINGS",
+          "@renderer/utils/utils"
         ]
       },
       "useProjectContext": {
@@ -6703,7 +6776,9 @@
           "Promise",
           "thefactory-tools/AgentType",
           "thefactory-tools/Chat",
-          "thefactory-tools/ChatContext"
+          "thefactory-tools/ChatContext",
+          "thefactory-tools/utils/getChatContextKey",
+          "thefactory-tools/utils"
         ]
       },
       "AgentsProvider": {
@@ -6715,7 +6790,9 @@
           "Promise",
           "thefactory-tools/Chat",
           "Set",
-          "ReactNode"
+          "ReactNode",
+          "thefactory-tools/utils/getChatContextKey",
+          "thefactory-tools/utils"
         ]
       },
       "AgentsView": {
@@ -6835,6 +6912,12 @@
           "FileDisplay",
           "thefactory-tools/utils/inferFileType",
           "thefactory-tools/utils"
+        ]
+      },
+      "BadgeColor": {
+        "path": "types/settings.ts",
+        "dependencies": [
+          "thefactory-tools/WebSearchApiKeys"
         ]
       },
       "BaseManager": {
@@ -7419,6 +7502,7 @@
         "path": "renderer/src/services/completionService.ts",
         "dependencies": [
           "CompletionService",
+          "thefactory-tools/AgentRunParams",
           "thefactory-tools/ChatContext",
           "thefactory-tools/CompletionMessage",
           "thefactory-tools/CompletionResponseTurns",
@@ -7431,9 +7515,10 @@
         "dependencies": [
           "Promise",
           "thefactory-tools/ChatContext",
+          "thefactory-tools/CompletionSettings",
+          "thefactory-tools/AgentRunParams",
           "thefactory-tools/CompletionResponseTurns",
           "thefactory-tools/LLMConfig",
-          "thefactory-tools/CompletionSettings",
           "thefactory-tools/CompletionMessage"
         ]
       },
@@ -7798,6 +7883,8 @@
           "thefactory-tools/ChatContext",
           "thefactory-tools/CompletionArgs",
           "AbortSignal",
+          "thefactory-tools/AgentRunnerStartRunOptions",
+          "thefactory-tools/AgentRunParams",
           "thefactory-tools/CompletionResponseTurns",
           "thefactory-tools/CompletionMessage",
           "thefactory-tools/CompletionResponse",
@@ -7810,6 +7897,11 @@
           "AbortController",
           "thefactory-tools/AgentRunnerTools",
           "thefactory-tools/createAgentRunnerTools",
+          "thefactory-tools/AgentRunType",
+          "thefactory-tools/ChatContextAgentRun",
+          "thefactory-tools/ChatContextAgentRunFeature",
+          "thefactory-tools/GithubCredentials",
+          "thefactory-tools/WebSearchApiKeys",
           "thefactory-tools/utils/getChatContextKey",
           "thefactory-tools/utils"
         ]
@@ -8266,6 +8358,12 @@
           "thefactory-tools/PricingState",
           "Promise",
           "thefactory-tools/ModelPrice"
+        ]
+      },
+      "getPRUrl": {
+        "path": "renderer/src/utils/gitPRUrl.ts",
+        "dependencies": [
+          "URL"
         ]
       },
       "getSystemPrompt": {
@@ -10074,14 +10172,20 @@
         "dependencies": [
           "FeatureFormValues",
           "Partial",
-          "@renderer/types/NavigationView"
+          "@renderer/types/NavigationView",
+          "thefactory-tools/utils/getChatContextKey",
+          "thefactory-tools/utils",
+          "thefactory-tools/ChatContext"
         ]
       },
       "ModalState": {
         "path": "renderer/src/navigation/Navigator.tsx",
         "dependencies": [
           "ModalRoute",
-          "@renderer/types/NavigationView"
+          "@renderer/types/NavigationView",
+          "thefactory-tools/utils/getChatContextKey",
+          "thefactory-tools/utils",
+          "thefactory-tools/ChatContext"
         ]
       },
       "ModelChip": {
@@ -10114,28 +10218,37 @@
       "NavigatorApi": {
         "path": "renderer/src/navigation/Navigator.tsx",
         "dependencies": [
+          "thefactory-tools/ChatContext",
           "@renderer/types/NavigationView",
           "ModalRoute",
           "ModalState",
-          "NavigatorState"
+          "NavigatorState",
+          "thefactory-tools/utils/getChatContextKey",
+          "thefactory-tools/utils"
         ]
       },
       "NavigatorProvider": {
         "path": "renderer/src/navigation/Navigator.tsx",
         "dependencies": [
           "NavigatorApi",
+          "thefactory-tools/ChatContext",
           "@renderer/types/NavigationView",
           "ModalRoute",
           "ModalState",
           "NavigatorState",
-          "ReactNode"
+          "ReactNode",
+          "thefactory-tools/utils/getChatContextKey",
+          "thefactory-tools/utils"
         ]
       },
       "NavigatorState": {
         "path": "renderer/src/navigation/Navigator.tsx",
         "dependencies": [
           "StoriesRoute",
-          "@renderer/types/NavigationView"
+          "@renderer/types/NavigationView",
+          "thefactory-tools/utils/getChatContextKey",
+          "thefactory-tools/utils",
+          "thefactory-tools/ChatContext"
         ]
       },
       "NewContentOnly": {
@@ -10184,14 +10297,14 @@
           "types/notifications/Notification",
           "types/notifications/NotificationCategory",
           "types/notifications",
+          "types/settings/BadgeColor",
+          "types/settings",
           "@renderer/services/settingsService/settingsService",
           "@renderer/services/settingsService",
           "@renderer/contexts/ProjectContext/useProjectContext",
           "@renderer/contexts/ProjectContext",
           "@renderer/contexts/ProjectsGroupsContext/useProjectsGroups",
           "@renderer/contexts/ProjectsGroupsContext",
-          "@renderer/contexts/chats/ChatsContext/useChats",
-          "@renderer/contexts/chats/ChatsContext",
           "@renderer/hooks/useChatThinking/useChatThinking",
           "@renderer/hooks/useChatThinking",
           "@renderer/hooks/useChatUnread/useChatUnread",
@@ -10205,7 +10318,9 @@
           "@renderer/contexts/AgentsContext/useAgents",
           "@renderer/contexts/AgentsContext",
           "@renderer/contexts/GitContext/useGit",
-          "@renderer/contexts/GitContext"
+          "@renderer/contexts/GitContext",
+          "@renderer/utils/utils/DEFAULT_PROJECT_SETTINGS",
+          "@renderer/utils/utils"
         ]
       },
       "NotificationCreateInput": {
@@ -10231,6 +10346,7 @@
         "path": "types/settings.ts",
         "dependencies": [
           "GitBadgeSubToggles",
+          "BadgeColor",
           "NotificationCategory",
           "Record",
           "thefactory-tools/WebSearchApiKeys"
@@ -10246,9 +10362,11 @@
       "NotificationSettings": {
         "path": "renderer/src/screens/settings/notifications/NotificationSettings.tsx",
         "dependencies": [
+          "types/settings/BadgeColor",
           "types/notifications/NotificationCategory",
           "Record",
-          "types/notifications"
+          "types/notifications",
+          "types/settings"
         ]
       },
       "NotificationsListener": {
@@ -10295,14 +10413,14 @@
           "types/notifications/NotificationMetadata",
           "types/notifications/NotificationCategory",
           "types/notifications",
+          "types/settings/BadgeColor",
+          "types/settings",
           "@renderer/services/settingsService/settingsService",
           "@renderer/services/settingsService",
           "@renderer/contexts/ProjectContext/useProjectContext",
           "@renderer/contexts/ProjectContext",
           "@renderer/contexts/ProjectsGroupsContext/useProjectsGroups",
           "@renderer/contexts/ProjectsGroupsContext",
-          "@renderer/contexts/chats/ChatsContext/useChats",
-          "@renderer/contexts/chats/ChatsContext",
           "@renderer/hooks/useChatThinking/useChatThinking",
           "@renderer/hooks/useChatThinking",
           "@renderer/hooks/useChatUnread/useChatUnread",
@@ -10316,7 +10434,9 @@
           "@renderer/contexts/AgentsContext/useAgents",
           "@renderer/contexts/AgentsContext",
           "@renderer/contexts/GitContext/useGit",
-          "@renderer/contexts/GitContext"
+          "@renderer/contexts/GitContext",
+          "@renderer/utils/utils/DEFAULT_PROJECT_SETTINGS",
+          "@renderer/utils/utils"
         ]
       },
       "NotificationSoundService": {
@@ -10504,14 +10624,14 @@
           "types/notifications/NotificationMetadata",
           "types/notifications/NotificationCategory",
           "types/notifications",
+          "types/settings/BadgeColor",
+          "types/settings",
           "@renderer/services/settingsService/settingsService",
           "@renderer/services/settingsService",
           "@renderer/contexts/ProjectContext/useProjectContext",
           "@renderer/contexts/ProjectContext",
           "@renderer/contexts/ProjectsGroupsContext/useProjectsGroups",
           "@renderer/contexts/ProjectsGroupsContext",
-          "@renderer/contexts/chats/ChatsContext/useChats",
-          "@renderer/contexts/chats/ChatsContext",
           "@renderer/hooks/useChatThinking/useChatThinking",
           "@renderer/hooks/useChatThinking",
           "@renderer/hooks/useChatUnread/useChatUnread",
@@ -10525,7 +10645,9 @@
           "@renderer/contexts/AgentsContext/useAgents",
           "@renderer/contexts/AgentsContext",
           "@renderer/contexts/GitContext/useGit",
-          "@renderer/contexts/GitContext"
+          "@renderer/contexts/GitContext",
+          "@renderer/utils/utils/DEFAULT_PROJECT_SETTINGS",
+          "@renderer/utils/utils"
         ]
       },
       "ProjectChip": {
@@ -10631,6 +10753,12 @@
         "dependencies": [
           "Button",
           "IconPlus",
+          "Select",
+          "SelectTrigger",
+          "SelectValue",
+          "SelectContent",
+          "SelectItem",
+          "Switch",
           "IconArrowLeftMini",
           "IconArrowRightMini",
           "IconEdit",
@@ -10647,7 +10775,15 @@
           "@renderer/components/ui/icons/Icons/IconDelete",
           "@renderer/components/ui/icons/Icons/IconEdit",
           "@renderer/components/ui/icons/Icons/IconPlus",
-          "@renderer/components/ui/icons/Icons"
+          "@renderer/components/ui/icons/Icons",
+          "@renderer/components/ui/Switch/Switch",
+          "@renderer/components/ui/Switch",
+          "@renderer/components/ui/Select/Select",
+          "@renderer/components/ui/Select/SelectContent",
+          "@renderer/components/ui/Select/SelectItem",
+          "@renderer/components/ui/Select/SelectTrigger",
+          "@renderer/components/ui/Select/SelectValue",
+          "@renderer/components/ui/Select"
         ]
       },
       "ProjectIcon": {
@@ -10713,8 +10849,8 @@
           "thefactory-tools/ProjectsGroups",
           "thefactory-tools/ReorderPayload",
           "thefactory-tools/ProjectsGroup",
-          "thefactory-tools/ProjectsGroupUpdate",
           "thefactory-tools/ProjectsGroupEditInput",
+          "thefactory-tools/ProjectsGroupUpdate",
           "thefactory-tools/ProjectsGroupCreateInput"
         ]
       },
@@ -11488,7 +11624,10 @@
       "StoriesRoute": {
         "path": "renderer/src/navigation/Navigator.tsx",
         "dependencies": [
-          "@renderer/types/NavigationView"
+          "@renderer/types/NavigationView",
+          "thefactory-tools/utils/getChatContextKey",
+          "thefactory-tools/utils",
+          "thefactory-tools/ChatContext"
         ]
       },
       "storiesService": {
@@ -11982,7 +12121,9 @@
           "AgentsContextValue",
           "thefactory-tools/ChatContext",
           "thefactory-tools/Chat",
-          "thefactory-tools/AgentType"
+          "thefactory-tools/AgentType",
+          "thefactory-tools/utils/getChatContextKey",
+          "thefactory-tools/utils"
         ]
       },
       "useAppSettings": {
@@ -12205,7 +12346,10 @@
         "path": "renderer/src/navigation/Navigator.tsx",
         "dependencies": [
           "NavigatorApi",
-          "@renderer/types/NavigationView"
+          "@renderer/types/NavigationView",
+          "thefactory-tools/utils/getChatContextKey",
+          "thefactory-tools/utils",
+          "thefactory-tools/ChatContext"
         ]
       },
       "useNotifications": {
@@ -12215,6 +12359,7 @@
           "types/notifications/NotificationCategory",
           "Record",
           "ProjectBadgeState",
+          "types/settings/BadgeColor",
           "NotificationPrefs",
           "react/useState",
           "react/useEffect",
@@ -12225,14 +12370,13 @@
           "@renderer/services/notificationsService",
           "types/notifications/NotificationMetadata",
           "types/notifications",
+          "types/settings",
           "@renderer/services/settingsService/settingsService",
           "@renderer/services/settingsService",
           "@renderer/contexts/ProjectContext/useProjectContext",
           "@renderer/contexts/ProjectContext",
           "@renderer/contexts/ProjectsGroupsContext/useProjectsGroups",
           "@renderer/contexts/ProjectsGroupsContext",
-          "@renderer/contexts/chats/ChatsContext/useChats",
-          "@renderer/contexts/chats/ChatsContext",
           "@renderer/hooks/useChatThinking/useChatThinking",
           "@renderer/hooks/useChatThinking",
           "@renderer/hooks/useChatUnread/useChatUnread",
@@ -12246,7 +12390,9 @@
           "@renderer/contexts/AgentsContext/useAgents",
           "@renderer/contexts/AgentsContext",
           "@renderer/contexts/GitContext/useGit",
-          "@renderer/contexts/GitContext"
+          "@renderer/contexts/GitContext",
+          "@renderer/utils/utils/DEFAULT_PROJECT_SETTINGS",
+          "@renderer/utils/utils"
         ]
       },
       "useProjectContext": {
@@ -13254,7 +13400,8 @@
           "Feature",
           "Story",
           "LLMConfig",
-          "ChatContext",
+          "ChatContextAgentRunFeature",
+          "ChatContextAgentRun",
           "src/tools/types.js/IFactoryTools",
           "src/tools/types.js"
         ]
@@ -13268,6 +13415,8 @@
           "CompletionTools",
           "WebSearchApiKeys",
           "GithubCredentials",
+          "ChatContextAgentRunFeature",
+          "ChatContextAgentRun",
           "AgentRunType",
           "LLMConfig",
           "src/tools/types.js/IFactoryTools",
@@ -13277,13 +13426,15 @@
       "AgentRunnerRunOrchestratorOptions": {
         "path": "dist/agentRunner/agentRunnerTypes.d.ts",
         "dependencies": [
+          "AbortSignal",
           "LLMCostsTools",
           "AgentTools",
-          "AbortSignal",
           "ChatsTools",
           "CompletionTools",
           "GitTools",
           "Tools",
+          "ChatContextAgentRunFeature",
+          "ChatContextAgentRun",
           "AgentRunType",
           "LLMConfig",
           "src/tools/types.js/IFactoryTools",
@@ -13312,8 +13463,10 @@
       "AgentRunnerTools": {
         "path": "dist/agentRunner/agentRunnerTypes.d.ts",
         "dependencies": [
-          "CompletionResponseTurns",
+          "AgentToolsResultType",
           "Promise",
+          "AgentRunnerStartRunOptions",
+          "CompletionResponseTurns",
           "ResumeCompletionToolsArgs",
           "CompletionToolsArgs",
           "SendCompletionToolsArgs",
@@ -13326,10 +13479,11 @@
       "AgentRunParams": {
         "path": "dist/agent/agentTypes.d.ts",
         "dependencies": [
-          "Record",
           "WebSearchApiKeys",
           "GithubCredentials",
           "LLMConfig",
+          "ChatContextAgentRunFeature",
+          "ChatContextAgentRun",
           "AgentRunType"
         ]
       },
@@ -14700,6 +14854,16 @@
           "node:fs/promises"
         ]
       },
+      "getGroupMemberProjectIds": {
+        "path": "dist/projectsgroups/projectsGroupsUtils.js",
+        "description": "Return all project IDs that are members of the given group.",
+        "dependencies": []
+      },
+      "getGroupMemberProjects": {
+        "path": "dist/projectsgroups/projectsGroupsUtils.js",
+        "description": "Return all projects that are members of the given group.",
+        "dependencies": []
+      },
       "getIsDev": {
         "path": "dist/logger.js",
         "dependencies": []
@@ -15374,6 +15538,11 @@
         "dependencies": [
           "node:fs/promises"
         ]
+      },
+      "isProjectInGroup": {
+        "path": "dist/projectsgroups/projectsGroupsUtils.js",
+        "description": "Check if a project is a member of a specific group.",
+        "dependencies": []
       },
       "isTestFileName": {
         "path": "dist/testRunner/testRunnerHelpers.js",

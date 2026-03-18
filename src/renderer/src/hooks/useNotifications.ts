@@ -5,10 +5,10 @@ import type {
   NotificationMetadata,
   NotificationCategory,
 } from 'src/types/notifications'
+import type { BadgeColor } from 'src/types/settings'
 import { settingsService } from '@renderer/services/settingsService'
 import { useProjectContext } from '@renderer/contexts/ProjectContext'
 import { useProjectsGroups } from '@renderer/contexts/ProjectsGroupsContext'
-import { useChats } from '@renderer/contexts/chats/ChatsContext'
 import { useChatThinking } from '@renderer/hooks/useChatThinking'
 import { useChatUnread } from '@renderer/hooks/useChatUnread'
 import { useNavigator } from '@renderer/navigation/Navigator'
@@ -16,13 +16,12 @@ import { useAppSettings } from '@renderer/contexts/AppSettingsContext'
 import { NotificationSoundService } from '@renderer/services/notificationSoundService'
 import { useAgents } from '@renderer/contexts/AgentsContext'
 import { useGit } from '@renderer/contexts/GitContext'
+import { DEFAULT_PROJECT_SETTINGS } from '@renderer/utils/utils'
 
 export type ProjectBadgeState = {
   agent_runs: { running: number; unread: number }
   chat_messages: { unread: number; thinking: boolean }
   git_changes: {
-    /** Unread feature-branch updates (branches ahead of current) */
-    unread: number
     /** Commits available to pull on the current branch (behind remote) */
     incoming: number
     /** Whether the working tree has uncommitted changes */
@@ -33,24 +32,32 @@ export type ProjectBadgeState = {
 const DEFAULT_PROJECT_BADGE_STATE: ProjectBadgeState = {
   agent_runs: { running: 0, unread: 0 },
   chat_messages: { unread: 0, thinking: false },
-  git_changes: { unread: 0, incoming: 0, uncommitted: false },
+  git_changes: { incoming: 0, uncommitted: false },
 }
 
 export function useNotifications() {
   const { activeProject, projects } = useProjectContext()
   const { groups } = useProjectsGroups()
-  const { chatsByProjectId } = useChats()
   
   const { thinkingCountByProject } = useChatThinking(500)
-  const { unreadCountByProject } = useChatUnread()
+  const { unreadCountByProject, totalUnreadCountByProject } = useChatUnread()
   const { getProjectRunningCount, getCompletedUnreadCount } = useAgents()
-  const { getProjectUpdatedBranchesCount, getGitDerivedBadges } = useGit()
+  const { getGitDerivedBadges } = useGit()
 
   type CategoryPrefs = Record<NotificationCategory, boolean>
-  type NotificationPrefs = { notificationsEnabled: CategoryPrefs; badgesEnabled: CategoryPrefs }
+  type NotificationPrefs = { 
+    notificationsEnabled: CategoryPrefs; 
+    badgesEnabled: CategoryPrefs;
+    badgeColors?: Record<NotificationCategory, BadgeColor>
+    chatBadgeCountMode?: 'total_messages' | 'chats_with_unread'
+    gitBadgeSubToggles?: { incoming_commits: boolean; uncommitted_changes: boolean }
+  }
   const DEFAULT_PREFS: NotificationPrefs = {
-    notificationsEnabled: { agent_runs: true, chat_messages: true, git_changes: true },
-    badgesEnabled: { agent_runs: true, chat_messages: true, git_changes: true },
+    notificationsEnabled: DEFAULT_PROJECT_SETTINGS.notifications.notificationsEnabled,
+    badgesEnabled: DEFAULT_PROJECT_SETTINGS.notifications.badgesEnabled,
+    badgeColors: DEFAULT_PROJECT_SETTINGS.notifications.badgeColors,
+    chatBadgeCountMode: DEFAULT_PROJECT_SETTINGS.notifications.chatBadgeCountMode,
+    gitBadgeSubToggles: { incoming_commits: true, uncommitted_changes: true },
   }
   const [prefsByProject, setPrefsByProject] = useState<Record<string, NotificationPrefs>>({})
 
@@ -62,6 +69,9 @@ export function useNotifications() {
       const next: NotificationPrefs = {
         notificationsEnabled: n.notificationsEnabled || DEFAULT_PREFS.notificationsEnabled,
         badgesEnabled: n.badgesEnabled || DEFAULT_PREFS.badgesEnabled,
+        badgeColors: n.badgeColors || DEFAULT_PREFS.badgeColors,
+        chatBadgeCountMode: n.chatBadgeCountMode || DEFAULT_PREFS.chatBadgeCountMode,
+        gitBadgeSubToggles: n.gitBadgeSubToggles || DEFAULT_PREFS.gitBadgeSubToggles,
       }
       setPrefsByProject((prev) => ({ ...prev, [pid]: next }))
     } catch {
@@ -107,22 +117,46 @@ export function useNotifications() {
     [activeProject?.id, prefsByProject],
   )
 
+  const getBadgeColor = useCallback(
+    (category: NotificationCategory, pid?: string): BadgeColor | undefined => {
+      const key = pid || activeProject?.id
+      if (!key) return DEFAULT_PREFS.badgeColors?.[category]
+      const p = prefsByProject[key] || DEFAULT_PREFS
+      return p.badgeColors?.[category] || DEFAULT_PREFS.badgeColors?.[category]
+    },
+    [activeProject?.id, prefsByProject],
+  )
+
+  const isGitBadgeSubToggleEnabled = useCallback(
+    (subToggle: 'incoming_commits' | 'uncommitted_changes', pid?: string): boolean => {
+      const key = pid || activeProject?.id
+      if (!key) return true
+      const p = prefsByProject[key] || DEFAULT_PREFS
+      return p.gitBadgeSubToggles?.[subToggle] !== false
+    },
+    [activeProject?.id, prefsByProject],
+  )
+
   const badgeStateByProject = useMemo(() => {
     const state: Record<string, ProjectBadgeState> = {}
     for (const p of projects) {
       const pid = p.id
       const gitDerived = getGitDerivedBadges(pid)
+      const prefs = prefsByProject[pid] || DEFAULT_PREFS
+      const chatUnread = prefs.chatBadgeCountMode === 'total_messages' 
+        ? (totalUnreadCountByProject.get(pid) ?? 0)
+        : (unreadCountByProject.get(pid) ?? 0)
+
       state[pid] = {
         agent_runs: {
           running: getProjectRunningCount(pid),
           unread: getCompletedUnreadCount(pid),
         },
         chat_messages: {
-          unread: unreadCountByProject.get(pid) ?? 0,
+          unread: chatUnread,
           thinking: (thinkingCountByProject.get(pid) ?? 0) > 0,
         },
         git_changes: {
-          unread: getProjectUpdatedBranchesCount(pid),
           incoming: gitDerived.incomingCommits,
           uncommitted: gitDerived.hasUncommittedChanges,
         },
@@ -134,9 +168,10 @@ export function useNotifications() {
     getProjectRunningCount,
     getCompletedUnreadCount,
     unreadCountByProject,
+    totalUnreadCountByProject,
     thinkingCountByProject,
-    getProjectUpdatedBranchesCount,
     getGitDerivedBadges,
+    prefsByProject,
   ])
 
   const getProjectBadgeState = useCallback(
@@ -154,7 +189,7 @@ export function useNotifications() {
       const agg: ProjectBadgeState = {
         agent_runs: { running: 0, unread: 0 },
         chat_messages: { unread: 0, thinking: false },
-        git_changes: { unread: 0, incoming: 0, uncommitted: false },
+        git_changes: { incoming: 0, uncommitted: false },
       }
       for (const pid of g.projects || []) {
         const st = badgeStateByProject[pid]
@@ -163,7 +198,6 @@ export function useNotifications() {
         agg.agent_runs.unread += st.agent_runs.unread
         agg.chat_messages.unread += st.chat_messages.unread
         agg.chat_messages.thinking = agg.chat_messages.thinking || st.chat_messages.thinking
-        agg.git_changes.unread += st.git_changes.unread
         agg.git_changes.incoming += st.git_changes.incoming
         agg.git_changes.uncommitted = agg.git_changes.uncommitted || st.git_changes.uncommitted
       }
@@ -262,6 +296,8 @@ export function useNotifications() {
   return {
     isNotificationsEnabled,
     isBadgeEnabled,
+    getBadgeColor,
+    isGitBadgeSubToggleEnabled,
     badgeStateByProject,
     getProjectBadgeState,
     getGroupBadgeState,

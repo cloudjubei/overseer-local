@@ -56,6 +56,8 @@ export default function ProjectManagerModal({
     requirements: [],
     metadata: { icon: 'folder', githubCredentialsId: '' },
     codeInfo: undefined,
+    mainGroupId: undefined,
+    scopeGroupIds: [],
   })
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null)
   const [initialGroupId, setInitialGroupId] = useState<string | null>(null)
@@ -68,10 +70,13 @@ export default function ProjectManagerModal({
     onRequestClose?.()
   }
 
-  // Derive uncategorized list
+  // Only MAIN-type groups are considered for the sidebar grouping list
+  const mainGroups = useMemo(() => groups.filter((g) => g.type === 'MAIN'), [groups])
+
+  // Derive uncategorized list (only based on MAIN groups membership)
   const groupedProjectIds = useMemo(
-    () => new Set(groups.flatMap((g) => g.projects || [])),
-    [groups],
+    () => new Set(mainGroups.flatMap((g) => g.projects || [])),
+    [mainGroups],
   )
   const uncategorized = useMemo(
     () => projects.filter((p) => !groupedProjectIds.has(p.id)),
@@ -95,11 +100,14 @@ export default function ProjectManagerModal({
             icon: normalizedIcon,
             githubCredentialsId: p.metadata?.githubCredentialsId || '',
           },
+          mainGroupId: p.mainGroupId ?? undefined,
+          scopeGroupIds: p.scopeGroupIds || [],
         })
         setEditingId(id)
-        const g = getGroupForProject(id)
-        setSelectedGroupId(g?.id ?? null)
-        setInitialGroupId(g?.id ?? null)
+        // selectedGroupId is the MAIN group; derive from the project's mainGroupId
+        const mainGroupId = p.mainGroupId ?? null
+        setSelectedGroupId(mainGroupId)
+        setInitialGroupId(mainGroupId)
         setMode('edit')
       }
     }
@@ -119,6 +127,8 @@ export default function ProjectManagerModal({
       requirements: [],
       metadata: { icon: 'folder', githubCredentialsId: '' },
       codeInfo: undefined,
+      mainGroupId: undefined,
+      scopeGroupIds: [],
     })
     setFormErrors([])
     setSaving(false)
@@ -129,9 +139,12 @@ export default function ProjectManagerModal({
 
   function startCreate() {
     resetForm()
-    // Default new project's group to currently selected group (if a real group)
+    // Default new project's MAIN group to the currently selected filter group (if a real MAIN group)
     if (currentGroupId && currentGroupId !== ALL_GROUP_ID && currentGroupId !== UNCATEGORIZED_ID) {
-      setSelectedGroupId(currentGroupId)
+      const g = groups.find((g) => g.id === currentGroupId)
+      if (g?.type === 'MAIN') {
+        setSelectedGroupId(currentGroupId)
+      }
     }
     setMode('create')
   }
@@ -148,10 +161,12 @@ export default function ProjectManagerModal({
         icon: normalizedIcon,
         githubCredentialsId: p.metadata?.githubCredentialsId || '',
       },
+      mainGroupId: p.mainGroupId ?? undefined,
+      scopeGroupIds: p.scopeGroupIds || [],
     })
-    const g = getGroupForProject(p.id)
-    setSelectedGroupId(g?.id ?? null)
-    setInitialGroupId(g?.id ?? null)
+    const mainGroupId = p.mainGroupId ?? null
+    setSelectedGroupId(mainGroupId)
+    setInitialGroupId(mainGroupId)
     setEditingId(p.id)
     setMode('edit')
   }
@@ -185,15 +200,25 @@ export default function ProjectManagerModal({
       return
     }
 
+    // Build the payload: mainGroupId comes from selectedGroupId (MAIN dropdown),
+    // scopeGroupIds are already tracked in form state via the checkboxes.
+    const payload = {
+      ...form,
+      mainGroupId: selectedGroupId ?? undefined,
+      scopeGroupIds: Array.isArray(form.scopeGroupIds) ? form.scopeGroupIds : [],
+    }
+
     setSaving(true)
     try {
       if (mode === 'create') {
-        await projectsService.createProject(form)
-        // Assign to group if selected
-        await setProjectGroup(form.id, selectedGroupId)
+        await projectsService.createProject(payload)
+        // Also add the project into the MAIN group's projects list if one was selected
+        if (selectedGroupId) {
+          await setProjectGroup(payload.id, selectedGroupId)
+        }
       } else if (mode === 'edit' && editingId) {
-        await projectsService.updateProject(editingId, form)
-        // Update group membership if changed
+        await projectsService.updateProject(editingId, payload)
+        // Update MAIN group membership in the group's projects list if it changed
         if (selectedGroupId !== initialGroupId) {
           await setProjectGroup(editingId, selectedGroupId)
         }
@@ -209,7 +234,7 @@ export default function ProjectManagerModal({
 
   const formId = 'project-manager-form'
 
-  // Group filter state (header)
+  // Group filter state (header) — shows all groups including SCOPE
   const [currentGroupId, setCurrentGroupId] = useState<string>(ALL_GROUP_ID)
 
   // Build options for header selector
@@ -357,7 +382,12 @@ export default function ProjectManagerModal({
                         <div aria-hidden>{renderProjectIcon(p.metadata?.icon)}</div>
                         <div>
                           <div style={{ fontWeight: 600 }}>
-                            {p.title} {p.active === false && <span className="text-xs text-text-secondary font-normal ml-2">(Inactive)</span>}
+                            {p.title}{' '}
+                            {p.active === false && (
+                              <span className="text-xs text-text-secondary font-normal ml-2">
+                                (Inactive)
+                              </span>
+                            )}
                           </div>
                           <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
                             {p.id} · {p.path}

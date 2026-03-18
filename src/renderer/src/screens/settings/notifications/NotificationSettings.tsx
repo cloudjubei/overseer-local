@@ -10,6 +10,7 @@ import { useNotifications } from '../../../hooks/useNotifications'
 import { useProjectSettings } from '../../../hooks/useProjectSettings'
 import { useAppSettings } from '../../../contexts/AppSettingsContext'
 import type { NotificationCategory } from 'src/types/notifications'
+import type { BadgeColor } from 'src/types/settings'
 
 export default function NotificationSettings() {
   const { projectSettings, setNotificationProjectSettings } = useProjectSettings()
@@ -17,11 +18,15 @@ export default function NotificationSettings() {
   const { enableNotifications } = useNotifications()
 
   const categories: NotificationCategory[] = ['agent_runs', 'chat_messages', 'git_changes']
+  const badgeColors: BadgeColor[] = ['red', 'blue', 'green', 'orange']
 
   const notifEnabled =
     projectSettings.notifications.notificationsEnabled || ({} as Record<NotificationCategory, boolean>)
   const badgeEnabled =
     projectSettings.notifications.badgesEnabled || ({} as Record<NotificationCategory, boolean>)
+  const colors =
+    projectSettings.notifications.badgeColors || ({} as Record<NotificationCategory, BadgeColor>)
+  const chatBadgeCountMode = projectSettings.notifications.chatBadgeCountMode || 'chats_with_unread'
 
   const labelFor = (c: NotificationCategory): string => {
     switch (c) {
@@ -81,21 +86,76 @@ export default function NotificationSettings() {
           <h3 className='font-medium mb-2'>Show Badges For</h3>
           <div className='space-y-2'>
             {categories.map((c) => (
-              <Switch
-                key={`badge-${c}`}
-                checked={badgeEnabled[c] !== false}
-                onCheckedChange={(checked) =>
-                  setNotificationProjectSettings({
-                    badgesEnabled: {
-                      ...badgeEnabled,
-                      [c]: checked,
-                    },
-                  })
-                }
-                label={labelFor(c)}
-              />
+              <div key={`badge-container-${c}`} className='flex items-center justify-between'>
+                <Switch
+                  key={`badge-${c}`}
+                  checked={badgeEnabled[c] !== false}
+                  onCheckedChange={(checked) =>
+                    setNotificationProjectSettings({
+                      badgesEnabled: {
+                        ...badgeEnabled,
+                        [c]: checked,
+                      },
+                    })
+                  }
+                  label={labelFor(c)}
+                />
+                
+                {badgeEnabled[c] !== false && (
+                  <div className='w-32'>
+                    <Select
+                      value={colors[c] || 'blue'}
+                      onValueChange={(value) =>
+                        setNotificationProjectSettings({
+                          badgeColors: {
+                            ...colors,
+                            [c]: value as BadgeColor,
+                          },
+                        })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder='Select color' />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {badgeColors.map((color) => (
+                          <SelectItem key={color} value={color}>
+                            <div className='flex items-center gap-2'>
+                              <div
+                                className='w-3 h-3 rounded-full'
+                                style={{ backgroundColor: color }}
+                              />
+                              <span className='capitalize'>{color}</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+              </div>
             ))}
           </div>
+        </div>
+
+        <div className='space-y-2 pt-2 border-t border-border'>
+          <h3 className='font-medium mb-2'>Chat Badge Counting Mode</h3>
+          <Select
+            value={chatBadgeCountMode}
+            onValueChange={(value) =>
+              setNotificationProjectSettings({
+                chatBadgeCountMode: value as 'total_messages' | 'chats_with_unread',
+              })
+            }
+          >
+            <SelectTrigger className='w-64'>
+              <SelectValue placeholder='Select mode' />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value='chats_with_unread'>Chats with unread messages</SelectItem>
+              <SelectItem value='total_messages'>Total unread messages</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         <Switch
@@ -119,7 +179,7 @@ export default function NotificationSettings() {
               })
             }
           >
-            <SelectTrigger>
+            <SelectTrigger className='w-64'>
               <SelectValue placeholder='Select duration' />
             </SelectTrigger>
             <SelectContent>

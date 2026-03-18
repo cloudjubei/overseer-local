@@ -2,7 +2,7 @@
   "id": "0f518a52-2d7a-4467-8cab-912e81424556",
   "status": "-",
   "title": "Agent Runs as Special Chats",
-  "description": "Migrate agent runs to match the updated thefactory-tools model: runs are represented as special chats (not separate run entities/folders). Re-enable the disabled agent-run plumbing (main/preload/renderer) and restore all UI entry points (ChatView category + story list/details/cards). While a run is executing, its chat is read-only (no sending messages; no editing run settings). After completion, the conversation can be continued like a normal chat. Starting a run must use the new orchestrator semantics and stream updates into the run chat.",
+  "description": "## Context\n\nAgent runs are now modelled as special chats (type `AGENT_RUN` / `AGENT_RUN_FEATURE`) stored via `ChatsContext`. The `startAgentRun` method on `completionService` is the canonical way to kick off a run – it creates the chat, sets `state: 'created'`, then streams updates into it. `AgentsContext.startAgent` already creates the chat record but **does not yet call `completionService.startAgentRun`** – it only creates the chat shell and leaves the run stranded.\n\nNavigation currently sends `AgentRunBullet` clicks to `#agents/run/{runId}` (the `AgentsView` modal) via `navigateAgentRun`. The requirement is instead to navigate the user to **`ChatView`** with the run chat selected, using the existing `#chats{getChatContextKey(context)}` hash scheme.\n\n## Goals\n\n1. **Wire `startAgentRun`** – After creating the chat shell, `AgentsContext.startAgent` must call `completionService.startAgentRun` with the correct `AgentRunParams` (agentType → agentRunType coercion, llmConfig, githubCredentials, webSearchApiKeys, chatContext).\n\n2. **Redirect `navigateAgentRun` → ChatView** – Change `Navigator.navigateAgentRun` to set the hash to `#chats{getChatContextKey(context)}` instead of `#agents/run/{runId}`. The callers (`StoriesListView`, `StoryDetailsView`, `StoryCard`, `AgentsView`) will automatically navigate to ChatView and pre-select the agent run chat.\n\n3. **Read-only ChatSidebar while running** – When the chat's `context.type` is `AGENT_RUN` or `AGENT_RUN_FEATURE` and `chat.state` is `'created'` or `'running'`, the `ChatSidebar` must suppress the `ChatInput` (replace with a status banner) and hide the send/settings controls that don't apply. After `state` becomes `completed`, `cancelled`, or `error`, the chat becomes a normal writable conversation.\n\n4. **`ChatsNavigationSidebar` – Agent Runs category** – The sidebar already groups runs under story/feature sections with a \"Runs\" sub-list. Verify the category tree correctly surfaces `AGENT_RUN` and `AGENT_RUN_FEATURE` chats and that clicking one navigates correctly.\n\n5. **`AgentsContext` – post-start navigation** – After `startAgent` successfully kicks off a run, automatically navigate the user to the new run chat so they can follow the live stream.\n\n## Key Files\n\n- `src/renderer/src/contexts/AgentsContext.tsx` — `startAgent`: add `completionService.startAgentRun` call; add post-start navigation\n- `src/renderer/src/navigation/Navigator.tsx` — `navigateAgentRun`: change hash target from `#agents/run/{id}` to `#chats/...`; needs access to `runsHistory` (or accept full context instead of runId)\n- `src/renderer/src/components/chat/ChatSidebar.tsx` — add read-only guard for running agent run chats\n- `src/renderer/src/components/chat/ChatsNavigationSidebar.tsx` — verify agent run category rendering\n- `src/renderer/src/screens/stories/StoriesListView.tsx` — entry point (AgentRunBullet + RunAgentButton)\n- `src/renderer/src/screens/stories/StoryDetailsView.tsx` — entry point (AgentRunBullet + RunAgentButton, per-feature runs)\n- `src/renderer/src/components/stories/StoryCard.tsx` — entry point (board view)\n- `src/renderer/src/screens/AgentsView.tsx` — legacy run modal; keep or redirect to ChatView\n\n## Invariants\n\n- While `state === 'created' | 'running'`: no sending messages, no editing run settings (model chip hidden or disabled, settings cog hidden or disabled).\n- After `state === 'completed' | 'cancelled' | 'error'`: full chat UI is restored (user can continue the conversation).\n- `navigateAgentRun` must work from any caller that only has a `runId`; it must look up the full context from `runsHistory` (via `AgentsContext` or `ChatsContext`) to build the hash.\n- Do not remove or break the `AgentsView` run history/stats dashboard — only the run detail modal needs redirecting to ChatView.",
   "features": [
     {
       "id": "c427da17-9997-4f96-b2a6-32e58c250636",
@@ -17,40 +17,40 @@
     {
       "id": "f28b0336-58e5-493d-b246-2515a86934c2",
       "status": "-",
-      "title": "Refactor FactoryAgentRunManager to start runs via orchestrator and write to chats",
-      "description": "Update src/logic/factory/FactoryAgentRunManager.ts to follow new thefactory-tools semantics: starting a run creates/uses a special run chat (AGENT_RUN / AGENT_RUN_FEATURE context) and invokes the orchestrator to execute. Orchestrator updates must append into that chat (streaming) and update run status on completion. Remove reliance on legacy run entities and ensure any in-flight restrictions (read-only while running) can be derived from chat state.",
+      "title": "Wire up completionService.startAgentRun from AgentsContext",
+      "description": "Call `completionService.startAgentRun` from within `AgentsContext.startAgent` to actually launch the run after the placeholder chat is created. Also add post-start navigation so the user is taken directly to the newly created agent run chat in the UI.",
       "context": [],
       "createdAt": "2026-03-13T14:41:36.320Z",
-      "updatedAt": "2026-03-13T14:41:36.320Z"
+      "updatedAt": "2026-03-18T02:51:12.128Z"
     },
     {
       "id": "0c6704d6-4ab6-4d63-ad51-227d1593009a",
       "status": "-",
-      "title": "Re-enable and migrate IPC, Preload, and Renderer Agent Services",
-      "description": "Re-enable disabled IPC keys and agent services (`main/managers.ts`, `preload/ipcHandlersKeys.ts`, `renderer/services/factoryAgentRunService.ts`, `contexts/AgentsContext.tsx`). Update their interfaces to interact with chat-backed run data instead of legacy run structures. Ensure UI components can fetch the project's runs, listen to run updates, and submit run start requests via IPC cleanly.",
+      "title": "Redirect navigateAgentRun to ChatView",
+      "description": "Update `Navigator.navigateAgentRun` to change the route to `#chats/{chatContextKey}` instead of `#agents/run/{runId}`. Since callers only have a `runId`, the function may need the full context passed, or it can look up the `runId` via `AgentsContext` or `ChatsContext`. Review `AgentsView` run history list routing to match.",
       "context": [],
       "createdAt": "2026-03-13T14:42:49.729Z",
-      "updatedAt": "2026-03-13T14:42:49.729Z"
+      "updatedAt": "2026-03-18T02:51:23.753Z"
     },
     {
       "id": "da01a92e-6471-42bb-b028-1b9939218817",
       "status": "-",
-      "title": "Enforce UI restrictions for running agent chats",
-      "description": "Update ChatContext and ChatSidebar implementations to lock down running agent chats. When a run is in 'running' state, hide or disable the ChatInput so messages cannot be sent, and block or remove the 'Chat Settings' and 'System Prompt' buttons. Wait for completion to restore normal chat interactions. Ensure ChatSidebar detects when a run is finished and becomes interactive again.",
+      "title": "Enforce read-only UI restrictions for running agent chats",
+      "description": "Update ChatSidebar implementations to lock down running agent chats. When a run is in 'created' or 'running' state, hide or disable the ChatInput so messages cannot be sent, and block or remove the 'Chat Settings' and 'System Prompt' buttons. Wait for completion to restore normal chat interactions. Ensure ChatSidebar detects when a run is finished and becomes interactive again.",
       "context": [],
       "createdAt": "2026-03-13T14:44:33.822Z",
-      "updatedAt": "2026-03-13T14:44:33.822Z"
+      "updatedAt": "2026-03-18T02:51:53.882Z"
     },
     {
       "id": "ad77cc29-7bf5-4fe7-b172-b7f5ee2a5012",
       "status": "-",
       "title": "Restore run displays in Chat navigation and Story UI",
-      "description": "Update navigation and story UI to reflect the new agent-run chat model. Modify ChatNavigationSidebar to display agent run chats in their own category under the project. Restore run listings in StoriesListView, StoryDetailsView, and StoryCard by filtering the chat list for runs belonging to the given story.",
+      "description": "Verify that ChatNavigationSidebar appropriately displays agent run chats in their own category under the story/feature. Verify that AgentRunBullet appears in StoryDetailsView and StoriesListView for running agent chats. This is mostly implemented already but needs verification against the routing changes.",
       "context": [],
       "createdAt": "2026-03-13T14:44:44.500Z",
-      "updatedAt": "2026-03-13T14:44:44.500Z"
+      "updatedAt": "2026-03-18T02:52:13.667Z"
     }
   ],
   "createdAt": "2026-03-13T14:31:13.825Z",
-  "updatedAt": "2026-03-13T14:31:13.825Z"
+  "updatedAt": "2026-03-18T02:50:38.312Z"
 }

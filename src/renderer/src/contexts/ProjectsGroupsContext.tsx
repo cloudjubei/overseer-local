@@ -63,7 +63,7 @@ export function ProjectsGroupsProvider({ children }: { children: React.ReactNode
   const getGroupForProject = useCallback(
     (projectId: string) => {
       if (!groups || groups.length === 0) return undefined
-      return groups.find((g) => g.projects?.includes(projectId))
+      return groups.find((g) => g.projects?.includes(projectId) && g.type !== 'SCOPE')
     },
     [groups],
   )
@@ -137,7 +137,7 @@ export function ProjectsGroupsProvider({ children }: { children: React.ReactNode
 
   // Move a project into a group (or remove from any group when groupId == null)
   const setProjectGroup = async (projectId: string, groupId: string | null): Promise<void> => {
-    const current = groups.find((g) => g.projects?.includes(projectId))
+    const current = groups.find((g) => g.projects?.includes(projectId) && g.type !== 'SCOPE')
     const target = groupId ? groups.find((g) => g.id === groupId) : undefined
 
     // if already in desired state, nothing to do

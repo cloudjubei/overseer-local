@@ -3,7 +3,7 @@
   "description": "the overseer local project",
   "repo_url": "https://github.com/cloudjubei/overseer-local",
   "createdAt": "2025-09-14T19:03:30.461Z",
-  "updatedAt": "2026-03-17T20:25:39.217Z",
+  "updatedAt": "2026-03-18T02:46:17.227Z",
   "storyIds": [
     "f67e8921-b197-40c9-9154-e95db8f27deb",
     "f1f12817-8f44-4f92-9b2f-af5910289a13",
@@ -44,5 +44,7 @@
     "f375e3cb-f377-43b5-bb79-b2ffbf778d15",
     "46219b4f-7297-4ed5-bf22-8dcd272a681b"
   ],
-  "scopeGroupIds": []
+  "scopeGroupIds": [
+    "9d03b28b-4491-4868-9bf8-1d66ed32679c"
+  ]
 }

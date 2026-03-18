@@ -8,6 +8,8 @@ import { useProjectContext } from './ProjectContext'
 import { chatsService } from '../services/chatsService'
 import { useChats } from './chats/ChatsContext'
 import { notificationsService } from '../services/notificationsService'
+import { completionService } from '../services/completionService'
+import { getChatContextKey } from 'thefactory-tools/utils'
 
 export type AgentsContextValue = {
   runsActive: Chat[]
@@ -171,6 +173,28 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
           webSearchApiKeys: appSettings.webSearchApiKeys,
         },
       })
+
+      // Start the run via completionService (fire-and-forget so navigation isn't blocked)
+      completionService
+        .startAgentRun(
+          {
+            agentType: effectiveAgentType as any,
+            chatContext: context as any,
+            llmConfig: activeConfig,
+            githubCredentials: activeCredentials,
+            webSearchApiKeys: appSettings.webSearchApiKeys,
+          },
+          {} as any,
+          false
+        )
+        .catch((err) => {
+          console.error('[AgentsContext] Agent run failed to start:', err)
+          chatsService.updateChat(context, { state: 'error' }).catch(() => {})
+        })
+
+      // Post-start navigation: redirect user to the new run chat
+      const chatKey = getChatContextKey(context)
+      window.location.hash = `#chats${chatKey}`
     },
     [activeConfig, appSettings, activeProject, getCredentials],
   )

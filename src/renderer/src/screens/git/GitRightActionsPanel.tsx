@@ -9,12 +9,13 @@ import { IconCommit } from '../../components/ui/icons/IconCommit'
 import { IconPullRequest } from '../../components/ui/icons/IconPullRequest'
 import { IconDoubleUp } from '../../components/ui/icons/IconDoubleUp'
 import { IconArchive } from '../../components/ui/icons/IconArchive'
-import { IconDelete } from '../../components/ui/icons/Icons'
+import { IconDelete, IconArrowDown } from '../../components/ui/icons/Icons'
 import { IconChevronDown } from '../../components/ui/icons/IconChevronDown'
 
 import { useProjectContext } from '../../contexts/ProjectContext'
 import { useGit } from '../../contexts/GitContext'
 import { gitService } from '../../services/gitService'
+import { getPRUrl } from '../../utils/gitPRUrl'
 
 import GitCommitModal from './GitCommitModal'
 import { GitCreateBranchModal } from './GitCreateBranchModal'
@@ -92,7 +93,7 @@ export function GitRightActionsPanel({
   currentBranchName?: string
   onStashAppliedOrDeleted?: () => void
 }) {
-  const { activeProjectId } = useProjectContext()
+  const { activeProjectId, activeProject } = useProjectContext()
   const { unified } = useGit()
 
   const [commitModalOpen, setCommitModalOpen] = useState(false)
@@ -107,6 +108,8 @@ export function GitRightActionsPanel({
 
   // "Branch" (create) is only meaningful when a local branch is active/selected
   const canCreateBranch = !!selectedBranch?.isLocal && !busy
+
+  const canCreatePR = selectedBranch && selectedBranch.name !== 'main' && !!activeProject?.repo_url && !busy
 
   const handlePull = async () => {
     if (!activeProjectId || !selectedBranch || busy) return
@@ -201,6 +204,16 @@ export function GitRightActionsPanel({
     }
   }
 
+  const handleCreatePR = () => {
+    if (!activeProject?.repo_url || !selectedBranch) return
+    const url = getPRUrl(activeProject.repo_url, selectedBranch.name, 'main')
+    if (url) {
+      window.open(url, '_blank')
+    } else {
+      alert('Could not determine PR URL for ' + activeProject.repo_url)
+    }
+  }
+
   return (
     <div
       className="shrink-0 border-l border-neutral-200 dark:border-neutral-800 flex flex-col min-h-0 items-center py-2 overflow-x-hidden"
@@ -241,7 +254,7 @@ export function GitRightActionsPanel({
             {selectedBranch.isLocal && (
               <>
                 <GitActionButton
-                  icon={<IconPullRequest className="w-5 h-5" />}
+                  icon={<IconArrowDown className="w-5 h-5" />}
                   label="Pull"
                   onClick={handlePull}
                   disabled={busy}
@@ -277,6 +290,19 @@ export function GitRightActionsPanel({
                 canCreateBranch
                   ? 'Create new branch from here'
                   : 'Select a local branch to create from'
+              }
+            />
+
+            {/* Create PR */}
+            <GitActionButton
+              icon={<IconPullRequest className="w-5 h-5" />}
+              label="PR"
+              onClick={handleCreatePR}
+              disabled={!canCreatePR}
+              tooltip={
+                canCreatePR
+                  ? `Create Pull Request for ${selectedBranch.name}`
+                  : 'Requires a branch (other than main) and a remote repo URL'
               }
             />
 

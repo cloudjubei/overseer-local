@@ -44,14 +44,15 @@ const NotificationBadge: React.FC<NotificationBadgeProps> = ({
         'h-5 min-w-5 px-1.5',
         // shape
         'rounded-full',
-        // typography
-        'text-[11px] leading-none font-semibold text-white',
+        // typography — line-height:0 lets flexbox own vertical centering
+        'text-[11px] font-semibold text-white',
         // color
         bg,
         // subtle outline to pop on dark/light backgrounds
         'ring-2 ring-white dark:ring-neutral-900',
         className,
       ].join(' ')}
+      style={{ lineHeight: 0 }}
       title={title}
       aria-label={title}
       role="status"

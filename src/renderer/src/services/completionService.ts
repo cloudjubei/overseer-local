@@ -1,4 +1,5 @@
 import type {
+  AgentRunParams,
   ChatContext,
   CompletionMessage,
   CompletionResponseTurns,
@@ -39,7 +40,13 @@ export type CompletionService = {
     config: LLMConfig,
   ): Promise<CompletionResponseTurns>
 
+  startAgentRun(
+    params: AgentRunParams,
+    settings: CompletionSettings,
+    isolated: boolean,
+  ): Promise<void>
+
   abortCompletion(chatContext: ChatContext): Promise<void>
 }
 
-export const completionService: CompletionService = { ...window.completionService } 
+export const completionService: CompletionService = { ...window.completionService }

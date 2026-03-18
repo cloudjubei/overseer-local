@@ -16,12 +16,13 @@
     },
     {
       "id": "659f1623-976f-4f50-8c7b-ec4f2ba0fd25",
-      "status": "-",
+      "status": "+",
       "title": "Group Activation & SCOPE Groups",
       "description": "Add activate/deactivate toggles to ProjectsGroup items in ProjectManagerModal. Introduces SCOPE group type for chat/scoping, alongside MAIN groups for strict hierarchical display.",
       "context": [],
       "createdAt": "2026-03-17T14:03:16.368Z",
-      "updatedAt": "2026-03-17T14:03:16.368Z"
+      "updatedAt": "2026-03-18T02:53:10.430Z",
+      "completedAt": "2026-03-18T02:53:10.430Z"
     },
     {
       "id": "9c892cb6-44f8-4cfb-96e4-56911491cc2d",

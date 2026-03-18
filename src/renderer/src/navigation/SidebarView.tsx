@@ -151,7 +151,8 @@ export default function SidebarView({}: SidebarProps) {
   const { activeProjectId, projects, setActiveProjectId } = useProjectContext()
   const { isAppSettingsLoaded, appSettings, updateAppSettings } = useAppSettings()
   const { groups } = useProjectsGroups()
-  const { isBadgeEnabled, getProjectBadgeState, getGroupBadgeState } = useNotifications()
+  const { isBadgeEnabled, isGitBadgeSubToggleEnabled, getProjectBadgeState, getGroupBadgeState } =
+    useNotifications()
 
   const [collapsed, setCollapsed] = useState<boolean>(appSettings.userPreferences.sidebarCollapsed)
 
@@ -177,7 +178,8 @@ export default function SidebarView({}: SidebarProps) {
   const agentsCompletedUnreadCurrentProject = stCurrent.agent_runs.unread
   const chatUnreadCurrentProject = stCurrent.chat_messages.unread
   const chatThinkingCurrentProject = stCurrent.chat_messages.thinking
-  const gitUnreadCurrentProject = stCurrent.git_changes.unread
+  const gitIncomingCurrentProject = stCurrent.git_changes.incoming
+  const gitUncommittedCurrentProject = stCurrent.git_changes.uncommitted
 
   const isMobile = useMediaQuery('(max-width: 768px)')
   const [mobileOpen, setMobileOpen] = useState<boolean>(false)
@@ -295,11 +297,16 @@ export default function SidebarView({}: SidebarProps) {
     () => projects.filter((p) => (p as any).active !== false),
     [projects],
   )
+
   // Filter out groups where all member projects are inactive (no visible members)
+  // Also only include active groups, and exclude SCOPE groups from main hierarchy
   const activeGroups = useMemo(
     () =>
-      groups.filter((g) =>
-        (g.projects || []).some((pid) => activeProjects.some((p) => p.id === pid)),
+      groups.filter(
+        (g) =>
+          g.active !== false &&
+          g.type !== 'SCOPE' &&
+          (g.projects || []).some((pid) => activeProjects.some((p) => p.id === pid)),
       ),
     [groups, activeProjects],
   )
@@ -316,56 +323,67 @@ export default function SidebarView({}: SidebarProps) {
       }
       return next
     })
-  }, [activeGroups.map((g) => g.id).join('|')])
+  }, [activeGroups])
 
-  const groupedProjectIds = useMemo(
-    () => new Set(activeGroups.flatMap((g) => g.projects || [])),
-    [activeGroups],
-  )
-  const uncategorizedProjects = useMemo(
-    () => activeProjects.filter((p) => !groupedProjectIds.has(p.id)),
-    [activeProjects, groupedProjectIds],
-  )
+  const groupedProjectIds = useMemo(() => {
+    const ids = new Set<string>()
+    for (const g of activeGroups) {
+      if (g.projects) {
+        for (const pid of g.projects) {
+          ids.add(pid)
+        }
+      }
+    }
+    return ids
+  }, [activeGroups])
 
   const cap99 = (n: number) => (n > 99 ? '99+' : `${n}`)
 
   const renderProjectItem = (p: ProjectSpec) => {
-    const active = activeProjectId === p.id
+    const active = p.id === activeProjectId
     const accent = useAccentClass(p.id, isMainProject(p.id))
-
     const st = getProjectBadgeState(p.id)
-    const activeCount = st.agent_runs.running
+    const activeRuns = st.agent_runs.running
+    const agentsCompletedUnread = st.agent_runs.unread
     const chatUnread = st.chat_messages.unread
-    const chatThinking = st.chat_messages.thinking
-    const gitUnread = st.git_changes.unread
-    const completedUnread = st.agent_runs.unread
-
+    const thinking = st.chat_messages.thinking
+    const gitIncoming = st.git_changes.incoming
+    const gitUncommitted = st.git_changes.uncommitted
     const iconKey = p.metadata?.icon || (isMainProject(p.id) ? 'collection' : 'folder')
     const projectIcon = renderProjectIcon(iconKey)
 
-    // Only show badges on non-selected projects
-    const showAgents = isBadgeEnabled('agent_runs', p.id) && activeCount > 0 && !active
-    const showAgentsCompleted = isBadgeEnabled('agent_runs', p.id) && completedUnread > 0 && !active
-    const showChat = isBadgeEnabled('chat_messages', p.id) && (chatUnread > 0 || chatThinking) && !active
-    const showGit = isBadgeEnabled('git_changes', p.id) && gitUnread > 0 && !active
-    const hasAnyBadge = showAgents || showAgentsCompleted || showChat || showGit
+    const showAgents = isBadgeEnabled('agent_runs', p.id) && activeRuns > 0 && !active
+    const showAgentsCompleted =
+      isBadgeEnabled('agent_runs', p.id) && agentsCompletedUnread > 0 && !active
+    const showChat =
+      isBadgeEnabled('chat_messages', p.id) && (chatUnread > 0 || thinking) && !active
+
+    const gitBadgesEnabled = isBadgeEnabled('git_changes', p.id) && !active
+    const showGitIncoming =
+      gitBadgesEnabled && isGitBadgeSubToggleEnabled('incoming_commits', p.id) && gitIncoming > 0
+    const showGitUncommitted =
+      gitBadgesEnabled && isGitBadgeSubToggleEnabled('uncommitted_changes', p.id) && gitUncommitted
+
+    const hasAnyBadge =
+      showAgents || showAgentsCompleted || showChat || showGitIncoming || showGitUncommitted
 
     const Btn = (
       <button
+        type="button"
+        onClick={() => handleProjectSwitch(p.id)}
         className={classNames(
           'nav-item flex-1',
           accent,
           active && 'nav-item--active',
           effectiveCollapsed && 'nav-item--compact',
         )}
-        aria-current={active ? 'true' : undefined}
-        onClick={() => handleProjectSwitch(p.id)}
         title={p.title}
+        aria-current={active ? 'page' : undefined}
       >
         <span className="nav-item__icon" aria-hidden>
           {projectIcon}
         </span>
-        {!effectiveCollapsed && <span className="nav-item__label">{p.title}</span>}
+        {!effectiveCollapsed && <span className="nav-item__label flex-1 text-left">{p.title}</span>}
 
         {hasAnyBadge && (
           <span
@@ -378,19 +396,19 @@ export default function SidebarView({}: SidebarProps) {
             {showAgents && (
               <NotificationBadge
                 className={effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''}
-                text={`${activeCount}`}
-                tooltipLabel={`${activeCount} running agents`}
+                text={`${activeRuns}`}
+                tooltipLabel={`${activeRuns} running agents`}
                 isInformative
               />
             )}
             {showAgentsCompleted && (
               <NotificationBadge
                 className={effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''}
-                text={cap99(completedUnread)}
-                tooltipLabel={`${completedUnread} completed agent runs`}
+                text={cap99(agentsCompletedUnread)}
+                tooltipLabel={`${agentsCompletedUnread} completed agent runs`}
               />
             )}
-            {showChat && chatThinking ? (
+            {showChat && thinking ? (
               <SpinnerWithDot
                 size={effectiveCollapsed ? 14 : 16}
                 showDot={chatUnread > 0}
@@ -403,11 +421,19 @@ export default function SidebarView({}: SidebarProps) {
                 tooltipLabel={`${chatUnread} unread chats`}
               />
             ) : null}
-            {showGit && (
+            {showGitIncoming && (
               <NotificationBadge
                 className={effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''}
-                text={`${gitUnread}`}
-                tooltipLabel={`${gitUnread} updated ${gitUnread === 1 ? 'branch' : 'branches'}`}
+                text={`${gitIncoming}↓`}
+                tooltipLabel={`${gitIncoming} incoming commits`}
+                color="blue"
+              />
+            )}
+            {showGitUncommitted && (
+              <NotificationBadge
+                className={effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''}
+                text={`*`}
+                tooltipLabel={`Uncommitted changes`}
                 color="green"
               />
             )}
@@ -417,7 +443,7 @@ export default function SidebarView({}: SidebarProps) {
     )
 
     return (
-      <li className="nav-li" key={p.id}>
+      <li key={p.id} className="nav-li">
         {effectiveCollapsed ? (
           <Tooltip content={p.title} placement="right">
             {Btn}
@@ -431,71 +457,51 @@ export default function SidebarView({}: SidebarProps) {
 
   const Aside = (
     <aside
-      className={`sidebar relative z-30 flex h-full shrink-0 flex-col overflow-hidden border-r bg-white dark:bg-neutral-900 dark:border-neutral-800 ${effectiveCollapsed ? 'collapsed' : ''}`}
-      aria-label="Primary navigation"
-      data-collapsed={effectiveCollapsed ? 'true' : 'false'}
+      className={`sidebar flex flex-col bg-sidebar dark:bg-sidebar-dark border-r border-sidebar-border dark:border-sidebar-border-dark view-transition z-40 transition-all duration-300 ${
+        effectiveCollapsed ? 'w-[64px]' : 'w-[260px]'
+      }`}
+      aria-label="Main navigation"
     >
-      <div
-        className={`mb-2 flex items-center ${effectiveCollapsed ? 'justify-center' : 'justify-between'} px-2 pt-3`}
-      >
-        {!effectiveCollapsed && (
-          <div className="px-1">
-            <div className="text-sm font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">
-              The Overseer
-            </div>
-            <div className="text-[11px] text-neutral-500 dark:text-neutral-400">
-              powered by TheFactory
-            </div>
-          </div>
-        )}
+      <div className="flex items-center justify-between p-3 shrink-0" aria-hidden>
         <button
-          type="button"
-          onClick={() => (isMobile ? setMobileOpen(false) : setCollapsed((v) => !v))}
-          className="nav-toggle"
-          aria-label={effectiveCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          aria-expanded={!effectiveCollapsed}
-          title={effectiveCollapsed ? 'Expand sidebar (⌘/Ctrl+B)' : 'Collapse sidebar (⌘/Ctrl+B)'}
+          className="sidebar-logo"
+          onClick={() => onActivate('Home')}
+          tabIndex={-1}
+          style={effectiveCollapsed ? { width: '100%', justifyContent: 'center' } : {}}
         >
-          <span aria-hidden>
-            <IconChevron
-              className="w-4 h-4"
-              style={{ transform: effectiveCollapsed ? 'none' : 'rotate(180deg)' }}
-            />
-          </span>
+          <img src="icon.png" alt="Overseer" />
+          {!effectiveCollapsed && <span>Overseer</span>}
         </button>
+
+        {!isMobile && (
+          <button
+            onClick={() => setCollapsed(!collapsed)}
+            className="p-1 rounded text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+            title={effectiveCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            tabIndex={-1}
+          >
+            <IconMenu className="w-4 h-4" />
+          </button>
+        )}
       </div>
 
       <nav
-        className="nav flex-1 min-h-0 overflow-y-auto"
+        className="flex-1 overflow-y-auto px-2 pb-4 scrollbar-thin overflow-x-hidden"
         style={hideScrollStyle}
-        onKeyDown={onKeyDownList}
       >
-        <ul className="nav-list" role="list">
+        <ul className="nav-list" role="list" onKeyDown={onKeyDownList}>
           {NAV_ITEMS.filter((n) => n.view !== 'Settings').map((item, i) => {
             const isActive = currentView === item.view
-            const ref = i === 0 ? firstItemRef : undefined
+            const isFirst = i === 0
+            const ref = isFirst ? firstItemRef : null
 
             const BtnBadges = () => {
-              if (
-                item.view === 'Git' &&
-                gitUnreadCurrentProject > 0 &&
-                isBadgeEnabled('git_changes', activeProjectId)
-              ) {
-                return (
-                  <NotificationBadge
-                    className={effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''}
-                    text={`${gitUnreadCurrentProject}`}
-                    tooltipLabel={`${gitUnreadCurrentProject} updated ${gitUnreadCurrentProject === 1 ? 'branch' : 'branches'}`}
-                    color="green"
-                  />
-                )
-              }
               if (item.view === 'Agents' && isBadgeEnabled('agent_runs', activeProjectId)) {
                 const parts: React.ReactNode[] = []
                 if (activeRunsCurrentProject > 0) {
                   parts.push(
                     <NotificationBadge
-                      key="agents-running"
+                      key="agent-running"
                       className={
                         effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''
                       }
@@ -508,7 +514,7 @@ export default function SidebarView({}: SidebarProps) {
                 if (agentsCompletedUnreadCurrentProject > 0) {
                   parts.push(
                     <NotificationBadge
-                      key="agents-completed"
+                      key="agent-unread"
                       className={
                         effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''
                       }
@@ -519,9 +525,47 @@ export default function SidebarView({}: SidebarProps) {
                 }
                 return parts.length ? <>{parts}</> : null
               }
-              if (item.view === 'Chat' && isBadgeEnabled('chat_messages', activeProjectId)) {
+              if (item.view === 'Git' && isBadgeEnabled('git_changes', activeProjectId)) {
                 const parts: React.ReactNode[] = []
 
+                if (
+                  isGitBadgeSubToggleEnabled('incoming_commits', activeProjectId) &&
+                  gitIncomingCurrentProject > 0
+                ) {
+                  parts.push(
+                    <NotificationBadge
+                      key="git-incoming"
+                      className={
+                        effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''
+                      }
+                      text={`${gitIncomingCurrentProject}↓`}
+                      tooltipLabel={`${gitIncomingCurrentProject} incoming commits`}
+                      color="blue"
+                    />,
+                  )
+                }
+
+                if (
+                  isGitBadgeSubToggleEnabled('uncommitted_changes', activeProjectId) &&
+                  gitUncommittedCurrentProject
+                ) {
+                  parts.push(
+                    <NotificationBadge
+                      key="git-uncommitted"
+                      className={
+                        effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''
+                      }
+                      text={`*`}
+                      tooltipLabel={`Uncommitted changes`}
+                      color="green"
+                    />,
+                  )
+                }
+
+                return parts.length ? <>{parts}</> : null
+              }
+              if (item.view === 'Chat' && isBadgeEnabled('chat_messages', activeProjectId)) {
+                const parts: React.ReactNode[] = []
                 if (chatThinkingCurrentProject) {
                   parts.push(
                     <SpinnerWithDot
@@ -535,9 +579,7 @@ export default function SidebarView({}: SidebarProps) {
                       }
                     />,
                   )
-                }
-
-                if (chatUnreadCurrentProject > 0) {
+                } else if (chatUnreadCurrentProject > 0) {
                   parts.push(
                     <NotificationBadge
                       key="chat-unread"
@@ -648,7 +690,9 @@ export default function SidebarView({}: SidebarProps) {
             </li>
           )}
 
-          {activeProjects.filter((p) => !groupedProjectIds.has(p.id)).map((p) => renderProjectItem(p))}
+          {activeProjects
+            .filter((p) => !groupedProjectIds.has(p.id))
+            .map((p) => renderProjectItem(p))}
 
           {!effectiveCollapsed &&
             activeGroups.map((g) => {
@@ -664,18 +708,13 @@ export default function SidebarView({}: SidebarProps) {
                 : ''
 
               const groupBadge = getGroupBadgeState(g.id)
-              
-              // If group is open and has active project, should we subtract the active project's badges from the group total?
-              // Let's keep the group total as-is for now, but in a refined version we might subtract them if the active project is expanded.
-              // Actually, wait, if the active project's badges are hidden inside the group because it's active,
-              // then the group badge will show a count that is larger than the sum of visible badges inside it.
-              // We'll leave it simple for now, as it's an aggregate of the group.
 
               const aggActive = groupBadge.agent_runs.running
               const aggAgentsCompletedUnread = groupBadge.agent_runs.unread
               const aggChatUnread = groupBadge.chat_messages.unread
               const aggThinking = groupBadge.chat_messages.thinking ? 1 : 0
-              const aggGitUnread = groupBadge.git_changes.unread
+              const aggGitIncoming = groupBadge.git_changes.incoming
+              const aggGitUncommitted = groupBadge.git_changes.uncommitted
 
               const aggShowAgents =
                 (g.projects || []).some((pid) => isBadgeEnabled('agent_runs', pid)) && aggActive > 0
@@ -685,12 +724,26 @@ export default function SidebarView({}: SidebarProps) {
               const aggShowChat =
                 (g.projects || []).some((pid) => isBadgeEnabled('chat_messages', pid)) &&
                 (aggChatUnread > 0 || aggThinking > 0)
-              const aggShowGit =
-                (g.projects || []).some((pid) => isBadgeEnabled('git_changes', pid)) &&
-                aggGitUnread > 0
+
+              const aggShowGitIncoming =
+                (g.projects || []).some(
+                  (pid) =>
+                    isBadgeEnabled('git_changes', pid) &&
+                    isGitBadgeSubToggleEnabled('incoming_commits', pid),
+                ) && aggGitIncoming > 0
+              const aggShowGitUncommitted =
+                (g.projects || []).some(
+                  (pid) =>
+                    isBadgeEnabled('git_changes', pid) &&
+                    isGitBadgeSubToggleEnabled('uncommitted_changes', pid),
+                ) && aggGitUncommitted
 
               const showAnyBadge =
-                aggShowAgents || aggShowAgentsCompleted || aggShowChat || aggShowGit
+                aggShowAgents ||
+                aggShowAgentsCompleted ||
+                aggShowChat ||
+                aggShowGitIncoming ||
+                aggShowGitUncommitted
 
               return (
                 <li key={g.id} className="nav-li">
@@ -752,11 +805,19 @@ export default function SidebarView({}: SidebarProps) {
                             tooltipLabel={`${aggChatUnread} unread chats in group`}
                           />
                         ) : null}
-                        {aggShowGit && (
+                        {aggShowGitIncoming && (
                           <NotificationBadge
                             className={''}
-                            text={`${aggGitUnread}`}
-                            tooltipLabel={`${aggGitUnread} updated ${aggGitUnread === 1 ? 'branch' : 'branches'} in group`}
+                            text={`${aggGitIncoming}↓`}
+                            tooltipLabel={`${aggGitIncoming} incoming commits in group`}
+                            color="blue"
+                          />
+                        )}
+                        {aggShowGitUncommitted && (
+                          <NotificationBadge
+                            className={''}
+                            text={`*`}
+                            tooltipLabel={`Uncommitted changes in group`}
                             color="green"
                           />
                         )}

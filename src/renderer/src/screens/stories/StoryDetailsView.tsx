@@ -394,7 +394,7 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
                     run={storyRun}
                     onClick={(e) => {
                       e.stopPropagation()
-                      navigateAgentRun(storyRun.context.agentRunId!)
+                      navigateAgentRun(storyRun.context)
                     }}
                   />
                 ) : (
@@ -684,7 +684,7 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
                                 run={featureRun}
                                 onClick={(e) => {
                                   e.stopPropagation()
-                                  navigateAgentRun(featureRun.context.agentRunId!)
+                                  navigateAgentRun(featureRun.context)
                                 }}
                               />
                             </div>

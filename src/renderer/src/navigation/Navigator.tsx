@@ -1,6 +1,8 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import type { FeatureFormValues } from '../components/stories/FeatureForm'
 import { NavigationView } from '@renderer/types'
+import { getChatContextKey } from 'thefactory-tools/utils'
+import type { ChatContext } from 'thefactory-tools'
 
 export type StoriesRoute =
   | { name: 'list' }
@@ -55,7 +57,7 @@ export type NavigatorApi = NavigatorState &
       highlightFeatureId?: string,
       highlightStory?: boolean,
     ) => void
-    navigateAgentRun: (runId: string) => void
+    navigateAgentRun: (context: ChatContext) => void
   }
 
 function viewPrefixToView(prefix: string): NavigationView {
@@ -181,8 +183,9 @@ export function NavigatorProvider({ children }: { children: React.ReactNode }) {
     [],
   )
 
-  const navigateAgentRun = useCallback((runId: string) => {
-    window.location.hash = `#agents/run/${runId}`
+  const navigateAgentRun = useCallback((context: ChatContext) => {
+    const key = getChatContextKey(context)
+    window.location.hash = `#chats${key}`
   }, [])
 
   const value = useMemo<NavigatorApi>(

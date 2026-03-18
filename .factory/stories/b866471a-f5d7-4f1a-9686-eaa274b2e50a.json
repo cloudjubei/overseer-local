@@ -16,12 +16,13 @@
     },
     {
       "id": "875e2bdd-79b9-4796-9b8b-5e296a7e8769",
-      "status": "-",
+      "status": "+",
       "title": "Feature 2: Git Badges & Metrics",
       "description": "Implement state derivation for Git repository status. Derive 'incoming commits' (pulls available) and 'uncommitted changes' (working tree dirty). Provide toggles to independently enable/disable badges for incoming vs. uncommitted changes. Default color: Green.",
       "context": [],
       "createdAt": "2026-03-17T20:05:28.514Z",
-      "updatedAt": "2026-03-17T20:05:28.514Z"
+      "updatedAt": "2026-03-18T02:47:48.637Z",
+      "completedAt": "2026-03-18T02:47:48.637Z"
     },
     {
       "id": "541f1df4-2e59-4ab8-a93e-ec5e662db178",
