@@ -24,6 +24,7 @@ import { validateProjectClient } from './validateProject'
 import { ProjectEditorForm } from './ProjectEditorForm'
 import { useProjectsGroups } from '@renderer/contexts/ProjectsGroupsContext'
 import { ProjectGroupsEditor } from './ProjectGroupsEditor'
+import { ProjectWizardModal } from './wizard/ProjectWizardModal'
 
 const ALL_GROUP_ID = '__all__'
 const UNCATEGORIZED_ID = '__uncategorized__'
@@ -61,6 +62,7 @@ export default function ProjectManagerModal({
   })
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null)
   const [initialGroupId, setInitialGroupId] = useState<string | null>(null)
+  const [isWizardOpen, setIsWizardOpen] = useState(false)
 
   const [formErrors, setFormErrors] = useState<string[]>([])
   const [saving, setSaving] = useState(false)
@@ -302,7 +304,7 @@ export default function ProjectManagerModal({
       {/* Right-side primary actions */}
       <div className="flex items-center gap-2">
         {mode === 'list' && (
-          <Button variant="primary" size="icon" onClick={() => startCreate()} title="Add project">
+          <Button variant="primary" size="icon" onClick={() => setIsWizardOpen(true)} title="Add project">
             <IconPlus className="w-4 h-4" />
           </Button>
         )}
@@ -461,6 +463,15 @@ export default function ProjectManagerModal({
           )}
         </div>
       </Modal>
+
+      {isWizardOpen && (
+        <ProjectWizardModal
+          isOpen={true}
+          onClose={() => setIsWizardOpen(false)}
+          onComplete={() => setIsWizardOpen(false)}
+          initialGroupId={currentGroupId !== ALL_GROUP_ID && currentGroupId !== UNCATEGORIZED_ID ? currentGroupId : null}
+        />
+      )}
     </>
   )
 }
