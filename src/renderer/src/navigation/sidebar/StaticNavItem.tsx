@@ -18,7 +18,7 @@ type StaticNavItemProps = {
   setFocusIndex: (i: number) => void
   onActivate: (view: NavDef['view']) => void
   isFirst?: boolean
-  firstItemRef?: React.RefObject<HTMLButtonElement>
+  firstItemRef?: React.RefObject<HTMLButtonElement | null>
 
   // Current scope badges
   activeRunsCurrentProject: number

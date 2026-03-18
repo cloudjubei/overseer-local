@@ -32,13 +32,6 @@ export const NAV_ITEMS: NavDef[] = [
   },
   { id: 'chats', label: 'Chat', view: 'Chat', icon: <IconChat />, accent: 'teal' },
   {
-    id: 'agents',
-    label: 'Agents',
-    view: 'Agents',
-    icon: <IconRobot />,
-    accent: 'teal',
-  },
-  {
     id: 'git',
     label: 'Git',
     view: 'Git',

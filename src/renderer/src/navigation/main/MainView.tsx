@@ -8,13 +8,16 @@ import ProjectTimelineView from '../../screens/ProjectTimelineView'
 import ToolsScreen from '../../screens/ToolsView'
 import TestsView from '../../screens/TestsView'
 import GitView from '../../screens/GitView'
+import GroupHomeView from '../../screens/GroupHomeView'
 import { useNavigator } from '../Navigator'
 import { IconMenu } from '../../components/ui/icons/Icons'
 import SidebarView from '../sidebar/SidebarView'
 import { useMediaQuery } from '../utils'
+import { useProjectsGroups } from '@renderer/contexts/ProjectsGroupsContext'
 
 export default function MainView() {
   const { currentView } = useNavigator()
+  const { activeSelectionType } = useProjectsGroups()
   const isMobile = useMediaQuery('(max-width: 768px)')
   const [mobileOpen, setMobileOpen] = useState<boolean>(false)
   const mobileTriggerRef = useRef<HTMLButtonElement | null>(null)
@@ -74,10 +77,10 @@ export default function MainView() {
       )
     return (
       <div key="Home" className="flex flex-col flex-1 min-h-0 view-transition">
-        <StoriesView />
+        {activeSelectionType === 'group' ? <GroupHomeView /> : <StoriesView />}
       </div>
     )
-  }, [currentView])
+  }, [currentView, activeSelectionType])
 
   return (
     <div className="flex h-full w-full min-w-0">

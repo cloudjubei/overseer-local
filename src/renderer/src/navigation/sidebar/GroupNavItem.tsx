@@ -1,6 +1,5 @@
-import React, { useState } from 'react'
-import { ProjectGroup } from 'thefactory-tools'
-import { ProjectSpec } from 'thefactory-tools'
+import React, { useEffect, useState } from 'react'
+import { ProjectsGroup, ProjectSpec } from 'thefactory-tools'
 import NotificationBadge, { getBadgeColorClass } from '../../components/stories/NotificationBadge'
 import SpinnerWithDot from '../../components/ui/SpinnerWithDot'
 import { IconChevron } from '../../components/ui/icons/Icons'
@@ -10,10 +9,10 @@ import { useAppSettings } from '../../contexts/AppSettingsContext'
 import { classNames } from '../utils'
 
 type GroupNavItemProps = {
-  group: ProjectGroup
+  group: ProjectsGroup
   groupProjects: ProjectSpec[]
   isActiveGroup: boolean
-  activeProjectId: string | null
+  activeProjectId?: string
   activeSelectionType: 'project' | 'group'
   effectiveCollapsed: boolean
   onGroupSelect: (groupId: string) => void
@@ -35,6 +34,18 @@ export default function GroupNavItem({
   const [isOpen, setIsOpen] = useState(false)
   const { isBadgeEnabled, isGitBadgeSubToggleEnabled, getGroupBadgeState } = useNotifications()
   const { appSettings } = useAppSettings()
+
+  // Auto-expand if the active project is in this group
+  const isActiveProjectInGroup =
+    activeSelectionType === 'project' &&
+    activeProjectId &&
+    groupProjects.some((p) => p.id === activeProjectId)
+
+  useEffect(() => {
+    if (isActiveProjectInGroup) {
+      setIsOpen(true)
+    }
+  }, [isActiveProjectInGroup])
 
   const chatBadgeColor = appSettings?.notificationSystemSettings?.badgeColors?.chat_messages
   const agentBadgeColor = appSettings?.notificationSystemSettings?.badgeColors?.agent_runs
@@ -80,7 +91,7 @@ export default function GroupNavItem({
       <div
         className={classNames(
           'nav-item',
-          'nav-item--compact',
+          'pl-0 gap-0', // Remove left padding & gap so the chevron button spans the entire left edge
           accentClass,
           isActiveGroup && 'nav-item--active',
         )}
@@ -88,7 +99,7 @@ export default function GroupNavItem({
         <button
           type="button"
           onClick={() => setIsOpen((prev) => !prev)}
-          className="nav-item__icon flex items-center justify-center hover:bg-black/5 dark:hover:bg-white/10 rounded"
+          className="flex items-center justify-center hover:bg-black/5 dark:hover:bg-white/10 h-full w-[42px] rounded-l"
           aria-expanded={isOpen}
           aria-controls={`group-${g.id}`}
         >
@@ -102,7 +113,7 @@ export default function GroupNavItem({
         </button>
         <button
           type="button"
-          className="nav-item__label flex-1 text-left font-medium outline-none truncate"
+          className="nav-item__label flex-1 text-left font-medium outline-none truncate h-full flex items-center"
           onClick={() => onGroupSelect(g.id)}
         >
           {g.title}
@@ -131,9 +142,7 @@ export default function GroupNavItem({
               <SpinnerWithDot
                 size={16}
                 showDot={aggChatUnread > 0}
-                dotTitle={
-                  aggChatUnread > 0 ? `${aggChatUnread} unread chats in group` : undefined
-                }
+                dotTitle={aggChatUnread > 0 ? `${aggChatUnread} unread chats in group` : undefined}
                 dotColorClass={chatColorClass}
               />
             ) : aggShowChat && aggChatUnread > 0 ? (

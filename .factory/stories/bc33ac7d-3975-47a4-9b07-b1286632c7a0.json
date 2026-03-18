@@ -26,12 +26,13 @@
     },
     {
       "id": "9c892cb6-44f8-4cfb-96e4-56911491cc2d",
-      "status": "-",
+      "status": "+",
       "title": "Sidebar Enhancements for Group Selection",
       "description": "Update SidebarView to split chevron interactions (collapse/expand) from row click (select group). Add Home, Chat, and Tools views for group-level selection. Home lists projects within the group. Tools view operates with a groupId.",
       "context": [],
       "createdAt": "2026-03-17T14:03:16.387Z",
-      "updatedAt": "2026-03-17T14:03:16.387Z"
+      "updatedAt": "2026-03-18T15:55:19.847Z",
+      "completedAt": "2026-03-18T15:55:19.847Z"
     },
     {
       "id": "2e071165-75f1-4bd4-a554-75ca67cbeb60",

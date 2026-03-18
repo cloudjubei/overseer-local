@@ -41,7 +41,7 @@ export default function SidebarView({
       setCollapsed(appSettings.userPreferences.sidebarCollapsed)
     }
   }, [isAppSettingsLoaded])
-  
+
   useEffect(() => {
     if (!isAppSettingsLoaded) return
     if (collapsed === appSettings.userPreferences.sidebarCollapsed) return
@@ -170,21 +170,25 @@ export default function SidebarView({
       aria-label="Main navigation"
       data-collapsed={effectiveCollapsed ? 'true' : 'false'}
     >
-      <div className="flex items-center justify-between p-3 shrink-0" aria-hidden>
-        <button
-          className="sidebar-logo"
-          onClick={() => onActivate('Home')}
-          tabIndex={-1}
-          style={effectiveCollapsed ? { width: '100%', justifyContent: 'center' } : {}}
-        >
-          <img src="icon.png" alt="Overseer" />
-          {!effectiveCollapsed && <span>Overseer</span>}
-        </button>
+      <div
+        className={`flex items-center p-3 shrink-0 ${
+          effectiveCollapsed ? 'justify-center' : 'justify-between'
+        }`}
+        aria-hidden
+      >
+        {!effectiveCollapsed && (
+          <button className="sidebar-logo" onClick={() => onActivate('Home')} tabIndex={-1}>
+            <div className="flex gap-3">
+              <img className="nav-item__icon" src="resources/icon.png" alt="Overseer" />
+              <span>Overseer</span>
+            </div>
+          </button>
+        )}
 
         {!isMobile && (
           <button
             onClick={() => setCollapsed(!collapsed)}
-            className="p-1 rounded text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+            className=" p-1 rounded text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
             title={effectiveCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             tabIndex={-1}
           >
@@ -305,37 +309,26 @@ export default function SidebarView({
         <ul className="nav-list" role="list" onKeyDown={onKeyDownList}>
           {NAV_ITEMS.filter((n) => n.view === 'Settings').map((item) => {
             const idx = NAV_ITEMS.findIndex((n) => n.view === item.view)
-            const isActive = currentView === item.view
-            const Btn = (
-              <button
-                type="button"
-                className={`nav-item ${isActive ? 'nav-item--active' : ''} ${effectiveCollapsed ? 'nav-item--compact' : ''} nav-accent-${item.accent ?? 'gray'}`}
-                aria-current={isActive ? 'page' : undefined}
-                onClick={() => onActivate(item.view)}
-                title={item.label}
-                tabIndex={focusIndex === idx ? 0 : -1}
-                onFocus={() => setFocusIndex(idx)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault()
-                    onActivate(item.view)
-                  }
-                }}
-              >
-                <span className="nav-item__icon">{item.icon}</span>
-                {!effectiveCollapsed && <span className="nav-item__label">{item.label}</span>}
-              </button>
-            )
+
             return (
-              <li key={item.id} className="nav-li">
-                {effectiveCollapsed ? (
-                  <Tooltip content={item.label} placement="right">
-                    {Btn}
-                  </Tooltip>
-                ) : (
-                  Btn
-                )}
-              </li>
+              <StaticNavItem
+                key={idx}
+                item={item}
+                isActive={currentView === item.view}
+                effectiveCollapsed={effectiveCollapsed}
+                focusIndex={focusIndex}
+                index={idx}
+                setFocusIndex={setFocusIndex}
+                onActivate={onActivate}
+                isFirst={true}
+                firstItemRef={firstItemRef}
+                activeRunsCurrentProject={0}
+                agentsCompletedUnreadCurrentProject={0}
+                chatUnreadCurrentProject={0}
+                chatThinkingCurrentProject={false}
+                gitIncomingCurrentProject={0}
+                gitUncommittedCurrentProject={false}
+              />
             )
           })}
         </ul>
