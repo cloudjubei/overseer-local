@@ -1,5 +1,3 @@
-import React from 'react'
-
 export function splitPath(p: string): { dir: string; name: string } {
   const idx = Math.max(p.lastIndexOf('/'), p.lastIndexOf('\\'))
   if (idx === -1) return { dir: '', name: p }

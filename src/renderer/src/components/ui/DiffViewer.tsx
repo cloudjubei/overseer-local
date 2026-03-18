@@ -7,7 +7,7 @@ import {
   generateHunkPatch,
 } from '../chat/tool-popups/diffUtils'
 import { PathDisplay } from './PathDisplay'
-import { FileChangesPills } from '../../screens/git/GitLocalChanges'
+import { GitFileChangesPills } from '@renderer/screens/git/common/GitFileChangesPills'
 
 export interface DiffViewerProps {
   path?: string
@@ -126,7 +126,6 @@ export function DiffViewer({
     <div className="flex-1 min-w-0 flex flex-col min-h-0 bg-white dark:bg-neutral-900 w-full h-full">
       {/* Toolbar */}
       <div className="text-xs text-neutral-600 dark:text-neutral-400 border-b border-neutral-200 dark:border-neutral-800 flex flex-col w-full shrink-0 bg-neutral-100 dark:bg-neutral-800/50">
-
         {/* Row 1 — file name + pills */}
         <div className="px-2 py-2 flex items-center justify-between min-w-0">
           {path ? (
@@ -135,7 +134,7 @@ export function DiffViewer({
                 <PathDisplay path={path} />
               </div>
               <div className="shrink-0 flex items-center">
-                <FileChangesPills patch={patch} />
+                <GitFileChangesPills patch={patch} />
               </div>
             </>
           ) : (

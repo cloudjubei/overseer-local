@@ -800,8 +800,9 @@
     "path": ".",
     "members": {
       "ACTIONS_RAIL_WIDTH": {
-        "path": "src/renderer/src/screens/git/GitRightActionsPanel.tsx",
+        "path": "src/renderer/src/screens/git/actions/GitActionsPanel.tsx",
         "dependencies": [
+          "react/useState",
           "thefactory-tools/GitUnifiedBranch"
         ]
       },
@@ -854,6 +855,20 @@
           "thefactory-tools/utils"
         ]
       },
+      "AgentRunsValue": {
+        "path": "src/renderer/src/hooks/useAgentRuns.ts",
+        "dependencies": [
+          "Promise",
+          "thefactory-tools/AgentRunType",
+          "thefactory-tools/Chat",
+          "react/useCallback",
+          "react/useMemo",
+          "thefactory-tools/ChatContextAgentRun",
+          "thefactory-tools/ChatContextAgentRunFeature",
+          "thefactory-tools/utils/getChatContextKey",
+          "thefactory-tools/utils"
+        ]
+      },
       "AgentsContextValue": {
         "path": "src/renderer/src/contexts/AgentsContext.tsx",
         "dependencies": [
@@ -877,28 +892,6 @@
           "Set",
           "ReactNode",
           "thefactory-tools/ChatContext"
-        ]
-      },
-      "AgentsView": {
-        "path": "src/renderer/src/screens/AgentsView.tsx",
-        "dependencies": [
-          "CurrentProjectView",
-          "AllProjectsView",
-          "react/useEffect",
-          "react/useMemo",
-          "react/useState",
-          "thefactory-tools/Chat",
-          "thefactory-tools/LLMConfig",
-          "@renderer/utils/time/formatDate",
-          "@renderer/utils/time/formatTime",
-          "@renderer/utils/time",
-          "@renderer/contexts/CostsContext/useCosts",
-          "@renderer/contexts/CostsContext",
-          "thefactory-tools/utils/getChatContextKey",
-          "thefactory-tools/utils",
-          "thefactory-tools/constants/COST_GROUP_ID_ALL",
-          "thefactory-tools/constants",
-          "@renderer/components/agents/StatusChip"
         ]
       },
       "AgentTypePicker": {
@@ -1101,23 +1094,15 @@
         ]
       },
       "ChatDraft": {
-        "path": "src/renderer/src/contexts/ChatsContext.tsx",
+        "path": "src/renderer/src/contexts/chats/ChatsTypes.ts",
         "dependencies": [
-          "thefactory-tools/LLMConfig",
-          "thefactory-tools/ChatContext",
           "thefactory-tools/Chat",
-          "thefactory-tools/CompletionMessage",
-          "thefactory-tools/ChatUpdate",
+          "thefactory-tools/ChatContext",
+          "thefactory-tools/ChatContextArguments",
           "thefactory-tools/ChatsSettings",
           "thefactory-tools/ChatSettings",
-          "thefactory-tools/ChatContextArguments",
           "thefactory-tools/CompletionSettings",
-          "thefactory-tools/utils/getChatContextKey",
-          "thefactory-tools/utils",
-          "@renderer/services/completionService/completionService",
-          "@renderer/services/completionService",
-          "@renderer/services/notificationsService/notificationsService",
-          "@renderer/services/notificationsService"
+          "thefactory-tools/CompletionMessage"
         ]
       },
       "ChatDynamicContextModal": {
@@ -1161,8 +1146,9 @@
         ]
       },
       "ChatsContextValue": {
-        "path": "src/renderer/src/contexts/ChatsContext.tsx",
+        "path": "src/renderer/src/contexts/chats/ChatsTypes.ts",
         "dependencies": [
+          "thefactory-tools/CompletionMessage",
           "Promise",
           "thefactory-tools/ChatContext",
           "thefactory-tools/ChatContextArguments",
@@ -1171,18 +1157,9 @@
           "Partial",
           "thefactory-tools/ChatsSettings",
           "ChatState",
-          "thefactory-tools/LLMConfig",
           "ChatDraft",
           "Record",
-          "thefactory-tools/Chat",
-          "thefactory-tools/CompletionMessage",
-          "thefactory-tools/ChatUpdate",
-          "thefactory-tools/utils/getChatContextKey",
-          "thefactory-tools/utils",
-          "@renderer/services/completionService/completionService",
-          "@renderer/services/completionService",
-          "@renderer/services/notificationsService/notificationsService",
-          "@renderer/services/notificationsService"
+          "thefactory-tools/Chat"
         ]
       },
       "ChatSettingsDropdown": {
@@ -1446,23 +1423,15 @@
         ]
       },
       "ChatState": {
-        "path": "src/renderer/src/contexts/ChatsContext.tsx",
+        "path": "src/renderer/src/contexts/chats/ChatsTypes.ts",
         "dependencies": [
           "thefactory-tools/Chat",
-          "thefactory-tools/LLMConfig",
           "thefactory-tools/ChatContext",
-          "thefactory-tools/CompletionMessage",
-          "thefactory-tools/ChatUpdate",
+          "thefactory-tools/ChatContextArguments",
           "thefactory-tools/ChatsSettings",
           "thefactory-tools/ChatSettings",
-          "thefactory-tools/ChatContextArguments",
           "thefactory-tools/CompletionSettings",
-          "thefactory-tools/utils/getChatContextKey",
-          "thefactory-tools/utils",
-          "@renderer/services/completionService/completionService",
-          "@renderer/services/completionService",
-          "@renderer/services/notificationsService/notificationsService",
-          "@renderer/services/notificationsService"
+          "thefactory-tools/CompletionMessage"
         ]
       },
       "ChatView": {
@@ -1506,6 +1475,14 @@
       "Chip": {
         "path": "src/renderer/src/components/ui/Chip.tsx",
         "dependencies": []
+      },
+      "classNames": {
+        "path": "src/renderer/src/navigation/utils.ts",
+        "dependencies": [
+          "Array",
+          "react/useState",
+          "react/useEffect"
+        ]
       },
       "cn": {
         "path": "src/renderer/src/utils/utils.ts",
@@ -1615,7 +1592,7 @@
         ]
       },
       "computeCommitGraph": {
-        "path": "src/renderer/src/screens/git/graphUtils.ts",
+        "path": "src/renderer/src/screens/git/commitGraph/gitCommitGraphUtils.ts",
         "dependencies": [
           "GraphNode",
           "thefactory-tools/GitLogCommit"
@@ -1845,13 +1822,17 @@
         "dependencies": [
           "IntraMode",
           "Set",
-          "DiffViewerProps"
+          "DiffViewerProps",
+          "@renderer/screens/git/common/GitFileChangesPills/GitFileChangesPills",
+          "@renderer/screens/git/common/GitFileChangesPills"
         ]
       },
       "DiffViewerProps": {
         "path": "src/renderer/src/components/ui/DiffViewer.tsx",
         "dependencies": [
-          "IntraMode"
+          "IntraMode",
+          "@renderer/screens/git/common/GitFileChangesPills/GitFileChangesPills",
+          "@renderer/screens/git/common/GitFileChangesPills"
         ]
       },
       "DirNode": {
@@ -2195,32 +2176,6 @@
           "thefactory-tools/Status"
         ]
       },
-      "FileChangesPills": {
-        "path": "src/renderer/src/screens/git/GitLocalChanges.tsx",
-        "dependencies": [
-          "@renderer/services/gitService/gitService",
-          "@renderer/services/gitService",
-          "@renderer/services/filesService/filesService",
-          "@renderer/services/filesService",
-          "@renderer/components/chat/tool-popups/diffUtils/IntraMode",
-          "@renderer/components/chat/tool-popups/diffUtils",
-          "@renderer/components/ui/ResizeHandle/ResizeHandle",
-          "@renderer/components/ui/ResizeHandle",
-          "@renderer/components/ui/icons/Icons/IconDelete",
-          "@renderer/components/ui/icons/Icons/IconFileAdded",
-          "@renderer/components/ui/icons/Icons/IconFileDeleted",
-          "@renderer/components/ui/icons/Icons/IconFileModified",
-          "@renderer/components/ui/icons/Icons",
-          "@renderer/components/ui/icons/IconRevert/IconRevert",
-          "@renderer/components/ui/icons/IconRevert",
-          "@renderer/components/ui/PathDisplay/PathDisplay",
-          "@renderer/components/ui/PathDisplay",
-          "@renderer/components/ui/DiffViewer/DiffViewer",
-          "@renderer/components/ui/DiffViewer",
-          "@renderer/components/ui/Spinner",
-          "@renderer/components/ui/Tooltip"
-        ]
-      },
       "FileDisplay": {
         "path": "src/renderer/src/components/ui/FileDisplay.tsx",
         "dependencies": [
@@ -2416,12 +2371,10 @@
           "Set"
         ]
       },
-      "getFilePatch": {
-        "path": "src/renderer/src/screens/git/GitCommitChanges.tsx",
+      "getBadgeColorClass": {
+        "path": "src/renderer/src/components/stories/NotificationBadge.tsx",
         "dependencies": [
-          "@renderer/services/gitService/gitService",
-          "@renderer/services/gitService",
-          "thefactory-tools/GitDiffSummary"
+          "react"
         ]
       },
       "getNotificationTitleForContext": {
@@ -2456,6 +2409,19 @@
         "path": "src/logic/chat/promptTemplates.ts",
         "dependencies": []
       },
+      "GitActionButton": {
+        "path": "src/renderer/src/screens/git/actions/GitActionButton.tsx",
+        "dependencies": [
+          "ReactNode"
+        ]
+      },
+      "GitActionsPanel": {
+        "path": "src/renderer/src/screens/git/actions/GitActionsPanel.tsx",
+        "dependencies": [
+          "thefactory-tools/GitUnifiedBranch",
+          "react/useState"
+        ]
+      },
       "GitBadgeSubToggles": {
         "path": "src/types/settings.ts",
         "description": "Sub-toggles for git badge types.",
@@ -2473,10 +2439,11 @@
         ]
       },
       "GitCheckoutRemoteModal": {
-        "path": "src/renderer/src/screens/git/GitCheckoutRemoteModal.tsx",
+        "path": "src/renderer/src/screens/git/modals/GitCheckoutRemoteModal.tsx",
         "dependencies": [
           "Modal",
           "Button",
+          "react/useState",
           "@renderer/components/ui/Modal/Modal",
           "@renderer/components/ui/Modal",
           "@renderer/components/ui/Button/Button",
@@ -2497,20 +2464,41 @@
         ]
       },
       "GitCommitGraph": {
-        "path": "src/renderer/src/screens/git/GitCommitGraph.tsx",
+        "path": "src/renderer/src/screens/git/commitGraph/GitCommitGraph.tsx",
         "dependencies": [
           "GraphNode",
           "thefactory-tools/GitLogCommit",
           "HTMLDivElement",
           "Map",
+          "react/useCallback",
+          "react/useEffect",
+          "react/useMemo",
+          "react/useRef",
+          "react/useState",
           "@renderer/services/gitService/gitService",
           "@renderer/services/gitService"
         ]
       },
+      "GitCommitGraphHeader": {
+        "path": "src/renderer/src/screens/git/commitGraph/GitCommitGraphHeader.tsx",
+        "dependencies": [
+          "PointerEvent",
+          "HTMLElement"
+        ]
+      },
+      "GitCommitGraphRow": {
+        "path": "src/renderer/src/screens/git/commitGraph/GitCommitGraphRow.tsx",
+        "dependencies": [
+          "HTMLDivElement",
+          "GraphNode"
+        ]
+      },
       "GitCommitModal": {
-        "path": "src/renderer/src/screens/git/GitCommitModal.tsx",
+        "path": "src/renderer/src/screens/git/modals/GitCommitModal.tsx",
         "dependencies": [
           "GitCommitModalProps",
+          "react/useEffect",
+          "react/useState",
           "@renderer/components/ui/Modal/Modal",
           "@renderer/components/ui/Modal",
           "@renderer/components/ui/Button/Button",
@@ -2522,8 +2510,10 @@
         ]
       },
       "GitCommitModalProps": {
-        "path": "src/renderer/src/screens/git/GitCommitModal.tsx",
+        "path": "src/renderer/src/screens/git/modals/GitCommitModal.tsx",
         "dependencies": [
+          "react/useEffect",
+          "react/useState",
           "@renderer/components/ui/Modal/Modal",
           "@renderer/components/ui/Modal",
           "@renderer/components/ui/Button/Button",
@@ -2552,7 +2542,7 @@
         ]
       },
       "GitCreateBranchModal": {
-        "path": "src/renderer/src/screens/git/GitCreateBranchModal.tsx",
+        "path": "src/renderer/src/screens/git/modals/GitCreateBranchModal.tsx",
         "dependencies": [
           "GitCreateBranchModalProps",
           "@renderer/components/ui/Modal/Modal",
@@ -2564,7 +2554,7 @@
         ]
       },
       "GitCreateBranchModalProps": {
-        "path": "src/renderer/src/screens/git/GitCreateBranchModal.tsx",
+        "path": "src/renderer/src/screens/git/modals/GitCreateBranchModal.tsx",
         "dependencies": [
           "@renderer/components/ui/Modal/Modal",
           "@renderer/components/ui/Modal",
@@ -2616,6 +2606,45 @@
           "thefactory-tools/GitBranchEvent",
           "thefactory-tools/GitUnifiedBranch",
           "thefactory-tools/GitStashListItem"
+        ]
+      },
+      "GitFileChangesPills": {
+        "path": "src/renderer/src/screens/git/common/GitFileChangesPills.tsx",
+        "dependencies": []
+      },
+      "GitFileDiffItem": {
+        "path": "src/renderer/src/screens/git/common/GitFileDiffItem.tsx",
+        "dependencies": [
+          "IntraMode",
+          "thefactory-tools/GitMergeReportFile",
+          "@renderer/components/ui/icons/IconChevron/IconChevron",
+          "@renderer/components/ui/icons/IconChevron",
+          "@renderer/components/chat/tool-popups/diffUtils/StructuredUnifiedDiff",
+          "@renderer/components/chat/tool-popups/diffUtils/IntraMode",
+          "@renderer/components/chat/tool-popups/diffUtils"
+        ]
+      },
+      "GitFileRow": {
+        "path": "src/renderer/src/screens/git/common/GitFileRow.tsx",
+        "dependencies": [
+          "MouseEvent",
+          "DragEvent",
+          "LocalFileEntry",
+          "@renderer/components/ui/icons/Icons/IconDelete",
+          "@renderer/components/ui/icons/Icons",
+          "@renderer/components/ui/icons/IconRevert/IconRevert",
+          "@renderer/components/ui/icons/IconRevert",
+          "@renderer/components/ui/PathDisplay/PathDisplay",
+          "@renderer/components/ui/PathDisplay",
+          "@renderer/components/ui/Tooltip"
+        ]
+      },
+      "GitFileStatusIcon": {
+        "path": "src/renderer/src/screens/git/common/GitFileStatusIcon.tsx",
+        "dependencies": [
+          "IconFileAdded",
+          "IconFileDeleted",
+          "IconFileModified"
         ]
       },
       "GitHubCredentials": {
@@ -2675,15 +2704,6 @@
           "@renderer/components/chat/tool-popups/diffUtils",
           "@renderer/components/ui/ResizeHandle/ResizeHandle",
           "@renderer/components/ui/ResizeHandle",
-          "@renderer/components/ui/icons/Icons/IconDelete",
-          "@renderer/components/ui/icons/Icons/IconFileAdded",
-          "@renderer/components/ui/icons/Icons/IconFileDeleted",
-          "@renderer/components/ui/icons/Icons/IconFileModified",
-          "@renderer/components/ui/icons/Icons",
-          "@renderer/components/ui/icons/IconRevert/IconRevert",
-          "@renderer/components/ui/icons/IconRevert",
-          "@renderer/components/ui/PathDisplay/PathDisplay",
-          "@renderer/components/ui/PathDisplay",
           "@renderer/components/ui/DiffViewer/DiffViewer",
           "@renderer/components/ui/DiffViewer",
           "@renderer/components/ui/Spinner",
@@ -2702,15 +2722,6 @@
           "@renderer/components/chat/tool-popups/diffUtils",
           "@renderer/components/ui/ResizeHandle/ResizeHandle",
           "@renderer/components/ui/ResizeHandle",
-          "@renderer/components/ui/icons/Icons/IconDelete",
-          "@renderer/components/ui/icons/Icons/IconFileAdded",
-          "@renderer/components/ui/icons/Icons/IconFileDeleted",
-          "@renderer/components/ui/icons/Icons/IconFileModified",
-          "@renderer/components/ui/icons/Icons",
-          "@renderer/components/ui/icons/IconRevert/IconRevert",
-          "@renderer/components/ui/icons/IconRevert",
-          "@renderer/components/ui/PathDisplay/PathDisplay",
-          "@renderer/components/ui/PathDisplay",
           "@renderer/components/ui/DiffViewer/DiffViewer",
           "@renderer/components/ui/DiffViewer",
           "@renderer/components/ui/Spinner",
@@ -2729,15 +2740,6 @@
           "@renderer/components/chat/tool-popups/diffUtils",
           "@renderer/components/ui/ResizeHandle/ResizeHandle",
           "@renderer/components/ui/ResizeHandle",
-          "@renderer/components/ui/icons/Icons/IconDelete",
-          "@renderer/components/ui/icons/Icons/IconFileAdded",
-          "@renderer/components/ui/icons/Icons/IconFileDeleted",
-          "@renderer/components/ui/icons/Icons/IconFileModified",
-          "@renderer/components/ui/icons/Icons",
-          "@renderer/components/ui/icons/IconRevert/IconRevert",
-          "@renderer/components/ui/icons/IconRevert",
-          "@renderer/components/ui/PathDisplay/PathDisplay",
-          "@renderer/components/ui/PathDisplay",
           "@renderer/components/ui/DiffViewer/DiffViewer",
           "@renderer/components/ui/DiffViewer",
           "@renderer/components/ui/Spinner",
@@ -2791,7 +2793,7 @@
         ]
       },
       "GitMergeModal": {
-        "path": "src/renderer/src/screens/git/GitMergeModal.tsx",
+        "path": "src/renderer/src/screens/git/modals/merge/GitMergeModal.tsx",
         "dependencies": [
           "Record",
           "Array",
@@ -2814,24 +2816,18 @@
           "@renderer/services/gitService",
           "@renderer/components/ui/icons/Icons/IconFastMerge",
           "@renderer/components/ui/icons/Icons",
-          "@renderer/components/ui/icons/IconChevron/IconChevron",
-          "@renderer/components/ui/icons/IconChevron",
           "@renderer/contexts/GitContext/useGit",
           "@renderer/contexts/GitContext",
-          "@renderer/components/ui/icons/Icons/IconFileAdded",
-          "@renderer/components/ui/icons/Icons/IconFileDeleted",
-          "@renderer/components/ui/icons/Icons/IconFileModified",
-          "@renderer/components/chat/tool-popups/diffUtils/StructuredUnifiedDiff",
           "@renderer/components/chat/tool-popups/diffUtils/IntraMode",
           "@renderer/components/chat/tool-popups/diffUtils",
           "@renderer/components/ui/Spinner",
           "@renderer/components/ui/SegmentedControl",
           "@renderer/components/ui/Tooltip",
-          "@renderer/screens/git/MergeConflictResolver"
+          "@renderer/screens/git/mergeConflict/MergeConflictResolver"
         ]
       },
       "GitMergeModalProps": {
-        "path": "src/renderer/src/screens/git/GitMergeModal.tsx",
+        "path": "src/renderer/src/screens/git/modals/merge/GitMergeModal.tsx",
         "dependencies": [
           "@renderer/components/ui/Modal/Modal",
           "@renderer/components/ui/Modal",
@@ -2850,20 +2846,14 @@
           "@renderer/services/gitService",
           "@renderer/components/ui/icons/Icons/IconFastMerge",
           "@renderer/components/ui/icons/Icons",
-          "@renderer/components/ui/icons/IconChevron/IconChevron",
-          "@renderer/components/ui/icons/IconChevron",
           "@renderer/contexts/GitContext/useGit",
           "@renderer/contexts/GitContext",
-          "@renderer/components/ui/icons/Icons/IconFileAdded",
-          "@renderer/components/ui/icons/Icons/IconFileDeleted",
-          "@renderer/components/ui/icons/Icons/IconFileModified",
-          "@renderer/components/chat/tool-popups/diffUtils/StructuredUnifiedDiff",
           "@renderer/components/chat/tool-popups/diffUtils/IntraMode",
           "@renderer/components/chat/tool-popups/diffUtils",
           "@renderer/components/ui/Spinner",
           "@renderer/components/ui/SegmentedControl",
           "@renderer/components/ui/Tooltip",
-          "@renderer/screens/git/MergeConflictResolver"
+          "@renderer/screens/git/mergeConflict/MergeConflictResolver"
         ]
       },
       "GitProvider": {
@@ -2884,12 +2874,6 @@
           "ReactNode",
           "thefactory-tools/GitCommitInfo",
           "thefactory-tools/GitStashListItem"
-        ]
-      },
-      "GitRightActionsPanel": {
-        "path": "src/renderer/src/screens/git/GitRightActionsPanel.tsx",
-        "dependencies": [
-          "thefactory-tools/GitUnifiedBranch"
         ]
       },
       "GitSelection": {
@@ -2962,8 +2946,8 @@
           "thefactory-tools/GitLogOptions"
         ]
       },
-      "GitSidebarBranches": {
-        "path": "src/renderer/src/screens/git/GitSidebarBranches.tsx",
+      "GitSidebar": {
+        "path": "src/renderer/src/screens/git/sidebar/GitSidebar.tsx",
         "dependencies": [
           "PointerEvent",
           "HTMLElement",
@@ -2971,8 +2955,40 @@
           "thefactory-tools/GitStashListItem"
         ]
       },
+      "GitSidebarBranchFolder": {
+        "path": "src/renderer/src/screens/git/sidebar/GitSidebarBranchFolder.tsx",
+        "dependencies": [
+          "thefactory-tools/GitUnifiedBranch",
+          "react/useState",
+          "react/useEffect"
+        ]
+      },
+      "GitSidebarBranchList": {
+        "path": "src/renderer/src/screens/git/sidebar/GitSidebarBranchList.tsx",
+        "dependencies": [
+          "thefactory-tools/GitUnifiedBranch"
+        ]
+      },
+      "GitSidebarBranchRow": {
+        "path": "src/renderer/src/screens/git/sidebar/GitSidebarBranchRow.tsx",
+        "dependencies": [
+          "thefactory-tools/GitUnifiedBranch"
+        ]
+      },
+      "GitSidebarSectionHeader": {
+        "path": "src/renderer/src/screens/git/sidebar/GitSidebarSectionHeader.tsx",
+        "dependencies": [
+          "ReactNode"
+        ]
+      },
+      "GitSidebarStashRow": {
+        "path": "src/renderer/src/screens/git/sidebar/GitSidebarStashRow.tsx",
+        "dependencies": [
+          "thefactory-tools/GitStashListItem"
+        ]
+      },
       "GitStashModal": {
-        "path": "src/renderer/src/screens/git/GitStashModal.tsx",
+        "path": "src/renderer/src/screens/git/modals/GitStashModal.tsx",
         "dependencies": [
           "GitStashModalProps",
           "@renderer/components/ui/Modal/Modal",
@@ -2984,7 +3000,7 @@
         ]
       },
       "GitStashModalProps": {
-        "path": "src/renderer/src/screens/git/GitStashModal.tsx",
+        "path": "src/renderer/src/screens/git/modals/GitStashModal.tsx",
         "dependencies": [
           "@renderer/components/ui/Modal/Modal",
           "@renderer/components/ui/Modal",
@@ -3009,7 +3025,7 @@
         ]
       },
       "GraphNode": {
-        "path": "src/renderer/src/screens/git/graphUtils.ts",
+        "path": "src/renderer/src/screens/git/commitGraph/gitCommitGraphUtils.ts",
         "dependencies": [
           "thefactory-tools/GitLogCommit"
         ]
@@ -4020,28 +4036,14 @@
         ]
       },
       "LocalFileEntry": {
-        "path": "src/renderer/src/screens/git/GitLocalChanges.tsx",
+        "path": "src/renderer/src/screens/git/common/GitFileRow.tsx",
         "dependencies": [
-          "@renderer/services/gitService/gitService",
-          "@renderer/services/gitService",
-          "@renderer/services/filesService/filesService",
-          "@renderer/services/filesService",
-          "@renderer/components/chat/tool-popups/diffUtils/IntraMode",
-          "@renderer/components/chat/tool-popups/diffUtils",
-          "@renderer/components/ui/ResizeHandle/ResizeHandle",
-          "@renderer/components/ui/ResizeHandle",
           "@renderer/components/ui/icons/Icons/IconDelete",
-          "@renderer/components/ui/icons/Icons/IconFileAdded",
-          "@renderer/components/ui/icons/Icons/IconFileDeleted",
-          "@renderer/components/ui/icons/Icons/IconFileModified",
           "@renderer/components/ui/icons/Icons",
           "@renderer/components/ui/icons/IconRevert/IconRevert",
           "@renderer/components/ui/icons/IconRevert",
           "@renderer/components/ui/PathDisplay/PathDisplay",
           "@renderer/components/ui/PathDisplay",
-          "@renderer/components/ui/DiffViewer/DiffViewer",
-          "@renderer/components/ui/DiffViewer",
-          "@renderer/components/ui/Spinner",
           "@renderer/components/ui/Tooltip"
         ]
       },
@@ -4057,15 +4059,6 @@
           "@renderer/components/chat/tool-popups/diffUtils",
           "@renderer/components/ui/ResizeHandle/ResizeHandle",
           "@renderer/components/ui/ResizeHandle",
-          "@renderer/components/ui/icons/Icons/IconDelete",
-          "@renderer/components/ui/icons/Icons/IconFileAdded",
-          "@renderer/components/ui/icons/Icons/IconFileDeleted",
-          "@renderer/components/ui/icons/Icons/IconFileModified",
-          "@renderer/components/ui/icons/Icons",
-          "@renderer/components/ui/icons/IconRevert/IconRevert",
-          "@renderer/components/ui/icons/IconRevert",
-          "@renderer/components/ui/PathDisplay/PathDisplay",
-          "@renderer/components/ui/PathDisplay",
           "@renderer/components/ui/DiffViewer/DiffViewer",
           "@renderer/components/ui/DiffViewer",
           "@renderer/components/ui/Spinner",
@@ -4135,7 +4128,7 @@
         ]
       },
       "MergeConflictResolver": {
-        "path": "src/renderer/src/screens/git/MergeConflictResolver.tsx",
+        "path": "src/renderer/src/screens/git/mergeConflict/MergeConflictResolver.tsx",
         "dependencies": [
           "BothOrder",
           "HTMLPreElement",
@@ -4163,7 +4156,7 @@
         ]
       },
       "MergeConflictResolverProps": {
-        "path": "src/renderer/src/screens/git/MergeConflictResolver.tsx",
+        "path": "src/renderer/src/screens/git/mergeConflict/MergeConflictResolver.tsx",
         "dependencies": [
           "thefactory-tools/GitConflictEntry",
           "@renderer/services/filesService/filesService",
@@ -4247,8 +4240,8 @@
           "@renderer/screens/settings/llms/SettingsLLMConfigModal",
           "@renderer/screens/settings/github/SettingsGitHubCredentialsModal",
           "@renderer/screens/projects/ProjectManagerModal",
-          "@renderer/screens/git/GitMergeModal",
-          "@renderer/screens/git/GitCommitModal"
+          "@renderer/screens/git/modals/merge/GitMergeModal",
+          "@renderer/screens/git/modals/GitCommitModal"
         ]
       },
       "ModalProps": {
@@ -4627,9 +4620,7 @@
       },
       "PathDisplay": {
         "path": "src/renderer/src/components/ui/PathDisplay.tsx",
-        "dependencies": [
-          "react"
-        ]
+        "dependencies": []
       },
       "PendingBranch": {
         "path": "src/renderer/src/contexts/GitContext.tsx",
@@ -5522,9 +5513,7 @@
       },
       "splitPath": {
         "path": "src/renderer/src/components/ui/PathDisplay.tsx",
-        "dependencies": [
-          "react"
-        ]
+        "dependencies": []
       },
       "STATUS_LABELS": {
         "path": "src/renderer/src/components/stories/StatusControl.tsx",
@@ -6201,12 +6190,34 @@
           "@renderer/contexts/CostsContext"
         ]
       },
+      "useAccentClass": {
+        "path": "src/renderer/src/navigation/utils.ts",
+        "dependencies": [
+          "react/useState",
+          "react/useEffect"
+        ]
+      },
       "useActiveProject": {
         "path": "src/renderer/src/contexts/ProjectContext.tsx",
         "dependencies": [
           "thefactory-tools/ProjectSpec",
           "thefactory-tools/ProjectUpdate",
           "thefactory-tools/ReorderPayload"
+        ]
+      },
+      "useAgentRuns": {
+        "path": "src/renderer/src/hooks/useAgentRuns.ts",
+        "dependencies": [
+          "thefactory-tools/ChatContextAgentRunFeature",
+          "thefactory-tools/ChatContextAgentRun",
+          "thefactory-tools/AgentRunType",
+          "Promise",
+          "thefactory-tools/Chat",
+          "AgentRunsValue",
+          "react/useCallback",
+          "react/useMemo",
+          "thefactory-tools/utils/getChatContextKey",
+          "thefactory-tools/utils"
         ]
       },
       "useAgents": {
@@ -6434,6 +6445,21 @@
         "dependencies": [
           "LLMConfigContextValue",
           "thefactory-tools/LLMConfig"
+        ]
+      },
+      "useLocalStorage": {
+        "path": "src/renderer/src/hooks/useLocalStorage.ts",
+        "dependencies": [
+          "T",
+          "react/useState",
+          "react/useEffect"
+        ]
+      },
+      "useMediaQuery": {
+        "path": "src/renderer/src/navigation/utils.ts",
+        "dependencies": [
+          "react/useState",
+          "react/useEffect"
         ]
       },
       "useNavigator": {
@@ -6723,8 +6749,9 @@
     "path": "src",
     "members": {
       "ACTIONS_RAIL_WIDTH": {
-        "path": "renderer/src/screens/git/GitRightActionsPanel.tsx",
+        "path": "renderer/src/screens/git/actions/GitActionsPanel.tsx",
         "dependencies": [
+          "react/useState",
           "thefactory-tools/GitUnifiedBranch"
         ]
       },
@@ -6777,6 +6804,20 @@
           "thefactory-tools/utils"
         ]
       },
+      "AgentRunsValue": {
+        "path": "renderer/src/hooks/useAgentRuns.ts",
+        "dependencies": [
+          "Promise",
+          "thefactory-tools/AgentRunType",
+          "thefactory-tools/Chat",
+          "react/useCallback",
+          "react/useMemo",
+          "thefactory-tools/ChatContextAgentRun",
+          "thefactory-tools/ChatContextAgentRunFeature",
+          "thefactory-tools/utils/getChatContextKey",
+          "thefactory-tools/utils"
+        ]
+      },
       "AgentsContextValue": {
         "path": "renderer/src/contexts/AgentsContext.tsx",
         "dependencies": [
@@ -6800,28 +6841,6 @@
           "Set",
           "ReactNode",
           "thefactory-tools/ChatContext"
-        ]
-      },
-      "AgentsView": {
-        "path": "renderer/src/screens/AgentsView.tsx",
-        "dependencies": [
-          "CurrentProjectView",
-          "AllProjectsView",
-          "react/useEffect",
-          "react/useMemo",
-          "react/useState",
-          "thefactory-tools/Chat",
-          "thefactory-tools/LLMConfig",
-          "@renderer/utils/time/formatDate",
-          "@renderer/utils/time/formatTime",
-          "@renderer/utils/time",
-          "@renderer/contexts/CostsContext/useCosts",
-          "@renderer/contexts/CostsContext",
-          "thefactory-tools/utils/getChatContextKey",
-          "thefactory-tools/utils",
-          "thefactory-tools/constants/COST_GROUP_ID_ALL",
-          "thefactory-tools/constants",
-          "@renderer/components/agents/StatusChip"
         ]
       },
       "AgentTypePicker": {
@@ -7024,23 +7043,15 @@
         ]
       },
       "ChatDraft": {
-        "path": "renderer/src/contexts/ChatsContext.tsx",
+        "path": "renderer/src/contexts/chats/ChatsTypes.ts",
         "dependencies": [
-          "thefactory-tools/LLMConfig",
-          "thefactory-tools/ChatContext",
           "thefactory-tools/Chat",
-          "thefactory-tools/CompletionMessage",
-          "thefactory-tools/ChatUpdate",
+          "thefactory-tools/ChatContext",
+          "thefactory-tools/ChatContextArguments",
           "thefactory-tools/ChatsSettings",
           "thefactory-tools/ChatSettings",
-          "thefactory-tools/ChatContextArguments",
           "thefactory-tools/CompletionSettings",
-          "thefactory-tools/utils/getChatContextKey",
-          "thefactory-tools/utils",
-          "@renderer/services/completionService/completionService",
-          "@renderer/services/completionService",
-          "@renderer/services/notificationsService/notificationsService",
-          "@renderer/services/notificationsService"
+          "thefactory-tools/CompletionMessage"
         ]
       },
       "ChatDynamicContextModal": {
@@ -7084,8 +7095,9 @@
         ]
       },
       "ChatsContextValue": {
-        "path": "renderer/src/contexts/ChatsContext.tsx",
+        "path": "renderer/src/contexts/chats/ChatsTypes.ts",
         "dependencies": [
+          "thefactory-tools/CompletionMessage",
           "Promise",
           "thefactory-tools/ChatContext",
           "thefactory-tools/ChatContextArguments",
@@ -7094,18 +7106,9 @@
           "Partial",
           "thefactory-tools/ChatsSettings",
           "ChatState",
-          "thefactory-tools/LLMConfig",
           "ChatDraft",
           "Record",
-          "thefactory-tools/Chat",
-          "thefactory-tools/CompletionMessage",
-          "thefactory-tools/ChatUpdate",
-          "thefactory-tools/utils/getChatContextKey",
-          "thefactory-tools/utils",
-          "@renderer/services/completionService/completionService",
-          "@renderer/services/completionService",
-          "@renderer/services/notificationsService/notificationsService",
-          "@renderer/services/notificationsService"
+          "thefactory-tools/Chat"
         ]
       },
       "ChatSettingsDropdown": {
@@ -7369,23 +7372,15 @@
         ]
       },
       "ChatState": {
-        "path": "renderer/src/contexts/ChatsContext.tsx",
+        "path": "renderer/src/contexts/chats/ChatsTypes.ts",
         "dependencies": [
           "thefactory-tools/Chat",
-          "thefactory-tools/LLMConfig",
           "thefactory-tools/ChatContext",
-          "thefactory-tools/CompletionMessage",
-          "thefactory-tools/ChatUpdate",
+          "thefactory-tools/ChatContextArguments",
           "thefactory-tools/ChatsSettings",
           "thefactory-tools/ChatSettings",
-          "thefactory-tools/ChatContextArguments",
           "thefactory-tools/CompletionSettings",
-          "thefactory-tools/utils/getChatContextKey",
-          "thefactory-tools/utils",
-          "@renderer/services/completionService/completionService",
-          "@renderer/services/completionService",
-          "@renderer/services/notificationsService/notificationsService",
-          "@renderer/services/notificationsService"
+          "thefactory-tools/CompletionMessage"
         ]
       },
       "ChatView": {
@@ -7429,6 +7424,14 @@
       "Chip": {
         "path": "renderer/src/components/ui/Chip.tsx",
         "dependencies": []
+      },
+      "classNames": {
+        "path": "renderer/src/navigation/utils.ts",
+        "dependencies": [
+          "Array",
+          "react/useState",
+          "react/useEffect"
+        ]
       },
       "cn": {
         "path": "renderer/src/utils/utils.ts",
@@ -7538,7 +7541,7 @@
         ]
       },
       "computeCommitGraph": {
-        "path": "renderer/src/screens/git/graphUtils.ts",
+        "path": "renderer/src/screens/git/commitGraph/gitCommitGraphUtils.ts",
         "dependencies": [
           "GraphNode",
           "thefactory-tools/GitLogCommit"
@@ -7768,13 +7771,17 @@
         "dependencies": [
           "IntraMode",
           "Set",
-          "DiffViewerProps"
+          "DiffViewerProps",
+          "@renderer/screens/git/common/GitFileChangesPills/GitFileChangesPills",
+          "@renderer/screens/git/common/GitFileChangesPills"
         ]
       },
       "DiffViewerProps": {
         "path": "renderer/src/components/ui/DiffViewer.tsx",
         "dependencies": [
-          "IntraMode"
+          "IntraMode",
+          "@renderer/screens/git/common/GitFileChangesPills/GitFileChangesPills",
+          "@renderer/screens/git/common/GitFileChangesPills"
         ]
       },
       "DirNode": {
@@ -8118,32 +8125,6 @@
           "thefactory-tools/Status"
         ]
       },
-      "FileChangesPills": {
-        "path": "renderer/src/screens/git/GitLocalChanges.tsx",
-        "dependencies": [
-          "@renderer/services/gitService/gitService",
-          "@renderer/services/gitService",
-          "@renderer/services/filesService/filesService",
-          "@renderer/services/filesService",
-          "@renderer/components/chat/tool-popups/diffUtils/IntraMode",
-          "@renderer/components/chat/tool-popups/diffUtils",
-          "@renderer/components/ui/ResizeHandle/ResizeHandle",
-          "@renderer/components/ui/ResizeHandle",
-          "@renderer/components/ui/icons/Icons/IconDelete",
-          "@renderer/components/ui/icons/Icons/IconFileAdded",
-          "@renderer/components/ui/icons/Icons/IconFileDeleted",
-          "@renderer/components/ui/icons/Icons/IconFileModified",
-          "@renderer/components/ui/icons/Icons",
-          "@renderer/components/ui/icons/IconRevert/IconRevert",
-          "@renderer/components/ui/icons/IconRevert",
-          "@renderer/components/ui/PathDisplay/PathDisplay",
-          "@renderer/components/ui/PathDisplay",
-          "@renderer/components/ui/DiffViewer/DiffViewer",
-          "@renderer/components/ui/DiffViewer",
-          "@renderer/components/ui/Spinner",
-          "@renderer/components/ui/Tooltip"
-        ]
-      },
       "FileDisplay": {
         "path": "renderer/src/components/ui/FileDisplay.tsx",
         "dependencies": [
@@ -8339,12 +8320,10 @@
           "Set"
         ]
       },
-      "getFilePatch": {
-        "path": "renderer/src/screens/git/GitCommitChanges.tsx",
+      "getBadgeColorClass": {
+        "path": "renderer/src/components/stories/NotificationBadge.tsx",
         "dependencies": [
-          "@renderer/services/gitService/gitService",
-          "@renderer/services/gitService",
-          "thefactory-tools/GitDiffSummary"
+          "react"
         ]
       },
       "getNotificationTitleForContext": {
@@ -8379,6 +8358,19 @@
         "path": "logic/chat/promptTemplates.ts",
         "dependencies": []
       },
+      "GitActionButton": {
+        "path": "renderer/src/screens/git/actions/GitActionButton.tsx",
+        "dependencies": [
+          "ReactNode"
+        ]
+      },
+      "GitActionsPanel": {
+        "path": "renderer/src/screens/git/actions/GitActionsPanel.tsx",
+        "dependencies": [
+          "thefactory-tools/GitUnifiedBranch",
+          "react/useState"
+        ]
+      },
       "GitBadgeSubToggles": {
         "path": "types/settings.ts",
         "description": "Sub-toggles for git badge types.",
@@ -8396,10 +8388,11 @@
         ]
       },
       "GitCheckoutRemoteModal": {
-        "path": "renderer/src/screens/git/GitCheckoutRemoteModal.tsx",
+        "path": "renderer/src/screens/git/modals/GitCheckoutRemoteModal.tsx",
         "dependencies": [
           "Modal",
           "Button",
+          "react/useState",
           "@renderer/components/ui/Modal/Modal",
           "@renderer/components/ui/Modal",
           "@renderer/components/ui/Button/Button",
@@ -8420,20 +8413,41 @@
         ]
       },
       "GitCommitGraph": {
-        "path": "renderer/src/screens/git/GitCommitGraph.tsx",
+        "path": "renderer/src/screens/git/commitGraph/GitCommitGraph.tsx",
         "dependencies": [
           "GraphNode",
           "thefactory-tools/GitLogCommit",
           "HTMLDivElement",
           "Map",
+          "react/useCallback",
+          "react/useEffect",
+          "react/useMemo",
+          "react/useRef",
+          "react/useState",
           "@renderer/services/gitService/gitService",
           "@renderer/services/gitService"
         ]
       },
+      "GitCommitGraphHeader": {
+        "path": "renderer/src/screens/git/commitGraph/GitCommitGraphHeader.tsx",
+        "dependencies": [
+          "PointerEvent",
+          "HTMLElement"
+        ]
+      },
+      "GitCommitGraphRow": {
+        "path": "renderer/src/screens/git/commitGraph/GitCommitGraphRow.tsx",
+        "dependencies": [
+          "HTMLDivElement",
+          "GraphNode"
+        ]
+      },
       "GitCommitModal": {
-        "path": "renderer/src/screens/git/GitCommitModal.tsx",
+        "path": "renderer/src/screens/git/modals/GitCommitModal.tsx",
         "dependencies": [
           "GitCommitModalProps",
+          "react/useEffect",
+          "react/useState",
           "@renderer/components/ui/Modal/Modal",
           "@renderer/components/ui/Modal",
           "@renderer/components/ui/Button/Button",
@@ -8445,8 +8459,10 @@
         ]
       },
       "GitCommitModalProps": {
-        "path": "renderer/src/screens/git/GitCommitModal.tsx",
+        "path": "renderer/src/screens/git/modals/GitCommitModal.tsx",
         "dependencies": [
+          "react/useEffect",
+          "react/useState",
           "@renderer/components/ui/Modal/Modal",
           "@renderer/components/ui/Modal",
           "@renderer/components/ui/Button/Button",
@@ -8475,7 +8491,7 @@
         ]
       },
       "GitCreateBranchModal": {
-        "path": "renderer/src/screens/git/GitCreateBranchModal.tsx",
+        "path": "renderer/src/screens/git/modals/GitCreateBranchModal.tsx",
         "dependencies": [
           "GitCreateBranchModalProps",
           "@renderer/components/ui/Modal/Modal",
@@ -8487,7 +8503,7 @@
         ]
       },
       "GitCreateBranchModalProps": {
-        "path": "renderer/src/screens/git/GitCreateBranchModal.tsx",
+        "path": "renderer/src/screens/git/modals/GitCreateBranchModal.tsx",
         "dependencies": [
           "@renderer/components/ui/Modal/Modal",
           "@renderer/components/ui/Modal",
@@ -8539,6 +8555,45 @@
           "thefactory-tools/GitBranchEvent",
           "thefactory-tools/GitUnifiedBranch",
           "thefactory-tools/GitStashListItem"
+        ]
+      },
+      "GitFileChangesPills": {
+        "path": "renderer/src/screens/git/common/GitFileChangesPills.tsx",
+        "dependencies": []
+      },
+      "GitFileDiffItem": {
+        "path": "renderer/src/screens/git/common/GitFileDiffItem.tsx",
+        "dependencies": [
+          "IntraMode",
+          "thefactory-tools/GitMergeReportFile",
+          "@renderer/components/ui/icons/IconChevron/IconChevron",
+          "@renderer/components/ui/icons/IconChevron",
+          "@renderer/components/chat/tool-popups/diffUtils/StructuredUnifiedDiff",
+          "@renderer/components/chat/tool-popups/diffUtils/IntraMode",
+          "@renderer/components/chat/tool-popups/diffUtils"
+        ]
+      },
+      "GitFileRow": {
+        "path": "renderer/src/screens/git/common/GitFileRow.tsx",
+        "dependencies": [
+          "MouseEvent",
+          "DragEvent",
+          "LocalFileEntry",
+          "@renderer/components/ui/icons/Icons/IconDelete",
+          "@renderer/components/ui/icons/Icons",
+          "@renderer/components/ui/icons/IconRevert/IconRevert",
+          "@renderer/components/ui/icons/IconRevert",
+          "@renderer/components/ui/PathDisplay/PathDisplay",
+          "@renderer/components/ui/PathDisplay",
+          "@renderer/components/ui/Tooltip"
+        ]
+      },
+      "GitFileStatusIcon": {
+        "path": "renderer/src/screens/git/common/GitFileStatusIcon.tsx",
+        "dependencies": [
+          "IconFileAdded",
+          "IconFileDeleted",
+          "IconFileModified"
         ]
       },
       "GitHubCredentials": {
@@ -8598,15 +8653,6 @@
           "@renderer/components/chat/tool-popups/diffUtils",
           "@renderer/components/ui/ResizeHandle/ResizeHandle",
           "@renderer/components/ui/ResizeHandle",
-          "@renderer/components/ui/icons/Icons/IconDelete",
-          "@renderer/components/ui/icons/Icons/IconFileAdded",
-          "@renderer/components/ui/icons/Icons/IconFileDeleted",
-          "@renderer/components/ui/icons/Icons/IconFileModified",
-          "@renderer/components/ui/icons/Icons",
-          "@renderer/components/ui/icons/IconRevert/IconRevert",
-          "@renderer/components/ui/icons/IconRevert",
-          "@renderer/components/ui/PathDisplay/PathDisplay",
-          "@renderer/components/ui/PathDisplay",
           "@renderer/components/ui/DiffViewer/DiffViewer",
           "@renderer/components/ui/DiffViewer",
           "@renderer/components/ui/Spinner",
@@ -8625,15 +8671,6 @@
           "@renderer/components/chat/tool-popups/diffUtils",
           "@renderer/components/ui/ResizeHandle/ResizeHandle",
           "@renderer/components/ui/ResizeHandle",
-          "@renderer/components/ui/icons/Icons/IconDelete",
-          "@renderer/components/ui/icons/Icons/IconFileAdded",
-          "@renderer/components/ui/icons/Icons/IconFileDeleted",
-          "@renderer/components/ui/icons/Icons/IconFileModified",
-          "@renderer/components/ui/icons/Icons",
-          "@renderer/components/ui/icons/IconRevert/IconRevert",
-          "@renderer/components/ui/icons/IconRevert",
-          "@renderer/components/ui/PathDisplay/PathDisplay",
-          "@renderer/components/ui/PathDisplay",
           "@renderer/components/ui/DiffViewer/DiffViewer",
           "@renderer/components/ui/DiffViewer",
           "@renderer/components/ui/Spinner",
@@ -8652,15 +8689,6 @@
           "@renderer/components/chat/tool-popups/diffUtils",
           "@renderer/components/ui/ResizeHandle/ResizeHandle",
           "@renderer/components/ui/ResizeHandle",
-          "@renderer/components/ui/icons/Icons/IconDelete",
-          "@renderer/components/ui/icons/Icons/IconFileAdded",
-          "@renderer/components/ui/icons/Icons/IconFileDeleted",
-          "@renderer/components/ui/icons/Icons/IconFileModified",
-          "@renderer/components/ui/icons/Icons",
-          "@renderer/components/ui/icons/IconRevert/IconRevert",
-          "@renderer/components/ui/icons/IconRevert",
-          "@renderer/components/ui/PathDisplay/PathDisplay",
-          "@renderer/components/ui/PathDisplay",
           "@renderer/components/ui/DiffViewer/DiffViewer",
           "@renderer/components/ui/DiffViewer",
           "@renderer/components/ui/Spinner",
@@ -8714,7 +8742,7 @@
         ]
       },
       "GitMergeModal": {
-        "path": "renderer/src/screens/git/GitMergeModal.tsx",
+        "path": "renderer/src/screens/git/modals/merge/GitMergeModal.tsx",
         "dependencies": [
           "Record",
           "Array",
@@ -8737,24 +8765,18 @@
           "@renderer/services/gitService",
           "@renderer/components/ui/icons/Icons/IconFastMerge",
           "@renderer/components/ui/icons/Icons",
-          "@renderer/components/ui/icons/IconChevron/IconChevron",
-          "@renderer/components/ui/icons/IconChevron",
           "@renderer/contexts/GitContext/useGit",
           "@renderer/contexts/GitContext",
-          "@renderer/components/ui/icons/Icons/IconFileAdded",
-          "@renderer/components/ui/icons/Icons/IconFileDeleted",
-          "@renderer/components/ui/icons/Icons/IconFileModified",
-          "@renderer/components/chat/tool-popups/diffUtils/StructuredUnifiedDiff",
           "@renderer/components/chat/tool-popups/diffUtils/IntraMode",
           "@renderer/components/chat/tool-popups/diffUtils",
           "@renderer/components/ui/Spinner",
           "@renderer/components/ui/SegmentedControl",
           "@renderer/components/ui/Tooltip",
-          "@renderer/screens/git/MergeConflictResolver"
+          "@renderer/screens/git/mergeConflict/MergeConflictResolver"
         ]
       },
       "GitMergeModalProps": {
-        "path": "renderer/src/screens/git/GitMergeModal.tsx",
+        "path": "renderer/src/screens/git/modals/merge/GitMergeModal.tsx",
         "dependencies": [
           "@renderer/components/ui/Modal/Modal",
           "@renderer/components/ui/Modal",
@@ -8773,20 +8795,14 @@
           "@renderer/services/gitService",
           "@renderer/components/ui/icons/Icons/IconFastMerge",
           "@renderer/components/ui/icons/Icons",
-          "@renderer/components/ui/icons/IconChevron/IconChevron",
-          "@renderer/components/ui/icons/IconChevron",
           "@renderer/contexts/GitContext/useGit",
           "@renderer/contexts/GitContext",
-          "@renderer/components/ui/icons/Icons/IconFileAdded",
-          "@renderer/components/ui/icons/Icons/IconFileDeleted",
-          "@renderer/components/ui/icons/Icons/IconFileModified",
-          "@renderer/components/chat/tool-popups/diffUtils/StructuredUnifiedDiff",
           "@renderer/components/chat/tool-popups/diffUtils/IntraMode",
           "@renderer/components/chat/tool-popups/diffUtils",
           "@renderer/components/ui/Spinner",
           "@renderer/components/ui/SegmentedControl",
           "@renderer/components/ui/Tooltip",
-          "@renderer/screens/git/MergeConflictResolver"
+          "@renderer/screens/git/mergeConflict/MergeConflictResolver"
         ]
       },
       "GitProvider": {
@@ -8807,12 +8823,6 @@
           "ReactNode",
           "thefactory-tools/GitCommitInfo",
           "thefactory-tools/GitStashListItem"
-        ]
-      },
-      "GitRightActionsPanel": {
-        "path": "renderer/src/screens/git/GitRightActionsPanel.tsx",
-        "dependencies": [
-          "thefactory-tools/GitUnifiedBranch"
         ]
       },
       "GitSelection": {
@@ -8885,8 +8895,8 @@
           "thefactory-tools/GitLogOptions"
         ]
       },
-      "GitSidebarBranches": {
-        "path": "renderer/src/screens/git/GitSidebarBranches.tsx",
+      "GitSidebar": {
+        "path": "renderer/src/screens/git/sidebar/GitSidebar.tsx",
         "dependencies": [
           "PointerEvent",
           "HTMLElement",
@@ -8894,8 +8904,40 @@
           "thefactory-tools/GitStashListItem"
         ]
       },
+      "GitSidebarBranchFolder": {
+        "path": "renderer/src/screens/git/sidebar/GitSidebarBranchFolder.tsx",
+        "dependencies": [
+          "thefactory-tools/GitUnifiedBranch",
+          "react/useState",
+          "react/useEffect"
+        ]
+      },
+      "GitSidebarBranchList": {
+        "path": "renderer/src/screens/git/sidebar/GitSidebarBranchList.tsx",
+        "dependencies": [
+          "thefactory-tools/GitUnifiedBranch"
+        ]
+      },
+      "GitSidebarBranchRow": {
+        "path": "renderer/src/screens/git/sidebar/GitSidebarBranchRow.tsx",
+        "dependencies": [
+          "thefactory-tools/GitUnifiedBranch"
+        ]
+      },
+      "GitSidebarSectionHeader": {
+        "path": "renderer/src/screens/git/sidebar/GitSidebarSectionHeader.tsx",
+        "dependencies": [
+          "ReactNode"
+        ]
+      },
+      "GitSidebarStashRow": {
+        "path": "renderer/src/screens/git/sidebar/GitSidebarStashRow.tsx",
+        "dependencies": [
+          "thefactory-tools/GitStashListItem"
+        ]
+      },
       "GitStashModal": {
-        "path": "renderer/src/screens/git/GitStashModal.tsx",
+        "path": "renderer/src/screens/git/modals/GitStashModal.tsx",
         "dependencies": [
           "GitStashModalProps",
           "@renderer/components/ui/Modal/Modal",
@@ -8907,7 +8949,7 @@
         ]
       },
       "GitStashModalProps": {
-        "path": "renderer/src/screens/git/GitStashModal.tsx",
+        "path": "renderer/src/screens/git/modals/GitStashModal.tsx",
         "dependencies": [
           "@renderer/components/ui/Modal/Modal",
           "@renderer/components/ui/Modal",
@@ -8932,7 +8974,7 @@
         ]
       },
       "GraphNode": {
-        "path": "renderer/src/screens/git/graphUtils.ts",
+        "path": "renderer/src/screens/git/commitGraph/gitCommitGraphUtils.ts",
         "dependencies": [
           "thefactory-tools/GitLogCommit"
         ]
@@ -9943,28 +9985,14 @@
         ]
       },
       "LocalFileEntry": {
-        "path": "renderer/src/screens/git/GitLocalChanges.tsx",
+        "path": "renderer/src/screens/git/common/GitFileRow.tsx",
         "dependencies": [
-          "@renderer/services/gitService/gitService",
-          "@renderer/services/gitService",
-          "@renderer/services/filesService/filesService",
-          "@renderer/services/filesService",
-          "@renderer/components/chat/tool-popups/diffUtils/IntraMode",
-          "@renderer/components/chat/tool-popups/diffUtils",
-          "@renderer/components/ui/ResizeHandle/ResizeHandle",
-          "@renderer/components/ui/ResizeHandle",
           "@renderer/components/ui/icons/Icons/IconDelete",
-          "@renderer/components/ui/icons/Icons/IconFileAdded",
-          "@renderer/components/ui/icons/Icons/IconFileDeleted",
-          "@renderer/components/ui/icons/Icons/IconFileModified",
           "@renderer/components/ui/icons/Icons",
           "@renderer/components/ui/icons/IconRevert/IconRevert",
           "@renderer/components/ui/icons/IconRevert",
           "@renderer/components/ui/PathDisplay/PathDisplay",
           "@renderer/components/ui/PathDisplay",
-          "@renderer/components/ui/DiffViewer/DiffViewer",
-          "@renderer/components/ui/DiffViewer",
-          "@renderer/components/ui/Spinner",
           "@renderer/components/ui/Tooltip"
         ]
       },
@@ -9980,15 +10008,6 @@
           "@renderer/components/chat/tool-popups/diffUtils",
           "@renderer/components/ui/ResizeHandle/ResizeHandle",
           "@renderer/components/ui/ResizeHandle",
-          "@renderer/components/ui/icons/Icons/IconDelete",
-          "@renderer/components/ui/icons/Icons/IconFileAdded",
-          "@renderer/components/ui/icons/Icons/IconFileDeleted",
-          "@renderer/components/ui/icons/Icons/IconFileModified",
-          "@renderer/components/ui/icons/Icons",
-          "@renderer/components/ui/icons/IconRevert/IconRevert",
-          "@renderer/components/ui/icons/IconRevert",
-          "@renderer/components/ui/PathDisplay/PathDisplay",
-          "@renderer/components/ui/PathDisplay",
           "@renderer/components/ui/DiffViewer/DiffViewer",
           "@renderer/components/ui/DiffViewer",
           "@renderer/components/ui/Spinner",
@@ -10058,7 +10077,7 @@
         ]
       },
       "MergeConflictResolver": {
-        "path": "renderer/src/screens/git/MergeConflictResolver.tsx",
+        "path": "renderer/src/screens/git/mergeConflict/MergeConflictResolver.tsx",
         "dependencies": [
           "BothOrder",
           "HTMLPreElement",
@@ -10086,7 +10105,7 @@
         ]
       },
       "MergeConflictResolverProps": {
-        "path": "renderer/src/screens/git/MergeConflictResolver.tsx",
+        "path": "renderer/src/screens/git/mergeConflict/MergeConflictResolver.tsx",
         "dependencies": [
           "thefactory-tools/GitConflictEntry",
           "@renderer/services/filesService/filesService",
@@ -10170,8 +10189,8 @@
           "@renderer/screens/settings/llms/SettingsLLMConfigModal",
           "@renderer/screens/settings/github/SettingsGitHubCredentialsModal",
           "@renderer/screens/projects/ProjectManagerModal",
-          "@renderer/screens/git/GitMergeModal",
-          "@renderer/screens/git/GitCommitModal"
+          "@renderer/screens/git/modals/merge/GitMergeModal",
+          "@renderer/screens/git/modals/GitCommitModal"
         ]
       },
       "ModalProps": {
@@ -10550,9 +10569,7 @@
       },
       "PathDisplay": {
         "path": "renderer/src/components/ui/PathDisplay.tsx",
-        "dependencies": [
-          "react"
-        ]
+        "dependencies": []
       },
       "PendingBranch": {
         "path": "renderer/src/contexts/GitContext.tsx",
@@ -11445,9 +11462,7 @@
       },
       "splitPath": {
         "path": "renderer/src/components/ui/PathDisplay.tsx",
-        "dependencies": [
-          "react"
-        ]
+        "dependencies": []
       },
       "STATUS_LABELS": {
         "path": "renderer/src/components/stories/StatusControl.tsx",
@@ -12124,12 +12139,34 @@
           "@renderer/contexts/CostsContext"
         ]
       },
+      "useAccentClass": {
+        "path": "renderer/src/navigation/utils.ts",
+        "dependencies": [
+          "react/useState",
+          "react/useEffect"
+        ]
+      },
       "useActiveProject": {
         "path": "renderer/src/contexts/ProjectContext.tsx",
         "dependencies": [
           "thefactory-tools/ProjectSpec",
           "thefactory-tools/ProjectUpdate",
           "thefactory-tools/ReorderPayload"
+        ]
+      },
+      "useAgentRuns": {
+        "path": "renderer/src/hooks/useAgentRuns.ts",
+        "dependencies": [
+          "thefactory-tools/ChatContextAgentRunFeature",
+          "thefactory-tools/ChatContextAgentRun",
+          "thefactory-tools/AgentRunType",
+          "Promise",
+          "thefactory-tools/Chat",
+          "AgentRunsValue",
+          "react/useCallback",
+          "react/useMemo",
+          "thefactory-tools/utils/getChatContextKey",
+          "thefactory-tools/utils"
         ]
       },
       "useAgents": {
@@ -12357,6 +12394,21 @@
         "dependencies": [
           "LLMConfigContextValue",
           "thefactory-tools/LLMConfig"
+        ]
+      },
+      "useLocalStorage": {
+        "path": "renderer/src/hooks/useLocalStorage.ts",
+        "dependencies": [
+          "T",
+          "react/useState",
+          "react/useEffect"
+        ]
+      },
+      "useMediaQuery": {
+        "path": "renderer/src/navigation/utils.ts",
+        "dependencies": [
+          "react/useState",
+          "react/useEffect"
         ]
       },
       "useNavigator": {
