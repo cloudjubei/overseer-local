@@ -101,12 +101,25 @@ export const GitLocalChanges = forwardRef<GitLocalChangesRef, GitLocalChangesPro
           }),
           gitService.getLocalStatus(projectId),
         ])
+
+        // Conflicted paths: files with status 'U' (unmerged) in either diff list
+        const conflictedPaths = new Set<string>([
+          ...(Array.isArray(stagedList) ? stagedList : [])
+            .filter((f: any) => f?.status === 'U')
+            .map((f: any) => f?.path || ''),
+          ...(Array.isArray(unstagedList) ? unstagedList : [])
+            .filter((f: any) => f?.status === 'U')
+            .map((f: any) => f?.path || ''),
+        ])
+
         const toEntry = (f: any): LocalFileEntry => ({
           path: f?.path || f?.oldPath || '',
           status: f?.status,
           patch: f?.patch,
           binary: !!f?.binary,
+          isConflicted: conflictedPaths.has(f?.path || f?.oldPath || ''),
         })
+
         const staged = (Array.isArray(stagedList) ? stagedList : [])
           .map(toEntry)
           .filter((f) => f.path)
@@ -121,11 +134,11 @@ export const GitLocalChanges = forwardRef<GitLocalChangesRef, GitLocalChangesPro
           staged,
           unstaged,
           untracked,
-          conflicts: (s as any)?.conflicts || [],
+          conflicts: Array.from(conflictedPaths).filter(Boolean),
         }
         setStatus(next)
         if (onStatusChange) onStatusChange(next)
-        // Preserve selection across refresh; keep the same path/area selected if still present
+        // Preserve selection across refresh
         setSelection((prev) => {
           const stagedPaths = next.staged.map((f) => f.path)
           const unPaths = [...next.unstaged, ...next.untracked].map((f) => f.path)
@@ -169,7 +182,7 @@ export const GitLocalChanges = forwardRef<GitLocalChangesRef, GitLocalChangesPro
       return null
     }, [status, selection, makeKey])
 
-    // Derive the patch to show: look only in the area the user selected from
+    // Derive the patch to show
     const selectedPatch = React.useMemo(() => {
       if (!primarySelected) return ''
       const list =
@@ -180,17 +193,23 @@ export const GitLocalChanges = forwardRef<GitLocalChangesRef, GitLocalChangesPro
       return f?.patch || ''
     }, [primarySelected, status])
 
+    // Is the currently-selected file conflicted?
+    const selectedIsConflicted = React.useMemo(() => {
+      if (!primarySelected) return false
+      const list =
+        primarySelected.area === 'staged'
+          ? status.staged
+          : [...status.unstaged, ...status.untracked]
+      return list.find((x) => x.path === primarySelected.path)?.isConflicted ?? false
+    }, [primarySelected, status])
+
     React.useEffect(() => {
       setSelectedPath(primarySelected?.path)
       setSelectedArea(primarySelected?.area)
     }, [primarySelected])
 
-    const notifyBusy = (busy: boolean) => {
-      if (onBusyChange) onBusyChange(busy)
-    }
-    const notifyError = (err: string | undefined) => {
-      if (onErrorChange) onErrorChange(err)
-    }
+    const notifyBusy = (busy: boolean) => { if (onBusyChange) onBusyChange(busy) }
+    const notifyError = (err: string | undefined) => { if (onErrorChange) onErrorChange(err) }
 
     // Git operations
     const stage = async (paths: string[]) => {
@@ -225,9 +244,7 @@ export const GitLocalChanges = forwardRef<GitLocalChangesRef, GitLocalChangesPro
 
     const reset = async (paths: string[]) => {
       if (!paths.length) return
-      const ok = window.confirm(
-        'Discard local changes to the selected file(s)? This cannot be undone.',
-      )
+      const ok = window.confirm('Discard local changes to the selected file(s)? This cannot be undone.')
       if (!ok) return
       notifyBusy(true)
       notifyError(undefined)
@@ -244,9 +261,7 @@ export const GitLocalChanges = forwardRef<GitLocalChangesRef, GitLocalChangesPro
 
     const remove = async (paths: string[]) => {
       if (!paths.length) return
-      const ok = window.confirm(
-        'Delete the selected file(s) from the working tree? This cannot be undone.',
-      )
+      const ok = window.confirm('Delete the selected file(s) from the working tree? This cannot be undone.')
       if (!ok) return
       notifyBusy(true)
       notifyError(undefined)
@@ -273,32 +288,18 @@ export const GitLocalChanges = forwardRef<GitLocalChangesRef, GitLocalChangesPro
       try {
         e.dataTransfer.setData('text/plain', JSON.stringify({ area, paths }))
       } catch {}
-      // Multi-drag ghost: show N files
       try {
         if (paths.length > 1) {
           const ghost = document.createElement('div')
-          ghost.style.position = 'fixed'
-          ghost.style.top = '-1000px'
-          ghost.style.left = '-1000px'
-          ghost.style.zIndex = '999999'
-          ghost.style.pointerEvents = 'none'
-          ghost.style.padding = '4px 8px'
-          ghost.style.borderRadius = '6px'
-          ghost.style.border = '1px solid rgba(59,130,246,0.5)'
-          ghost.style.background = 'rgba(59,130,246,0.08)'
-          ghost.style.color = 'inherit'
-          ghost.style.fontSize = '12px'
-          ghost.style.fontFamily =
-            'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace'
+          ghost.style.cssText =
+            'position:fixed;top:-1000px;left:-1000px;z-index:999999;pointer-events:none;' +
+            'padding:4px 8px;border-radius:6px;border:1px solid rgba(59,130,246,0.5);' +
+            'background:rgba(59,130,246,0.08);font-size:12px;font-family:monospace'
           ghost.textContent = `${paths.length} files`
           document.body.appendChild(ghost)
-          try {
-            e.dataTransfer.setDragImage(ghost, 12, 12)
-          } catch {}
+          try { e.dataTransfer.setDragImage(ghost, 12, 12) } catch {}
           const cleanup = () => {
-            try {
-              document.body.removeChild(ghost)
-            } catch {}
+            try { document.body.removeChild(ghost) } catch {}
             document.removeEventListener('dragend', cleanup, true)
           }
           document.addEventListener('dragend', cleanup, true)
@@ -354,8 +355,7 @@ export const GitLocalChanges = forwardRef<GitLocalChangesRef, GitLocalChangesPro
       const b = list.indexOf(path)
       if (a === -1 || b === -1) return selectSingle(area, path)
       const [start, end] = a <= b ? [a, b] : [b, a]
-      const keys = list.slice(start, end + 1).map((p) => makeKey(area, p))
-      setSelection(new Set(keys))
+      setSelection(new Set(list.slice(start, end + 1).map((p) => makeKey(area, p))))
     }
 
     // Resizers
@@ -366,8 +366,7 @@ export const GitLocalChanges = forwardRef<GitLocalChangesRef, GitLocalChangesPro
       const onMove = (ev: PointerEvent) => {
         const st = vertResizeRef.current
         if (!st) return
-        const dx = ev.clientX - st.startX
-        const next = st.startW + dx
+        const next = st.startW + ev.clientX - st.startX
         const containerW = rootRef.current?.clientWidth || window.innerWidth
         const minLeft = Math.max(260, Math.floor(containerW * 0.2))
         const maxLeft = Math.floor(containerW * 0.8)
@@ -389,19 +388,14 @@ export const GitLocalChanges = forwardRef<GitLocalChangesRef, GitLocalChangesPro
       if (!panel) return
       const stagedH = stagedHeaderRef.current?.offsetHeight || 0
       const unstagedH = unstagedHeaderRef.current?.offsetHeight || 0
-      const handleH = 8
-      const avail = Math.max(100, panel.clientHeight - stagedH - unstagedH - handleH)
-      const estimatedRowPx = 28
-      const minPx = Math.max(estimatedRowPx * 2, Math.floor(avail * 0.2))
+      const avail = Math.max(100, panel.clientHeight - stagedH - unstagedH - 8)
+      const minPx = Math.max(56, Math.floor(avail * 0.2))
       horResizeRef.current = { startY: e.clientY, startH: stagedHeightPx, avail, minPx }
       const onMove = (ev: PointerEvent) => {
         const st = horResizeRef.current
         if (!st) return
-        const dy = ev.clientY - st.startY
-        const next = st.startH + dy
-        const maxPx = st.avail - st.minPx
-        const clamped = Math.max(st.minPx, Math.min(maxPx, next))
-        setStagedHeightPx(clamped)
+        const next = st.startH + ev.clientY - st.startY
+        setStagedHeightPx(Math.max(st.minPx, Math.min(st.avail - st.minPx, next)))
       }
       const onUp = () => {
         horResizeRef.current = null
@@ -412,7 +406,6 @@ export const GitLocalChanges = forwardRef<GitLocalChangesRef, GitLocalChangesPro
       window.addEventListener('pointerup', onUp)
     }
 
-    // Keep 20%/80% constraints based on current container width
     React.useEffect(() => {
       const clampNow = () => {
         const containerW = rootRef.current?.clientWidth || window.innerWidth
@@ -425,12 +418,10 @@ export const GitLocalChanges = forwardRef<GitLocalChangesRef, GitLocalChangesPro
       return () => window.removeEventListener('resize', clampNow)
     }, [])
 
-    // Ensure staged min height shows at least 2 rows and 20% of pane
     React.useEffect(() => {
       const panel = leftPaneRef.current
       if (!panel) return
-      const estimatedRowPx = 28
-      const stagedHMin = Math.max(estimatedRowPx * 2, Math.floor(panel.clientHeight * 0.2))
+      const stagedHMin = Math.max(56, Math.floor(panel.clientHeight * 0.2))
       setStagedHeightPx((h) => Math.max(stagedHMin, h))
     }, [leftWidth])
 
@@ -441,17 +432,12 @@ export const GitLocalChanges = forwardRef<GitLocalChangesRef, GitLocalChangesPro
     const [ignoreWS, setIgnoreWS] = useLocalStorage<boolean>('GitLocalChanges_ignoreWS', false)
     const [intra, setIntra] = useLocalStorage<IntraMode>('GitLocalChanges_intra', 'none')
 
-    /** Apply a partial/hunk patch: cached=true always (we apply to index). reverse=true to unstage. */
     const handleApplyPatch = async (patch: string, reverse: boolean) => {
       if (!selectedPath) return
       notifyBusy(true)
       notifyError(undefined)
       try {
-        const res = await gitService.applyPatch(projectId, {
-          patch,
-          cached: true,
-          reverse,
-        })
+        const res = await gitService.applyPatch(projectId, { patch, cached: true, reverse })
         if (!res?.ok) notifyError(res?.error || 'Failed to apply patch')
       } catch (e: any) {
         notifyError(e?.message || String(e))
@@ -461,22 +447,14 @@ export const GitLocalChanges = forwardRef<GitLocalChangesRef, GitLocalChangesPro
       }
     }
 
-    /** Discard a partial/hunk patch from the working tree (no confirm needed for hunks). */
     const handleDiscardPatch = async (patch: string) => {
       if (!selectedPath) return
-      const ok = window.confirm(
-        'Discard these changes from the working tree? This cannot be undone.',
-      )
+      const ok = window.confirm('Discard these changes from the working tree? This cannot be undone.')
       if (!ok) return
       notifyBusy(true)
       notifyError(undefined)
       try {
-        // Apply the patch in reverse to the working tree (cached=false, reverse=true)
-        const res = await gitService.applyPatch(projectId, {
-          patch,
-          cached: false,
-          reverse: true,
-        })
+        const res = await gitService.applyPatch(projectId, { patch, cached: false, reverse: true })
         if (!res?.ok) notifyError(res?.error || 'Failed to discard patch')
       } catch (e: any) {
         notifyError(e?.message || String(e))
@@ -509,19 +487,16 @@ export const GitLocalChanges = forwardRef<GitLocalChangesRef, GitLocalChangesPro
                     void unstage(status.staged.map((f) => f.path))
                 }}
                 aria-label="Unstage all"
-                title="Unstage all"
               />
             </Tooltip>
           </div>
+
           {/* Staged list */}
           <div
             className={`overflow-auto shrink-0 ${dragOverArea === 'staged' && dragItem?.area !== 'staged' ? 'outline outline-1 outline-teal-500/60 bg-teal-500/5' : ''}`}
             style={{ height: stagedHeightPx }}
             onDragOver={(e) => {
-              if (dragItem && dragItem.area !== 'staged') {
-                e.preventDefault()
-                setDragOverArea('staged')
-              }
+              if (dragItem && dragItem.area !== 'staged') { e.preventDefault(); setDragOverArea('staged') }
             }}
             onDragLeave={() => setDragOverArea((prev) => (prev === 'staged' ? null : prev))}
             onDrop={onDropTo('staged')}
@@ -532,39 +507,35 @@ export const GitLocalChanges = forwardRef<GitLocalChangesRef, GitLocalChangesPro
               </div>
             ) : !error ? (
               <div>
-                {status.staged.map((f) => {
-                  const sel = isSelected('staged', f.path)
-                  return (
-                    <GitFileRow
-                      key={`staged:${f.path}`}
-                      file={f}
-                      checked={true}
-                      selected={sel}
-                      onToggle={() => unstage([f.path])}
-                      onReset={() => reset([f.path])}
-                      onRemove={() => remove([f.path])}
-                      draggable
-                      onDragStart={onDragStartRow('staged', f.path)}
-                      onClick={(e) => {
-                        if ((e as any).shiftKey) selectRange('staged', f.path)
-                        else if ((e as any).metaKey || (e as any).ctrlKey)
-                          toggleOne('staged', f.path)
-                        else selectSingle('staged', f.path)
-                      }}
-                    />
-                  )
-                })}
+                {status.staged.map((f) => (
+                  <GitFileRow
+                    key={`staged:${f.path}`}
+                    file={f}
+                    checked={true}
+                    selected={isSelected('staged', f.path)}
+                    onToggle={() => unstage([f.path])}
+                    onReset={() => reset([f.path])}
+                    onRemove={() => remove([f.path])}
+                    onResolveConflict={onResolveConflict ? () => onResolveConflict(f.path) : undefined}
+                    draggable
+                    onDragStart={onDragStartRow('staged', f.path)}
+                    onClick={(e) => {
+                      if ((e as any).shiftKey) selectRange('staged', f.path)
+                      else if ((e as any).metaKey || (e as any).ctrlKey) toggleOne('staged', f.path)
+                      else selectSingle('staged', f.path)
+                    }}
+                  />
+                ))}
                 {status.staged.length === 0 && (
                   <div className="p-2 text-xs text-neutral-500">No staged files.</div>
                 )}
               </div>
             ) : (
-              <div className="p-2 text-xs text-red-600 dark:text-red-400 whitespace-pre-wrap">
-                {error}
-              </div>
+              <div className="p-2 text-xs text-red-600 dark:text-red-400 whitespace-pre-wrap">{error}</div>
             )}
           </div>
-          {/* Horizontal resizer with visible divider and cursor handle under mouse */}
+
+          {/* Horizontal resizer */}
           <ResizeHandle
             orientation="horizontal"
             className="relative z-10 border-y border-neutral-200 dark:border-neutral-800"
@@ -576,6 +547,7 @@ export const GitLocalChanges = forwardRef<GitLocalChangesRef, GitLocalChangesPro
               setHorHandleX(e.clientX - r.left)
             }}
           />
+
           {/* Unstaged header */}
           <div
             ref={unstagedHeaderRef}
@@ -591,17 +563,15 @@ export const GitLocalChanges = forwardRef<GitLocalChangesRef, GitLocalChangesPro
                     void stage([...status.unstaged, ...status.untracked].map((f) => f.path))
                 }}
                 aria-label="Stage all"
-                title="Stage all"
               />
             </Tooltip>
           </div>
+
+          {/* Unstaged list */}
           <div
             className={`min-h-[120px] flex-1 overflow-auto ${dragOverArea === 'unstaged' && dragItem?.area !== 'unstaged' ? 'outline outline-1 outline-teal-500/60 bg-teal-500/5' : ''}`}
             onDragOver={(e) => {
-              if (dragItem && dragItem.area !== 'unstaged') {
-                e.preventDefault()
-                setDragOverArea('unstaged')
-              }
+              if (dragItem && dragItem.area !== 'unstaged') { e.preventDefault(); setDragOverArea('unstaged') }
             }}
             onDragLeave={() => setDragOverArea((prev) => (prev === 'unstaged' ? null : prev))}
             onDrop={onDropTo('unstaged')}
@@ -612,36 +582,31 @@ export const GitLocalChanges = forwardRef<GitLocalChangesRef, GitLocalChangesPro
               </div>
             ) : !error ? (
               <div>
-                {[...status.unstaged, ...status.untracked].map((f) => {
-                  const sel = isSelected('unstaged', f.path)
-                  return (
-                    <GitFileRow
-                      key={`unstaged:${f.path}`}
-                      file={f}
-                      checked={false}
-                      selected={sel}
-                      onToggle={() => stage([f.path])}
-                      onReset={() => reset([f.path])}
-                      onRemove={() => remove([f.path])}
-                      draggable
-                      onDragStart={onDragStartRow('unstaged', f.path)}
-                      onClick={(e) => {
-                        if ((e as any).shiftKey) selectRange('unstaged', f.path)
-                        else if ((e as any).metaKey || (e as any).ctrlKey)
-                          toggleOne('unstaged', f.path)
-                        else selectSingle('unstaged', f.path)
-                      }}
-                    />
-                  )
-                })}
+                {[...status.unstaged, ...status.untracked].map((f) => (
+                  <GitFileRow
+                    key={`unstaged:${f.path}`}
+                    file={f}
+                    checked={false}
+                    selected={isSelected('unstaged', f.path)}
+                    onToggle={() => stage([f.path])}
+                    onReset={() => reset([f.path])}
+                    onRemove={() => remove([f.path])}
+                    onResolveConflict={onResolveConflict ? () => onResolveConflict(f.path) : undefined}
+                    draggable
+                    onDragStart={onDragStartRow('unstaged', f.path)}
+                    onClick={(e) => {
+                      if ((e as any).shiftKey) selectRange('unstaged', f.path)
+                      else if ((e as any).metaKey || (e as any).ctrlKey) toggleOne('unstaged', f.path)
+                      else selectSingle('unstaged', f.path)
+                    }}
+                  />
+                ))}
                 {[...status.unstaged, ...status.untracked].length === 0 && (
                   <div className="p-2 text-xs text-neutral-500">No unstaged files.</div>
                 )}
               </div>
             ) : (
-              <div className="p-2 text-xs text-red-600 dark:text-red-400 whitespace-pre-wrap">
-                {error}
-              </div>
+              <div className="p-2 text-xs text-red-600 dark:text-red-400 whitespace-pre-wrap">{error}</div>
             )}
           </div>
         </div>
@@ -659,7 +624,7 @@ export const GitLocalChanges = forwardRef<GitLocalChangesRef, GitLocalChangesPro
           }}
         />
 
-        {/* Right panel */}
+        {/* Right panel — diff viewer */}
         <div className="min-w-0 min-h-0 flex flex-col h-full" style={{ width: rightWidth }}>
           <DiffViewer
             path={selectedPath}
@@ -673,6 +638,12 @@ export const GitLocalChanges = forwardRef<GitLocalChangesRef, GitLocalChangesPro
             isStaged={selectedArea === 'staged'}
             onApplyPatch={handleApplyPatch}
             onDiscardPatch={handleDiscardPatch}
+            isConflicted={selectedIsConflicted}
+            onResolveConflict={
+              selectedPath && onResolveConflict
+                ? () => onResolveConflict(selectedPath)
+                : undefined
+            }
           />
         </div>
       </div>

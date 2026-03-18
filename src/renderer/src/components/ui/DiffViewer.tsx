@@ -84,36 +84,31 @@ export function DiffViewer({
 
   const handleApplySelection = () => {
     if (!patch || !onApplyPatch) return
-    const partialPatch = generateSelectedPatch(patch, selectedLines)
-    onApplyPatch(partialPatch, !!isStaged)
+    onApplyPatch(generateSelectedPatch(patch, selectedLines), !!isStaged)
     setSelectable(false)
     setSelectedLines(new Set())
   }
 
   const handleDiscardSelection = () => {
     if (!patch || !onDiscardPatch) return
-    const partialPatch = generateSelectedPatch(patch, selectedLines)
-    onDiscardPatch(partialPatch)
+    onDiscardPatch(generateSelectedPatch(patch, selectedLines))
     setSelectable(false)
     setSelectedLines(new Set())
   }
 
   const handleStageHunk = (hunkIndex: number) => {
     if (!patch || !onApplyPatch) return
-    const hunkPatch = generateHunkPatch(patch, hunkIndex)
-    onApplyPatch(hunkPatch, false)
+    onApplyPatch(generateHunkPatch(patch, hunkIndex), false)
   }
 
   const handleUnstageHunk = (hunkIndex: number) => {
     if (!patch || !onApplyPatch) return
-    const hunkPatch = generateHunkPatch(patch, hunkIndex)
-    onApplyPatch(hunkPatch, true)
+    onApplyPatch(generateHunkPatch(patch, hunkIndex), true)
   }
 
   const handleDiscardHunk = (hunkIndex: number) => {
     if (!patch || !onDiscardPatch) return
-    const hunkPatch = generateHunkPatch(patch, hunkIndex)
-    onDiscardPatch(hunkPatch)
+    onDiscardPatch(generateHunkPatch(patch, hunkIndex))
   }
 
   const hasSelection = selectedLines.size > 0
@@ -122,11 +117,15 @@ export function DiffViewer({
     <div className="flex-1 min-w-0 flex flex-col min-h-0 bg-white dark:bg-neutral-900 w-full h-full">
       {/* Toolbar */}
       <div className="text-xs text-neutral-600 dark:text-neutral-400 border-b border-neutral-200 dark:border-neutral-800 flex flex-col w-full shrink-0 bg-neutral-100 dark:bg-neutral-800/50">
+
         {/* Row 1 — file name + pills */}
         <div className="px-2 py-2 flex items-center justify-between min-w-0">
           {path ? (
             <>
               <div className="flex-1 min-w-0 mr-4 font-semibold text-neutral-700 dark:text-neutral-200 flex items-center gap-2">
+                {isConflicted && (
+                  <IconWarningTriangle className="w-3.5 h-3.5 text-red-600 dark:text-red-400 flex-none" />
+                )}
                 <PathDisplay path={path} />
               </div>
               <div className="shrink-0 flex items-center">
@@ -142,19 +141,11 @@ export function DiffViewer({
         {path && (
           <div className="px-2 pb-2 flex items-center gap-3 shrink-0 font-normal border-t border-neutral-200 dark:border-neutral-700 pt-1.5">
             <label className="inline-flex items-center gap-1 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={wrap}
-                onChange={(e) => onWrapChange(e.target.checked)}
-              />
+              <input type="checkbox" checked={wrap} onChange={(e) => onWrapChange(e.target.checked)} />
               <span>Wrap</span>
             </label>
             <label className="inline-flex items-center gap-1 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={ignoreWS}
-                onChange={(e) => onIgnoreWSChange(e.target.checked)}
-              />
+              <input type="checkbox" checked={ignoreWS} onChange={(e) => onIgnoreWSChange(e.target.checked)} />
               <span>Ignore WS</span>
             </label>
             <label className="inline-flex items-center gap-1 cursor-pointer">
@@ -172,10 +163,10 @@ export function DiffViewer({
           </div>
         )}
 
-        {/* Row 3 — selection actions + exit (only in edit mode) */}
+        {/* Row 3 — selection actions + Resolve Conflicts + Select Lines (only in edit mode) */}
         {path && isEditable && (
           <div className="px-2 border-t border-neutral-200 dark:border-neutral-700 flex items-center h-[50px]">
-            {/* Left: Stage/Discard selected — always rendered in selection mode, disabled if no selection */}
+            {/* Left: stage/discard selected (only in selection mode) */}
             <div className="flex items-center gap-2 flex-1">
               {selectable && (
                 <>
@@ -204,22 +195,34 @@ export function DiffViewer({
                 </>
               )}
             </div>
-            {/* Right: Select Lines / Exit Selection toggle */}
-            <button
-              className={`px-3 py-1 rounded text-[11px] font-medium border transition-colors ${
-                selectable
-                  ? 'bg-white border-black text-black hover:bg-neutral-100 ml-4'
-                  : 'bg-neutral-200 dark:bg-neutral-700 hover:bg-neutral-300 dark:hover:bg-neutral-600 border-neutral-300 dark:border-neutral-600 text-neutral-700 dark:text-neutral-200'
-              }`}
-              onClick={() => {
-                setSelectable((s) => {
-                  if (s) setSelectedLines(new Set())
-                  return !s
-                })
-              }}
-            >
-              {selectable ? 'Exit Selection' : 'Select Lines'}
-            </button>
+
+            {/* Right: Resolve Conflicts (when conflicted) + Select Lines toggle */}
+            <div className="flex items-center gap-2">
+              {isConflicted && onResolveConflict && (
+                <button
+                  onClick={onResolveConflict}
+                  className="px-3 py-1 rounded text-[11px] font-medium border transition-colors bg-red-600 hover:bg-red-700 active:bg-red-800 text-white border-red-700 flex items-center gap-1.5"
+                >
+                  <IconWarningTriangle className="w-3.5 h-3.5" />
+                  Resolve Conflicts
+                </button>
+              )}
+              <button
+                className={`px-3 py-1 rounded text-[11px] font-medium border transition-colors ${
+                  selectable
+                    ? 'bg-white border-black text-black hover:bg-neutral-100'
+                    : 'bg-neutral-200 dark:bg-neutral-700 hover:bg-neutral-300 dark:hover:bg-neutral-600 border-neutral-300 dark:border-neutral-600 text-neutral-700 dark:text-neutral-200'
+                }`}
+                onClick={() => {
+                  setSelectable((s) => {
+                    if (s) setSelectedLines(new Set())
+                    return !s
+                  })
+                }}
+              >
+                {selectable ? 'Exit Selection' : 'Select Lines'}
+              </button>
+            </div>
           </div>
         )}
       </div>

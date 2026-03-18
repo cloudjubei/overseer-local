@@ -5,6 +5,7 @@ import StatusControl, { STATUS_LABELS } from '@renderer/components/stories/Statu
 import { useNavigator } from '@renderer/navigation/Navigator'
 import StoryCard from '@renderer/components/stories/StoryCard'
 import { useStories } from '@renderer/contexts/StoriesContext'
+import { IconChevronLeft, IconChevronRight } from '@renderer/components/ui/icons/Icons'
 
 const STATUS_ORDER: Status[] = ['-', '~', '+', '=', '?']
 
@@ -166,9 +167,7 @@ export default function BoardView({ stories }: Props) {
           aria-label="Scroll left"
           onClick={() => scrollByCols(-1)}
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
-            <path fill="currentColor" d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
-          </svg>
+          <IconChevronLeft className="w-4 h-4" />
         </button>
       )}
       {canScrollRight && (
@@ -177,9 +176,7 @@ export default function BoardView({ stories }: Props) {
           aria-label="Scroll right"
           onClick={() => scrollByCols(1)}
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
-            <path fill="currentColor" d="M8.59 16.59 10 18l6-6-6-6-1.41 1.41L13.17 12z" />
-          </svg>
+          <IconChevronRight className="w-4 h-4" />
         </button>
       )}
 

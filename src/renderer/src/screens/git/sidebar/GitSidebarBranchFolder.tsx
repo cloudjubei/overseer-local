@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { GitUnifiedBranch } from 'thefactory-tools'
+import { IconChevronDown } from '../../../components/ui/icons/Icons'
 import { IconFolder } from '../../../components/ui/icons/IconFolder'
 import { IconFolderOpen } from '../../../components/ui/icons/IconFolderOpen'
 import GitSidebarBranchRow from './GitSidebarBranchRow'
@@ -37,25 +38,7 @@ export default function GitSidebarBranchFolder({
         className="w-full flex items-center gap-1 py-1 pl-3 pr-2 text-left
                    hover:bg-neutral-100 dark:hover:bg-neutral-800/50 rounded transition-colors"
       >
-        <svg
-          width="8"
-          height="8"
-          viewBox="0 0 10 10"
-          className={`shrink-0 text-neutral-400 transition-transform ${open ? '' : '-rotate-90'}`}
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path
-            d="M1 3l4 4 4-4"
-            stroke="currentColor"
-            fill="none"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+        <IconChevronDown className={`shrink-0 text-neutral-400 w-3 h-3 transition-transform ${open ? '' : '-rotate-90'}`} />
         <span className="w-3.5 h-3.5 flex items-center justify-center text-neutral-400">
           {open ? <IconFolderOpen className="w-3 h-3" /> : <IconFolder className="w-3 h-3" />}
         </span>

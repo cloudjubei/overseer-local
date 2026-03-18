@@ -1,6 +1,6 @@
 import React from 'react'
 import { gitService } from '@renderer/services/gitService'
-import { GitUnifiedBranch } from 'thefactory-tools'
+import { GitConflictEntry, GitUnifiedBranch } from 'thefactory-tools'
 import { useProjectContext } from '../contexts/ProjectContext'
 import { useGit } from '../contexts/GitContext'
 import { useNavigator } from '../navigation/Navigator'
@@ -33,7 +33,6 @@ export default function GitView() {
     () => dedupeByName((unifiedBranches || []).filter((b) => b.isLocal)),
     [unifiedBranches],
   )
-  // Remote section: branches that exist remotely (may or may not have a local)
   const remoteBranches = React.useMemo(
     () => dedupeByName((unifiedBranches || []).filter((b) => b.isRemote)),
     [unifiedBranches],
@@ -138,7 +137,6 @@ export default function GitView() {
     [current],
   )
 
-  // Resolved selected branch object (local preferred over remote)
   const selectedBranch = React.useMemo(() => {
     if (!selectedBranchName) return undefined
     return (
@@ -157,17 +155,10 @@ export default function GitView() {
     [selection, projectId],
   )
 
-  // ─── Commit graph → select branch ─────────────────────────────────────────
-  // When the user clicks a commit row, try to select whichever branch tip
-  // matches that SHA. Prefer local over remote to avoid accidental remote-only
-  // selection when a branch exists in both places.
   const onSelectBranchBySha = React.useCallback(
     (sha: string) => {
       const local = localBranches.find((b) => b.localSha === sha)
-      if (local) {
-        selection.selectBranch(projectId, local.name)
-        return
-      }
+      if (local) { selection.selectBranch(projectId, local.name); return }
       const remote = remoteBranches.find((b) => b.remoteSha === sha)
       if (remote) selection.selectBranch(projectId, remote.name)
     },
@@ -179,18 +170,14 @@ export default function GitView() {
   }, [projectId, current?.name, selection])
 
   // ─── Switch / checkout ─────────────────────────────────────────────────────
-  const [checkoutRemoteBranch, setCheckoutRemoteBranch] = React.useState<
-    GitUnifiedBranch | undefined
-  >()
+  const [checkoutRemoteBranch, setCheckoutRemoteBranch] = React.useState<GitUnifiedBranch | undefined>()
 
   const switchToBranch = React.useCallback(
     async (b: GitUnifiedBranch) => {
       if (!projectId) return
       await loadCleanStatus()
       if (isClean === false) {
-        alert(
-          'Working tree is not clean. Please commit or stash your changes before switching branches.',
-        )
+        alert('Working tree is not clean. Please commit or stash your changes before switching branches.')
         return
       }
       if (b.isLocal) {
@@ -202,7 +189,6 @@ export default function GitView() {
           await loadCleanStatus()
         }
       } else {
-        // Remote-only branch: open checkout modal
         setCheckoutRemoteBranch(b)
       }
     },
@@ -217,8 +203,10 @@ export default function GitView() {
   const [mergeBase, setMergeBase] = React.useState<string | undefined>(undefined)
   const [mergeHead, setMergeHead] = React.useState<string | undefined>(undefined)
 
+  // Conflict resolver state — matches MergeConflictResolverProps exactly
   const [conflict, setConflict] = React.useState<
-    undefined | { projectId: string; baseRef: string; headRef: string; mergeMessage?: string }
+    | { projectId: string; baseRef: string; branch: string; conflicts: GitConflictEntry[] }
+    | undefined
   >(undefined)
 
   const openMerge = (baseRef: string, headRef: string) => {
@@ -226,6 +214,61 @@ export default function GitView() {
     setMergeHead(headRef)
     setShowMerge(true)
   }
+
+  // ─── Resolve conflict from a file row click ────────────────────────────────
+  // When the user clicks "Resolve Conflict" on a specific file in GitLocalChanges,
+  // we load all conflicted files for that project (git status) and open the resolver.
+  const handleResolveConflict = React.useCallback(
+    async (filePath: string) => {
+      if (!projectId) return
+      try {
+        // Get the full diff lists to find all conflicted (status=U) files
+        const [stagedList, unstagedList] = await Promise.all([
+          gitService.getLocalDiffSummary(projectId, { staged: true }),
+          gitService.getLocalDiffSummary(projectId, { staged: false }),
+        ])
+        const allFiles = [...(stagedList || []), ...(unstagedList || [])]
+        const conflictedPaths = Array.from(
+          new Set(
+            allFiles
+              .filter((f: any) => f?.status === 'U')
+              .map((f: any) => f?.path || '')
+              .filter(Boolean),
+          ),
+        )
+        // Build GitConflictEntry list; put the clicked file first
+        const entries: GitConflictEntry[] = conflictedPaths.map((p) => ({
+          path: p,
+          type: 'both_modified' as const,
+        }))
+        const sorted = [
+          ...entries.filter((e) => e.path === filePath),
+          ...entries.filter((e) => e.path !== filePath),
+        ]
+        if (sorted.length === 0) {
+          // Fallback: just open for the single file
+          sorted.push({ path: filePath, type: 'both_modified' as const })
+        }
+        // Try to read MERGE_HEAD so we can pass the incoming branch name
+        let incomingBranch = 'MERGE_HEAD'
+        try {
+          const mergeHeadContent = await gitService.getFileContent(projectId, '.git/MERGE_HEAD', 'HEAD')
+          if (mergeHeadContent?.trim()) incomingBranch = mergeHeadContent.trim()
+        } catch {}
+        setConflict({
+          projectId,
+          baseRef: current?.name || 'HEAD',
+          branch: incomingBranch,
+          conflicts: sorted,
+        })
+      } catch (e: any) {
+        alert(`Failed to open conflict resolver: ${e?.message || String(e)}`)
+      }
+    },
+    [projectId, current?.name],
+  )
+
+  void nav // suppress unused-var lint
 
   return (
     <div className="flex h-full min-h-0">
@@ -259,6 +302,7 @@ export default function GitView() {
         onRefresh={reload}
         onOpenMerge={openMerge}
         onSelectBranchBySha={onSelectBranchBySha}
+        onResolveConflict={handleResolveConflict}
       />
 
       <GitActionsPanel
@@ -300,8 +344,8 @@ export default function GitView() {
             setConflict({
               projectId,
               baseRef: mergeBase,
-              headRef: mergeHead,
-              mergeMessage: payload?.message,
+              branch: mergeHead,
+              conflicts: payload?.conflicts || [],
             })
           }}
           onAfterMerge={() => {
@@ -315,8 +359,8 @@ export default function GitView() {
         <MergeConflictResolver
           projectId={conflict.projectId}
           baseRef={conflict.baseRef}
-          headRef={conflict.headRef}
-          mergeMessage={conflict.mergeMessage}
+          branch={conflict.branch}
+          conflicts={conflict.conflicts}
           onClose={() => {
             setConflict(undefined)
             window.dispatchEvent(new CustomEvent('git:refresh-now', { detail: { projectId } }))

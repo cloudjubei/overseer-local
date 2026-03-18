@@ -15,6 +15,7 @@ export function GitBranchDetailsPanel({
   selectedStashRef,
   changedCount,
   onSelectBranchBySha,
+  onResolveConflict,
 }: {
   projectId?: string
   loading: boolean
@@ -28,17 +29,13 @@ export function GitBranchDetailsPanel({
   onRefresh: () => void
   onOpenMerge: (baseRef: string, headRef: string) => void
   onSelectBranchBySha?: (sha: string) => void
+  /** Bubbled up from GitLocalChanges when user clicks Resolve Conflict on a file */
+  onResolveConflict?: (filePath: string) => void
 }) {
-  // selectedCommitSha is the row highlighted in the graph AND shown in the diff panel below.
-  // It is driven from outside (branch change → tip sha, or uncommitted changes → 'UNCOMMITTED'),
-  // and can also be changed by the user clicking a row directly.
   const [selectedCommitSha, setSelectedCommitSha] = useState<string | undefined>(undefined)
 
   const isDirty = changedCount > 0
 
-  // When the selected branch changes, jump to:
-  //   • 'UNCOMMITTED' if there are working-tree changes (only relevant for the current branch)
-  //   • the branch tip sha otherwise
   useEffect(() => {
     if (!selectedBranch) {
       setSelectedCommitSha(undefined)
@@ -48,15 +45,12 @@ export function GitBranchDetailsPanel({
     if (isCurrent && isDirty) {
       setSelectedCommitSha('UNCOMMITTED')
     } else {
-      // localSha is the tip of the local branch; fall back to remoteSha for remote-only branches
       const tip = selectedBranch.localSha ?? selectedBranch.remoteSha
       setSelectedCommitSha(tip)
     }
-    // Re-run when the branch name changes OR when dirty-ness flips for the current branch
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedBranch?.name, isDirty])
 
-  // The SHA to scroll the graph to. For UNCOMMITTED there's no row to scroll to.
   const scrollToSha = selectedCommitSha === 'UNCOMMITTED' ? undefined : selectedCommitSha
 
   // ─── Vertical resizer ──────────────────────────────────────────────────────
@@ -148,7 +142,11 @@ export function GitBranchDetailsPanel({
             {/* Bottom: diff for selected commit or local working-tree changes */}
             <div className="flex-1 min-h-0 overflow-hidden flex flex-col w-full relative">
               {!selectedCommitSha || selectedCommitSha === 'UNCOMMITTED' ? (
-                <GitLocalChanges projectId={projectId} className="flex-1 min-h-0" />
+                <GitLocalChanges
+                  projectId={projectId}
+                  className="flex-1 min-h-0"
+                  onResolveConflict={onResolveConflict}
+                />
               ) : (
                 <GitCommitChanges
                   projectId={projectId}

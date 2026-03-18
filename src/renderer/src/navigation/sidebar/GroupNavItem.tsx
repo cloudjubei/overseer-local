@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { ProjectsGroup, ProjectSpec } from 'thefactory-tools'
 import NotificationBadge, { getBadgeColorClass } from '../../components/stories/NotificationBadge'
 import SpinnerWithDot from '../../components/ui/SpinnerWithDot'
-import { IconChevron } from '../../components/ui/icons/Icons'
+import { IconFolder, IconFolderOpen, IconCollection } from '../../components/ui/icons/Icons'
 import ProjectNavItem from './ProjectNavItem'
 import { useNotifications } from '@renderer/hooks/useNotifications'
 import { useAppSettings } from '../../contexts/AppSettingsContext'
@@ -99,27 +99,33 @@ export default function GroupNavItem({
       <div
         className={classNames(
           'nav-item',
-          isScope ? 'pl-3' : 'pl-0 gap-0', // SCOPE rows have normal padding; MAIN rows use chevron layout
+          'pl-0 gap-0',
           accentClass,
           isActiveGroup && 'nav-item--active',
         )}
       >
-        {/* Chevron toggle — MAIN groups only */}
-        {!isScope && (
+        {isScope ? (
+          /* SCOPE: static collection icon, same width as the MAIN folder button so labels align */
+          <span
+            className="flex items-center justify-center h-full w-[42px] shrink-0"
+            aria-hidden
+          >
+            <IconCollection className="w-4 h-4" />
+          </span>
+        ) : (
+          /* MAIN: clickable folder icon that toggles expand/collapse */
           <button
             type="button"
             onClick={() => setIsOpen((prev) => !prev)}
-            className="flex items-center justify-center hover:bg-black/5 dark:hover:bg-white/10 h-full w-[42px] rounded-l"
+            className="flex items-center justify-center hover:bg-black/5 dark:hover:bg-white/10 h-full w-[42px] rounded-l shrink-0"
             aria-expanded={isOpen}
             aria-controls={`group-${g.id}`}
           >
-            <IconChevron
-              className="w-4 h-4"
-              style={{
-                transform: isOpen ? 'rotate(90deg)' : 'none',
-                transition: 'transform 0.15s ease',
-              }}
-            />
+            {isOpen ? (
+              <IconFolderOpen className="w-4 h-4" />
+            ) : (
+              <IconFolder className="w-4 h-4" />
+            )}
           </button>
         )}
 

@@ -1,4 +1,5 @@
 import React from 'react'
+import { IconChevronDown } from '../../../components/ui/icons/Icons'
 
 export default function GitSidebarSectionHeader({
   label,
@@ -19,22 +20,7 @@ export default function GitSidebarSectionHeader({
                  hover:bg-neutral-100 dark:hover:bg-neutral-800/60 transition-colors rounded"
     >
       {/* chevron */}
-      <svg
-        width="10"
-        height="10"
-        viewBox="0 0 10 10"
-        className={`shrink-0 text-neutral-400 transition-transform ${open ? '' : '-rotate-90'}`}
-        fill="currentColor"
-      >
-        <path
-          d="M1 3l4 4 4-4"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          fill="none"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
+      <IconChevronDown className={`shrink-0 text-neutral-400 w-3.5 h-3.5 transition-transform ${open ? '' : '-rotate-90'}`} />
       <span className="w-3.5 h-3.5 flex items-center justify-center text-neutral-500 dark:text-neutral-400">
         {icon}
       </span>
