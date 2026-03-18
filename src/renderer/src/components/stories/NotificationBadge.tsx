@@ -7,6 +7,24 @@ export interface NotificationBadgeProps {
   isInformative?: boolean
   /** Optional explicit color override. Defaults to red; when isInformative=true defaults to blue. */
   color?: 'red' | 'blue' | 'green' | 'orange'
+  colorClass?: string
+}
+
+export const getBadgeColorClass = (
+  color?: 'red' | 'blue' | 'green' | 'orange',
+  isInformative: boolean = false
+) => {
+  return color
+    ? color === 'green'
+      ? 'bg-green-500'
+      : color === 'orange'
+      ? 'bg-orange-500'
+      : color === 'blue'
+      ? 'bg-blue-500'
+      : 'bg-red-500'
+    : isInformative
+    ? 'bg-blue-500'
+    : 'bg-red-500'
 }
 
 /*
@@ -22,18 +40,9 @@ const NotificationBadge: React.FC<NotificationBadgeProps> = ({
   tooltipLabel,
   isInformative = false,
   color,
+  colorClass,
 }) => {
-  const bg = color
-    ? color === 'green'
-      ? 'bg-green-500'
-      : color === 'orange'
-      ? 'bg-orange-500'
-      : color === 'blue'
-      ? 'bg-blue-500'
-      : 'bg-red-500'
-    : isInformative
-    ? 'bg-blue-500'
-    : 'bg-red-500'
+  const bg = colorClass || getBadgeColorClass(color, isInformative)
   const title = tooltipLabel || text
 
   return (
@@ -48,14 +57,14 @@ const NotificationBadge: React.FC<NotificationBadgeProps> = ({
         'text-[11px] font-semibold text-white',
         // color
         bg,
-        // subtle outline to pop on dark/light backgrounds
+        // separation (makes it "pop" when on a similar background)
         'ring-2 ring-white dark:ring-neutral-900',
         className,
-      ].join(' ')}
-      style={{ lineHeight: 0 }}
+      ]
+        .filter(Boolean)
+        .join(' ')}
       title={title}
       aria-label={title}
-      role="status"
     >
       {text}
     </span>

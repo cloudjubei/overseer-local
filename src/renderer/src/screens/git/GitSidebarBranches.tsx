@@ -9,6 +9,7 @@ import { IconFolder } from '../../components/ui/icons/IconFolder'
 import { IconFolderOpen } from '../../components/ui/icons/IconFolderOpen'
 import { IconArrowUp } from '../../components/ui/icons/IconArrowUp'
 import { IconArrowDown } from '../../components/ui/icons/IconArrowDown'
+import { useLocalStorage } from '../../hooks/useLocalStorage'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function groupBranches(branches: GitUnifiedBranch[]) {
@@ -48,10 +49,20 @@ function SectionHeader({
     >
       {/* chevron */}
       <svg
-        width="10" height="10" viewBox="0 0 10 10" className={`shrink-0 text-neutral-400 transition-transform ${open ? '' : '-rotate-90'}`}
+        width="10"
+        height="10"
+        viewBox="0 0 10 10"
+        className={`shrink-0 text-neutral-400 transition-transform ${open ? '' : '-rotate-90'}`}
         fill="currentColor"
       >
-        <path d="M1 3l4 4 4-4" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+        <path
+          d="M1 3l4 4 4-4"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
       </svg>
       <span className="w-3.5 h-3.5 flex items-center justify-center text-neutral-500 dark:text-neutral-400">
         {icon}
@@ -194,30 +205,41 @@ function BranchFolder({
                    hover:bg-neutral-100 dark:hover:bg-neutral-800/50 rounded transition-colors"
       >
         <svg
-          width="8" height="8" viewBox="0 0 10 10"
+          width="8"
+          height="8"
+          viewBox="0 0 10 10"
           className={`shrink-0 text-neutral-400 transition-transform ${open ? '' : '-rotate-90'}`}
-          fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
         >
-          <path d="M1 3l4 4 4-4" />
+          <path
+            d="M1 3l4 4 4-4"
+            stroke="currentColor"
+            fill="none"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
         </svg>
         <span className="w-3.5 h-3.5 flex items-center justify-center text-neutral-400">
-          {open
-            ? <IconFolderOpen className="w-3.5 h-3.5" />
-            : <IconFolder className="w-3.5 h-3.5" />}
+          {open ? <IconFolderOpen className="w-3 h-3" /> : <IconFolder className="w-3 h-3" />}
         </span>
-        <span className="text-[11px] font-medium text-neutral-600 dark:text-neutral-400 truncate">
+        <span className="text-[11px] font-medium text-neutral-600 dark:text-neutral-400">
           {groupName}
         </span>
       </button>
+
       {open && (
-        <div className="ml-4 border-l border-neutral-200 dark:border-neutral-800">
+        <div className="mt-0.5 flex flex-col">
           {branches.map((b) => (
             <BranchRow
               key={b.name}
               branch={b}
-              isSelected={selectedBranchName === b.name && !selectedStashRef}
+              isSelected={b.name === selectedBranchName && !selectedStashRef}
               isRemoteSection={isRemoteSection}
-              indent={0}
+              indent={1} // inside a folder
               onClick={() => onSelectBranch(b)}
               onDoubleClick={() => onDoubleClickBranch?.(b)}
             />
@@ -228,7 +250,7 @@ function BranchFolder({
   )
 }
 
-// ─── Branch list (root + groups) ─────────────────────────────────────────────
+// ─── List of branches (root + folders) ────────────────────────────────────────
 function BranchList({
   branches,
   isRemoteSection,
@@ -244,10 +266,12 @@ function BranchList({
   onSelectBranch: (b: GitUnifiedBranch) => void
   onDoubleClickBranch?: (b: GitUnifiedBranch) => void
 }) {
-  const { groups, root } = groupBranches(branches)
+  const { root, groups } = groupBranches(branches)
+  const sortedGroupNames = Object.keys(groups).sort((a, b) => a.localeCompare(b))
+
   return (
-    <>
-      {/* Root-level (no prefix) */}
+    <div className="flex flex-col gap-0.5">
+      {/* Root branches first */}
       {root.map((b) => (
         <BranchRow
           key={b.name}
@@ -258,12 +282,13 @@ function BranchList({
           onDoubleClick={() => onDoubleClickBranch?.(b)}
         />
       ))}
-      {/* Grouped */}
-      {Object.entries(groups).map(([g, brs]) => (
+
+      {/* Grouped folders */}
+      {sortedGroupNames.map((g) => (
         <BranchFolder
           key={g}
           groupName={g}
-          branches={brs}
+          branches={groups[g]}
           isRemoteSection={isRemoteSection}
           selectedBranchName={selectedBranchName}
           selectedStashRef={selectedStashRef}
@@ -300,7 +325,6 @@ function StashRow({
   )
 }
 
-// ─── Main export ──────────────────────────────────────────────────────────────
 export function GitSidebarBranches({
   projectId,
   loading,
@@ -331,7 +355,7 @@ export function GitSidebarBranches({
   onDoubleClickBranch?: (b: GitUnifiedBranch) => void
   onSelectStash: (ref: string) => void
 }) {
-  const [widthPx, setWidthPx] = useState<number>(280)
+  const [widthPx, setWidthPx] = useLocalStorage<number>('GitSidebarBranches_widthPx', 280)
   const resizeRef = useRef<{ startX: number; startW: number; maxW: number } | null>(null)
 
   const [branchesOpen, setBranchesOpen] = useState(true)
@@ -385,7 +409,6 @@ export function GitSidebarBranches({
           <div className="px-3 py-2 text-xs text-red-600 dark:text-red-400">Error: {error}</div>
         ) : (
           <div className="flex flex-col pb-3 px-1">
-
             {/* ── BRANCHES ──────────────────────────────── */}
             <SectionHeader
               label="Branches"
@@ -419,34 +442,32 @@ export function GitSidebarBranches({
             )}
 
             {/* ── REMOTES ───────────────────────────────── */}
-            {remoteBranches.length > 0 && (
-              <>
-                <div className="mx-1 my-1 border-t border-neutral-100 dark:border-neutral-800" />
-                <SectionHeader
-                  label="Remotes"
-                  icon={<IconGlobe className="w-3.5 h-3.5" />}
-                  open={remotesOpen}
-                  onToggle={() => setRemotesOpen((v) => !v)}
-                />
-                {remotesOpen && (
-                  <div className="mb-1">
-                    <BranchList
-                      branches={remoteBranches}
-                      isRemoteSection={true}
-                      selectedBranchName={selectedBranchName}
-                      selectedStashRef={selectedStashRef}
-                      onSelectBranch={onSelectBranch}
-                      onDoubleClickBranch={onDoubleClickBranch}
-                    />
-                  </div>
+            <SectionHeader
+              label="Remotes"
+              icon={<IconGlobe className="w-3.5 h-3.5" />}
+              open={remotesOpen}
+              onToggle={() => setRemotesOpen((v) => !v)}
+            />
+            {remotesOpen && (
+              <div className="mb-1">
+                {remoteBranches.length === 0 ? (
+                  <div className="px-3 py-1 text-xs text-neutral-400">No remote branches.</div>
+                ) : (
+                  <BranchList
+                    branches={remoteBranches}
+                    isRemoteSection={true}
+                    selectedBranchName={selectedBranchName}
+                    selectedStashRef={selectedStashRef}
+                    onSelectBranch={onSelectBranch}
+                    onDoubleClickBranch={onDoubleClickBranch}
+                  />
                 )}
-              </>
+              </div>
             )}
 
             {/* ── STASHES ───────────────────────────────── */}
             {stashes && stashes.length > 0 && (
               <>
-                <div className="mx-1 my-1 border-t border-neutral-100 dark:border-neutral-800" />
                 <SectionHeader
                   label="Stashes"
                   icon={<IconArchive className="w-3.5 h-3.5" />}
@@ -454,7 +475,7 @@ export function GitSidebarBranches({
                   onToggle={() => setStashesOpen((v) => !v)}
                 />
                 {stashesOpen && (
-                  <div className="mb-1">
+                  <div className="flex flex-col gap-0.5 mb-1">
                     {stashes.map((s) => (
                       <StashRow
                         key={s.ref}

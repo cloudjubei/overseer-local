@@ -5,6 +5,7 @@ import { GitLocalChanges } from './GitLocalChanges'
 import { ResizeHandle } from '../../components/ui/ResizeHandle'
 import { GitCommitGraph } from './GitCommitGraph'
 import { GitCommitChanges } from './GitCommitChanges'
+import { useLocalStorage } from '../../hooks/useLocalStorage'
 
 export function GitBranchDetailsPanel({
   projectId,
@@ -67,7 +68,7 @@ export function GitBranchDetailsPanel({
 
   // ─── Vertical resizer ──────────────────────────────────────────────────────
   const rootRef = useRef<HTMLDivElement | null>(null)
-  const [topHeightPx, setTopHeightPx] = useState<number>(250)
+  const [topHeightPx, setTopHeightPx] = useLocalStorage<number>('GitBranchDetailsPanel_topHeightPx', 250)
   const resizeRef = useRef<{ startY: number; startH: number; containerH: number } | null>(null)
 
   const onTopResizeStart = (e: React.PointerEvent) => {

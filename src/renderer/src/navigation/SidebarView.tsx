@@ -12,7 +12,7 @@ import { useNavigator } from './Navigator'
 import Tooltip from '../components/ui/Tooltip'
 import { MAIN_PROJECT, useProjectContext } from '../contexts/ProjectContext'
 import { useAppSettings } from '../contexts/AppSettingsContext'
-import NotificationBadge from '../components/stories/NotificationBadge'
+import NotificationBadge, { getBadgeColorClass } from '../components/stories/NotificationBadge'
 import { ProjectSpec } from 'thefactory-tools'
 import {
   IconHome,
@@ -111,6 +111,12 @@ const NAV_ITEMS: NavDef[] = [
   },
 ]
 
+const GROUP_NAV_ITEMS: NavDef[] = [
+  { id: 'home', label: 'Home', view: 'Home', icon: <IconHome />, accent: 'brand' },
+  { id: 'chats', label: 'Chat', view: 'Chat', icon: <IconChat />, accent: 'teal' },
+  { id: 'tools', label: 'Tools', view: 'Tools', icon: <IconToolbox />, accent: 'brand' },
+]
+
 function useMediaQuery(query: string) {
   const [matches, setMatches] = useState<boolean>(() =>
     typeof window !== 'undefined' ? window.matchMedia(query).matches : false,
@@ -150,11 +156,19 @@ export default function SidebarView({}: SidebarProps) {
   const { currentView, navigateView, openModal } = useNavigator()
   const { activeProjectId, projects, setActiveProjectId } = useProjectContext()
   const { isAppSettingsLoaded, appSettings, updateAppSettings } = useAppSettings()
-  const { groups } = useProjectsGroups()
+  const { groups, activeGroupId, activeSelectionType, setActiveGroupId, setActiveSelectionType } =
+    useProjectsGroups()
   const { isBadgeEnabled, isGitBadgeSubToggleEnabled, getProjectBadgeState, getGroupBadgeState } =
     useNotifications()
 
   const [collapsed, setCollapsed] = useState<boolean>(appSettings.userPreferences.sidebarCollapsed)
+  const chatBadgeColor = appSettings?.notificationSystemSettings?.badgeColors?.chat_messages
+  const agentBadgeColor = appSettings?.notificationSystemSettings?.badgeColors?.agent_runs
+  const gitBadgeColor = appSettings?.notificationSystemSettings?.badgeColors?.git_changes
+
+  const chatColorClass = getBadgeColorClass(chatBadgeColor)
+  const agentColorClass = getBadgeColorClass(agentBadgeColor, true)
+  const gitColorClass = getBadgeColorClass(gitBadgeColor)
 
   useEffect(() => {
     if (isAppSettingsLoaded) {
@@ -168,12 +182,26 @@ export default function SidebarView({}: SidebarProps) {
   }, [collapsed])
 
   const handleProjectSwitch = (projectId: string) => {
-    if (projectId === activeProjectId) return
+    if (projectId === activeProjectId && activeSelectionType === 'project') return
     setActiveProjectId(projectId)
+    setActiveSelectionType('project')
+    setActiveGroupId(null)
     navigateView(currentView)
   }
 
-  const stCurrent = getProjectBadgeState(activeProjectId)
+  const handleGroupSelect = (groupId: string) => {
+    setActiveSelectionType('group')
+    setActiveGroupId(groupId)
+    if (!['Home', 'Chat', 'Tools'].includes(currentView)) {
+      navigateView('Home')
+    }
+  }
+
+  const stCurrent =
+    activeSelectionType === 'group' && activeGroupId
+      ? getGroupBadgeState(activeGroupId)
+      : getProjectBadgeState(activeProjectId)
+
   const activeRunsCurrentProject = stCurrent.agent_runs.running
   const agentsCompletedUnreadCurrentProject = stCurrent.agent_runs.unread
   const chatUnreadCurrentProject = stCurrent.chat_messages.unread
@@ -194,29 +222,39 @@ export default function SidebarView({}: SidebarProps) {
     if (mobileOpen) setTimeout(() => firstItemRef.current?.focus(), 0)
   }, [mobileOpen])
 
+  const displayedNavItems = useMemo(() => {
+    return activeSelectionType === 'group'
+      ? GROUP_NAV_ITEMS
+      : NAV_ITEMS.filter((n) => n.view !== 'Settings')
+  }, [activeSelectionType])
+
   const activeIndex = useMemo(() => {
-    const idx = NAV_ITEMS.findIndex((n) => n.view === currentView)
+    const idx = displayedNavItems.findIndex((n) => n.view === currentView)
     return idx >= 0 ? idx : 0
-  }, [currentView])
+  }, [currentView, displayedNavItems])
+
   const [focusIndex, setFocusIndex] = useState<number>(activeIndex)
   useEffect(() => setFocusIndex(activeIndex), [activeIndex])
 
-  const onKeyDownList = useCallback((e: React.KeyboardEvent) => {
-    const max = NAV_ITEMS.length - 1
-    if (e.key === 'ArrowDown') {
-      e.preventDefault()
-      setFocusIndex((i) => (i >= max ? 0 : i + 1))
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault()
-      setFocusIndex((i) => (i <= 0 ? max : i - 1))
-    } else if (e.key === 'Home') {
-      e.preventDefault()
-      setFocusIndex(0)
-    } else if (e.key === 'End') {
-      e.preventDefault()
-      setFocusIndex(max)
-    }
-  }, [])
+  const onKeyDownList = useCallback(
+    (e: React.KeyboardEvent) => {
+      const max = displayedNavItems.length - 1
+      if (e.key === 'ArrowDown') {
+        e.preventDefault()
+        setFocusIndex((i) => (i >= max ? 0 : i + 1))
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault()
+        setFocusIndex((i) => (i <= 0 ? max : i - 1))
+      } else if (e.key === 'Home') {
+        e.preventDefault()
+        setFocusIndex(0)
+      } else if (e.key === 'End') {
+        e.preventDefault()
+        setFocusIndex(max)
+      }
+    },
+    [displayedNavItems],
+  )
 
   const onActivate = useCallback(
     (view: NavDef['view']) => {
@@ -289,8 +327,6 @@ export default function SidebarView({}: SidebarProps) {
   const effectiveCollapsed = isMobile ? false : collapsed
 
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({})
-  const { projects: allProjects } = useProjectContext()
-  const { groups: allGroups } = useProjectsGroups()
 
   // Filter out inactive projects (p.active === false) for sidebar display
   const activeProjects = useMemo(
@@ -340,7 +376,7 @@ export default function SidebarView({}: SidebarProps) {
   const cap99 = (n: number) => (n > 99 ? '99+' : `${n}`)
 
   const renderProjectItem = (p: ProjectSpec) => {
-    const active = p.id === activeProjectId
+    const active = activeSelectionType === 'project' && p.id === activeProjectId
     const accent = useAccentClass(p.id, isMainProject(p.id))
     const st = getProjectBadgeState(p.id)
     const activeRuns = st.agent_runs.running
@@ -353,10 +389,8 @@ export default function SidebarView({}: SidebarProps) {
     const projectIcon = renderProjectIcon(iconKey)
 
     const showAgents = isBadgeEnabled('agent_runs') && activeRuns > 0 && !active
-    const showAgentsCompleted =
-      isBadgeEnabled('agent_runs') && agentsCompletedUnread > 0 && !active
-    const showChat =
-      isBadgeEnabled('chat_messages') && (chatUnread > 0 || thinking) && !active
+    const showAgentsCompleted = isBadgeEnabled('agent_runs') && agentsCompletedUnread > 0 && !active
+    const showChat = isBadgeEnabled('chat_messages') && (chatUnread > 0 || thinking) && !active
 
     const gitBadgesEnabled = isBadgeEnabled('git_changes') && !active
     const showGitIncoming =
@@ -399,6 +433,7 @@ export default function SidebarView({}: SidebarProps) {
                 text={`${activeRuns}`}
                 tooltipLabel={`${activeRuns} running agents`}
                 isInformative
+                colorClass={agentColorClass}
               />
             )}
             {showAgentsCompleted && (
@@ -406,6 +441,7 @@ export default function SidebarView({}: SidebarProps) {
                 className={effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''}
                 text={cap99(agentsCompletedUnread)}
                 tooltipLabel={`${agentsCompletedUnread} completed agent runs`}
+                colorClass={agentColorClass}
               />
             )}
             {showChat && thinking ? (
@@ -413,12 +449,14 @@ export default function SidebarView({}: SidebarProps) {
                 size={effectiveCollapsed ? 14 : 16}
                 showDot={chatUnread > 0}
                 dotTitle={chatUnread > 0 ? `${chatUnread} unread chats` : undefined}
+                dotColorClass={chatColorClass}
               />
             ) : showChat && chatUnread > 0 ? (
               <NotificationBadge
                 className={effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''}
                 text={cap99(chatUnread)}
                 tooltipLabel={`${chatUnread} unread chats`}
+                colorClass={chatColorClass}
               />
             ) : null}
             {showGitIncoming && (
@@ -426,7 +464,7 @@ export default function SidebarView({}: SidebarProps) {
                 className={effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''}
                 text={`${gitIncoming}↓`}
                 tooltipLabel={`${gitIncoming} incoming commits`}
-                color="blue"
+                colorClass={gitColorClass}
               />
             )}
             {showGitUncommitted && (
@@ -434,7 +472,7 @@ export default function SidebarView({}: SidebarProps) {
                 className={effectiveCollapsed ? 'h-[14px] min-w-[14px] px-0.5 text-[6px]' : ''}
                 text={`*`}
                 tooltipLabel={`Uncommitted changes`}
-                color="green"
+                colorClass={gitColorClass}
               />
             )}
           </span>
@@ -490,7 +528,7 @@ export default function SidebarView({}: SidebarProps) {
         style={hideScrollStyle}
       >
         <ul className="nav-list" role="list" onKeyDown={onKeyDownList}>
-          {NAV_ITEMS.filter((n) => n.view !== 'Settings').map((item, i) => {
+          {displayedNavItems.map((item, i) => {
             const isActive = currentView === item.view
             const isFirst = i === 0
             const ref = isFirst ? firstItemRef : null
@@ -508,6 +546,7 @@ export default function SidebarView({}: SidebarProps) {
                       text={`${activeRunsCurrentProject}`}
                       tooltipLabel={`${activeRunsCurrentProject} running agents`}
                       isInformative
+                      colorClass={agentColorClass}
                     />,
                   )
                 }
@@ -520,6 +559,7 @@ export default function SidebarView({}: SidebarProps) {
                       }
                       text={cap99(agentsCompletedUnreadCurrentProject)}
                       tooltipLabel={`${agentsCompletedUnreadCurrentProject} completed agent runs`}
+                      colorClass={agentColorClass}
                     />,
                   )
                 }
@@ -540,7 +580,7 @@ export default function SidebarView({}: SidebarProps) {
                       }
                       text={`${gitIncomingCurrentProject}↓`}
                       tooltipLabel={`${gitIncomingCurrentProject} incoming commits`}
-                      color="blue"
+                      colorClass={gitColorClass}
                     />,
                   )
                 }
@@ -557,7 +597,7 @@ export default function SidebarView({}: SidebarProps) {
                       }
                       text={`*`}
                       tooltipLabel={`Uncommitted changes`}
-                      color="green"
+                      colorClass={gitColorClass}
                     />,
                   )
                 }
@@ -577,6 +617,7 @@ export default function SidebarView({}: SidebarProps) {
                           ? `${chatUnreadCurrentProject} unread chats`
                           : undefined
                       }
+                      dotColorClass={chatColorClass}
                     />,
                   )
                 } else if (chatUnreadCurrentProject > 0) {
@@ -588,6 +629,7 @@ export default function SidebarView({}: SidebarProps) {
                       }
                       text={cap99(chatUnreadCurrentProject)}
                       tooltipLabel={`${chatUnreadCurrentProject} unread chats`}
+                      colorClass={chatColorClass}
                     />,
                   )
                 }
@@ -702,10 +744,8 @@ export default function SidebarView({}: SidebarProps) {
                 .filter(Boolean) as ProjectSpec[]
               const isOpen = openGroups[g.id] || false
 
-              const hasActive = !!groupProjects.find((p) => p.id === activeProjectId)
-              const accentClass = hasActive
-                ? useAccentClass(activeProjectId, isMainProject(activeProjectId))
-                : ''
+              const isActiveGroup = activeSelectionType === 'group' && activeGroupId === g.id
+              const accentClass = isActiveGroup ? 'nav-accent-brand' : ''
 
               const groupBadge = getGroupBadgeState(g.id)
 
@@ -717,11 +757,19 @@ export default function SidebarView({}: SidebarProps) {
               const aggGitUncommitted = groupBadge.git_changes.uncommitted
 
               const aggShowAgents = isBadgeEnabled('agent_runs') && aggActive > 0
-              const aggShowAgentsCompleted = isBadgeEnabled('agent_runs') && aggAgentsCompletedUnread > 0
-              const aggShowChat = isBadgeEnabled('chat_messages') && (aggChatUnread > 0 || aggThinking > 0)
+              const aggShowAgentsCompleted =
+                isBadgeEnabled('agent_runs') && aggAgentsCompletedUnread > 0
+              const aggShowChat =
+                isBadgeEnabled('chat_messages') && (aggChatUnread > 0 || aggThinking > 0)
 
-              const aggShowGitIncoming = isBadgeEnabled('git_changes') && isGitBadgeSubToggleEnabled('incoming_commits') && aggGitIncoming > 0
-              const aggShowGitUncommitted = isBadgeEnabled('git_changes') && isGitBadgeSubToggleEnabled('uncommitted_changes') && aggGitUncommitted
+              const aggShowGitIncoming =
+                isBadgeEnabled('git_changes') &&
+                isGitBadgeSubToggleEnabled('incoming_commits') &&
+                aggGitIncoming > 0
+              const aggShowGitUncommitted =
+                isBadgeEnabled('git_changes') &&
+                isGitBadgeSubToggleEnabled('uncommitted_changes') &&
+                aggGitUncommitted
 
               const showAnyBadge =
                 aggShowAgents ||
@@ -732,20 +780,21 @@ export default function SidebarView({}: SidebarProps) {
 
               return (
                 <li key={g.id} className="nav-li">
-                  <button
-                    type="button"
-                    onClick={() => setOpenGroups((prev) => ({ ...prev, [g.id]: !isOpen }))}
+                  <div
                     className={classNames(
                       'nav-item',
                       'nav-item--compact',
                       accentClass,
-                      hasActive && 'nav-item--active',
+                      isActiveGroup && 'nav-item--active',
                     )}
-                    aria-expanded={isOpen}
-                    aria-controls={`group-${g.id}`}
-                    title={g.title}
                   >
-                    <span className="nav-item__icon" aria-hidden>
+                    <button
+                      type="button"
+                      onClick={() => setOpenGroups((prev) => ({ ...prev, [g.id]: !isOpen }))}
+                      className="nav-item__icon flex items-center justify-center hover:bg-black/5 dark:hover:bg-white/10 rounded"
+                      aria-expanded={isOpen}
+                      aria-controls={`group-${g.id}`}
+                    >
                       <IconChevron
                         className="w-4 h-4"
                         style={{
@@ -753,8 +802,14 @@ export default function SidebarView({}: SidebarProps) {
                           transition: 'transform 0.15s ease',
                         }}
                       />
-                    </span>
-                    <span className="nav-item__label flex-1 text-left">{g.title}</span>
+                    </button>
+                    <button
+                      type="button"
+                      className="nav-item__label flex-1 text-left font-medium outline-none truncate"
+                      onClick={() => handleGroupSelect(g.id)}
+                    >
+                      {g.title}
+                    </button>
 
                     {showAnyBadge && !isOpen && (
                       <span className="nav-item__badges" aria-hidden>
@@ -764,6 +819,7 @@ export default function SidebarView({}: SidebarProps) {
                             text={`${aggActive}`}
                             tooltipLabel={`${aggActive} running agents in group`}
                             isInformative
+                            colorClass={agentColorClass}
                           />
                         )}
                         {aggShowAgentsCompleted && (
@@ -771,6 +827,7 @@ export default function SidebarView({}: SidebarProps) {
                             className={''}
                             text={cap99(aggAgentsCompletedUnread)}
                             tooltipLabel={`${aggAgentsCompletedUnread} completed agent runs in group`}
+                            colorClass={agentColorClass}
                           />
                         )}
                         {aggShowChat && aggThinking > 0 ? (
@@ -782,12 +839,14 @@ export default function SidebarView({}: SidebarProps) {
                                 ? `${aggChatUnread} unread chats in group`
                                 : undefined
                             }
+                            dotColorClass={chatColorClass}
                           />
                         ) : aggShowChat && aggChatUnread > 0 ? (
                           <NotificationBadge
                             className={''}
                             text={cap99(aggChatUnread)}
                             tooltipLabel={`${aggChatUnread} unread chats in group`}
+                            colorClass={chatColorClass}
                           />
                         ) : null}
                         {aggShowGitIncoming && (
@@ -795,7 +854,7 @@ export default function SidebarView({}: SidebarProps) {
                             className={''}
                             text={`${aggGitIncoming}↓`}
                             tooltipLabel={`${aggGitIncoming} incoming commits in group`}
-                            color="blue"
+                            colorClass={gitColorClass}
                           />
                         )}
                         {aggShowGitUncommitted && (
@@ -803,21 +862,23 @@ export default function SidebarView({}: SidebarProps) {
                             className={''}
                             text={`*`}
                             tooltipLabel={`Uncommitted changes in group`}
-                            color="green"
+                            colorClass={gitColorClass}
                           />
                         )}
                       </span>
                     )}
-                  </button>
+                  </div>
 
-                  {isOpen && groupProjects.length > 0 && (
-                    <ul
-                      id={`group-${g.id}`}
-                      className="nav-list"
-                      aria-label={`${g.title} projects`}
-                    >
-                      {groupProjects.map((p) => renderProjectItem(p))}
-                    </ul>
+                  {isOpen && (
+                    <div className="pl-3 mt-1 flex flex-col gap-1">
+                      <ul
+                        id={`group-${g.id}`}
+                        className="nav-list"
+                        aria-label={`${g.title} projects`}
+                      >
+                        {groupProjects.map((p) => renderProjectItem(p))}
+                      </ul>
+                    </div>
                   )}
                 </li>
               )

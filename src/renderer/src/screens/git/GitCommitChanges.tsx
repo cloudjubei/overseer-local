@@ -6,6 +6,7 @@ import { ResizeHandle } from '../../components/ui/ResizeHandle'
 import { IconFileAdded, IconFileDeleted, IconFileModified } from '../../components/ui/icons/Icons'
 import { PathDisplay } from '../../components/ui/PathDisplay'
 import { DiffViewer } from '../../components/ui/DiffViewer'
+import { useLocalStorage } from '../../hooks/useLocalStorage'
 
 function StatusIcon({ status, className = 'w-4 h-4 flex-none' }: { status?: string; className?: string }) {
   if (status === 'A') return <IconFileAdded className={className} />
@@ -48,7 +49,7 @@ export function GitCommitChanges({
   const [selectedFile, setSelectedFile] = useState<string | null>(null)
 
   const containerRef = useRef<HTMLDivElement>(null)
-  const [leftWidth, setLeftWidth] = useState(300)
+  const [leftWidth, setLeftWidth] = useLocalStorage<number>('GitCommitChanges_leftWidth', 300)
   const [vertHandleY, setVertHandleY] = useState<number | null>(null)
   const resizeRef = useRef<{ startX: number; startW: number } | null>(null)
 

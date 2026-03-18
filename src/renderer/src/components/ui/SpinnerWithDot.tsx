@@ -7,9 +7,10 @@ export type SpinnerWithDotProps = {
   showDot?: boolean
   className?: string
   dotTitle?: string
+  dotColorClass?: string
 }
 
-export default function SpinnerWithDot({ size = 16, showDot = false, className = '', dotTitle }: SpinnerWithDotProps) {
+export default function SpinnerWithDot({ size = 16, showDot = false, className = '', dotTitle, dotColorClass }: SpinnerWithDotProps) {
   const s = size
   const dotSizeClass = s <= 14 ? 'w-1.5 h-1.5' : 'w-2 h-2'
   return (
@@ -17,7 +18,7 @@ export default function SpinnerWithDot({ size = 16, showDot = false, className =
       <Spinner size={s} />
       {showDot && (
         <span className="absolute -top-0 -right-0 translate-x-1 -translate-y-1">
-          <DotBadge className={[dotSizeClass, 'ring-2'].join(' ')} title={dotTitle} />
+          <DotBadge className={[dotSizeClass, 'ring-2'].join(' ')} title={dotTitle} colorClass={dotColorClass} />
         </span>
       )}
     </span>

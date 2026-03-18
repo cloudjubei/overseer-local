@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState, useCallback, memo } from 'react'
 import { useActiveProject, useProjectContext } from '@renderer/contexts/ProjectContext'
 import { useStories } from '@renderer/contexts/StoriesContext'
-// import { useChats } from '@renderer/contexts/ChatsContext'
 import { useChats } from '../../contexts/chats/ChatsContext'
 import type { ChatContext } from 'thefactory-tools'
 import { IconChevron } from '@renderer/components/ui/icons/Icons'
@@ -11,6 +10,7 @@ import { getChatContextKey } from 'thefactory-tools/utils'
 import NotificationBadge from '@renderer/components/stories/NotificationBadge'
 import { useChatThinking } from '@renderer/hooks/useChatThinking'
 import SpinnerWithDot from '@renderer/components/ui/SpinnerWithDot'
+import { useAppSettings } from '@renderer/contexts/AppSettingsContext'
 
 function prettyTopicName(topic?: string): string {
   if (!topic) return 'Topic'
@@ -165,6 +165,7 @@ const ChatButton = memo(function ChatButton({
   unreadCount,
   isThinking,
   updatedAt,
+  chatBadgeColor,
 }: {
   ctx: ChatContext
   label: string
@@ -173,6 +174,7 @@ const ChatButton = memo(function ChatButton({
   unreadCount: number
   isThinking: boolean
   updatedAt?: string
+  chatBadgeColor?: 'red' | 'blue' | 'green' | 'orange'
 }) {
   const cap99 = (n: number) => (n > 99 ? '99+' : `${n}`)
   const hasUnread = unreadCount > 0
@@ -201,6 +203,7 @@ const ChatButton = memo(function ChatButton({
             className={'h-[16px] min-w-[16px] px-1 text-[10px]'}
             text={cap99(unreadCount)}
             tooltipLabel={`${unreadCount} unread messages`}
+            color={chatBadgeColor}
           />
         ) : null}
       </div>
@@ -218,12 +221,14 @@ const ConnectedChatButton = memo(function ConnectedChatButton({
   isActive,
   onClick,
   updatedAt,
+  chatBadgeColor,
 }: {
   ctx: ChatContext
   label: string
   isActive: boolean
   onClick: (ctx: ChatContext) => void
   updatedAt?: string
+  chatBadgeColor?: 'red' | 'blue' | 'green' | 'orange'
 }) {
   const { unreadKeys, getUnreadCountForKey } = useChatUnread()
   const { isThinkingKey } = useChatThinking(500)
@@ -242,6 +247,7 @@ const ConnectedChatButton = memo(function ConnectedChatButton({
       unreadCount={unreadCount}
       isThinking={isThinking}
       updatedAt={updatedAt}
+      chatBadgeColor={chatBadgeColor}
     />
   )
 })
@@ -296,6 +302,9 @@ export default function ChatsNavigationSidebar({
   const { projects, getStoryDisplayIndex } = useProjectContext()
   const { storiesById, featuresById } = useStories()
   const { chatsByProjectId } = useChats()
+  const { appSettings } = useAppSettings()
+
+  const chatBadgeColor = appSettings?.notificationSystemSettings?.badgeColors?.chat_messages
 
   const getProjectTitle = useCallback(
     (id?: string) => {
@@ -565,6 +574,7 @@ export default function ChatsNavigationSidebar({
                 })}
                 isActive={isActive(generalContext)}
                 onClick={ensureOpen}
+                chatBadgeColor={chatBadgeColor}
               />
             </div>
           </div>
@@ -610,6 +620,7 @@ export default function ChatsNavigationSidebar({
                                     label={g.storyChat.label}
                                     isActive={isActive(g.storyChat.ctx)}
                                     onClick={ensureOpen}
+                                    chatBadgeColor={chatBadgeColor}
                                   />
                                 </div>
                               </div>
@@ -636,6 +647,7 @@ export default function ChatsNavigationSidebar({
                                             label={it.label}
                                             isActive={isActive(it.ctx)}
                                             onClick={ensureOpen}
+                                            chatBadgeColor={chatBadgeColor}
                                           />
                                         </div>
                                       ))}
@@ -666,6 +678,7 @@ export default function ChatsNavigationSidebar({
                                             label={it.label}
                                             isActive={isActive(it.ctx)}
                                             onClick={ensureOpen}
+                                            chatBadgeColor={chatBadgeColor}
                                           />
                                         </div>
                                       ))}
@@ -722,6 +735,7 @@ export default function ChatsNavigationSidebar({
                                                       label={f.featureChat.label}
                                                       isActive={isActive(f.featureChat.ctx)}
                                                       onClick={ensureOpen}
+                                                      chatBadgeColor={chatBadgeColor}
                                                     />
                                                   </div>
                                                 </div>
@@ -747,6 +761,7 @@ export default function ChatsNavigationSidebar({
                                                               label={it.label}
                                                               isActive={isActive(it.ctx)}
                                                               onClick={ensureOpen}
+                                                              chatBadgeColor={chatBadgeColor}
                                                             />
                                                           </div>
                                                         ))}
@@ -798,6 +813,7 @@ export default function ChatsNavigationSidebar({
                           label={t.label}
                           isActive={isActive(t.ctx)}
                           onClick={ensureOpen}
+                          chatBadgeColor={chatBadgeColor}
                         />
                       </div>
                     ))}
@@ -833,6 +849,7 @@ export default function ChatsNavigationSidebar({
                     isActive={isActive(ctx)}
                     onClick={onSelectContext}
                     updatedAt={c.chat.updatedAt || c.chat.createdAt || ''}
+                    chatBadgeColor={chatBadgeColor}
                   />
                 )
               })}

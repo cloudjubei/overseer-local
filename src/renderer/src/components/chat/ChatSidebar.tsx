@@ -18,7 +18,6 @@ import { IconSettings, IconChevron, IconScroll, IconRefreshChat, IconCode } from
 import { IconCalculator } from '../ui/icons/IconCalculator'
 import { useProjectContext } from '../../contexts/ProjectContext'
 import { useStories } from '../../contexts/StoriesContext'
-// import { useAgents } from '../../contexts/AgentsContext'
 import { ToolSchemas, ALL_CHAT_AGENT_TOOLS } from 'thefactory-tools/constants'
 import { Button } from '@renderer/components/ui/Button'
 import { Modal } from '@renderer/components/ui/Modal'
