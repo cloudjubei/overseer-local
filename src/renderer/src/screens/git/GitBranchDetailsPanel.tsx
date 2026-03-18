@@ -3,7 +3,7 @@ import Spinner from '../../components/ui/Spinner'
 import { GitUnifiedBranch } from 'thefactory-tools'
 import { GitLocalChanges } from './GitLocalChanges'
 import { ResizeHandle } from '../../components/ui/ResizeHandle'
-import { GitCommitGraph } from './GitCommitGraph'
+import { GitCommitGraph } from './commitGraph/GitCommitGraph'
 import { GitCommitChanges } from './GitCommitChanges'
 import { useLocalStorage } from '../../hooks/useLocalStorage'
 
@@ -13,13 +13,7 @@ export function GitBranchDetailsPanel({
   error,
   selectedBranch,
   selectedStashRef,
-  currentBranch,
-  checkingClean,
-  isClean,
   changedCount,
-  onRefresh,
-  onGoProject,
-  onOpenMerge,
   onSelectBranchBySha,
 }: {
   projectId?: string
@@ -32,7 +26,6 @@ export function GitBranchDetailsPanel({
   isClean?: boolean
   changedCount: number
   onRefresh: () => void
-  onGoProject: () => void
   onOpenMerge: (baseRef: string, headRef: string) => void
   onSelectBranchBySha?: (sha: string) => void
 }) {
@@ -59,8 +52,8 @@ export function GitBranchDetailsPanel({
       const tip = selectedBranch.localSha ?? selectedBranch.remoteSha
       setSelectedCommitSha(tip)
     }
-  // Re-run when the branch name changes OR when dirty-ness flips for the current branch
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Re-run when the branch name changes OR when dirty-ness flips for the current branch
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedBranch?.name, isDirty])
 
   // The SHA to scroll the graph to. For UNCOMMITTED there's no row to scroll to.
@@ -68,7 +61,10 @@ export function GitBranchDetailsPanel({
 
   // ─── Vertical resizer ──────────────────────────────────────────────────────
   const rootRef = useRef<HTMLDivElement | null>(null)
-  const [topHeightPx, setTopHeightPx] = useLocalStorage<number>('GitBranchDetailsPanel_topHeightPx', 250)
+  const [topHeightPx, setTopHeightPx] = useLocalStorage<number>(
+    'GitBranchDetailsPanel_topHeightPx',
+    250,
+  )
   const resizeRef = useRef<{ startY: number; startH: number; containerH: number } | null>(null)
 
   const onTopResizeStart = (e: React.PointerEvent) => {
@@ -109,13 +105,17 @@ export function GitBranchDetailsPanel({
     <div className="flex-1 min-w-0 flex flex-col min-h-0" ref={rootRef}>
       <div className="flex-1 min-h-0 overflow-auto flex flex-col">
         {!projectId ? (
-          <div className="p-4 text-sm text-neutral-600 dark:text-neutral-300">No active project.</div>
+          <div className="p-4 text-sm text-neutral-600 dark:text-neutral-300">
+            No active project.
+          </div>
         ) : loading ? (
           <div className="p-4 flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-300">
             <Spinner /> Loading branches…
           </div>
         ) : error ? (
-          <div className="p-4 text-sm text-red-700 dark:text-red-200">Failed to load branches: {error}</div>
+          <div className="p-4 text-sm text-red-700 dark:text-red-200">
+            Failed to load branches: {error}
+          </div>
         ) : selectedBranch ? (
           <div className="flex flex-col min-h-0 h-full w-full">
             {/* Top: commit graph */}
@@ -150,13 +150,21 @@ export function GitBranchDetailsPanel({
               {!selectedCommitSha || selectedCommitSha === 'UNCOMMITTED' ? (
                 <GitLocalChanges projectId={projectId} className="flex-1 min-h-0" />
               ) : (
-                <GitCommitChanges projectId={projectId} commitSha={selectedCommitSha} className="flex-1 min-h-0" />
+                <GitCommitChanges
+                  projectId={projectId}
+                  commitSha={selectedCommitSha}
+                  className="flex-1 min-h-0"
+                />
               )}
             </div>
           </div>
         ) : selectedStashRef ? (
           <div className="flex flex-col h-full min-h-0">
-            <GitCommitChanges projectId={projectId} commitSha={selectedStashRef} className="flex-1 min-h-0" />
+            <GitCommitChanges
+              projectId={projectId}
+              commitSha={selectedStashRef}
+              className="flex-1 min-h-0"
+            />
           </div>
         ) : (
           <div className="p-4 text-sm text-neutral-600 dark:text-neutral-300">

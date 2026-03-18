@@ -8,8 +8,8 @@ import FeatureEditView from '../screens/stories/FeatureEditView'
 import SettingsLLMConfigModal from '@renderer/screens/settings/llms/SettingsLLMConfigModal'
 import SettingsGitHubCredentialsModal from '@renderer/screens/settings/github/SettingsGitHubCredentialsModal'
 import ProjectManagerModal from '@renderer/screens/projects/ProjectManagerModal'
-import GitMergeModal from '@renderer/screens/git/GitMergeModal'
-import GitCommitModal from '@renderer/screens/git/GitCommitModal'
+import GitMergeModal from '@renderer/screens/git/modals/merge/GitMergeModal'
+import GitCommitModal from '@renderer/screens/git/modals/GitCommitModal'
 
 export default function ModalHost() {
   const { modal, closeModal } = useNavigator()

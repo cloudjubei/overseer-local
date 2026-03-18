@@ -3,18 +3,12 @@ import Spinner from '../../components/ui/Spinner'
 import { gitService } from '@renderer/services/gitService'
 import { GitDiffSummary } from 'thefactory-tools'
 import { ResizeHandle } from '../../components/ui/ResizeHandle'
-import { IconFileAdded, IconFileDeleted, IconFileModified } from '../../components/ui/icons/Icons'
 import { PathDisplay } from '../../components/ui/PathDisplay'
 import { DiffViewer } from '../../components/ui/DiffViewer'
 import { useLocalStorage } from '../../hooks/useLocalStorage'
+import GitFileStatusIcon from './common/GitFileStatusIcon'
 
-function StatusIcon({ status, className = 'w-4 h-4 flex-none' }: { status?: string; className?: string }) {
-  if (status === 'A') return <IconFileAdded className={className} />
-  if (status === 'D') return <IconFileDeleted className={className} />
-  return <IconFileModified className={className} />
-}
-
-export function getFilePatch(diffPatch: string | undefined, path: string): string | undefined {
+function getFilePatch(diffPatch: string | undefined, path: string): string | undefined {
   if (!diffPatch) return undefined
   const blocks = diffPatch.split('\ndiff --git ')
   for (let i = 0; i < blocks.length; i++) {
@@ -117,13 +111,18 @@ export function GitCommitChanges({
   const filePatch = activeFile?.patch || getFilePatch(diff?.patch, activeFile?.path || '')
 
   return (
-    <div className={`flex-1 min-h-0 flex flex-col bg-white dark:bg-neutral-900 ${className}`} ref={containerRef}>
+    <div
+      className={`flex-1 min-h-0 flex flex-col bg-white dark:bg-neutral-900 ${className}`}
+      ref={containerRef}
+    >
       {loading ? (
         <div className="p-4 flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-300">
           <Spinner /> Loading commit changes…
         </div>
       ) : error ? (
-        <div className="p-4 text-sm text-red-700 dark:text-red-200">Failed to load diff: {error}</div>
+        <div className="p-4 text-sm text-red-700 dark:text-red-200">
+          Failed to load diff: {error}
+        </div>
       ) : diff ? (
         <div className="flex min-h-0 h-full relative">
           <div
@@ -147,7 +146,7 @@ export function GitCommitChanges({
                     onClick={() => setSelectedFile(f.path)}
                   >
                     <div className="flex items-center gap-2 min-w-0 flex-1">
-                      <StatusIcon status={f.status} />
+                      <GitFileStatusIcon status={f.status} />
                       <PathDisplay path={f.path} />
                     </div>
                   </div>
@@ -156,7 +155,6 @@ export function GitCommitChanges({
             </div>
           </div>
 
-          {/* Vertical Divider with handle under cursor */}
           <ResizeHandle
             orientation="vertical"
             className="absolute top-0 bottom-0 z-10"
@@ -170,7 +168,10 @@ export function GitCommitChanges({
             }}
           />
 
-          <div className="flex-1 min-w-0 flex flex-col min-h-0 bg-white dark:bg-neutral-900" style={{ width: `calc(100% - ${leftWidth}px)` }}>
+          <div
+            className="flex-1 min-w-0 flex flex-col min-h-0 bg-white dark:bg-neutral-900"
+            style={{ width: `calc(100% - ${leftWidth}px)` }}
+          >
             <DiffViewer
               path={activeFile?.path}
               patch={filePatch}

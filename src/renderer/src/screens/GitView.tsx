@@ -1,19 +1,16 @@
 import React from 'react'
 import { gitService } from '@renderer/services/gitService'
 import { GitUnifiedBranch } from 'thefactory-tools'
-
 import { useProjectContext } from '../contexts/ProjectContext'
 import { useGit } from '../contexts/GitContext'
 import { useNavigator } from '../navigation/Navigator'
-
-import GitCommitModal from './git/GitCommitModal'
-import GitMergeModal from './git/GitMergeModal'
-import MergeConflictResolver from './git/MergeConflictResolver'
-
-import { GitSidebarBranches } from './git/GitSidebarBranches'
+import GitCommitModal from './git/modals/GitCommitModal'
+import GitMergeModal from './git/modals/merge/GitMergeModal'
+import MergeConflictResolver from './git/mergeConflict/MergeConflictResolver'
+import { GitSidebar } from './git/sidebar/GitSidebar'
 import { GitBranchDetailsPanel } from './git/GitBranchDetailsPanel'
-import { GitRightActionsPanel } from './git/GitRightActionsPanel'
-import { GitCheckoutRemoteModal } from './git/GitCheckoutRemoteModal'
+import { GitActionsPanel } from './git/actions/GitActionsPanel'
+import { GitCheckoutRemoteModal } from './git/modals/GitCheckoutRemoteModal'
 
 function dedupeByName(list: GitUnifiedBranch[]): GitUnifiedBranch[] {
   const m = new Map<string, GitUnifiedBranch>()
@@ -68,8 +65,7 @@ export default function GitView() {
         if (typeof v === 'number') return v > 0
         return !!v
       }
-      const num = (v: any): number =>
-        Array.isArray(v) ? v.length : typeof v === 'number' ? v : 0
+      const num = (v: any): number => (Array.isArray(v) ? v.length : typeof v === 'number' ? v : 0)
       const dirty = [
         (s as any).isClean === false,
         any((s as any).unstaged),
@@ -94,7 +90,9 @@ export default function GitView() {
     }
   }, [projectId])
 
-  React.useEffect(() => { void loadCleanStatus() }, [projectId, loadCleanStatus])
+  React.useEffect(() => {
+    void loadCleanStatus()
+  }, [projectId, loadCleanStatus])
 
   React.useEffect(() => {
     const handler = (ev: any) => {
@@ -166,7 +164,10 @@ export default function GitView() {
   const onSelectBranchBySha = React.useCallback(
     (sha: string) => {
       const local = localBranches.find((b) => b.localSha === sha)
-      if (local) { selection.selectBranch(projectId, local.name); return }
+      if (local) {
+        selection.selectBranch(projectId, local.name)
+        return
+      }
       const remote = remoteBranches.find((b) => b.remoteSha === sha)
       if (remote) selection.selectBranch(projectId, remote.name)
     },
@@ -178,14 +179,18 @@ export default function GitView() {
   }, [projectId, current?.name, selection])
 
   // ─── Switch / checkout ─────────────────────────────────────────────────────
-  const [checkoutRemoteBranch, setCheckoutRemoteBranch] = React.useState<GitUnifiedBranch | undefined>()
+  const [checkoutRemoteBranch, setCheckoutRemoteBranch] = React.useState<
+    GitUnifiedBranch | undefined
+  >()
 
   const switchToBranch = React.useCallback(
     async (b: GitUnifiedBranch) => {
       if (!projectId) return
       await loadCleanStatus()
       if (isClean === false) {
-        alert('Working tree is not clean. Please commit or stash your changes before switching branches.')
+        alert(
+          'Working tree is not clean. Please commit or stash your changes before switching branches.',
+        )
         return
       }
       if (b.isLocal) {
@@ -213,8 +218,7 @@ export default function GitView() {
   const [mergeHead, setMergeHead] = React.useState<string | undefined>(undefined)
 
   const [conflict, setConflict] = React.useState<
-    | undefined
-    | { projectId: string; baseRef: string; headRef: string; mergeMessage?: string }
+    undefined | { projectId: string; baseRef: string; headRef: string; mergeMessage?: string }
   >(undefined)
 
   const openMerge = (baseRef: string, headRef: string) => {
@@ -225,7 +229,7 @@ export default function GitView() {
 
   return (
     <div className="flex h-full min-h-0">
-      <GitSidebarBranches
+      <GitSidebar
         title={title}
         projectId={projectId}
         loading={loading}
@@ -253,18 +257,20 @@ export default function GitView() {
         isClean={isClean}
         changedCount={changedCount}
         onRefresh={reload}
-        onGoProject={() => nav.navigate('Projects')}
         onOpenMerge={openMerge}
         onSelectBranchBySha={onSelectBranchBySha}
       />
 
-      <GitRightActionsPanel
+      <GitActionsPanel
         selectedBranch={selectedBranch}
         selectedStashRef={selectedStashRef}
         checkingClean={checkingClean}
         isClean={isClean}
         changedCount={changedCount}
-        onRefresh={() => { void loadCleanStatus(); reload() }}
+        onRefresh={() => {
+          void loadCleanStatus()
+          reload()
+        }}
         onSwitchToBranch={switchToBranch}
         onOpenMerge={openMerge}
         currentBranchName={current?.name}
@@ -274,8 +280,8 @@ export default function GitView() {
       {showCommit && projectId && commitBranch ? (
         <GitCommitModal
           projectId={projectId}
-          branch={commitBranch}
-          onClose={() => setShowCommit(false)}
+          currentBranch={commitBranch}
+          onRequestClose={() => setShowCommit(false)}
           onAfterCommit={() => {
             setShowCommit(false)
             window.dispatchEvent(new CustomEvent('git:refresh-now', { detail: { projectId } }))
@@ -288,10 +294,15 @@ export default function GitView() {
           projectId={projectId}
           baseRef={mergeBase}
           headRef={mergeHead}
-          onClose={() => setShowMerge(false)}
+          onRequestClose={() => setShowMerge(false)}
           onConflict={(payload) => {
             setShowMerge(false)
-            setConflict({ projectId, baseRef: mergeBase, headRef: mergeHead, mergeMessage: payload?.message })
+            setConflict({
+              projectId,
+              baseRef: mergeBase,
+              headRef: mergeHead,
+              mergeMessage: payload?.message,
+            })
           }}
           onAfterMerge={() => {
             setShowMerge(false)

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Modal } from '@renderer/components/ui/Modal'
 import { Button } from '@renderer/components/ui/Button'
 import { gitService } from '@renderer/services/gitService'
@@ -10,7 +10,11 @@ export type GitCommitModalProps = {
   onRequestClose: () => void
 }
 
-export default function GitCommitModal({ projectId, currentBranch, onRequestClose }: GitCommitModalProps) {
+export default function GitCommitModal({
+  projectId,
+  currentBranch,
+  onRequestClose,
+}: GitCommitModalProps) {
   const { unified } = useGit()
 
   const [busy, setBusy] = useState(false)
@@ -21,11 +25,14 @@ export default function GitCommitModal({ projectId, currentBranch, onRequestClos
   const [amend, setAmend] = useState(false)
 
   const [stagedCount, setStagedCount] = useState<number>(0)
-  
+
   useEffect(() => {
-    gitService.getLocalStatus(projectId).then(status => {
-      setStagedCount(status?.staged?.length || 0)
-    }).catch(console.error)
+    gitService
+      .getLocalStatus(projectId)
+      .then((status) => {
+        setStagedCount(status?.staged?.length || 0)
+      })
+      .catch(console.error)
   }, [projectId])
 
   const doCommit = async () => {
@@ -41,9 +48,9 @@ export default function GitCommitModal({ projectId, currentBranch, onRequestClos
     setBusy(true)
     setOpError(undefined)
     try {
-      const res = await gitService.commit(projectId, { 
-        message: commitMsg.trim() || undefined, 
-        amend 
+      const res = await gitService.commit(projectId, {
+        message: commitMsg.trim() || undefined,
+        amend,
       })
       if (!res?.ok) {
         setOpError(res?.error || 'Commit failed')
@@ -67,32 +74,29 @@ export default function GitCommitModal({ projectId, currentBranch, onRequestClos
   }
 
   const header = (
-    <div className='flex flex-col gap-1.5'>
-      <div className='text-base font-semibold'>Prepare commit</div>
-      <div className='text-xs text-neutral-600 dark:text-neutral-400'>Working tree · branch {currentBranch}</div>
+    <div className="flex flex-col gap-1.5">
+      <div className="text-base font-semibold">Prepare commit</div>
+      <div className="text-xs text-neutral-600 dark:text-neutral-400">
+        Working tree · branch {currentBranch}
+      </div>
     </div>
   )
 
   return (
-    <Modal
-      isOpen={true}
-      onClose={onRequestClose}
-      title={header}
-      panelClassName='w-[500px]'
-    >
-      <div className='p-4 flex flex-col gap-4'>
+    <Modal isOpen={true} onClose={onRequestClose} title={header} panelClassName="w-[500px]">
+      <div className="p-4 flex flex-col gap-4">
         {opError && (
-          <div className='text-sm text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-900/20 p-2 rounded'>
+          <div className="text-sm text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-900/20 p-2 rounded">
             {opError}
           </div>
         )}
-        
-        <div className='text-sm text-neutral-600 dark:text-neutral-400'>
+
+        <div className="text-sm text-neutral-600 dark:text-neutral-400">
           {stagedCount} staged file{stagedCount === 1 ? '' : 's'}
         </div>
 
         <textarea
-          className='w-full min-h-[120px] text-sm resize-none border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 rounded-md p-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500'
+          className="w-full min-h-[120px] text-sm resize-none border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 rounded-md p-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500"
           placeholder={amend ? 'Leave blank to keep existing commit message' : 'Commit message...'}
           value={commitMsg}
           onChange={(e) => setCommitMsg(e.target.value)}
@@ -102,33 +106,33 @@ export default function GitCommitModal({ projectId, currentBranch, onRequestClos
           autoFocus
         />
 
-        <div className='flex flex-col gap-2 mt-2'>
-          <label className='text-sm text-neutral-700 dark:text-neutral-300 inline-flex items-center gap-2 cursor-pointer'>
-            <input 
-              type='checkbox' 
-              checked={amend} 
-              onChange={(e) => setAmend(e.target.checked)} 
-              className='checkbox checkbox-sm rounded'
+        <div className="flex flex-col gap-2 mt-2">
+          <label className="text-sm text-neutral-700 dark:text-neutral-300 inline-flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={amend}
+              onChange={(e) => setAmend(e.target.checked)}
+              className="checkbox checkbox-sm rounded"
             />
             Amend last commit
           </label>
-          <label className='text-sm text-neutral-700 dark:text-neutral-300 inline-flex items-center gap-2 cursor-pointer'>
-            <input 
-              type='checkbox' 
-              checked={pushNow} 
-              onChange={(e) => setPushNow(e.target.checked)} 
-              className='checkbox checkbox-sm rounded'
+          <label className="text-sm text-neutral-700 dark:text-neutral-300 inline-flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={pushNow}
+              onChange={(e) => setPushNow(e.target.checked)}
+              className="checkbox checkbox-sm rounded"
             />
             Push changes immediately to remote (origin)
           </label>
         </div>
 
-        <div className='flex justify-end gap-2 mt-4'>
-          <Button variant='secondary' onClick={onRequestClose} disabled={busy}>
+        <div className="flex justify-end gap-2 mt-4">
+          <Button variant="secondary" onClick={onRequestClose} disabled={busy}>
             Cancel
           </Button>
           <Button
-            variant='primary'
+            variant="primary"
             disabled={busy || (!amend && stagedCount === 0) || (!amend && !commitMsg.trim())}
             onClick={doCommit}
           >

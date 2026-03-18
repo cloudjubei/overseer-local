@@ -1,76 +1,26 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { GitUnifiedBranch } from 'thefactory-tools'
-
-import Tooltip from '../../components/ui/Tooltip'
-import { IconRefresh } from '../../components/ui/icons/IconRefresh'
-import { IconBranch } from '../../components/ui/icons/IconBranch'
-import { IconFastMerge } from '../../components/ui/icons/IconFastMerge'
-import { IconCommit } from '../../components/ui/icons/IconCommit'
-import { IconPullRequest } from '../../components/ui/icons/IconPullRequest'
-import { IconDoubleUp } from '../../components/ui/icons/IconDoubleUp'
-import { IconArchive } from '../../components/ui/icons/IconArchive'
-import { IconDelete, IconArrowDown } from '../../components/ui/icons/Icons'
-import { IconChevronDown } from '../../components/ui/icons/IconChevronDown'
-
-import { useProjectContext } from '../../contexts/ProjectContext'
-import { useGit } from '../../contexts/GitContext'
-import { gitService } from '../../services/gitService'
-import { getPRUrl } from '../../utils/gitPRUrl'
-
-import GitCommitModal from './GitCommitModal'
-import { GitCreateBranchModal } from './GitCreateBranchModal'
-import { GitStashModal } from './GitStashModal'
+import { IconRefresh } from '../../../components/ui/icons/IconRefresh'
+import { IconBranch } from '../../../components/ui/icons/IconBranch'
+import { IconFastMerge } from '../../../components/ui/icons/IconFastMerge'
+import { IconCommit } from '../../../components/ui/icons/IconCommit'
+import { IconPullRequest } from '../../../components/ui/icons/IconPullRequest'
+import { IconDoubleUp } from '../../../components/ui/icons/IconDoubleUp'
+import { IconArchive } from '../../../components/ui/icons/IconArchive'
+import { IconDelete, IconArrowDown } from '../../../components/ui/icons/Icons'
+import { IconChevronDown } from '../../../components/ui/icons/IconChevronDown'
+import { useProjectContext } from '../../../contexts/ProjectContext'
+import { useGit } from '../../../contexts/GitContext'
+import { gitService } from '../../../services/gitService'
+import { getPRUrl } from '../../../utils/gitPRUrl'
+import GitCommitModal from '../modals/GitCommitModal'
+import { GitCreateBranchModal } from '../modals/GitCreateBranchModal'
+import { GitStashModal } from '../modals/GitStashModal'
+import GitActionButton from './GitActionButton'
 
 export const ACTIONS_RAIL_WIDTH = 60
 
-function GitActionButton({
-  icon,
-  label,
-  onClick,
-  disabled,
-  tooltip,
-  badge,
-}: {
-  icon: React.ReactNode
-  label: string
-  onClick: () => void
-  disabled?: boolean
-  tooltip?: string
-  badge?: number
-}) {
-  const btn = (
-    <button
-      className={
-        'w-[52px] h-[52px] shrink-0 rounded-xl border border-neutral-200 dark:border-neutral-800 ' +
-        'bg-white dark:bg-neutral-950/30 ' +
-        'hover:bg-neutral-50 dark:hover:bg-neutral-900/40 ' +
-        'active:scale-[0.98] transition ' +
-        'flex flex-col items-center justify-center gap-1 relative ' +
-        (disabled
-          ? 'opacity-50 cursor-not-allowed hover:bg-white dark:hover:bg-neutral-950/30'
-          : '')
-      }
-      onClick={onClick}
-      disabled={disabled}
-      type="button"
-    >
-      <div className="w-5 h-5 text-neutral-700 dark:text-neutral-200 flex items-center justify-center">
-        {icon}
-      </div>
-      <div className="text-[10px] leading-3 text-neutral-700 dark:text-neutral-300 text-center px-1">
-        {label}
-      </div>
-      {badge !== undefined && badge > 0 && (
-        <div className="absolute top-1 right-1 bg-blue-500 text-white text-[9px] font-bold px-1 py-0.5 rounded-md leading-none shadow-sm min-w-[16px] text-center">
-          {badge}
-        </div>
-      )}
-    </button>
-  )
-  return tooltip ? <Tooltip content={tooltip}>{btn}</Tooltip> : btn
-}
-
-export function GitRightActionsPanel({
+export function GitActionsPanel({
   selectedBranch,
   selectedStashRef,
   checkingClean,
@@ -109,7 +59,8 @@ export function GitRightActionsPanel({
   // "Branch" (create) is only meaningful when a local branch is active/selected
   const canCreateBranch = !!selectedBranch?.isLocal && !busy
 
-  const canCreatePR = selectedBranch && selectedBranch.name !== 'main' && !!activeProject?.repo_url && !busy
+  const canCreatePR =
+    selectedBranch && selectedBranch.name !== 'main' && !!activeProject?.repo_url && !busy
 
   const handlePull = async () => {
     if (!activeProjectId || !selectedBranch || busy) return

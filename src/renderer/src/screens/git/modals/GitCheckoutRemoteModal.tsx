@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Modal } from '@renderer/components/ui/Modal'
 import { Button } from '@renderer/components/ui/Button'
 import { gitService } from '@renderer/services/gitService'
@@ -27,7 +27,9 @@ export function GitCheckoutRemoteModal({
         const res = await gitService.checkout(projectId, remoteBranchName)
         if (res?.ok === false) throw new Error(res.error)
       } else {
-        setError("Custom local names for remote branches are currently unsupported. Please use the default name.")
+        setError(
+          'Custom local names for remote branches are currently unsupported. Please use the default name.',
+        )
         setBusy(false)
         return
       }

@@ -5,147 +5,14 @@ import { gitService } from '@renderer/services/gitService'
 import { filesService } from '@renderer/services/filesService'
 import { IntraMode } from '@renderer/components/chat/tool-popups/diffUtils'
 import { ResizeHandle } from '@renderer/components/ui/ResizeHandle'
-import {
-  IconDelete,
-  IconFileAdded,
-  IconFileDeleted,
-  IconFileModified,
-} from '@renderer/components/ui/icons/Icons'
-import { IconRevert } from '@renderer/components/ui/icons/IconRevert'
-import { PathDisplay } from '@renderer/components/ui/PathDisplay'
 import { DiffViewer } from '@renderer/components/ui/DiffViewer'
-
-export type LocalFileEntry = { path: string; status?: string; patch?: string; binary?: boolean }
+import GitFileRow, { LocalFileEntry } from './common/GitFileRow'
 
 export type LocalStatus = {
   staged: LocalFileEntry[]
   unstaged: LocalFileEntry[]
   untracked: LocalFileEntry[]
   conflicts?: any[]
-}
-
-function StatusIcon({
-  status,
-  className = 'w-5 h-5 flex-none',
-}: {
-  status?: string
-  className?: string
-}) {
-  if (status === 'A') return <IconFileAdded className={className} />
-  if (status === 'D') return <IconFileDeleted className={className} />
-  return <IconFileModified className={className} />
-}
-
-function parseAddDel(patch?: string): { add: number; del: number } {
-  if (!patch) return { add: 0, del: 0 }
-  let add = 0,
-    del = 0
-  const lines = patch.replace(/\r\n/g, '\n').split('\n')
-  for (const ln of lines) {
-    if (ln.startsWith('+++ ') || ln.startsWith('--- ') || ln.startsWith('@@')) continue
-    if (ln.startsWith('+')) add += 1
-    else if (ln.startsWith('-')) del += 1
-  }
-  return { add, del }
-}
-
-export function FileChangesPills({ patch }: { patch?: string }) {
-  if (!patch) return null
-  const { add, del } = parseAddDel(patch)
-  if (add === 0 && del === 0) return null
-
-  return (
-    <div className="flex items-center gap-1 shrink-0 text-[10px] font-mono leading-none">
-      {add > 0 ? (
-        <span className="inline-flex items-center justify-center px-1.5 py-0.5 rounded-full bg-green-500/10 text-green-700 dark:text-green-400 border border-green-500/20">
-          +{add}
-        </span>
-      ) : null}
-      {del > 0 ? (
-        <span className="inline-flex items-center justify-center px-1.5 py-0.5 rounded-full bg-red-500/10 text-red-700 dark:text-red-400 border border-red-500/20">
-          -{del}
-        </span>
-      ) : null}
-    </div>
-  )
-}
-
-function FileRow({
-  file,
-  checked,
-  selected,
-  onToggle,
-  onReset,
-  onRemove,
-  draggable,
-  onDragStart,
-  onClick,
-}: {
-  file: LocalFileEntry
-  checked: boolean
-  selected?: boolean
-  onToggle: (file: LocalFileEntry) => void
-  onReset: (file: LocalFileEntry) => void
-  onRemove: (file: LocalFileEntry) => void
-  draggable?: boolean
-  onDragStart?: (e: React.DragEvent) => void
-  onClick?: (e: React.MouseEvent) => void
-}) {
-  return (
-    <div
-      className={`group flex items-center justify-between gap-2 px-2 py-1 text-xs border-b border-neutral-200 dark:border-neutral-800 ${selected ? 'bg-sky-50 dark:bg-sky-900/25' : ''}`}
-      draggable={draggable}
-      onDragStart={onDragStart}
-      onClick={onClick}
-      role="row"
-    >
-      <div className="flex items-center gap-2 min-w-0 flex-1">
-        <input
-          type="checkbox"
-          checked={checked}
-          onChange={() => onToggle(file)}
-          onClick={(e) => e.stopPropagation()}
-          aria-label={checked ? 'Unstage file' : 'Stage file'}
-        />
-        <StatusIcon status={file.status} />
-        <PathDisplay path={file.path} />
-      </div>
-
-      <div className="grid items-center shrink-0 min-h-[20px] justify-items-end pl-2">
-        {/* The Pills fade out on row hover to make space for actions */}
-        <div className="col-start-1 row-start-1 flex items-center justify-end opacity-100 group-hover:opacity-0 transition-opacity">
-          <FileChangesPills patch={file.patch} />
-        </div>
-        {/* Actions fade in on row hover */}
-        <div className="col-start-1 row-start-1 flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <Tooltip content={'Reset (discard local changes)'} placement="bottom">
-            <button
-              className="btn-secondary btn-icon text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
-              aria-label="Reset file changes"
-              onClick={(e) => {
-                e.stopPropagation()
-                onReset(file)
-              }}
-            >
-              <IconRevert className="w-4 h-4" />
-            </button>
-          </Tooltip>
-          <Tooltip content={'Remove (delete file)'} placement="bottom">
-            <button
-              className="btn-secondary btn-icon"
-              aria-label="Remove file"
-              onClick={(e) => {
-                e.stopPropagation()
-                onRemove(file)
-              }}
-            >
-              <IconDelete className="w-4 h-4" />
-            </button>
-          </Tooltip>
-        </div>
-      </div>
-    </div>
-  )
 }
 
 export type GitLocalChangesProps = {
@@ -171,7 +38,9 @@ export const GitLocalChanges = forwardRef<GitLocalChangesRef, GitLocalChangesPro
     })
 
     const [selectedPath, setSelectedPath] = React.useState<string | undefined>(undefined)
-    const [selectedArea, setSelectedArea] = React.useState<'staged' | 'unstaged' | undefined>(undefined)
+    const [selectedArea, setSelectedArea] = React.useState<'staged' | 'unstaged' | undefined>(
+      undefined,
+    )
 
     // Vertical divider (left/right)
     const rootRef = React.useRef<HTMLDivElement | null>(null)
@@ -589,7 +458,9 @@ export const GitLocalChanges = forwardRef<GitLocalChangesRef, GitLocalChangesPro
     /** Discard a partial/hunk patch from the working tree (no confirm needed for hunks). */
     const handleDiscardPatch = async (patch: string) => {
       if (!selectedPath) return
-      const ok = window.confirm('Discard these changes from the working tree? This cannot be undone.')
+      const ok = window.confirm(
+        'Discard these changes from the working tree? This cannot be undone.',
+      )
       if (!ok) return
       notifyBusy(true)
       notifyError(undefined)
@@ -658,7 +529,7 @@ export const GitLocalChanges = forwardRef<GitLocalChangesRef, GitLocalChangesPro
                 {status.staged.map((f) => {
                   const sel = isSelected('staged', f.path)
                   return (
-                    <FileRow
+                    <GitFileRow
                       key={`staged:${f.path}`}
                       file={f}
                       checked={true}
@@ -718,7 +589,6 @@ export const GitLocalChanges = forwardRef<GitLocalChangesRef, GitLocalChangesPro
               />
             </Tooltip>
           </div>
-          {/* Unstaged list */}
           <div
             className={`min-h-[120px] flex-1 overflow-auto ${dragOverArea === 'unstaged' && dragItem?.area !== 'unstaged' ? 'outline outline-1 outline-teal-500/60 bg-teal-500/5' : ''}`}
             onDragOver={(e) => {
@@ -739,7 +609,7 @@ export const GitLocalChanges = forwardRef<GitLocalChangesRef, GitLocalChangesPro
                 {[...status.unstaged, ...status.untracked].map((f) => {
                   const sel = isSelected('unstaged', f.path)
                   return (
-                    <FileRow
+                    <GitFileRow
                       key={`unstaged:${f.path}`}
                       file={f}
                       checked={false}
@@ -770,7 +640,6 @@ export const GitLocalChanges = forwardRef<GitLocalChangesRef, GitLocalChangesPro
           </div>
         </div>
 
-        {/* Vertical Divider with handle under cursor */}
         <ResizeHandle
           orientation="vertical"
           className="absolute top-0 bottom-0 z-10"
