@@ -75,6 +75,7 @@ export function ChatSidebarHeader({
           </button>
         ) : null}
         <ContextInfoButton context={context} label={chatContextTitle} />
+        
         <button
           onClick={() => setIsPromptModalOpen(true)}
           className="btn-secondary btn-icon"

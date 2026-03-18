@@ -26,12 +26,13 @@
     },
     {
       "id": "0c6704d6-4ab6-4d63-ad51-227d1593009a",
-      "status": "-",
+      "status": "+",
       "title": "Redirect navigateAgentRun to ChatView",
       "description": "Update `Navigator.navigateAgentRun` to change the route to `#chats/{chatContextKey}` instead of `#agents/run/{runId}`. Since callers only have a `runId`, the function may need the full context passed, or it can look up the `runId` via `AgentsContext` or `ChatsContext`. Review `AgentsView` run history list routing to match.",
       "context": [],
       "createdAt": "2026-03-13T14:42:49.729Z",
-      "updatedAt": "2026-03-18T02:51:23.753Z"
+      "updatedAt": "2026-03-18T12:44:32.543Z",
+      "completedAt": "2026-03-18T12:44:32.543Z"
     },
     {
       "id": "da01a92e-6471-42bb-b028-1b9939218817",

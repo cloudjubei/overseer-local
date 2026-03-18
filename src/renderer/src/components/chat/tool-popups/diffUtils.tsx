@@ -223,11 +223,12 @@ function renderCell(item: { line: any; markup?: any } | undefined, side: 'left' 
   const num = side === 'left' ? line.oldLine : line.newLine
 
   return (
-    <div className={`flex w-full ${bgCls} group ${wrap ? 'min-w-0' : 'min-w-max'}`}>
-      <div className='w-[40px] flex-none px-1 py-0.5 text-right select-none text-[var(--text-tertiary)] bg-[var(--surface-base)] tabular-nums border-r border-[var(--border-subtle)] pr-1 opacity-70 text-[10px]'>
+    <div className={`flex w-full relative ${bgCls} group ${wrap ? 'min-w-0' : 'min-w-max'}`}>
+      <div className='sticky left-0 z-10 w-[40px] flex-none px-1 py-0.5 text-right select-none text-[var(--text-tertiary)] bg-inherit tabular-nums border-r border-[var(--border-subtle)] pr-1 text-[10px]'>
+        <div className='absolute inset-0 bg-[var(--surface-base)] pointer-events-none -z-10' />
         {num || ''}
       </div>
-      <div className={`px-2 py-0.5 flex-1 ${wrap ? 'whitespace-pre-wrap break-words' : 'whitespace-pre'}`}>
+      <div className={`px-2 py-0.5 flex-1 pl-2 ${wrap ? 'whitespace-pre-wrap break-words' : 'whitespace-pre'}`}>
         {markup ? (
           <>
             {markup.map((seg, si) =>
@@ -299,12 +300,12 @@ function SideBySideContent({ hunks, wrap }: { hunks: ParsedHunk[]; wrap: boolean
   return (
     <div className='grid grid-cols-2 divide-x divide-neutral-100 dark:divide-neutral-800 h-full w-full'>
       {/* Left Column */}
-      <div className='overflow-x-auto overflow-y-hidden'>
-        <div className='min-w-fit'>
+      <div className='overflow-x-auto overflow-y-hidden relative'>
+        <div className='min-w-fit relative'>
           {allRows.map((row, idx) => (
-            <div key={idx} className='border-b border-neutral-100 dark:border-neutral-800/50 last:border-b-0 h-[22px]'>
+            <div key={idx} className={`border-b border-neutral-100 dark:border-neutral-800/50 last:border-b-0 h-[22px] ${row.isHeader ? 'bg-[var(--surface-overlay)] text-[var(--text-secondary)] text-[10px] border-t first:border-t-0' : ''}`}>
               {row.isHeader ? (
-                <div className='bg-[var(--surface-overlay)] text-[var(--text-secondary)] px-2 py-0.5 text-[10px] border-b border-[var(--border-subtle)] border-t first:border-t-0 sticky top-0 z-20 whitespace-nowrap overflow-hidden text-ellipsis h-full'>
+                <div className='px-2 py-0.5 sticky left-0 z-20 whitespace-nowrap overflow-hidden text-ellipsis h-full w-full' style={{ maxWidth: 'fit-content' }}>
                   {row.headerText}
                 </div>
               ) : (
@@ -316,12 +317,12 @@ function SideBySideContent({ hunks, wrap }: { hunks: ParsedHunk[]; wrap: boolean
       </div>
 
       {/* Right Column */}
-      <div className='overflow-x-auto overflow-y-hidden'>
-        <div className='min-w-fit'>
+      <div className='overflow-x-auto overflow-y-hidden relative'>
+        <div className='min-w-fit relative'>
           {allRows.map((row, idx) => (
-            <div key={idx} className='border-b border-neutral-100 dark:border-neutral-800/50 last:border-b-0 h-[22px]'>
+            <div key={idx} className={`border-b border-neutral-100 dark:border-neutral-800/50 last:border-b-0 h-[22px] ${row.isHeader ? 'bg-[var(--surface-overlay)] text-[var(--text-secondary)] text-[10px] border-t first:border-t-0' : ''}`}>
               {row.isHeader ? (
-                <div className='bg-[var(--surface-overlay)] text-[var(--text-secondary)] px-2 py-0.5 text-[10px] border-b border-[var(--border-subtle)] border-t first:border-t-0 sticky top-0 z-20 whitespace-nowrap overflow-hidden text-ellipsis h-full'>
+                <div className='px-2 py-0.5 sticky left-0 z-20 whitespace-nowrap overflow-hidden text-ellipsis h-full w-full' style={{ maxWidth: 'fit-content' }}>
                   {row.headerText}
                 </div>
               ) : (
@@ -456,7 +457,7 @@ export function StructuredUnifiedDiff(props: StructuredUnifiedDiffProps) {
             </div>
 
             {/* Lines body — scrolls horizontally; vertical scroll is owned by parent */}
-            <div className='overflow-x-auto'>
+            <div className='overflow-x-auto relative'>
               <div className={wrap ? 'min-w-0' : 'min-w-max'}>
                 <div className='text-[10px] leading-relaxed divide-y divide-neutral-100 dark:divide-neutral-800/50'>
                   {h.lines
@@ -476,27 +477,34 @@ export function StructuredUnifiedDiff(props: StructuredUnifiedDiffProps) {
                       const isSelectableLine = ln.type === 'add' || ln.type === 'del'
 
                       return (
-                        <div key={j} className={`flex ${bgCls}`}>
-                          {selectable && (
-                            <div className='w-[24px] flex-none flex items-center justify-center border-r border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/30'>
-                              {isSelectableLine && (
-                                <input
-                                  type="checkbox"
-                                  className="cursor-pointer"
-                                  checked={selectedLines?.has(`${i}:${j}`)}
-                                  onChange={() => onToggleLineSelection?.(i, j)}
-                                />
-                              )}
+                        <div key={j} className={`flex relative ${bgCls}`}>
+                          {/* STICKY LEFT SECTION: Checkbox (if any) + Line numbers + Marker */}
+                          <div className='sticky left-0 z-10 flex flex-none bg-inherit border-r border-neutral-200 dark:border-neutral-800 shadow-[1px_0_0_0_transparent] dark:shadow-[1px_0_0_0_transparent]'>
+                            {/* Force the sticky container to match the background of the row */}
+                            <div className='absolute inset-0 bg-neutral-50/95 dark:bg-[#1a1a1a]/95 pointer-events-none -z-10' />
+                            {selectable && (
+                              <div className='w-[24px] flex-none flex items-center justify-center border-r border-neutral-200/50 dark:border-neutral-800/50'>
+                                {isSelectableLine && (
+                                  <input
+                                    type="checkbox"
+                                    className="cursor-pointer"
+                                    checked={selectedLines?.has(`${i}:${j}`)}
+                                    onChange={() => onToggleLineSelection?.(i, j)}
+                                  />
+                                )}
+                              </div>
+                            )}
+                            {/* Line numbers */}
+                            <div className='w-[60px] flex-none flex text-right select-none text-neutral-400 dark:text-neutral-600 border-r border-neutral-200/50 dark:border-neutral-800/50 text-[10px]'>
+                              <span className='w-1/2 pr-1'>{ln.oldLine !== undefined ? ln.oldLine : ''}</span>
+                              <span className='w-1/2 pr-1'>{ln.newLine !== undefined ? ln.newLine : ''}</span>
                             </div>
-                          )}
-                          {/* Line numbers */}
-                          <div className='w-[60px] flex-none flex text-right select-none text-neutral-400 dark:text-neutral-600 border-r border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/30 text-[10px]'>
-                            <span className='w-1/2 pr-1'>{ln.oldLine !== undefined ? ln.oldLine : ''}</span>
-                            <span className='w-1/2 pr-1'>{ln.newLine !== undefined ? ln.newLine : ''}</span>
-                          </div>
 
-                          <div className='w-4 flex-none text-center select-none opacity-50 text-[10px]'>{marker}</div>
-                          <div className={`flex-1 min-w-0 py-0.5 pr-2 ${wrap ? 'whitespace-pre-wrap break-words' : 'whitespace-pre'}`}>
+                            <div className='w-4 flex-none text-center select-none opacity-50 text-[10px]'>{marker}</div>
+                          </div>
+                          
+                          {/* Line content */}
+                          <div className={`flex-1 min-w-0 py-0.5 pr-2 pl-2 ${wrap ? 'whitespace-pre-wrap break-words' : 'whitespace-pre'}`}>
                             {ln._markup ? (
                               <>
                                 {ln._markup.map((seg, si) =>

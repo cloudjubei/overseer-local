@@ -1,6 +1,6 @@
 {
   "id": "b866471a-f5d7-4f1a-9686-eaa274b2e50a",
-  "status": "-",
+  "status": "+",
   "title": "Refactor Notifications to Derived State & Enhance Badges",
   "description": "Transition the badge and notification system from disjointed, standalone entities to a pure derived-state model. Badges will strictly reflect the real-time state of Chats, Agent Runs, and Git. Introduce robust user preferences for badge behaviors and custom colors.",
   "features": [
@@ -46,14 +46,16 @@
     },
     {
       "id": "3c3e5a88-9198-445d-ba28-9e03d464c5eb",
-      "status": "-",
+      "status": "+",
       "title": "Final Feature: Git Unread State Consolidation & Clearance",
       "description": "Resolve the stuck Git badge issue where `getProjectUpdatedBranchesCount` in `GitContext` returns a positive unread count that cannot be cleared because `GitView` provides no mechanism to mark branches as 'seen'.\n\n**Root Cause:**\nThe Git badge is purely derived from `GitContext.unified.relToCurrent` (branches ahead of current). Unlike Chats (which have explicit read/unread tracking), Git has no 'last-seen SHA' concept in the renderer — so any branch that is ahead stays counted forever until it is merged or deleted.\n\n**Work Items:**\n\n1. **Audit `GitContext` unread model** — Confirm exactly which field drives `getProjectUpdatedBranchesCount`. Determine if there is already a `lastSeenSha` / `seenBranches` concept or if it needs to be introduced.\n\n2. **Introduce a 'seen branches' store** — Add a lightweight per-project map `{ [branchName]: string /* headSha */ }` persisted via `appSettings` or a dedicated preferences key. When a user opens `GitView` for a project, mark all currently-listed branches as seen (store their current head SHA). A branch is only 'unread' if its head SHA has changed since it was last seen.\n\n3. **Wire clearance on `GitView` mount/focus** — In `src/renderer/src/screens/GitView.tsx`, on mount and whenever the active project changes, call a new `markBranchesSeen(projectId)` action from `GitContext`. This action should update the seen-SHA store and trigger a recomputation of `getProjectUpdatedBranchesCount` so the badge drops to 0.\n\n4. **Update `GitContext` badge derivation** — `getProjectUpdatedBranchesCount` must compare each branch's current head SHA against its last-seen SHA (not just whether `ahead > 0`). Only count a branch as unread if its SHA has advanced beyond what was last seen.\n\n5. **Ensure badge re-arms correctly** — After clearing, if a branch later receives new commits (monitor event updates the SHA), it should reappear in the count. The seen-SHA store entry for that branch becomes stale and the count increments again.\n\n**Files likely involved:**\n- `src/renderer/src/contexts/GitContext.tsx`\n- `src/renderer/src/screens/GitView.tsx`\n- `src/renderer/src/hooks/useNotifications.ts` (or equivalent badge derivation hook)\n- `src/renderer/src/navigation/SidebarView.tsx` (badge display)\n\n**Acceptance Criteria:**\n- Opening `GitView` clears the Git badge for the active project.\n- The badge reappears if a branch subsequently receives new commits.\n- No badge accumulation occurs on app restart for branches that were already seen.\n- The fix is purely additive (no removal of existing Git monitoring or badge logic).",
       "context": [],
       "createdAt": "2026-03-17T22:27:28.194Z",
-      "updatedAt": "2026-03-17T22:27:28.194Z"
+      "updatedAt": "2026-03-18T12:29:27.788Z",
+      "completedAt": "2026-03-18T12:29:27.788Z"
     }
   ],
   "createdAt": "2026-03-17T20:03:54.485Z",
-  "updatedAt": "2026-03-17T20:03:54.485Z"
+  "updatedAt": "2026-03-17T20:03:54.485Z",
+  "completedAt": "2026-03-18T12:29:27.788Z"
 }

@@ -816,6 +816,10 @@
           "SelectItem"
         ]
       },
+      "AgentRunBanner": {
+        "path": "src/renderer/src/components/chat/sidebar/AgentRunBanner.tsx",
+        "dependencies": []
+      },
       "AgentRunBullet": {
         "path": "src/renderer/src/components/agents/AgentRunBullet.tsx",
         "dependencies": [
@@ -1220,10 +1224,6 @@
           "thefactory-tools/constants/ToolSchemas",
           "thefactory-tools/constants/ALL_CHAT_AGENT_TOOLS",
           "thefactory-tools/constants",
-          "@renderer/components/ui/Button/Button",
-          "@renderer/components/ui/Button",
-          "@renderer/components/ui/Modal/Modal",
-          "@renderer/components/ui/Modal",
           "@renderer/hooks/useChatUnread/useChatUnread",
           "@renderer/hooks/useChatUnread",
           "@renderer/contexts/ProjectContext/useActiveProject",
@@ -1232,6 +1232,32 @@
           "thefactory-tools/utils",
           "@renderer/hooks/useNotifications/useNotifications",
           "@renderer/hooks/useNotifications"
+        ]
+      },
+      "ChatSidebarHeader": {
+        "path": "src/renderer/src/components/chat/sidebar/ChatSidebarHeader.tsx",
+        "dependencies": [
+          "ChatSidebarHeaderProps",
+          "thefactory-tools/ChatContext",
+          "thefactory-tools/CompletionSettings",
+          "@renderer/components/ui/Button/Button",
+          "@renderer/components/ui/Button"
+        ]
+      },
+      "ChatSidebarHeaderProps": {
+        "path": "src/renderer/src/components/chat/sidebar/ChatSidebarHeader.tsx",
+        "dependencies": [
+          "Promise",
+          "thefactory-tools/CompletionSettings",
+          "Partial",
+          "ToolToggle",
+          "thefactory-tools/ChatContext",
+          "SetStateAction",
+          "Dispatch",
+          "HTMLButtonElement",
+          "MutableRefObject",
+          "@renderer/components/ui/Button/Button",
+          "@renderer/components/ui/Button"
         ]
       },
       "ChatSidebarModalPanel": {
@@ -1243,6 +1269,24 @@
           "HTMLDivElement",
           "thefactory-tools/ChatContext",
           "react-dom/createPortal"
+        ]
+      },
+      "ChatSidebarModals": {
+        "path": "src/renderer/src/components/chat/sidebar/ChatSidebarModals.tsx",
+        "dependencies": [
+          "ChatSidebarModalsProps",
+          "@renderer/components/ui/Modal/Modal",
+          "@renderer/components/ui/Modal"
+        ]
+      },
+      "ChatSidebarModalsProps": {
+        "path": "src/renderer/src/components/chat/sidebar/ChatSidebarModals.tsx",
+        "dependencies": [
+          "SetStateAction",
+          "Dispatch",
+          "ChatState",
+          "@renderer/components/ui/Modal/Modal",
+          "@renderer/components/ui/Modal"
         ]
       },
       "ChatSidebarPanel": {
@@ -1270,10 +1314,6 @@
           "thefactory-tools/constants/ToolSchemas",
           "thefactory-tools/constants/ALL_CHAT_AGENT_TOOLS",
           "thefactory-tools/constants",
-          "@renderer/components/ui/Button/Button",
-          "@renderer/components/ui/Button",
-          "@renderer/components/ui/Modal/Modal",
-          "@renderer/components/ui/Modal",
           "@renderer/hooks/useChatUnread/useChatUnread",
           "@renderer/hooks/useChatUnread",
           "@renderer/contexts/ProjectContext/useActiveProject",
@@ -2377,6 +2417,10 @@
           "react"
         ]
       },
+      "getFilePatch": {
+        "path": "src/renderer/src/screens/git/common/gitUtils.tsx",
+        "dependencies": []
+      },
       "getNotificationTitleForContext": {
         "path": "src/renderer/src/contexts/chats/ChatsUtils.ts",
         "dependencies": [
@@ -2529,7 +2573,6 @@
         "dependencies": [
           "GitSelection",
           "Record",
-          "thefactory-tools/GitUnifiedBranch",
           "MergePreferences",
           "Promise",
           "PendingFeatureRefsState",
@@ -2538,6 +2581,7 @@
           "ProjectGitStatus",
           "thefactory-tools/GitCommitInfo",
           "thefactory-tools/GitBranchEvent",
+          "thefactory-tools/GitUnifiedBranch",
           "thefactory-tools/GitStashListItem"
         ]
       },
@@ -2706,6 +2750,8 @@
           "@renderer/components/ui/ResizeHandle",
           "@renderer/components/ui/DiffViewer/DiffViewer",
           "@renderer/components/ui/DiffViewer",
+          "@renderer/hooks/useLocalStorage/useLocalStorage",
+          "@renderer/hooks/useLocalStorage",
           "@renderer/components/ui/Spinner",
           "@renderer/components/ui/Tooltip"
         ]
@@ -2724,6 +2770,8 @@
           "@renderer/components/ui/ResizeHandle",
           "@renderer/components/ui/DiffViewer/DiffViewer",
           "@renderer/components/ui/DiffViewer",
+          "@renderer/hooks/useLocalStorage/useLocalStorage",
+          "@renderer/hooks/useLocalStorage",
           "@renderer/components/ui/Spinner",
           "@renderer/components/ui/Tooltip"
         ]
@@ -2742,6 +2790,8 @@
           "@renderer/components/ui/ResizeHandle",
           "@renderer/components/ui/DiffViewer/DiffViewer",
           "@renderer/components/ui/DiffViewer",
+          "@renderer/hooks/useLocalStorage/useLocalStorage",
+          "@renderer/hooks/useLocalStorage",
           "@renderer/components/ui/Spinner",
           "@renderer/components/ui/Tooltip"
         ]
@@ -3030,10 +3080,27 @@
           "thefactory-tools/GitLogCommit"
         ]
       },
+      "GROUP_NAV_ITEMS": {
+        "path": "src/renderer/src/navigation/sidebar/constants.tsx",
+        "dependencies": [
+          "NavDef",
+          "@renderer/types/NavigationView"
+        ]
+      },
       "GroupHomeView": {
         "path": "src/renderer/src/screens/GroupHomeView.tsx",
         "dependencies": [
           "IconWarningTriangle"
+        ]
+      },
+      "GroupNavItem": {
+        "path": "src/renderer/src/navigation/sidebar/GroupNavItem.tsx",
+        "dependencies": [
+          "GroupNavItemProps",
+          "thefactory-tools/ProjectGroup",
+          "thefactory-tools/ProjectSpec",
+          "@renderer/hooks/useNotifications/useNotifications",
+          "@renderer/hooks/useNotifications"
         ]
       },
       "hasUnsavedChanges": {
@@ -4061,6 +4128,8 @@
           "@renderer/components/ui/ResizeHandle",
           "@renderer/components/ui/DiffViewer/DiffViewer",
           "@renderer/components/ui/DiffViewer",
+          "@renderer/hooks/useLocalStorage/useLocalStorage",
+          "@renderer/hooks/useLocalStorage",
           "@renderer/components/ui/Spinner",
           "@renderer/components/ui/Tooltip"
         ]
@@ -4077,6 +4146,12 @@
           "thefactory-tools/ProjectSpec",
           "thefactory-tools/ProjectUpdate",
           "thefactory-tools/ReorderPayload"
+        ]
+      },
+      "MainView": {
+        "path": "src/renderer/src/navigation/main/MainView.tsx",
+        "dependencies": [
+          "HTMLButtonElement"
         ]
       },
       "Markdown": {
@@ -4294,6 +4369,20 @@
         "dependencies": [
           "Promise",
           "Array"
+        ]
+      },
+      "NAV_ITEMS": {
+        "path": "src/renderer/src/navigation/sidebar/constants.tsx",
+        "dependencies": [
+          "NavDef",
+          "@renderer/types/NavigationView"
+        ]
+      },
+      "NavDef": {
+        "path": "src/renderer/src/navigation/sidebar/constants.tsx",
+        "dependencies": [
+          "ReactNode",
+          "@renderer/types/NavigationView"
         ]
       },
       "NavigationView": {
@@ -4912,6 +5001,17 @@
           "@renderer/components/ui/Spinner"
         ]
       },
+      "ProjectNavItem": {
+        "path": "src/renderer/src/navigation/sidebar/ProjectNavItem.tsx",
+        "dependencies": [
+          "ProjectNavItemProps",
+          "thefactory-tools/ProjectSpec",
+          "@renderer/screens/projects/projectIcons/renderProjectIcon",
+          "@renderer/screens/projects/projectIcons",
+          "@renderer/hooks/useNotifications/useNotifications",
+          "@renderer/hooks/useNotifications"
+        ]
+      },
       "ProjectSettings": {
         "path": "src/types/settings.ts",
         "dependencies": [
@@ -5434,35 +5534,29 @@
         ]
       },
       "SidebarProps": {
-        "path": "src/renderer/src/navigation/SidebarView.tsx",
+        "path": "src/renderer/src/navigation/sidebar/SidebarView.tsx",
         "dependencies": [
-          "thefactory-tools/ProjectSpec",
-          "@renderer/screens/projects/projectIcons/renderProjectIcon",
-          "@renderer/screens/projects/projectIcons",
-          "@renderer/types/NavigationView",
+          "HTMLButtonElement",
+          "MutableRefObject",
+          "@renderer/hooks/useNotifications/useNotifications",
+          "@renderer/hooks/useNotifications",
           "@renderer/utils/hideScrollStyle/hideScrollStyle",
           "@renderer/utils/hideScrollStyle",
-          "@renderer/hooks/useNotifications/useNotifications",
-          "@renderer/hooks/useNotifications"
+          "thefactory-tools/ProjectSpec"
         ]
       },
       "SidebarView": {
-        "path": "src/renderer/src/navigation/SidebarView.tsx",
+        "path": "src/renderer/src/navigation/sidebar/SidebarView.tsx",
         "dependencies": [
           "thefactory-tools/ProjectSpec",
-          "ReactNode",
-          "Record",
           "NavDef",
           "KeyboardEvent",
           "HTMLButtonElement",
           "SidebarProps",
-          "@renderer/screens/projects/projectIcons/renderProjectIcon",
-          "@renderer/screens/projects/projectIcons",
-          "@renderer/types/NavigationView",
-          "@renderer/utils/hideScrollStyle/hideScrollStyle",
-          "@renderer/utils/hideScrollStyle",
           "@renderer/hooks/useNotifications/useNotifications",
-          "@renderer/hooks/useNotifications"
+          "@renderer/hooks/useNotifications",
+          "@renderer/utils/hideScrollStyle/hideScrollStyle",
+          "@renderer/utils/hideScrollStyle"
         ]
       },
       "SimpleSplitText": {
@@ -5514,6 +5608,15 @@
       "splitPath": {
         "path": "src/renderer/src/components/ui/PathDisplay.tsx",
         "dependencies": []
+      },
+      "StaticNavItem": {
+        "path": "src/renderer/src/navigation/sidebar/StaticNavItem.tsx",
+        "dependencies": [
+          "ReactNode",
+          "StaticNavItemProps",
+          "@renderer/hooks/useNotifications/useNotifications",
+          "@renderer/hooks/useNotifications"
+        ]
       },
       "STATUS_LABELS": {
         "path": "src/renderer/src/components/stories/StatusControl.tsx",
@@ -6765,6 +6868,10 @@
           "SelectItem"
         ]
       },
+      "AgentRunBanner": {
+        "path": "renderer/src/components/chat/sidebar/AgentRunBanner.tsx",
+        "dependencies": []
+      },
       "AgentRunBullet": {
         "path": "renderer/src/components/agents/AgentRunBullet.tsx",
         "dependencies": [
@@ -7169,10 +7276,6 @@
           "thefactory-tools/constants/ToolSchemas",
           "thefactory-tools/constants/ALL_CHAT_AGENT_TOOLS",
           "thefactory-tools/constants",
-          "@renderer/components/ui/Button/Button",
-          "@renderer/components/ui/Button",
-          "@renderer/components/ui/Modal/Modal",
-          "@renderer/components/ui/Modal",
           "@renderer/hooks/useChatUnread/useChatUnread",
           "@renderer/hooks/useChatUnread",
           "@renderer/contexts/ProjectContext/useActiveProject",
@@ -7181,6 +7284,32 @@
           "thefactory-tools/utils",
           "@renderer/hooks/useNotifications/useNotifications",
           "@renderer/hooks/useNotifications"
+        ]
+      },
+      "ChatSidebarHeader": {
+        "path": "renderer/src/components/chat/sidebar/ChatSidebarHeader.tsx",
+        "dependencies": [
+          "ChatSidebarHeaderProps",
+          "thefactory-tools/ChatContext",
+          "thefactory-tools/CompletionSettings",
+          "@renderer/components/ui/Button/Button",
+          "@renderer/components/ui/Button"
+        ]
+      },
+      "ChatSidebarHeaderProps": {
+        "path": "renderer/src/components/chat/sidebar/ChatSidebarHeader.tsx",
+        "dependencies": [
+          "Promise",
+          "thefactory-tools/CompletionSettings",
+          "Partial",
+          "ToolToggle",
+          "thefactory-tools/ChatContext",
+          "SetStateAction",
+          "Dispatch",
+          "HTMLButtonElement",
+          "MutableRefObject",
+          "@renderer/components/ui/Button/Button",
+          "@renderer/components/ui/Button"
         ]
       },
       "ChatSidebarModalPanel": {
@@ -7192,6 +7321,24 @@
           "HTMLDivElement",
           "thefactory-tools/ChatContext",
           "react-dom/createPortal"
+        ]
+      },
+      "ChatSidebarModals": {
+        "path": "renderer/src/components/chat/sidebar/ChatSidebarModals.tsx",
+        "dependencies": [
+          "ChatSidebarModalsProps",
+          "@renderer/components/ui/Modal/Modal",
+          "@renderer/components/ui/Modal"
+        ]
+      },
+      "ChatSidebarModalsProps": {
+        "path": "renderer/src/components/chat/sidebar/ChatSidebarModals.tsx",
+        "dependencies": [
+          "SetStateAction",
+          "Dispatch",
+          "ChatState",
+          "@renderer/components/ui/Modal/Modal",
+          "@renderer/components/ui/Modal"
         ]
       },
       "ChatSidebarPanel": {
@@ -7219,10 +7366,6 @@
           "thefactory-tools/constants/ToolSchemas",
           "thefactory-tools/constants/ALL_CHAT_AGENT_TOOLS",
           "thefactory-tools/constants",
-          "@renderer/components/ui/Button/Button",
-          "@renderer/components/ui/Button",
-          "@renderer/components/ui/Modal/Modal",
-          "@renderer/components/ui/Modal",
           "@renderer/hooks/useChatUnread/useChatUnread",
           "@renderer/hooks/useChatUnread",
           "@renderer/contexts/ProjectContext/useActiveProject",
@@ -8326,6 +8469,10 @@
           "react"
         ]
       },
+      "getFilePatch": {
+        "path": "renderer/src/screens/git/common/gitUtils.tsx",
+        "dependencies": []
+      },
       "getNotificationTitleForContext": {
         "path": "renderer/src/contexts/chats/ChatsUtils.ts",
         "dependencies": [
@@ -8478,7 +8625,6 @@
         "dependencies": [
           "GitSelection",
           "Record",
-          "thefactory-tools/GitUnifiedBranch",
           "MergePreferences",
           "Promise",
           "PendingFeatureRefsState",
@@ -8487,6 +8633,7 @@
           "ProjectGitStatus",
           "thefactory-tools/GitCommitInfo",
           "thefactory-tools/GitBranchEvent",
+          "thefactory-tools/GitUnifiedBranch",
           "thefactory-tools/GitStashListItem"
         ]
       },
@@ -8655,6 +8802,8 @@
           "@renderer/components/ui/ResizeHandle",
           "@renderer/components/ui/DiffViewer/DiffViewer",
           "@renderer/components/ui/DiffViewer",
+          "@renderer/hooks/useLocalStorage/useLocalStorage",
+          "@renderer/hooks/useLocalStorage",
           "@renderer/components/ui/Spinner",
           "@renderer/components/ui/Tooltip"
         ]
@@ -8673,6 +8822,8 @@
           "@renderer/components/ui/ResizeHandle",
           "@renderer/components/ui/DiffViewer/DiffViewer",
           "@renderer/components/ui/DiffViewer",
+          "@renderer/hooks/useLocalStorage/useLocalStorage",
+          "@renderer/hooks/useLocalStorage",
           "@renderer/components/ui/Spinner",
           "@renderer/components/ui/Tooltip"
         ]
@@ -8691,6 +8842,8 @@
           "@renderer/components/ui/ResizeHandle",
           "@renderer/components/ui/DiffViewer/DiffViewer",
           "@renderer/components/ui/DiffViewer",
+          "@renderer/hooks/useLocalStorage/useLocalStorage",
+          "@renderer/hooks/useLocalStorage",
           "@renderer/components/ui/Spinner",
           "@renderer/components/ui/Tooltip"
         ]
@@ -8979,10 +9132,27 @@
           "thefactory-tools/GitLogCommit"
         ]
       },
+      "GROUP_NAV_ITEMS": {
+        "path": "renderer/src/navigation/sidebar/constants.tsx",
+        "dependencies": [
+          "NavDef",
+          "@renderer/types/NavigationView"
+        ]
+      },
       "GroupHomeView": {
         "path": "renderer/src/screens/GroupHomeView.tsx",
         "dependencies": [
           "IconWarningTriangle"
+        ]
+      },
+      "GroupNavItem": {
+        "path": "renderer/src/navigation/sidebar/GroupNavItem.tsx",
+        "dependencies": [
+          "GroupNavItemProps",
+          "thefactory-tools/ProjectGroup",
+          "thefactory-tools/ProjectSpec",
+          "@renderer/hooks/useNotifications/useNotifications",
+          "@renderer/hooks/useNotifications"
         ]
       },
       "hasUnsavedChanges": {
@@ -10010,6 +10180,8 @@
           "@renderer/components/ui/ResizeHandle",
           "@renderer/components/ui/DiffViewer/DiffViewer",
           "@renderer/components/ui/DiffViewer",
+          "@renderer/hooks/useLocalStorage/useLocalStorage",
+          "@renderer/hooks/useLocalStorage",
           "@renderer/components/ui/Spinner",
           "@renderer/components/ui/Tooltip"
         ]
@@ -10026,6 +10198,12 @@
           "thefactory-tools/ProjectSpec",
           "thefactory-tools/ProjectUpdate",
           "thefactory-tools/ReorderPayload"
+        ]
+      },
+      "MainView": {
+        "path": "renderer/src/navigation/main/MainView.tsx",
+        "dependencies": [
+          "HTMLButtonElement"
         ]
       },
       "Markdown": {
@@ -10243,6 +10421,20 @@
         "dependencies": [
           "Promise",
           "Array"
+        ]
+      },
+      "NAV_ITEMS": {
+        "path": "renderer/src/navigation/sidebar/constants.tsx",
+        "dependencies": [
+          "NavDef",
+          "@renderer/types/NavigationView"
+        ]
+      },
+      "NavDef": {
+        "path": "renderer/src/navigation/sidebar/constants.tsx",
+        "dependencies": [
+          "ReactNode",
+          "@renderer/types/NavigationView"
         ]
       },
       "NavigationView": {
@@ -10861,6 +11053,17 @@
           "@renderer/components/ui/Spinner"
         ]
       },
+      "ProjectNavItem": {
+        "path": "renderer/src/navigation/sidebar/ProjectNavItem.tsx",
+        "dependencies": [
+          "ProjectNavItemProps",
+          "thefactory-tools/ProjectSpec",
+          "@renderer/screens/projects/projectIcons/renderProjectIcon",
+          "@renderer/screens/projects/projectIcons",
+          "@renderer/hooks/useNotifications/useNotifications",
+          "@renderer/hooks/useNotifications"
+        ]
+      },
       "ProjectSettings": {
         "path": "types/settings.ts",
         "dependencies": [
@@ -11383,35 +11586,29 @@
         ]
       },
       "SidebarProps": {
-        "path": "renderer/src/navigation/SidebarView.tsx",
+        "path": "renderer/src/navigation/sidebar/SidebarView.tsx",
         "dependencies": [
-          "thefactory-tools/ProjectSpec",
-          "@renderer/screens/projects/projectIcons/renderProjectIcon",
-          "@renderer/screens/projects/projectIcons",
-          "@renderer/types/NavigationView",
+          "HTMLButtonElement",
+          "MutableRefObject",
+          "@renderer/hooks/useNotifications/useNotifications",
+          "@renderer/hooks/useNotifications",
           "@renderer/utils/hideScrollStyle/hideScrollStyle",
           "@renderer/utils/hideScrollStyle",
-          "@renderer/hooks/useNotifications/useNotifications",
-          "@renderer/hooks/useNotifications"
+          "thefactory-tools/ProjectSpec"
         ]
       },
       "SidebarView": {
-        "path": "renderer/src/navigation/SidebarView.tsx",
+        "path": "renderer/src/navigation/sidebar/SidebarView.tsx",
         "dependencies": [
           "thefactory-tools/ProjectSpec",
-          "ReactNode",
-          "Record",
           "NavDef",
           "KeyboardEvent",
           "HTMLButtonElement",
           "SidebarProps",
-          "@renderer/screens/projects/projectIcons/renderProjectIcon",
-          "@renderer/screens/projects/projectIcons",
-          "@renderer/types/NavigationView",
-          "@renderer/utils/hideScrollStyle/hideScrollStyle",
-          "@renderer/utils/hideScrollStyle",
           "@renderer/hooks/useNotifications/useNotifications",
-          "@renderer/hooks/useNotifications"
+          "@renderer/hooks/useNotifications",
+          "@renderer/utils/hideScrollStyle/hideScrollStyle",
+          "@renderer/utils/hideScrollStyle"
         ]
       },
       "SimpleSplitText": {
@@ -11463,6 +11660,15 @@
       "splitPath": {
         "path": "renderer/src/components/ui/PathDisplay.tsx",
         "dependencies": []
+      },
+      "StaticNavItem": {
+        "path": "renderer/src/navigation/sidebar/StaticNavItem.tsx",
+        "dependencies": [
+          "ReactNode",
+          "StaticNavItemProps",
+          "@renderer/hooks/useNotifications/useNotifications",
+          "@renderer/hooks/useNotifications"
+        ]
       },
       "STATUS_LABELS": {
         "path": "renderer/src/components/stories/StatusControl.tsx",
