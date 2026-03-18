@@ -9,6 +9,14 @@ import {
   IconEdit,
   IconPlus,
 } from '@renderer/components/ui/icons/Icons'
+import { Switch } from '@renderer/components/ui/Switch'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@renderer/components/ui/Select'
 
 function GroupNameModal({
   title,
@@ -68,7 +76,7 @@ function GroupNameModal({
 }
 
 export function ProjectGroupsEditor() {
-  const { groups, reorderGroup, createGroup, updateGroupTitle, deleteGroup } = useProjectsGroups()
+  const { groups, reorderGroup, createGroup, updateGroupTitle, updateGroup, deleteGroup } = useProjectsGroups()
   const [isAddOpen, setIsAddOpen] = useState(false)
   const [renameTargetId, setRenameTargetId] = useState<string | null>(null)
   const renameTarget = groups.find((g) => g.id === renameTargetId) || null
@@ -101,11 +109,30 @@ export function ProjectGroupsEditor() {
 
       <ul className="divide-y divide-border" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
         {groups.map((g, idx) => (
-          <li key={g.id} className="flex items-center justify-between py-2">
-            <div className="flex items-center gap-2">
-              <strong>{g.title}</strong>
+          <li key={g.id} className="flex flex-col py-2 gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-4 flex-1 min-w-0">
+              <strong className="truncate max-w-[200px]" title={g.title}>{g.title}</strong>
+              <div className="flex items-center gap-3">
+                <Select
+                  value={g.type || 'MAIN'}
+                  onValueChange={(val: any) => updateGroup(g.id, { type: val })}
+                >
+                  <SelectTrigger className="ui-select w-[90px] h-7 text-xs px-2">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="MAIN">MAIN</SelectItem>
+                    <SelectItem value="SCOPE">SCOPE</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Switch
+                  checked={g.active !== false}
+                  onCheckedChange={(val) => updateGroup(g.id, { active: val })}
+                  label={g.active !== false ? "Active" : "Inactive"}
+                />
+              </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 mt-2 sm:mt-0">
               <Button
                 variant="secondary"
                 size="icon"

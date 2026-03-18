@@ -567,12 +567,13 @@
     },
     {
       "id": "45abaa36-3d20-488c-b631-d1255e11654b",
-      "status": "-",
+      "status": "+",
       "title": "Implement Hunk/Line-level Staging UI in GitView",
       "description": "Implement UI functionality in GitView to allow selecting lines and hunks in the diff view. When lines/hunks are selected, the user should be able to stage or unstage just those selected changes. This will require generating a unified patch from the selected lines and sending it to the future applyPatch endpoint. Temporary mocked implementation in GitManager can be used until the backend is ready.",
       "context": [],
       "createdAt": "2026-03-17T19:37:41.301Z",
-      "updatedAt": "2026-03-17T19:37:41.301Z"
+      "updatedAt": "2026-03-18T00:56:34.349Z",
+      "completedAt": "2026-03-18T00:56:34.349Z"
     },
     {
       "id": "196a8ad8-a3f5-4bab-b069-735157f25886",

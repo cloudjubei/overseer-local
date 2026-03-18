@@ -6,7 +6,7 @@ export interface NotificationBadgeProps {
   tooltipLabel?: string
   isInformative?: boolean
   /** Optional explicit color override. Defaults to red; when isInformative=true defaults to blue. */
-  color?: 'red' | 'blue' | 'green'
+  color?: 'red' | 'blue' | 'green' | 'orange'
 }
 
 /*
@@ -26,6 +26,8 @@ const NotificationBadge: React.FC<NotificationBadgeProps> = ({
   const bg = color
     ? color === 'green'
       ? 'bg-green-500'
+      : color === 'orange'
+      ? 'bg-orange-500'
       : color === 'blue'
       ? 'bg-blue-500'
       : 'bg-red-500'

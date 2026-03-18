@@ -17,6 +17,7 @@ export type ProjectsGroupsContextValue = {
 
   createGroup: (title: string) => Promise<ProjectsGroup | undefined>
   updateGroupTitle: (groupId: string, title: string) => Promise<ProjectsGroup | undefined>
+  updateGroup: (groupId: string, patch: ProjectsGroupEditInput) => Promise<ProjectsGroup | undefined>
   deleteGroup: (groupId: string) => Promise<void>
 
   reorderProject: (groupId: string, payload: ReorderPayload) => Promise<ProjectsGroup | undefined>
@@ -83,7 +84,13 @@ export function ProjectsGroupsProvider({ children }: { children: React.ReactNode
     groupId: string,
     title: string,
   ): Promise<ProjectsGroup | undefined> => {
-    const patch: ProjectsGroupEditInput = { title }
+    return updateGroup(groupId, { title })
+  }
+
+  const updateGroup = async (
+    groupId: string,
+    patch: ProjectsGroupEditInput,
+  ): Promise<ProjectsGroup | undefined> => {
     const updated = await projectsGroupsService.updateProjectsGroup(groupId, patch)
     if (updated) {
       setGroups((prev) => prev.map((g) => (g.id === groupId ? updated : g)))
@@ -181,6 +188,7 @@ export function ProjectsGroupsProvider({ children }: { children: React.ReactNode
       getGroupForProject,
       createGroup,
       updateGroupTitle,
+      updateGroup,
       deleteGroup,
       reorderProject,
       reorderGroup,
@@ -197,18 +205,3 @@ export function useProjectsGroups(): ProjectsGroupsContextValue {
   if (!ctx) throw new Error('useProjectsGroups must be used within ProjectsGroupsProvider')
   return ctx
 }
-
-// Types reference (from thefactory-tools)
-// export type ProjectsGroups = ProjectsGroup[];
-// export interface ProjectsGroup {
-//   id: string;
-//   title: string;
-//   projects: string[];
-//   createdAt: string;
-//   updatedAt: string;
-// }
-// export type ProjectsGroupCreateInput = Pick<ProjectsGroup, 'title'>;
-// export type ProjectsGroupEditInput = Partial<ProjectsGroupCreateInput>;
-// export type ProjectsGroupUpdateType = 'change';
-// export type ProjectsGroupUpdate = { type: ProjectsGroupUpdateType; groups: ProjectsGroups };
-// export interface ReorderPayload { fromIndex: number; toIndex: number }

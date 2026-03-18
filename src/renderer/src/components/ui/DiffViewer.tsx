@@ -195,19 +195,17 @@ export function DiffViewer({
                   >
                     {isStaged ? 'Unstage Selected' : 'Stage Selected'}
                   </button>
-                  {!isStaged && (
-                    <button
-                      onClick={handleDiscardSelection}
-                      disabled={!hasSelection}
-                      className={`px-3 py-1 rounded text-[11px] font-medium transition-colors ${
-                        hasSelection
-                          ? 'bg-red-600 hover:bg-red-700 active:bg-red-800 text-white'
-                          : 'bg-neutral-200 dark:bg-neutral-800 text-neutral-400 dark:text-neutral-600 cursor-not-allowed'
-                      }`}
-                    >
-                      Discard Selected
-                    </button>
-                  )}
+                  <button
+                    onClick={handleDiscardSelection}
+                    disabled={!hasSelection}
+                    className={`px-3 py-1 rounded text-[11px] font-medium transition-colors ${
+                      hasSelection
+                        ? 'bg-red-600 hover:bg-red-700 active:bg-red-800 text-white'
+                        : 'bg-neutral-200 dark:bg-neutral-800 text-neutral-400 dark:text-neutral-600 cursor-not-allowed'
+                    }`}
+                  >
+                    Discard Selected
+                  </button>
                 </>
               )}
             </div>
