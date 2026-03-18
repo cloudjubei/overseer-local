@@ -271,7 +271,7 @@ export function GitCommitGraph({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projectId, uncommittedChanges])
 
-  // Scroll to a sha when the branch selection changes
+  // Scroll to a sha when the branch selection changes or when commits load
   useEffect(() => {
     if (!scrollToSha) return
     // Give the DOM a tick to render if commits just loaded
@@ -281,7 +281,7 @@ export function GitCommitGraph({
     }
     const id = window.setTimeout(tryScroll, 50)
     return () => window.clearTimeout(id)
-  }, [scrollToSha])
+  }, [scrollToSha, commits])
 
   const graphNodes = useMemo(() => {
     let nodes = computeCommitGraph(commits)

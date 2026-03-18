@@ -57,6 +57,9 @@ export function parseUnifiedDiff(patch: string): ParsedHunk[] {
       oldLine += 1
       newLine += 1
       cur.lines.push({ type: 'ctx', text: ln.slice(1), oldLine, newLine })
+    } else if (ln.startsWith('\\')) {
+      // \ No newline at end of file
+      cur.lines.push({ type: 'meta', text: ln })
     } else {
       cur.lines.push({ type: 'ctx', text: ln })
     }
@@ -553,30 +556,46 @@ export function generateSelectedPatch(
     let hunkBody = ''
     let hasModifications = false
 
+    let lastLineIncluded: 'add' | 'del' | 'ctx' | null = null
+
     for (let lIdx = 0; lIdx < hunk.lines.length; lIdx++) {
       const line = hunk.lines[lIdx]
-      if (line.type === 'meta') continue
       const isSelected = selectedLines.has(`${hIdx}:${lIdx}`)
+
+      if (line.type === 'meta') {
+        // If the preceding line was included (as add/del/ctx), include this meta line.
+        // E.g. \ No newline at end of file
+        if (lastLineIncluded) {
+          hunkBody += line.text + '\n'
+        }
+        continue
+      }
 
       if (line.type === 'ctx') {
         hunkBody += ' ' + line.text + '\n'
         oldLinesCount++
         newLinesCount++
+        lastLineIncluded = 'ctx'
       } else if (line.type === 'add') {
         if (isSelected) {
           hunkBody += '+' + line.text + '\n'
           newLinesCount++
           hasModifications = true
+          lastLineIncluded = 'add'
+        } else {
+          lastLineIncluded = null
         }
       } else if (line.type === 'del') {
         if (isSelected) {
           hunkBody += '-' + line.text + '\n'
           oldLinesCount++
           hasModifications = true
+          lastLineIncluded = 'del'
         } else {
           hunkBody += ' ' + line.text + '\n'
           oldLinesCount++
           newLinesCount++
+          lastLineIncluded = 'ctx'
         }
       }
     }
@@ -591,10 +610,9 @@ export function generateSelectedPatch(
 
 /** Generate a patch for a single hunk by index */
 export function generateHunkPatch(patch: string, hunkIndex: number): string {
-  const hunks = parseUnifiedDiff(patch)
-  const hunk = hunks[hunkIndex]
-  if (!hunk) return ''
-
+  // Rather than reconstructing the hunk line-by-line and potentially missing edge cases
+  // like internal meta lines, we can extract the exact raw string of this hunk.
+  // We locate the Nth hunk header and extract everything up to the next hunk header or EOF.
   let out = ''
   const lines = patch.replace(/\r\n/g, '\n').split('\n')
   for (const l of lines) {
@@ -602,26 +620,24 @@ export function generateHunkPatch(patch: string, hunkIndex: number): string {
     out += l + '\n'
   }
 
-  let oldLinesCount = 0
-  let newLinesCount = 0
-  let hunkBody = ''
+  let currentHunkIdx = -1
+  let inTargetHunk = false
 
-  for (const line of hunk.lines) {
-    if (line.type === 'meta') continue
-    if (line.type === 'ctx') {
-      hunkBody += ' ' + line.text + '\n'
-      oldLinesCount++
-      newLinesCount++
-    } else if (line.type === 'add') {
-      hunkBody += '+' + line.text + '\n'
-      newLinesCount++
-    } else if (line.type === 'del') {
-      hunkBody += '-' + line.text + '\n'
-      oldLinesCount++
+  for (let i = 0; i < lines.length; i++) {
+    const l = lines[i]
+    if (l.startsWith('@@')) {
+      currentHunkIdx++
+      if (currentHunkIdx === hunkIndex) {
+        inTargetHunk = true
+      } else if (currentHunkIdx > hunkIndex) {
+        break
+      }
+    }
+    
+    if (inTargetHunk) {
+      out += l + '\n'
     }
   }
 
-  out += `@@ -${hunk.oldStart},${oldLinesCount} +${hunk.newStart},${newLinesCount} @@${hunk.header ? ' ' + hunk.header : ''}\n`
-  out += hunkBody
   return out.trimEnd() + '\n'
 }

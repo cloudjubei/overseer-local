@@ -84,6 +84,7 @@ export default class DocumentIngestionManager extends BaseManager {
     }
     try {
       if (documentsToUpsert.length > 0) {
+        console.log('documentsToUpsert: ', documentsToUpsert.length, ' projectId: ', projectId)
         await this.databaseManager.upsertDocuments(documentsToUpsert)
       }
     } catch (e) {

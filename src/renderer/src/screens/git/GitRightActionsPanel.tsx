@@ -20,7 +20,7 @@ import GitCommitModal from './GitCommitModal'
 import { GitCreateBranchModal } from './GitCreateBranchModal'
 import { GitStashModal } from './GitStashModal'
 
-export const ACTIONS_RAIL_WIDTH = 80
+export const ACTIONS_RAIL_WIDTH = 60
 
 function GitActionButton({
   icon,
@@ -40,12 +40,14 @@ function GitActionButton({
   const btn = (
     <button
       className={
-        'w-[64px] h-[64px] shrink-0 rounded-xl border border-neutral-200 dark:border-neutral-800 ' +
+        'w-[52px] h-[52px] shrink-0 rounded-xl border border-neutral-200 dark:border-neutral-800 ' +
         'bg-white dark:bg-neutral-950/30 ' +
         'hover:bg-neutral-50 dark:hover:bg-neutral-900/40 ' +
         'active:scale-[0.98] transition ' +
         'flex flex-col items-center justify-center gap-1 relative ' +
-        (disabled ? 'opacity-50 cursor-not-allowed hover:bg-white dark:hover:bg-neutral-950/30' : '')
+        (disabled
+          ? 'opacity-50 cursor-not-allowed hover:bg-white dark:hover:bg-neutral-950/30'
+          : '')
       }
       onClick={onClick}
       disabled={disabled}
@@ -110,24 +112,38 @@ export function GitRightActionsPanel({
     if (!activeProjectId || !selectedBranch || busy) return
     setBusy(true)
     try {
-      const res = await gitService.pull(activeProjectId, selectedBranch.upstreamRemote, selectedBranch.name)
+      const res = await gitService.pull(
+        activeProjectId,
+        selectedBranch.upstreamRemote,
+        selectedBranch.name,
+      )
       if (res?.ok === false) alert(res.error || 'Failed to pull')
       onRefresh()
       await unified.reload(activeProjectId)
-    } catch (e: any) { alert(e.message || String(e)) }
-    finally { setBusy(false) }
+    } catch (e: any) {
+      alert(e.message || String(e))
+    } finally {
+      setBusy(false)
+    }
   }
 
   const handlePush = async () => {
     if (!activeProjectId || !selectedBranch || busy) return
     setBusy(true)
     try {
-      const res = await gitService.push(activeProjectId, selectedBranch.upstreamRemote, selectedBranch.name)
+      const res = await gitService.push(
+        activeProjectId,
+        selectedBranch.upstreamRemote,
+        selectedBranch.name,
+      )
       if (res?.ok === false) alert(res.error || 'Failed to push')
       onRefresh()
       await unified.reload(activeProjectId)
-    } catch (e: any) { alert(e.message || String(e)) }
-    finally { setBusy(false) }
+    } catch (e: any) {
+      alert(e.message || String(e))
+    } finally {
+      setBusy(false)
+    }
   }
 
   const handleFetch = async () => {
@@ -138,8 +154,11 @@ export function GitRightActionsPanel({
       if (res?.ok === false) alert(res.error || 'Failed to fetch')
       onRefresh()
       await unified.reload(activeProjectId)
-    } catch (e: any) { alert(e.message || String(e)) }
-    finally { setBusy(false) }
+    } catch (e: any) {
+      alert(e.message || String(e))
+    } finally {
+      setBusy(false)
+    }
   }
 
   const handleApplyStash = async () => {
@@ -151,14 +170,19 @@ export function GitRightActionsPanel({
         alert(`Apply stash failed: ${res?.error || 'Unknown error'}`)
       } else {
         if (window.confirm('Stash applied successfully. Do you want to drop it now?')) {
-          const dropRes = await gitService.removeStash(activeProjectId, { stashRef: selectedStashRef })
+          const dropRes = await gitService.removeStash(activeProjectId, {
+            stashRef: selectedStashRef,
+          })
           if (!dropRes?.ok) alert(`Drop stash failed: ${dropRes?.error || 'Unknown error'}`)
         }
         onStashAppliedOrDeleted?.()
       }
       onRefresh()
-    } catch (e: any) { alert(`Apply stash failed: ${e?.message}`) }
-    finally { setBusy(false) }
+    } catch (e: any) {
+      alert(`Apply stash failed: ${e?.message}`)
+    } finally {
+      setBusy(false)
+    }
   }
 
   const handleDeleteStash = async () => {
@@ -170,8 +194,11 @@ export function GitRightActionsPanel({
       if (!res?.ok) alert(`Drop stash failed: ${res?.error || 'Unknown error'}`)
       else onStashAppliedOrDeleted?.()
       onRefresh()
-    } catch (e: any) { alert(`Drop stash failed: ${e?.message}`) }
-    finally { setBusy(false) }
+    } catch (e: any) {
+      alert(`Drop stash failed: ${e?.message}`)
+    } finally {
+      setBusy(false)
+    }
   }
 
   return (
@@ -180,7 +207,6 @@ export function GitRightActionsPanel({
       style={{ width: ACTIONS_RAIL_WIDTH }}
     >
       <div className="flex flex-col gap-2 items-center w-full px-2 overflow-y-auto overflow-x-hidden hide-scrollbar">
-
         {/* Always-visible */}
         <GitActionButton
           icon={<IconRefresh className="w-5 h-5" />}
@@ -247,7 +273,11 @@ export function GitRightActionsPanel({
               label="Branch"
               onClick={() => setCreateBranchModalOpen(true)}
               disabled={!canCreateBranch}
-              tooltip={canCreateBranch ? 'Create new branch from here' : 'Select a local branch to create from'}
+              tooltip={
+                canCreateBranch
+                  ? 'Create new branch from here'
+                  : 'Select a local branch to create from'
+              }
             />
 
             {/* Switch + Merge: only if the selected branch is NOT the current one */}
@@ -258,7 +288,9 @@ export function GitRightActionsPanel({
                   label="Switch"
                   onClick={() => onSwitchToBranch(selectedBranch)}
                   disabled={busy || !canSwitch}
-                  tooltip={canSwitch ? 'Switch to this branch' : 'Working tree must be clean to switch'}
+                  tooltip={
+                    canSwitch ? 'Switch to this branch' : 'Working tree must be clean to switch'
+                  }
                 />
                 {selectedBranch.isLocal && (
                   <GitActionButton
@@ -266,7 +298,11 @@ export function GitRightActionsPanel({
                     label="Merge"
                     onClick={() => onOpenMerge(currentBranchName || 'main', selectedBranch.name)}
                     disabled={busy || !currentBranchName}
-                    tooltip={currentBranchName ? `Merge ${selectedBranch.name} → ${currentBranchName}` : 'Current branch unknown'}
+                    tooltip={
+                      currentBranchName
+                        ? `Merge ${selectedBranch.name} → ${currentBranchName}`
+                        : 'Current branch unknown'
+                    }
                   />
                 )}
               </>
@@ -314,7 +350,10 @@ export function GitRightActionsPanel({
         <GitCommitModal
           projectId={activeProjectId}
           currentBranch={selectedBranch.name}
-          onRequestClose={() => { setCommitModalOpen(false); onRefresh() }}
+          onRequestClose={() => {
+            setCommitModalOpen(false)
+            onRefresh()
+          }}
         />
       )}
 
@@ -323,7 +362,10 @@ export function GitRightActionsPanel({
           projectId={activeProjectId}
           currentBranch={selectedBranch.name}
           onRequestClose={() => setCreateBranchModalOpen(false)}
-          onSuccess={() => { onRefresh(); unified.reload(activeProjectId) }}
+          onSuccess={() => {
+            onRefresh()
+            unified.reload(activeProjectId)
+          }}
         />
       )}
 

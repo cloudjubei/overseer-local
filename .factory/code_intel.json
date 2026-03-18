@@ -1830,6 +1830,7 @@
         "path": "src/renderer/src/components/ui/DiffViewer.tsx",
         "dependencies": [
           "IntraMode",
+          "Set",
           "DiffViewerProps"
         ]
       },
@@ -2000,15 +2001,14 @@
       "FactoryTestsManager": {
         "path": "src/logic/factory/FactoryTestsManager.ts",
         "dependencies": [
-          "thefactory-tools/TestTools",
+          "thefactory-tools/TestRunnerTools",
           "Promise",
           "thefactory-tools/CoverageResult",
           "thefactory-tools/TestsResult",
           "Record",
           "ProjectsManager",
           "electron/BrowserWindow",
-          "thefactory-tools/createTestTools",
-          "thefactory-tools/TestResult"
+          "thefactory-tools/createTestRunnerTools"
         ]
       },
       "factoryTestsService": {
@@ -2382,6 +2382,13 @@
           "thefactory-tools/CoverageResult"
         ]
       },
+      "generateHunkPatch": {
+        "path": "src/renderer/src/components/chat/tool-popups/diffUtils.tsx",
+        "description": "Generate a patch for a single hunk by index",
+        "dependencies": [
+          "react"
+        ]
+      },
       "generateSelectedPatch": {
         "path": "src/renderer/src/components/chat/tool-popups/diffUtils.tsx",
         "dependencies": [
@@ -2422,16 +2429,20 @@
         "path": "src/logic/chat/promptTemplates.ts",
         "dependencies": []
       },
+      "GitBadgeSubToggles": {
+        "path": "src/types/settings.ts",
+        "description": "Sub-toggles for git badge types.",
+        "dependencies": [
+          "thefactory-tools/WebSearchApiKeys"
+        ]
+      },
       "GitBranchDetailsPanel": {
         "path": "src/renderer/src/screens/git/GitBranchDetailsPanel.tsx",
         "dependencies": [
           "PointerEvent",
           "HTMLElement",
           "HTMLDivElement",
-          "thefactory-tools/GitUnifiedBranch",
-          "thefactory-tools/GitDiffSummary",
-          "@renderer/services/gitService/gitService",
-          "@renderer/services/gitService"
+          "thefactory-tools/GitUnifiedBranch"
         ]
       },
       "GitCheckoutRemoteModal": {
@@ -2463,6 +2474,8 @@
         "dependencies": [
           "GraphNode",
           "thefactory-tools/GitLogCommit",
+          "HTMLDivElement",
+          "Map",
           "@renderer/services/gitService/gitService",
           "@renderer/services/gitService"
         ]
@@ -2504,6 +2517,7 @@
           "Promise",
           "PendingFeatureRefsState",
           "UnifiedBranchesState",
+          "GitDerivedBadgeState",
           "ProjectGitStatus",
           "thefactory-tools/GitCommitInfo",
           "thefactory-tools/GitBranchEvent",
@@ -2565,6 +2579,16 @@
           "Promise",
           "Partial",
           "Omit"
+        ]
+      },
+      "GitDerivedBadgeState": {
+        "path": "src/renderer/src/contexts/GitContext.tsx",
+        "description": "Derived git badge state for a single project's current branch.",
+        "dependencies": [
+          "thefactory-tools/GitCommitInfo",
+          "thefactory-tools/GitBranchEvent",
+          "thefactory-tools/GitUnifiedBranch",
+          "thefactory-tools/GitStashListItem"
         ]
       },
       "GitHubCredentials": {
@@ -2821,6 +2845,7 @@
           "GitContextValue",
           "GitSelection",
           "thefactory-tools/GitUnifiedBranch",
+          "GitDerivedBadgeState",
           "Record",
           "PendingBranch",
           "thefactory-tools/GitBranchEvent",
@@ -4362,6 +4387,7 @@
       "NotificationProjectSettings": {
         "path": "src/types/settings.ts",
         "dependencies": [
+          "GitBadgeSubToggles",
           "NotificationCategory",
           "Record",
           "thefactory-tools/WebSearchApiKeys"
@@ -5816,7 +5842,6 @@
       "StructuredUnifiedDiff": {
         "path": "src/renderer/src/components/chat/tool-popups/diffUtils.tsx",
         "dependencies": [
-          "ParsedHunk",
           "StructuredUnifiedDiffProps"
         ]
       },
@@ -7648,6 +7673,7 @@
         "path": "renderer/src/components/ui/DiffViewer.tsx",
         "dependencies": [
           "IntraMode",
+          "Set",
           "DiffViewerProps"
         ]
       },
@@ -7818,15 +7844,14 @@
       "FactoryTestsManager": {
         "path": "logic/factory/FactoryTestsManager.ts",
         "dependencies": [
-          "thefactory-tools/TestTools",
+          "thefactory-tools/TestRunnerTools",
           "Promise",
           "thefactory-tools/CoverageResult",
           "thefactory-tools/TestsResult",
           "Record",
           "ProjectsManager",
           "electron/BrowserWindow",
-          "thefactory-tools/createTestTools",
-          "thefactory-tools/TestResult"
+          "thefactory-tools/createTestRunnerTools"
         ]
       },
       "factoryTestsService": {
@@ -8200,6 +8225,13 @@
           "thefactory-tools/CoverageResult"
         ]
       },
+      "generateHunkPatch": {
+        "path": "renderer/src/components/chat/tool-popups/diffUtils.tsx",
+        "description": "Generate a patch for a single hunk by index",
+        "dependencies": [
+          "react"
+        ]
+      },
       "generateSelectedPatch": {
         "path": "renderer/src/components/chat/tool-popups/diffUtils.tsx",
         "dependencies": [
@@ -8240,16 +8272,20 @@
         "path": "logic/chat/promptTemplates.ts",
         "dependencies": []
       },
+      "GitBadgeSubToggles": {
+        "path": "types/settings.ts",
+        "description": "Sub-toggles for git badge types.",
+        "dependencies": [
+          "thefactory-tools/WebSearchApiKeys"
+        ]
+      },
       "GitBranchDetailsPanel": {
         "path": "renderer/src/screens/git/GitBranchDetailsPanel.tsx",
         "dependencies": [
           "PointerEvent",
           "HTMLElement",
           "HTMLDivElement",
-          "thefactory-tools/GitUnifiedBranch",
-          "thefactory-tools/GitDiffSummary",
-          "@renderer/services/gitService/gitService",
-          "@renderer/services/gitService"
+          "thefactory-tools/GitUnifiedBranch"
         ]
       },
       "GitCheckoutRemoteModal": {
@@ -8281,6 +8317,8 @@
         "dependencies": [
           "GraphNode",
           "thefactory-tools/GitLogCommit",
+          "HTMLDivElement",
+          "Map",
           "@renderer/services/gitService/gitService",
           "@renderer/services/gitService"
         ]
@@ -8322,6 +8360,7 @@
           "Promise",
           "PendingFeatureRefsState",
           "UnifiedBranchesState",
+          "GitDerivedBadgeState",
           "ProjectGitStatus",
           "thefactory-tools/GitCommitInfo",
           "thefactory-tools/GitBranchEvent",
@@ -8383,6 +8422,16 @@
           "Promise",
           "Partial",
           "Omit"
+        ]
+      },
+      "GitDerivedBadgeState": {
+        "path": "renderer/src/contexts/GitContext.tsx",
+        "description": "Derived git badge state for a single project's current branch.",
+        "dependencies": [
+          "thefactory-tools/GitCommitInfo",
+          "thefactory-tools/GitBranchEvent",
+          "thefactory-tools/GitUnifiedBranch",
+          "thefactory-tools/GitStashListItem"
         ]
       },
       "GitHubCredentials": {
@@ -8639,6 +8688,7 @@
           "GitContextValue",
           "GitSelection",
           "thefactory-tools/GitUnifiedBranch",
+          "GitDerivedBadgeState",
           "Record",
           "PendingBranch",
           "thefactory-tools/GitBranchEvent",
@@ -10180,6 +10230,7 @@
       "NotificationProjectSettings": {
         "path": "types/settings.ts",
         "dependencies": [
+          "GitBadgeSubToggles",
           "NotificationCategory",
           "Record",
           "thefactory-tools/WebSearchApiKeys"
@@ -11634,7 +11685,6 @@
       "StructuredUnifiedDiff": {
         "path": "renderer/src/components/chat/tool-popups/diffUtils.tsx",
         "dependencies": [
-          "ParsedHunk",
           "StructuredUnifiedDiffProps"
         ]
       },

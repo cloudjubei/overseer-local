@@ -1,5 +1,11 @@
 {
-  "status": "error",
-  "message": "No JS/TS test files found under the provided path.",
-  "files": {}
+  "status": "ok",
+  "files": {},
+  "summary": {
+    "pct_branch": 0,
+    "pct_functions": 0,
+    "pct_lines": 0,
+    "pct_statements": 0
+  },
+  "message": ""
 }

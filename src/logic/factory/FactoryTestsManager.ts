@@ -1,9 +1,8 @@
 import type { BrowserWindow } from 'electron'
 import IPC_HANDLER_KEYS from '../../preload/ipcHandlersKeys'
 import {
-  createTestTools,
-  TestTools,
-  TestResult,
+  createTestRunnerTools,
+  TestRunnerTools,
   CoverageResult,
   TestsResult,
 } from 'thefactory-tools'
@@ -13,7 +12,7 @@ import BaseManager from '../BaseManager'
 
 export default class FactoryTestsManager extends BaseManager {
   private toolsLock = new Mutex()
-  private tools: Record<string, TestTools> = {}
+  private tools: Record<string, TestRunnerTools> = {}
   private projectsManager: ProjectsManager
 
   constructor(projectRoot: string, window: BrowserWindow, projectsManager: ProjectsManager) {
@@ -93,28 +92,36 @@ export default class FactoryTestsManager extends BaseManager {
     return await tools?.getLastTestsCoverage()
   }
 
-  private async updateTool(projectId: string): Promise<TestTools | undefined> {
+  private async updateTool(projectId: string): Promise<TestRunnerTools | undefined> {
     const projectRoot = await this.projectsManager.getProjectDir(projectId)
     if (!projectRoot) {
       return
     }
-    const tools = createTestTools(projectId, projectRoot)
-    await tools.init()
-    this.tools[projectId] = tools
+    try {
+      const tools = createTestRunnerTools(projectId, projectRoot)
+      await tools.init()
+      this.tools[projectId] = tools
 
-    tools.subscribe(async (testUpdate) => {
-      if (this.window) {
-        this.window.webContents.send(IPC_HANDLER_KEYS.FACTORY_TESTS_SUBSCRIBE, testUpdate)
-      }
-    })
-    return tools
-  }
-  private async __getTools(projectId: string): Promise<TestTools | undefined> {
-    await this.toolsLock.lock()
-    if (!this.tools[projectId]) {
-      await this.updateTool(projectId)
+      tools.subscribe(async (testUpdate) => {
+        if (this.window) {
+          this.window.webContents.send(IPC_HANDLER_KEYS.FACTORY_TESTS_SUBSCRIBE, testUpdate)
+        }
+      })
+      return tools
+    } catch (e: any) {
+      return undefined
     }
-    this.toolsLock.unlock()
-    return this.tools[projectId]
+  }
+
+  private async __getTools(projectId: string): Promise<TestRunnerTools | undefined> {
+    await this.toolsLock.lock()
+    try {
+      if (!this.tools[projectId]) {
+        await this.updateTool(projectId)
+      }
+      return this.tools[projectId]
+    } finally {
+      this.toolsLock.unlock()
+    }
   }
 }
