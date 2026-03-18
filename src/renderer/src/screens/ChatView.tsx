@@ -2,8 +2,8 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { ChatSidebar } from '@renderer/components/chat'
 import { useProjectContext, useActiveProject } from '@renderer/contexts/ProjectContext'
 import { useStories } from '@renderer/contexts/StoriesContext'
-// import { useChats } from '@renderer/contexts/ChatsContext'
 import { useChats } from '@renderer/contexts/chats/ChatsContext'
+import { useProjectsGroups } from '@renderer/contexts/ProjectsGroupsContext'
 import type {
   ChatContext,
   ChatContextAgentRun,
@@ -37,11 +37,14 @@ function titleForContext(
     getProjectTitle: (id?: string) => string
     getStoryTitle: (id?: string) => string
     getFeatureTitle: (id?: string) => string
+    getGroupTitle: (id?: string) => string
   },
 ): string {
   switch (context.type) {
     case 'PROJECT':
       return `Project Chat — ${opts.getProjectTitle((context as ChatContextProject).projectId)}`
+    case 'GROUP':
+      return `Group Chat — ${opts.getGroupTitle((context as any).groupId)}`
     case 'STORY':
       return `Story Chat — ${opts.getStoryTitle((context as ChatContextStory).storyId)}`
     case 'FEATURE': {
@@ -88,6 +91,7 @@ function parseChatRouteFromHash(hashRaw: string): ChatContext | undefined {
 export default function ChatView() {
   const { projectId: activeProjectId } = useActiveProject()
   const { projects } = useProjectContext()
+  const { groups, activeGroupId, activeSelectionType } = useProjectsGroups()
   const { storiesById, featuresById } = useStories()
   const { getChatIfExists, chats, chatsByProjectId } = useChats()
   const { hasUnreadForProject } = useChatUnread()
@@ -98,6 +102,11 @@ export default function ChatView() {
     if (!id) return ''
     const p = projects.find((prj) => prj.id === id)
     return p?.title || id
+  }
+  const getGroupTitle = (id?: string) => {
+    if (!id) return ''
+    const g = groups.find((grp) => grp.id === id)
+    return g?.title || id
   }
   const getStoryTitle = (id?: string) => {
     if (!id) return ''
@@ -170,26 +179,37 @@ export default function ChatView() {
         return
       }
 
-      // 2. Check if current selection is valid for the active project
+      // 2. Check if current selection is valid for the active project/group
       if (selectedContext) {
-        const key = getChatContextKey(selectedContext)
-        const projectChats = chatsByProjectId[activeProjectId ?? ''] || []
-        if (projectChats.some((c) => c.key === key)) {
-          return // Current context is valid, do nothing
+        if (activeSelectionType === 'group' && activeGroupId) {
+          if (selectedContext.type === 'GROUP' && (selectedContext as any).groupId === activeGroupId) {
+            return
+          }
+        } else {
+          const key = getChatContextKey(selectedContext)
+          const projectChats = chatsByProjectId[activeProjectId ?? ''] || []
+          if (projectChats.some((c) => c.key === key) || (selectedContext.type === 'PROJECT' && selectedContext.projectId === activeProjectId)) {
+            return // Current context is valid, do nothing
+          }
         }
       }
 
       // 3. Current context is invalid or missing, find a new one.
       // Wait until chats for this project are loaded.
-      if (!hasLoadedProjectChats) {
+      if (activeSelectionType === 'project' && !hasLoadedProjectChats) {
         if (selectedContext) setSelectedContext(undefined)
         return
       }
 
       // Find best candidate for new context
-      let newContext: ChatContext | undefined = loadMostRecentlyOpened()
-      if (!newContext && activeProjectId) {
-        newContext = { type: 'PROJECT', projectId: activeProjectId }
+      let newContext: ChatContext | undefined = undefined
+      if (activeSelectionType === 'group' && activeGroupId) {
+        newContext = { type: 'GROUP', groupId: activeGroupId } as any
+      } else {
+        newContext = loadMostRecentlyOpened()
+        if (!newContext && activeProjectId) {
+          newContext = { type: 'PROJECT', projectId: activeProjectId }
+        }
       }
 
       if (newContext) {
@@ -214,7 +234,7 @@ export default function ChatView() {
     const onHash = () => void apply()
     window.addEventListener('hashchange', onHash)
     return () => window.removeEventListener('hashchange', onHash)
-  }, [getChatIfExists, activeProjectId, chatsByProjectId, selectedContext])
+  }, [getChatIfExists, activeProjectId, activeGroupId, activeSelectionType, chatsByProjectId, selectedContext])
 
   useEffect(() => {
     if (selectedContext) {
@@ -227,6 +247,7 @@ export default function ChatView() {
   // Track last 'opened' timestamp per chat key in the active project
   useEffect(() => {
     if (!selectedContext || !activeProjectId) return
+    if (selectedContext.type === 'GROUP') return
     try {
       const key = getChatContextKey(selectedContext)
       const storageKey = `chat-last-opened:${activeProjectId}`
@@ -310,6 +331,7 @@ export default function ChatView() {
           context={selectedContext}
           chatContextTitle={titleForContext(selectedContext, {
             getProjectTitle,
+            getGroupTitle,
             getStoryTitle,
             getFeatureTitle,
           })}
