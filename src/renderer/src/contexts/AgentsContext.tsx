@@ -174,17 +174,6 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
             type: 'AGENT_RUN_STORY',
           }
 
-      await chatsService.createChat({
-        context,
-        messages: [],
-        state: 'created',
-        metadata: {
-          agentType: effectiveAgentType,
-          llmConfig: activeConfig,
-          githubCredentials: activeCredentials,
-          webSearchApiKeys: appSettings.webSearchApiKeys,
-        },
-      })
       const chatSettings = getSettings(context)!
       const isolated = true
 
@@ -202,7 +191,6 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
         )
         .catch((err) => {
           console.error('[AgentsContext] Agent run failed to start:', err)
-          chatsService.updateChat(context, { state: 'error' }).catch(() => {})
         })
     },
     [activeConfig, appSettings, activeProject, getCredentials],

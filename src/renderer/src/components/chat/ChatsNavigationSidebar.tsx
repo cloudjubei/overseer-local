@@ -393,7 +393,7 @@ export default function ChatsNavigationSidebar({
       if (
         type === 'PROJECT' ||
         type === 'PROJECT_TOPIC' ||
-        type === 'AGENT_RUN' ||
+        type === 'AGENT_RUN_STORY' ||
         type === 'AGENT_RUN_FEATURE'
       ) {
         return ctx.projectId === activeProjectId

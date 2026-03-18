@@ -1,5 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import type { ChatContext, ChatUpdate, CompletionMessage, LLMConfig, ChatSettings } from 'thefactory-tools'
+import type {
+  ChatContext,
+  ChatUpdate,
+  CompletionMessage,
+  LLMConfig,
+  ChatSettings,
+} from 'thefactory-tools'
 import { getChatContextKey } from 'thefactory-tools/utils'
 
 import { chatsService } from '@renderer/services/chatsService'
@@ -175,6 +181,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
         for (const project of projects) {
           try {
             const projectChats = await chatsService.listChats(project.id)
+
             const chatStates: ChatState[] = projectChats.map((chat) => ({
               key: getChatContextKey(chat.context),
               chat,
@@ -364,7 +371,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       const key = getChatContextKey(context)
       const chatState = await getChat(context)
       if (chatState.isThinking) return
-      
+
       try {
         const updated = await chatsService.deleteLastMessage(context)
         if (updated) {
@@ -471,12 +478,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
   )
 
   const retryCompletion = useCallback(
-    async (
-      context: ChatContext,
-      prompt: string,
-      settings: ChatSettings,
-      config: LLMConfig,
-    ) => {
+    async (context: ChatContext, prompt: string, settings: ChatSettings, config: LLMConfig) => {
       const key = getChatContextKey(context)
       const chatState = await getChat(context)
       if (chatState.isThinking) return

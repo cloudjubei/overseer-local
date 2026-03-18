@@ -3130,7 +3130,7 @@
         "path": "src/renderer/src/navigation/sidebar/GroupNavItem.tsx",
         "dependencies": [
           "GroupNavItemProps",
-          "thefactory-tools/ProjectGroup",
+          "thefactory-tools/ProjectsGroup",
           "thefactory-tools/ProjectSpec",
           "@renderer/hooks/useNotifications/useNotifications",
           "@renderer/hooks/useNotifications"
@@ -4184,7 +4184,9 @@
       "MainView": {
         "path": "src/renderer/src/navigation/main/MainView.tsx",
         "dependencies": [
-          "HTMLButtonElement"
+          "HTMLButtonElement",
+          "@renderer/contexts/ProjectsGroupsContext/useProjectsGroups",
+          "@renderer/contexts/ProjectsGroupsContext"
         ]
       },
       "Markdown": {
@@ -9217,7 +9219,7 @@
         "path": "renderer/src/navigation/sidebar/GroupNavItem.tsx",
         "dependencies": [
           "GroupNavItemProps",
-          "thefactory-tools/ProjectGroup",
+          "thefactory-tools/ProjectsGroup",
           "thefactory-tools/ProjectSpec",
           "@renderer/hooks/useNotifications/useNotifications",
           "@renderer/hooks/useNotifications"
@@ -10271,7 +10273,9 @@
       "MainView": {
         "path": "renderer/src/navigation/main/MainView.tsx",
         "dependencies": [
-          "HTMLButtonElement"
+          "HTMLButtonElement",
+          "@renderer/contexts/ProjectsGroupsContext/useProjectsGroups",
+          "@renderer/contexts/ProjectsGroupsContext"
         ]
       },
       "Markdown": {
@@ -13482,6 +13486,13 @@
           "TheFactoryDb"
         ]
       },
+      "DatabaseInfo": {
+        "path": "dist/migrations/runner.d.ts",
+        "dependencies": [
+          "Array",
+          "pg/Pool"
+        ]
+      },
       "DB": {
         "path": "dist/connection.d.ts",
         "description": "Represents the raw database client from the `pg` library.",
@@ -13583,6 +13594,12 @@
         "path": "dist/utils.js",
         "dependencies": []
       },
+      "getDatabaseInfo": {
+        "path": "dist/migrations/runner.js",
+        "dependencies": [
+          "pg/Pool"
+        ]
+      },
       "Logger": {
         "path": "dist/types.d.ts",
         "description": "A simple logger interface.",
@@ -13596,6 +13613,42 @@
       "MatchParams": {
         "path": "dist/types.d.ts",
         "description": "Parameters for filtering results in match and search operations.",
+        "dependencies": []
+      },
+      "migrateDatabase": {
+        "path": "dist/migrations/runner.js",
+        "dependencies": [
+          "pg/Pool"
+        ]
+      },
+      "MigrateOptions": {
+        "path": "dist/migrations/runner.d.ts",
+        "dependencies": [
+          "pg/Pool"
+        ]
+      },
+      "Migration": {
+        "path": "dist/migrations/types.d.ts",
+        "dependencies": [
+          "Promise",
+          "MigrationContext",
+          "pg/Pool",
+          "pg/PoolClient"
+        ]
+      },
+      "migration001": {
+        "path": "dist/migrations/001-init.js",
+        "dependencies": []
+      },
+      "MigrationContext": {
+        "path": "dist/migrations/types.d.ts",
+        "dependencies": [
+          "pg/PoolClient",
+          "pg/Pool"
+        ]
+      },
+      "migrations": {
+        "path": "dist/migrations/index.js",
         "dependencies": []
       },
       "normalizeDocPath": {
