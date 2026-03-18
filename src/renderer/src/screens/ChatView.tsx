@@ -9,6 +9,8 @@ import type {
   ChatContextAgentRun,
   ChatContextAgentRunFeature,
   ChatContextFeature,
+  ChatContextGroup,
+  ChatContextGroupTopic,
   ChatContextProject,
   ChatContextProjectTopic,
   ChatContextStory,
@@ -41,27 +43,31 @@ function titleForContext(
   },
 ): string {
   switch (context.type) {
+    case 'GROUP':
+      return `Group Chat — ${opts.getGroupTitle((context as ChatContextGroup).groupId)}`
+    case 'GROUP_TOPIC': {
+      const c = context as ChatContextGroupTopic
+      return `Group ${prettyTopicName(c.groupTopic)} — ${opts.getGroupTitle(c.groupId)}`
+    }
     case 'PROJECT':
       return `Project Chat — ${opts.getProjectTitle((context as ChatContextProject).projectId)}`
-    case 'GROUP':
-      return `Group Chat — ${opts.getGroupTitle((context as any).groupId)}`
-    case 'STORY':
-      return `Story Chat — ${opts.getStoryTitle((context as ChatContextStory).storyId)}`
-    case 'FEATURE': {
-      const c = context as ChatContextFeature
-      return `Feature Chat — ${opts.getStoryTitle(c.storyId)} / ${opts.getFeatureTitle(c.featureId)}`
-    }
     case 'PROJECT_TOPIC': {
       const c = context as ChatContextProjectTopic
       return `Project ${prettyTopicName(c.projectTopic)} — ${opts.getProjectTitle(c.projectId)}`
     }
+    case 'STORY':
+      return `Story Chat — ${opts.getStoryTitle((context as ChatContextStory).storyId)}`
     case 'STORY_TOPIC': {
       const c = context as ChatContextStoryTopic
       return `Story ${prettyTopicName(c.storyTopic)} — ${opts.getStoryTitle(c.storyId)}`
     }
-    case 'AGENT_RUN': {
+    case 'AGENT_RUN_STORY': {
       const c = context as ChatContextAgentRun
       return `Agent Story Run ${opts.getStoryTitle(c.storyId)}`
+    }
+    case 'FEATURE': {
+      const c = context as ChatContextFeature
+      return `Feature Chat — ${opts.getStoryTitle(c.storyId)} / ${opts.getFeatureTitle(c.featureId)}`
     }
     case 'AGENT_RUN_FEATURE': {
       const c = context as ChatContextAgentRunFeature
@@ -182,13 +188,19 @@ export default function ChatView() {
       // 2. Check if current selection is valid for the active project/group
       if (selectedContext) {
         if (activeSelectionType === 'group' && activeGroupId) {
-          if (selectedContext.type === 'GROUP' && (selectedContext as any).groupId === activeGroupId) {
+          if (
+            selectedContext.type === 'GROUP' &&
+            (selectedContext as any).groupId === activeGroupId
+          ) {
             return
           }
         } else {
           const key = getChatContextKey(selectedContext)
           const projectChats = chatsByProjectId[activeProjectId ?? ''] || []
-          if (projectChats.some((c) => c.key === key) || (selectedContext.type === 'PROJECT' && selectedContext.projectId === activeProjectId)) {
+          if (
+            projectChats.some((c) => c.key === key) ||
+            (selectedContext.type === 'PROJECT' && selectedContext.projectId === activeProjectId)
+          ) {
             return // Current context is valid, do nothing
           }
         }
@@ -234,7 +246,14 @@ export default function ChatView() {
     const onHash = () => void apply()
     window.addEventListener('hashchange', onHash)
     return () => window.removeEventListener('hashchange', onHash)
-  }, [getChatIfExists, activeProjectId, activeGroupId, activeSelectionType, chatsByProjectId, selectedContext])
+  }, [
+    getChatIfExists,
+    activeProjectId,
+    activeGroupId,
+    activeSelectionType,
+    chatsByProjectId,
+    selectedContext,
+  ])
 
   useEffect(() => {
     if (selectedContext) {

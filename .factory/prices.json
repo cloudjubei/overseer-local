@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-03-12T12:25:51.197Z",
+  "updatedAt": "2026-03-18T15:32:56.120Z",
   "prices": [
     {
       "provider": "openai",
@@ -3949,7 +3949,7 @@
       "provider": "gemini",
       "model": "gemini/gemini-1.5-flash",
       "inputPerMTokensUSD": 0.075,
-      "outputPerMTokensUSD": 0.3,
+      "outputPerMTokensUSD": 0,
       "currency": "USD"
     },
     {
@@ -17056,7 +17056,7 @@
     {
       "provider": "vertex_ai",
       "model": "vertex_ai/gemini-embedding-2-preview",
-      "inputPerMTokensUSD": 0.19999999999999998,
+      "inputPerMTokensUSD": 0.15,
       "outputPerMTokensUSD": 0,
       "currency": "USD"
     },

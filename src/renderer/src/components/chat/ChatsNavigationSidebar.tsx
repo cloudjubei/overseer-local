@@ -1,8 +1,20 @@
 import React, { useEffect, useMemo, useState, useCallback, memo } from 'react'
 import { useActiveProject, useProjectContext } from '@renderer/contexts/ProjectContext'
+import { useProjectsGroups } from '@renderer/contexts/ProjectsGroupsContext'
 import { useStories } from '@renderer/contexts/StoriesContext'
 import { useChats } from '../../contexts/chats/ChatsContext'
-import type { ChatContext } from 'thefactory-tools'
+import type {
+  ChatContext,
+  ChatContextAgentRunFeature,
+  ChatContextAgentRunStory,
+  ChatContextFeature,
+  ChatContextGroup,
+  ChatContextGroupTopic,
+  ChatContextProject,
+  ChatContextProjectTopic,
+  ChatContextStory,
+  ChatContextStoryTopic,
+} from 'thefactory-tools'
 import { IconChevron } from '@renderer/components/ui/icons/Icons'
 import { useChatUnread } from '@renderer/hooks/useChatUnread'
 import DotBadge from '@renderer/components/ui/DotBadge'
@@ -16,40 +28,47 @@ function prettyTopicName(topic?: string): string {
   if (!topic) return 'Topic'
   return String(topic)
     .replace(/_/g, ' ')
-    .replace(/\b\w/g, (m) => m.toUpperCase())
+    .replace(/\\b\\w/g, (m) => m.toUpperCase())
 }
 
 function titleForContext(
   context: ChatContext,
   opts: {
     getProjectTitle: (id?: string) => string
+    getGroupTitle: (id?: string) => string
     getStoryTitle: (id?: string) => string
     getFeatureTitle: (id?: string) => string
   },
 ): string {
   switch (context.type) {
+    case 'GROUP':
+      return `Group Chat — ${opts.getGroupTitle((context as ChatContextGroup).groupId)}`
+    case 'GROUP_TOPIC': {
+      const c = context as ChatContextGroupTopic
+      return `Group ${prettyTopicName(c.groupTopic)} — ${opts.getGroupTitle(c.groupId)}`
+    }
     case 'PROJECT':
-      return `Project Chat — ${opts.getProjectTitle(context.projectId)}`
+      return `Project Chat — ${opts.getProjectTitle((context as ChatContextProject).projectId)}`
+    case 'PROJECT_TOPIC': {
+      const c = context as ChatContextProjectTopic
+      return `Project ${prettyTopicName(c.projectTopic)} — ${opts.getProjectTitle(c.projectId)}`
+    }
     case 'STORY':
-      return `Story Chat — ${opts.getStoryTitle(context.storyId)}`
-    case 'FEATURE':
-      return `Feature Chat — ${opts.getStoryTitle(context.storyId)} / ${opts.getFeatureTitle(
-        context.featureId,
-      )}`
-    case 'PROJECT_TOPIC':
-      return `Project ${prettyTopicName((context as any).projectTopic)} — ${opts.getProjectTitle(
-        context.projectId,
-      )}`
-    case 'STORY_TOPIC':
-      return `Story ${prettyTopicName((context as any).storyTopic)} — ${opts.getStoryTitle(
-        context.storyId,
-      )}`
-    case 'AGENT_RUN':
-      return `Agent Story Run — ${opts.getStoryTitle(context.storyId)}`
-    case 'AGENT_RUN_FEATURE':
-      return `Agent Feature Run — ${opts.getStoryTitle(context.storyId)} / ${opts.getFeatureTitle(
-        context.featureId,
-      )}`
+      return `Story Chat — ${opts.getStoryTitle((context as ChatContextStory).storyId)}`
+    case 'FEATURE': {
+      const c = context as ChatContextFeature
+      return `Feature Chat — ${opts.getStoryTitle(c.storyId)} / ${opts.getFeatureTitle(c.featureId)}`
+    }
+    case 'STORY_TOPIC': {
+      const c = context as ChatContextStoryTopic
+      return `Story ${prettyTopicName(c.storyTopic)} — ${opts.getStoryTitle(c.storyId)}`
+    }
+    case 'AGENT_RUN_STORY':
+      return `Agent Story Run — ${opts.getStoryTitle((context as ChatContextAgentRunStory).storyId)}`
+    case 'AGENT_RUN_FEATURE': {
+      const c = context as ChatContextAgentRunFeature
+      return `Agent Feature Run — ${opts.getStoryTitle(c.storyId)} / ${opts.getFeatureTitle(c.featureId)}`
+    }
     default:
       return 'Chat'
   }
@@ -92,7 +111,7 @@ function computeKeysForContext(ctx: ChatContext): string[] {
   const storiesKey = 'cat:stories'
   const topicsKey = 'cat:project-topics'
 
-  if (ctx.type === 'PROJECT') {
+  if (ctx.type === 'PROJECT' || ctx.type === 'GROUP') {
     return keys
   }
 
@@ -100,14 +119,14 @@ function computeKeysForContext(ctx: ChatContext): string[] {
     ctx.type === 'STORY' ||
     ctx.type === 'FEATURE' ||
     ctx.type === 'STORY_TOPIC' ||
-    ctx.type === 'AGENT_RUN' ||
+    ctx.type === 'AGENT_RUN_STORY' ||
     ctx.type === 'AGENT_RUN_FEATURE'
   ) {
     const sid = (ctx as any).storyId as string
     keys.push(storiesKey)
     keys.push(`story:${sid}`)
     if (ctx.type === 'STORY_TOPIC') keys.push(`story:${sid}:topics`)
-    if (ctx.type === 'AGENT_RUN') keys.push(`story:${sid}:runs`)
+    if (ctx.type === 'AGENT_RUN_STORY') keys.push(`story:${sid}:runs`)
     if (ctx.type === 'FEATURE' || ctx.type === 'AGENT_RUN_FEATURE') {
       keys.push(`story:${sid}:features`)
       const fid = (ctx as any).featureId as string
@@ -300,8 +319,9 @@ export default function ChatsNavigationSidebar({
 }: ChatsNavigationSidebarProps) {
   const { projectId: activeProjectId, project } = useActiveProject()
   const { projects, getStoryDisplayIndex } = useProjectContext()
+  const { activeSelectionType, activeGroupId, groups } = useProjectsGroups()
   const { storiesById, featuresById } = useStories()
-  const { chatsByProjectId } = useChats()
+  const { chatsByProjectId, chatsByGroupId } = useChats()
   const { appSettings } = useAppSettings()
 
   const chatBadgeColor = appSettings?.notificationSystemSettings?.badgeColors?.chat_messages
@@ -313,6 +333,15 @@ export default function ChatsNavigationSidebar({
       return p?.title || id
     },
     [projects],
+  )
+
+  const getGroupTitle = useCallback(
+    (id?: string) => {
+      if (!id) return ''
+      const g = groups.find((grp) => grp.id === id)
+      return g?.title || id
+    },
+    [groups],
   )
 
   const getStoryTitle = useCallback(
@@ -333,8 +362,30 @@ export default function ChatsNavigationSidebar({
     [featuresById],
   )
 
+  const isActive = useCallback(
+    (ctx: ChatContext) => {
+      if (!selectedContext) return false
+      return getChatContextKey(selectedContext) === getChatContextKey(ctx)
+    },
+    [selectedContext],
+  )
+
+  const ensureOpen = useCallback(
+    (ctx: ChatContext) => {
+      // Do not prefetch/create chats here to avoid accidentally recreating deleted chats
+      onSelectContext(ctx)
+    },
+    [onSelectContext],
+  )
+
+  const groupContext: ChatContext = useMemo(
+    () => ({ type: 'GROUP', groupId: activeGroupId }) as any,
+    [activeGroupId],
+  )
+
   // Enforce active project scoping for all chat lists
   const projectChats = useMemo(() => {
+    if (!activeProjectId) return []
     const raw = chatsByProjectId[activeProjectId] || []
     const filtered = raw.filter((c) => {
       const ctx = c.chat.context as any
@@ -359,6 +410,7 @@ export default function ChatsNavigationSidebar({
 
   // Hash of timestamps for the active project's chats to trigger re-sorting when they change
   const chatsTimeHash = useMemo(() => {
+    if (!activeProjectId) return []
     const list = chatsByProjectId[activeProjectId] || []
     return list.map((c) => `${c.key}:${c.chat.updatedAt || c.chat.createdAt || ''}`).join('|')
   }, [chatsByProjectId, activeProjectId])
@@ -420,22 +472,6 @@ export default function ChatsNavigationSidebar({
     }
   }, [selectedContext])
 
-  const isActive = useCallback(
-    (ctx: ChatContext) => {
-      if (!selectedContext) return false
-      return getChatContextKey(selectedContext) === getChatContextKey(ctx)
-    },
-    [selectedContext],
-  )
-
-  const ensureOpen = useCallback(
-    (ctx: ChatContext) => {
-      // Do not prefetch/create chats here to avoid accidentally recreating deleted chats
-      onSelectContext(ctx)
-    },
-    [onSelectContext],
-  )
-
   const handleToggle = useCallback((key: string) => {
     setOpen((prev) => ({ ...prev, [key]: !prev[key] }))
   }, [])
@@ -446,6 +482,7 @@ export default function ChatsNavigationSidebar({
   )
 
   const storiesGrouping = useMemo(() => {
+    if (!activeProjectId) return []
     const byStory = new Map<string, StoryGroup>()
 
     for (const c of projectChats) {
@@ -457,7 +494,7 @@ export default function ChatsNavigationSidebar({
         type === 'STORY' ||
         type === 'FEATURE' ||
         type === 'STORY_TOPIC' ||
-        type === 'AGENT_RUN' ||
+        type === 'AGENT_RUN_STORY' ||
         type === 'AGENT_RUN_FEATURE'
       ) {
         const sid = (ctx as any).storyId as string | undefined
@@ -481,13 +518,28 @@ export default function ChatsNavigationSidebar({
         group.updatedAt = group.updatedAt.localeCompare(updatedAt) < 0 ? updatedAt : group.updatedAt
 
         if (type === 'STORY') {
-          const label = titleForContext(ctx, { getProjectTitle, getStoryTitle, getFeatureTitle })
+          const label = titleForContext(ctx, {
+            getProjectTitle,
+            getGroupTitle,
+            getStoryTitle,
+            getFeatureTitle,
+          })
           group.storyChat = { ctx, label, key: c.key, updatedAt }
         } else if (type === 'STORY_TOPIC') {
-          const label = titleForContext(ctx, { getProjectTitle, getStoryTitle, getFeatureTitle })
+          const label = titleForContext(ctx, {
+            getProjectTitle,
+            getGroupTitle,
+            getStoryTitle,
+            getFeatureTitle,
+          })
           group.topics.push({ ctx, label, key: c.key, updatedAt })
-        } else if (type === 'AGENT_RUN') {
-          const label = titleForContext(ctx, { getProjectTitle, getStoryTitle, getFeatureTitle })
+        } else if (type === 'AGENT_RUN_STORY') {
+          const label = titleForContext(ctx, {
+            getProjectTitle,
+            getGroupTitle,
+            getStoryTitle,
+            getFeatureTitle,
+          })
           group.runs.push({ ctx, label, key: c.key, updatedAt })
         } else if (type === 'FEATURE' || type === 'AGENT_RUN_FEATURE') {
           const fid = (ctx as any).featureId as string | undefined
@@ -505,7 +557,12 @@ export default function ChatsNavigationSidebar({
             group.features[fid] = f
           }
           f.updatedAt = f.updatedAt.localeCompare(updatedAt) < 0 ? updatedAt : f.updatedAt
-          const label = titleForContext(ctx, { getProjectTitle, getStoryTitle, getFeatureTitle })
+          const label = titleForContext(ctx, {
+            getProjectTitle,
+            getGroupTitle,
+            getStoryTitle,
+            getFeatureTitle,
+          })
           if (type === 'FEATURE') f.featureChat = { ctx, label, key: c.key, updatedAt }
           else f.runs.push({ ctx, label, key: c.key, updatedAt })
         }
@@ -531,6 +588,7 @@ export default function ChatsNavigationSidebar({
   }, [
     projectChats,
     getProjectTitle,
+    getGroupTitle,
     getStoryTitle,
     getFeatureTitle,
     activeProjectId,
@@ -546,7 +604,12 @@ export default function ChatsNavigationSidebar({
       if (ctx.type === 'PROJECT_TOPIC') {
         items.push({
           ctx,
-          label: titleForContext(ctx, { getProjectTitle, getStoryTitle, getFeatureTitle }),
+          label: titleForContext(ctx, {
+            getProjectTitle,
+            getGroupTitle,
+            getStoryTitle,
+            getFeatureTitle,
+          }),
           key: c.key,
           updatedAt,
         })
@@ -554,7 +617,35 @@ export default function ChatsNavigationSidebar({
     }
     items.sort((a, b) => a.label.localeCompare(b.label))
     return items
-  }, [projectChats, getProjectTitle, getStoryTitle, getFeatureTitle])
+  }, [projectChats, getProjectTitle, getGroupTitle, getStoryTitle, getFeatureTitle])
+
+  if (activeSelectionType === 'group') {
+    return (
+      <div className="flex-1 min-h-0 overflow-auto px-2 pb-3 space-y-3">
+        <div className="space-y-3">
+          <div className="space-y-1">
+            <div className="px-2">
+              <SectionHeader title="Group" isOpen={true} onToggle={() => {}} />
+            </div>
+            <div className="px-2">
+              <ConnectedChatButton
+                ctx={groupContext}
+                label={titleForContext(groupContext, {
+                  getProjectTitle,
+                  getGroupTitle,
+                  getStoryTitle,
+                  getFeatureTitle,
+                })}
+                isActive={isActive(groupContext)}
+                onClick={ensureOpen}
+                chatBadgeColor={chatBadgeColor}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="flex-1 min-h-0 overflow-auto px-2 pb-3 space-y-3">
@@ -569,6 +660,7 @@ export default function ChatsNavigationSidebar({
                 ctx={generalContext}
                 label={titleForContext(generalContext, {
                   getProjectTitle,
+                  getGroupTitle,
                   getStoryTitle,
                   getFeatureTitle,
                 })}
@@ -838,6 +930,7 @@ export default function ChatsNavigationSidebar({
                 const ctx = c.chat.context
                 const label = titleForContext(ctx, {
                   getProjectTitle,
+                  getGroupTitle,
                   getStoryTitle,
                   getFeatureTitle,
                 })

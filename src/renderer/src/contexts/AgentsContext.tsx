@@ -5,6 +5,7 @@ import type {
   AgentRunType,
   ChatContextAgentRun,
   ChatContextAgentRunFeature,
+  ChatContextAgentRunStory,
 } from 'thefactory-tools'
 import { useAppSettings } from './AppSettingsContext'
 import { useLLMConfig } from '../contexts/LLMConfigContext'
@@ -50,7 +51,7 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
     const projectChats = chatsByProjectId[activeProject.id] || []
     return projectChats
       .map((c) => c.chat)
-      .filter((c) => c.context.type === 'AGENT_RUN' || c.context.type === 'AGENT_RUN_FEATURE')
+      .filter((c) => c.context.type === 'AGENT_RUN_STORY' || c.context.type === 'AGENT_RUN_FEATURE')
   }, [chatsByProjectId, activeProject?.id])
 
   const runsActive = useMemo(
@@ -101,7 +102,7 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
         const type = c.chat.context.type
         const state = c.chat.state
         if (
-          (type === 'AGENT_RUN' || type === 'AGENT_RUN_FEATURE') &&
+          (type === 'AGENT_RUN_STORY' || type === 'AGENT_RUN_FEATURE') &&
           (state === 'running' || state === 'created')
         ) {
           count++
@@ -119,7 +120,9 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
       const projectChats = chatsByProjectId[pId] || []
       const runs = projectChats
         .map((c) => c.chat)
-        .filter((c) => c.context.type === 'AGENT_RUN' || c.context.type === 'AGENT_RUN_FEATURE')
+        .filter(
+          (c) => c.context.type === 'AGENT_RUN_STORY' || c.context.type === 'AGENT_RUN_FEATURE',
+        )
       let count = 0
       for (const r of runs) {
         if (isFinished(r) && r.context.agentRunId && !seenCompletedIds.has(r.context.agentRunId))
@@ -160,7 +163,7 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
       const agentRunId = Date.now().toString()
 
       const commonContext = { projectId, storyId, agentRunId }
-      const context: ChatContextAgentRun | ChatContextAgentRunFeature = featureId
+      const context: ChatContextAgentRunStory | ChatContextAgentRunFeature = featureId
         ? {
             ...commonContext,
             type: 'AGENT_RUN_FEATURE',
@@ -168,7 +171,7 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
           }
         : {
             ...commonContext,
-            type: 'AGENT_RUN',
+            type: 'AGENT_RUN_STORY',
           }
 
       await chatsService.createChat({

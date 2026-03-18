@@ -14,20 +14,24 @@ export function extractSettingsForContext(
 ): ChatSettings | undefined {
   if (!all || !context) return undefined
   switch (context.type) {
+    case 'GROUP':
+      return all.GROUP
+    case 'GROUP_TOPIC':
+      return all.GROUP_TOPIC[context.groupTopic!]
     case 'PROJECT':
       return all.PROJECT
-    case 'STORY':
-      return all.STORY
-    case 'FEATURE':
-      return all.FEATURE
-    case 'AGENT_RUN':
-      return all.AGENT_RUN
-    case 'AGENT_RUN_FEATURE':
-      return all.AGENT_RUN_FEATURE
     case 'PROJECT_TOPIC':
       return all.PROJECT_TOPIC[context.projectTopic!]
+    case 'STORY':
+      return all.STORY
     case 'STORY_TOPIC':
       return all.STORY_TOPIC[context.storyTopic!]
+    case 'AGENT_RUN_STORY':
+      return all.AGENT_RUN_STORY
+    case 'FEATURE':
+      return all.FEATURE
+    case 'AGENT_RUN_FEATURE':
+      return all.AGENT_RUN_FEATURE
     default:
       return all.GENERAL
   }

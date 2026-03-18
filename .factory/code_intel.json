@@ -869,6 +869,7 @@
           "react/useMemo",
           "thefactory-tools/ChatContextAgentRun",
           "thefactory-tools/ChatContextAgentRunFeature",
+          "thefactory-tools/ChatContextAgentRunStory",
           "thefactory-tools/utils/getChatContextKey",
           "thefactory-tools/utils"
         ]
@@ -881,7 +882,8 @@
           "thefactory-tools/Chat",
           "thefactory-tools/ChatContext",
           "thefactory-tools/ChatContextAgentRun",
-          "thefactory-tools/ChatContextAgentRunFeature"
+          "thefactory-tools/ChatContextAgentRunFeature",
+          "thefactory-tools/ChatContextAgentRunStory"
         ]
       },
       "AgentsProvider": {
@@ -889,13 +891,14 @@
         "dependencies": [
           "AgentsContextValue",
           "thefactory-tools/ChatContextAgentRunFeature",
-          "thefactory-tools/ChatContextAgentRun",
+          "thefactory-tools/ChatContextAgentRunStory",
           "thefactory-tools/AgentRunType",
           "Promise",
           "thefactory-tools/Chat",
           "Set",
           "ReactNode",
-          "thefactory-tools/ChatContext"
+          "thefactory-tools/ChatContext",
+          "thefactory-tools/ChatContextAgentRun"
         ]
       },
       "AgentTypePicker": {
@@ -1231,7 +1234,9 @@
           "thefactory-tools/utils/getChatContextKey",
           "thefactory-tools/utils",
           "@renderer/hooks/useNotifications/useNotifications",
-          "@renderer/hooks/useNotifications"
+          "@renderer/hooks/useNotifications",
+          "@renderer/contexts/ProjectsGroupsContext/useProjectsGroups",
+          "@renderer/contexts/ProjectsGroupsContext"
         ]
       },
       "ChatSidebarHeader": {
@@ -1321,7 +1326,9 @@
           "thefactory-tools/utils/getChatContextKey",
           "thefactory-tools/utils",
           "@renderer/hooks/useNotifications/useNotifications",
-          "@renderer/hooks/useNotifications"
+          "@renderer/hooks/useNotifications",
+          "@renderer/contexts/ProjectsGroupsContext/useProjectsGroups",
+          "@renderer/contexts/ProjectsGroupsContext"
         ]
       },
       "chatsManager": {
@@ -1363,8 +1370,19 @@
           "@renderer/contexts/ProjectContext/useActiveProject",
           "@renderer/contexts/ProjectContext/useProjectContext",
           "@renderer/contexts/ProjectContext",
+          "@renderer/contexts/ProjectsGroupsContext/useProjectsGroups",
+          "@renderer/contexts/ProjectsGroupsContext",
           "@renderer/contexts/StoriesContext/useStories",
           "@renderer/contexts/StoriesContext",
+          "thefactory-tools/ChatContextAgentRunFeature",
+          "thefactory-tools/ChatContextAgentRunStory",
+          "thefactory-tools/ChatContextFeature",
+          "thefactory-tools/ChatContextGroup",
+          "thefactory-tools/ChatContextGroupTopic",
+          "thefactory-tools/ChatContextProject",
+          "thefactory-tools/ChatContextProjectTopic",
+          "thefactory-tools/ChatContextStory",
+          "thefactory-tools/ChatContextStoryTopic",
           "@renderer/components/ui/icons/Icons/IconChevron",
           "@renderer/components/ui/icons/Icons",
           "@renderer/hooks/useChatUnread/useChatUnread",
@@ -1387,8 +1405,19 @@
           "@renderer/contexts/ProjectContext/useActiveProject",
           "@renderer/contexts/ProjectContext/useProjectContext",
           "@renderer/contexts/ProjectContext",
+          "@renderer/contexts/ProjectsGroupsContext/useProjectsGroups",
+          "@renderer/contexts/ProjectsGroupsContext",
           "@renderer/contexts/StoriesContext/useStories",
           "@renderer/contexts/StoriesContext",
+          "thefactory-tools/ChatContextAgentRunFeature",
+          "thefactory-tools/ChatContextAgentRunStory",
+          "thefactory-tools/ChatContextFeature",
+          "thefactory-tools/ChatContextGroup",
+          "thefactory-tools/ChatContextGroupTopic",
+          "thefactory-tools/ChatContextProject",
+          "thefactory-tools/ChatContextProjectTopic",
+          "thefactory-tools/ChatContextStory",
+          "thefactory-tools/ChatContextStoryTopic",
           "@renderer/components/ui/icons/Icons/IconChevron",
           "@renderer/components/ui/icons/Icons",
           "@renderer/hooks/useChatUnread/useChatUnread",
@@ -1425,6 +1454,8 @@
           "@renderer/services/chatsService",
           "@renderer/services/projectsService/projectsService",
           "@renderer/services/projectsService",
+          "@renderer/services/projectsGroupsService/projectsGroupsService",
+          "@renderer/services/projectsGroupsService",
           "@renderer/services/completionService/completionService",
           "@renderer/services/completionService",
           "@renderer/services/notificationsService/notificationsService",
@@ -1493,6 +1524,8 @@
           "thefactory-tools/ChatContextAgentRun",
           "thefactory-tools/ChatContextAgentRunFeature",
           "thefactory-tools/ChatContextFeature",
+          "thefactory-tools/ChatContextGroup",
+          "thefactory-tools/ChatContextGroupTopic",
           "thefactory-tools/ChatContextProject",
           "thefactory-tools/ChatContextProjectTopic",
           "thefactory-tools/ChatContextStory",
@@ -6312,13 +6345,14 @@
         "path": "src/renderer/src/hooks/useAgentRuns.ts",
         "dependencies": [
           "thefactory-tools/ChatContextAgentRunFeature",
-          "thefactory-tools/ChatContextAgentRun",
+          "thefactory-tools/ChatContextAgentRunStory",
           "thefactory-tools/AgentRunType",
           "Promise",
           "thefactory-tools/Chat",
           "AgentRunsValue",
           "react/useCallback",
           "react/useMemo",
+          "thefactory-tools/ChatContextAgentRun",
           "thefactory-tools/utils/getChatContextKey",
           "thefactory-tools/utils"
         ]
@@ -6331,7 +6365,8 @@
           "thefactory-tools/Chat",
           "thefactory-tools/AgentRunType",
           "thefactory-tools/ChatContextAgentRun",
-          "thefactory-tools/ChatContextAgentRunFeature"
+          "thefactory-tools/ChatContextAgentRunFeature",
+          "thefactory-tools/ChatContextAgentRunStory"
         ]
       },
       "useAppSettings": {
@@ -6921,6 +6956,7 @@
           "react/useMemo",
           "thefactory-tools/ChatContextAgentRun",
           "thefactory-tools/ChatContextAgentRunFeature",
+          "thefactory-tools/ChatContextAgentRunStory",
           "thefactory-tools/utils/getChatContextKey",
           "thefactory-tools/utils"
         ]
@@ -6933,7 +6969,8 @@
           "thefactory-tools/Chat",
           "thefactory-tools/ChatContext",
           "thefactory-tools/ChatContextAgentRun",
-          "thefactory-tools/ChatContextAgentRunFeature"
+          "thefactory-tools/ChatContextAgentRunFeature",
+          "thefactory-tools/ChatContextAgentRunStory"
         ]
       },
       "AgentsProvider": {
@@ -6941,13 +6978,14 @@
         "dependencies": [
           "AgentsContextValue",
           "thefactory-tools/ChatContextAgentRunFeature",
-          "thefactory-tools/ChatContextAgentRun",
+          "thefactory-tools/ChatContextAgentRunStory",
           "thefactory-tools/AgentRunType",
           "Promise",
           "thefactory-tools/Chat",
           "Set",
           "ReactNode",
-          "thefactory-tools/ChatContext"
+          "thefactory-tools/ChatContext",
+          "thefactory-tools/ChatContextAgentRun"
         ]
       },
       "AgentTypePicker": {
@@ -7283,7 +7321,9 @@
           "thefactory-tools/utils/getChatContextKey",
           "thefactory-tools/utils",
           "@renderer/hooks/useNotifications/useNotifications",
-          "@renderer/hooks/useNotifications"
+          "@renderer/hooks/useNotifications",
+          "@renderer/contexts/ProjectsGroupsContext/useProjectsGroups",
+          "@renderer/contexts/ProjectsGroupsContext"
         ]
       },
       "ChatSidebarHeader": {
@@ -7373,7 +7413,9 @@
           "thefactory-tools/utils/getChatContextKey",
           "thefactory-tools/utils",
           "@renderer/hooks/useNotifications/useNotifications",
-          "@renderer/hooks/useNotifications"
+          "@renderer/hooks/useNotifications",
+          "@renderer/contexts/ProjectsGroupsContext/useProjectsGroups",
+          "@renderer/contexts/ProjectsGroupsContext"
         ]
       },
       "chatsManager": {
@@ -7415,8 +7457,19 @@
           "@renderer/contexts/ProjectContext/useActiveProject",
           "@renderer/contexts/ProjectContext/useProjectContext",
           "@renderer/contexts/ProjectContext",
+          "@renderer/contexts/ProjectsGroupsContext/useProjectsGroups",
+          "@renderer/contexts/ProjectsGroupsContext",
           "@renderer/contexts/StoriesContext/useStories",
           "@renderer/contexts/StoriesContext",
+          "thefactory-tools/ChatContextAgentRunFeature",
+          "thefactory-tools/ChatContextAgentRunStory",
+          "thefactory-tools/ChatContextFeature",
+          "thefactory-tools/ChatContextGroup",
+          "thefactory-tools/ChatContextGroupTopic",
+          "thefactory-tools/ChatContextProject",
+          "thefactory-tools/ChatContextProjectTopic",
+          "thefactory-tools/ChatContextStory",
+          "thefactory-tools/ChatContextStoryTopic",
           "@renderer/components/ui/icons/Icons/IconChevron",
           "@renderer/components/ui/icons/Icons",
           "@renderer/hooks/useChatUnread/useChatUnread",
@@ -7439,8 +7492,19 @@
           "@renderer/contexts/ProjectContext/useActiveProject",
           "@renderer/contexts/ProjectContext/useProjectContext",
           "@renderer/contexts/ProjectContext",
+          "@renderer/contexts/ProjectsGroupsContext/useProjectsGroups",
+          "@renderer/contexts/ProjectsGroupsContext",
           "@renderer/contexts/StoriesContext/useStories",
           "@renderer/contexts/StoriesContext",
+          "thefactory-tools/ChatContextAgentRunFeature",
+          "thefactory-tools/ChatContextAgentRunStory",
+          "thefactory-tools/ChatContextFeature",
+          "thefactory-tools/ChatContextGroup",
+          "thefactory-tools/ChatContextGroupTopic",
+          "thefactory-tools/ChatContextProject",
+          "thefactory-tools/ChatContextProjectTopic",
+          "thefactory-tools/ChatContextStory",
+          "thefactory-tools/ChatContextStoryTopic",
           "@renderer/components/ui/icons/Icons/IconChevron",
           "@renderer/components/ui/icons/Icons",
           "@renderer/hooks/useChatUnread/useChatUnread",
@@ -7477,6 +7541,8 @@
           "@renderer/services/chatsService",
           "@renderer/services/projectsService/projectsService",
           "@renderer/services/projectsService",
+          "@renderer/services/projectsGroupsService/projectsGroupsService",
+          "@renderer/services/projectsGroupsService",
           "@renderer/services/completionService/completionService",
           "@renderer/services/completionService",
           "@renderer/services/notificationsService/notificationsService",
@@ -7545,6 +7611,8 @@
           "thefactory-tools/ChatContextAgentRun",
           "thefactory-tools/ChatContextAgentRunFeature",
           "thefactory-tools/ChatContextFeature",
+          "thefactory-tools/ChatContextGroup",
+          "thefactory-tools/ChatContextGroupTopic",
           "thefactory-tools/ChatContextProject",
           "thefactory-tools/ChatContextProjectTopic",
           "thefactory-tools/ChatContextStory",
@@ -12364,13 +12432,14 @@
         "path": "renderer/src/hooks/useAgentRuns.ts",
         "dependencies": [
           "thefactory-tools/ChatContextAgentRunFeature",
-          "thefactory-tools/ChatContextAgentRun",
+          "thefactory-tools/ChatContextAgentRunStory",
           "thefactory-tools/AgentRunType",
           "Promise",
           "thefactory-tools/Chat",
           "AgentRunsValue",
           "react/useCallback",
           "react/useMemo",
+          "thefactory-tools/ChatContextAgentRun",
           "thefactory-tools/utils/getChatContextKey",
           "thefactory-tools/utils"
         ]
@@ -12383,7 +12452,8 @@
           "thefactory-tools/Chat",
           "thefactory-tools/AgentRunType",
           "thefactory-tools/ChatContextAgentRun",
-          "thefactory-tools/ChatContextAgentRunFeature"
+          "thefactory-tools/ChatContextAgentRunFeature",
+          "thefactory-tools/ChatContextAgentRunStory"
         ]
       },
       "useAppSettings": {
@@ -13673,7 +13743,7 @@
           "Story",
           "LLMConfig",
           "ChatContextAgentRunFeature",
-          "ChatContextAgentRun",
+          "ChatContextAgentRunStory",
           "src/tools/types.js/IFactoryTools",
           "src/tools/types.js"
         ]
@@ -13688,7 +13758,7 @@
           "WebSearchApiKeys",
           "GithubCredentials",
           "ChatContextAgentRunFeature",
-          "ChatContextAgentRun",
+          "ChatContextAgentRunStory",
           "AgentRunType",
           "LLMConfig",
           "src/tools/types.js/IFactoryTools",
@@ -13706,7 +13776,7 @@
           "GitTools",
           "Tools",
           "ChatContextAgentRunFeature",
-          "ChatContextAgentRun",
+          "ChatContextAgentRunStory",
           "AgentRunType",
           "LLMConfig",
           "src/tools/types.js/IFactoryTools",
@@ -13755,7 +13825,7 @@
           "GithubCredentials",
           "LLMConfig",
           "ChatContextAgentRunFeature",
-          "ChatContextAgentRun",
+          "ChatContextAgentRunStory",
           "AgentRunType"
         ]
       },
@@ -13927,11 +13997,20 @@
       },
       "ChatContextAgentRunFeature": {
         "path": "dist/chats/chatsTypes.d.ts",
-        "dependencies": []
+        "dependencies": [
+          "ChatContextAgentRun"
+        ]
+      },
+      "ChatContextAgentRunStory": {
+        "path": "dist/chats/chatsTypes.d.ts",
+        "dependencies": [
+          "ChatContextAgentRun"
+        ]
       },
       "ChatContextArguments": {
         "path": "dist/chats/chatsTypes.d.ts",
         "dependencies": [
+          "AgentRunType",
           "Feature",
           "Story",
           "ProjectSpec",
@@ -16523,7 +16602,7 @@
           "Status"
         ]
       },
-      "STORY_CONTEXT_HEADER": {
+      "STORY_CONTEXT": {
         "path": "dist/chats/chatsConstants.js",
         "dependencies": []
       },

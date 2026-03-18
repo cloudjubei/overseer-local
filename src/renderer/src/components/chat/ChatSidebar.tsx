@@ -25,6 +25,7 @@ import { useToast } from '../ui/Toast'
 import { ChatSidebarHeader } from './sidebar/ChatSidebarHeader'
 import { AgentRunBanner } from './sidebar/AgentRunBanner'
 import { ChatSidebarModals } from './sidebar/ChatSidebarModals'
+import { useProjectsGroups } from '@renderer/contexts/ProjectsGroupsContext'
 
 export type ChatSidebarProps = {
   context: ChatContext
@@ -67,6 +68,7 @@ export default function ChatSidebar({
 
   const { toast } = useToast()
 
+  const { getGroupById } = useProjectsGroups()
   const { getProjectById } = useProjectContext()
   const { storiesById, featuresById } = useStories()
   const { activeChatConfig, isChatConfigured } = useLLMConfig()
@@ -321,6 +323,7 @@ export default function ChatSidebar({
 
   const contextArguments: ChatContextArguments = useMemo(() => {
     const args: ChatContextArguments = { ...context }
+    if (context.groupId) args.projectsGroup = getGroupById(context.groupId)
     if (context.projectId) args.project = getProjectById(context.projectId)
     if (context.storyId) args.story = storiesById[context.storyId]
     if (context.featureId) args.feature = featuresById[context.featureId]
@@ -472,8 +475,8 @@ export default function ChatSidebar({
   )
 
   const isRunningAgent =
-    (context.type === 'AGENT_RUN' || context.type === 'AGENT_RUN_FEATURE') &&
-    (chat?.state === 'created' || chat?.state === 'running')
+    (context.type === 'AGENT_RUN_STORY' || context.type === 'AGENT_RUN_FEATURE') &&
+    (chat?.chat.state === 'created' || chat?.chat.state === 'running')
 
   return (
     <section className={sectionClass}>

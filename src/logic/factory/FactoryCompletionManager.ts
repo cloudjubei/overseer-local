@@ -268,7 +268,7 @@ export default class FactoryCompletionManager extends BaseManager {
 
     const callTool = async (toolCall: ToolCall): Promise<any> => {
       return await this.factoryToolsManager.executeTool(
-        projectId,
+        toolCall.arguments?.projectId ?? projectId,
         toolCall.name,
         toolCall.arguments,
       )

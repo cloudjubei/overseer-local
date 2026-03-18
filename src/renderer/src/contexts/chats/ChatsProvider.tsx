@@ -4,6 +4,7 @@ import { getChatContextKey } from 'thefactory-tools/utils'
 
 import { chatsService } from '@renderer/services/chatsService'
 import { projectsService } from '@renderer/services/projectsService'
+import { projectsGroupsService } from '@renderer/services/projectsGroupsService'
 import { completionService } from '@renderer/services/completionService'
 import { notificationsService } from '@renderer/services/notificationsService'
 import { useActiveProject } from '@renderer/contexts/ProjectContext'
@@ -33,12 +34,14 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
 
   const [chats, setChats] = useState<Record<string, ChatState>>({})
   const [chatsByProjectId, setChatsByProjectId] = useState<Record<string, ChatState[]>>({})
+  const [chatsByGroupId, setChatsByGroupId] = useState<Record<string, ChatState[]>>({})
 
   // Track last assistant message index we've notified for each chat key.
   const lastAssistantNotifiedRef = useRef<Record<string, number>>({})
 
   // Track chat->project so we can resolve notifications + last-opened cleanup.
   const chatKeyToProjectIdRef = useRef<Record<string, string>>({})
+  const chatKeyToGroupIdRef = useRef<Record<string, string>>({})
 
   // Track recently-deleted chat keys so we don't resurrect via late updates.
   const deletedAtByKeyRef = useRef<Map<string, number>>(new Map())
@@ -103,6 +106,32 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
     })
   }, [])
 
+  const upsertChatsByGroup = useCallback((chatState: ChatState) => {
+    const gid = (chatState.chat.context as any).groupId
+    if (!gid) return
+    setChatsByGroupId((prev) => {
+      const existing = prev[gid] || []
+      const idx = existing.findIndex((c) => c.key === chatState.key)
+      let nextForGroup: ChatState[]
+      if (idx >= 0) {
+        nextForGroup = existing.map((c, i) => (i === idx ? { ...c, ...chatState } : c))
+      } else {
+        nextForGroup = [...existing, chatState]
+      }
+      return { ...prev, [gid]: nextForGroup }
+    })
+  }, [])
+
+  const removeFromChatsByGroup = useCallback((chatState: ChatState) => {
+    const gid = (chatState.chat.context as any).groupId
+    if (!gid) return
+    setChatsByGroupId((prev) => {
+      const existing = prev[gid] || []
+      const nextForGroup = existing.filter((c) => c.key !== chatState.key)
+      return { ...prev, [gid]: nextForGroup }
+    })
+  }, [])
+
   const updateChatState = useCallback(
     (key: string, updates: Partial<ChatState>) => {
       setChats((prev) => {
@@ -119,25 +148,28 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
         const next: ChatState = { ...base, ...updates }
         if (next.chat) {
           upsertChatsByProject(next)
+          upsertChatsByGroup(next)
         }
         return { ...prev, [key]: next }
       })
     },
-    [upsertChatsByProject],
+    [upsertChatsByProject, upsertChatsByGroup],
   )
 
   // --- initial load (legacy parity) ---
   useEffect(() => {
     const loadAll = async () => {
       try {
-        const [projects, settings] = await Promise.all([
+        const [projects, groups, settings] = await Promise.all([
           projectsService.listProjects(),
+          projectsGroupsService.listProjectsGroups(),
           chatsService.getChatSettings(),
         ])
 
         setAllChatSettings(settings || undefined)
 
         const byProject: Record<string, ChatState[]> = {}
+        const byGroup: Record<string, ChatState[]> = {}
         const all: Record<string, ChatState> = {}
 
         for (const project of projects) {
@@ -176,8 +208,44 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
           }
         }
 
+        for (const group of groups) {
+          try {
+            const groupChats = await chatsService.listChats(group.id)
+            const chatStates: ChatState[] = groupChats.map((chat) => ({
+              key: getChatContextKey(chat.context),
+              chat,
+              isLoading: false,
+              isThinking: false,
+            }))
+
+            byGroup[group.id] = chatStates
+
+            for (const st of chatStates) {
+              all[st.key] = st
+              chatKeyToGroupIdRef.current[st.key] = group.id
+
+              try {
+                const msgs = st.chat?.messages || []
+                let lastAssistantIdx = -1
+                for (let i = msgs.length - 1; i >= 0; i--) {
+                  if ((msgs[i] as any)?.role === 'assistant') {
+                    lastAssistantIdx = i
+                    break
+                  }
+                }
+                lastAssistantNotifiedRef.current[st.key] = lastAssistantIdx
+              } catch {
+                // ignore
+              }
+            }
+          } catch (e) {
+            console.error(`Failed to list chats for group ${group.id}`, e)
+          }
+        }
+
         setChats(all)
         setChatsByProjectId(byProject)
+        setChatsByGroupId(byGroup)
       } catch (e) {
         console.error('Failed to load chats/settings', e)
       }
@@ -202,6 +270,8 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
         try {
           const pid = chat.context?.projectId
           if (pid) chatKeyToProjectIdRef.current[key] = pid
+          const gid = (chat.context as any)?.groupId
+          if (gid) chatKeyToGroupIdRef.current[key] = gid
         } catch {
           // ignore
         }
@@ -245,6 +315,8 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       try {
         const pid = chat?.context?.projectId
         if (pid) chatKeyToProjectIdRef.current[key] = pid
+        const gid = (chat?.context as any)?.groupId
+        if (gid) chatKeyToGroupIdRef.current[key] = gid
       } catch {
         // ignore
       }
@@ -261,7 +333,10 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       setChats((prev) => {
         const next = { ...prev }
         const existing = next[key]
-        if (existing) removeFromChatsByProject(existing)
+        if (existing) {
+          removeFromChatsByProject(existing)
+          removeFromChatsByGroup(existing)
+        }
         delete next[key]
         return next
       })
@@ -274,13 +349,14 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
 
       try {
         delete chatKeyToProjectIdRef.current[key]
+        delete chatKeyToGroupIdRef.current[key]
       } catch {
         // ignore
       }
 
       await chatsService.deleteChat(context)
     },
-    [markDeleted, removeFromChatsByProject, clearDraft],
+    [markDeleted, removeFromChatsByProject, removeFromChatsByGroup, clearDraft],
   )
 
   const deleteLastMessage = useCallback(
@@ -435,7 +511,10 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
 
         if (chatUpdate.type === 'delete') {
           const existing = newChats[key]
-          if (existing) removeFromChatsByProject(existing)
+          if (existing) {
+            removeFromChatsByProject(existing)
+            removeFromChatsByGroup(existing)
+          }
 
           markDeleted(key)
 
@@ -452,6 +531,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
           delete newChats[key]
           try {
             delete chatKeyToProjectIdRef.current[key]
+            delete chatKeyToGroupIdRef.current[key]
           } catch {
             // ignore
           }
@@ -513,12 +593,18 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
 
           newChats[key] = next
           upsertChatsByProject(next)
+          upsertChatsByGroup(next)
 
           try {
             const pidFromChat = chatUpdate.chat?.context?.projectId
             const pidFromCtx = chatUpdate.context.projectId
             const pid = pidFromChat || pidFromCtx
             if (pid) chatKeyToProjectIdRef.current[key] = pid
+
+            const gidFromChat = (chatUpdate.chat?.context as any)?.groupId
+            const gidFromCtx = (chatUpdate.context as any)?.groupId
+            const gid = gidFromChat || gidFromCtx
+            if (gid) chatKeyToGroupIdRef.current[key] = gid
           } catch {
             // ignore
           }
@@ -601,14 +687,17 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
     markDeleted,
     projectId,
     removeFromChatsByProject,
+    removeFromChatsByGroup,
     removeLastOpenedChatKey,
     upsertChatsByProject,
+    upsertChatsByGroup,
   ])
 
   const value = useMemo<ChatsContextValue>(
     () => ({
       chats,
       chatsByProjectId,
+      chatsByGroupId,
 
       getDraft,
       setDraft,
@@ -638,6 +727,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
     [
       chats,
       chatsByProjectId,
+      chatsByGroupId,
       getDraft,
       setDraft,
       clearDraft,
