@@ -19,7 +19,7 @@ export default class FactoryLLMCostsManager extends BaseManager {
   async init(): Promise<void> {
     this._connectionString = this.databaseManager.getConnectionString()
     this.tools = createLLMCostsTools(this.projectRoot, this._connectionString)
-
+    await this.tools.init()
     console.log(
       '[factory] LLMCostsTools initialized. Loaded',
       this.tools?.listPrices()?.prices?.length || 0,
@@ -47,11 +47,13 @@ export default class FactoryLLMCostsManager extends BaseManager {
     return handlers
   }
 
-  getTools(): LLMCostsTools | undefined {
+  async getTools(): Promise<LLMCostsTools | undefined> {
+    //TODO FIX HACK: the below is a hack so that llm cost tools are initiated AFTER databaseManager connects
     const connectionString = this.databaseManager.getConnectionString()
     if (connectionString !== this._connectionString) {
       this._connectionString = connectionString
       this.tools = createLLMCostsTools(this.projectRoot, this._connectionString)
+      await this.tools.init()
     }
     return this.tools
   }
@@ -66,7 +68,7 @@ export default class FactoryLLMCostsManager extends BaseManager {
 
   async getCost(chatKey: string): Promise<LLMCostAggregateContent | undefined> {
     // Always use getTools() so we re-init tools if DB connection changes.
-    const tools = this.getTools()
+    const tools = await this.getTools()
     return tools?.getCost(chatKey)
   }
 }

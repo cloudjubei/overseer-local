@@ -158,7 +158,10 @@ export default function GitView() {
   const onSelectBranchBySha = React.useCallback(
     (sha: string) => {
       const local = localBranches.find((b) => b.localSha === sha)
-      if (local) { selection.selectBranch(projectId, local.name); return }
+      if (local) {
+        selection.selectBranch(projectId, local.name)
+        return
+      }
       const remote = remoteBranches.find((b) => b.remoteSha === sha)
       if (remote) selection.selectBranch(projectId, remote.name)
     },
@@ -170,14 +173,18 @@ export default function GitView() {
   }, [projectId, current?.name, selection])
 
   // ─── Switch / checkout ─────────────────────────────────────────────────────
-  const [checkoutRemoteBranch, setCheckoutRemoteBranch] = React.useState<GitUnifiedBranch | undefined>()
+  const [checkoutRemoteBranch, setCheckoutRemoteBranch] = React.useState<
+    GitUnifiedBranch | undefined
+  >()
 
   const switchToBranch = React.useCallback(
     async (b: GitUnifiedBranch) => {
       if (!projectId) return
       await loadCleanStatus()
       if (isClean === false) {
-        alert('Working tree is not clean. Please commit or stash your changes before switching branches.')
+        alert(
+          'Working tree is not clean. Please commit or stash your changes before switching branches.',
+        )
         return
       }
       if (b.isLocal) {
@@ -252,7 +259,11 @@ export default function GitView() {
         // Try to read MERGE_HEAD so we can pass the incoming branch name
         let incomingBranch = 'MERGE_HEAD'
         try {
-          const mergeHeadContent = await gitService.getFileContent(projectId, '.git/MERGE_HEAD', 'HEAD')
+          const mergeHeadContent = await gitService.getFileContent(
+            projectId,
+            '.git/MERGE_HEAD',
+            'HEAD',
+          )
           if (mergeHeadContent?.trim()) incomingBranch = mergeHeadContent.trim()
         } catch {}
         setConflict({
@@ -340,19 +351,6 @@ export default function GitView() {
           baseRef={mergeBase}
           branch={mergeHead}
           onRequestClose={() => setShowMerge(false)}
-          onConflict={(payload) => {
-            setShowMerge(false)
-            setConflict({
-              projectId,
-              baseRef: mergeBase,
-              branch: mergeHead,
-              conflicts: payload?.conflicts || [],
-            })
-          }}
-          onAfterMerge={() => {
-            setShowMerge(false)
-            window.dispatchEvent(new CustomEvent('git:refresh-now', { detail: { projectId } }))
-          }}
         />
       ) : null}
 

@@ -7,9 +7,7 @@ export type CostsContextValue = {
   getCost: (chatKey: string) => Promise<LLMCostAggregateContent | undefined>
 
   // Batch lookup convenience that dedupes keys and shares the same cache
-  getCosts: (
-    chatKeys: string[],
-  ) => Promise<Record<string, LLMCostAggregateContent | undefined>>
+  getCosts: (chatKeys: string[]) => Promise<Record<string, LLMCostAggregateContent | undefined>>
 
   // For when the UI knows a cost group changed and wants fresh data
   invalidate: (chatKey?: string) => void
@@ -28,36 +26,42 @@ type CacheEntry = {
 export function CostsProvider({ children }: { children: React.ReactNode }) {
   const cacheRef = useRef<Map<string, CacheEntry>>(new Map())
 
-  const invalidate = useCallback((chatKey?: string) => {
-    if (!chatKey) {
-      cacheRef.current.clear()
-      return
-    }
-    cacheRef.current.delete(chatKey)
-  }, [])
+  const invalidate = useCallback(
+    (chatKey?: string) => {
+      if (!chatKey) {
+        cacheRef.current.clear()
+        return
+      }
+      cacheRef.current.delete(chatKey)
+    },
+    [cacheRef],
+  )
 
-  const getCost = useCallback(async (chatKey: string) => {
-    const t = Date.now()
-    const cache = cacheRef.current
-    const existing = cache.get(chatKey)
+  const getCost = useCallback(
+    async (chatKey: string) => {
+      const t = Date.now()
+      const cache = cacheRef.current
+      const existing = cache.get(chatKey)
 
-    if (existing && existing.expiresAt > t) {
-      if (existing.inFlight) return existing.inFlight
-      return existing.value
-    }
+      if (existing && existing.expiresAt > t) {
+        if (existing.inFlight) return existing.inFlight
+        return existing.value
+      }
 
-    const inFlight = costsService.getCost(chatKey)
-    cache.set(chatKey, { expiresAt: t + DEFAULT_TTL_MS, inFlight })
+      const inFlight = costsService.getCost(chatKey)
+      cache.set(chatKey, { expiresAt: t + DEFAULT_TTL_MS, inFlight })
 
-    try {
-      const value = await inFlight
-      cache.set(chatKey, { expiresAt: Date.now() + DEFAULT_TTL_MS, value })
-      return value
-    } catch (err) {
-      cache.delete(chatKey)
-      throw err
-    }
-  }, [])
+      try {
+        const value = await inFlight
+        cache.set(chatKey, { expiresAt: Date.now() + DEFAULT_TTL_MS, value })
+        return value
+      } catch (err) {
+        cache.delete(chatKey)
+        throw err
+      }
+    },
+    [cacheRef],
+  )
 
   const getCosts = useCallback(
     async (chatKeys: string[]) => {

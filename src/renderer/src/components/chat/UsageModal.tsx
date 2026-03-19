@@ -57,6 +57,7 @@ type UsageAgg = {
   completionTokens: number
   totalTokens: number
   cachedReadInputTokens: number
+  cachedReadInputTokensRatio: number
 }
 
 function emptyAgg(): UsageAgg {
@@ -66,6 +67,7 @@ function emptyAgg(): UsageAgg {
     completionTokens: 0,
     totalTokens: 0,
     cachedReadInputTokens: 0,
+    cachedReadInputTokensRatio: 0,
   }
 }
 
@@ -204,7 +206,6 @@ export default function UsageModal({ isOpen, onClose, messages, chatKey }: Usage
   }, [messages, pricesByKey])
   const hasCurrent = usageRows.length > 0
 
-
   const aggByModel = useMemo(() => {
     const totalsAgg = emptyAgg()
     const map = new Map<string, UsageAgg>()
@@ -224,10 +225,15 @@ export default function UsageModal({ isOpen, onClose, messages, chatKey }: Usage
       totalsAgg.promptTokens += r.promptTokens
       a.completionTokens += r.completionTokens
       totalsAgg.completionTokens += r.completionTokens
-      a.totalTokens += r.promptTokens + r.completionTokens
-      totalsAgg.totalTokens += r.promptTokens + r.completionTokens
       a.cachedReadInputTokens += r.cachedReadInputTokens
       totalsAgg.cachedReadInputTokens += r.cachedReadInputTokens
+      a.cachedReadInputTokensRatio =
+        a.cachedReadInputTokens / Math.max(1, a.promptTokens + a.cachedReadInputTokens)
+      totalsAgg.cachedReadInputTokensRatio =
+        totalsAgg.cachedReadInputTokens /
+        Math.max(1, totalsAgg.promptTokens + totalsAgg.cachedReadInputTokens)
+      a.totalTokens += r.promptTokens + r.completionTokens + r.cachedReadInputTokens
+      totalsAgg.totalTokens += r.promptTokens + r.completionTokens + r.cachedReadInputTokens
       map.set(name, a)
     }
     const rows = Array.from(map.entries())
@@ -282,7 +288,8 @@ export default function UsageModal({ isOpen, onClose, messages, chatKey }: Usage
               {Math.round(r.completionTokens).toLocaleString()}
             </td>
             <td className="px-2 py-2 align-top">
-              {Math.round(r.cachedReadInputTokens).toLocaleString()}
+              {Math.round(r.cachedReadInputTokens).toLocaleString()} (
+              {Math.round(r.cachedReadInputTokensRatio * 100).toLocaleString()}%)
             </td>
           </tr>
         ))}
@@ -295,13 +302,19 @@ export default function UsageModal({ isOpen, onClose, messages, chatKey }: Usage
         costUSD: durable.totalCostUSD,
         promptTokens: durable.totalPromptTokens,
         completionTokens: durable.totalCompletionTokens,
-        totalTokens: durable.totalPromptTokens + durable.totalCompletionTokens,
         cachedReadInputTokens: durable.totalCachedReadInputTokens,
+        cachedReadInputTokensRatio:
+          durable.totalCachedReadInputTokens /
+          Math.max(1, durable.totalPromptTokens + durable.totalCachedReadInputTokens),
+        totalTokens:
+          durable.totalPromptTokens +
+          durable.totalCompletionTokens +
+          durable.totalCachedReadInputTokens,
       }
     : undefined
 
-  const durableBreakdownRows: Array<{ key: string; label: string } & UsageAgg> | undefined = useMemo(
-    () => {
+  const durableBreakdownRows: Array<{ key: string; label: string } & UsageAgg> | undefined =
+    useMemo(() => {
       if (!durable) return undefined
       const rows = Object.entries(durable.breakdown)
         .map(([k, b]) => {
@@ -312,8 +325,10 @@ export default function UsageModal({ isOpen, onClose, messages, chatKey }: Usage
             costUSD: b.costUSD,
             promptTokens: b.promptTokens,
             completionTokens: b.completionTokens,
-            totalTokens: b.promptTokens + b.completionTokens,
             cachedReadInputTokens: b.cachedReadInputTokens,
+            cachedReadInputTokensRatio:
+              b.cachedReadInputTokens / Math.max(1, b.promptTokens + b.cachedReadInputTokens),
+            totalTokens: b.promptTokens + b.completionTokens + b.cachedReadInputTokens,
           }
         })
         .sort((a, b) => b.costUSD - a.costUSD)
@@ -326,9 +341,7 @@ export default function UsageModal({ isOpen, onClose, messages, chatKey }: Usage
         },
         ...rows,
       ]
-    },
-    [durable, durableAgg],
-  )
+    }, [durable, durableAgg])
 
   return (
     <Modal

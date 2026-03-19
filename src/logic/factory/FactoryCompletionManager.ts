@@ -132,7 +132,7 @@ export default class FactoryCompletionManager extends BaseManager {
   ): Promise<CompletionResponse> {
     await this.chatsManager.addChatMessages(chatContext, messages)
 
-    const args = this.getCompletionArgs(chatContext, systemPrompt, llmConfig)
+    const args = await this.getCompletionArgs(chatContext, systemPrompt, llmConfig)
 
     try {
       return await this.agentRunnerTools.sendCompletion(args)
@@ -149,7 +149,13 @@ export default class FactoryCompletionManager extends BaseManager {
     settings: CompletionSettings,
     config: LLMConfig,
   ): Promise<CompletionResponseTurns> {
-    const args = this.getCompletionToolsArgs(projectId, chatContext, systemPrompt, settings, config)
+    const args = await this.getCompletionToolsArgs(
+      projectId,
+      chatContext,
+      systemPrompt,
+      settings,
+      config,
+    )
 
     try {
       return await this.agentRunnerTools.sendCompletionTools({ ...args, message })
@@ -165,7 +171,13 @@ export default class FactoryCompletionManager extends BaseManager {
     settings: CompletionSettings,
     config: LLMConfig,
   ): Promise<CompletionResponseTurns> {
-    const args = this.getCompletionToolsArgs(projectId, chatContext, systemPrompt, settings, config)
+    const args = await this.getCompletionToolsArgs(
+      projectId,
+      chatContext,
+      systemPrompt,
+      settings,
+      config,
+    )
 
     try {
       return await this.agentRunnerTools.retryCompletionTools(args)
@@ -182,7 +194,13 @@ export default class FactoryCompletionManager extends BaseManager {
     settings: CompletionSettings,
     config: LLMConfig,
   ): Promise<CompletionResponseTurns> {
-    const args = this.getCompletionToolsArgs(projectId, chatContext, systemPrompt, settings, config)
+    const args = await this.getCompletionToolsArgs(
+      projectId,
+      chatContext,
+      systemPrompt,
+      settings,
+      config,
+    )
 
     try {
       return await this.agentRunnerTools.resumeCompletionTools({ ...args, toolsGranted })
@@ -195,8 +213,9 @@ export default class FactoryCompletionManager extends BaseManager {
     settings: CompletionSettings,
     isolated: boolean,
   ): Promise<void> {
+    //TODO: startAgentRun use settings
     const chatsTools = this.chatsManager.getTools()
-    const llmCostsTools = this.factoryLLMCostsManager.getTools()
+    const llmCostsTools = await this.factoryLLMCostsManager.getTools()
     const abortSignal = this.createAbortSignal(params.chatContext)
     const opts: AgentRunnerStartRunOptions = {
       params,
@@ -236,13 +255,13 @@ export default class FactoryCompletionManager extends BaseManager {
     delete this.abortControllers[path]
   }
 
-  private getCompletionArgs(
+  private async getCompletionArgs(
     chatContext: ChatContext,
     systemPrompt: string,
     llmConfig: LLMConfig,
-  ): CompletionArgs {
+  ): Promise<CompletionArgs> {
     const chatsTools = this.chatsManager.getTools()
-    const llmCostsTools = this.factoryLLMCostsManager.getTools()
+    const llmCostsTools = await this.factoryLLMCostsManager.getTools()
     const projectTools = this.projectsManager.getTools()
     const abortSignal = this.createAbortSignal(chatContext)
 
@@ -257,14 +276,14 @@ export default class FactoryCompletionManager extends BaseManager {
     }
   }
 
-  private getCompletionToolsArgs(
+  private async getCompletionToolsArgs(
     projectId: string,
     chatContext: ChatContext,
     systemPrompt: string,
     settings: CompletionSettings,
     llmConfig: LLMConfig,
-  ): CompletionToolsArgs {
-    const completionArgs = this.getCompletionArgs(chatContext, systemPrompt, llmConfig)
+  ): Promise<CompletionToolsArgs> {
+    const completionArgs = await this.getCompletionArgs(chatContext, systemPrompt, llmConfig)
 
     const callTool = async (toolCall: ToolCall): Promise<any> => {
       return await this.factoryToolsManager.executeTool(
