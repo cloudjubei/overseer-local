@@ -40,7 +40,8 @@ export default function BoardView({ stories }: Props) {
     for (const k of Object.keys(map) as Status[]) {
       map[k].sort(
         (a, b) =>
-          (getStoryDisplayIndex(projectId, a.id) || 0) - (getStoryDisplayIndex(projectId, b.id) || 0),
+          (getStoryDisplayIndex(projectId || '', a.id) || 0) -
+          (getStoryDisplayIndex(projectId || '', b.id) || 0),
       )
     }
     return map

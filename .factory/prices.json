@@ -19,6 +19,14 @@
     },
     {
       "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "inputPerMTokensUSD": 0.75,
+      "outputPerMTokensUSD": 4.5,
+      "currency": "USD",
+      "cacheReadInputPerMTokensUSD": 0.075
+    },
+    {
+      "provider": "openai",
       "model": "gpt-5-nano",
       "inputPerMTokensUSD": 0.049999999999999996,
       "outputPerMTokensUSD": 0.39999999999999997,

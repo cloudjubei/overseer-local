@@ -24,8 +24,8 @@ export type ChatSidebarHeaderProps = {
   completion: CompletionSettings | undefined
   draftPrompt: string
   setDraftPrompt: Dispatch<SetStateAction<string>>
-  updateSettingsPrompt: (context: ChatContext, prompt: string) => Promise<void>
-  resetSettingsPrompt: (context: ChatContext) => Promise<void>
+  updateSettingsPrompt: (context: ChatContext, prompt: string) => Promise<string | undefined>
+  resetSettingsPrompt: (context: ChatContext) => Promise<string | undefined>
   tools: ToolToggle[]
   toggleAvailable: (tool: ToolToggle) => Promise<void>
   toggleAutoCall: (tool: ToolToggle) => Promise<void>

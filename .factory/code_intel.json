@@ -1041,6 +1041,9 @@
           "@renderer/navigation/Navigator",
           "@renderer/contexts/StoriesContext/useStories",
           "@renderer/contexts/StoriesContext",
+          "@renderer/components/ui/icons/Icons/IconChevronLeft",
+          "@renderer/components/ui/icons/Icons/IconChevronRight",
+          "@renderer/components/ui/icons/Icons",
           "@renderer/components/stories/StatusControl",
           "@renderer/components/stories/StoryCard"
         ]
@@ -3099,6 +3102,7 @@
       "GitView": {
         "path": "src/renderer/src/screens/GitView.tsx",
         "dependencies": [
+          "thefactory-tools/GitConflictEntry",
           "thefactory-tools/GitUnifiedBranch",
           "@renderer/services/gitService/gitService",
           "@renderer/services/gitService"
@@ -3326,6 +3330,18 @@
         "path": "src/renderer/src/components/ui/icons/IconChevronDown.tsx",
         "dependencies": []
       },
+      "IconChevronLeft": {
+        "path": "src/renderer/src/components/ui/icons/IconChevronLeft.tsx",
+        "dependencies": [
+          "react/CSSProperties"
+        ]
+      },
+      "IconChevronRight": {
+        "path": "src/renderer/src/components/ui/icons/IconChevronRight.tsx",
+        "dependencies": [
+          "react/CSSProperties"
+        ]
+      },
       "IconClamp": {
         "path": "src/renderer/src/components/ui/icons/IconClamp.tsx",
         "dependencies": [
@@ -3334,6 +3350,10 @@
       },
       "IconClipboardCheck": {
         "path": "src/renderer/src/components/ui/icons/IconClipboardCheck.tsx",
+        "dependencies": []
+      },
+      "IconClose": {
+        "path": "src/renderer/src/components/ui/icons/IconClose.tsx",
         "dependencies": []
       },
       "IconCode": {
@@ -3428,10 +3448,34 @@
           "Added"
         ]
       },
+      "IconFileBadge": {
+        "path": "src/renderer/src/components/ui/icons/IconFileTypes.tsx",
+        "dependencies": [
+          "react"
+        ]
+      },
+      "IconFileDefault": {
+        "path": "src/renderer/src/components/ui/icons/IconFileTypes.tsx",
+        "dependencies": [
+          "react"
+        ]
+      },
       "IconFileDeleted": {
         "path": "src/renderer/src/components/ui/icons/IconFileDeleted.tsx",
         "dependencies": [
           "Deleted"
+        ]
+      },
+      "IconFileImage": {
+        "path": "src/renderer/src/components/ui/icons/IconFileTypes.tsx",
+        "dependencies": [
+          "react"
+        ]
+      },
+      "IconFileJson": {
+        "path": "src/renderer/src/components/ui/icons/IconFileTypes.tsx",
+        "dependencies": [
+          "react"
         ]
       },
       "IconFileModified": {
@@ -3443,6 +3487,18 @@
       "IconFiles": {
         "path": "src/renderer/src/components/ui/icons/IconFiles.tsx",
         "dependencies": []
+      },
+      "IconFileText": {
+        "path": "src/renderer/src/components/ui/icons/IconFileTypes.tsx",
+        "dependencies": [
+          "react"
+        ]
+      },
+      "IconFileZip": {
+        "path": "src/renderer/src/components/ui/icons/IconFileTypes.tsx",
+        "dependencies": [
+          "react"
+        ]
       },
       "IconFirstAidKit": {
         "path": "src/renderer/src/components/ui/icons/IconFirstAidKit.tsx",
@@ -4155,7 +4211,6 @@
       "LocalStatus": {
         "path": "src/renderer/src/screens/git/GitLocalChanges.tsx",
         "dependencies": [
-          "Set",
           "LocalFileEntry",
           "@renderer/services/gitService/gitService",
           "@renderer/services/gitService",
@@ -7161,6 +7216,9 @@
           "@renderer/navigation/Navigator",
           "@renderer/contexts/StoriesContext/useStories",
           "@renderer/contexts/StoriesContext",
+          "@renderer/components/ui/icons/Icons/IconChevronLeft",
+          "@renderer/components/ui/icons/Icons/IconChevronRight",
+          "@renderer/components/ui/icons/Icons",
           "@renderer/components/stories/StatusControl",
           "@renderer/components/stories/StoryCard"
         ]
@@ -9219,6 +9277,7 @@
       "GitView": {
         "path": "renderer/src/screens/GitView.tsx",
         "dependencies": [
+          "thefactory-tools/GitConflictEntry",
           "thefactory-tools/GitUnifiedBranch",
           "@renderer/services/gitService/gitService",
           "@renderer/services/gitService"
@@ -9446,6 +9505,18 @@
         "path": "renderer/src/components/ui/icons/IconChevronDown.tsx",
         "dependencies": []
       },
+      "IconChevronLeft": {
+        "path": "renderer/src/components/ui/icons/IconChevronLeft.tsx",
+        "dependencies": [
+          "react/CSSProperties"
+        ]
+      },
+      "IconChevronRight": {
+        "path": "renderer/src/components/ui/icons/IconChevronRight.tsx",
+        "dependencies": [
+          "react/CSSProperties"
+        ]
+      },
       "IconClamp": {
         "path": "renderer/src/components/ui/icons/IconClamp.tsx",
         "dependencies": [
@@ -9454,6 +9525,10 @@
       },
       "IconClipboardCheck": {
         "path": "renderer/src/components/ui/icons/IconClipboardCheck.tsx",
+        "dependencies": []
+      },
+      "IconClose": {
+        "path": "renderer/src/components/ui/icons/IconClose.tsx",
         "dependencies": []
       },
       "IconCode": {
@@ -9548,10 +9623,34 @@
           "Added"
         ]
       },
+      "IconFileBadge": {
+        "path": "renderer/src/components/ui/icons/IconFileTypes.tsx",
+        "dependencies": [
+          "react"
+        ]
+      },
+      "IconFileDefault": {
+        "path": "renderer/src/components/ui/icons/IconFileTypes.tsx",
+        "dependencies": [
+          "react"
+        ]
+      },
       "IconFileDeleted": {
         "path": "renderer/src/components/ui/icons/IconFileDeleted.tsx",
         "dependencies": [
           "Deleted"
+        ]
+      },
+      "IconFileImage": {
+        "path": "renderer/src/components/ui/icons/IconFileTypes.tsx",
+        "dependencies": [
+          "react"
+        ]
+      },
+      "IconFileJson": {
+        "path": "renderer/src/components/ui/icons/IconFileTypes.tsx",
+        "dependencies": [
+          "react"
         ]
       },
       "IconFileModified": {
@@ -9563,6 +9662,18 @@
       "IconFiles": {
         "path": "renderer/src/components/ui/icons/IconFiles.tsx",
         "dependencies": []
+      },
+      "IconFileText": {
+        "path": "renderer/src/components/ui/icons/IconFileTypes.tsx",
+        "dependencies": [
+          "react"
+        ]
+      },
+      "IconFileZip": {
+        "path": "renderer/src/components/ui/icons/IconFileTypes.tsx",
+        "dependencies": [
+          "react"
+        ]
       },
       "IconFirstAidKit": {
         "path": "renderer/src/components/ui/icons/IconFirstAidKit.tsx",
@@ -10275,7 +10386,6 @@
       "LocalStatus": {
         "path": "renderer/src/screens/git/GitLocalChanges.tsx",
         "dependencies": [
-          "Set",
           "LocalFileEntry",
           "@renderer/services/gitService/gitService",
           "@renderer/services/gitService",

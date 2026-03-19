@@ -426,6 +426,12 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       })
 
       const chatProjectId = context.projectId ?? projectId
+      if (!chatProjectId) {
+        console.warn('sendMessage: missing projectId for chat completion', { context, projectId })
+        updateChatState(key, { isThinking: false })
+        return
+      }
+
       try {
         await completionService.sendCompletionTools(
           chatProjectId,
@@ -459,6 +465,12 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       updateChatState(key, { ...chatState, isThinking: true })
 
       const chatProjectId = context.projectId ?? projectId
+      if (!chatProjectId) {
+        console.warn('resumeTools: missing projectId for chat completion', { context, projectId })
+        updateChatState(key, { isThinking: false })
+        return
+      }
+
       try {
         await completionService.resumeCompletionTools(
           chatProjectId,
@@ -486,6 +498,12 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       updateChatState(key, { ...chatState, isThinking: true })
 
       const chatProjectId = context.projectId ?? projectId
+      if (!chatProjectId) {
+        console.warn('retryCompletion: missing projectId for chat completion', { context, projectId })
+        updateChatState(key, { isThinking: false })
+        return
+      }
+
       try {
         await completionService.retryCompletionTools(
           chatProjectId,

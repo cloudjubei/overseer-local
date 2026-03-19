@@ -70,6 +70,7 @@ export * from './IconScroll'
 export * from './IconRefresh'
 export * from './IconRefreshChat'
 export * from './IconClose'
+export * from './IconFileTypes'
 
 // New programming icons
 export * from './IconCode'

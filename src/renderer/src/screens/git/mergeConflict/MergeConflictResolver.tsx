@@ -13,6 +13,7 @@ export type MergeConflictResolverProps = {
   baseRef: string
   branch: string
   conflicts: GitConflictEntry[]
+  onClose?: () => void
 }
 
 type SegmentText = { type: 'text'; text: string }
@@ -97,6 +98,7 @@ export default function MergeConflictResolver({
   baseRef,
   branch,
   conflicts,
+  onClose,
 }: MergeConflictResolverProps) {
   const { toast } = useToast()
   const [selected, setSelected] = React.useState<string | null>(conflicts[0]?.path || null)
@@ -1033,6 +1035,7 @@ export default function MergeConflictResolver({
                     new CustomEvent('git:refresh-now', { detail: { projectId } }),
                   )
                 } catch {}
+                if (onClose) onClose()
               } finally {
                 setAbortRunning(false)
               }
@@ -1061,6 +1064,7 @@ export default function MergeConflictResolver({
             <Button
               onClick={async () => {
                 await doFinalize()
+                if (onClose) onClose()
               }}
               disabled={!allResolved || finalizing}
               loading={finalizing}

@@ -336,8 +336,9 @@ export default function GitView() {
       {showMerge && projectId && mergeBase && mergeHead ? (
         <GitMergeModal
           projectId={projectId}
+          repoPath={''}
           baseRef={mergeBase}
-          headRef={mergeHead}
+          branch={mergeHead}
           onRequestClose={() => setShowMerge(false)}
           onConflict={(payload) => {
             setShowMerge(false)

@@ -8,12 +8,14 @@ export type GitCommitModalProps = {
   projectId: string
   currentBranch: string
   onRequestClose: () => void
+  onAfterCommit?: () => void
 }
 
 export default function GitCommitModal({
   projectId,
   currentBranch,
   onRequestClose,
+  onAfterCommit,
 }: GitCommitModalProps) {
   const { unified } = useGit()
 
@@ -29,22 +31,11 @@ export default function GitCommitModal({
   useEffect(() => {
     gitService
       .getLocalStatus(projectId)
-      .then((status) => {
-        setStagedCount(status?.staged?.length || 0)
-      })
+      .then((st) => setStagedCount(st.staged.length))
       .catch(console.error)
   }, [projectId])
 
-  const doCommit = async () => {
-    if (!amend && !commitMsg.trim()) {
-      alert('Commit message required unless amending without message change')
-      return
-    }
-    if (!amend && stagedCount === 0) {
-      alert('No staged files to commit')
-      return
-    }
-
+  const onCommit = async () => {
     setBusy(true)
     setOpError(undefined)
     try {
@@ -66,6 +57,7 @@ export default function GitCommitModal({
       // refresh unified panel
       await unified.reload(projectId)
       onRequestClose()
+      if (onAfterCommit) onAfterCommit()
     } catch (e: any) {
       setOpError(e?.message || String(e))
     } finally {
@@ -82,62 +74,66 @@ export default function GitCommitModal({
     </div>
   )
 
+  const footer = (
+    <div className="flex items-center justify-between gap-2 w-full">
+      <div className="text-xs text-neutral-600 dark:text-neutral-400">
+        {stagedCount} file(s) staged
+      </div>
+      <div className="flex items-center gap-2">
+        <Button onClick={onRequestClose} variant="secondary" disabled={busy}>
+          Cancel
+        </Button>
+        <Button
+          onClick={onCommit}
+          loading={busy}
+          disabled={busy || (!amend && stagedCount === 0) || (!amend && !commitMsg.trim())}
+        >
+          {amend ? 'Amend Commit' : 'Commit'}
+        </Button>
+      </div>
+    </div>
+  )
+
   return (
-    <Modal isOpen={true} onClose={onRequestClose} title={header} panelClassName="w-[500px]">
-      <div className="p-4 flex flex-col gap-4">
+    <Modal isOpen onClose={onRequestClose} header={header} footer={footer} width="md">
+      <div className="flex flex-col gap-4">
         {opError && (
-          <div className="text-sm text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-900/20 p-2 rounded">
+          <div className="p-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm rounded border border-red-200 dark:border-red-800/30 whitespace-pre-wrap">
             {opError}
           </div>
         )}
 
-        <div className="text-sm text-neutral-600 dark:text-neutral-400">
-          {stagedCount} staged file{stagedCount === 1 ? '' : 's'}
+        <div className="flex flex-col gap-1.5">
+          <label className="text-xs font-semibold">Commit message</label>
+          <textarea
+            className="w-full text-sm rounded-md border border-neutral-200 dark:border-neutral-800 bg-transparent p-2 resize-none h-24 focus:outline-none focus:ring-1 focus:ring-amber-500/50"
+            placeholder="Describe your changes..."
+            value={commitMsg}
+            onChange={(e) => setCommitMsg(e.target.value)}
+            disabled={busy}
+            autoFocus
+          />
         </div>
 
-        <textarea
-          className="w-full min-h-[120px] text-sm resize-none border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 rounded-md p-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500"
-          placeholder={amend ? 'Leave blank to keep existing commit message' : 'Commit message...'}
-          value={commitMsg}
-          onChange={(e) => setCommitMsg(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) doCommit()
-          }}
-          autoFocus
-        />
-
-        <div className="flex flex-col gap-2 mt-2">
-          <label className="text-sm text-neutral-700 dark:text-neutral-300 inline-flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={amend}
-              onChange={(e) => setAmend(e.target.checked)}
-              className="checkbox checkbox-sm rounded"
-            />
-            Amend last commit
-          </label>
-          <label className="text-sm text-neutral-700 dark:text-neutral-300 inline-flex items-center gap-2 cursor-pointer">
+        <div className="flex items-center gap-4 text-sm">
+          <label className="inline-flex items-center gap-2 cursor-pointer">
             <input
               type="checkbox"
               checked={pushNow}
               onChange={(e) => setPushNow(e.target.checked)}
-              className="checkbox checkbox-sm rounded"
+              disabled={busy}
             />
-            Push changes immediately to remote (origin)
+            <span>Commit & Push</span>
           </label>
-        </div>
-
-        <div className="flex justify-end gap-2 mt-4">
-          <Button variant="secondary" onClick={onRequestClose} disabled={busy}>
-            Cancel
-          </Button>
-          <Button
-            variant="primary"
-            disabled={busy || (!amend && stagedCount === 0) || (!amend && !commitMsg.trim())}
-            onClick={doCommit}
-          >
-            {busy ? 'Committing...' : 'Commit'}
-          </Button>
+          <label className="inline-flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={amend}
+              onChange={(e) => setAmend(e.target.checked)}
+              disabled={busy}
+            />
+            <span>Amend previous commit</span>
+          </label>
         </div>
       </div>
     </Modal>

@@ -1,11 +1,4 @@
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react'
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import type { LLMConfig } from 'thefactory-tools'
 import { llmConfigsService } from '../services/llmConfigsService'
 
@@ -78,7 +71,7 @@ export function LLMConfigProvider({ children }: { children: React.ReactNode }) {
     const map = new Map(configs.map((c) => [c.id, c] as const))
     const items = recentAgentRunIds.map((id) => map.get(id)).filter(Boolean) as LLMConfig[]
     const base = items.length > 0 ? items : configs
-    return base.slice(0, 5)
+    return base.slice(0, 6)
   }, [configs, recentAgentRunIds])
 
   const setActiveAgentRun = useCallback(
@@ -101,7 +94,7 @@ export function LLMConfigProvider({ children }: { children: React.ReactNode }) {
     const map = new Map(configs.map((c) => [c.id, c] as const))
     const items = recentChatIds.map((id) => map.get(id)).filter(Boolean) as LLMConfig[]
     const base = items.length > 0 ? items : configs
-    return base.slice(0, 5)
+    return base.slice(0, 6)
   }, [configs, recentChatIds])
 
   const setActiveChat = useCallback(

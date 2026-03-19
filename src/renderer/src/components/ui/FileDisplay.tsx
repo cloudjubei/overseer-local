@@ -4,6 +4,14 @@ import { goToFile } from '../../navigation/FilesNavigation'
 import { useFiles } from '../../contexts/FilesContext'
 import { FileMeta } from 'thefactory-tools'
 import { inferFileType } from 'thefactory-tools/utils'
+import {
+  IconFileBadge,
+  IconFileJson,
+  IconFileImage,
+  IconFileZip,
+  IconFileText,
+  IconFileDefault,
+} from './icons/Icons'
 
 export type FileKind = 'file' | 'folder' | 'symlink' | 'unknown'
 
@@ -64,32 +72,6 @@ function extFromTypeOrName(type?: string | null, name?: string): string | null {
   return null
 }
 
-function SvgIcon({
-  path,
-  size = 20,
-  viewBox = '0 0 24 24',
-}: {
-  path: React.ReactNode
-  stroke?: string
-  fill?: string
-  size?: number
-  viewBox?: string
-}) {
-  return (
-    <span className="fd-icon" aria-hidden>
-      <svg
-        width={size}
-        height={size}
-        viewBox={viewBox}
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        {path}
-      </svg>
-    </span>
-  )
-}
-
 function iconForExt(ext: string | null): React.ReactNode {
   const e = (ext || '').toLowerCase()
   // Basic set of meaningful icons; keep simple inline SVGs to avoid asset pipeline issues
@@ -97,128 +79,48 @@ function iconForExt(ext: string | null): React.ReactNode {
     case 'md':
     case 'markdown': {
       return (
-        <SvgIcon
-          path={
-            <>
-              <rect x="2" y="3" width="20" height="18" rx="2" fill="#e8eefc" stroke="#a7b7f9" />
-              <text
-                x="12"
-                y="16"
-                textAnchor="middle"
-                fontSize="9"
-                fill="#3b5bdb"
-                fontFamily="monospace"
-              >
-                MD
-              </text>
-            </>
-          }
-        />
+        <span className="fd-icon" aria-hidden>
+          <IconFileBadge badgeText="MD" fill="#e8eefc" stroke="#a7b7f9" textColor="#3b5bdb" />
+        </span>
       )
     }
     case 'json': {
       return (
-        <SvgIcon
-          path={
-            <>
-              <rect x="2" y="3" width="20" height="18" rx="2" fill="#ecf7ff" stroke="#8ed0ff" />
-              <path
-                d="M9 9c-2 0-2 6 0 6M15 9c2 0 2 6 0 6"
-                stroke="#1c7ed6"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-              />
-            </>
-          }
-        />
+        <span className="fd-icon" aria-hidden>
+          <IconFileJson />
+        </span>
       )
     }
     case 'js':
     case 'cjs':
     case 'mjs': {
       return (
-        <SvgIcon
-          path={
-            <>
-              <rect x="2" y="3" width="20" height="18" rx="2" fill="#fffbe6" stroke="#ffe58f" />
-              <text
-                x="12"
-                y="16"
-                textAnchor="middle"
-                fontSize="9"
-                fill="#d4b106"
-                fontFamily="monospace"
-              >
-                JS
-              </text>
-            </>
-          }
-        />
+        <span className="fd-icon" aria-hidden>
+          <IconFileBadge badgeText="JS" fill="#fffbe6" stroke="#ffe58f" textColor="#d4b106" />
+        </span>
       )
     }
     case 'ts':
     case 'tsx': {
       return (
-        <SvgIcon
-          path={
-            <>
-              <rect x="2" y="3" width="20" height="18" rx="2" fill="#e7f5ff" stroke="#a5d8ff" />
-              <text
-                x="12"
-                y="16"
-                textAnchor="middle"
-                fontSize="9"
-                fill="#1971c2"
-                fontFamily="monospace"
-              >
-                TS
-              </text>
-            </>
-          }
-        />
+        <span className="fd-icon" aria-hidden>
+          <IconFileBadge badgeText="TS" fill="#e7f5ff" stroke="#a5d8ff" textColor="#1971c2" />
+        </span>
       )
     }
     case 'css': {
       return (
-        <SvgIcon
-          path={
-            <>
-              <rect x="2" y="3" width="20" height="18" rx="2" fill="#f3f0ff" stroke="#d0bfff" />
-              <text
-                x="12"
-                y="16"
-                textAnchor="middle"
-                fontSize="9"
-                fill="#7048e8"
-                fontFamily="monospace"
-              >
-                CSS
-              </text>
-            </>
-          }
-        />
+        <span className="fd-icon" aria-hidden>
+          <IconFileBadge badgeText="CSS" fill="#f3f0ff" stroke="#d0bfff" textColor="#7048e8" />
+        </span>
       )
     }
     case 'html':
     case 'htm': {
       return (
-        <SvgIcon
-          path={
-            <>
-              <rect x="2" y="3" width="20" height="18" rx="2" fill="#fff0f0" stroke="#ffc9c9" />
-              <text
-                x="12"
-                y="16"
-                textAnchor="middle"
-                fontSize="8"
-                fill="#e03131"
-                fontFamily="monospace"
-              >
-                HTML
-              </text>
-            </>
-          }
-        />
+        <span className="fd-icon" aria-hidden>
+          <IconFileBadge badgeText="HTML" fill="#fff0f0" stroke="#ffc9c9" textColor="#e03131" />
+        </span>
       )
     }
     case 'png':
@@ -229,36 +131,16 @@ function iconForExt(ext: string | null): React.ReactNode {
     case 'svg':
     case 'webp': {
       return (
-        <SvgIcon
-          path={
-            <>
-              <rect x="2" y="3" width="20" height="18" rx="2" fill="#ecfdf5" stroke="#b2f2bb" />
-              <path d="M6 17l4-5 3 4 2-3 3 4H6z" fill="#40c057" />
-              <circle cx="9" cy="9" r="1.5" fill="#37b24d" />
-            </>
-          }
-        />
+        <span className="fd-icon" aria-hidden>
+          <IconFileImage />
+        </span>
       )
     }
     case 'pdf': {
       return (
-        <SvgIcon
-          path={
-            <>
-              <rect x="2" y="3" width="20" height="18" rx="2" fill="#fff5f5" stroke="#ffa8a8" />
-              <text
-                x="12"
-                y="16"
-                textAnchor="middle"
-                fontSize="9"
-                fill="#c92a2a"
-                fontFamily="monospace"
-              >
-                PDF
-              </text>
-            </>
-          }
-        />
+        <span className="fd-icon" aria-hidden>
+          <IconFileBadge badgeText="PDF" fill="#fff5f5" stroke="#ffa8a8" textColor="#c92a2a" />
+        </span>
       )
     }
     case 'zip':
@@ -267,55 +149,24 @@ function iconForExt(ext: string | null): React.ReactNode {
     case 'tgz':
     case 'rar': {
       return (
-        <SvgIcon
-          path={
-            <>
-              <rect x="2" y="3" width="20" height="18" rx="2" fill="#fff9db" stroke="#ffe8a1" />
-              <path d="M12 6v12M12 6h2M12 9h2M12 12h2M12 15h2" stroke="#e67700" strokeWidth="1.5" />
-            </>
-          }
-        />
+        <span className="fd-icon" aria-hidden>
+          <IconFileZip />
+        </span>
       )
     }
     case 'txt':
     case 'log':
     case 'text': {
       return (
-        <SvgIcon
-          path={
-            <>
-              <rect x="2" y="3" width="20" height="18" rx="2" fill="#f8f9fa" stroke="#dee2e6" />
-              <path
-                d="M6 8h10M6 11h10M6 14h8"
-                stroke="#495057"
-                strokeWidth="1.2"
-                strokeLinecap="round"
-              />
-            </>
-          }
-        />
+        <span className="fd-icon" aria-hidden>
+          <IconFileText />
+        </span>
       )
     }
     default: {
       return (
         <span className="fd-icon fd-icon--badge" aria-hidden>
-          <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <rect
-              x="4"
-              y="3"
-              width="16"
-              height="18"
-              rx="2"
-              fill="var(--surface-2, #f5f6f8)"
-              stroke="var(--border-subtle, #d9dbe1)"
-            />
-            <path
-              d="M8 8h8M8 12h8M8 16h6"
-              stroke="var(--text-muted)"
-              strokeWidth="1.3"
-              strokeLinecap="round"
-            />
-          </svg>
+          <IconFileDefault />
         </span>
       )
     }

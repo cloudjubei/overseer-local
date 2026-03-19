@@ -175,9 +175,23 @@ export default function ChatView() {
     }
 
     const apply = async () => {
+      const isValidContext = (ctx: ChatContext | undefined): boolean => {
+        if (!ctx) return false
+        if (activeSelectionType === 'group' && activeGroupId) {
+          return ctx.type === 'GROUP' && (ctx as any).groupId === activeGroupId
+        } else {
+          const key = getChatContextKey(ctx)
+          const projectChats = chatsByProjectId[activeProjectId ?? ''] || []
+          return (
+            projectChats.some((c) => c.key === key) ||
+            (ctx.type === 'PROJECT' && ctx.projectId === activeProjectId)
+          )
+        }
+      }
+
       // 1. Handle hash navigation first
       const hashCtx = parseChatRouteFromHash(window.location.hash)
-      if (hashCtx) {
+      if (hashCtx && isValidContext(hashCtx)) {
         if (!selectedContext || getChatContextKey(hashCtx) !== getChatContextKey(selectedContext)) {
           await getChatIfExists(hashCtx)
           setSelectedContext(hashCtx)
@@ -186,24 +200,8 @@ export default function ChatView() {
       }
 
       // 2. Check if current selection is valid for the active project/group
-      if (selectedContext) {
-        if (activeSelectionType === 'group' && activeGroupId) {
-          if (
-            selectedContext.type === 'GROUP' &&
-            (selectedContext as any).groupId === activeGroupId
-          ) {
-            return
-          }
-        } else {
-          const key = getChatContextKey(selectedContext)
-          const projectChats = chatsByProjectId[activeProjectId ?? ''] || []
-          if (
-            projectChats.some((c) => c.key === key) ||
-            (selectedContext.type === 'PROJECT' && selectedContext.projectId === activeProjectId)
-          ) {
-            return // Current context is valid, do nothing
-          }
-        }
+      if (isValidContext(selectedContext)) {
+        return // Current context is valid, do nothing
       }
 
       // 3. Current context is invalid or missing, find a new one.

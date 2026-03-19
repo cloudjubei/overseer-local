@@ -196,7 +196,7 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState<boolean>(false)
   const [error, setError] = useState<string | undefined>(undefined)
   const [currentProject, setCurrentProject] = useState<ProjectGitStatus>({
-    projectId: activeProjectId,
+    projectId: activeProjectId || '',
     pending: [],
   })
   const [allProjects, setAllProjects] = useState<ProjectGitStatus[]>([])
@@ -237,9 +237,12 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
   const onMonitorUpdate = async (update: { projectId: string; state: GitBranchEvent }) => {
     const { projectId, state: branchUpdate } = update
 
+    // Reflect the actual current base branch if known from unified state; fallback to 'main'
+    const currentBase = unifiedByProject[projectId]?.branches?.find((b) => b.current)?.name
+
     // Update derived badge state when the monitor reports on the current branch
     // GitBranchEvent includes `behind` (incoming commits) and `hasUncommittedChanges`
-    if (branchUpdate.current) {
+    if (branchUpdate.name === currentBase) {
       setGitDerivedBadgesByProject((prev) => ({
         ...prev,
         [projectId]: {
@@ -266,9 +269,6 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
       const storyId = getStoryIdFromBranchName(branchUpdate.name)
       const isFeature = !!storyId
       const isUpdated = branchUpdate.ahead > 0 // behind does not matter for badge logic now
-
-      // Reflect the actual current base branch if known from unified state; fallback to 'main'
-      const currentBase = unifiedByProject[projectId]?.branches?.find((b) => b.current)?.name
 
       if (isFeature && isUpdated) {
         const pendingBranch: PendingBranch = {
@@ -297,7 +297,6 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
       const storyId = getStoryIdFromBranchName(branchUpdate.name)
       const isFeature = !!storyId
       const isUpdated = branchUpdate.ahead > 0
-      const currentBase = unifiedByProject[projectId]?.branches?.find((b) => b.current)?.name
       if (isFeature && isUpdated) {
         // De-duplicate: if there is already an unread git_changes notification
         // for this project+branch+baseRef, do not create a new one (treat as ongoing)
@@ -371,7 +370,7 @@ export function GitProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const curr = allProjects.find((p) => p.projectId === activeProjectId) || {
-      projectId: activeProjectId,
+      projectId: activeProjectId || '',
       pending: [],
     }
     setCurrentProject(curr)
