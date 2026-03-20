@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-03-18T15:32:56.120Z",
+  "updatedAt": "2026-03-19T18:31:51.106Z",
   "prices": [
     {
       "provider": "openai",
@@ -17183,6 +17183,46 @@
       "inputPerMTokensUSD": 0.075,
       "outputPerMTokensUSD": 0.3,
       "currency": "USD"
+    },
+    {
+      "provider": "azure",
+      "model": "azure/gpt-5.4-mini",
+      "inputPerMTokensUSD": 0.75,
+      "outputPerMTokensUSD": 4.5,
+      "currency": "USD",
+      "cacheReadInputPerMTokensUSD": 0.075
+    },
+    {
+      "provider": "azure",
+      "model": "azure/gpt-5.4-nano",
+      "inputPerMTokensUSD": 0.19999999999999998,
+      "outputPerMTokensUSD": 1.25,
+      "currency": "USD",
+      "cacheReadInputPerMTokensUSD": 0.02
+    },
+    {
+      "provider": "xai",
+      "model": "xai/grok-4.20-multi-agent-beta-0309",
+      "inputPerMTokensUSD": 2,
+      "outputPerMTokensUSD": 6,
+      "currency": "USD",
+      "cacheReadInputPerMTokensUSD": 0.19999999999999998
+    },
+    {
+      "provider": "xai",
+      "model": "xai/grok-4.20-beta-0309-reasoning",
+      "inputPerMTokensUSD": 2,
+      "outputPerMTokensUSD": 6,
+      "currency": "USD",
+      "cacheReadInputPerMTokensUSD": 0.19999999999999998
+    },
+    {
+      "provider": "xai",
+      "model": "xai/grok-4.20-beta-0309-non-reasoning",
+      "inputPerMTokensUSD": 2,
+      "outputPerMTokensUSD": 6,
+      "currency": "USD",
+      "cacheReadInputPerMTokensUSD": 0.19999999999999998
     }
   ]
 }
