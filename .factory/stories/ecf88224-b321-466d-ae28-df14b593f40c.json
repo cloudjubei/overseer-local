@@ -17,12 +17,13 @@
     },
     {
       "id": "e402c2ec-0ae6-46c4-be48-8b229db21f5c",
-      "status": "-",
+      "status": "+",
       "title": "Step 2 - Project Details & FS Setup",
       "description": "A configuration screen for brand new projects to define basic metadata and generate the local filesystem structure.",
       "context": [],
       "createdAt": "2026-03-17T16:31:40.633Z",
-      "updatedAt": "2026-03-17T16:31:40.633Z"
+      "updatedAt": "2026-03-20T15:48:16.359Z",
+      "completedAt": "2026-03-20T15:48:16.359Z"
     },
     {
       "id": "0ff6a64b-3cd4-4cb4-ac22-c73c2ac23b8d",
