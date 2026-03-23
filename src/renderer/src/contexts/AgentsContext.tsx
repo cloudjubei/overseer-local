@@ -1,9 +1,7 @@
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react'
 import type {
-  ChatContext,
   Chat,
   AgentRunType,
-  ChatContextAgentRun,
   ChatContextAgentRunFeature,
   ChatContextAgentRunStory,
 } from 'thefactory-tools'
@@ -177,6 +175,7 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
       const chatSettings = getSettings(context)!
       const isolated = true
 
+      console.log('startAgentRun from AgentsContext')
       completionService
         .startAgentRun(
           {

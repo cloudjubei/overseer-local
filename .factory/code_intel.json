@@ -13965,6 +13965,7 @@
           "Tools",
           "Feature",
           "Story",
+          "CompletionSettings",
           "LLMConfig",
           "ChatContextAgentRunFeature",
           "ChatContextAgentRunStory",
@@ -13980,6 +13981,7 @@
           "ChatsTools",
           "WebSearchApiKeys",
           "GithubCredentials",
+          "CompletionSettings",
           "ChatContextAgentRunFeature",
           "ChatContextAgentRunStory",
           "AgentRunType",
@@ -13997,6 +13999,7 @@
           "ChatsTools",
           "GitTools",
           "Tools",
+          "CompletionSettings",
           "ChatContextAgentRunFeature",
           "ChatContextAgentRunStory",
           "AgentRunType",
@@ -14018,6 +14021,7 @@
         "dependencies": [
           "AbortSignal",
           "LLMCostsTools",
+          "CompletionSettings",
           "ChatsTools",
           "AgentRunParams",
           "src/tools/types.js/IFactoryTools",
@@ -14641,19 +14645,11 @@
           "What"
         ]
       },
-      "COMPLETION_HISTORY_SUMMARIZATION": {
-        "path": "dist/completion/completionConstants.js",
-        "dependencies": []
-      },
       "COMPLETION_INTERACTION_MESSAGE_INSTRUCTIONS": {
         "path": "dist/completion/completionConstants.js",
         "dependencies": []
       },
       "COMPLETION_INTERACTION_TOOLS_INSTRUCTIONS": {
-        "path": "dist/completion/completionConstants.js",
-        "dependencies": []
-      },
-      "COMPLETION_MESSAGES_TO_SEND": {
         "path": "dist/completion/completionConstants.js",
         "dependencies": []
       },
@@ -15081,6 +15077,22 @@
         "path": "dist/project/projectTypes.d.ts",
         "dependencies": []
       },
+      "DEFAULT_AGENT_HISTORY_SUMMARIZATION": {
+        "path": "dist/chats/chatsConstants.js",
+        "dependencies": []
+      },
+      "DEFAULT_AGENT_MAX_TURNS": {
+        "path": "dist/chats/chatsConstants.js",
+        "dependencies": []
+      },
+      "DEFAULT_AGENT_MESSAGE_SANITIZATION": {
+        "path": "dist/chats/chatsConstants.js",
+        "dependencies": []
+      },
+      "DEFAULT_AGENT_MESSAGES_TO_SEND": {
+        "path": "dist/chats/chatsConstants.js",
+        "dependencies": []
+      },
       "DEFAULT_AUTO_CALL_TOOLS": {
         "path": "dist/chats/chatsConstants.js",
         "dependencies": []
@@ -15125,7 +15137,11 @@
         "path": "dist/chats/chatsConstants.js",
         "dependencies": [
           "DEFAULT_CHAT_PROMPTS",
-          "DEFAULT_COMPLETION_SETTINGS"
+          "DEFAULT_COMPLETION_SETTINGS",
+          "DEFAULT_AGENT_MESSAGES_TO_SEND",
+          "DEFAULT_AGENT_MAX_TURNS",
+          "DEFAULT_AGENT_HISTORY_SUMMARIZATION",
+          "DEFAULT_AGENT_MESSAGE_SANITIZATION"
         ]
       },
       "DEFAULT_CODE_EXTS": {
@@ -15369,6 +15385,10 @@
       },
       "getChatContextPath": {
         "path": "dist/chats/chatsUtils.js",
+        "dependencies": []
+      },
+      "getChatKeysForContext": {
+        "path": "dist/llmCosts/llmCostsHelpers.js",
         "dependencies": []
       },
       "getChatsDir": {
@@ -16234,9 +16254,9 @@
       "LLMCostsTools": {
         "path": "dist/llmCosts/llmCostsTypes.d.ts",
         "dependencies": [
+          "Promise",
           "PricingConfig",
           "PricingState",
-          "Promise",
           "ModelUsage",
           "ModelPrice",
           "LLMCostAggregateContent",
@@ -16298,6 +16318,12 @@
       "MAX_TEXT_ATTACHMENT_BYTES": {
         "path": "dist/completion/completionConstants.js",
         "dependencies": []
+      },
+      "migrateHistoricalCosts": {
+        "path": "dist/llmCosts/LLMCostsTools.js",
+        "dependencies": [
+          "thefactory-db/openDatabase"
+        ]
       },
       "ModelPrice": {
         "path": "dist/llmCosts/llmCostsTypes.d.ts",

@@ -75,7 +75,7 @@
     }
   },
   "GROUP": {
-    "systemPrompt": "You are an expert AI assistant focused on refining and developing software features within a specific group of projects. Your primary goal is to help the user articulate, clarify, implement, and improve projects within *this group*.\n\n# Current Group Context:\n## Group Name: '{{group_title}}'\n## Group ID: '{{group_id}}'\n## Group Type: '{{group_type}}'\n## Group Projects:\n{{group_projects}}\n\nYour responses and suggestions must be highly relevant to this specific group and its projects.\n\nCRITICAL: When calling tools that require a `projectId` argument, you MUST include the `projectId` corresponding to the target project. Valid `projectId`s are limited to the members of this group listed above. Proactively suggest improvements, alternative approaches, or identify possible issues specifically related to the group's goals or implementation. Offer to generate code snippets or interact with project files when appropriate.\n\nYou have access to a suite of tools that can interact with the projects' codebase, stories and features. Utilize these tools to gather additional information and to propose/execute changes that directly interact with *these projects' description or implementation files* after explicit user confirmation. Remember that this conversation is persistent and *specific to this group*, maintaining continuity and building upon previous interactions for *this particular group*.",
+    "systemPrompt": "You are an expert AI assistant focused on refining and developing software features within a specific group of projects. Your primary goal is to help the user articulate, clarify, implement, and improve projects within *this group*.\n\n# Current Group Context:\n## Group Name: '{{group_title}}'\n## Group ID: '{{group_id}}'\n## Group Projects:\n{{group_projects}}\n\nYour responses and suggestions must be highly relevant to this specific group and its projects.\n\nCRITICAL: When calling tools that require a `projectId` argument, you MUST include the `projectId` corresponding to the target project. Valid `projectId`s are limited to the members of this group listed above. Proactively suggest improvements, alternative approaches, or identify possible issues specifically related to the group's goals or implementation. Offer to generate code snippets or interact with project files when appropriate.\n\nYou have access to a suite of tools that can interact with the projects' codebase, stories and features. Utilize these tools to gather additional information and to propose/execute changes that directly interact with *these projects' description or implementation files* after explicit user confirmation. Remember that this conversation is persistent and *specific to this group*, maintaining continuity and building upon previous interactions for *this particular group*.",
     "completionSettings": {
       "maxTurns": 20,
       "finishTurnOnErrors": true,
@@ -151,7 +151,7 @@
   },
   "GROUP_TOPIC": {
     "other": {
-      "systemPrompt": "You are an expert AI assistant focused on refining and developing software features within a specific group of projects. Your primary goal is to help the user articulate, clarify, implement, and improve projects within *this group*.\n\n# Current Group Context:\n## Group Name: '{{group_title}}'\n## Group ID: '{{group_id}}'\n## Group Type: '{{group_type}}'\n## Group Projects:\n{{group_projects}}\n\nYour responses and suggestions must be highly relevant to this specific group and its projects.\n\nCRITICAL: When calling tools that require a `projectId` argument, you MUST include the `projectId` corresponding to the target project. Valid `projectId`s are limited to the members of this group listed above. Proactively suggest improvements, alternative approaches, or identify possible issues specifically related to the group's goals or implementation. Offer to generate code snippets or interact with project files when appropriate.\n\nYou have access to a suite of tools that can interact with the projects' codebase, stories and features. Utilize these tools to gather additional information and to propose/execute changes that directly interact with *these projects' description or implementation files* after explicit user confirmation. Remember that this conversation is persistent and *specific to this group*, maintaining continuity and building upon previous interactions for *this particular group*.",
+      "systemPrompt": "You are an expert AI assistant focused on refining and developing software features within a specific group of projects. Your primary goal is to help the user articulate, clarify, implement, and improve projects within *this group*.\n\n# Current Group Context:\n## Group Name: '{{group_title}}'\n## Group ID: '{{group_id}}'\n## Group Projects:\n{{group_projects}}\n\nYour responses and suggestions must be highly relevant to this specific group and its projects.\n\nCRITICAL: When calling tools that require a `projectId` argument, you MUST include the `projectId` corresponding to the target project. Valid `projectId`s are limited to the members of this group listed above. Proactively suggest improvements, alternative approaches, or identify possible issues specifically related to the group's goals or implementation. Offer to generate code snippets or interact with project files when appropriate.\n\nYou have access to a suite of tools that can interact with the projects' codebase, stories and features. Utilize these tools to gather additional information and to propose/execute changes that directly interact with *these projects' description or implementation files* after explicit user confirmation. Remember that this conversation is persistent and *specific to this group*, maintaining continuity and building upon previous interactions for *this particular group*.",
       "completionSettings": {
         "maxTurns": 20,
         "finishTurnOnErrors": true,
@@ -454,10 +454,10 @@
   "AGENT_RUN_STORY": {
     "systemPrompt": "You are an expert AI assistant helping to manage and understand agent runs (autonomous work done by AI agents) for this project.\n\n# Current Project Context:\n## Project Name: '{{project_title}}'\n## Project ID: '{{project_id}}'\n## Project Description:\n{{project_description}}\n\n---\n\n# Current Story Context:\n## Story Name: '{{story_title}}'\n## Story ID: '{{story_id}}'\n## StoryDescription:\n{{story_description}}\n## Story's Features:\n{{story_features}}\n\n---\n\n# Agent Run by {{agent_run_type}}\n\nGuide the user on interpreting this run, troubleshooting errors and planning next actions related to the project and story.",
     "completionSettings": {
-      "maxTurns": 20,
+      "maxTurns": 50,
       "finishTurnOnErrors": true,
-      "allowErrorResponses": false,
-      "allowNoCallResponses": false,
+      "allowErrorResponses": true,
+      "allowNoCallResponses": true,
       "numberMessagesToSend": 20,
       "availableTools": [
         "listContents",
@@ -521,8 +521,7 @@
         "maxOpsInSummary": 5
       },
       "messageSanitization": {
-        "enabled": true,
-        "keepLastMessages": 5
+        "enabled": true
       }
     }
   },

@@ -6,6 +6,7 @@ import type {
   AgentRunnerTools,
   AgentRunParams,
   AgentRunType,
+  AgentToolsResultType,
   ChatContext,
   ChatContextAgentRun,
   ChatContextAgentRunFeature,
@@ -212,24 +213,24 @@ export default class FactoryCompletionManager extends BaseManager {
     params: AgentRunParams,
     settings: CompletionSettings,
     isolated: boolean,
-  ): Promise<void> {
-    //TODO: startAgentRun use settings
+  ): Promise<AgentToolsResultType> {
     const chatsTools = this.chatsManager.getTools()
     const llmCostsTools = await this.factoryLLMCostsManager.getTools()
     const abortSignal = this.createAbortSignal(params.chatContext)
     const opts: AgentRunnerStartRunOptions = {
       params,
       chatsTools,
+      settings,
       llmCostsTools,
       abortSignal,
       isolated,
     }
 
-    try {
-      await this.agentRunnerTools.startAgentRun(opts)
-    } finally {
+    const p = this.agentRunnerTools.startAgentRun(opts)
+    p.finally(() => {
       this.cleanupAbort(params.chatContext)
-    }
+    })
+    return p
   }
 
   abortCompletion(chatContext: ChatContext) {
