@@ -859,29 +859,12 @@
           "thefactory-tools/utils"
         ]
       },
-      "AgentRunsValue": {
-        "path": "src/renderer/src/hooks/useAgentRuns.ts",
-        "dependencies": [
-          "Promise",
-          "thefactory-tools/AgentRunType",
-          "thefactory-tools/Chat",
-          "react/useCallback",
-          "react/useMemo",
-          "thefactory-tools/ChatContextAgentRun",
-          "thefactory-tools/ChatContextAgentRunFeature",
-          "thefactory-tools/ChatContextAgentRunStory",
-          "thefactory-tools/utils/getChatContextKey",
-          "thefactory-tools/utils"
-        ]
-      },
       "AgentsContextValue": {
         "path": "src/renderer/src/contexts/AgentsContext.tsx",
         "dependencies": [
           "Promise",
           "thefactory-tools/AgentRunType",
           "thefactory-tools/Chat",
-          "thefactory-tools/ChatContext",
-          "thefactory-tools/ChatContextAgentRun",
           "thefactory-tools/ChatContextAgentRunFeature",
           "thefactory-tools/ChatContextAgentRunStory"
         ]
@@ -896,9 +879,7 @@
           "Promise",
           "thefactory-tools/Chat",
           "Set",
-          "ReactNode",
-          "thefactory-tools/ChatContext",
-          "thefactory-tools/ChatContextAgentRun"
+          "ReactNode"
         ]
       },
       "AgentTypePicker": {
@@ -2027,6 +2008,7 @@
           "thefactory-tools/CompletionArgs",
           "AbortSignal",
           "thefactory-tools/AgentRunnerStartRunOptions",
+          "thefactory-tools/AgentToolsResultType",
           "thefactory-tools/AgentRunParams",
           "thefactory-tools/CompletionResponseTurns",
           "thefactory-tools/CompletionMessage",
@@ -6422,30 +6404,12 @@
           "thefactory-tools/ReorderPayload"
         ]
       },
-      "useAgentRuns": {
-        "path": "src/renderer/src/hooks/useAgentRuns.ts",
-        "dependencies": [
-          "thefactory-tools/ChatContextAgentRunFeature",
-          "thefactory-tools/ChatContextAgentRunStory",
-          "thefactory-tools/AgentRunType",
-          "Promise",
-          "thefactory-tools/Chat",
-          "AgentRunsValue",
-          "react/useCallback",
-          "react/useMemo",
-          "thefactory-tools/ChatContextAgentRun",
-          "thefactory-tools/utils/getChatContextKey",
-          "thefactory-tools/utils"
-        ]
-      },
       "useAgents": {
         "path": "src/renderer/src/contexts/AgentsContext.tsx",
         "dependencies": [
           "AgentsContextValue",
-          "thefactory-tools/ChatContext",
           "thefactory-tools/Chat",
           "thefactory-tools/AgentRunType",
-          "thefactory-tools/ChatContextAgentRun",
           "thefactory-tools/ChatContextAgentRunFeature",
           "thefactory-tools/ChatContextAgentRunStory"
         ]
@@ -7034,29 +6998,12 @@
           "thefactory-tools/utils"
         ]
       },
-      "AgentRunsValue": {
-        "path": "renderer/src/hooks/useAgentRuns.ts",
-        "dependencies": [
-          "Promise",
-          "thefactory-tools/AgentRunType",
-          "thefactory-tools/Chat",
-          "react/useCallback",
-          "react/useMemo",
-          "thefactory-tools/ChatContextAgentRun",
-          "thefactory-tools/ChatContextAgentRunFeature",
-          "thefactory-tools/ChatContextAgentRunStory",
-          "thefactory-tools/utils/getChatContextKey",
-          "thefactory-tools/utils"
-        ]
-      },
       "AgentsContextValue": {
         "path": "renderer/src/contexts/AgentsContext.tsx",
         "dependencies": [
           "Promise",
           "thefactory-tools/AgentRunType",
           "thefactory-tools/Chat",
-          "thefactory-tools/ChatContext",
-          "thefactory-tools/ChatContextAgentRun",
           "thefactory-tools/ChatContextAgentRunFeature",
           "thefactory-tools/ChatContextAgentRunStory"
         ]
@@ -7071,9 +7018,7 @@
           "Promise",
           "thefactory-tools/Chat",
           "Set",
-          "ReactNode",
-          "thefactory-tools/ChatContext",
-          "thefactory-tools/ChatContextAgentRun"
+          "ReactNode"
         ]
       },
       "AgentTypePicker": {
@@ -8202,6 +8147,7 @@
           "thefactory-tools/CompletionArgs",
           "AbortSignal",
           "thefactory-tools/AgentRunnerStartRunOptions",
+          "thefactory-tools/AgentToolsResultType",
           "thefactory-tools/AgentRunParams",
           "thefactory-tools/CompletionResponseTurns",
           "thefactory-tools/CompletionMessage",
@@ -12597,30 +12543,12 @@
           "thefactory-tools/ReorderPayload"
         ]
       },
-      "useAgentRuns": {
-        "path": "renderer/src/hooks/useAgentRuns.ts",
-        "dependencies": [
-          "thefactory-tools/ChatContextAgentRunFeature",
-          "thefactory-tools/ChatContextAgentRunStory",
-          "thefactory-tools/AgentRunType",
-          "Promise",
-          "thefactory-tools/Chat",
-          "AgentRunsValue",
-          "react/useCallback",
-          "react/useMemo",
-          "thefactory-tools/ChatContextAgentRun",
-          "thefactory-tools/utils/getChatContextKey",
-          "thefactory-tools/utils"
-        ]
-      },
       "useAgents": {
         "path": "renderer/src/contexts/AgentsContext.tsx",
         "dependencies": [
           "AgentsContextValue",
-          "thefactory-tools/ChatContext",
           "thefactory-tools/Chat",
           "thefactory-tools/AgentRunType",
-          "thefactory-tools/ChatContextAgentRun",
           "thefactory-tools/ChatContextAgentRunFeature",
           "thefactory-tools/ChatContextAgentRunStory"
         ]
@@ -16363,15 +16291,11 @@
       },
       "parseAgentResponse": {
         "path": "dist/agent/agentHelpers.js",
-        "dependencies": [
-          "node:fs/writeFileSync"
-        ]
+        "dependencies": []
       },
       "parseAgentResponseSafe": {
         "path": "dist/agent/agentHelpers.js",
-        "dependencies": [
-          "node:fs/writeFileSync"
-        ]
+        "dependencies": []
       },
       "parseFirstValidJson": {
         "path": "dist/helpers.js",

@@ -63,6 +63,7 @@
         "runTestCoverage",
         "compileCheck"
       ],
+      "forceFinishTools": [],
       "historySummarization": {
         "enabled": true,
         "keepLastTurns": 5,
@@ -138,6 +139,7 @@
         "runTestCoverage",
         "compileCheck"
       ],
+      "forceFinishTools": [],
       "historySummarization": {
         "enabled": true,
         "keepLastTurns": 5,
@@ -214,6 +216,7 @@
           "runTestCoverage",
           "compileCheck"
         ],
+        "forceFinishTools": [],
         "historySummarization": {
           "enabled": true,
           "keepLastTurns": 5,
@@ -290,6 +293,7 @@
         "runTestCoverage",
         "compileCheck"
       ],
+      "forceFinishTools": [],
       "historySummarization": {
         "enabled": true,
         "keepLastTurns": 5,
@@ -365,6 +369,7 @@
         "runTestCoverage",
         "compileCheck"
       ],
+      "forceFinishTools": [],
       "historySummarization": {
         "enabled": true,
         "keepLastTurns": 5,
@@ -440,6 +445,7 @@
         "runTestCoverage",
         "compileCheck"
       ],
+      "forceFinishTools": [],
       "historySummarization": {
         "enabled": true,
         "keepLastTurns": 5,
@@ -515,6 +521,10 @@
         "runTestCoverage",
         "compileCheck"
       ],
+      "forceFinishTools": [
+        "finishFeature",
+        "blockFeature"
+      ],
       "historySummarization": {
         "enabled": true,
         "keepLastTurns": 5,
@@ -528,10 +538,10 @@
   "AGENT_RUN_FEATURE": {
     "systemPrompt": "You are an expert AI assistant helping to manage and understand agent runs (autonomous work done by AI agents) for this project.\n\n# Current Project Context:\n## Project Name: '{{project_title}}'\n## Project ID: '{{project_id}}'\n## Project Description:\n{{project_description}}\n\n---\n\n# Current Story Context:\n## Story Name: '{{story_title}}'\n## Story ID: '{{story_id}}'\n## StoryDescription:\n{{story_description}}\n## Story's Features:\n{{story_features}}\n\n---\n\n# Current Feature Context:\n## Feature Name: '{{feature_title}}'\n## Feature ID: '{{feature_id}}'\n## Feature Description: \n'{{feature_description}}'\n\n---\n\n# Agent Run by {{agent_run_type}}\n\nGuide the user on interpreting this run, troubleshooting errors and planning next actions related to the project and story.",
     "completionSettings": {
-      "maxTurns": 20,
+      "maxTurns": 50,
       "finishTurnOnErrors": true,
-      "allowErrorResponses": false,
-      "allowNoCallResponses": false,
+      "allowErrorResponses": true,
+      "allowNoCallResponses": true,
       "numberMessagesToSend": 20,
       "availableTools": [
         "listContents",
@@ -589,14 +599,17 @@
         "runTestCoverage",
         "compileCheck"
       ],
+      "forceFinishTools": [
+        "finishFeature",
+        "blockFeature"
+      ],
       "historySummarization": {
         "enabled": true,
         "keepLastTurns": 5,
         "maxOpsInSummary": 5
       },
       "messageSanitization": {
-        "enabled": true,
-        "keepLastMessages": 5
+        "enabled": true
       }
     }
   },
@@ -665,6 +678,7 @@
           "runTestCoverage",
           "compileCheck"
         ],
+        "forceFinishTools": [],
         "historySummarization": {
           "enabled": true,
           "keepLastTurns": 5,
@@ -740,6 +754,7 @@
           "runTestCoverage",
           "compileCheck"
         ],
+        "forceFinishTools": [],
         "historySummarization": {
           "enabled": true,
           "keepLastTurns": 5,
@@ -815,6 +830,7 @@
           "runTestCoverage",
           "compileCheck"
         ],
+        "forceFinishTools": [],
         "historySummarization": {
           "enabled": true,
           "keepLastTurns": 5,
@@ -892,6 +908,7 @@
           "runTestCoverage",
           "compileCheck"
         ],
+        "forceFinishTools": [],
         "historySummarization": {
           "enabled": true,
           "keepLastTurns": 5,
