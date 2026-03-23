@@ -25,6 +25,8 @@ import { useChatUnread } from '@renderer/hooks/useChatUnread'
 import DotBadge from '@renderer/components/ui/DotBadge'
 import { getChatContextKey, getChatContext } from 'thefactory-tools/utils'
 import { useNotifications } from '@renderer/hooks/useNotifications'
+import ChatTopicCreateModal from '@renderer/components/chat/ChatTopicCreateModal'
+import { IconPlus } from '@renderer/components/ui/icons/Icons'
 
 function prettyTopicName(topic?: string): string {
   if (!topic) return 'Topic'
@@ -103,6 +105,9 @@ export default function ChatView() {
   const { hasUnreadForProject } = useChatUnread()
   const { markNotificationsByMetadata, getGroupBadgeState } = useNotifications()
 
+  // Modal state
+  const [isTopicModalOpen, setIsTopicModalOpen] = useState(false)
+
   // Helpers for titles
   const getProjectTitle = (id?: string) => {
     if (!id) return ''
@@ -178,7 +183,7 @@ export default function ChatView() {
       const isValidContext = (ctx: ChatContext | undefined): boolean => {
         if (!ctx) return false
         if (activeSelectionType === 'group' && activeGroupId) {
-          return ctx.type === 'GROUP' && (ctx as any).groupId === activeGroupId
+          return ctx.type === 'GROUP' || ctx.type === 'GROUP_TOPIC'
         } else {
           const key = getChatContextKey(ctx)
           const projectChats = chatsByProjectId[activeProjectId ?? ''] || []
@@ -291,11 +296,7 @@ export default function ChatView() {
     } catch (_) {}
   }, [selectedContext, activeProjectId, markNotificationsByMetadata])
 
-  // Seed from agent run history when switching to a run context
-
-  // Header action: Categories | History switch with unread dot hint.
-  // When a group is selected, derive unread state from the group's aggregate badge.
-  // When a project is selected, use the per-project unread check as before.
+  // Header action: Categories | History switch with unread dot hint, plus the 'create topic' button
   const headerAction = useMemo(() => {
     const seg = (
       <SegmentedControl
@@ -312,7 +313,6 @@ export default function ChatView() {
 
     let showDot: boolean
     if (activeSelectionType === 'group' && activeGroupId) {
-      // Show dot when the active group has any unread chat messages across its projects
       const groupBadge = getGroupBadgeState(activeGroupId)
       showDot = groupBadge.chat_messages.unread > 0 || groupBadge.chat_messages.thinking
     } else {
@@ -323,6 +323,15 @@ export default function ChatView() {
       <div className="flex items-center gap-2">
         {seg}
         {showDot && <DotBadge title={activeSelectionType === 'group' ? 'Unread chats in this group' : 'Unread chats in this project'} />}
+        <button
+          type="button"
+          onClick={() => setIsTopicModalOpen(true)}
+          className="inline-flex h-8 w-8 items-center justify-center rounded-md text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-primary)]"
+          title="Create custom chat topic"
+          aria-label="Create custom chat topic"
+        >
+          <IconPlus className="w-5 h-5" />
+        </button>
       </div>
     )
   }, [mode, activeProjectId, activeGroupId, activeSelectionType, hasUnreadForProject, getGroupBadgeState])
@@ -330,45 +339,59 @@ export default function ChatView() {
   const collapsedLabel = mode === 'categories' ? 'CATEGORIES' : 'HISTORY'
 
   return (
-    <CollapsibleSidebar
-      items={[]}
-      activeId={''}
-      onSelect={() => {}}
-      storageKey="chatview-sidebar-collapsed"
-      headerTitle={''}
-      headerSubtitle={''}
-      headerAction={headerAction}
-      collapsedLabel={collapsedLabel}
-      navContent={
-        <ChatsNavigationSidebar
-          selectedContext={selectedContext}
-          onSelectContext={(ctx) => {
-            try {
-              const p = getChatContextKey(ctx)
-              const targetHash = `#chats${p}`
-              if (window.location.hash !== targetHash) window.location.hash = targetHash
-            } catch {}
-            setSelectedContext(ctx)
-          }}
-          mode={mode}
-        />
-      }
-    >
-      {selectedContext ? (
-        <ChatSidebar
-          context={selectedContext}
-          chatContextTitle={titleForContext(selectedContext, {
-            getProjectTitle,
-            getGroupTitle,
-            getStoryTitle,
-            getFeatureTitle,
-          })}
-        />
-      ) : (
-        <div className="h-full w-full flex items-center justify-center text-[var(--text-secondary)]">
-          Select a chat to begin.
-        </div>
-      )}
-    </CollapsibleSidebar>
+    <>
+      <CollapsibleSidebar
+        items={[]}
+        activeId={''}
+        onSelect={() => {}}
+        storageKey="chatview-sidebar-collapsed"
+        headerTitle={''}
+        headerSubtitle={''}
+        headerAction={headerAction}
+        collapsedLabel={collapsedLabel}
+        navContent={
+          <ChatsNavigationSidebar
+            selectedContext={selectedContext}
+            onSelectContext={(ctx) => {
+              try {
+                const p = getChatContextKey(ctx)
+                const targetHash = `#chats${p}`
+                if (window.location.hash !== targetHash) window.location.hash = targetHash
+              } catch {}
+              setSelectedContext(ctx)
+            }}
+            mode={mode}
+          />
+        }
+      >
+        {selectedContext ? (
+          <ChatSidebar
+            context={selectedContext}
+            chatContextTitle={titleForContext(selectedContext, {
+              getProjectTitle,
+              getGroupTitle,
+              getStoryTitle,
+              getFeatureTitle,
+            })}
+          />
+        ) : (
+          <div className="h-full w-full flex items-center justify-center text-[var(--text-secondary)]">
+            Select a chat to begin.
+          </div>
+        )}
+      </CollapsibleSidebar>
+
+      <ChatTopicCreateModal
+        isOpen={isTopicModalOpen}
+        onClose={() => setIsTopicModalOpen(false)}
+        onTopicCreated={async (ctx) => {
+          await getChatIfExists(ctx)
+          const p = getChatContextKey(ctx)
+          const targetHash = `#chats${p}`
+          if (window.location.hash !== targetHash) window.location.hash = targetHash
+          setSelectedContext(ctx)
+        }}
+      />
+    </>
   )
 }
