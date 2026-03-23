@@ -71,6 +71,7 @@ function titleForContext(
       const c = context as ChatContextFeature
       return `Feature Chat — ${opts.getStoryTitle(c.storyId)} / ${opts.getFeatureTitle(c.featureId)}`
     }
+
     case 'AGENT_RUN_FEATURE': {
       const c = context as ChatContextAgentRunFeature
       return `Agent Feature Run ${opts.getStoryTitle(c.storyId)} / ${opts.getFeatureTitle(c.featureId)}`
@@ -322,7 +323,15 @@ export default function ChatView() {
     return (
       <div className="flex items-center gap-2">
         {seg}
-        {showDot && <DotBadge title={activeSelectionType === 'group' ? 'Unread chats in this group' : 'Unread chats in this project'} />}
+        {showDot && (
+          <DotBadge
+            title={
+              activeSelectionType === 'group'
+                ? 'Unread chats in this group'
+                : 'Unread chats in this project'
+            }
+          />
+        )}
         <button
           type="button"
           onClick={() => setIsTopicModalOpen(true)}
@@ -334,7 +343,14 @@ export default function ChatView() {
         </button>
       </div>
     )
-  }, [mode, activeProjectId, activeGroupId, activeSelectionType, hasUnreadForProject, getGroupBadgeState])
+  }, [
+    mode,
+    activeProjectId,
+    activeGroupId,
+    activeSelectionType,
+    hasUnreadForProject,
+    getGroupBadgeState,
+  ])
 
   const collapsedLabel = mode === 'categories' ? 'CATEGORIES' : 'HISTORY'
 
