@@ -1,6 +1,6 @@
 {
   "id": "bc33ac7d-3975-47a4-9b07-b1286632c7a0",
-  "status": "-",
+  "status": "+",
   "title": "Project & Group Activation, SCOPE Groups, and Sidebar Enhancements",
   "description": "Introduces activation/deactivation toggles for projects and groups, adds a new 'SCOPE' group type for chat aggregation, and enhances the Sidebar to support group-level selections (Home, Chat, Tools) and custom topic creation.",
   "features": [
@@ -36,14 +36,16 @@
     },
     {
       "id": "2e071165-75f1-4bd4-a554-75ca67cbeb60",
-      "status": "-",
+      "status": "+",
       "title": "Group Chat & Topic Creation",
       "description": "Add a '+' button next to the Categories/History switch in Chat to allow users to create new chat topics for Groups, Projects, and Stories. Ensure the Group Chat view lists the main group chat and any custom group topics.",
       "context": [],
       "createdAt": "2026-03-17T14:03:16.408Z",
-      "updatedAt": "2026-03-17T14:03:16.408Z"
+      "updatedAt": "2026-03-23T21:45:39.372Z",
+      "completedAt": "2026-03-23T21:45:39.372Z"
     }
   ],
   "createdAt": "2026-03-17T14:01:48.628Z",
-  "updatedAt": "2026-03-17T14:01:48.628Z"
+  "updatedAt": "2026-03-17T14:01:48.628Z",
+  "completedAt": "2026-03-23T21:45:39.372Z"
 }
