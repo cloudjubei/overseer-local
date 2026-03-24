@@ -2,6 +2,9 @@ import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 're
 import { useFilesAutocomplete } from '../../hooks/useFilesAutocomplete'
 import { useReferencesAutocomplete } from '../../hooks/useReferencesAutocomplete'
 import { useFiles } from '../../contexts/FilesContext'
+import { IconFolder } from './icons/Icons'
+import { renderFileSuggestionIcon } from '../chat/fileSuggestionIcons'
+import { PathDisplay } from './PathDisplay'
 
 export type FileMentionsTextareaProps = {
   id?: string
@@ -51,7 +54,19 @@ export default function FileMentionsTextarea({
   // Guard against undefined 'files' during initial loads or heavy operations
   const filesList = useMemo(() => {
     if (disableAutocomplete) return []
-    return (files ?? []).map((f) => f.relativePath!)
+    const filePaths = (files ?? []).map((f) => f.relativePath!).filter(Boolean)
+
+    // Folder support: infer folder paths from file paths.
+    const folderSet = new Set<string>()
+    for (const p of filePaths) {
+      const parts = p.split('/').filter(Boolean)
+      // Add each directory prefix: a/b/c.txt -> a, a/b
+      for (let i = 0; i < parts.length - 1; i++) {
+        folderSet.add(parts.slice(0, i + 1).join('/'))
+      }
+    }
+
+    return [...filePaths, ...Array.from(folderSet)]
   }, [files, disableAutocomplete])
 
   // No-op input/setInput when autocomplete is disabled so hooks do zero work.
@@ -287,16 +302,28 @@ export default function FileMentionsTextarea({
           role='listbox'
           aria-label='Files suggestions'
         >
-          {fileMatches.map((path, idx) => (
-            <div
-              key={idx}
-              role='option'
-              className='px-3 py-2 cursor-pointer hover:bg-[color-mix(in_srgb,var(--accent-primary)_8%,transparent)] text-[var(--text-primary)] text-sm'
-              onClick={() => handleFileSelect(path)}
-            >
-              {path}
-            </div>
-          ))}
+          {fileMatches.map((path, idx) => {
+            const isFolder = !path.includes('.')
+            return (
+              <div
+                key={idx}
+                role='option'
+                className='px-3 py-2 cursor-pointer hover:bg-[color-mix(in_srgb,var(--accent-primary)_8%,transparent)] text-[var(--text-primary)] text-sm flex items-center gap-2'
+                onClick={() => handleFileSelect(path)}
+              >
+                <span className='inline-flex items-center justify-center w-4 h-4 opacity-90'>
+                  {isFolder ? (
+                    <IconFolder className='w-4 h-4' />
+                  ) : (
+                    renderFileSuggestionIcon({ path, kind: 'file' }, 'w-4 h-4')
+                  )}
+                </span>
+                <div className='min-w-0 flex-1'>
+                  <PathDisplay path={path} />
+                </div>
+              </div>
+            )
+          })}
         </div>
       )}
 

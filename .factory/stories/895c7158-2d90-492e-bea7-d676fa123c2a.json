@@ -16,12 +16,13 @@
     },
     {
       "id": "4057a5df-ba67-4573-a081-a828a1dfc01d",
-      "status": "-",
+      "status": "+",
       "title": "Folder Support and Icons",
       "description": "Make the file suggestions also work for folders - we should add an icon at the left of all files that will indicate the extension (.ts,.tsx or .py files for code in their language). Create a similar file to @src/renderer/src/screens/projects/codeInfoIcons.tsx for file extension icons that can be used here and in the future.",
       "context": [],
       "createdAt": "2026-03-24T15:52:59.428Z",
-      "updatedAt": "2026-03-24T15:52:59.428Z"
+      "updatedAt": "2026-03-24T22:44:18.331Z",
+      "completedAt": "2026-03-24T22:44:18.331Z"
     },
     {
       "id": "b7fa983b-29d2-4af5-988b-211741a577b7",
