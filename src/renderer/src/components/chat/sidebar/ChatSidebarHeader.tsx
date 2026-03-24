@@ -3,7 +3,13 @@ import type { ChatContext, CompletionSettings } from 'thefactory-tools'
 import { Button } from '@renderer/components/ui/Button'
 import ContextInfoButton from '../../ui/ContextInfoButton'
 import ModelChip from '../../agents/ModelChip'
-import { IconSettings, IconChevron, IconScroll, IconRefreshChat, IconCode } from '../../ui/icons/Icons'
+import {
+  IconSettings,
+  IconChevron,
+  IconScroll,
+  IconRefreshChat,
+  IconCode,
+} from '../../ui/icons/Icons'
 import { IconCalculator } from '../../ui/icons/IconCalculator'
 import ChatSettingsDropdown, { type ToolToggle } from '../ChatSettingsDropdown'
 
@@ -75,7 +81,7 @@ export function ChatSidebarHeader({
           </button>
         ) : null}
         <ContextInfoButton context={context} label={chatContextTitle} />
-        
+
         <button
           onClick={() => setIsPromptModalOpen(true)}
           className="btn-secondary btn-icon"

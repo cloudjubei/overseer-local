@@ -1,10 +1,15 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { Modal } from '@renderer/components/ui/Modal'
 import { Button } from '@renderer/components/ui/Button'
 import { useActiveProject } from '@renderer/contexts/ProjectContext'
 import { useProjectsGroups } from '@renderer/contexts/ProjectsGroupsContext'
 import { useStories } from '@renderer/contexts/StoriesContext'
-import type { ChatContext } from 'thefactory-tools'
+import type {
+  ChatContext,
+  ChatContextGroupTopic,
+  ChatContextProjectTopic,
+  ChatContextStoryTopic,
+} from 'thefactory-tools'
 
 type Props = {
   isOpen: boolean
@@ -15,7 +20,7 @@ type Props = {
 export default function ChatTopicCreateModal({ isOpen, onClose, onTopicCreated }: Props) {
   const { projectId: activeProjectId } = useActiveProject()
   const { activeSelectionType, activeGroupId } = useProjectsGroups()
-  const { storiesById } = useStories()
+  const { storiesById, storyIdsByProject } = useStories()
 
   const [topicName, setTopicName] = useState('')
   const [targetType, setTargetType] = useState<'group' | 'project' | 'story'>('project')
@@ -33,11 +38,16 @@ export default function ChatTopicCreateModal({ isOpen, onClose, onTopicCreated }
     }
   }, [isOpen, activeSelectionType])
 
-  const activeStories = Object.values(storiesById)
-    .filter((s) => s.projectId === activeProjectId)
-    .sort((a, b) => a.title.localeCompare(b.title))
+  const activeStories = useMemo(() => {
+    if (activeProjectId) {
+      const stories = storyIdsByProject[activeProjectId]
+        .map((id) => storiesById[id])
+        .filter(Boolean)
+      return stories.sort((a, b) => a.title.localeCompare(b.title))
+    }
+    return []
+  }, [activeProjectId, storyIdsByProject, storiesById])
 
-  // Auto-select first story if 'story' is chosen but none selected
   useEffect(() => {
     if (targetType === 'story' && !selectedStoryId && activeStories.length > 0) {
       setSelectedStoryId(activeStories[0].id)
@@ -52,11 +62,23 @@ export default function ChatTopicCreateModal({ isOpen, onClose, onTopicCreated }
     let ctx: ChatContext | undefined
 
     if (targetType === 'group' && activeGroupId) {
-      ctx = { type: 'GROUP_TOPIC', groupId: activeGroupId, groupTopic: sanitizedTopic } as any
+      ctx = {
+        type: 'GROUP_TOPIC',
+        groupId: activeGroupId,
+        groupTopic: sanitizedTopic,
+      } as ChatContextGroupTopic
     } else if (targetType === 'project' && activeProjectId) {
-      ctx = { type: 'PROJECT_TOPIC', projectId: activeProjectId, projectTopic: sanitizedTopic } as any
+      ctx = {
+        type: 'PROJECT_TOPIC',
+        projectId: activeProjectId,
+        projectTopic: sanitizedTopic,
+      } as ChatContextProjectTopic
     } else if (targetType === 'story' && selectedStoryId) {
-      ctx = { type: 'STORY_TOPIC', storyId: selectedStoryId, storyTopic: sanitizedTopic } as any
+      ctx = {
+        type: 'STORY_TOPIC',
+        storyId: selectedStoryId,
+        storyTopic: sanitizedTopic,
+      } as ChatContextStoryTopic
     }
 
     if (ctx) {

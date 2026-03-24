@@ -184,6 +184,7 @@ const IPC_HANDLER_KEYS = {
   GIT_GET_FILE_CONTENT: 'git:get-file-content',
   GIT_GET_LOG: 'git:get-log',
   GIT_RESET_ALL: 'git:reset-all',
+  GIT_START_PROJECT: 'git:start-project',
   GIT_ADD_STASH: 'git:add-stash',
   GIT_LIST_STASHES: 'git:list-stashes',
   GIT_APPLY_STASH: 'git:apply-stash',

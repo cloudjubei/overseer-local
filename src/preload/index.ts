@@ -378,6 +378,8 @@ const GIT_API = {
   getFileContent: (projectId, path, ref) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_GET_FILE_CONTENT, { projectId, path, ref }),
   resetAll: (projectId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_RESET_ALL, { projectId }),
+  startProject: (projectId, options) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_START_PROJECT, { projectId, options }),
   addStash: (projectId, options) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_ADD_STASH, { projectId, options }),
   listStashes: (projectId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.GIT_LIST_STASHES, { projectId }),

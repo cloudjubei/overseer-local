@@ -192,7 +192,9 @@ export default function FeatureForm({
   }
 
   const handleReferenceSelected = (ref: string) => {
+    console.log('handleReferenceSelected ref: ', ref)
     const canonical = normalizeDependency(ref)
+    console.log('handleReferenceSelected canonical: ', canonical)
     setBlockers((prev) => (prev.includes(canonical) ? prev : [...prev, canonical]))
   }
 
@@ -427,6 +429,8 @@ export default function FeatureForm({
               const newDeps = deps
                 .map((d) => normalizeDependency(d))
                 .filter((d) => !blockers.includes(d))
+
+              console.log('DependencySelector newDeps: ', newDeps)
               setBlockers([...blockers, ...newDeps])
               setShowSelector(false)
             }}

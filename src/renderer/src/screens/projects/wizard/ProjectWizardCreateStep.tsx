@@ -94,6 +94,7 @@ export interface ProjectWizardCreateState {
   id: string
   path: string
   icon: string
+  description: string
 }
 
 interface ProjectWizardCreateStepProps {
@@ -106,6 +107,7 @@ export function ProjectWizardCreateStep({ initialState, onStateChange }: Project
   const [id, setId] = useState(initialState?.id || '')
   const [path, setPath] = useState(initialState?.path || '')
   const [icon, setIcon] = useState(initialState?.icon || 'folder')
+  const [description, setDescription] = useState(initialState?.description || '')
   const [autoId, setAutoId] = useState(true)
 
   useEffect(() => {
@@ -120,8 +122,8 @@ export function ProjectWizardCreateStep({ initialState, onStateChange }: Project
 
   useEffect(() => {
     const isValid = title.trim() !== '' && id.trim() !== '' && path.trim() !== ''
-    onStateChange({ title, id, path, icon }, isValid)
-  }, [title, id, path, icon, onStateChange])
+    onStateChange({ title, id, path, icon, description }, isValid)
+  }, [title, id, path, icon, description, onStateChange])
 
   return (
     <div className="flex flex-col w-full max-w-xl mx-auto py-4">
@@ -138,6 +140,13 @@ export function ProjectWizardCreateStep({ initialState, onStateChange }: Project
           value={title}
           onChange={setTitle}
           placeholder="My Awesome App"
+        />
+
+        <TextInput
+          label="Description"
+          value={description}
+          onChange={setDescription}
+          placeholder="A brief description of this project"
         />
 
         <TextInput

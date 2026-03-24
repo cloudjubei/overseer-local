@@ -1,20 +1,7 @@
 import React, { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import type { ChatContext } from 'thefactory-tools'
-import DependencyBullet from '../stories/DependencyBullet'
-
-function collectDependencies(context: ChatContext): { deps: string[]; hasAny: boolean } {
-  const deps: string[] = []
-  // Story contexts
-  if ((context as any).storyId) {
-    deps.push((context as any).storyId)
-  }
-  // Feature contexts
-  if ((context as any).featureId && (context as any).storyId) {
-    deps.push(`${(context as any).storyId}.${(context as any).featureId}`)
-  }
-  return { deps, hasAny: deps.length > 0 }
-}
+import StoryAndFeatureCallout from '../stories/StoryAndFeatureCallout'
 
 export default function ContextInfoButton({
   context,
@@ -25,7 +12,9 @@ export default function ContextInfoButton({
   label?: string
   className?: string
 }) {
-  const { deps, hasAny } = useMemo(() => collectDependencies(context), [context])
+  const storyId = (context as any).storyId as string | undefined
+  const featureId = (context as any).featureId as string | undefined
+  const hasAny = !!(storyId || featureId)
 
   const [open, setOpen] = useState(false)
   const [pos, setPos] = useState<{ top: number; left: number; placement: 'top' | 'bottom' } | null>(
@@ -220,18 +209,9 @@ export default function ContextInfoButton({
                 }}
               />
             )}
-            <div className="p-2 min-w-[200px]">
+            <div className="p-2">
               {hasAny ? (
-                <div className="flex flex-wrap gap-1">
-                  {deps.map((d) => (
-                    <DependencyBullet
-                      key={d}
-                      dependency={d}
-                      interactive
-                      notFoundDependencyDisplay={'*DELETED*'}
-                    />
-                  ))}
-                </div>
+                <StoryAndFeatureCallout storyId={storyId} featureId={featureId} />
               ) : (
                 <div className="text-xs text-[var(--text-secondary)] px-1 py-0.5">
                   No contextual items.

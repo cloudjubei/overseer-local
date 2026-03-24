@@ -103,6 +103,7 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
   }, [storyId, storiesById])
 
   const storyDisplayIndex = useMemo(() => {
+    if (!projectId) return '?'
     return getStoryDisplayIndex(projectId, storyId)
   }, [projectId, storyId, getStoryDisplayIndex])
 

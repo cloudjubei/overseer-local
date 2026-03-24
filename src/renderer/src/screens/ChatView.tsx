@@ -8,6 +8,7 @@ import type {
   ChatContext,
   ChatContextAgentRun,
   ChatContextAgentRunFeature,
+  ChatContextAgentRunStory,
   ChatContextFeature,
   ChatContextGroup,
   ChatContextGroupTopic,
@@ -24,7 +25,9 @@ import SegmentedControl from '@renderer/components/ui/SegmentedControl'
 import { useChatUnread } from '@renderer/hooks/useChatUnread'
 import DotBadge from '@renderer/components/ui/DotBadge'
 import { getChatContextKey, getChatContext } from 'thefactory-tools/utils'
+import { useAppSettings } from '@renderer/contexts/AppSettingsContext'
 import { useNotifications } from '@renderer/hooks/useNotifications'
+import { useAgents } from '@renderer/contexts/AgentsContext'
 import ChatTopicCreateModal from '@renderer/components/chat/ChatTopicCreateModal'
 import { IconPlus } from '@renderer/components/ui/icons/Icons'
 
@@ -102,9 +105,11 @@ export default function ChatView() {
   const { projects } = useProjectContext()
   const { groups, activeGroupId, activeSelectionType } = useProjectsGroups()
   const { storiesById, featuresById } = useStories()
-  const { getChatIfExists, chats, chatsByProjectId } = useChats()
-  const { hasUnreadForProject } = useChatUnread()
-  const { markNotificationsByMetadata, getGroupBadgeState } = useNotifications()
+  const { getChatIfExists, chatsByProjectId } = useChats()
+  const { markNotificationsByMetadata, getGroupBadgeState, getProjectBadgeState } =
+    useNotifications()
+  const { markRunSeen } = useAgents()
+  const { appSettings } = useAppSettings()
 
   // Modal state
   const [isTopicModalOpen, setIsTopicModalOpen] = useState(false)
@@ -143,6 +148,14 @@ export default function ChatView() {
     }
     return undefined
   })
+
+  const onSelectChatContext = (context: ChatContext) => {
+    try {
+      const p = getChatContextKey(context)
+      const targetHash = `#chats${p}`
+      if (window.location.hash !== targetHash) window.location.hash = targetHash
+    } catch {}
+  }
 
   // Sidebar mode state (categories | history)
   const [mode, setMode] = useState<'categories' | 'history'>(() => {
@@ -220,11 +233,11 @@ export default function ChatView() {
       // Find best candidate for new context
       let newContext: ChatContext | undefined = undefined
       if (activeSelectionType === 'group' && activeGroupId) {
-        newContext = { type: 'GROUP', groupId: activeGroupId } as any
+        newContext = { type: 'GROUP', groupId: activeGroupId } as ChatContextGroup
       } else {
         newContext = loadMostRecentlyOpened()
         if (!newContext && activeProjectId) {
-          newContext = { type: 'PROJECT', projectId: activeProjectId }
+          newContext = { type: 'PROJECT', projectId: activeProjectId } as ChatContextProject
         }
       }
 
@@ -294,8 +307,17 @@ export default function ChatView() {
         { actionUrl },
         { category: 'chat_messages', projectId: activeProjectId },
       )
+
+      if (
+        selectedContext.type === 'AGENT_RUN_STORY' ||
+        selectedContext.type === 'AGENT_RUN_FEATURE'
+      ) {
+        markRunSeen(
+          (selectedContext as ChatContextAgentRunStory | ChatContextAgentRunFeature).agentRunId,
+        )
+      }
     } catch (_) {}
-  }, [selectedContext, activeProjectId, markNotificationsByMetadata])
+  }, [selectedContext, activeProjectId, markNotificationsByMetadata, markRunSeen])
 
   // Header action: Categories | History switch with unread dot hint, plus the 'create topic' button
   const headerAction = useMemo(() => {
@@ -312,26 +334,45 @@ export default function ChatView() {
       />
     )
 
-    let showDot: boolean
+    let showChatDot = false
+    let showAgentDot = false
+
     if (activeSelectionType === 'group' && activeGroupId) {
       const groupBadge = getGroupBadgeState(activeGroupId)
-      showDot = groupBadge.chat_messages.unread > 0 || groupBadge.chat_messages.thinking
+      showChatDot = groupBadge.chat_messages.unread > 0
+      showAgentDot = groupBadge.agent_runs.unread > 0 || groupBadge.agent_runs.running > 0
     } else {
-      showDot = hasUnreadForProject(activeProjectId)
+      const projBadge = getProjectBadgeState(activeProjectId)
+      showChatDot = projBadge.chat_messages.unread > 0
+      showAgentDot = projBadge.agent_runs.unread > 0 || projBadge.agent_runs.running > 0
     }
+
+    const chatBadgeColor = appSettings?.notificationSystemSettings?.badgeColors?.chat_messages
+    const agentBadgeColor = appSettings?.notificationSystemSettings?.badgeColors?.agent_runs
 
     return (
       <div className="flex items-center gap-2">
-        {seg}
-        {showDot && (
-          <DotBadge
-            title={
-              activeSelectionType === 'group'
-                ? 'Unread chats in this group'
-                : 'Unread chats in this project'
-            }
-          />
-        )}
+        <div className="relative">
+          {seg}
+          {(showChatDot || showAgentDot) && (
+            <div className="absolute -top-1 -right-1 flex flex-col gap-[2px]">
+              {showChatDot && (
+                <DotBadge
+                  title="Unread chats"
+                  colorClass={chatBadgeColor ? `bg-${chatBadgeColor}-500` : 'bg-red-500'}
+                  className="w-[6px] h-[6px]"
+                />
+              )}
+              {showAgentDot && (
+                <DotBadge
+                  title="Unread agent runs"
+                  colorClass={agentBadgeColor ? `bg-${agentBadgeColor}-500` : 'bg-blue-500'}
+                  className="w-[6px] h-[6px]"
+                />
+              )}
+            </div>
+          )}
+        </div>
         <button
           type="button"
           onClick={() => setIsTopicModalOpen(true)}
@@ -348,8 +389,9 @@ export default function ChatView() {
     activeProjectId,
     activeGroupId,
     activeSelectionType,
-    hasUnreadForProject,
     getGroupBadgeState,
+    getProjectBadgeState,
+    appSettings,
   ])
 
   const collapsedLabel = mode === 'categories' ? 'CATEGORIES' : 'HISTORY'
@@ -368,14 +410,7 @@ export default function ChatView() {
         navContent={
           <ChatsNavigationSidebar
             selectedContext={selectedContext}
-            onSelectContext={(ctx) => {
-              try {
-                const p = getChatContextKey(ctx)
-                const targetHash = `#chats${p}`
-                if (window.location.hash !== targetHash) window.location.hash = targetHash
-              } catch {}
-              setSelectedContext(ctx)
-            }}
+            onSelectContext={onSelectChatContext}
             mode={mode}
           />
         }
@@ -400,13 +435,7 @@ export default function ChatView() {
       <ChatTopicCreateModal
         isOpen={isTopicModalOpen}
         onClose={() => setIsTopicModalOpen(false)}
-        onTopicCreated={async (ctx) => {
-          await getChatIfExists(ctx)
-          const p = getChatContextKey(ctx)
-          const targetHash = `#chats${p}`
-          if (window.location.hash !== targetHash) window.location.hash = targetHash
-          setSelectedContext(ctx)
-        }}
+        onTopicCreated={onSelectChatContext}
       />
     </>
   )

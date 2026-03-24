@@ -105,7 +105,7 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
   // Compute display index mappings directly from all projects and stories
   const storyDisplayToId = useMemo(() => {
     const mapping: Record<string, string> = {}
-    projects.forEach(project => {
+    projects.forEach((project) => {
       project.storyIds.forEach((storyId, idx) => {
         mapping[`${idx + 1}`] = storyId
       })
@@ -115,7 +115,7 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
 
   const featureDisplayToIdByStory = useMemo(() => {
     const mapping: Record<string, Record<string, string>> = {}
-    Object.values(storiesById).forEach(story => {
+    Object.values(storiesById).forEach((story) => {
       const featureMap: Record<string, string> = {}
       story.features.forEach((feature, idx) => {
         featureMap[`${idx}`] = feature.id
@@ -150,7 +150,7 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
         if (!isDelete && story) {
           newStoriesById[storyId] = story!
         }
-        
+
         if (story) {
           for (const f of story.features) {
             delete newFeaturesById[f.id]
@@ -174,7 +174,7 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
       const projectId = storyUpdate.projectId
       const isDelete = storyUpdate.type === 'delete'
       const story = storyUpdate.story
-      
+
       updateStories([{ storyId, projectId, isDelete, story }])
     },
     [updateStories],

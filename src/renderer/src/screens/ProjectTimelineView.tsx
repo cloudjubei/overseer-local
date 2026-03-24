@@ -4,8 +4,8 @@ import { useStories } from '../contexts/StoriesContext'
 import { useActiveProject, useProjectContext } from '../contexts/ProjectContext'
 import { dbService } from '../services/dbService'
 import type { Entity, EntityInput } from 'thefactory-db'
-import StorySummaryCallout from '../components/stories/StorySummaryCallout'
-import FeatureSummaryCallout from '../components/stories/FeatureSummaryCallout'
+import { StoryCardRaw } from '../components/stories/StoryCard'
+import { FeatureCardRaw } from '../components/stories/FeatureCard'
 import { useNavigator } from '../navigation/Navigator'
 import { Switch } from '../components/ui/Switch'
 
@@ -985,30 +985,21 @@ export default function ProjectTimelineView() {
         >
           {hover.kind === 'story'
             ? (() => {
-                const t = storiesById[hover.storyId]
-                if (!t) return null
-                const displayId = String(getStoryDisplayIndex(projectId, t.id) ?? t.id)
-                return (
-                  <StorySummaryCallout
-                    title={t.title}
-                    description={(t as any)?.description || ''}
-                    status={t.status}
-                    displayId={displayId}
-                  />
-                )
+                const story = storiesById[hover.storyId]
+                if (!project || !story) return null
+                return <StoryCardRaw project={project} story={story} className="max-w-xs" />
               })()
             : hover.kind === 'feature'
               ? (() => {
-                  const t = storiesById[hover.storyId]
-                  const f = t?.features.find((x) => x.id === hover.featureId)
-                  if (!t || !f) return null
-                  const displayId = String(getFeatureDisplayIndex(t.id, f.id) ?? f.id)
+                  const story = storiesById[hover.storyId]
+                  const f = story?.features.find((x) => x.id === hover.featureId)
+                  if (!project || !story || !f) return null
                   return (
-                    <FeatureSummaryCallout
-                      title={f.title}
-                      description={f.description || ''}
-                      status={f.status}
-                      displayId={displayId}
+                    <FeatureCardRaw
+                      project={project}
+                      feature={f}
+                      story={story}
+                      className="max-w-xs"
                     />
                   )
                 })()

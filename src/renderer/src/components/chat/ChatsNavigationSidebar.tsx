@@ -23,6 +23,7 @@ import NotificationBadge from '@renderer/components/stories/NotificationBadge'
 import { useChatThinking } from '@renderer/hooks/useChatThinking'
 import SpinnerWithDot from '@renderer/components/ui/SpinnerWithDot'
 import { useAppSettings } from '@renderer/contexts/AppSettingsContext'
+import { useAgents } from '@renderer/contexts/AgentsContext'
 
 function prettyTopicName(topic?: string): string {
   if (!topic) return 'Topic'
@@ -185,6 +186,9 @@ const ChatButton = memo(function ChatButton({
   isThinking,
   updatedAt,
   chatBadgeColor,
+  agentBadgeColor,
+  isAgentRunning,
+  isAgentUnread,
 }: {
   ctx: ChatContext
   label: string
@@ -194,6 +198,9 @@ const ChatButton = memo(function ChatButton({
   isThinking: boolean
   updatedAt?: string
   chatBadgeColor?: 'red' | 'blue' | 'green' | 'orange'
+  agentBadgeColor?: 'red' | 'blue' | 'green' | 'orange'
+  isAgentRunning?: boolean
+  isAgentUnread?: boolean
 }) {
   const cap99 = (n: number) => (n > 99 ? '99+' : `${n}`)
   const hasUnread = unreadCount > 0
@@ -211,11 +218,13 @@ const ChatButton = memo(function ChatButton({
     >
       <div className="flex items-center justify-between gap-2 min-w-0">
         <div className="text-[12px] font-medium text-[var(--text-primary)] truncate">{label}</div>
-        {isThinking ? (
+        {isAgentRunning || isThinking ? (
           <SpinnerWithDot
             size={14}
-            showDot={hasUnread}
-            dotTitle={hasUnread ? 'Unread messages' : undefined}
+            showDot={hasUnread || isAgentUnread}
+            dotTitle={hasUnread ? 'Unread messages' : isAgentUnread ? 'Unread agent run' : undefined}
+            dotColorClass={isAgentUnread && agentBadgeColor ? `bg-${agentBadgeColor}-500` : undefined}
+            className={isAgentRunning && agentBadgeColor ? `text-${agentBadgeColor}-500` : undefined}
           />
         ) : hasUnread ? (
           <NotificationBadge
@@ -223,6 +232,12 @@ const ChatButton = memo(function ChatButton({
             text={cap99(unreadCount)}
             tooltipLabel={`${unreadCount} unread messages`}
             color={chatBadgeColor}
+          />
+        ) : isAgentUnread ? (
+          <DotBadge
+            title="Finished Agent Run"
+            colorClass={agentBadgeColor ? `bg-${agentBadgeColor}-500` : 'bg-blue-500'}
+            className="flex-none ml-auto"
           />
         ) : null}
       </div>
@@ -251,11 +266,23 @@ const ConnectedChatButton = memo(function ConnectedChatButton({
 }) {
   const { unreadKeys, getUnreadCountForKey } = useChatUnread()
   const { isThinkingKey } = useChatThinking(500)
+  const { chats } = useChats()
+  const { isRunUnread } = useAgents()
+  const { appSettings } = useAppSettings()
 
   const key = useMemo(() => getChatContextKey(ctx), [ctx])
   const isUnread = unreadKeys.has(key)
   const unreadCount = isUnread ? getUnreadCountForKey(key) : 0
   const isThinking = isThinkingKey(key)
+
+  const chatState = chats[key]
+  const chat = chatState?.chat
+
+  const isAgentContext = ctx.type === 'AGENT_RUN_STORY' || ctx.type === 'AGENT_RUN_FEATURE'
+  const isAgentRunning = Boolean(isAgentContext && (chat?.state === 'running' || chat?.state === 'created'))
+  const isAgentUnread = Boolean(isAgentContext && chat ? isRunUnread(chat) : false)
+
+  const agentBadgeColor = appSettings?.notificationSystemSettings?.badgeColors?.agent_runs
 
   return (
     <ChatButton
@@ -267,6 +294,9 @@ const ConnectedChatButton = memo(function ConnectedChatButton({
       isThinking={isThinking}
       updatedAt={updatedAt}
       chatBadgeColor={chatBadgeColor}
+      agentBadgeColor={agentBadgeColor}
+      isAgentRunning={isAgentRunning}
+      isAgentUnread={isAgentUnread}
     />
   )
 })

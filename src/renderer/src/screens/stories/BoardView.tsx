@@ -3,7 +3,7 @@ import type { Status, Story } from 'thefactory-tools'
 import { useActiveProject, useProjectContext } from '@renderer/contexts/ProjectContext'
 import StatusControl, { STATUS_LABELS } from '@renderer/components/stories/StatusControl'
 import { useNavigator } from '@renderer/navigation/Navigator'
-import StoryCard from '@renderer/components/stories/StoryCard'
+import { StoryCard, StoryCardRaw } from '@renderer/components/stories/StoryCard'
 import { useStories } from '@renderer/contexts/StoriesContext'
 import { IconChevronLeft, IconChevronRight } from '@renderer/components/ui/icons/Icons'
 
@@ -226,7 +226,7 @@ export default function BoardView({ stories }: Props) {
                 <div className="empty">No stories</div>
               ) : (
                 grouped[s].map((t) => (
-                  <StoryCard
+                  <StoryCardRaw
                     key={t.id}
                     project={project}
                     story={t}
@@ -234,6 +234,7 @@ export default function BoardView({ stories }: Props) {
                     onDragStart={(e) => onDragStart(e, t.id)}
                     onClick={() => navigateStoryDetails(t.id)}
                     showStatus={false}
+                    showActions={true}
                     onStatusChange={async (next) => {
                       try {
                         await updateStoryStatus(t.id, next)

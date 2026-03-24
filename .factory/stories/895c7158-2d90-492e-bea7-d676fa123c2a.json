@@ -1,0 +1,55 @@
+{
+  "id": "895c7158-2d90-492e-bea7-d676fa123c2a",
+  "status": "-",
+  "title": "File Suggestion Improvements",
+  "description": "Improvements to the file suggestions feature in the chat input area.",
+  "features": [
+    {
+      "id": "04edce8b-3343-497b-8a63-7d190e72b6c4",
+      "status": "-",
+      "title": "Trigger and Positioning",
+      "description": "Make the file suggestions get added on `enter` not space. Make them always appear above the input box - sometimes they get shoved to the right and the file paths cannot be seen.",
+      "context": [],
+      "createdAt": "2026-03-24T15:52:59.426Z",
+      "updatedAt": "2026-03-24T15:52:59.426Z"
+    },
+    {
+      "id": "4057a5df-ba67-4573-a081-a828a1dfc01d",
+      "status": "-",
+      "title": "Folder Support and Icons",
+      "description": "Make the file suggestions also work for folders - we should add an icon at the left of all files that will indicate the extension (.ts,.tsx or .py files for code in their language). Create a similar file to @src/renderer/src/screens/projects/codeInfoIcons.tsx for file extension icons that can be used here and in the future.",
+      "context": [],
+      "createdAt": "2026-03-24T15:52:59.428Z",
+      "updatedAt": "2026-03-24T15:52:59.428Z"
+    },
+    {
+      "id": "b7fa983b-29d2-4af5-988b-211741a577b7",
+      "status": "-",
+      "title": "Inline Custom Render",
+      "description": "Make the file suggestions render within the input box in a custom way, similarly to how we have it in the StoryCreate Modal.",
+      "context": [],
+      "createdAt": "2026-03-24T15:52:59.432Z",
+      "updatedAt": "2026-03-24T15:52:59.432Z"
+    },
+    {
+      "id": "0c7ea050-2368-4f51-a3ac-1ec124376654",
+      "status": "-",
+      "title": "Interactive Render Elements",
+      "description": "The custom render needs to have a small X to the right of it to get rid off a file and when hovering over it (when it's added), it should show the file preview card above. If the user backspaces into a custom render of this `@file` it should not delete any characters, but enter the add mode as if the user just started typing the whole `@file` and was at the end but hasn't confirmed yet.",
+      "context": [],
+      "createdAt": "2026-03-24T15:52:59.433Z",
+      "updatedAt": "2026-03-24T15:52:59.433Z"
+    },
+    {
+      "id": "1eb2d250-c4f6-4576-a9c5-32efdf2e76ff",
+      "status": "-",
+      "title": "Copy/Paste Support",
+      "description": "When copying text with this custom rendered file suggestion (anywhere), it must copy the exact file path + `@`, so that when the user pastes this content into the chat input, the custom rendering can be recreated (this must be checked also).",
+      "context": [],
+      "createdAt": "2026-03-24T15:52:59.435Z",
+      "updatedAt": "2026-03-24T15:52:59.435Z"
+    }
+  ],
+  "createdAt": "2026-03-24T15:48:37.871Z",
+  "updatedAt": "2026-03-24T15:48:37.871Z"
+}

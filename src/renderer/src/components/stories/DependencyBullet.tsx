@@ -1,9 +1,9 @@
 import React from 'react'
 import { useNavigator } from '../../navigation/Navigator'
 import Tooltip from '../ui/Tooltip'
-import type { Status } from 'thefactory-tools'
-import StorySummaryCallout from './StorySummaryCallout'
-import FeatureSummaryCallout from './FeatureSummaryCallout'
+import { StoryCard } from './StoryCard'
+import { FeatureCard } from './FeatureCard'
+import StatusControl from './StatusControl'
 import { useStories } from '../../contexts/StoriesContext'
 import { IconXCircle } from '../ui/icons/Icons'
 
@@ -14,6 +14,7 @@ export interface DependencyBulletProps {
   notFoundDependencyDisplay?: string
   onRemove?: () => void
   interactive?: boolean
+  disableHoverInfo?: boolean
 }
 
 const DependencyBullet: React.FC<DependencyBulletProps> = ({
@@ -23,6 +24,7 @@ const DependencyBullet: React.FC<DependencyBulletProps> = ({
   notFoundDependencyDisplay,
   onRemove,
   interactive = true,
+  disableHoverInfo = false,
 }) => {
   const { navigateStoryDetails, storiesRoute } = useNavigator()
   const { resolveDependency } = useStories()
@@ -32,29 +34,35 @@ const DependencyBullet: React.FC<DependencyBulletProps> = ({
   const isFeatureDependency = !isError && resolved.kind === 'feature'
   const display = isError ? (notFoundDependencyDisplay ?? dependency) : resolved.display
 
-  let summary: { title: string; description: string; status: Status; displayId: string } = {
-    title: 'Not found',
-    description: '',
-    status: '-' as Status,
-    displayId: display,
-  }
-
-  if (!isError) {
-    if (resolved.kind === 'story') {
-      summary = {
-        title: resolved.story.title,
-        description: resolved.story.description,
-        status: resolved.story.status as Status,
-        displayId: display,
-      }
-    } else {
-      summary = {
-        title: resolved.feature.title,
-        description: resolved.feature.description,
-        status: resolved.feature.status as Status,
-        displayId: display,
-      }
-    }
+  let content: React.ReactNode
+  if (isError) {
+    content = (
+      <div className="summary-card p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-md max-w-xs">
+        <div className="text-xs text-gray-500 mb-1">Not found</div>
+        <h3 className="text-lg font-semibold mb-2">Not found</h3>
+        <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
+          The requested dependency could not be resolved.
+        </p>
+        <StatusControl status="-" />
+      </div>
+    )
+  } else if (resolved.kind === 'story') {
+    const { storyId } = resolved
+    content = (
+      <StoryCard
+        storyId={storyId}
+        className="max-w-xs !border-0 shadow-none !bg-transparent dark:!bg-transparent"
+      />
+    )
+  } else {
+    const { storyId, featureId } = resolved
+    content = (
+      <FeatureCard
+        storyId={storyId}
+        featureId={featureId}
+        className="max-w-xs !border-0 shadow-none !bg-transparent dark:!bg-transparent"
+      />
+    )
   }
 
   const handleClick = () => {
@@ -90,12 +98,6 @@ const DependencyBullet: React.FC<DependencyBulletProps> = ({
     }
   }
 
-  const content = isFeatureDependency ? (
-    <FeatureSummaryCallout {...summary} />
-  ) : (
-    <StorySummaryCallout {...summary} />
-  )
-
   const spanProps: React.HTMLAttributes<HTMLSpanElement> = {}
   if (interactive) {
     spanProps.onClick = (e) => {
@@ -113,7 +115,7 @@ const DependencyBullet: React.FC<DependencyBulletProps> = ({
   }
 
   return (
-    <Tooltip content={content} zIndex={2000}>
+    <Tooltip placement="bottom" content={content} zIndex={2000} disabled={disableHoverInfo}>
       <span
         className={`${className} chip  ${isError ? '' : isFeatureDependency ? 'feature' : 'story'} ${isError ? 'chip--missing' : isOutbound ? 'chip--blocks' : 'chip--ok'}`}
         title={`${display}${isOutbound ? ' (requires this)' : ''}`}

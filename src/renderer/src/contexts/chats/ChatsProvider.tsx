@@ -7,14 +7,12 @@ import type {
   ChatSettings,
 } from 'thefactory-tools'
 import { getChatContextKey } from 'thefactory-tools/utils'
-
 import { chatsService } from '@renderer/services/chatsService'
 import { projectsService } from '@renderer/services/projectsService'
 import { projectsGroupsService } from '@renderer/services/projectsGroupsService'
 import { completionService } from '@renderer/services/completionService'
 import { notificationsService } from '@renderer/services/notificationsService'
 import { useActiveProject } from '@renderer/contexts/ProjectContext'
-
 import type { ChatsContextValue, ChatState } from './ChatsTypes'
 import { useChatDrafts } from './ChatsDrafts'
 import { useChatSettings } from './ChatsSettings'
@@ -499,7 +497,10 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
 
       const chatProjectId = context.projectId ?? projectId
       if (!chatProjectId) {
-        console.warn('retryCompletion: missing projectId for chat completion', { context, projectId })
+        console.warn('retryCompletion: missing projectId for chat completion', {
+          context,
+          projectId,
+        })
         updateChatState(key, { isThinking: false })
         return
       }

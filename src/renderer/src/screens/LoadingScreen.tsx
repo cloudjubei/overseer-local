@@ -54,14 +54,10 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ onLoaded }) => {
     // Initialize Git tools per project and start monitors with current branch as base
     try {
       const projectIds = projects.map((p) => p.id)
-      // For each project, discover current branch via unified list, then start monitor on that base
       await Promise.all(
         projectIds.map(async (pid) => {
           try {
-            const unified = await gitService.listUnifiedBranches(pid)
-            const current = unified.find((b) => b.current)
-            const base = current?.name || 'main'
-            await gitService.startMonitor(pid, { baseBranch: base })
+            await gitService.startProject(pid)
           } catch (err) {
             console.warn('[LoadingScreen] Git init failed for project', pid, err)
             // Do not throw; continue initializing others

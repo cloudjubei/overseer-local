@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react'
-import type { ToolCall, ToolResultType } from 'thefactory-tools'
+import type { Story, ToolCall, ToolResultType } from 'thefactory-tools'
 import Code from '../../ui/Code'
-import FeatureSummaryCard from '../../stories/FeatureSummaryCard'
+import { FeatureCardRaw } from '../../stories/FeatureCard'
 import { useStories } from '@renderer/contexts/StoriesContext'
 import { useActiveProject } from '@renderer/contexts/ProjectContext'
 
@@ -14,9 +14,12 @@ import { NewContentOnly } from './components/NewContentOnly'
 import { ReorderList } from './components/ReorderList'
 
 import { extract, isCompletelyNewFile, tryString } from './utils'
-import StorySummaryCard from '@renderer/components/stories/StorySummaryCard'
+import { StoryCardRaw } from '@renderer/components/stories/StoryCard'
 import { WriteToolsPreview } from './renderers/WriteToolsPreview'
 import { TextToolsPreview } from './renderers/TextToolsPreview'
+import StoryAndFeatureCallout from '@renderer/components/stories/StoryAndFeatureCallout'
+
+import { useNavigator } from '@renderer/navigation/Navigator'
 
 export default function ToolCallHoverCard({
   toolCall,
@@ -28,8 +31,9 @@ export default function ToolCallHoverCard({
   resultType?: ToolResultType
 }) {
   const name = toolCall?.name || 'tool'
-  const { projectId } = useActiveProject()
+  const { projectId, project } = useActiveProject()
   const { storiesById, featuresById } = useStories()
+  const { navigateStoryDetails } = useNavigator()
 
   const args = toolCall?.arguments || {}
   const toolName = String(name)
@@ -252,12 +256,36 @@ export default function ToolCallHoverCard({
       return <InlineOldNew oldVal={delPath} newVal={'(deleted)'} />
     }
 
+    //TODO: fix incomplete args (no storyId/featureId) + hacks
     if (n === 'createFeature') {
-      return <FeatureSummaryCard feature={args} />
+      const isComplete = !isInFlight && !!result?.id
+      const storyId = args.storyId
+      const story = isComplete ? { ...result } : ({ id: storyId } as any)
+      const feature = isComplete ? story.features[story.features.length - 1] : ({ ...args } as any)
+      return (
+        <FeatureCardRaw
+          project={project!}
+          story={story}
+          feature={feature}
+          isNew={!isComplete}
+          onPillClick={isComplete ? () => navigateStoryDetails(storyId, result.id) : undefined}
+        />
+      )
     }
 
+    //TODO: fix incomplete args
     if (n === 'createStory') {
-      return <StorySummaryCard story={args} />
+      const isComplete = !isInFlight && !!result?.id
+      return (
+        <StoryCardRaw
+          project={project!}
+          story={result || args}
+          isNew={!isComplete}
+          onPillClick={
+            isComplete ? () => navigateStoryDetails(result.id, undefined, true) : undefined
+          }
+        />
+      )
     }
 
     if (n === 'reorderFeature') {
@@ -273,6 +301,16 @@ export default function ToolCallHoverCard({
         return <ReorderList items={order} movedId={movedId} />
       }
       return <div className="text-[11px] text-[var(--text-secondary)]">No reorder data</div>
+    }
+
+    if (n === 'finishFeature' || n === 'blockFeature') {
+      const storyId = tryString(extract(args, ['storyId']))
+      const featureId = tryString(extract(args, ['featureId']))
+      return (
+        <div className="p-2">
+          <StoryAndFeatureCallout storyId={storyId} featureId={featureId} />
+        </div>
+      )
     }
 
     if (n === 'searchFilesByExact' || n === 'searchFilesByKeywords') {

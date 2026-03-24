@@ -130,7 +130,37 @@ export default class GitManager extends BaseManager {
     handlers[IPC_HANDLER_KEYS.GIT_APPLY_PATCH] = ({ projectId, options }) =>
       this.applyPatch(projectId, options)
 
+    handlers[IPC_HANDLER_KEYS.GIT_START_PROJECT] = ({ projectId, options }) =>
+      this.startProject(projectId, options)
+
     return handlers
+  }
+
+  private async startProject(projectId: string, options?: { init?: boolean }): Promise<void> {
+    const tools = await this.getTools(projectId)
+    if (!tools) {
+      console.warn('[GitManager] Could not get tools for project', projectId)
+      return
+    }
+
+    try {
+      if (options?.init) {
+        // Run git init logic via tools. gitInit() doesn't currently exist directly in GitTools, 
+        // but it is done through tools.init() where it handles creating the repo if needed, or we can just rely on tools.init()
+        await tools.init()
+      }
+
+      const unified = await tools.listUnifiedBranches()
+      if (unified.ok) {
+        const current = unified.branches?.find((b) => b.current)
+        const base = current?.name || 'main'
+        await this.startMonitor(projectId, { baseBranch: base })
+      } else {
+        await this.startMonitor(projectId, { baseBranch: 'main' })
+      }
+    } catch (err) {
+      console.warn('[GitManager] Git startProject failed for project', projectId, err)
+    }
   }
 
   private async applyPatch(

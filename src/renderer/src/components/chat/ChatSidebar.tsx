@@ -413,6 +413,7 @@ export default function ChatSidebar({
   }, [chat?.chat.messages, isThinking])
 
   const handleDeleteChat = useCallback(async () => {
+    setIsSettingsOpen(false)
     const projectId = context.projectId || activeProjectId
     if (!projectId) return
 
