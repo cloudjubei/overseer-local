@@ -523,6 +523,25 @@ export default function FileMentionsTextarea({
           setEditingTokenRange(null)
         }}
         onKeyDown={onKeyDownInternal}
+        onCopy={(e) => {
+          // When users select/copy from the custom rendered overlay, the underlying textarea text
+          // should be copied as the raw token text (e.g. "@src/file.ts").
+          // Because the textarea text is transparent, some platforms/browsers can behave oddly when
+          // copying. Force a plain-text copy from the textarea selection.
+          try {
+            const el = e.currentTarget
+            const start = el.selectionStart ?? 0
+            const end = el.selectionEnd ?? start
+            const selected = (value ?? '').slice(start, end)
+            // Only override if there's an actual selection.
+            if (selected.length > 0) {
+              e.preventDefault()
+              e.clipboardData.setData('text/plain', selected)
+            }
+          } catch {
+            /* ignore and allow default */
+          }
+        }}
         onSelect={(e) => {
           updateSelectionFromEl(e.currentTarget)
           onSelect?.(e)

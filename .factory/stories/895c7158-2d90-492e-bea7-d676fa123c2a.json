@@ -1,6 +1,6 @@
 {
   "id": "895c7158-2d90-492e-bea7-d676fa123c2a",
-  "status": "-",
+  "status": "+",
   "title": "File Suggestion Improvements",
   "description": "Improvements to the file suggestions feature in the chat input area.",
   "features": [
@@ -46,14 +46,16 @@
     },
     {
       "id": "1eb2d250-c4f6-4576-a9c5-32efdf2e76ff",
-      "status": "-",
+      "status": "+",
       "title": "Copy/Paste Support",
       "description": "When copying text with this custom rendered file suggestion (anywhere), it must copy the exact file path + `@`, so that when the user pastes this content into the chat input, the custom rendering can be recreated (this must be checked also).",
       "context": [],
       "createdAt": "2026-03-24T15:52:59.435Z",
-      "updatedAt": "2026-03-24T15:52:59.435Z"
+      "updatedAt": "2026-03-24T22:47:52.100Z",
+      "completedAt": "2026-03-24T22:47:52.100Z"
     }
   ],
   "createdAt": "2026-03-24T15:48:37.871Z",
-  "updatedAt": "2026-03-24T15:48:37.871Z"
+  "updatedAt": "2026-03-24T15:48:37.871Z",
+  "completedAt": "2026-03-24T22:47:52.100Z"
 }
