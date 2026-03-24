@@ -40,7 +40,8 @@
 .file-mentions-overlay {
   position: absolute;
   inset: 0;
-  pointer-events: none;
+  /* We need pointer events for hover + remove interactions. */
+  pointer-events: auto;
   z-index: 1;
 
   /* Mirror textarea behavior */
@@ -51,6 +52,38 @@
 
 .file-mentions-overlay__content {
   display: block;
+}
+
+.file-mentions-token {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.file-mentions-token__remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 9999px;
+  line-height: 14px;
+  font-size: 12px;
+  color: var(--text-muted);
+  border: 1px solid var(--border-subtle, #e1e3ea);
+  background: var(--surface-0, #fafbfc);
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.file-mentions-token__remove:hover {
+  color: var(--text-primary);
+  border-color: var(--border-default, #d0d3db);
+  background: var(--surface-1, #fff);
+}
+
+.file-mentions-hover-preview {
+  max-width: min(520px, calc(100vw - 24px));
 }
 
 /* Make textarea text invisible but keep caret visible */

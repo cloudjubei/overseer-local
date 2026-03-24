@@ -66,16 +66,34 @@ function tokenize(
   return parts
 }
 
+function isRangeInsideToken(params: {
+  tokenStart: number
+  tokenEnd: number
+  caretPos: number
+  key: 'Backspace' | 'Delete'
+}): boolean {
+  const { tokenStart, tokenEnd, caretPos, key } = params
+  // With a collapsed selection, Backspace affects the char before caret, Delete affects the char after.
+  // Treat "backspacing into" a token as caret being immediately after it.
+  if (key === 'Backspace') return caretPos === tokenEnd
+  if (key === 'Delete') return caretPos === tokenStart
+  return false
+}
+
 export function RichText({
   text,
   variant = 'display',
   inputEditRange,
+  onRequestEditToken,
 }: {
   text: string | null | undefined
   variant?: 'display' | 'input'
   // When rendering in input mode, if provided, suppress chip styling for any mention whose
   // raw token range intersects this range (render as plain text for editing UX at caret).
   inputEditRange?: { start: number; end: number } | null
+  // Input-mode only: allow the parent textarea to intercept backspace/delete into a token and
+  // request an edit range to be selected.
+  onRequestEditToken?: (range: { start: number; end: number }) => void
 }) {
   const { filesByPath } = useFiles()
   const segments = React.useMemo(() => tokenize(text || ''), [text])
@@ -109,18 +127,33 @@ export function RichText({
 
           const isFile = seg.type === 'file'
           const label = raw
+
+          // Important: overlay is pointer-events:none to preserve native textarea selection.
+          // But we can still embed metadata for the textarea to read by mapping positions.
           return (
             <span
               key={idx}
               className={
-                'inline align-baseline rounded-sm px-1 py-[1px] ' +
+                'file-mentions-token inline align-baseline rounded-sm px-1 py-[1px] ' +
                 'border border-[var(--border-subtle)] ' +
                 (isFile
                   ? 'bg-[color-mix(in_srgb,var(--accent-primary)_10%,transparent)] text-[var(--text-primary)]'
                   : 'bg-[color-mix(in_srgb,var(--accent-secondary,_#a78bfa)_10%,transparent)] text-[var(--text-primary)]')
               }
+              data-token-start={start}
+              data-token-end={end}
+              data-token-raw={raw}
             >
-              {label}
+              <span className="file-mentions-token__label">{label}</span>
+              {isFile ? (
+                <span
+                  className="file-mentions-token__remove"
+                  aria-hidden
+                  title="Remove"
+                >
+                  ×
+                </span>
+              ) : null}
             </span>
           )
         })}
@@ -145,6 +178,7 @@ export function RichText({
             meta = {
               name: found.name || token.split('/').pop() || token,
               absolutePath: found.absolutePath,
+              relativePath: token,
               size: found.size,
               mtime: found.mtime,
               ctime: found.ctime,
@@ -157,6 +191,7 @@ export function RichText({
               meta = {
                 name: alt.name || short,
                 absolutePath: alt.absolutePath,
+                relativePath: short,
                 size: alt.size,
                 mtime: alt.mtime,
                 ctime: alt.ctime,
@@ -181,12 +216,28 @@ export function RichText({
           <span key={idx} className="inline-file-chip">
             <FileDisplay
               file={meta}
-              density="compact"
+              density="normal"
               interactive={false}
               showPreviewOnHover={true}
+              previewPlacement="top"
               navigateOnClick={false}
               showMeta={false}
               className="inline"
+              trailing={
+                <button
+                  type="button"
+                  className="inline-file-chip__remove"
+                  aria-label={`Remove ${meta.name}`}
+                  title="Remove"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    // Display-mode remove not wired by default; consumer can intercept via event delegation
+                  }}
+                >
+                  ×
+                </button>
+              }
             />
           </span>
         )
@@ -196,3 +247,5 @@ export function RichText({
 }
 
 export default RichText
+
+export { tokenize, isRangeInsideToken }

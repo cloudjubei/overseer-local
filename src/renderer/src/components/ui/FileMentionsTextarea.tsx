@@ -1,11 +1,12 @@
-import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useFilesAutocomplete } from '../../hooks/useFilesAutocomplete'
 import { useReferencesAutocomplete } from '../../hooks/useReferencesAutocomplete'
 import { useFiles } from '../../contexts/FilesContext'
 import { IconFolder } from './icons/Icons'
 import { renderFileSuggestionIcon } from '../chat/fileSuggestionIcons'
 import { PathDisplay } from './PathDisplay'
-import { RichText } from './RichText'
+import { RichText, tokenize } from './RichText'
+import FileDisplay from './FileDisplay'
 
 export type FileMentionsTextareaProps = {
   id?: string
@@ -27,6 +28,40 @@ export type FileMentionsTextareaProps = {
   onFocus?: React.FocusEventHandler<HTMLTextAreaElement>
 }
 
+type TokenInfo = {
+  type: 'file' | 'dep'
+  raw: string
+  start: number
+  end: number
+  value: string
+}
+
+function findTokenAtBoundary(text: string, caretPos: number, which: 'backspace' | 'delete') {
+  const segments = tokenize(text)
+  let pos = 0
+  for (const seg of segments) {
+    if (seg.type === 'text') {
+      pos += seg.value.length
+      continue
+    }
+    const start = pos
+    const end = start + seg.raw.length
+    pos = end
+
+    if (which === 'backspace' && caretPos === end) {
+      return { start, end }
+    }
+    if (which === 'delete' && caretPos === start) {
+      return { start, end }
+    }
+  }
+  return null
+}
+
+function removeRange(text: string, start: number, end: number) {
+  return text.slice(0, start) + text.slice(end)
+}
+
 export default function FileMentionsTextarea({
   id,
   value,
@@ -46,7 +81,7 @@ export default function FileMentionsTextarea({
   onMouseUp,
   onFocus,
 }: FileMentionsTextareaProps) {
-  const { files } = useFiles()
+  const { files, filesByPath } = useFiles()
   const innerRef = useRef<HTMLTextAreaElement | null>(null)
   const textareaRef = inputRef ?? innerRef
   const mirrorRef = useRef<HTMLDivElement | null>(null)
@@ -57,6 +92,17 @@ export default function FileMentionsTextarea({
   // invisible (but caret + selection remain native). This mirrors the StoryCreate-style behavior.
   const [isFocused, setIsFocused] = useState(false)
   const [selection, setSelection] = useState<{ start: number; end: number } | null>(null)
+
+  // When user backspaces into a mention chip, we enter "add mode" by selecting the whole token.
+  // This is used by RichText(input) to render that token as raw text (not chip) so the user can edit.
+  const [editingTokenRange, setEditingTokenRange] = useState<{ start: number; end: number } | null>(
+    null,
+  )
+
+  // Hover preview + remove affordance for file chips in the overlay.
+  const [hoveredFileToken, setHoveredFileToken] = useState<{ path: string; anchorRect: DOMRect } | null>(
+    null,
+  )
 
   // Guard against undefined 'files' during initial loads or heavy operations
   const filesList = useMemo(() => {
@@ -156,7 +202,7 @@ export default function FileMentionsTextarea({
 
     const realWidth = node.offsetWidth || 260
     const newLeft = clamp(
-      (filesDropdownLeft ?? parent.left + PADDING),
+      filesDropdownLeft ?? parent.left + PADDING,
       parent.left + PADDING,
       parent.right - realWidth - PADDING,
     )
@@ -239,11 +285,13 @@ export default function FileMentionsTextarea({
 
   const handleFileSelect = (path: string) => {
     onFileSelectInternal(path)
+    setEditingTokenRange(null)
     if (onFileMentionSelected) onFileMentionSelected(path)
   }
 
   const handleRefSelect = (refDisplay: string) => {
     onRefSelectInternal(refDisplay)
+    setEditingTokenRange(null)
     if (onReferenceSelected) onReferenceSelected(refDisplay)
   }
 
@@ -254,9 +302,42 @@ export default function FileMentionsTextarea({
     setSelection({ start, end })
   }
 
+  const ensureSelectionRange = useCallback((range: { start: number; end: number }) => {
+    const el = textareaRef.current
+    if (!el) return
+    requestAnimationFrame(() => {
+      el.focus()
+      try {
+        el.setSelectionRange(range.start, range.end)
+      } catch {
+        /* ignore */
+      }
+      setSelection({ start: range.start, end: range.end })
+    })
+  }, [])
+
   const onKeyDownInternal = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     const key = e.key
     const isEnter = key === 'Enter'
+
+    // If caret is collapsed and user backspaces into a token, do not delete characters.
+    // Instead, select the whole token ("add mode") so the user can edit it.
+    if ((key === 'Backspace' || key === 'Delete') && !disableAutocomplete) {
+      const el = e.currentTarget
+      const start = el.selectionStart ?? 0
+      const end = el.selectionEnd ?? start
+      const collapsed = start === end
+      if (collapsed) {
+        const tokenRange = findTokenAtBoundary(value, start, key === 'Backspace' ? 'backspace' : 'delete')
+        if (tokenRange) {
+          e.preventDefault()
+          e.stopPropagation()
+          setEditingTokenRange(tokenRange)
+          ensureSelectionRange(tokenRange)
+          return
+        }
+      }
+    }
 
     // Accept the top suggestion on Enter (not Space).
     // This prevents accidental selection when the user just wants to type a space.
@@ -279,6 +360,104 @@ export default function FileMentionsTextarea({
     onKeyDown?.(e)
   }
 
+  const handleOverlayPointerMove: React.PointerEventHandler<HTMLDivElement> = (e) => {
+    if (disableAutocomplete) return
+    const target = e.target as HTMLElement | null
+    if (!target) return
+
+    const tokenEl = target.closest?.('.file-mentions-token') as HTMLElement | null
+    if (!tokenEl) {
+      if (hoveredFileToken) setHoveredFileToken(null)
+      return
+    }
+
+    const raw = tokenEl.getAttribute('data-token-raw') || ''
+    if (!raw.startsWith('@')) {
+      if (hoveredFileToken) setHoveredFileToken(null)
+      return
+    }
+    const path = raw.slice(1)
+    const rect = tokenEl.getBoundingClientRect()
+
+    // Only update when path changes to avoid re-render spam.
+    if (!hoveredFileToken || hoveredFileToken.path !== path) {
+      setHoveredFileToken({ path, anchorRect: rect })
+    }
+  }
+
+  const handleOverlayPointerLeave: React.PointerEventHandler<HTMLDivElement> = () => {
+    if (hoveredFileToken) setHoveredFileToken(null)
+  }
+
+  const handleOverlayPointerDown: React.PointerEventHandler<HTMLDivElement> = (e) => {
+    if (disableAutocomplete) return
+
+    const target = e.target as HTMLElement | null
+    if (!target) return
+
+    const removeEl = target.closest?.('.file-mentions-token__remove') as HTMLElement | null
+    if (!removeEl) return
+
+    const tokenEl = removeEl.closest?.('.file-mentions-token') as HTMLElement | null
+    if (!tokenEl) return
+
+    const raw = tokenEl.getAttribute('data-token-raw') || ''
+    const startStr = tokenEl.getAttribute('data-token-start')
+    const endStr = tokenEl.getAttribute('data-token-end')
+
+    const start = startStr != null ? Number(startStr) : NaN
+    const end = endStr != null ? Number(endStr) : NaN
+
+    if (!raw.startsWith('@') || !Number.isFinite(start) || !Number.isFinite(end)) return
+
+    e.preventDefault()
+    e.stopPropagation()
+
+    const next = removeRange(value, start, end)
+    onChange(next)
+
+    // Keep caret at the start of the removed token.
+    requestAnimationFrame(() => {
+      const el = textareaRef.current
+      if (!el) return
+      el.focus()
+      try {
+        el.setSelectionRange(start, start)
+      } catch {
+        /* ignore */
+      }
+      setSelection({ start, end: start })
+    })
+
+    setEditingTokenRange(null)
+    setHoveredFileToken(null)
+  }
+
+  const hoveredFileMeta: FileMeta | null = useMemo(() => {
+    if (!hoveredFileToken) return null
+    const token = hoveredFileToken.path
+    const found = filesByPath?.[token]
+    if (!found) return null
+    return {
+      name: found.name || token.split('/').pop() || token,
+      absolutePath: found.absolutePath,
+      relativePath: token,
+      size: found.size,
+      mtime: found.mtime,
+      ctime: found.ctime,
+      type: found.type,
+    }
+  }, [hoveredFileToken, filesByPath])
+
+  const overlayPreviewPosition = useMemo(() => {
+    if (!hoveredFileToken) return null
+    const r = hoveredFileToken.anchorRect
+    return {
+      left: r.left + r.width / 2,
+      top: r.top,
+    }
+  }, [hoveredFileToken])
+
   return (
     <div className='relative' ref={containerRef}>
       <div
@@ -292,20 +471,57 @@ export default function FileMentionsTextarea({
         aria-hidden='true'
         className='file-mentions-overlay'
         style={{ display: disableAutocomplete ? 'none' : undefined }}
+        onPointerMove={handleOverlayPointerMove}
+        onPointerLeave={handleOverlayPointerLeave}
+        onPointerDown={handleOverlayPointerDown}
       >
         {/* Preserve line wrapping + sizing by matching textarea typography and padding via inherited className/style. */}
         <span className='file-mentions-overlay__content'>
-          <RichText text={value} variant='input' inputEditRange={isFocused ? selection : null} />
+          <RichText
+            text={value}
+            variant='input'
+            inputEditRange={isFocused ? (editingTokenRange ?? selection) : null}
+          />
           {/* Ensure last line height is respected when value ends with a newline */}
           {value?.endsWith('\n') ? '\n' : null}
         </span>
       </div>
 
+      {/* Hover preview card */}
+      {!disableAutocomplete && hoveredFileMeta && overlayPreviewPosition && (
+        <div
+          className='file-mentions-hover-preview'
+          style={{
+            position: 'fixed',
+            left: overlayPreviewPosition.left,
+            top: overlayPreviewPosition.top,
+            transform: 'translate(-50%, calc(-100% - 10px))',
+            zIndex: 2000,
+            pointerEvents: 'none',
+          }}
+        >
+          <div style={{ pointerEvents: 'auto' }}>
+            <FileDisplay
+              file={hoveredFileMeta}
+              density='normal'
+              interactive={false}
+              showPreviewOnHover={false}
+              navigateOnClick={false}
+              showMeta={true}
+            />
+          </div>
+        </div>
+      )}
+
       <textarea
         id={id}
         ref={textareaRef}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => {
+          onChange(e.target.value)
+          // If user is typing, keep edit range in sync with selection rather than sticky.
+          setEditingTokenRange(null)
+        }}
         onKeyDown={onKeyDownInternal}
         onSelect={(e) => {
           updateSelectionFromEl(e.currentTarget)
@@ -322,6 +538,7 @@ export default function FileMentionsTextarea({
         }}
         onBlur={() => {
           setIsFocused(false)
+          setHoveredFileToken(null)
         }}
         placeholder={placeholder}
         rows={rows}
