@@ -115,7 +115,13 @@ const DependencyBullet: React.FC<DependencyBulletProps> = ({
   }
 
   return (
-    <Tooltip placement="bottom" content={content} zIndex={2000} disabled={disableHoverInfo}>
+    <Tooltip
+      placement="bottom"
+      allowedPlacements={['bottom', 'top', 'right', 'left']}
+      content={content}
+      zIndex={2000}
+      disabled={disableHoverInfo}
+    >
       <span
         className={`${className} chip  ${isError ? '' : isFeatureDependency ? 'feature' : 'story'} ${isError ? 'chip--missing' : isOutbound ? 'chip--blocks' : 'chip--ok'}`}
         title={`${display}${isOutbound ? ' (requires this)' : ''}`}

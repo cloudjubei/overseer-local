@@ -251,6 +251,7 @@ function MessageListInner({
           toolPreviewByIdRef.current = { ...toolPreviewByIdRef.current, [toolCallId]: ready }
           setToolPreviewById((prev) => ({ ...prev, [toolCallId]: ready }))
         } catch (e: any) {
+          console.log('error is: ', e)
           const err: ToolPreview = { status: 'error', error: String(e?.message || e) }
           toolPreviewByIdRef.current = { ...toolPreviewByIdRef.current, [toolCallId]: err }
           setToolPreviewById((prev) => ({ ...prev, [toolCallId]: err }))

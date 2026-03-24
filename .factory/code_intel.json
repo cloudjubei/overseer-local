@@ -1498,11 +1498,8 @@
       "ChatTopicCreateModal": {
         "path": "src/renderer/src/components/chat/ChatTopicCreateModal.tsx",
         "dependencies": [
-          "thefactory-tools/ChatContextStoryTopic",
-          "thefactory-tools/ChatContextProjectTopic",
-          "thefactory-tools/ChatContextGroupTopic",
-          "thefactory-tools/ChatContext",
           "FormEvent",
+          "HTMLInputElement",
           "Props",
           "@renderer/components/ui/Modal/Modal",
           "@renderer/components/ui/Modal",
@@ -1511,9 +1508,7 @@
           "@renderer/contexts/ProjectContext/useActiveProject",
           "@renderer/contexts/ProjectContext",
           "@renderer/contexts/ProjectsGroupsContext/useProjectsGroups",
-          "@renderer/contexts/ProjectsGroupsContext",
-          "@renderer/contexts/StoriesContext/useStories",
-          "@renderer/contexts/StoriesContext"
+          "@renderer/contexts/ProjectsGroupsContext"
         ]
       },
       "ChatView": {
@@ -7097,11 +7092,8 @@
       "WriteToolsPreview": {
         "path": "src/renderer/src/components/chat/ToolCall/renderers/WriteToolsPreview.tsx",
         "dependencies": [
-          "PreviewState",
           "thefactory-tools/ToolResultType",
-          "thefactory-tools/ToolCall",
-          "@renderer/services/factoryToolsService/factoryToolsService",
-          "@renderer/services/factoryToolsService"
+          "thefactory-tools/ToolCall"
         ]
       }
     }
@@ -7820,11 +7812,8 @@
       "ChatTopicCreateModal": {
         "path": "renderer/src/components/chat/ChatTopicCreateModal.tsx",
         "dependencies": [
-          "thefactory-tools/ChatContextStoryTopic",
-          "thefactory-tools/ChatContextProjectTopic",
-          "thefactory-tools/ChatContextGroupTopic",
-          "thefactory-tools/ChatContext",
           "FormEvent",
+          "HTMLInputElement",
           "Props",
           "@renderer/components/ui/Modal/Modal",
           "@renderer/components/ui/Modal",
@@ -7833,9 +7822,7 @@
           "@renderer/contexts/ProjectContext/useActiveProject",
           "@renderer/contexts/ProjectContext",
           "@renderer/contexts/ProjectsGroupsContext/useProjectsGroups",
-          "@renderer/contexts/ProjectsGroupsContext",
-          "@renderer/contexts/StoriesContext/useStories",
-          "@renderer/contexts/StoriesContext"
+          "@renderer/contexts/ProjectsGroupsContext"
         ]
       },
       "ChatView": {
@@ -13419,11 +13406,8 @@
       "WriteToolsPreview": {
         "path": "renderer/src/components/chat/ToolCall/renderers/WriteToolsPreview.tsx",
         "dependencies": [
-          "PreviewState",
           "thefactory-tools/ToolResultType",
-          "thefactory-tools/ToolCall",
-          "@renderer/services/factoryToolsService/factoryToolsService",
-          "@renderer/services/factoryToolsService"
+          "thefactory-tools/ToolCall"
         ]
       }
     }
@@ -14378,18 +14362,6 @@
         "path": "dist/chats/chatsConstants.js",
         "dependencies": []
       },
-      "ALLOWED_GROUP_TOPICS": {
-        "path": "dist/chats/chatsConstants.js",
-        "dependencies": []
-      },
-      "ALLOWED_PROJECT_TOPICS": {
-        "path": "dist/chats/chatsConstants.js",
-        "dependencies": []
-      },
-      "ALLOWED_STORY_TOPICS": {
-        "path": "dist/chats/chatsConstants.js",
-        "dependencies": []
-      },
       "appendCost": {
         "path": "dist/llmCosts/LLMCostsTools.js",
         "dependencies": [
@@ -14569,9 +14541,6 @@
       "ChatContext": {
         "path": "dist/chats/chatsTypes.d.ts",
         "dependencies": [
-          "ChatContextStoryTopicType",
-          "ChatContextProjectTopicType",
-          "ChatContextGroupTopicType",
           "ChatContextType"
         ]
       },
@@ -14670,15 +14639,6 @@
           "ChatContextStory"
         ]
       },
-      "ChatContextArgumentsStoryTopic": {
-        "path": "dist/chats/chatsTypes.d.ts",
-        "dependencies": [
-          "ChatContextStoryTopicType",
-          "Story",
-          "ProjectSpec",
-          "ChatContextStoryTopic"
-        ]
-      },
       "ChatContextFeature": {
         "path": "dist/chats/chatsTypes.d.ts",
         "dependencies": []
@@ -14693,12 +14653,6 @@
       },
       "ChatContextGroupTopic": {
         "path": "dist/chats/chatsTypes.d.ts",
-        "dependencies": [
-          "ChatContextGroupTopicType"
-        ]
-      },
-      "ChatContextGroupTopicType": {
-        "path": "dist/chats/chatsTypes.d.ts",
         "dependencies": []
       },
       "ChatContextProject": {
@@ -14707,25 +14661,9 @@
       },
       "ChatContextProjectTopic": {
         "path": "dist/chats/chatsTypes.d.ts",
-        "dependencies": [
-          "ChatContextProjectTopicType"
-        ]
-      },
-      "ChatContextProjectTopicType": {
-        "path": "dist/chats/chatsTypes.d.ts",
         "dependencies": []
       },
       "ChatContextStory": {
-        "path": "dist/chats/chatsTypes.d.ts",
-        "dependencies": []
-      },
-      "ChatContextStoryTopic": {
-        "path": "dist/chats/chatsTypes.d.ts",
-        "dependencies": [
-          "ChatContextStoryTopicType"
-        ]
-      },
-      "ChatContextStoryTopicType": {
         "path": "dist/chats/chatsTypes.d.ts",
         "dependencies": []
       },
@@ -14795,11 +14733,7 @@
       "ChatsSettings": {
         "path": "dist/chats/chatsTypes.d.ts",
         "dependencies": [
-          "ChatSettings",
-          "ChatContextStoryTopicType",
-          "Record",
-          "ChatContextProjectTopicType",
-          "ChatContextGroupTopicType"
+          "ChatSettings"
         ]
       },
       "ChatState": {
@@ -15503,13 +15437,7 @@
       "DEFAULT_CHAT_PROMPTS": {
         "path": "dist/chats/chatsConstants.js",
         "dependencies": [
-          "When",
-          "TestResult",
-          "TestStats",
-          "TestRegular",
-          "TestFailure",
-          "Record",
-          "CoverageStats"
+          "When"
         ]
       },
       "DEFAULT_CHAT_SANITIZATION_KEEP_LAST_MESSAGES": {
@@ -15683,6 +15611,9 @@
         "dependencies": [
           "Promise",
           "Buffer",
+          "Record",
+          "WriteExactReplaceResult",
+          "WriteExactReplaceQuery",
           "BufferEncoding",
           "FileMeta",
           "FilesResult",
@@ -17905,6 +17836,14 @@
       },
       "WRITE_TOOL_NAMES": {
         "path": "dist/completion/completionMessageSanitizer.js",
+        "dependencies": []
+      },
+      "WriteExactReplaceQuery": {
+        "path": "dist/file/fileTypes.d.ts",
+        "dependencies": []
+      },
+      "WriteExactReplaceResult": {
+        "path": "dist/file/fileTypes.d.ts",
         "dependencies": []
       },
       "writeFuzzyPatch": {

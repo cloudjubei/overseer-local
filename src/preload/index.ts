@@ -130,6 +130,8 @@ const CHATS_API = {
   },
   listChats: (projectId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_LIST, { projectId }),
   createChat: (input) => ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_CREATE, { input }),
+  createTopicChat: (type, entityId, title) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_CREATE_TOPIC, { type, entityId, title }),
   getChat: (chatContext) => ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_GET, { chatContext }),
   updateChat: (chatContext, patch) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.CHATS_UPDATE, { chatContext, patch }),

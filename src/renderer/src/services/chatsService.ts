@@ -17,6 +17,7 @@ export type ChatsService = {
   subscribe: (callback: (chatUpdate: ChatUpdate) => void) => () => void
   listChats: (projectId?: string) => Promise<Chat[]>
   createChat: (input: ChatCreateInput) => Promise<Chat>
+  createTopicChat: (type: 'group' | 'project', entityId: string, title?: string) => Promise<Chat>
   getChat: (context: ChatContext) => Promise<Chat>
   updateChat: (context: ChatContext, input: ChatEditInput) => Promise<Chat | undefined>
   clearChat: (context: ChatContext) => Promise<Chat | undefined>

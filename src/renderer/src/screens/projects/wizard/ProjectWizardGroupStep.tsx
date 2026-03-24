@@ -25,27 +25,53 @@ export function ProjectWizardGroupStep({ initialState, onStateChange }: ProjectW
     onStateChange({ groupIds }, true)
   }, [])
 
+  const mainGroups = groups.filter((g) => g.type === 'MAIN')
+  const scopeGroups = groups.filter((g) => g.type === 'SCOPE')
+
   return (
     <div className="flex flex-col gap-6 w-[500px]">
       <div className="text-center">
         <h2 className="text-2xl font-bold text-text-high mb-2">Group Memberships</h2>
         <p className="text-text-low">Optionally assign this project to existing groups.</p>
       </div>
-      <div className="bg-surface-raised p-6 rounded-xl border border-border flex flex-col gap-4 max-h-[300px] overflow-y-auto">
+      <div className="bg-surface-raised p-6 rounded-xl border border-border flex flex-col gap-6 max-h-[350px] overflow-y-auto">
         {groups.length === 0 ? (
           <p className="text-text-low text-center">No groups available.</p>
         ) : (
-          groups.map((group) => (
-            <label key={group.id} className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={groupIds.includes(group.id)}
-                onChange={() => handleToggleGroup(group.id)}
-                className="w-4 h-4 text-primary bg-surface border-border rounded focus:ring-primary focus:ring-2"
-              />
-              <span className="text-text-main">{group.name}</span>
-            </label>
-          ))
+          <>
+            {mainGroups.length > 0 && (
+              <div className="flex flex-col gap-3">
+                <h3 className="text-sm font-semibold text-text-low uppercase tracking-wider">Main Groups</h3>
+                {mainGroups.map((group) => (
+                  <label key={group.id} className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={groupIds.includes(group.id)}
+                      onChange={() => handleToggleGroup(group.id)}
+                      className="w-4 h-4 text-primary bg-surface border-border rounded focus:ring-primary focus:ring-2"
+                    />
+                    <span className="text-text-main">{(group as any).title ?? (group as any).name ?? group.id}</span>
+                  </label>
+                ))}
+              </div>
+            )}
+            {scopeGroups.length > 0 && (
+              <div className="flex flex-col gap-3">
+                <h3 className="text-sm font-semibold text-text-low uppercase tracking-wider">Scope Groups</h3>
+                {scopeGroups.map((group) => (
+                  <label key={group.id} className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={groupIds.includes(group.id)}
+                      onChange={() => handleToggleGroup(group.id)}
+                      className="w-4 h-4 text-primary bg-surface border-border rounded focus:ring-primary focus:ring-2"
+                    />
+                    <span className="text-text-main">{(group as any).title ?? (group as any).name ?? group.id}</span>
+                  </label>
+                ))}
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

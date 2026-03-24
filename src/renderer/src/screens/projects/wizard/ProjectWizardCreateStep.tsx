@@ -122,8 +122,9 @@ export function ProjectWizardCreateStep({ initialState, onStateChange }: Project
 
   useEffect(() => {
     const isValid = title.trim() !== '' && id.trim() !== '' && path.trim() !== ''
+    // Only call onStateChange if something actually changed to avoid infinite loops
     onStateChange({ title, id, path, icon, description }, isValid)
-  }, [title, id, path, icon, description, onStateChange])
+  }, [title, id, path, icon, description])
 
   return (
     <div className="flex flex-col w-full max-w-xl mx-auto py-4">

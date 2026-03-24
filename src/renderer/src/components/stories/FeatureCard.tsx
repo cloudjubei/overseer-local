@@ -84,7 +84,6 @@ export function FeatureCardRaw({
   const storyId = story.id
   const featureId = feature.id
   const dependency = `${storyId}.${featureId}`
-  console.log('FeatureCard dependency: ', dependency)
 
   const featureRun = runsHistory.find(
     (r) =>

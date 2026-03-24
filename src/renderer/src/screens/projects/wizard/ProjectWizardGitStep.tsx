@@ -19,7 +19,7 @@ export function ProjectWizardGitStep({ initialState, onStateChange }: ProjectWiz
     // but we can just let it be empty or non-empty for now.
     const isValid = true
     onStateChange({ initGit, repoUrl }, isValid)
-  }, [initGit, repoUrl, onStateChange])
+  }, [initGit, repoUrl])
 
   return (
     <div className="flex flex-col gap-6 w-[500px]">

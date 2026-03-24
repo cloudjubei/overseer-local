@@ -5,6 +5,7 @@ export type TooltipProps = {
   children: React.ReactNode
   content: React.ReactNode
   placement?: 'top' | 'bottom' | 'left' | 'right'
+  allowedPlacements?: ('top' | 'bottom' | 'left' | 'right')[]
   /**
    * For side placements ('left'/'right') controls vertical alignment.
    * - 'center': vertically centered to anchor (default, legacy behavior)
@@ -38,6 +39,7 @@ export default function Tooltip({
   children,
   content,
   placement = 'right',
+  allowedPlacements,
   sideAlign = 'center',
   delayMs = 300,
   disabled = false,
@@ -314,30 +316,51 @@ export default function Tooltip({
       return available >= Math.min(tipRect.height, viewportHeight * 0.6)
     }
 
-    const order: ('top' | 'bottom' | 'left' | 'right')[] = (() => {
-      switch (placement) {
-        case 'left':
-          return ['left', 'right', 'top', 'bottom']
-        case 'top':
-          return ['top', 'bottom', 'right', 'left']
-        case 'bottom':
-          return ['bottom', 'top', 'right', 'left']
-        case 'right':
-        default:
-          return ['right', 'left', 'top', 'bottom']
-      }
-    })()
+    const order: ('top' | 'bottom' | 'left' | 'right')[] =
+      allowedPlacements ||
+      (() => {
+        switch (placement) {
+          case 'left':
+            return ['left', 'right', 'top', 'bottom']
+          case 'top':
+            return ['top', 'bottom', 'right', 'left']
+          case 'bottom':
+            return ['bottom', 'top', 'right', 'left']
+          case 'right':
+          default:
+            return ['right', 'left', 'top', 'bottom']
+        }
+      })()
 
     let chosen: 'top' | 'bottom' | 'left' | 'right' = placement
 
+    let found = false
     for (const pl of order) {
       if ((pl === 'left' || pl === 'right') && fitsSide(pl)) {
         chosen = pl
+        found = true
         break
       }
       if ((pl === 'top' || pl === 'bottom') && fitsVert(pl)) {
         chosen = pl
+        found = true
         break
+      }
+    }
+
+    if (!found) {
+      let maxSpace = -1
+      for (const pl of order) {
+        const space =
+          pl === 'left' ? anchorRect.left
+          : pl === 'right' ? viewportWidth - anchorRect.right
+          : pl === 'top' ? anchorRect.top
+          : viewportHeight - anchorRect.bottom
+
+        if (space > maxSpace) {
+          maxSpace = space
+          chosen = pl
+        }
       }
     }
 
@@ -363,9 +386,28 @@ export default function Tooltip({
       maxHeight != null
         ? Math.min(tipRect.height, maxHeight)
         : Math.min(tipRect.height, availHeight)
+    
+    // We must use the minimum between tipRect.width and availableWidth to avoid pushing it offscreen
+    // when calculating the actual rendered footprint.
+    const clampWidth = Math.min(tipRect.width, availableWidth)
 
-    const clampedTop = Math.max(spacing, Math.min(pos.top, viewportHeight - clampHeight - spacing))
-    const clampedLeft = Math.max(0, Math.min(pos.left, viewportWidth - tipRect.width))
+    let clampedTop = Math.max(spacing, Math.min(pos.top, viewportHeight - clampHeight - spacing))
+    let clampedLeft = Math.max(spacing, Math.min(pos.left, viewportWidth - clampWidth - spacing))
+
+    // Anti-overlap strictness: ensure the tooltip never slides over its anchor
+    if (chosen === 'right') {
+      clampedLeft = Math.max(anchorRect.right + spacing, clampedLeft)
+    } else if (chosen === 'left') {
+      clampedLeft = Math.min(anchorRect.left - spacing - clampWidth, clampedLeft)
+    } else if (chosen === 'bottom') {
+      clampedTop = Math.max(anchorRect.bottom + spacing, clampedTop)
+    } else if (chosen === 'top') {
+      clampedTop = Math.min(anchorRect.top - spacing - clampHeight, clampedTop)
+    }
+
+    // Final safety bounds: if anti-overlap pushed it offscreen entirely, pull it back in.
+    clampedTop = Math.max(spacing, Math.min(clampedTop, viewportHeight - clampHeight - spacing))
+    clampedLeft = Math.max(spacing, Math.min(clampedLeft, viewportWidth - clampWidth - spacing))
 
     setEffectivePlacement(chosen)
     setMaxWidth(Math.floor(availableWidth))

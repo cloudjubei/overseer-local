@@ -41,6 +41,8 @@ export default class ChatsManager extends BaseManager {
 
     handlers[IPC_HANDLER_KEYS.CHATS_LIST] = async ({ projectId }) => this.listChats(projectId)
     handlers[IPC_HANDLER_KEYS.CHATS_CREATE] = async ({ input }) => this.createChat(input)
+    handlers[IPC_HANDLER_KEYS.CHATS_CREATE_TOPIC] = async ({ type, entityId, title }) =>
+      this.createTopicChat(type, entityId, title)
     handlers[IPC_HANDLER_KEYS.CHATS_GET] = async ({ chatContext }) => this.getChat(chatContext)
     handlers[IPC_HANDLER_KEYS.CHATS_UPDATE] = async ({ chatContext, patch }) =>
       this.updateChat(chatContext, patch)
@@ -84,6 +86,13 @@ export default class ChatsManager extends BaseManager {
     const c = await this.tools.createChat(input)
     console.log('chat create chat:', c)
     return c
+  }
+  async createTopicChat(
+    type: 'group' | 'project',
+    entityId: string,
+    title?: string,
+  ): Promise<Chat> {
+    return await this.tools.createTopicChat(type, entityId, title)
   }
   async updateChat(chatContext: ChatContext, patch: ChatEditInput): Promise<Chat | undefined> {
     return await this.tools.updateChat(chatContext, patch)

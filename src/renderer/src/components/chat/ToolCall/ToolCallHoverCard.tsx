@@ -43,10 +43,31 @@ export default function ToolCallHoverCard({
 
   const toolPrimaryPath: string | undefined = (() => {
     if (toolName === 'writeFile') return tryString(extract(args, ['path']))
-    if (toolName === 'writeExactReplace') return tryString(extract(args, ['path']))
-    if (toolName === 'readFileRange') return tryString(extract(args, ['path']))
+
+    // writeExactReplaces has multiple changes; keep headerPath empty (handled by preview)
+    if (toolName === 'writeExactReplaces') return undefined
+
+    if (toolName === 'readFileRanges') {
+      // args.queries?: [{path,...}]
+      const queries = extract(args, ['queries'])
+      if (Array.isArray(queries) && queries.length > 0) {
+        return tryString(extract(queries[0], ['path']))
+      }
+      // legacy single-range shape (defensive)
+      return tryString(extract(args, ['path']))
+    }
+
     if (toolName === 'readFileStructure') return tryString(extract(args, ['path']))
-    if (toolName === 'grepFile') return tryString(extract(args, ['path']))
+
+    if (toolName === 'grepFiles') {
+      const queries = extract(args, ['queries'])
+      if (Array.isArray(queries) && queries.length > 0) {
+        return tryString(extract(queries[0], ['path']))
+      }
+      // legacy
+      return tryString(extract(args, ['path']))
+    }
+
     if (toolName === 'listContents') return tryString(extract(args, ['path']))
     return undefined
   })()
@@ -59,7 +80,7 @@ export default function ToolCallHoverCard({
   // - write tools: allow only when it is NOT a completely new file.
   // - text tools: allow only while in-flight (once finished we only show new content).
   const canShowSplitToggle = useMemo(() => {
-    if (toolName === 'writeFile' || toolName === 'writeExactReplace') {
+    if (toolName === 'writeFile' || toolName === 'writeExactReplaces') {
       const isNew = toolName === 'writeFile' ? isCompletelyNewFile(result) : false
       return !isNew
     }
@@ -90,7 +111,7 @@ export default function ToolCallHoverCard({
     }
 
     // ── extracted renderers ──
-    if (n === 'writeFile' || n === 'writeExactReplace') {
+    if (n === 'writeFile' || n === 'writeExactReplaces') {
       return (
         <WriteToolsPreview
           toolCall={toolCall}
@@ -119,14 +140,54 @@ export default function ToolCallHoverCard({
     // ── existing local renderers ──
     if (n === 'readPaths') {
       const files: string[] = extract(args, ['paths']) ?? []
+      const withLineNumbers = extract(args, ['lineNumbers'])
 
       return (
         <div className="text-xs space-y-1">
+          {typeof withLineNumbers === 'boolean' ? (
+            <Row>
+              <span className="text-[var(--text-secondary)]">lineNumbers:</span>
+              <span className="font-mono text-[11px]">{String(withLineNumbers)}</span>
+            </Row>
+          ) : null}
+
           {files.map((file, idx) => (
             <Row key={file || idx}>
               <span className="font-mono text-[11px]">{file || '(unknown)'}</span>
             </Row>
           ))}
+        </div>
+      )
+    }
+
+    if (n === 'readFileRanges') {
+      const queries = extract(args, ['queries'])
+      const safe = Array.isArray(queries) ? queries : []
+      const paths = safe
+        .map((q: any) => tryString(extract(q, ['path'])))
+        .filter((p: any): p is string => typeof p === 'string' && p.length > 0)
+
+      // Show if lineNumbers present in the first query (common case)
+      const withLineNumbers = safe.length > 0 ? extract(safe[0], ['lineNumbers']) : undefined
+
+      return (
+        <div className="text-xs space-y-1">
+          {typeof withLineNumbers === 'boolean' ? (
+            <Row>
+              <span className="text-[var(--text-secondary)]">lineNumbers:</span>
+              <span className="font-mono text-[11px]">{String(withLineNumbers)}</span>
+            </Row>
+          ) : null}
+
+          {paths.length > 0 ? (
+            paths.map((p, idx) => (
+              <Row key={`${p}-${idx}`}>
+                <span className="font-mono text-[11px]">{p}</span>
+              </Row>
+            ))
+          ) : (
+            <div className="text-[11px] text-[var(--text-secondary)]">No queries</div>
+          )}
         </div>
       )
     }
@@ -339,7 +400,7 @@ export default function ToolCallHoverCard({
         </div>
       )
     }
-    if (n === 'searchFiles' || n === 'searchFilePaths') {
+    if (n === 'searchFiles' || n === 'searchFilePaths' || n === 'searchFilesAndRead') {
       const query = tryString(extract(args, ['query']) || extract(result, ['query'])) || ''
       let resultLines: string[] = result
 
@@ -420,8 +481,12 @@ export default function ToolCallHoverCard({
     return <Code language="json" code={str} />
   }, [toolCall, name, result, resultType, storiesById, featuresById, sideBySide, projectId])
 
+  const isSmall = toolName === 'finishFeature' || toolName === 'blockFeature'
+
   return (
-    <div className="w-[480px] max-w-[70vw] rounded-md border border-[var(--border-subtle)] bg-[var(--surface-overlay)] p-2 shadow-[var(--shadow-2)]">
+    <div
+      className={`${isSmall ? 'min-w-[120px] max-w-[70vw]' : 'w-[480px] max-w-[70vw]'} rounded-md border border-[var(--border-subtle)] bg-[var(--surface-overlay)] p-2 shadow-[var(--shadow-2)]`}
+    >
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <StatusIcon resultType={resultType} />

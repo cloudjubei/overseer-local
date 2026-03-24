@@ -158,7 +158,7 @@ export default function ContextInfoButton({
 
   // Render callout via portal to ensure absolute positioning is anchored to viewport
   const panel =
-    open && pos
+    open
       ? createPortal(
           <div
             ref={panelRef}
@@ -167,8 +167,9 @@ export default function ContextInfoButton({
             aria-label="Chat context"
             style={{
               position: 'absolute',
-              top: pos.top,
-              left: pos.left,
+              top: pos?.top ?? -9999,
+              left: pos?.left ?? -9999,
+              visibility: pos ? 'visible' : 'hidden',
               zIndex: 1100, // above header/chat scroll
               maxWidth: 'min(80vw, 360px)',
               // Ensure nested tooltips render above this panel
@@ -178,7 +179,7 @@ export default function ContextInfoButton({
             className="rounded-md border border-[var(--border-default)] bg-[var(--surface-overlay)] shadow-xl"
           >
             {/* Arrow */}
-            {pos.placement === 'bottom' ? (
+            {pos?.placement === 'bottom' ? (
               <div
                 aria-hidden
                 style={{
@@ -193,7 +194,7 @@ export default function ContextInfoButton({
                   filter: 'drop-shadow(0 -1px 0 var(--border-default))',
                 }}
               />
-            ) : (
+            ) : pos?.placement === 'top' ? (
               <div
                 aria-hidden
                 style={{
@@ -208,7 +209,7 @@ export default function ContextInfoButton({
                   filter: 'drop-shadow(0 1px 0 var(--border-default))',
                 }}
               />
-            )}
+            ) : null}
             <div className="p-2">
               {hasAny ? (
                 <StoryAndFeatureCallout storyId={storyId} featureId={featureId} />

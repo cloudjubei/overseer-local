@@ -15,7 +15,6 @@ import type {
   ChatContextProject,
   ChatContextProjectTopic,
   ChatContextStory,
-  ChatContextStoryTopic,
   CompletionMessage,
 } from 'thefactory-tools'
 import CollapsibleSidebar from '../components/ui/CollapsibleSidebar'
@@ -46,26 +45,23 @@ function titleForContext(
     getFeatureTitle: (id?: string) => string
     getGroupTitle: (id?: string) => string
   },
+  chatTitle?: string
 ): string {
   switch (context.type) {
     case 'GROUP':
       return `Group Chat — ${opts.getGroupTitle((context as ChatContextGroup).groupId)}`
     case 'GROUP_TOPIC': {
       const c = context as ChatContextGroupTopic
-      return `Group ${prettyTopicName(c.groupTopic)} — ${opts.getGroupTitle(c.groupId)}`
+      return `Group ${chatTitle ? chatTitle : prettyTopicName(c.topicId)} — ${opts.getGroupTitle(c.groupId)}`
     }
     case 'PROJECT':
       return `Project Chat — ${opts.getProjectTitle((context as ChatContextProject).projectId)}`
     case 'PROJECT_TOPIC': {
       const c = context as ChatContextProjectTopic
-      return `Project ${prettyTopicName(c.projectTopic)} — ${opts.getProjectTitle(c.projectId)}`
+      return `Project ${chatTitle ? chatTitle : prettyTopicName(c.topicId)} — ${opts.getProjectTitle(c.projectId)}`
     }
     case 'STORY':
       return `Story Chat — ${opts.getStoryTitle((context as ChatContextStory).storyId)}`
-    case 'STORY_TOPIC': {
-      const c = context as ChatContextStoryTopic
-      return `Story ${prettyTopicName(c.storyTopic)} — ${opts.getStoryTitle(c.storyId)}`
-    }
     case 'AGENT_RUN_STORY': {
       const c = context as ChatContextAgentRun
       return `Agent Story Run ${opts.getStoryTitle(c.storyId)}`
@@ -105,7 +101,7 @@ export default function ChatView() {
   const { projects } = useProjectContext()
   const { groups, activeGroupId, activeSelectionType } = useProjectsGroups()
   const { storiesById, featuresById } = useStories()
-  const { getChatIfExists, chatsByProjectId } = useChats()
+  const { getChatIfExists, chatsByProjectId, chats } = useChats()
   const { markNotificationsByMetadata, getGroupBadgeState, getProjectBadgeState } =
     useNotifications()
   const { markRunSeen } = useAgents()
@@ -418,12 +414,16 @@ export default function ChatView() {
         {selectedContext ? (
           <ChatSidebar
             context={selectedContext}
-            chatContextTitle={titleForContext(selectedContext, {
-              getProjectTitle,
-              getGroupTitle,
-              getStoryTitle,
-              getFeatureTitle,
-            })}
+            chatContextTitle={titleForContext(
+              selectedContext,
+              {
+                getProjectTitle,
+                getGroupTitle,
+                getStoryTitle,
+                getFeatureTitle,
+              },
+              chats[getChatContextKey(selectedContext)]?.chat.title
+            )}
           />
         ) : (
           <div className="h-full w-full flex items-center justify-center text-[var(--text-secondary)]">

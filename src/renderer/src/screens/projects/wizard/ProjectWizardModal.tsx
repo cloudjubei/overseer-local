@@ -36,12 +36,11 @@ export function ProjectWizardModal({ isOpen, onClose, onComplete, initialGroupId
 
   const { setProjectGroup } = useProjectsGroups()
 
-  // Initialize group data based on initialGroupId
   React.useEffect(() => {
     if (initialGroupId && !groupData.groupIds.includes(initialGroupId)) {
       setGroupData(prev => ({ ...prev, groupIds: [...prev.groupIds, initialGroupId] }))
     }
-  }, [initialGroupId])
+  }, [initialGroupId, groupData.groupIds])
 
   // Reset state when modal closes
   React.useEffect(() => {
@@ -96,7 +95,7 @@ export function ProjectWizardModal({ isOpen, onClose, onComplete, initialGroupId
           }
           
           const newProject = await projectsService.createProject(payload)
-          setCreatedProjectId(newProject.id)
+          setCreatedProjectId(newProject?.id || payload.id)
           setStep(3)
         } catch (e: any) {
           setError(e?.message || String(e))
@@ -217,7 +216,10 @@ export function ProjectWizardModal({ isOpen, onClose, onComplete, initialGroupId
                   <ProjectWizardCreateStep 
                     initialState={createData || undefined}
                     onStateChange={(state, valid) => {
-                      setCreateData(state)
+                      setCreateData(prev => {
+                        if (JSON.stringify(prev) === JSON.stringify(state)) return prev
+                        return state
+                      })
                       setIsValid(valid)
                     }}
                   />
@@ -226,7 +228,10 @@ export function ProjectWizardModal({ isOpen, onClose, onComplete, initialGroupId
                   <ProjectWizardGroupStep
                     initialState={groupData}
                     onStateChange={(state, valid) => {
-                      setGroupData(state)
+                      setGroupData(prev => {
+                        if (JSON.stringify(prev) === JSON.stringify(state)) return prev
+                        return state
+                      })
                       setIsValid(valid)
                     }}
                   />
@@ -235,7 +240,10 @@ export function ProjectWizardModal({ isOpen, onClose, onComplete, initialGroupId
                   <ProjectWizardCodeStep
                     initialState={codeData || undefined}
                     onStateChange={(state, valid) => {
-                      setCodeData(state)
+                      setCodeData(prev => {
+                        if (JSON.stringify(prev) === JSON.stringify(state)) return prev
+                        return state
+                      })
                       setIsValid(valid)
                     }}
                   />
@@ -244,7 +252,10 @@ export function ProjectWizardModal({ isOpen, onClose, onComplete, initialGroupId
                   <ProjectWizardGitStep
                     initialState={gitData || undefined}
                     onStateChange={(state, valid) => {
-                      setGitData(state)
+                      setGitData(prev => {
+                        if (JSON.stringify(prev) === JSON.stringify(state)) return prev
+                        return state
+                      })
                       setIsValid(valid)
                     }}
                   />
