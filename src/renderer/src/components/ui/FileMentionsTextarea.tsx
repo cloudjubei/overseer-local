@@ -5,6 +5,7 @@ import { useFiles } from '../../contexts/FilesContext'
 import { IconFolder } from './icons/Icons'
 import { renderFileSuggestionIcon } from '../chat/fileSuggestionIcons'
 import { PathDisplay } from './PathDisplay'
+import { RichText } from './RichText'
 
 export type FileMentionsTextareaProps = {
   id?: string
@@ -50,6 +51,12 @@ export default function FileMentionsTextarea({
   const textareaRef = inputRef ?? innerRef
   const mirrorRef = useRef<HTMLDivElement | null>(null)
   const containerRef = useRef<HTMLDivElement | null>(null)
+
+  // --- Inline overlay rendering (for "custom render within the input box") ---
+  // We render a styled overlay above the textarea content, while keeping the real textarea text
+  // invisible (but caret + selection remain native). This mirrors the StoryCreate-style behavior.
+  const [isFocused, setIsFocused] = useState(false)
+  const [selection, setSelection] = useState<{ start: number; end: number } | null>(null)
 
   // Guard against undefined 'files' during initial loads or heavy operations
   const filesList = useMemo(() => {
@@ -240,6 +247,13 @@ export default function FileMentionsTextarea({
     if (onReferenceSelected) onReferenceSelected(refDisplay)
   }
 
+  const updateSelectionFromEl = (el: HTMLTextAreaElement | null) => {
+    if (!el) return
+    const start = el.selectionStart ?? 0
+    const end = el.selectionEnd ?? start
+    setSelection({ start, end })
+  }
+
   const onKeyDownInternal = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     const key = e.key
     const isEnter = key === 'Enter'
@@ -272,19 +286,47 @@ export default function FileMentionsTextarea({
         aria-hidden='true'
         className='absolute top-[-9999px] left-0 overflow-hidden whitespace-pre-wrap break-words pointer-events-none'
       />
+
+      {/* Overlay: render styled mentions inline within the input box. */}
+      <div
+        aria-hidden='true'
+        className='file-mentions-overlay'
+        style={{ display: disableAutocomplete ? 'none' : undefined }}
+      >
+        {/* Preserve line wrapping + sizing by matching textarea typography and padding via inherited className/style. */}
+        <span className='file-mentions-overlay__content'>
+          <RichText text={value} variant='input' inputEditRange={isFocused ? selection : null} />
+          {/* Ensure last line height is respected when value ends with a newline */}
+          {value?.endsWith('\n') ? '\n' : null}
+        </span>
+      </div>
+
       <textarea
         id={id}
         ref={textareaRef}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={onKeyDownInternal}
-        onSelect={onSelect}
-        onMouseUp={onMouseUp}
-        onFocus={onFocus}
+        onSelect={(e) => {
+          updateSelectionFromEl(e.currentTarget)
+          onSelect?.(e)
+        }}
+        onMouseUp={(e) => {
+          updateSelectionFromEl(e.currentTarget)
+          onMouseUp?.(e)
+        }}
+        onFocus={(e) => {
+          setIsFocused(true)
+          updateSelectionFromEl(e.currentTarget)
+          onFocus?.(e)
+        }}
+        onBlur={() => {
+          setIsFocused(false)
+        }}
         placeholder={placeholder}
         rows={rows}
         disabled={disabled}
-        className={className}
+        className={['file-mentions-textarea', className].filter(Boolean).join(' ')}
         style={style}
         aria-label={ariaLabel}
       />

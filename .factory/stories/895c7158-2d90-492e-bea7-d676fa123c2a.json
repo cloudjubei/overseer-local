@@ -26,12 +26,13 @@
     },
     {
       "id": "b7fa983b-29d2-4af5-988b-211741a577b7",
-      "status": "-",
+      "status": "+",
       "title": "Inline Custom Render",
       "description": "Make the file suggestions render within the input box in a custom way, similarly to how we have it in the StoryCreate Modal.",
       "context": [],
       "createdAt": "2026-03-24T15:52:59.432Z",
-      "updatedAt": "2026-03-24T15:52:59.432Z"
+      "updatedAt": "2026-03-24T22:45:14.173Z",
+      "completedAt": "2026-03-24T22:45:14.173Z"
     },
     {
       "id": "0c7ea050-2368-4f51-a3ac-1ec124376654",

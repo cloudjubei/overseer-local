@@ -31,3 +31,37 @@
   color: var(--text-muted, #7a7f8f);
   background: var(--surface-0, #fafbfc);
 }
+
+/*
+  Inline custom render inside textarea:
+  We render an overlay that visually shows mentions as chips while keeping the real textarea
+  content transparent. The textarea still owns the caret/selection.
+*/
+.file-mentions-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+
+  /* Mirror textarea behavior */
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.file-mentions-overlay__content {
+  display: block;
+}
+
+/* Make textarea text invisible but keep caret visible */
+.file-mentions-textarea {
+  position: relative;
+  z-index: 2;
+  color: transparent;
+  caret-color: var(--text-primary);
+}
+
+/* Ensure placeholder is still readable */
+.file-mentions-textarea::placeholder {
+  color: var(--text-muted);
+}
