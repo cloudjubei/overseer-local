@@ -3,6 +3,7 @@ import { Modal } from '@renderer/components/ui/Modal'
 import { Button } from '@renderer/components/ui/Button'
 import { useActiveProject } from '@renderer/contexts/ProjectContext'
 import { useProjectsGroups } from '@renderer/contexts/ProjectsGroupsContext'
+import { useChats } from '@renderer/contexts/chats/ChatsContext'
 
 /**
  * NOTE:
@@ -21,6 +22,7 @@ type Props = {
 export default function ChatTopicCreateModal({ isOpen, onClose, onTopicCreated }: Props) {
   const { projectId: activeProjectId } = useActiveProject()
   const { activeSelectionType, activeGroupId } = useProjectsGroups()
+  const { createTopicChat } = useChats()
 
   const [title, setTitle] = useState('')
   const [isCreating, setIsCreating] = useState(false)
@@ -51,15 +53,23 @@ export default function ChatTopicCreateModal({ isOpen, onClose, onTopicCreated }
     try {
       // We intentionally call into the chats layer which must wrap ChatsTools.createTopicChat.
       // The returned chat should include the generated topic chat id.
-      const chat = await window.chatsService.createTopicChat(
+      console.log(
+        'activeSelectionType: ',
+        activeSelectionType,
+        ' title: ',
+        title,
+        ' activeProjectId: ',
+        activeProjectId,
+      )
+      const chat = await createTopicChat(
         activeSelectionType === 'group' ? 'group' : 'project',
         activeSelectionType === 'group' ? activeGroupId! : activeProjectId!,
-        title.trim()
+        title.trim(),
       )
 
       if (!chat) throw new Error('Failed to create topic chat')
 
-      onTopicCreated(chat.context)
+      onTopicCreated(chat.chat.context)
       onClose()
     } catch (err) {
       console.error('Failed to create topic chat', err)
@@ -83,7 +93,12 @@ export default function ChatTopicCreateModal({ isOpen, onClose, onTopicCreated }
           <Button type="button" variant="secondary" onClick={onClose} disabled={isCreating}>
             Cancel
           </Button>
-          <Button type="button" variant="primary" onClick={() => void handleCreate()} disabled={!canCreate || isCreating}>
+          <Button
+            type="button"
+            variant="primary"
+            onClick={() => void handleCreate()}
+            disabled={!canCreate || isCreating}
+          >
             {isCreating ? 'Creating…' : 'Create'}
           </Button>
         </div>
@@ -91,9 +106,7 @@ export default function ChatTopicCreateModal({ isOpen, onClose, onTopicCreated }
     >
       <form onSubmit={(e) => void handleCreate(e)} className="space-y-3">
         <div>
-          <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
-            Title
-          </label>
+          <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">Title</label>
           <input
             ref={inputRef}
             type="text"
@@ -107,10 +120,14 @@ export default function ChatTopicCreateModal({ isOpen, onClose, onTopicCreated }
         </div>
 
         {activeSelectionType === 'group' && !activeGroupId ? (
-          <div className="text-xs text-[var(--text-secondary)]">Select a group to create a group topic.</div>
+          <div className="text-xs text-[var(--text-secondary)]">
+            Select a group to create a group topic.
+          </div>
         ) : null}
         {activeSelectionType !== 'group' && !activeProjectId ? (
-          <div className="text-xs text-[var(--text-secondary)]">Select a project to create a project topic.</div>
+          <div className="text-xs text-[var(--text-secondary)]">
+            Select a project to create a project topic.
+          </div>
         ) : null}
       </form>
     </Modal>

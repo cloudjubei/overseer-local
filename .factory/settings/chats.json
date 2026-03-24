@@ -323,8 +323,8 @@
       }
     }
   },
-  "STORY": {
-    "systemPrompt": "You are an expert AI assistant focused on refining and developing software features within *this* project. Your primary goal is to help the user articulate, clarify, implement, and improve the *current story*.\n\n# Current Project Context:\n## Project Name: '{{project_title}}'\n## Project ID: '{{project_id}}'\n## Project Description:\n{{project_description}}\n\n---\n\n# Current Story Context:\n## Story Name: '{{story_title}}'\n## Story ID: '{{story_id}}'\n## StoryDescription:\n{{story_description}}\n## Story's Features:\n{{story_features}}\n\nYour responses and suggestions must be highly relevant to this specific story. Proactively suggest improvements, alternative approaches, or identify possible issues specifically related to the story's definition or implementation. Offer to update the story description or generate code snippets for this story when appropriate.\n\nYou have access to a suite of tools that can interact with the project's codebase, stories and features. Utilize these tools to gather additional information and to propose/execute changes that directly interact with *this story's description or implementation files* after explicit user confirmation. Remember that this conversation is persistent and *specific to this story*, maintaining continuity and building upon previous interactions for *this particular story*.",
+  "PROJECT_TOPIC": {
+    "systemPrompt": "You are an expert AI assistant focused on a specific topic within *this* project. Your primary goal is to help the user articulate, clarify, implement, and reason about this topic.\n\n# Current Project Context:\n## Project Name: '{{project_title}}'\n## Project ID: '{{project_id}}'\n## Project Description:\n{{project_description}}\n\nYour responses and suggestions must be highly relevant to this specific project and topic.\n\nYou have access to a suite of tools that can interact with the project's codebase, stories and features. Utilize these tools to gather additional information and to propose/execute changes that directly interact with *this project's description or implementation files* after explicit user confirmation. Remember that this conversation is persistent and *specific to this project topic*, maintaining continuity and building upon previous interactions.",
     "completionSettings": {
       "maxTurns": 20,
       "finishTurnOnErrors": true,
@@ -404,8 +404,8 @@
       }
     }
   },
-  "FEATURE": {
-    "systemPrompt": "You are an expert AI assistant focused on refining and developing software features within *this* project. Your primary goal is to help the user articulate, clarify, implement, and improve the *current feature*.\n\n# Current Project Context:\n## Project Name: '{{project_title}}'\n## Project ID: '{{project_id}}'\n## Project Description:\n{{project_description}}\n\n---\n\n# Current Story Context:\n## Story Name: '{{story_title}}'\n## Story ID: '{{story_id}}'\n## StoryDescription:\n{{story_description}}\n## Story's Features:\n{{story_features}}\n\n---\n\n# Current Feature Context:\n## Feature Name: '{{feature_title}}'\n## Feature ID: '{{feature_id}}'\n## Feature Description: \n'{{feature_description}}'\n\nYour responses and suggestions must be highly relevant to this specific feature. Proactively suggest improvements, alternative approaches, or identify possible issues specifically related to the feature's definition or implementation. Offer to update the feature description or generate code snippets for this feature when appropriate.\n\nYou have access to a suite of tools that can interact with the project's codebase, stories and features. Utilize these tools to gather additional information and to propose/execute changes that directly interact with *this feature's description or implementation files* after explicit user confirmation. Remember that this conversation is persistent and *specific to this feature*, maintaining continuity and building upon previous interactions for *this particular feature*.",
+  "STORY": {
+    "systemPrompt": "You are an expert AI assistant focused on refining and developing software features within *this* project. Your primary goal is to help the user articulate, clarify, implement, and improve the *current story*.\n\n# Current Project Context:\n## Project Name: '{{project_title}}'\n## Project ID: '{{project_id}}'\n## Project Description:\n{{project_description}}\n\n---\n\n# Current Story Context:\n## Story Name: '{{story_title}}'\n## Story ID: '{{story_id}}'\n## StoryDescription:\n{{story_description}}\n## Story's Features:\n{{story_features}}\n\nYour responses and suggestions must be highly relevant to this specific story. Proactively suggest improvements, alternative approaches, or identify possible issues specifically related to the story's definition or implementation. Offer to update the story description or generate code snippets for this story when appropriate.\n\nYou have access to a suite of tools that can interact with the project's codebase, stories and features. Utilize these tools to gather additional information and to propose/execute changes that directly interact with *this story's description or implementation files* after explicit user confirmation. Remember that this conversation is persistent and *specific to this story*, maintaining continuity and building upon previous interactions for *this particular story*.",
     "completionSettings": {
       "maxTurns": 20,
       "finishTurnOnErrors": true,
@@ -568,6 +568,87 @@
       }
     }
   },
+  "FEATURE": {
+    "systemPrompt": "You are an expert AI assistant focused on refining and developing software features within *this* project. Your primary goal is to help the user articulate, clarify, implement, and improve the *current feature*.\n\n# Current Project Context:\n## Project Name: '{{project_title}}'\n## Project ID: '{{project_id}}'\n## Project Description:\n{{project_description}}\n\n---\n\n# Current Story Context:\n## Story Name: '{{story_title}}'\n## Story ID: '{{story_id}}'\n## StoryDescription:\n{{story_description}}\n## Story's Features:\n{{story_features}}\n\n---\n\n# Current Feature Context:\n## Feature Name: '{{feature_title}}'\n## Feature ID: '{{feature_id}}'\n## Feature Description: \n'{{feature_description}}'\n\nYour responses and suggestions must be highly relevant to this specific feature. Proactively suggest improvements, alternative approaches, or identify possible issues specifically related to the feature's definition or implementation. Offer to update the feature description or generate code snippets for this feature when appropriate.\n\nYou have access to a suite of tools that can interact with the project's codebase, stories and features. Utilize these tools to gather additional information and to propose/execute changes that directly interact with *this feature's description or implementation files* after explicit user confirmation. Remember that this conversation is persistent and *specific to this feature*, maintaining continuity and building upon previous interactions for *this particular feature*.",
+    "completionSettings": {
+      "maxTurns": 20,
+      "finishTurnOnErrors": true,
+      "allowErrorResponses": false,
+      "allowNoCallResponses": false,
+      "numberMessagesToSend": 20,
+      "availableTools": [
+        "listContents",
+        "searchFiles",
+        "searchFilePaths",
+        "searchFilesByKeywords",
+        "searchFilesByExact",
+        "readPaths",
+        "readFileRanges",
+        "grepFiles",
+        "writeFile",
+        "writeExactReplaces",
+        "renamePath",
+        "deletePath",
+        "getAstOutline",
+        "astEditNode",
+        "astRenameSymbol",
+        "gitResetFiles",
+        "gitStageFiles",
+        "gitUnstageFiles",
+        "gitDiff",
+        "gitStatus",
+        "gitLog",
+        "webSearch",
+        "webReadURLs",
+        "webReadURLsFull",
+        "getCode",
+        "runTests",
+        "runTestCoverage",
+        "compileCheck",
+        "listStories",
+        "getStoryReference",
+        "updateStoryTitle",
+        "updateStoryDescription",
+        "createStory",
+        "reorderStory",
+        "createFeature",
+        "updateFeatureTitle",
+        "updateFeatureDescription",
+        "reorderFeature"
+      ],
+      "autoCallTools": [
+        "listStories",
+        "getStoryReference",
+        "listContents",
+        "searchFiles",
+        "searchFilePaths",
+        "searchFilesByKeywords",
+        "searchFilesByExact",
+        "readPaths",
+        "readFileRanges",
+        "grepFiles",
+        "getAstOutline",
+        "gitDiff",
+        "gitStatus",
+        "gitLog",
+        "getCode",
+        "webReadURLs",
+        "runTests",
+        "runTestCoverage",
+        "compileCheck"
+      ],
+      "forceFinishTools": [],
+      "historySummarization": {
+        "enabled": true,
+        "keepLastTurns": 5,
+        "maxOpsInSummary": 5
+      },
+      "messageSanitization": {
+        "enabled": true,
+        "keepLastMessages": 5
+      }
+    }
+  },
   "AGENT_RUN_FEATURE": {
     "systemPrompt": "You are an expert AI assistant helping to manage and understand agent runs (autonomous work done by AI agents) for this project.\n\n# Current Project Context:\n## Project Name: '{{project_title}}'\n## Project ID: '{{project_id}}'\n## Project Description:\n{{project_description}}\n\n---\n\n# Current Story Context:\n## Story Name: '{{story_title}}'\n## Story ID: '{{story_id}}'\n## StoryDescription:\n{{story_description}}\n## Story's Features:\n{{story_features}}\n\n---\n\n# Current Feature Context:\n## Feature Name: '{{feature_title}}'\n## Feature ID: '{{feature_id}}'\n## Feature Description: \n'{{feature_description}}'\n\n---\n\n# Agent Run by {{agent_run_type}}\n\nGuide the user on interpreting this run, troubleshooting errors and planning next actions related to the project and story.",
     "completionSettings": {
@@ -648,87 +729,6 @@
       },
       "messageSanitization": {
         "enabled": true
-      }
-    }
-  },
-  "PROJECT_TOPIC": {
-    "systemPrompt": "You are an expert AI assistant focused on a specific topic within *this* project. Your primary goal is to help the user articulate, clarify, implement, and reason about this topic.\n\n# Current Project Context:\n## Project Name: '{{project_title}}'\n## Project ID: '{{project_id}}'\n## Project Description:\n{{project_description}}\n\nYour responses and suggestions must be highly relevant to this specific project and topic.\n\nYou have access to a suite of tools that can interact with the project's codebase, stories and features. Utilize these tools to gather additional information and to propose/execute changes that directly interact with *this project's description or implementation files* after explicit user confirmation. Remember that this conversation is persistent and *specific to this project topic*, maintaining continuity and building upon previous interactions.",
-    "completionSettings": {
-      "maxTurns": 20,
-      "finishTurnOnErrors": true,
-      "allowErrorResponses": false,
-      "allowNoCallResponses": false,
-      "numberMessagesToSend": 20,
-      "availableTools": [
-        "listContents",
-        "searchFiles",
-        "searchFilePaths",
-        "searchFilesByKeywords",
-        "searchFilesByExact",
-        "readPaths",
-        "readFileRanges",
-        "grepFiles",
-        "writeFile",
-        "writeExactReplaces",
-        "renamePath",
-        "deletePath",
-        "getAstOutline",
-        "astEditNode",
-        "astRenameSymbol",
-        "gitResetFiles",
-        "gitStageFiles",
-        "gitUnstageFiles",
-        "gitDiff",
-        "gitStatus",
-        "gitLog",
-        "webSearch",
-        "webReadURLs",
-        "webReadURLsFull",
-        "getCode",
-        "runTests",
-        "runTestCoverage",
-        "compileCheck",
-        "listStories",
-        "getStoryReference",
-        "updateStoryTitle",
-        "updateStoryDescription",
-        "createStory",
-        "reorderStory",
-        "createFeature",
-        "updateFeatureTitle",
-        "updateFeatureDescription",
-        "reorderFeature"
-      ],
-      "autoCallTools": [
-        "listStories",
-        "getStoryReference",
-        "listContents",
-        "searchFiles",
-        "searchFilePaths",
-        "searchFilesByKeywords",
-        "searchFilesByExact",
-        "readPaths",
-        "readFileRanges",
-        "grepFiles",
-        "getAstOutline",
-        "gitDiff",
-        "gitStatus",
-        "gitLog",
-        "getCode",
-        "webReadURLs",
-        "runTests",
-        "runTestCoverage",
-        "compileCheck"
-      ],
-      "forceFinishTools": [],
-      "historySummarization": {
-        "enabled": true,
-        "keepLastTurns": 5,
-        "maxOpsInSummary": 5
-      },
-      "messageSanitization": {
-        "enabled": true,
-        "keepLastMessages": 5
       }
     }
   }

@@ -82,10 +82,7 @@ export default class ChatsManager extends BaseManager {
     return await this.tools.getChat(chatContext)
   }
   async createChat(input: ChatCreateInput): Promise<Chat> {
-    console.log('chat create input: ', input)
-    const c = await this.tools.createChat(input)
-    console.log('chat create chat:', c)
-    return c
+    return await this.tools.createChat(input)
   }
   async createTopicChat(
     type: 'group' | 'project',

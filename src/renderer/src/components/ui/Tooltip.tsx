@@ -80,6 +80,26 @@ export default function Tooltip({
   // Mouse position tracking (used for a best-effort stay-open-on-resize).
   const lastMouseRef = useRef<{ x: number; y: number } | null>(null)
 
+  // The committed top position after initial placement. Used to lock the top edge
+  // so that when content grows/shrinks the card only expands downward (or shrinks
+  // upward from the bottom), keeping the top stable under the user's cursor.
+  const committedTopRef = useRef<number | null>(null)
+
+  // Ref mirror of `position` so the ResizeObserver callback can read the current
+  // value without needing to be re-created every time position changes.
+  const positionRef = useRef<{ top: number; left: number } | null>(null)
+
+  // Tracks the RAF scheduled when we defer measurement because the parent tooltip
+  // is still measuring offscreen. Must be cancelled on close / re-run.
+  const deferredMeasureRafRef = useRef<number | null>(null)
+
+  const cancelDeferredMeasure = () => {
+    if (deferredMeasureRafRef.current != null) {
+      window.cancelAnimationFrame(deferredMeasureRafRef.current)
+      deferredMeasureRafRef.current = null
+    }
+  }
+
   const DEFAULT_CLOSE_DELAY = 160
   const CLOSE_DELAY = closeDelayMs ?? DEFAULT_CLOSE_DELAY
 
@@ -87,6 +107,7 @@ export default function Tooltip({
     return () => {
       if (timerRef.current) window.clearTimeout(timerRef.current)
       if (hideTimerRef.current) window.clearTimeout(hideTimerRef.current)
+      cancelDeferredMeasure()
       removeOutsideHandlers()
       if (sizeObserverRef.current) sizeObserverRef.current.disconnect()
       sizeObserverRef.current = null
@@ -191,11 +212,13 @@ export default function Tooltip({
   // on upcoming frames so expensive content clamps before any user scroll.
   useLayoutEffect(() => {
     if (!open) {
+      cancelDeferredMeasure()
       setPosition(null)
       setMaxWidth(undefined)
       setMaxHeight(undefined)
       setEffectivePlacement(placement)
       measurePassRef.current = 0
+      committedTopRef.current = null
       return
     }
     if (!anchorRef.current) return
@@ -231,14 +254,39 @@ export default function Tooltip({
       if (!tooltipRef.current) return
 
       // Avoid infinite loops: only react once we have a real position.
-      if (!position || position.top === -9999) return
+      const currentPos = positionRef.current
+      if (!currentPos || currentPos.top <= -5000) return
 
-      requestMeasure()
+      const tip = tooltipRef.current
+      const viewportHeight = window.innerHeight
+      const spacing = 8
+      const lockedTop = committedTopRef.current
+
+      if (lockedTop !== null) {
+        // Content changed height (e.g. accordion open/close). Keep the committed top
+        // locked so the card grows downward. Only shift it up if we'd overflow the
+        // viewport bottom — but never above the cursor, so the card stays under it.
+        const newHeight = tip.getBoundingClientRect().height
+        let newTop = lockedTop
+        const bottomOverflow = lockedTop + newHeight + spacing - viewportHeight
+        if (bottomOverflow > 0) {
+          newTop = lockedTop - bottomOverflow
+          const m = lastMouseRef.current
+          if (m) newTop = Math.min(newTop, m.y - 4)
+          newTop = Math.max(spacing, newTop)
+        }
+        
+        positionRef.current = { top: newTop, left: currentPos.left }
+        setPosition({ top: newTop, left: currentPos.left })
+      } else {
+        // No committed top yet — fall back to full remeasure.
+        requestMeasure()
+      }
 
       // Best-effort: if pointer is still inside new bounds, keep open.
       const m = lastMouseRef.current
       if (m) {
-        const r = tooltipRef.current.getBoundingClientRect()
+        const r = tip.getBoundingClientRect()
         const inside = m.x >= r.left && m.x <= r.right && m.y >= r.top && m.y <= r.bottom
         if (inside) {
           clearHideTimer()
@@ -255,16 +303,32 @@ export default function Tooltip({
       if (sizeObserverRef.current === obs) sizeObserverRef.current = null
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, position])
+  }, [open])
 
   useLayoutEffect(() => {
-    if (!open || !position || position.top !== -9999 || !tooltipRef.current || !anchorRef.current)
+    if (!open || !position || position.top > -5000 || !tooltipRef.current || !anchorRef.current)
       return
 
     const tip = tooltipRef.current
     const tipRect = tip.getBoundingClientRect()
     const anchor = anchorRef.current
     const anchorRect = anchor.getBoundingClientRect()
+
+    // If the anchor is currently hidden offscreen because it is inside a parent tooltip
+    // that is also measuring, we must defer our own measurement until the parent finishes.
+    if (anchorRect.top < -5000 || anchorRect.left < -5000) {
+      if (measurePassRef.current < 20) {
+        measurePassRef.current = (measurePassRef.current + 1) as any
+        const nextTop = position.top === -9999 ? -9998 : -9999
+        cancelDeferredMeasure()
+        deferredMeasureRafRef.current = window.requestAnimationFrame(() => {
+          deferredMeasureRafRef.current = null
+          setPosition({ top: nextTop, left: nextTop })
+        })
+      }
+      return
+    }
+
     const viewportWidth = window.innerWidth
     const viewportHeight = window.innerHeight
     const spacing = 8
@@ -412,15 +476,20 @@ export default function Tooltip({
     setEffectivePlacement(chosen)
     setMaxWidth(Math.floor(availableWidth))
     setMaxHeight(Math.floor(availHeight))
-    setPosition({
-      top: clampedTop,
-      left: clampedLeft,
-    })
+    const settled = measurePassRef.current >= 2
+    const nextPos = settled
+      ? { top: clampedTop, left: clampedLeft }
+      : { top: -9999, left: -9999 }
 
-    if (measurePassRef.current < 2) {
+    if (!settled) {
       measurePassRef.current = (measurePassRef.current + 1) as any
-      setPosition({ top: -9999, left: -9999 })
+    } else {
+      // Placement has settled — commit the top so the ResizeObserver can lock it.
+      committedTopRef.current = clampedTop
+      positionRef.current = { top: clampedTop, left: clampedLeft }
     }
+
+    setPosition(nextPos)
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, position, placement, maxHeight, sideAlign])

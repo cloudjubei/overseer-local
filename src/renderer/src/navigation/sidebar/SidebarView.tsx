@@ -32,7 +32,7 @@ export default function SidebarView({
   const { isAppSettingsLoaded, appSettings, updateAppSettings } = useAppSettings()
   const { groups, activeGroupId, activeSelectionType, setActiveGroupId, setActiveSelectionType } =
     useProjectsGroups()
-  const { getProjectBadgeState, getGroupBadgeState } = useNotifications()
+  const { getProjectBadgeState, getGroupBadgeState, getGroupOwnBadgeState } = useNotifications()
 
   const [collapsed, setCollapsed] = useState<boolean>(appSettings.userPreferences.sidebarCollapsed)
 
@@ -68,7 +68,7 @@ export default function SidebarView({
 
   const stCurrent =
     activeSelectionType === 'group' && activeGroupId
-      ? getGroupBadgeState(activeGroupId)
+      ? getGroupOwnBadgeState(activeGroupId)
       : getProjectBadgeState(activeProjectId)
 
   const activeRunsCurrentProject = stCurrent.agent_runs.running

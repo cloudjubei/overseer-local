@@ -15,13 +15,10 @@ import type {
   ChatContextProject,
   ChatContextProjectTopic,
   ChatContextStory,
-  CompletionMessage,
 } from 'thefactory-tools'
 import CollapsibleSidebar from '../components/ui/CollapsibleSidebar'
-import { chatsService } from '@renderer/services/chatsService'
 import ChatsNavigationSidebar from '@renderer/components/chat/ChatsNavigationSidebar'
 import SegmentedControl from '@renderer/components/ui/SegmentedControl'
-import { useChatUnread } from '@renderer/hooks/useChatUnread'
 import DotBadge from '@renderer/components/ui/DotBadge'
 import { getChatContextKey, getChatContext } from 'thefactory-tools/utils'
 import { useAppSettings } from '@renderer/contexts/AppSettingsContext'
@@ -29,13 +26,6 @@ import { useNotifications } from '@renderer/hooks/useNotifications'
 import { useAgents } from '@renderer/contexts/AgentsContext'
 import ChatTopicCreateModal from '@renderer/components/chat/ChatTopicCreateModal'
 import { IconPlus } from '@renderer/components/ui/icons/Icons'
-
-function prettyTopicName(topic?: string): string {
-  if (!topic) return 'Topic'
-  return String(topic)
-    .replace(/_/g, ' ')
-    .replace(/\b\w/g, (m) => m.toUpperCase())
-}
 
 function titleForContext(
   context: ChatContext,
@@ -45,20 +35,20 @@ function titleForContext(
     getFeatureTitle: (id?: string) => string
     getGroupTitle: (id?: string) => string
   },
-  chatTitle?: string
+  chatTitle?: string,
 ): string {
   switch (context.type) {
     case 'GROUP':
       return `Group Chat — ${opts.getGroupTitle((context as ChatContextGroup).groupId)}`
     case 'GROUP_TOPIC': {
       const c = context as ChatContextGroupTopic
-      return `Group ${chatTitle ? chatTitle : prettyTopicName(c.topicId)} — ${opts.getGroupTitle(c.groupId)}`
+      return `Group ${chatTitle ?? 'Topic'}`
     }
     case 'PROJECT':
       return `Project Chat — ${opts.getProjectTitle((context as ChatContextProject).projectId)}`
     case 'PROJECT_TOPIC': {
       const c = context as ChatContextProjectTopic
-      return `Project ${chatTitle ? chatTitle : prettyTopicName(c.topicId)} — ${opts.getProjectTitle(c.projectId)}`
+      return `Project ${chatTitle ?? 'Topic'}`
     }
     case 'STORY':
       return `Story Chat — ${opts.getStoryTitle((context as ChatContextStory).storyId)}`
@@ -102,7 +92,7 @@ export default function ChatView() {
   const { groups, activeGroupId, activeSelectionType } = useProjectsGroups()
   const { storiesById, featuresById } = useStories()
   const { getChatIfExists, chatsByProjectId, chats } = useChats()
-  const { markNotificationsByMetadata, getGroupBadgeState, getProjectBadgeState } =
+  const { markNotificationsByMetadata, getGroupOwnBadgeState, getProjectBadgeState } =
     useNotifications()
   const { markRunSeen } = useAgents()
   const { appSettings } = useAppSettings()
@@ -334,7 +324,7 @@ export default function ChatView() {
     let showAgentDot = false
 
     if (activeSelectionType === 'group' && activeGroupId) {
-      const groupBadge = getGroupBadgeState(activeGroupId)
+      const groupBadge = getGroupOwnBadgeState(activeGroupId)
       showChatDot = groupBadge.chat_messages.unread > 0
       showAgentDot = groupBadge.agent_runs.unread > 0 || groupBadge.agent_runs.running > 0
     } else {
@@ -385,7 +375,7 @@ export default function ChatView() {
     activeProjectId,
     activeGroupId,
     activeSelectionType,
-    getGroupBadgeState,
+    getGroupOwnBadgeState,
     getProjectBadgeState,
     appSettings,
   ])
@@ -422,7 +412,7 @@ export default function ChatView() {
                 getStoryTitle,
                 getFeatureTitle,
               },
-              chats[getChatContextKey(selectedContext)]?.chat.title
+              chats[getChatContextKey(selectedContext)]?.chat.title,
             )}
           />
         ) : (

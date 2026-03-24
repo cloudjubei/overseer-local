@@ -1368,7 +1368,6 @@
           "thefactory-tools/ChatContextProject",
           "thefactory-tools/ChatContextProjectTopic",
           "thefactory-tools/ChatContextStory",
-          "thefactory-tools/ChatContextStoryTopic",
           "@renderer/components/ui/icons/Icons/IconChevron",
           "@renderer/components/ui/icons/Icons",
           "@renderer/hooks/useChatUnread/useChatUnread",
@@ -1405,7 +1404,6 @@
           "thefactory-tools/ChatContextProject",
           "thefactory-tools/ChatContextProjectTopic",
           "thefactory-tools/ChatContextStory",
-          "thefactory-tools/ChatContextStoryTopic",
           "@renderer/components/ui/icons/Icons/IconChevron",
           "@renderer/components/ui/icons/Icons",
           "@renderer/hooks/useChatUnread/useChatUnread",
@@ -1434,6 +1432,7 @@
           "thefactory-tools/ChatContext",
           "thefactory-tools/CompletionMessage",
           "Promise",
+          "thefactory-tools/Chat",
           "Record",
           "Partial",
           "Map",
@@ -1508,7 +1507,9 @@
           "@renderer/contexts/ProjectContext/useActiveProject",
           "@renderer/contexts/ProjectContext",
           "@renderer/contexts/ProjectsGroupsContext/useProjectsGroups",
-          "@renderer/contexts/ProjectsGroupsContext"
+          "@renderer/contexts/ProjectsGroupsContext",
+          "@renderer/contexts/chats/ChatsContext/useChats",
+          "@renderer/contexts/chats/ChatsContext"
         ]
       },
       "ChatView": {
@@ -1536,12 +1537,6 @@
           "thefactory-tools/ChatContextGroupTopic",
           "thefactory-tools/ChatContextProjectTopic",
           "thefactory-tools/ChatContextStory",
-          "thefactory-tools/ChatContextStoryTopic",
-          "thefactory-tools/CompletionMessage",
-          "@renderer/services/chatsService/chatsService",
-          "@renderer/services/chatsService",
-          "@renderer/hooks/useChatUnread/useChatUnread",
-          "@renderer/hooks/useChatUnread",
           "thefactory-tools/utils/getChatContextKey",
           "thefactory-tools/utils/getChatContext",
           "thefactory-tools/utils",
@@ -1595,6 +1590,12 @@
           "@renderer/utils/utils/cn",
           "@renderer/utils/utils",
           "@renderer/components/ui/Tooltip"
+        ]
+      },
+      "coerceLanguage": {
+        "path": "src/renderer/src/screens/projects/wizard/languageCoercion.ts",
+        "dependencies": [
+          "thefactory-tools/ProgrammingLanguage"
         ]
       },
       "CollapsibleSidebar": {
@@ -7089,6 +7090,18 @@
           "@renderer/components/ui/Spinner"
         ]
       },
+      "WriteMultiToolsPreview": {
+        "path": "src/renderer/src/components/chat/ToolCall/renderers/WriteMultiToolsPreview.tsx",
+        "dependencies": [
+          "Set",
+          "thefactory-tools/ToolResultType",
+          "thefactory-tools/ToolCall",
+          "@renderer/components/ui/icons/IconChevronRight/IconChevronRight",
+          "@renderer/components/ui/icons/IconChevronRight",
+          "@renderer/utils/utils/cn",
+          "@renderer/utils/utils"
+        ]
+      },
       "WriteToolsPreview": {
         "path": "src/renderer/src/components/chat/ToolCall/renderers/WriteToolsPreview.tsx",
         "dependencies": [
@@ -7682,7 +7695,6 @@
           "thefactory-tools/ChatContextProject",
           "thefactory-tools/ChatContextProjectTopic",
           "thefactory-tools/ChatContextStory",
-          "thefactory-tools/ChatContextStoryTopic",
           "@renderer/components/ui/icons/Icons/IconChevron",
           "@renderer/components/ui/icons/Icons",
           "@renderer/hooks/useChatUnread/useChatUnread",
@@ -7719,7 +7731,6 @@
           "thefactory-tools/ChatContextProject",
           "thefactory-tools/ChatContextProjectTopic",
           "thefactory-tools/ChatContextStory",
-          "thefactory-tools/ChatContextStoryTopic",
           "@renderer/components/ui/icons/Icons/IconChevron",
           "@renderer/components/ui/icons/Icons",
           "@renderer/hooks/useChatUnread/useChatUnread",
@@ -7748,6 +7759,7 @@
           "thefactory-tools/ChatContext",
           "thefactory-tools/CompletionMessage",
           "Promise",
+          "thefactory-tools/Chat",
           "Record",
           "Partial",
           "Map",
@@ -7822,7 +7834,9 @@
           "@renderer/contexts/ProjectContext/useActiveProject",
           "@renderer/contexts/ProjectContext",
           "@renderer/contexts/ProjectsGroupsContext/useProjectsGroups",
-          "@renderer/contexts/ProjectsGroupsContext"
+          "@renderer/contexts/ProjectsGroupsContext",
+          "@renderer/contexts/chats/ChatsContext/useChats",
+          "@renderer/contexts/chats/ChatsContext"
         ]
       },
       "ChatView": {
@@ -7850,12 +7864,6 @@
           "thefactory-tools/ChatContextGroupTopic",
           "thefactory-tools/ChatContextProjectTopic",
           "thefactory-tools/ChatContextStory",
-          "thefactory-tools/ChatContextStoryTopic",
-          "thefactory-tools/CompletionMessage",
-          "@renderer/services/chatsService/chatsService",
-          "@renderer/services/chatsService",
-          "@renderer/hooks/useChatUnread/useChatUnread",
-          "@renderer/hooks/useChatUnread",
           "thefactory-tools/utils/getChatContextKey",
           "thefactory-tools/utils/getChatContext",
           "thefactory-tools/utils",
@@ -7909,6 +7917,12 @@
           "@renderer/utils/utils/cn",
           "@renderer/utils/utils",
           "@renderer/components/ui/Tooltip"
+        ]
+      },
+      "coerceLanguage": {
+        "path": "renderer/src/screens/projects/wizard/languageCoercion.ts",
+        "dependencies": [
+          "thefactory-tools/ProgrammingLanguage"
         ]
       },
       "CollapsibleSidebar": {
@@ -13401,6 +13415,18 @@
           "@renderer/contexts/ProjectsGroupsContext/useProjectsGroups",
           "@renderer/contexts/ProjectsGroupsContext",
           "@renderer/components/ui/Spinner"
+        ]
+      },
+      "WriteMultiToolsPreview": {
+        "path": "renderer/src/components/chat/ToolCall/renderers/WriteMultiToolsPreview.tsx",
+        "dependencies": [
+          "Set",
+          "thefactory-tools/ToolResultType",
+          "thefactory-tools/ToolCall",
+          "@renderer/components/ui/icons/IconChevronRight/IconChevronRight",
+          "@renderer/components/ui/icons/IconChevronRight",
+          "@renderer/utils/utils/cn",
+          "@renderer/utils/utils"
         ]
       },
       "WriteToolsPreview": {

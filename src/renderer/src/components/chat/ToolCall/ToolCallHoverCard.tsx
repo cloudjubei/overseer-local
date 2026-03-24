@@ -17,9 +17,18 @@ import { extract, isCompletelyNewFile, tryString } from './utils'
 import { StoryCardRaw } from '@renderer/components/stories/StoryCard'
 import { WriteToolsPreview } from './renderers/WriteToolsPreview'
 import { TextToolsPreview } from './renderers/TextToolsPreview'
+import { WriteMultiToolsPreview } from './renderers/WriteMultiToolsPreview'
 import StoryAndFeatureCallout from '@renderer/components/stories/StoryAndFeatureCallout'
 
 import { useNavigator } from '@renderer/navigation/Navigator'
+
+function SmallBadge({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="inline-flex items-center rounded border border-[var(--border-subtle)] bg-[var(--surface-base)] px-1 py-0 text-[10px] font-medium text-[var(--text-secondary)]">
+      {children}
+    </span>
+  )
+}
 
 export default function ToolCallHoverCard({
   toolCall,
@@ -47,26 +56,11 @@ export default function ToolCallHoverCard({
     // writeExactReplaces has multiple changes; keep headerPath empty (handled by preview)
     if (toolName === 'writeExactReplaces') return undefined
 
-    if (toolName === 'readFileRanges') {
-      // args.queries?: [{path,...}]
-      const queries = extract(args, ['queries'])
-      if (Array.isArray(queries) && queries.length > 0) {
-        return tryString(extract(queries[0], ['path']))
-      }
-      // legacy single-range shape (defensive)
-      return tryString(extract(args, ['path']))
-    }
+    if (toolName === 'readFileRanges') return undefined
 
     if (toolName === 'readFileStructure') return tryString(extract(args, ['path']))
 
-    if (toolName === 'grepFiles') {
-      const queries = extract(args, ['queries'])
-      if (Array.isArray(queries) && queries.length > 0) {
-        return tryString(extract(queries[0], ['path']))
-      }
-      // legacy
-      return tryString(extract(args, ['path']))
-    }
+    if (toolName === 'grepFiles') return undefined
 
     if (toolName === 'listContents') return tryString(extract(args, ['path']))
     return undefined
@@ -77,11 +71,11 @@ export default function ToolCallHoverCard({
   const [sideBySide, setSideBySide] = useState<boolean>(false)
 
   // Split-toggle rules:
-  // - write tools: allow only when it is NOT a completely new file.
+  // - writeFile: allow only when it is NOT a completely new file.
   // - text tools: allow only while in-flight (once finished we only show new content).
   const canShowSplitToggle = useMemo(() => {
-    if (toolName === 'writeFile' || toolName === 'writeExactReplaces') {
-      const isNew = toolName === 'writeFile' ? isCompletelyNewFile(result) : false
+    if (toolName === 'writeFile') {
+      const isNew = isCompletelyNewFile(result)
       return !isNew
     }
 
@@ -111,7 +105,18 @@ export default function ToolCallHoverCard({
     }
 
     // ── extracted renderers ──
-    if (n === 'writeFile' || n === 'writeExactReplaces') {
+    if (n === 'writeExactReplaces') {
+      return (
+        <WriteMultiToolsPreview
+          toolCall={toolCall}
+          result={result}
+          resultType={resultType}
+          projectId={projectId}
+        />
+      )
+    }
+
+    if (n === 'writeFile') {
       return (
         <WriteToolsPreview
           toolCall={toolCall}
@@ -139,23 +144,34 @@ export default function ToolCallHoverCard({
 
     // ── existing local renderers ──
     if (n === 'readPaths') {
-      const files: string[] = extract(args, ['paths']) ?? []
+      const files: string[] = Array.isArray(extract(args, ['paths'])) ? extract(args, ['paths']) : []
       const withLineNumbers = extract(args, ['lineNumbers'])
+      const resultMap = result && typeof result === 'object' && !Array.isArray(result) ? result : {}
 
       return (
         <div className="text-xs space-y-1">
-          {typeof withLineNumbers === 'boolean' ? (
-            <Row>
-              <span className="text-[var(--text-secondary)]">lineNumbers:</span>
-              <span className="font-mono text-[11px]">{String(withLineNumbers)}</span>
-            </Row>
+          {withLineNumbers ? (
+            <div className="mb-2">
+              <SmallBadge>lineNumbers</SmallBadge>
+            </div>
           ) : null}
+          {files.length > 0 ? (
+            files.map((file, idx) => {
+              const content = typeof resultMap[file] === 'string' ? resultMap[file] : undefined
+              const suffix = resultType === 'success' && typeof content === 'string' ? `: ${content.length} chars` : ''
 
-          {files.map((file, idx) => (
-            <Row key={file || idx}>
-              <span className="font-mono text-[11px]">{file || '(unknown)'}</span>
-            </Row>
-          ))}
+              return (
+                <Row key={file || idx} className="flex items-center gap-1.5 flex-wrap">
+                  <span className="font-mono text-[11px]">{file || '(unknown)'}</span>
+                  {suffix ? (
+                    <span className="font-mono text-[11px] text-[var(--text-secondary)]">{suffix}</span>
+                  ) : null}
+                </Row>
+              )
+            })
+          ) : (
+            <div className="text-[11px] text-[var(--text-secondary)]">No paths</div>
+          )}
         </div>
       )
     }
@@ -163,31 +179,199 @@ export default function ToolCallHoverCard({
     if (n === 'readFileRanges') {
       const queries = extract(args, ['queries'])
       const safe = Array.isArray(queries) ? queries : []
-      const paths = safe
-        .map((q: any) => tryString(extract(q, ['path'])))
-        .filter((p: any): p is string => typeof p === 'string' && p.length > 0)
-
-      // Show if lineNumbers present in the first query (common case)
-      const withLineNumbers = safe.length > 0 ? extract(safe[0], ['lineNumbers']) : undefined
+      const resultMap = result && typeof result === 'object' && !Array.isArray(result) ? result : {}
+      
+      const anyWithLineNumbers = safe.some((q: any) => extract(q, ['lineNumbers']))
 
       return (
         <div className="text-xs space-y-1">
-          {typeof withLineNumbers === 'boolean' ? (
-            <Row>
-              <span className="text-[var(--text-secondary)]">lineNumbers:</span>
-              <span className="font-mono text-[11px]">{String(withLineNumbers)}</span>
-            </Row>
+          {anyWithLineNumbers ? (
+            <div className="mb-2">
+              <SmallBadge>lineNumbers</SmallBadge>
+            </div>
           ) : null}
+          {safe.length > 0 ? (
+            safe.map((q: any, idx: number) => {
+              const path = tryString(extract(q, ['path'])) || '(unknown)'
+              const startLine = extract(q, ['startLine'])
+              const endLine = extract(q, ['endLine'])
+              const content = typeof resultMap[path] === 'string' ? resultMap[path] : undefined
+              const suffix = resultType === 'success' && typeof content === 'string' ? `: ${content.length} chars` : ''
 
-          {paths.length > 0 ? (
-            paths.map((p, idx) => (
-              <Row key={`${p}-${idx}`}>
-                <span className="font-mono text-[11px]">{p}</span>
-              </Row>
-            ))
+              return (
+                <Row key={`${path}-${idx}`} className="flex items-center gap-1.5 flex-wrap">
+                  <span className="font-mono text-[11px]">
+                    L{String(startLine ?? '?')}:L{String(endLine ?? '?')} {path}
+                  </span>
+                  {suffix ? (
+                    <span className="font-mono text-[11px] text-[var(--text-secondary)]">{suffix}</span>
+                  ) : null}
+                </Row>
+              )
+            })
           ) : (
             <div className="text-[11px] text-[var(--text-secondary)]">No queries</div>
           )}
+        </div>
+      )
+    }
+
+    if (n === 'grepFiles') {
+      const queries = extract(args, ['queries'])
+      const safe = Array.isArray(queries) ? queries : []
+      const resultMap = result && typeof result === 'object' && !Array.isArray(result) ? result : {}
+
+      return (
+        <div className="text-xs space-y-2">
+          {safe.length > 0 ? (
+            safe.map((q: any, idx: number) => {
+              const path = tryString(extract(q, ['path'])) || '(unknown)'
+              const pattern = tryString(extract(q, ['pattern'])) || ''
+              const matches = Array.isArray(resultMap[path]) ? resultMap[path] : undefined
+              const suffix = resultType === 'success' && matches ? `: ${matches.length} matches` : ''
+
+              return (
+                <div key={`${path}-${idx}`} className="space-y-0.5">
+                  <Row>
+                    <span className="font-mono text-[11px] break-words">{pattern || '(no pattern)'}</span>
+                  </Row>
+                  <Row className="flex items-center gap-1.5 flex-wrap">
+                    <span className="font-mono text-[11px]">{path}</span>
+                    {suffix ? (
+                      <span className="font-mono text-[11px] text-[var(--text-secondary)]">{suffix}</span>
+                    ) : null}
+                  </Row>
+                </div>
+              )
+            })
+          ) : (
+            <div className="text-[11px] text-[var(--text-secondary)]">No queries</div>
+          )}
+        </div>
+      )
+    }
+
+    if (n === 'compileCheck') {
+      const paths = (extract(args, ['paths']) ?? []) as Array<string | undefined>
+      const safePaths = paths.filter((p): p is string => typeof p === 'string')
+      const strict = extract(args, ['strict'])
+
+      const failingPathsRaw =
+        extract(result, ['failingPaths']) ||
+        extract(result, ['failedPaths']) ||
+        extract(result, ['errorsByFile']) ||
+        extract(result, ['failuresByPath']) ||
+        extract(result, ['files'])
+
+      const failingPaths: string[] = Array.isArray(failingPathsRaw)
+        ? failingPathsRaw.filter((p: any): p is string => typeof p === 'string')
+        : failingPathsRaw && typeof failingPathsRaw === 'object'
+          ? Object.keys(failingPathsRaw)
+          : []
+
+      const shownPaths = resultType === 'success' ? failingPaths : safePaths
+
+      return (
+        <div className="text-xs space-y-1">
+          <Row className="flex items-center gap-1.5 flex-wrap">
+            <span className="text-[var(--text-secondary)]">strict:</span>
+            <span className="font-mono text-[11px]">{String(!!strict)}</span>
+          </Row>
+
+          {shownPaths.length > 0 ? (
+            <div>
+              <SectionTitle>{resultType === 'success' ? 'Failing paths' : 'Paths'}</SectionTitle>
+              <PreLimited lines={shownPaths} maxLines={10} />
+            </div>
+          ) : resultType === 'success' ? (
+            <div className="text-[11px] text-[var(--text-secondary)]">No failing paths</div>
+          ) : (
+            <div className="text-[11px] text-[var(--text-secondary)]">No paths</div>
+          )}
+        </div>
+      )
+    }
+
+    if (n === 'gitResetFiles') {
+      const paths = (extract(args, ['paths']) ?? []) as Array<string | undefined>
+      const safePaths = paths.filter((p): p is string => typeof p === 'string')
+
+      return (
+        <div className="text-xs space-y-1">
+          {safePaths.length > 0 ? (
+            safePaths.map((file, idx) => (
+              <Row key={`${file}-${idx}`}>
+                <span className="font-mono text-[11px]">{file}</span>
+              </Row>
+            ))
+          ) : (
+            <div className="text-[11px] text-[var(--text-secondary)]">No paths</div>
+          )}
+        </div>
+      )
+    }
+
+    if (n === 'gitDiff') {
+      const options = extract(args, ['options']) || {}
+      const paths = (extract(options, ['paths']) ?? []) as Array<string | undefined>
+      const safePaths = paths.filter((p): p is string => typeof p === 'string')
+      const staged = extract(options, ['staged'])
+      const includePatch = extract(options, ['includePatch'])
+      const includeStructured = extract(options, ['includeStructured'])
+
+      const files =
+        (extract(result, ['files']) ?? extract(result, ['diffs']) ?? extract(result, ['entries']) ?? []) as any[]
+
+      return (
+        <div className="text-xs space-y-1">
+          <Row className="flex items-center gap-1.5 flex-wrap">
+            <span className="text-[var(--text-secondary)]">mode:</span>
+            <span className="font-mono text-[11px]">{staged ? 'staged' : 'unstaged'}</span>
+            {includePatch ? <SmallBadge>patch</SmallBadge> : null}
+            {includeStructured ? <SmallBadge>structured</SmallBadge> : null}
+          </Row>
+
+          {safePaths.length > 0 ? (
+            <div>
+              <SectionTitle>Paths</SectionTitle>
+              <PreLimited lines={safePaths} maxLines={10} />
+            </div>
+          ) : null}
+
+          {resultType === 'success' ? (
+            files.length > 0 ? (
+              <div>
+                <SectionTitle>Results</SectionTitle>
+                <div className="space-y-1">
+                  {files.map((file: any, idx: number) => {
+                    const path =
+                      tryString(extract(file, ['path'])) ||
+                      tryString(extract(file, ['newPath'])) ||
+                      tryString(extract(file, ['oldPath'])) ||
+                      `(entry ${idx + 1})`
+                    const added = extract(file, ['addedLines']) ?? extract(file, ['additions'])
+                    const removed = extract(file, ['removedLines']) ?? extract(file, ['deletions'])
+                    const truncated = !!extract(file, ['patchTruncated'])
+
+                    return (
+                      <Row key={`${path}-${idx}`} className="flex items-center gap-1.5 flex-wrap">
+                        <span className="font-mono text-[11px]">{path}</span>
+                        {typeof added === 'number' ? (
+                          <span className="font-mono text-[11px] text-[var(--text-secondary)]">+{added}</span>
+                        ) : null}
+                        {typeof removed === 'number' ? (
+                          <span className="font-mono text-[11px] text-[var(--text-secondary)]">-{removed}</span>
+                        ) : null}
+                        {truncated ? <SmallBadge>patch truncated</SmallBadge> : null}
+                      </Row>
+                    )
+                  })}
+                </div>
+              </div>
+            ) : (
+              <div className="text-[11px] text-[var(--text-secondary)]">No diff results</div>
+            )
+          ) : null}
         </div>
       )
     }

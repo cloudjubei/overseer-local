@@ -159,6 +159,25 @@ export function useNotifications() {
     [badgeStateByProject],
   )
 
+  const getGroupOwnBadgeState = useCallback(
+    (groupId: string): ProjectBadgeState => {
+      const chatUnread =
+        systemSettings.chatBadgeCountMode === 'total_messages'
+          ? (totalUnreadCountByProject.get(groupId) ?? 0)
+          : (unreadCountByProject.get(groupId) ?? 0)
+
+      return {
+        agent_runs: { running: 0, unread: 0 },
+        chat_messages: {
+          unread: chatUnread,
+          thinking: (thinkingCountByProject.get(groupId) ?? 0) > 0,
+        },
+        git_changes: { incoming: 0, uncommitted: false },
+      }
+    },
+    [totalUnreadCountByProject, unreadCountByProject, thinkingCountByProject, systemSettings.chatBadgeCountMode],
+  )
+
   const getGroupBadgeState = useCallback(
     (groupId: string): ProjectBadgeState => {
       const g = groups.find((x) => x.id === groupId)
@@ -284,6 +303,7 @@ export function useNotifications() {
     badgeStateByProject,
     getProjectBadgeState,
     getGroupBadgeState,
+    getGroupOwnBadgeState,
     enableNotifications,
     markNotificationsByIds,
     markNotificationsByMetadata,

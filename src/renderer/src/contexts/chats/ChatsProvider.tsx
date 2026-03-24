@@ -5,6 +5,7 @@ import type {
   CompletionMessage,
   LLMConfig,
   ChatSettings,
+  Chat,
 } from 'thefactory-tools'
 import { getChatContextKey } from 'thefactory-tools/utils'
 import { chatsService } from '@renderer/services/chatsService'
@@ -270,17 +271,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
 
       try {
         const chat = await chatsService.getChat(context)
-        const chatState: ChatState = { key, chat, isLoading: false, isThinking: false }
-        updateChatState(key, chatState)
-        try {
-          const pid = chat.context?.projectId
-          if (pid) chatKeyToProjectIdRef.current[key] = pid
-          const gid = (chat.context as any)?.groupId
-          if (gid) chatKeyToGroupIdRef.current[key] = gid
-        } catch {
-          // ignore
-        }
-        return chatState
+        return updateExistingChat(key, chat)
       } catch {
         return undefined
       }
@@ -293,6 +284,14 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       const chatState = await getChatIfExists(context)
       if (!chatState) throw new Error('Chat does not exist')
       return chatState
+    },
+    [getChatIfExists],
+  )
+  const createTopicChat = useCallback(
+    async (type: 'group' | 'project', entityId: string, title: string): Promise<ChatState> => {
+      const chat = await chatsService.createTopicChat(type, entityId, title)
+      const key = getChatContextKey(chat.context)
+      return updateExistingChat(key, chat)
     },
     [getChatIfExists],
   )
@@ -315,20 +314,24 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       let chat = await chatsService.clearChat(context)
       if (!chat) chat = await chatsService.getChat(context)
 
-      const st: ChatState = { key, chat: chat!, isLoading: false, isThinking: false }
-      updateChatState(key, st)
-      try {
-        const pid = chat?.context?.projectId
-        if (pid) chatKeyToProjectIdRef.current[key] = pid
-        const gid = (chat?.context as any)?.groupId
-        if (gid) chatKeyToGroupIdRef.current[key] = gid
-      } catch {
-        // ignore
-      }
-      return st
+      return updateExistingChat(key, chat!)
     },
     [clearDeleted, updateChatState],
   )
+
+  const updateExistingChat = (key: string, chat: Chat): ChatState => {
+    const st: ChatState = { key, chat, isLoading: false, isThinking: false }
+    updateChatState(key, st)
+    try {
+      const pid = chat?.context?.projectId
+      if (pid) chatKeyToProjectIdRef.current[key] = pid
+      const gid = (chat?.context as any)?.groupId
+      if (gid) chatKeyToGroupIdRef.current[key] = gid
+    } catch {
+      // ignore
+    }
+    return st
+  }
 
   const deleteChat = useCallback(
     async (context: ChatContext): Promise<void> => {
@@ -731,6 +734,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
 
       getChatIfExists,
       getChat,
+      createTopicChat,
       restartChat,
       deleteChat,
       deleteLastMessage,
@@ -758,6 +762,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
       abortMessage,
       getChatIfExists,
       getChat,
+      createTopicChat,
       restartChat,
       deleteChat,
       deleteLastMessage,

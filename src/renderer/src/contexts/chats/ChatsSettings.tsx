@@ -17,15 +17,13 @@ export function extractSettingsForContext(
     case 'GROUP':
       return all.GROUP
     case 'GROUP_TOPIC':
-      return all.GROUP_TOPIC[context.groupTopic!]
+      return all.GROUP_TOPIC
     case 'PROJECT':
       return all.PROJECT
     case 'PROJECT_TOPIC':
-      return all.PROJECT_TOPIC[context.projectTopic!]
+      return all.PROJECT_TOPIC
     case 'STORY':
       return all.STORY
-    case 'STORY_TOPIC':
-      return all.STORY_TOPIC[context.storyTopic!]
     case 'AGENT_RUN_STORY':
       return all.AGENT_RUN_STORY
     case 'FEATURE':

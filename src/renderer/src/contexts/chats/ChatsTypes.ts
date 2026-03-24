@@ -57,6 +57,11 @@ export type ChatsContextValue = {
 
   getChatIfExists: (context: ChatContext) => Promise<ChatState | undefined>
   getChat: (context: ChatContext) => Promise<ChatState>
+  createTopicChat: (
+    type: 'group' | 'project',
+    entityId: string,
+    title: string,
+  ) => Promise<ChatState>
   restartChat: (context: ChatContext) => Promise<ChatState>
   deleteChat: (context: ChatContext) => Promise<void>
   deleteLastMessage: (context: ChatContext) => Promise<void>

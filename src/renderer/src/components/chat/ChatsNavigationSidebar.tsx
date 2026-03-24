@@ -39,7 +39,7 @@ function titleForContext(
     getStoryTitle: (id?: string) => string
     getFeatureTitle: (id?: string) => string
   },
-  chatTitle?: string
+  chatTitle?: string,
 ): string {
   switch (context.type) {
     case 'GROUP':
@@ -216,9 +216,15 @@ const ChatButton = memo(function ChatButton({
           <SpinnerWithDot
             size={14}
             showDot={hasUnread || isAgentUnread}
-            dotTitle={hasUnread ? 'Unread messages' : isAgentUnread ? 'Unread agent run' : undefined}
-            dotColorClass={isAgentUnread && agentBadgeColor ? `bg-${agentBadgeColor}-500` : undefined}
-            className={isAgentRunning && agentBadgeColor ? `text-${agentBadgeColor}-500` : undefined}
+            dotTitle={
+              hasUnread ? 'Unread messages' : isAgentUnread ? 'Unread agent run' : undefined
+            }
+            dotColorClass={
+              isAgentUnread && agentBadgeColor ? `bg-${agentBadgeColor}-500` : undefined
+            }
+            className={
+              isAgentRunning && agentBadgeColor ? `text-${agentBadgeColor}-500` : undefined
+            }
           />
         ) : hasUnread ? (
           <NotificationBadge
@@ -273,7 +279,9 @@ const ConnectedChatButton = memo(function ConnectedChatButton({
   const chat = chatState?.chat
 
   const isAgentContext = ctx.type === 'AGENT_RUN_STORY' || ctx.type === 'AGENT_RUN_FEATURE'
-  const isAgentRunning = Boolean(isAgentContext && (chat?.state === 'running' || chat?.state === 'created'))
+  const isAgentRunning = Boolean(
+    isAgentContext && (chat?.state === 'running' || chat?.state === 'created'),
+  )
   const isAgentUnread = Boolean(isAgentContext && chat ? isRunUnread(chat) : false)
 
   const agentBadgeColor = appSettings?.notificationSystemSettings?.badgeColors?.agent_runs
@@ -412,7 +420,7 @@ export default function ChatsNavigationSidebar({
     if (!activeProjectId) return []
     const raw = chatsByProjectId[activeProjectId] || []
     const filtered = raw.filter((c) => {
-      const ctx = c.chat.context as any
+      const ctx = c.chat.context
       const type = ctx?.type
       if (
         type === 'PROJECT' ||
@@ -429,6 +437,7 @@ export default function ChatsNavigationSidebar({
       }
       return false
     })
+
     return filtered.slice()
   }, [chatsByProjectId, activeProjectId, getStoryDisplayIndex])
 
@@ -549,7 +558,7 @@ export default function ChatsNavigationSidebar({
               getStoryTitle,
               getFeatureTitle,
             },
-            c.chat.title
+            c.chat.title,
           )
           group.storyChat = { ctx, label, key: c.key, updatedAt }
         } else if (type === 'AGENT_RUN_STORY') {
@@ -561,7 +570,7 @@ export default function ChatsNavigationSidebar({
               getStoryTitle,
               getFeatureTitle,
             },
-            c.chat.title
+            c.chat.title,
           )
           group.runs.push({ ctx, label, key: c.key, updatedAt })
         } else if (type === 'FEATURE' || type === 'AGENT_RUN_FEATURE') {
@@ -588,7 +597,7 @@ export default function ChatsNavigationSidebar({
               getStoryTitle,
               getFeatureTitle,
             },
-            c.chat.title
+            c.chat.title,
           )
           if (type === 'FEATURE') f.featureChat = { ctx, label, key: c.key, updatedAt }
           else f.runs.push({ ctx, label, key: c.key, updatedAt })
@@ -639,7 +648,7 @@ export default function ChatsNavigationSidebar({
               getStoryTitle,
               getFeatureTitle,
             },
-            c.chat.title
+            c.chat.title,
           ),
           key: c.key,
           updatedAt,
@@ -669,7 +678,9 @@ export default function ChatsNavigationSidebar({
                     getStoryTitle,
                     getFeatureTitle,
                   },
-                  chatsByGroupId[activeGroupId ?? '']?.find((c) => c.key === getChatContextKey(groupContext))?.chat.title
+                  chatsByGroupId[activeGroupId ?? '']?.find(
+                    (c) => c.key === getChatContextKey(groupContext),
+                  )?.chat.title,
                 )}
                 isActive={isActive(groupContext)}
                 onClick={ensureOpen}
@@ -701,7 +712,9 @@ export default function ChatsNavigationSidebar({
                     getStoryTitle,
                     getFeatureTitle,
                   },
-                  chatsByProjectId[activeProjectId ?? '']?.find((c) => c.key === getChatContextKey(generalContext))?.chat.title
+                  chatsByProjectId[activeProjectId ?? '']?.find(
+                    (c) => c.key === getChatContextKey(generalContext),
+                  )?.chat.title,
                 )}
                 isActive={isActive(generalContext)}
                 onClick={ensureOpen}
@@ -975,7 +988,7 @@ export default function ChatsNavigationSidebar({
                     getStoryTitle,
                     getFeatureTitle,
                   },
-                  c.chat.title
+                  c.chat.title,
                 )
                 return (
                   <ConnectedChatButton

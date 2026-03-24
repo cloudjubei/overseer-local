@@ -1,15 +1,9 @@
-import React, { useMemo, useState } from 'react'
+import React, { useMemo } from 'react'
 import type { ToolCall, ToolResultType } from 'thefactory-tools'
 import Code from '../../../ui/Code'
 import Spinner from '../../../ui/Spinner'
 import { StructuredUnifiedDiff } from '../../tool-popups/diffUtils'
-import { PathDisplay } from '../../../ui/PathDisplay'
-import GitFileStatusIcon from '../../../../screens/git/common/GitFileStatusIcon'
-import { GitFileChangesPills } from '../../../../screens/git/common/GitFileChangesPills'
-
 import { buildUnifiedDiffIfPresent, extract, isCompletelyNewFile, tryString } from '../utils'
-import { IconChevronRight } from '@renderer/components/ui/icons/IconChevronRight'
-import { cn } from '@renderer/utils/utils'
 
 export function WriteToolsPreview({
   toolCall,
@@ -118,135 +112,6 @@ export function WriteToolsPreview({
 
   // writeFile, writeDiffToFile, writeStructuredDiffToFile are display-equivalent: all are diffs.
   if (resultError) return errorContent(resultError)
-
-  const multiResults = useMemo(() => {
-    if (toolName !== 'writeExactReplaces') return undefined
-    if (Array.isArray(actualData) && actualData.length > 0) return actualData
-    return undefined
-  }, [toolName, actualData])
-
-  const uniquePathsCount = useMemo(() => {
-    if (multiResults) {
-      return new Set(multiResults.map((r) => r.path).filter(Boolean)).size
-    }
-    if (toolName === 'writeExactReplaces') {
-      const queries = extract(args, ['queries'])
-      if (Array.isArray(queries)) {
-        return new Set(queries.map((q) => q.path).filter(Boolean)).size
-      }
-    }
-    return 1
-  }, [multiResults, toolName, args])
-
-  const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set())
-
-  const togglePath = (path: string) => {
-    setExpandedPaths((prev) => {
-      const next = new Set(prev)
-      if (next.has(path)) next.delete(path)
-      else next.add(path)
-      return next
-    })
-  }
-
-  if (toolName === 'writeExactReplaces' && uniquePathsCount > 1) {
-    if (isPreviewObject && result.status === 'pending')
-      return spinnerContent('Loading diff preview…')
-    if (isInFlight && !multiResults && !successPatch) return spinnerContent('Loading diff preview…')
-
-    // If we have a successPatch from a ToolPreview but not multiResults, we must fallback to single viewer
-    if (!multiResults && successPatch) {
-      // Fall through to single patch viewer
-    } else {
-      const resultsToShow = multiResults || []
-      if (resultsToShow.length === 0 && !isInFlight) {
-        return <div className="text-[11px] text-[var(--text-secondary)]">No files changed</div>
-      }
-
-      if (resultsToShow.length === 0) {
-        return spinnerContent('Loading diff preview…')
-      }
-
-      // Group by path
-      const grouped = new Map<string, any[]>()
-      for (const r of resultsToShow) {
-        const path = tryString(r.path) || '(unknown)'
-        if (!grouped.has(path)) grouped.set(path, [])
-        grouped.get(path)!.push(r)
-      }
-
-      const groupsArray = Array.from(grouped.entries())
-
-      return (
-        <div className="flex flex-col min-h-0 border border-neutral-200 dark:border-neutral-800 rounded-md overflow-hidden bg-[var(--bg-primary)]">
-          {groupsArray.map(([path, fileResults]) => {
-            const isExpanded = expandedPaths.has(path)
-            const combinedPatch = fileResults
-              .map((r) => tryString(r.diff) || tryString(r.patch))
-              .filter(Boolean)
-              .join('\n')
-            const anyErr = fileResults.find((r) => tryString(r.error))?.error
-            const err = anyErr ? tryString(anyErr) : undefined
-
-            return (
-              <div
-                key={path}
-                className="group flex flex-col border-b last:border-b-0 border-neutral-200 dark:border-neutral-800"
-              >
-                <div
-                  className="flex items-center justify-between gap-2 px-2 py-1.5 text-xs bg-[var(--bg-secondary)] hover:bg-[var(--bg-tertiary)] cursor-pointer select-none transition-colors"
-                  onClick={() => togglePath(path)}
-                >
-                  <div className="flex items-center gap-2 min-w-0 flex-1">
-                    <IconChevronRight
-                      className={cn(
-                        'w-3.5 h-3.5 text-neutral-400 transition-transform',
-                        isExpanded && 'rotate-90',
-                      )}
-                    />
-                    <GitFileStatusIcon status={'M'} />
-                    <PathDisplay path={path} />
-                  </div>
-                  <div className="grid items-center shrink-0 min-h-[20px] justify-items-end pl-2">
-                    {err ? (
-                      <span className="text-red-500 text-[10px]">Error</span>
-                    ) : (
-                      <GitFileChangesPills patch={combinedPatch} />
-                    )}
-                  </div>
-                </div>
-                {err && !isExpanded ? (
-                  <div className="text-[10px] text-red-500 px-2 pb-1.5 bg-[var(--bg-secondary)]">
-                    {err}
-                  </div>
-                ) : null}
-
-                {isExpanded && (
-                  <div className="flex flex-col bg-[var(--bg-primary)] px-2 py-2 gap-2">
-                    {fileResults.map((r, i) => {
-                      const patch = tryString(r.diff) || tryString(r.patch)
-                      const hunkErr = tryString(r.error)
-                      if (!patch && !hunkErr) return null
-                      return (
-                        <div key={i} className="flex flex-col min-h-0">
-                          {hunkErr ? (
-                            <div className="text-xs text-red-500 mb-1">{hunkErr}</div>
-                          ) : null}
-                          {patch ? (
-                            <StructuredUnifiedDiff patch={patch} sideBySide={sideBySide} />
-                          ) : null}
-                        </div>
-                      )
-                    })}
-                  </div>
-                )}
-              </div>
-            )
-          })}
-        </div>
-      )
-    }
-  }
 
   const patchToShow = successPatch
 
