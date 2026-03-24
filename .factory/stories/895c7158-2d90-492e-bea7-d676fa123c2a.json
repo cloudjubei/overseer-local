@@ -6,12 +6,13 @@
   "features": [
     {
       "id": "04edce8b-3343-497b-8a63-7d190e72b6c4",
-      "status": "-",
+      "status": "+",
       "title": "Trigger and Positioning",
       "description": "Make the file suggestions get added on `enter` not space. Make them always appear above the input box - sometimes they get shoved to the right and the file paths cannot be seen.",
       "context": [],
       "createdAt": "2026-03-24T15:52:59.426Z",
-      "updatedAt": "2026-03-24T15:52:59.426Z"
+      "updatedAt": "2026-03-24T22:43:20.226Z",
+      "completedAt": "2026-03-24T22:43:20.226Z"
     },
     {
       "id": "4057a5df-ba67-4573-a081-a828a1dfc01d",

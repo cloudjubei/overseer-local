@@ -95,15 +95,27 @@ export default function FileMentionsTextarea({
   const PADDING = 8
   const clamp = (v: number, min: number, max: number) => Math.max(min, Math.min(max, v))
 
+  const getContainerBounds = () => {
+    // Prefer the actual input container for horizontal clamping.
+    // Fall back to viewport when bounds are not available.
+    const rect = containerRef.current?.getBoundingClientRect()
+    if (rect) return rect
+    return {
+      left: 0,
+      right: window.innerWidth,
+      width: window.innerWidth,
+    } as DOMRect
+  }
+
   useEffect(() => {
     if (!isFilesOpen || !filesPosition) {
       setFilesDropdownLeft(null)
       setFilesDropdownMaxWidth(null)
       return
     }
-    const parent = containerRef.current?.getBoundingClientRect()
-    if (!parent) return
+    const parent = getContainerBounds()
 
+    // Clamp to the input container so suggestions never get pushed off to the right.
     const estWidth = 260
     const left = clamp(
       filesPosition.left,
@@ -116,9 +128,9 @@ export default function FileMentionsTextarea({
 
   useLayoutEffect(() => {
     if (!isFilesOpen) return
-    const parent = containerRef.current?.getBoundingClientRect()
+    const parent = getContainerBounds()
     const node = filesDropdownRef.current
-    if (!parent || !node) return
+    if (!node) return
 
     const realWidth = node.offsetWidth || 260
     const newLeft = clamp(
@@ -134,9 +146,8 @@ export default function FileMentionsTextarea({
   useEffect(() => {
     if (!isFilesOpen) return
     const onResize = () => {
-      const parent = containerRef.current?.getBoundingClientRect()
+      const parent = getContainerBounds()
       const node = filesDropdownRef.current
-      if (!parent) return
       const width = node?.offsetWidth || 260
       const newLeft = clamp(
         filesDropdownLeft ?? parent.left + PADDING,
@@ -156,9 +167,9 @@ export default function FileMentionsTextarea({
       setRefsDropdownMaxWidth(null)
       return
     }
-    const parent = containerRef.current?.getBoundingClientRect()
-    if (!parent) return
+    const parent = getContainerBounds()
 
+    // Clamp to the input container so suggestions never get pushed off to the right.
     const estWidth = 260
     const left = clamp(
       refsPosition.left,
@@ -171,9 +182,9 @@ export default function FileMentionsTextarea({
 
   useLayoutEffect(() => {
     if (!isRefsOpen) return
-    const parent = containerRef.current?.getBoundingClientRect()
+    const parent = getContainerBounds()
     const node = refsDropdownRef.current
-    if (!parent || !node) return
+    if (!node) return
 
     const realWidth = node.offsetWidth || 260
     const newLeft = clamp(
@@ -189,9 +200,8 @@ export default function FileMentionsTextarea({
   useEffect(() => {
     if (!isRefsOpen) return
     const onResize = () => {
-      const parent = containerRef.current?.getBoundingClientRect()
+      const parent = getContainerBounds()
       const node = refsDropdownRef.current
-      if (!parent) return
       const width = node?.offsetWidth || 260
       const newLeft = clamp(
         refsDropdownLeft ?? parent.left + PADDING,
@@ -217,16 +227,23 @@ export default function FileMentionsTextarea({
 
   const onKeyDownInternal = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     const key = e.key
-    const isSpace = key === ' ' || key === 'Spacebar' || key === 'Space'
-    if (isSpace) {
+    const isEnter = key === 'Enter'
+
+    // Accept the top suggestion on Enter (not Space).
+    // This prevents accidental selection when the user just wants to type a space.
+    if (isEnter && !e.shiftKey && !e.altKey && !e.metaKey && !e.ctrlKey) {
       if (isFilesOpen && fileMatches.length > 0) {
         e.preventDefault()
         e.stopPropagation()
         handleFileSelect(fileMatches[0])
-      } else if (isRefsOpen && refMatches.length > 0) {
+        return
+      }
+
+      if (isRefsOpen && refMatches.length > 0) {
         e.preventDefault()
         e.stopPropagation()
         handleRefSelect(refMatches[0].display)
+        return
       }
     }
 
