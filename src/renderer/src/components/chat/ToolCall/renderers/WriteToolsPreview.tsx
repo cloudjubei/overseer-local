@@ -58,11 +58,7 @@ export function WriteToolsPreview({
     let cancelled = false
 
     async function run() {
-      if (
-        toolName !== 'writeFile' &&
-        toolName !== 'writeDiffToFile' &&
-        toolName !== 'writeStructuredDiffToFile'
-      ) {
+      if (toolName !== 'writeFile' && toolName !== 'writeExactReplace') {
         return
       }
 

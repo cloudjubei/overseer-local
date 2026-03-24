@@ -39,8 +39,7 @@ export default function ToolCallHoverCard({
 
   const toolPrimaryPath: string | undefined = (() => {
     if (toolName === 'writeFile') return tryString(extract(args, ['path']))
-    if (toolName === 'writeDiffToFile') return tryString(extract(args, ['path']))
-    if (toolName === 'writeStructuredDiffToFile') return tryString(extract(args, ['path']))
+    if (toolName === 'writeExactReplace') return tryString(extract(args, ['path']))
     if (toolName === 'readFileRange') return tryString(extract(args, ['path']))
     if (toolName === 'readFileStructure') return tryString(extract(args, ['path']))
     if (toolName === 'grepFile') return tryString(extract(args, ['path']))
@@ -56,11 +55,7 @@ export default function ToolCallHoverCard({
   // - write tools: allow only when it is NOT a completely new file.
   // - text tools: allow only while in-flight (once finished we only show new content).
   const canShowSplitToggle = useMemo(() => {
-    if (
-      toolName === 'writeFile' ||
-      toolName === 'writeDiffToFile' ||
-      toolName === 'writeStructuredDiffToFile'
-    ) {
+    if (toolName === 'writeFile' || toolName === 'writeExactReplace') {
       const isNew = toolName === 'writeFile' ? isCompletelyNewFile(result) : false
       return !isNew
     }
@@ -91,7 +86,7 @@ export default function ToolCallHoverCard({
     }
 
     // ── extracted renderers ──
-    if (n === 'writeFile' || n === 'writeDiffToFile' || n === 'writeStructuredDiffToFile') {
+    if (n === 'writeFile' || n === 'writeExactReplace') {
       return (
         <WriteToolsPreview
           toolCall={toolCall}
