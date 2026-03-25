@@ -205,6 +205,10 @@ const CODE_INTEL_API = {
     ipcRenderer.invoke(IPC_HANDLER_KEYS.CODE_INTEL_DETECT_ENVIRONMENT, { dirPath }),
 }
 
+const DIAGNOSTICS_API = {
+  getSnapshot: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.DIAGNOSTICS_GET_SNAPSHOT),
+}
+
 const PROJECTSGROUPS_API = {
   subscribe: (callback) => {
     const listener = (_event, payload) => callback(payload)
@@ -448,6 +452,7 @@ if (process.contextIsolated) {
     contextBridge.exposeInMainWorld('storiesService', STORIES_API)
     contextBridge.exposeInMainWorld('projectsService', PROJECTS_API)
     contextBridge.exposeInMainWorld('codeIntelService', CODE_INTEL_API)
+    contextBridge.exposeInMainWorld('diagnosticsService', DIAGNOSTICS_API)
     contextBridge.exposeInMainWorld('projectsGroupsService', PROJECTSGROUPS_API)
     contextBridge.exposeInMainWorld('filesService', FILES_API)
     contextBridge.exposeInMainWorld('chatsService', CHATS_API)

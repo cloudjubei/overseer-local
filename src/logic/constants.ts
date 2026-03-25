@@ -14,6 +14,7 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
       help: 'Mod+/',
       addUiFeature: 'Mod+Shift+F',
     },
+    showDiagnosticsOverlay: false,
   },
   notificationSystemSettings: {
     osNotificationsEnabled: true,

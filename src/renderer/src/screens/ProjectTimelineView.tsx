@@ -69,6 +69,10 @@ function clamp(n: number, min: number, max: number) {
 
 const DEFAULT_WINDOW_DAYS = 30
 const LEFT_COL_WIDTH = '16rem'
+const PROJECT_COL_WIDTH = '14rem'
+
+const ROW_HEIGHT_PX = 144
+const CELL_PADDING_PX = 8
 
 type Zoom = 'day' | 'week' | 'month'
 
@@ -182,6 +186,15 @@ interface RowItem {
   kind: 'feature' | 'story' | 'label'
   storyId?: string // for feature coloring
   scope?: 'project' | '__global__' // for label coloring
+  projectId?: string // for all-projects display
+}
+
+type RowDefinition = {
+  key: string
+  title: string
+  items: RowItem[]
+  projectId?: string
+  projectTitle?: string
 }
 
 // Hover callout state
@@ -199,10 +212,145 @@ type HoverInfo =
       rect: DOMRect
     }
 
+function BucketedRow({
+  row,
+  units,
+  unitCount,
+  startAligned,
+  zoom,
+  labels,
+  openEdit,
+  onHover,
+  onLeave,
+  onClickStory,
+  onClickFeature,
+  stickyColumnCount,
+}: {
+  row: RowDefinition
+  units: Unit[]
+  unitCount: number
+  startAligned: Date
+  zoom: Zoom
+  labels: TimelineLabel[]
+  openEdit: (l: TimelineLabel) => void
+  onHover: (info: HoverInfo) => void
+  onLeave: () => void
+  onClickStory: (storyId: string) => void
+  onClickFeature: (storyId: string, featureId: string) => void
+  stickyColumnCount: number
+}) {
+  const buckets = useMemo(() => {
+    const byIdx: RowItem[][] = Array.from({ length: unitCount }, () => [])
+    for (const item of row.items) {
+      const idx = getUnitIndex(zoom, startAligned, unitCount, item.timestamp)
+      byIdx[idx].push(item)
+    }
+    return byIdx
+  }, [row.items, zoom, startAligned, unitCount])
+
+  return (
+    <>
+      {/* Background grid lines */}
+      <div className="absolute inset-0 flex pointer-events-none">
+        {units.map((u, i) => {
+          const isCurrentDay = zoom === 'day' && diffInDays(u.start, startOfDay(new Date())) === 0
+          return (
+            <div
+              key={i}
+              className={`flex-none h-full border-subtle ${isCurrentDay ? 'bg-accent-primary/[0.03]' : ''}`}
+              style={{
+                width: `calc(100% / ${unitCount})`,
+                borderLeft: i > 0 ? '1px solid var(--border-subtle)' : 'none',
+              }}
+            />
+          )
+        })}
+      </div>
+
+      {/* Per-cell scrollable buckets */}
+      <div className="relative w-full h-full flex">
+        {buckets.map((items, i) => {
+          const isCurrentDay = zoom === 'day' && diffInDays(units[i].start, startOfDay(new Date())) === 0
+          return (
+            <div
+              key={i}
+              data-current-day={isCurrentDay ? 'true' : 'false'}
+              className="flex-none h-full border-subtle overflow-auto"
+              style={{
+                width: `calc(100% / ${unitCount})`,
+                borderLeft: i > 0 ? '1px solid var(--border-subtle)' : 'none',
+                padding: CELL_PADDING_PX,
+              }}
+            >
+              <div className="flex flex-col gap-1">
+                {items.map((item) => {
+                  const isGlobal = item.scope === '__global__'
+
+                  if (item.kind === 'label') {
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        className="w-full flex items-center gap-2 text-left"
+                        onClick={() => {
+                          const l = labels.find((x) => x.id === item.id)
+                          if (l) openEdit(l)
+                        }}
+                        title="Click to edit"
+                      >
+                        <span
+                          className={`shrink-0 w-2.5 h-2.5 rotate-45 border ${isGlobal ? 'bg-purple-200 border-purple-500' : 'bg-emerald-200 border-emerald-500'}`}
+                        />
+                        <span className="text-[11px] text-muted truncate">{item.title}</span>
+                      </button>
+                    )
+                  }
+
+                  const style = storyColorStyles(item.storyId)
+                  const clickable = item.kind === 'story' ? () => onClickStory(item.id) : () => onClickFeature(item.storyId!, item.id)
+
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      className="w-full max-w-full text-left"
+                      onClick={clickable}
+                      onMouseEnter={(e) => {
+                        const rect = e.currentTarget.getBoundingClientRect()
+                        if (item.kind === 'story') {
+                          onHover({ kind: 'story', storyId: item.id, rect })
+                        } else {
+                          onHover({ kind: 'feature', storyId: item.storyId!, featureId: item.id, rect })
+                        }
+                      }}
+                      onMouseLeave={onLeave}
+                      title={item.title}
+                    >
+                      <div
+                        className="px-2 py-1 rounded text-[11px] font-medium border shadow-sm truncate"
+                        style={{
+                          ...style,
+                          maxWidth: '100%',
+                        }}
+                      >
+                        {item.title}
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </>
+  )
+}
+
 export default function ProjectTimelineView() {
   const { projectId, project } = useActiveProject()
-  const { getStoryDisplayIndex } = useProjectContext()
-  const { storiesById, getFeatureDisplayIndex } = useStories()
+  const { projects } = useProjectContext()
+  const { storiesById } = useStories()
   const { navigateStoryDetails } = useNavigator()
 
   const [labels, setLabels] = useState<TimelineLabel[]>([])
@@ -213,9 +361,7 @@ export default function ProjectTimelineView() {
   const [isAdding, setIsAdding] = useState(false)
   const [newLabel, setNewLabel] = useState<string>('')
   const [newDescription, setNewDescription] = useState<string>('')
-  const [newTimestamp, setNewTimestamp] = useState<string>(() =>
-    new Date().toISOString().slice(0, 16),
-  ) // yyyy-MM-ddTHH:mm
+  const [newTimestamp, setNewTimestamp] = useState<string>(() => new Date().toISOString().slice(0, 16)) // yyyy-MM-ddTHH:mm
   const [scope, setScope] = useState<'project' | '__global__'>('project')
 
   // Edit-label popup state
@@ -226,23 +372,23 @@ export default function ProjectTimelineView() {
   const [editScope, setEditScope] = useState<'project' | '__global__'>('project')
   const [savingEdit, setSavingEdit] = useState(false)
 
-  // Zoom state (Notion/Airtable-like)
+  // Zoom state
   const [zoom, setZoom] = useState<Zoom>('day')
 
   // Hover state for callout
   const [hover, setHover] = useState<HoverInfo>(null)
 
+  const [showAllProjects, setShowAllProjects] = useState(false)
+
   // Auto-scroll bookkeeping
   const hasInitialAutoScrolledRef = useRef(false)
   const prevZoomRef = useRef<Zoom>('day')
 
-  const [showAllProjects, setShowAllProjects] = useState(false)
-
   const prevProjectIdRef = useRef(projectId)
   useEffect(() => {
     if (prevProjectIdRef.current !== projectId) {
-      hasInitialAutoScrolledRef.current = false // Retrigger auto-scroll
-      setShowAllProjects(false) // Reset toggle on project change
+      hasInitialAutoScrolledRef.current = false
+      setShowAllProjects(false)
       prevProjectIdRef.current = projectId
     }
   }, [projectId])
@@ -258,13 +404,14 @@ export default function ProjectTimelineView() {
       .flatMap((t) =>
         (t.features || []).map((f: Feature) => ({
           ...f,
-          storyProjectId: projectId,
-          storyId: t.id,
+          storyProjectId: (t as any).projectId ?? projectId,
+          storyId: (t as any).id,
         })),
       )
       .filter((f) => !!f.completedAt)
-  }, [displayedStories])
+  }, [displayedStories, projectId])
 
+  // Fetch timeline labels
   useEffect(() => {
     if (!projectId && !showAllProjects) {
       setError('Project ID is missing.')
@@ -306,19 +453,14 @@ export default function ProjectTimelineView() {
 
   const timelineItems = useMemo(() => {
     const fs = displayedFeatures.map((f: any) => mapFeatureToTimelineLabel(f.storyProjectId, f))
-
-    // Include stories for week/month so the range reflects stories when those views are active
-    let ts: TimelineLabel[] = []
-    if (zoom !== 'day') {
-      ts = displayedStories
-        .map((t: any) => mapStoryToTimelineLabel(t.projectId, t))
-        .filter((x): x is TimelineLabel => !!x)
-    }
+    const ts = displayedStories
+      .map((t: any) => mapStoryToTimelineLabel(t.projectId ?? projectId ?? 'noproj', t))
+      .filter((x): x is TimelineLabel => !!x)
 
     return [...fs, ...ts, ...labels].sort(
       (a, b) => new Date(a.content.timestamp).getTime() - new Date(b.content.timestamp).getTime(),
     )
-  }, [displayedFeatures, displayedStories, labels, zoom])
+  }, [displayedFeatures, displayedStories, labels, projectId])
 
   // Determine raw min/max
   const { rawStartDate, rawEndDate } = useMemo(() => {
@@ -352,7 +494,7 @@ export default function ProjectTimelineView() {
   const { units, unitCount, startAligned } = useMemo(() => {
     let start: Date
     let end: Date
-    let arr: Unit[] = []
+    const arr: Unit[] = []
 
     if (zoom === 'day') {
       const paddedStart = addDays(rawStartDate, -2)
@@ -412,7 +554,7 @@ export default function ProjectTimelineView() {
     return { units: arr, unitCount: arr.length, startAligned: start }
   }, [rawStartDate, rawEndDate, zoom])
 
-  // Header groups based on units (month groups for day/week, year groups for month)
+  // Header groups based on units
   const headerGroups = useMemo(() => {
     const groups: { label: string; startIdx: number; len: number }[] = []
     let current = ''
@@ -432,62 +574,52 @@ export default function ProjectTimelineView() {
     return groups
   }, [units, zoom])
 
-  // Grid column sizing based on zoom (one column per unit; min width changes)
+  // Grid column sizing based on zoom
   const cellMinWidth = useMemo(() => {
     switch (zoom) {
       case 'month':
-        return 80
+        return 130
       case 'week':
-        return 56
+        return 160
       default:
-        return 72
+        return 200
     }
   }, [zoom])
 
-  const gridTemplate = useMemo(
-    () => `${LEFT_COL_WIDTH} repeat(${unitCount}, minmax(${cellMinWidth}px, 1fr))`,
-    [unitCount, cellMinWidth],
-  )
+  const stickyColumnCount = showAllProjects ? 2 : 1
+  const gridTemplate = useMemo(() => {
+    const sticky = showAllProjects ? `${PROJECT_COL_WIDTH} ${LEFT_COL_WIDTH}` : `${LEFT_COL_WIDTH}`
+    return `${sticky} repeat(${unitCount}, minmax(${cellMinWidth}px, 1fr))`
+  }, [unitCount, cellMinWidth, showAllProjects])
 
-  // Build rows for features (day) or stories (week/month) and user-defined label rows
-  const featureRows = useMemo(() => {
-    const items: RowItem[] = displayedFeatures.map((f) => ({
+  const featureRowSingleProject = useMemo<RowDefinition>(() => {
+    const items: RowItem[] = displayedFeatures.map((f: any) => ({
       id: f.id,
       title: f.title,
       timestamp: f.completedAt ?? new Date().toISOString(),
       kind: 'feature',
       storyId: f.storyId,
+      projectId: f.storyProjectId,
     }))
-    return [
-      {
-        key: 'features',
-        title: 'Features (completed)',
-        items,
-      },
-    ]
+    return { key: 'features', title: 'Features', items }
   }, [displayedFeatures])
 
-  const storyRows = useMemo(() => {
+  const storyRowSingleProject = useMemo<RowDefinition>(() => {
     const items = displayedStories
-      .map((t) => {
+      .map((t: any) => {
         const ts = getStoryCompletedAt(t)
         if (!ts) return null
         return {
-          id: (t as any).id,
-          title: (t as any).title,
+          id: t.id,
+          title: t.title,
           timestamp: ts,
           kind: 'story' as const,
+          projectId: t.projectId,
         } as RowItem
       })
       .filter((x): x is RowItem => !!x)
 
-    return [
-      {
-        key: 'stories',
-        title: 'Stories (completed)',
-        items,
-      },
-    ]
+    return { key: 'stories', title: 'Stories', items }
   }, [displayedStories])
 
   const labelRows = useMemo(() => {
@@ -504,8 +636,7 @@ export default function ProjectTimelineView() {
       const title = l.content.label
       const k = title
       if (!groups.has(k)) groups.set(k, { key: k, title: k, items: [], rowScope: 'project' })
-      const scopeOfItem: 'project' | '__global__' =
-        l.projectId === projectId ? 'project' : '__global__'
+      const scopeOfItem: 'project' | '__global__' = l.projectId === projectId ? 'project' : '__global__'
       const grp = groups.get(k)!
       grp.items.push({
         id: l.id,
@@ -513,59 +644,111 @@ export default function ProjectTimelineView() {
         timestamp: l.content.timestamp,
         scope: scopeOfItem,
         kind: 'label',
+        projectId: l.projectId,
       })
       if (scopeOfItem === '__global__') grp.rowScope = '__global__'
     }
-    // Sort: Global rows first, then by title
     return Array.from(groups.values()).sort((a, b) => {
       if (a.rowScope !== b.rowScope) return a.rowScope === '__global__' ? -1 : 1
       return a.title.localeCompare(b.title)
     })
   }, [labels, projectId])
 
-  const rows = useMemo(() => {
-    if (zoom === 'day') return [...featureRows, ...labelRows]
-    return [...storyRows, ...labelRows]
-  }, [zoom, featureRows, storyRows, labelRows])
+  const rows = useMemo<RowDefinition[]>(() => {
+    if (!showAllProjects) {
+      return [featureRowSingleProject, storyRowSingleProject, ...labelRows]
+    }
+
+    // All-projects: stack Feature/Story per project
+    const byProject = new Map<string, { projectId: string; projectTitle: string; features: RowItem[]; stories: RowItem[] }>()
+    for (const p of projects) {
+      byProject.set(p.id, { projectId: p.id, projectTitle: p.title || p.id, features: [], stories: [] })
+    }
+
+    // Populate from displayedStories / displayedFeatures (already across all projects)
+    for (const f of displayedFeatures as any[]) {
+      const pid = f.storyProjectId ?? '__unknown__'
+      if (!byProject.has(pid)) byProject.set(pid, { projectId: pid, projectTitle: pid, features: [], stories: [] })
+      byProject.get(pid)!.features.push({
+        id: f.id,
+        title: f.title,
+        timestamp: f.completedAt ?? new Date().toISOString(),
+        kind: 'feature',
+        storyId: f.storyId,
+        projectId: pid,
+      })
+    }
+
+    for (const s of displayedStories as any[]) {
+      const ts = getStoryCompletedAt(s)
+      if (!ts) continue
+      const pid = s.projectId ?? '__unknown__'
+      if (!byProject.has(pid)) byProject.set(pid, { projectId: pid, projectTitle: pid, features: [], stories: [] })
+      byProject.get(pid)!.stories.push({
+        id: s.id,
+        title: s.title,
+        timestamp: ts,
+        kind: 'story',
+        projectId: pid,
+      })
+    }
+
+    const ordered = Array.from(byProject.values()).sort((a, b) => a.projectTitle.localeCompare(b.projectTitle))
+    const out: RowDefinition[] = []
+    for (const p of ordered) {
+      out.push({
+        key: `${p.projectId}-features`,
+        title: 'Features',
+        items: p.features,
+        projectId: p.projectId,
+        projectTitle: p.projectTitle,
+      })
+      out.push({
+        key: `${p.projectId}-stories`,
+        title: 'Stories',
+        items: p.stories,
+        projectId: p.projectId,
+        projectTitle: p.projectTitle,
+      })
+    }
+
+    // Append label rows at bottom (keep behavior consistent)
+    return [...out, ...labelRows]
+  }, [
+    showAllProjects,
+    featureRowSingleProject,
+    storyRowSingleProject,
+    labelRows,
+    projects,
+    displayedFeatures,
+    displayedStories,
+  ])
 
   // Refs for scrolling logic
   const scrollContainerRef = useRef<HTMLDivElement>(null)
-  const headerContainerRef = useRef<HTMLDivElement>(null)
-  const initialScrollTargetRef = useRef<HTMLDivElement>(null)
+  const headerScrollRef = useRef<HTMLDivElement>(null)
 
-  // Sync horizontal scroll between body and sticky header
+  // Sync horizontal scroll between body and header scroller
   const handleScroll = () => {
-    if (scrollContainerRef.current && headerContainerRef.current) {
-      headerContainerRef.current.scrollLeft = scrollContainerRef.current.scrollLeft
+    if (scrollContainerRef.current && headerScrollRef.current) {
+      headerScrollRef.current.scrollLeft = scrollContainerRef.current.scrollLeft
     }
   }
 
-  // Auto-scroll to current day (or appropriate view) on initial load or zoom change
+  // Auto-scroll to END (rightmost) on initial load or zoom change
   useEffect(() => {
     if (loading || units.length === 0) return
 
     if (!hasInitialAutoScrolledRef.current || prevZoomRef.current !== zoom) {
-      // Small timeout to let DOM render sizes
-      setTimeout(() => {
-        if (scrollContainerRef.current && initialScrollTargetRef.current) {
-          const container = scrollContainerRef.current
-          const target = initialScrollTargetRef.current
-          // Calculate offset to center the target
-          const targetLeft = target.offsetLeft
-          const targetWidth = target.offsetWidth
-          const containerWidth = container.offsetWidth
-          const targetScrollLeft = targetLeft - containerWidth / 2 + targetWidth / 2
-
-          container.scrollTo({
-            left: Math.max(0, targetScrollLeft),
-            behavior: 'auto',
-          })
-          hasInitialAutoScrolledRef.current = true
-          prevZoomRef.current = zoom
-        }
-      }, 50)
+      requestAnimationFrame(() => {
+        const container = scrollContainerRef.current
+        if (!container) return
+        container.scrollTo({ left: container.scrollWidth, behavior: 'auto' })
+        hasInitialAutoScrolledRef.current = true
+        prevZoomRef.current = zoom
+      })
     }
-  }, [loading, units, zoom, labels, displayedFeatures])
+  }, [loading, units.length, zoom])
 
   // Interactions
   const onAddLabel = async (e: React.FormEvent) => {
@@ -619,9 +802,6 @@ export default function ProjectTimelineView() {
       if (!targetLabels.length) throw new Error('Label not found')
       const target = targetLabels[0]
 
-      if (pid !== target.projectId) {
-        // Change project id? DB updateEntity currently respects patch.
-      }
       const updated = await dbService.updateEntity(editingId, {
         projectId: pid,
         content: {
@@ -631,9 +811,7 @@ export default function ProjectTimelineView() {
           description: editDescription.trim() || undefined,
         },
       })
-      setLabels((prev) =>
-        prev.map((x) => (x.id === editingId ? normalizeLabels([updated!])[0] : x)),
-      )
+      setLabels((prev) => prev.map((x) => (x.id === editingId ? normalizeLabels([updated!])[0] : x)))
       closeEdit()
     } catch (err: any) {
       alert(`Failed to save edit: ${err?.message || err}`)
@@ -656,6 +834,16 @@ export default function ProjectTimelineView() {
       setSavingEdit(false)
     }
   }
+
+  const onClickStory = (storyId: string) => {
+    navigateStoryDetails(storyId.replace('story-', ''))
+  }
+
+  const onClickFeature = (storyId: string, _featureId: string) => {
+    // Keep behavior consistent with previous: click navigates to story details
+    navigateStoryDetails(storyId)
+  }
+
 
   return (
     <div className="flex flex-col h-full bg-base text-primary overflow-hidden">
@@ -689,11 +877,7 @@ export default function ProjectTimelineView() {
             <label htmlFor="allProjectsSwitch" className="text-sm font-medium cursor-pointer">
               All projects
             </label>
-            <Switch
-              key="allProjectsSwitch"
-              checked={showAllProjects}
-              onCheckedChange={setShowAllProjects}
-            />
+            <Switch key="allProjectsSwitch" checked={showAllProjects} onCheckedChange={setShowAllProjects} />
           </div>
           <button
             onClick={() => setIsAdding(!isAdding)}
@@ -705,10 +889,7 @@ export default function ProjectTimelineView() {
       </div>
 
       {isAdding && (
-        <form
-          onSubmit={onAddLabel}
-          className="shrink-0 border-b border-default bg-raised p-4 flex flex-col gap-3"
-        >
+        <form onSubmit={onAddLabel} className="shrink-0 border-b border-default bg-raised p-4 flex flex-col gap-3">
           <div className="text-sm font-medium text-primary">New timeline label</div>
           <div className="grid gap-2 sm:grid-cols-5 items-end">
             <div className="flex flex-col gap-1 sm:col-span-2">
@@ -764,28 +945,27 @@ export default function ProjectTimelineView() {
         </form>
       )}
 
-      {error && (
-        <div className="shrink-0 p-4 m-4 border border-red-200 bg-red-50 text-red-600 rounded">
-          {error}
-        </div>
-      )}
+      {error && <div className="shrink-0 p-4 m-4 border border-red-200 bg-red-50 text-red-600 rounded">{error}</div>}
 
       <div className="flex-1 min-h-0 relative flex flex-col bg-base overflow-hidden">
-        {/* Sticky Header Grid Container */}
-        <div
-          ref={headerContainerRef}
-          className="shrink-0 w-full overflow-hidden border-b border-default bg-raised pointer-events-none"
-        >
-          <div
-            className="grid text-xs text-muted pointer-events-auto"
-            style={{ gridTemplateColumns: gridTemplate }}
-          >
-            {/* Top-left empty block */}
-            <div className="sticky left-0 z-20 bg-raised border-r border-default h-[3.5rem]" />
+        {/* Sticky Header */}
+        <div className="shrink-0 w-full overflow-hidden border-b border-default bg-raised">
+          <div className="grid text-xs text-muted" style={{ gridTemplateColumns: gridTemplate }}>
+            {showAllProjects && (
+              <div className="sticky left-0 z-30 bg-raised border-r border-default h-[3.5rem]" />
+            )}
+            <div
+              className={`${showAllProjects ? 'sticky z-20' : 'sticky left-0 z-20'} bg-raised border-r border-default h-[3.5rem]`}
+              style={showAllProjects ? ({ left: PROJECT_COL_WIDTH } as any) : undefined}
+            />
 
-            {/* Units header (2 rows of grouping + column headers) */}
-            <div className="col-start-2 relative h-[3.5rem]" style={{ gridColumnEnd: -1 }}>
-              {/* Grouping row (Months / Years) */}
+            {/* Scrollable header scroller for units only */}
+            <div
+              ref={headerScrollRef}
+              className="col-start-2 relative h-[3.5rem] overflow-hidden"
+              style={{ gridColumnEnd: -1, gridColumnStart: stickyColumnCount + 1 }}
+            >
+              {/* Grouping row */}
               <div className="absolute top-0 left-0 w-full flex h-6 border-b border-subtle">
                 {headerGroups.map((g, idx) => (
                   <div
@@ -804,8 +984,7 @@ export default function ProjectTimelineView() {
               {/* Individual unit columns */}
               <div className="absolute top-6 left-0 w-full flex h-8">
                 {units.map((u, i) => {
-                  const isCurrentDay =
-                    zoom === 'day' && diffInDays(u.start, startOfDay(new Date())) === 0
+                  const isCurrentDay = zoom === 'day' && diffInDays(u.start, startOfDay(new Date())) === 0
                   return (
                     <div
                       key={u.key}
@@ -816,9 +995,7 @@ export default function ProjectTimelineView() {
                       }}
                     >
                       <div className="text-[11px] leading-tight">{u.labelTop}</div>
-                      {u.labelBottom && (
-                        <div className="text-[9px] opacity-75">{u.labelBottom}</div>
-                      )}
+                      {u.labelBottom && <div className="text-[9px] opacity-75">{u.labelBottom}</div>}
                     </div>
                   )
                 })}
@@ -827,142 +1004,59 @@ export default function ProjectTimelineView() {
           </div>
         </div>
 
-        {/* Scrollable Body Grid Container */}
-        <div
-          ref={scrollContainerRef}
-          onScroll={handleScroll}
-          className="flex-1 w-full overflow-auto relative"
-        >
+        {/* Scrollable Body */}
+        <div ref={scrollContainerRef} onScroll={handleScroll} className="flex-1 w-full overflow-auto relative">
           {loading && labels.length === 0 ? (
             <div className="p-4 text-sm text-muted">Loading timeline...</div>
           ) : (
             <div className="grid pb-12" style={{ gridTemplateColumns: gridTemplate }}>
               {rows.map((row, rIdx) => (
                 <React.Fragment key={row.key}>
-                  {/* Left row header (Sticky) */}
-                  <div
-                    className="sticky left-0 z-10 flex items-center bg-base border-r border-default border-b px-3 py-2"
-                    style={{ gridRow: rIdx + 1 }}
-                  >
-                    <div className="text-sm font-medium text-primary truncate" title={row.title}>
-                      {row.title}
+                  {showAllProjects && (
+                    <div
+                      className="sticky left-0 z-20 flex items-center bg-base border-r border-default border-b px-3"
+                      style={{ gridRow: rIdx + 1, height: ROW_HEIGHT_PX, width: PROJECT_COL_WIDTH }}
+                      title={row.projectTitle || ''}
+                    >
+                      <div className="text-sm font-medium text-primary truncate">{row.projectTitle || ''}</div>
                     </div>
+                  )}
+
+                  <div
+                    className={`${showAllProjects ? 'sticky z-10' : 'sticky left-0 z-10'} flex items-center bg-base border-r border-default border-b px-3`}
+                    style={{
+                      gridRow: rIdx + 1,
+                      height: ROW_HEIGHT_PX,
+                      width: LEFT_COL_WIDTH,
+                      ...(showAllProjects ? ({ left: PROJECT_COL_WIDTH } as any) : {}),
+                    }}
+                    title={row.title}
+                  >
+                    <div className="text-sm font-medium text-primary truncate">{row.title}</div>
                   </div>
 
-                  {/* Row background cells and content */}
                   <div
                     className="relative border-b border-subtle"
-                    style={{ gridColumn: `2 / -1`, gridRow: rIdx + 1 }}
+                    style={{
+                      gridColumn: `${stickyColumnCount + 1} / -1`,
+                      gridRow: rIdx + 1,
+                      height: ROW_HEIGHT_PX,
+                    }}
                   >
-                    {/* Background grid lines */}
-                    <div className="absolute inset-0 flex pointer-events-none">
-                      {units.map((u, i) => {
-                        const isCurrentDay =
-                          zoom === 'day' && diffInDays(u.start, startOfDay(new Date())) === 0
-                        return (
-                          <div
-                            key={i}
-                            className={`flex-none h-full border-subtle ${isCurrentDay ? 'bg-accent-primary/[0.03]' : ''}`}
-                            style={{
-                              width: `calc(100% / ${unitCount})`,
-                              borderLeft: i > 0 ? '1px solid var(--border-subtle)' : 'none',
-                            }}
-                          />
-                        )
-                      })}
-                    </div>
-
-                    {/* Timeline items mapped to positions */}
-                    <div className="relative h-12 w-full">
-                      {row.items.map((item, iIdx) => {
-                        const isGlobal = item.scope === '__global__'
-                        const uIdx = getUnitIndex(zoom, startAligned, unitCount, item.timestamp)
-                        // Target day (approx 50% through the column cell width)
-                        const leftPct = (uIdx + 0.5) * (100 / unitCount)
-                        const isCurrentDay =
-                          zoom === 'day' &&
-                          diffInDays(units[uIdx].start, startOfDay(new Date())) === 0
-
-                        // Stagger items vertically if multiple on same unit
-                        // Using modulo index to loosely distribute
-                        const topOffsets = ['top-2', 'top-4', 'top-6', 'top-1']
-                        const topClass = topOffsets[iIdx % topOffsets.length]
-
-                        let contentEl = null
-                        if (item.kind === 'label') {
-                          // Milestone marker
-                          contentEl = (
-                            <div className={`absolute ${topClass} flex items-center gap-1`}>
-                              <div
-                                className={`w-3 h-3 rotate-45 border cursor-pointer hover:scale-110 transition-transform ${isGlobal ? 'bg-purple-200 border-purple-500' : 'bg-emerald-200 border-emerald-500'}`}
-                                onClick={() => {
-                                  const l = labels.find((x) => x.id === item.id)
-                                  if (l) openEdit(l)
-                                }}
-                                title="Click to edit"
-                              />
-                            </div>
-                          )
-                        } else {
-                          // Story or Feature (dot or chip)
-                          const style = storyColorStyles(item.storyId)
-                          contentEl = (
-                            <div
-                              className={`absolute ${topClass} flex flex-col items-center cursor-pointer hover:z-10`}
-                              onClick={() => {
-                                if (item.storyId) navigateStoryDetails(item.storyId)
-                                else if (item.kind === 'story')
-                                  navigateStoryDetails(item.id.replace('story-', ''))
-                              }}
-                              onMouseEnter={(e) => {
-                                const rect = e.currentTarget.getBoundingClientRect()
-                                if (item.kind === 'story') {
-                                  setHover({
-                                    kind: 'story',
-                                    storyId: item.id.replace('story-', ''),
-                                    rect,
-                                  })
-                                } else if (item.kind === 'feature') {
-                                  setHover({
-                                    kind: 'feature',
-                                    storyId: item.storyId!,
-                                    featureId: item.id,
-                                    rect,
-                                  })
-                                }
-                              }}
-                              onMouseLeave={() => setHover(null)}
-                            >
-                              {zoom === 'day' ? (
-                                <div
-                                  className="w-3 h-3 rounded-full border shadow-sm transition-transform hover:scale-125"
-                                  style={style}
-                                />
-                              ) : (
-                                <div
-                                  className="px-1.5 py-0.5 rounded text-[10px] font-medium border shadow-sm max-w-[80px] truncate"
-                                  style={style}
-                                  title={item.title}
-                                >
-                                  {item.title}
-                                </div>
-                              )}
-                            </div>
-                          )
-                        }
-
-                        return (
-                          <div
-                            key={item.id}
-                            className="absolute h-full w-0 flex justify-center z-10"
-                            style={{ left: `${leftPct}%` }}
-                            ref={isCurrentDay ? initialScrollTargetRef : null}
-                          >
-                            {contentEl}
-                          </div>
-                        )
-                      })}
-                    </div>
+                    <BucketedRow
+                      row={row}
+                      units={units}
+                      unitCount={unitCount}
+                      startAligned={startAligned}
+                      zoom={zoom}
+                      labels={labels}
+                      openEdit={openEdit}
+                      onHover={setHover}
+                      onLeave={() => setHover(null)}
+                      onClickStory={onClickStory}
+                      onClickFeature={onClickFeature}
+                      stickyColumnCount={stickyColumnCount}
+                    />
                   </div>
                 </React.Fragment>
               ))}
@@ -971,37 +1065,33 @@ export default function ProjectTimelineView() {
         </div>
       </div>
 
-      {/* Hover callout (fixed-position, pointer-events: none) */}
+      {/* Hover callout */}
       {hover && (
         <div
           className="fixed z-50 pointer-events-none"
           style={{
             top: Math.max(8, hover.rect.top + window.scrollY - 4),
-            left: Math.min(
-              window.scrollX + window.innerWidth - 320,
-              hover.rect.left + window.scrollX + hover.rect.width + 8,
-            ),
+            left: Math.min(window.scrollX + window.innerWidth - 320, hover.rect.left + window.scrollX + hover.rect.width + 8),
           }}
         >
           {hover.kind === 'story'
             ? (() => {
                 const story = storiesById[hover.storyId]
-                if (!project || !story) return null
-                return <StoryCardRaw project={project} story={story} className="max-w-xs" />
+                const storyProject = showAllProjects
+                  ? projects.find((p) => p.id === (story as any)?.projectId)
+                  : project
+                if (!storyProject || !story) return null
+                return <StoryCardRaw project={storyProject as any} story={story} className="max-w-xs" />
               })()
             : hover.kind === 'feature'
               ? (() => {
                   const story = storiesById[hover.storyId]
                   const f = story?.features.find((x) => x.id === hover.featureId)
-                  if (!project || !story || !f) return null
-                  return (
-                    <FeatureCardRaw
-                      project={project}
-                      feature={f}
-                      story={story}
-                      className="max-w-xs"
-                    />
-                  )
+                  const storyProject = showAllProjects
+                    ? projects.find((p) => p.id === (story as any)?.projectId)
+                    : project
+                  if (!storyProject || !story || !f) return null
+                  return <FeatureCardRaw project={storyProject as any} feature={f} story={story} className="max-w-xs" />
                 })()
               : null}
         </div>

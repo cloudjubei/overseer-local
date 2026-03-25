@@ -18,6 +18,7 @@ import CodeIntelManager from '../logic/code_intel/CodeIntelManager'
 import LLMConfigsManager from '../logic/llm/LLMConfigsManager'
 import GitCredentialsManager from '../logic/git/GitCredentialsManager'
 import GitManager from '../logic/git/GitManager'
+import DiagnosticsManager from '../logic/diagnostics/DiagnosticsManager'
 
 export let databaseManager: DatabaseManager | undefined
 export let factoryLLMCostsManager: FactoryLLMCostsManager | undefined
@@ -37,6 +38,7 @@ export let codeIntelManager: CodeIntelManager | undefined
 export let llmConfigsManager: LLMConfigsManager | undefined
 export let gitCredentialsManager: GitCredentialsManager | undefined
 export let gitManager: GitManager | undefined
+export let diagnosticsManager: DiagnosticsManager | undefined
 
 let managers: BaseManager[] = []
 
@@ -59,6 +61,7 @@ export async function initManagers(projectRoot: string, mainWindow: BrowserWindo
   llmConfigsManager = new LLMConfigsManager(projectRoot, mainWindow)
   gitCredentialsManager = new GitCredentialsManager(projectRoot, mainWindow)
   gitManager = new GitManager(projectRoot, mainWindow, projectsManager, gitCredentialsManager)
+  diagnosticsManager = new DiagnosticsManager(projectRoot, mainWindow)
 
   factoryLLMCostsManager = new FactoryLLMCostsManager(projectRoot, mainWindow, databaseManager)
   liveDataManager = new LiveDataManager(projectRoot, mainWindow, factoryLLMCostsManager)
@@ -102,6 +105,7 @@ export async function initManagers(projectRoot: string, mainWindow: BrowserWindo
     factoryTestsManager,
     codeIntelManager,
     llmConfigsManager,
+    diagnosticsManager,
   ]
 
   for (const manager of managers) {

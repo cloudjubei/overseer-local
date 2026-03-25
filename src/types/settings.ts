@@ -54,6 +54,9 @@ export interface UserPreferences {
   chatSidebarWidth?: number
   shortcutsModifier: ShortcutsModifier
   shortcuts: ShortcutsConfig
+
+  /** Dev-only: show performance diagnostics overlay (CPU/memory/lag). */
+  showDiagnosticsOverlay?: boolean
 }
 export type StoryViewMode = 'list' | 'board'
 export type StoryListViewSorting = 'index_asc' | 'index_desc' | 'status_asc' | 'status_desc'

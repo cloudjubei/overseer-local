@@ -15,7 +15,10 @@ import {
   IconGitHub,
   IconSearch,
   IconDatabase,
+  IconCpu,
 } from '../components/ui/icons/Icons'
+
+import DeveloperSettings from './settings/developer/DeveloperSettings'
 
 // Settings Categories
 const CATEGORIES = [
@@ -40,6 +43,12 @@ const CATEGORIES = [
     icon: <IconDatabase className="h-4 w-4" />,
     accent: 'indigo',
   },
+  {
+    id: 'developer',
+    label: 'Developer',
+    icon: <IconCpu className="h-4 w-4" />,
+    accent: 'gray',
+  },
 ]
 
 type CategoryId = (typeof CATEGORIES)[number]['id']
@@ -63,6 +72,7 @@ export default function SettingsView() {
         {activeCategory === 'github' && <GitHubSettings />}
         {activeCategory === 'websearch' && <WebSearchSettings />}
         {activeCategory === 'database' && <DatabaseSettings />}
+        {activeCategory === 'developer' && <DeveloperSettings />}
       </div>
     </CollapsibleSidebar>
   )
