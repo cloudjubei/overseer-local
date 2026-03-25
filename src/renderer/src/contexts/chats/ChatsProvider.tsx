@@ -112,7 +112,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const upsertChatsByGroup = useCallback((chatState: ChatState) => {
-    const gid = (chatState.chat.context as any).groupId
+    const gid = chatState.chat.context.groupId
     if (!gid) return
     setChatsByGroupId((prev) => {
       const existing = prev[gid] || []
@@ -128,7 +128,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const removeFromChatsByGroup = useCallback((chatState: ChatState) => {
-    const gid = (chatState.chat.context as any).groupId
+    const gid = chatState.chat.context.groupId
     if (!gid) return
     setChatsByGroupId((prev) => {
       const existing = prev[gid] || []
@@ -145,7 +145,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
           current ||
           ({
             key,
-            chat: (updates as any).chat,
+            chat: updates.chat,
             isLoading: false,
             isThinking: false,
           } as ChatState)
@@ -625,8 +625,8 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
             const pid = pidFromChat || pidFromCtx
             if (pid) chatKeyToProjectIdRef.current[key] = pid
 
-            const gidFromChat = (chatUpdate.chat?.context as any)?.groupId
-            const gidFromCtx = (chatUpdate.context as any)?.groupId
+            const gidFromChat = chatUpdate.chat?.context?.groupId
+            const gidFromCtx = chatUpdate.context?.groupId
             const gid = gidFromChat || gidFromCtx
             if (gid) chatKeyToGroupIdRef.current[key] = gid
           } catch {
@@ -638,7 +638,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
             const msgs = chatUpdate.chat?.messages || []
             let lastAssistantIdx = -1
             for (let i = msgs.length - 1; i >= 0; i--) {
-              const role = (msgs[i] as any)?.role
+              const role = msgs[i]?.role
               if (role === 'assistant') {
                 lastAssistantIdx = i
                 break
@@ -651,7 +651,7 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
               if (prevChat) {
                 const prevMsgs = prevChat.messages || []
                 for (let i = prevMsgs.length - 1; i >= 0; i--) {
-                  const role = (prevMsgs[i] as any)?.role
+                  const role = prevMsgs[i]?.role
                   if (role === 'assistant') {
                     prevAssistantIdx = i
                     break
@@ -661,14 +661,14 @@ export function ChatsProvider({ children }: { children: React.ReactNode }) {
 
               const seenIdx = lastAssistantNotifiedRef.current[key] ?? -1
               const baseline = Math.max(prevAssistantIdx, seenIdx)
-              const isLatestAssistant = (msgs[lastAssistantIdx] as any)?.role === 'assistant'
+              const isLatestAssistant = msgs[lastAssistantIdx]?.role === 'assistant'
 
               if (isLatestAssistant && lastAssistantIdx > baseline) {
                 lastAssistantNotifiedRef.current[key] = lastAssistantIdx
 
                 const title = getNotificationTitleForContext(chatUpdate.context)
 
-                const raw = String((msgs[lastAssistantIdx] as any)?.content || '')
+                const raw = String(msgs[lastAssistantIdx]?.content || '')
                 const snippet = raw.replace(/\s+/g, ' ').slice(0, 120)
                 const message = snippet || 'Assistant responded'
 
