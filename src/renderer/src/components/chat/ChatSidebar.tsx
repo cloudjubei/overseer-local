@@ -478,13 +478,6 @@ export default function ChatSidebar({
   const isRunningAgent =
     (context.type === 'AGENT_RUN_STORY' || context.type === 'AGENT_RUN_FEATURE') &&
     (chat?.chat.state === 'created' || chat?.chat.state === 'running')
-  if (context.type === 'AGENT_RUN_STORY' || context.type === 'AGENT_RUN_FEATURE') {
-    console.log('[DEBUG ChatSidebar isRunningAgent]', {
-      contextType: context.type,
-      chatState: chat?.chat.state,
-      isRunningAgent,
-    })
-  }
 
   return (
     <section className={sectionClass}>

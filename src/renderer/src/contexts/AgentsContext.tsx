@@ -175,7 +175,6 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
       const chatSettings = getSettings(context)!
       const isolated = true
 
-      console.log('startAgentRun from AgentsContext')
       completionService
         .startAgentRun(
           {
