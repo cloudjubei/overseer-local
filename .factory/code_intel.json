@@ -805,6 +805,24 @@
           "thefactory-tools/GitUnifiedBranch"
         ]
       },
+      "addDays": {
+        "path": "src/renderer/src/screens/projectTimeline/timelineDateUtils.ts",
+        "dependencies": [
+          "Date"
+        ]
+      },
+      "addMonths": {
+        "path": "src/renderer/src/screens/projectTimeline/timelineDateUtils.ts",
+        "dependencies": [
+          "Date"
+        ]
+      },
+      "addWeeks": {
+        "path": "src/renderer/src/screens/projectTimeline/timelineDateUtils.ts",
+        "dependencies": [
+          "Date"
+        ]
+      },
       "AgentModelQuickSelect": {
         "path": "src/renderer/src/components/agents/AgentModelQuickSelect.tsx",
         "dependencies": [
@@ -1041,6 +1059,26 @@
         "description": "BranchChip — reusable inline badge for branch metadata.",
         "dependencies": [
           "react"
+        ]
+      },
+      "buildAllProjectsRows": {
+        "path": "src/renderer/src/screens/projectTimeline/timelineItemUtils.ts",
+        "dependencies": [
+          "RowDefinition",
+          "RowItem",
+          "thefactory-tools/Feature",
+          "thefactory-tools/Story",
+          "thefactory-db/Entity"
+        ]
+      },
+      "buildLabelRows": {
+        "path": "src/renderer/src/screens/projectTimeline/timelineItemUtils.ts",
+        "dependencies": [
+          "RowItem",
+          "TimelineLabel",
+          "thefactory-tools/Feature",
+          "thefactory-tools/Story",
+          "thefactory-db/Entity"
         ]
       },
       "buildSimpleUnifiedDiff": {
@@ -1557,6 +1595,10 @@
         "path": "src/renderer/src/components/ui/Chip.tsx",
         "dependencies": []
       },
+      "clamp": {
+        "path": "src/renderer/src/screens/projectTimeline/timelineDateUtils.ts",
+        "dependencies": []
+      },
       "classNames": {
         "path": "src/renderer/src/navigation/utils.ts",
         "dependencies": [
@@ -1960,20 +2002,17 @@
           "Promise",
           "Record",
           "electron/BrowserWindow",
-          "electron/app",
-          "electron/process"
+          "electron/app"
         ]
       },
       "DiagnosticsOverlay": {
         "path": "src/renderer/src/components/ui/DiagnosticsOverlay.tsx",
         "dependencies": [
-          "IconCpu",
-          "IconMinimize",
-          "IconMaximize",
-          "SnapshotRows",
-          "MiniSparkline",
+          "HTMLElement",
+          "PointerEvent",
           "react/useMemo",
           "react/useState",
+          "react/useRef",
           "src/types/diagnostics/DiagnosticsSnapshot",
           "src/types/diagnostics"
         ]
@@ -1989,8 +2028,27 @@
       "DiagnosticsSnapshot": {
         "path": "src/types/diagnostics.ts",
         "dependencies": [
+          "Array",
           "ProcessMemoryInfo",
           "CpuUsage"
+        ]
+      },
+      "diffInDays": {
+        "path": "src/renderer/src/screens/projectTimeline/timelineDateUtils.ts",
+        "dependencies": [
+          "Date"
+        ]
+      },
+      "diffInMonths": {
+        "path": "src/renderer/src/screens/projectTimeline/timelineDateUtils.ts",
+        "dependencies": [
+          "Date"
+        ]
+      },
+      "diffInWeeks": {
+        "path": "src/renderer/src/screens/projectTimeline/timelineDateUtils.ts",
+        "dependencies": [
+          "Date"
         ]
       },
       "DiffViewer": {
@@ -2084,6 +2142,14 @@
           "@renderer/utils/time",
           "@renderer/services/pricingService/getPrice",
           "@renderer/services/pricingService"
+        ]
+      },
+      "ENTITY_TYPE": {
+        "path": "src/renderer/src/screens/projectTimeline/timelineItemUtils.ts",
+        "dependencies": [
+          "thefactory-tools/Feature",
+          "thefactory-tools/Story",
+          "thefactory-db/Entity"
         ]
       },
       "ExclamationChip": {
@@ -2616,9 +2682,24 @@
           "URL"
         ]
       },
+      "getStoryCompletedAt": {
+        "path": "src/renderer/src/screens/projectTimeline/timelineItemUtils.ts",
+        "dependencies": [
+          "thefactory-tools/Story",
+          "thefactory-tools/Feature",
+          "thefactory-db/Entity"
+        ]
+      },
       "getSystemPrompt": {
         "path": "src/logic/chat/promptTemplates.ts",
         "dependencies": []
+      },
+      "getUnitIndex": {
+        "path": "src/renderer/src/screens/projectTimeline/timelineDateUtils.ts",
+        "dependencies": [
+          "Date",
+          "Zoom"
+        ]
       },
       "GitActionButton": {
         "path": "src/renderer/src/screens/git/actions/GitActionButton.tsx",
@@ -3313,6 +3394,13 @@
           "thefactory-tools/CompletionHistorySummarization",
           "@renderer/components/ui/Switch/Switch",
           "@renderer/components/ui/Switch"
+        ]
+      },
+      "HoverInfo": {
+        "path": "src/renderer/src/screens/projectTimeline/ProjectTimelineTypes.ts",
+        "dependencies": [
+          "DOMRect",
+          "thefactory-db/Entity"
         ]
       },
       "IconAmbulance": {
@@ -4035,6 +4123,12 @@
           "diff/createTwoFilesPatch"
         ]
       },
+      "isoWeekNumber": {
+        "path": "src/renderer/src/screens/projectTimeline/timelineDateUtils.ts",
+        "dependencies": [
+          "Date"
+        ]
+      },
       "JsonView": {
         "path": "src/renderer/src/components/ui/JsonView.tsx",
         "dependencies": [
@@ -4353,6 +4447,24 @@
           "@renderer/contexts/ProjectsGroupsContext"
         ]
       },
+      "mapFeatureToTimelineLabel": {
+        "path": "src/renderer/src/screens/projectTimeline/timelineItemUtils.ts",
+        "dependencies": [
+          "TimelineLabel",
+          "thefactory-tools/Feature",
+          "thefactory-tools/Story",
+          "thefactory-db/Entity"
+        ]
+      },
+      "mapStoryToTimelineLabel": {
+        "path": "src/renderer/src/screens/projectTimeline/timelineItemUtils.ts",
+        "dependencies": [
+          "TimelineLabel",
+          "thefactory-tools/Story",
+          "thefactory-tools/Feature",
+          "thefactory-db/Entity"
+        ]
+      },
       "Markdown": {
         "path": "src/renderer/src/components/ui/Markdown.tsx",
         "dependencies": [
@@ -4633,6 +4745,15 @@
         "dependencies": [
           "SectionTitle",
           "PreLimited"
+        ]
+      },
+      "normalizeLabels": {
+        "path": "src/renderer/src/screens/projectTimeline/timelineItemUtils.ts",
+        "dependencies": [
+          "TimelineLabel",
+          "thefactory-db/Entity",
+          "thefactory-tools/Feature",
+          "thefactory-tools/Story"
         ]
       },
       "normalizeService": {
@@ -5374,16 +5495,18 @@
           "FormEvent",
           "TimelineLabel",
           "thefactory-db/EntityInput",
-          "HTMLDivElement",
-          "RowDefinition",
-          "RowItem",
-          "Unit",
           "Date",
+          "YearStripGroup",
+          "RowDefinition",
+          "HeaderGroup",
+          "Unit",
           "thefactory-db/Entity",
           "thefactory-tools/Feature",
+          "thefactory-tools/Story",
+          "Array",
           "Zoom",
-          "HoverInfo",
-          "thefactory-tools/Story"
+          "HTMLDivElement",
+          "HoverInfo"
         ]
       },
       "ProjectWizardCodeState": {
@@ -5621,6 +5744,19 @@
         "path": "src/renderer/src/components/chat/ToolCall/components/Row.tsx",
         "dependencies": [
           "ReactNode"
+        ]
+      },
+      "RowDefinition": {
+        "path": "src/renderer/src/screens/projectTimeline/ProjectTimelineTypes.ts",
+        "dependencies": [
+          "RowItem",
+          "thefactory-db/Entity"
+        ]
+      },
+      "RowItem": {
+        "path": "src/renderer/src/screens/projectTimeline/ProjectTimelineTypes.ts",
+        "dependencies": [
+          "thefactory-db/Entity"
         ]
       },
       "RunAgentButton": {
@@ -5923,6 +6059,24 @@
         "path": "src/renderer/src/components/ui/PathDisplay.tsx",
         "dependencies": []
       },
+      "startOfDay": {
+        "path": "src/renderer/src/screens/projectTimeline/timelineDateUtils.ts",
+        "dependencies": [
+          "Date"
+        ]
+      },
+      "startOfMonth": {
+        "path": "src/renderer/src/screens/projectTimeline/timelineDateUtils.ts",
+        "dependencies": [
+          "Date"
+        ]
+      },
+      "startOfWeek": {
+        "path": "src/renderer/src/screens/projectTimeline/timelineDateUtils.ts",
+        "dependencies": [
+          "Date"
+        ]
+      },
       "StaticNavItem": {
         "path": "src/renderer/src/navigation/sidebar/StaticNavItem.tsx",
         "dependencies": [
@@ -6192,6 +6346,15 @@
           "@renderer/contexts/StoriesContext"
         ]
       },
+      "storyColorStyles": {
+        "path": "src/renderer/src/screens/projectTimeline/timelineItemUtils.ts",
+        "dependencies": [
+          "CSSProperties",
+          "thefactory-tools/Feature",
+          "thefactory-tools/Story",
+          "thefactory-db/Entity"
+        ]
+      },
       "StoryCreateView": {
         "path": "src/renderer/src/screens/stories/StoryCreateView.tsx",
         "dependencies": [
@@ -6422,6 +6585,50 @@
         "path": "src/renderer/src/utils/time.ts",
         "dependencies": []
       },
+      "TimelineGridHeader": {
+        "path": "src/renderer/src/screens/projectTimeline/TimelineGridHeader.tsx",
+        "dependencies": [
+          "Zoom",
+          "Unit"
+        ]
+      },
+      "TimelineGridRow": {
+        "path": "src/renderer/src/screens/projectTimeline/TimelineGridRow.tsx",
+        "dependencies": [
+          "HoverInfo",
+          "TimelineLabel",
+          "Zoom",
+          "Date",
+          "Unit",
+          "RowDefinition"
+        ]
+      },
+      "TimelineHoverCard": {
+        "path": "src/renderer/src/screens/projectTimeline/TimelineHoverCard.tsx",
+        "dependencies": [
+          "thefactory-tools/Project",
+          "HTMLDivElement",
+          "Record",
+          "HoverInfo",
+          "@renderer/components/stories/FeatureCard/FeatureCardRaw",
+          "@renderer/components/stories/FeatureCard",
+          "@renderer/components/stories/StoryCard/StoryCardRaw",
+          "@renderer/components/stories/StoryCard"
+        ]
+      },
+      "TimelineLabel": {
+        "path": "src/renderer/src/screens/projectTimeline/ProjectTimelineTypes.ts",
+        "dependencies": [
+          "TimestampContent",
+          "thefactory-db/Entity"
+        ]
+      },
+      "TimestampContent": {
+        "path": "src/renderer/src/screens/projectTimeline/ProjectTimelineTypes.ts",
+        "dependencies": [
+          "thefactory-db/Entity"
+        ]
+      },
       "ToastProvider": {
         "path": "src/renderer/src/components/ui/Toast.tsx",
         "dependencies": [
@@ -6553,6 +6760,10 @@
           "diff/createTwoFilesPatch"
         ]
       },
+      "tsToInput": {
+        "path": "src/renderer/src/screens/projectTimeline/timelineDateUtils.ts",
+        "dependencies": []
+      },
       "TurnChip": {
         "path": "src/renderer/src/components/agents/TurnChip.tsx",
         "dependencies": []
@@ -6576,6 +6787,13 @@
           "thefactory-tools/GitUnifiedBranch",
           "thefactory-tools/GitCommitInfo",
           "thefactory-tools/GitBranchEvent"
+        ]
+      },
+      "Unit": {
+        "path": "src/renderer/src/screens/projectTimeline/ProjectTimelineTypes.ts",
+        "dependencies": [
+          "Date",
+          "thefactory-db/Entity"
         ]
       },
       "UnsavedCheck": {
@@ -7189,6 +7407,12 @@
           "thefactory-tools/ToolResultType",
           "thefactory-tools/ToolCall"
         ]
+      },
+      "Zoom": {
+        "path": "src/renderer/src/screens/projectTimeline/ProjectTimelineTypes.ts",
+        "dependencies": [
+          "thefactory-db/Entity"
+        ]
       }
     }
   },
@@ -7212,6 +7436,24 @@
         "dependencies": [
           "react/useState",
           "thefactory-tools/GitUnifiedBranch"
+        ]
+      },
+      "addDays": {
+        "path": "renderer/src/screens/projectTimeline/timelineDateUtils.ts",
+        "dependencies": [
+          "Date"
+        ]
+      },
+      "addMonths": {
+        "path": "renderer/src/screens/projectTimeline/timelineDateUtils.ts",
+        "dependencies": [
+          "Date"
+        ]
+      },
+      "addWeeks": {
+        "path": "renderer/src/screens/projectTimeline/timelineDateUtils.ts",
+        "dependencies": [
+          "Date"
         ]
       },
       "AgentModelQuickSelect": {
@@ -7450,6 +7692,26 @@
         "description": "BranchChip — reusable inline badge for branch metadata.",
         "dependencies": [
           "react"
+        ]
+      },
+      "buildAllProjectsRows": {
+        "path": "renderer/src/screens/projectTimeline/timelineItemUtils.ts",
+        "dependencies": [
+          "RowDefinition",
+          "RowItem",
+          "thefactory-tools/Feature",
+          "thefactory-tools/Story",
+          "thefactory-db/Entity"
+        ]
+      },
+      "buildLabelRows": {
+        "path": "renderer/src/screens/projectTimeline/timelineItemUtils.ts",
+        "dependencies": [
+          "RowItem",
+          "TimelineLabel",
+          "thefactory-tools/Feature",
+          "thefactory-tools/Story",
+          "thefactory-db/Entity"
         ]
       },
       "buildSimpleUnifiedDiff": {
@@ -7966,6 +8228,10 @@
         "path": "renderer/src/components/ui/Chip.tsx",
         "dependencies": []
       },
+      "clamp": {
+        "path": "renderer/src/screens/projectTimeline/timelineDateUtils.ts",
+        "dependencies": []
+      },
       "classNames": {
         "path": "renderer/src/navigation/utils.ts",
         "dependencies": [
@@ -8369,20 +8635,17 @@
           "Promise",
           "Record",
           "electron/BrowserWindow",
-          "electron/app",
-          "electron/process"
+          "electron/app"
         ]
       },
       "DiagnosticsOverlay": {
         "path": "renderer/src/components/ui/DiagnosticsOverlay.tsx",
         "dependencies": [
-          "IconCpu",
-          "IconMinimize",
-          "IconMaximize",
-          "SnapshotRows",
-          "MiniSparkline",
+          "HTMLElement",
+          "PointerEvent",
           "react/useMemo",
           "react/useState",
+          "react/useRef",
           "types/diagnostics/DiagnosticsSnapshot",
           "types/diagnostics"
         ]
@@ -8398,8 +8661,27 @@
       "DiagnosticsSnapshot": {
         "path": "types/diagnostics.ts",
         "dependencies": [
+          "Array",
           "ProcessMemoryInfo",
           "CpuUsage"
+        ]
+      },
+      "diffInDays": {
+        "path": "renderer/src/screens/projectTimeline/timelineDateUtils.ts",
+        "dependencies": [
+          "Date"
+        ]
+      },
+      "diffInMonths": {
+        "path": "renderer/src/screens/projectTimeline/timelineDateUtils.ts",
+        "dependencies": [
+          "Date"
+        ]
+      },
+      "diffInWeeks": {
+        "path": "renderer/src/screens/projectTimeline/timelineDateUtils.ts",
+        "dependencies": [
+          "Date"
         ]
       },
       "DiffViewer": {
@@ -8493,6 +8775,14 @@
           "@renderer/utils/time",
           "@renderer/services/pricingService/getPrice",
           "@renderer/services/pricingService"
+        ]
+      },
+      "ENTITY_TYPE": {
+        "path": "renderer/src/screens/projectTimeline/timelineItemUtils.ts",
+        "dependencies": [
+          "thefactory-tools/Feature",
+          "thefactory-tools/Story",
+          "thefactory-db/Entity"
         ]
       },
       "ExclamationChip": {
@@ -9025,9 +9315,24 @@
           "URL"
         ]
       },
+      "getStoryCompletedAt": {
+        "path": "renderer/src/screens/projectTimeline/timelineItemUtils.ts",
+        "dependencies": [
+          "thefactory-tools/Story",
+          "thefactory-tools/Feature",
+          "thefactory-db/Entity"
+        ]
+      },
       "getSystemPrompt": {
         "path": "logic/chat/promptTemplates.ts",
         "dependencies": []
+      },
+      "getUnitIndex": {
+        "path": "renderer/src/screens/projectTimeline/timelineDateUtils.ts",
+        "dependencies": [
+          "Date",
+          "Zoom"
+        ]
       },
       "GitActionButton": {
         "path": "renderer/src/screens/git/actions/GitActionButton.tsx",
@@ -9722,6 +10027,13 @@
           "thefactory-tools/CompletionHistorySummarization",
           "@renderer/components/ui/Switch/Switch",
           "@renderer/components/ui/Switch"
+        ]
+      },
+      "HoverInfo": {
+        "path": "renderer/src/screens/projectTimeline/ProjectTimelineTypes.ts",
+        "dependencies": [
+          "DOMRect",
+          "thefactory-db/Entity"
         ]
       },
       "IconAmbulance": {
@@ -10444,6 +10756,12 @@
           "diff/createTwoFilesPatch"
         ]
       },
+      "isoWeekNumber": {
+        "path": "renderer/src/screens/projectTimeline/timelineDateUtils.ts",
+        "dependencies": [
+          "Date"
+        ]
+      },
       "JsonView": {
         "path": "renderer/src/components/ui/JsonView.tsx",
         "dependencies": [
@@ -10762,6 +11080,24 @@
           "@renderer/contexts/ProjectsGroupsContext"
         ]
       },
+      "mapFeatureToTimelineLabel": {
+        "path": "renderer/src/screens/projectTimeline/timelineItemUtils.ts",
+        "dependencies": [
+          "TimelineLabel",
+          "thefactory-tools/Feature",
+          "thefactory-tools/Story",
+          "thefactory-db/Entity"
+        ]
+      },
+      "mapStoryToTimelineLabel": {
+        "path": "renderer/src/screens/projectTimeline/timelineItemUtils.ts",
+        "dependencies": [
+          "TimelineLabel",
+          "thefactory-tools/Story",
+          "thefactory-tools/Feature",
+          "thefactory-db/Entity"
+        ]
+      },
       "Markdown": {
         "path": "renderer/src/components/ui/Markdown.tsx",
         "dependencies": [
@@ -11042,6 +11378,15 @@
         "dependencies": [
           "SectionTitle",
           "PreLimited"
+        ]
+      },
+      "normalizeLabels": {
+        "path": "renderer/src/screens/projectTimeline/timelineItemUtils.ts",
+        "dependencies": [
+          "TimelineLabel",
+          "thefactory-db/Entity",
+          "thefactory-tools/Feature",
+          "thefactory-tools/Story"
         ]
       },
       "normalizeService": {
@@ -11783,16 +12128,18 @@
           "FormEvent",
           "TimelineLabel",
           "thefactory-db/EntityInput",
-          "HTMLDivElement",
-          "RowDefinition",
-          "RowItem",
-          "Unit",
           "Date",
+          "YearStripGroup",
+          "RowDefinition",
+          "HeaderGroup",
+          "Unit",
           "thefactory-db/Entity",
           "thefactory-tools/Feature",
+          "thefactory-tools/Story",
+          "Array",
           "Zoom",
-          "HoverInfo",
-          "thefactory-tools/Story"
+          "HTMLDivElement",
+          "HoverInfo"
         ]
       },
       "ProjectWizardCodeState": {
@@ -12030,6 +12377,19 @@
         "path": "renderer/src/components/chat/ToolCall/components/Row.tsx",
         "dependencies": [
           "ReactNode"
+        ]
+      },
+      "RowDefinition": {
+        "path": "renderer/src/screens/projectTimeline/ProjectTimelineTypes.ts",
+        "dependencies": [
+          "RowItem",
+          "thefactory-db/Entity"
+        ]
+      },
+      "RowItem": {
+        "path": "renderer/src/screens/projectTimeline/ProjectTimelineTypes.ts",
+        "dependencies": [
+          "thefactory-db/Entity"
         ]
       },
       "RunAgentButton": {
@@ -12332,6 +12692,24 @@
         "path": "renderer/src/components/ui/PathDisplay.tsx",
         "dependencies": []
       },
+      "startOfDay": {
+        "path": "renderer/src/screens/projectTimeline/timelineDateUtils.ts",
+        "dependencies": [
+          "Date"
+        ]
+      },
+      "startOfMonth": {
+        "path": "renderer/src/screens/projectTimeline/timelineDateUtils.ts",
+        "dependencies": [
+          "Date"
+        ]
+      },
+      "startOfWeek": {
+        "path": "renderer/src/screens/projectTimeline/timelineDateUtils.ts",
+        "dependencies": [
+          "Date"
+        ]
+      },
       "StaticNavItem": {
         "path": "renderer/src/navigation/sidebar/StaticNavItem.tsx",
         "dependencies": [
@@ -12601,6 +12979,15 @@
           "@renderer/contexts/StoriesContext"
         ]
       },
+      "storyColorStyles": {
+        "path": "renderer/src/screens/projectTimeline/timelineItemUtils.ts",
+        "dependencies": [
+          "CSSProperties",
+          "thefactory-tools/Feature",
+          "thefactory-tools/Story",
+          "thefactory-db/Entity"
+        ]
+      },
       "StoryCreateView": {
         "path": "renderer/src/screens/stories/StoryCreateView.tsx",
         "dependencies": [
@@ -12831,6 +13218,50 @@
         "path": "renderer/src/utils/time.ts",
         "dependencies": []
       },
+      "TimelineGridHeader": {
+        "path": "renderer/src/screens/projectTimeline/TimelineGridHeader.tsx",
+        "dependencies": [
+          "Zoom",
+          "Unit"
+        ]
+      },
+      "TimelineGridRow": {
+        "path": "renderer/src/screens/projectTimeline/TimelineGridRow.tsx",
+        "dependencies": [
+          "HoverInfo",
+          "TimelineLabel",
+          "Zoom",
+          "Date",
+          "Unit",
+          "RowDefinition"
+        ]
+      },
+      "TimelineHoverCard": {
+        "path": "renderer/src/screens/projectTimeline/TimelineHoverCard.tsx",
+        "dependencies": [
+          "thefactory-tools/Project",
+          "HTMLDivElement",
+          "Record",
+          "HoverInfo",
+          "@renderer/components/stories/FeatureCard/FeatureCardRaw",
+          "@renderer/components/stories/FeatureCard",
+          "@renderer/components/stories/StoryCard/StoryCardRaw",
+          "@renderer/components/stories/StoryCard"
+        ]
+      },
+      "TimelineLabel": {
+        "path": "renderer/src/screens/projectTimeline/ProjectTimelineTypes.ts",
+        "dependencies": [
+          "TimestampContent",
+          "thefactory-db/Entity"
+        ]
+      },
+      "TimestampContent": {
+        "path": "renderer/src/screens/projectTimeline/ProjectTimelineTypes.ts",
+        "dependencies": [
+          "thefactory-db/Entity"
+        ]
+      },
       "ToastProvider": {
         "path": "renderer/src/components/ui/Toast.tsx",
         "dependencies": [
@@ -12962,6 +13393,10 @@
           "diff/createTwoFilesPatch"
         ]
       },
+      "tsToInput": {
+        "path": "renderer/src/screens/projectTimeline/timelineDateUtils.ts",
+        "dependencies": []
+      },
       "TurnChip": {
         "path": "renderer/src/components/agents/TurnChip.tsx",
         "dependencies": []
@@ -12985,6 +13420,13 @@
           "thefactory-tools/GitUnifiedBranch",
           "thefactory-tools/GitCommitInfo",
           "thefactory-tools/GitBranchEvent"
+        ]
+      },
+      "Unit": {
+        "path": "renderer/src/screens/projectTimeline/ProjectTimelineTypes.ts",
+        "dependencies": [
+          "Date",
+          "thefactory-db/Entity"
         ]
       },
       "UnsavedCheck": {
@@ -13597,6 +14039,12 @@
         "dependencies": [
           "thefactory-tools/ToolResultType",
           "thefactory-tools/ToolCall"
+        ]
+      },
+      "Zoom": {
+        "path": "renderer/src/screens/projectTimeline/ProjectTimelineTypes.ts",
+        "dependencies": [
+          "thefactory-db/Entity"
         ]
       }
     }
@@ -15637,7 +16085,6 @@
       "DEFAULT_CHAT_PROMPTS": {
         "path": "dist/chats/chatsConstants.js",
         "dependencies": [
-          "Batch",
           "When"
         ]
       },
@@ -15900,7 +16347,7 @@
         ]
       },
       "GENERAL_OMISSION_RECEIPT": {
-        "path": "dist/completion/completionMessageSanitizer.js",
+        "path": "dist/completion/completionConstants.js",
         "dependencies": []
       },
       "getAbsolutePath": {
@@ -17269,7 +17716,7 @@
         "dependencies": []
       },
       "READ_OMISSION_RECEIPT": {
-        "path": "dist/completion/completionMessageSanitizer.js",
+        "path": "dist/completion/completionConstants.js",
         "dependencies": []
       },
       "READ_TOOL_NAMES": {
@@ -17782,6 +18229,10 @@
           "src/agent/agentTypes.js"
         ]
       },
+      "TOOL_USAGE": {
+        "path": "dist/completion/completionConstants.js",
+        "dependencies": []
+      },
       "ToolCall": {
         "path": "dist/agent/agentTypes.d.ts",
         "dependencies": [
@@ -17958,7 +18409,7 @@
         ]
       },
       "WRITE_OMISSION_RECEIPT": {
-        "path": "dist/completion/completionMessageSanitizer.js",
+        "path": "dist/completion/completionConstants.js",
         "dependencies": []
       },
       "WRITE_TOOL_NAMES": {

@@ -1,5 +1,6 @@
 import type { BrowserWindow } from 'electron'
-import { app, process as electronProcess } from 'electron'
+import { app } from 'electron'
+import process from 'node:process'
 import BaseManager from '../BaseManager'
 import IPC_HANDLER_KEYS from '../../preload/ipcHandlersKeys'
 import type { DiagnosticsSnapshot } from '../../types/diagnostics'
@@ -84,40 +85,80 @@ export default class DiagnosticsManager extends BaseManager {
     // app.getAppMetrics includes CPU and memory per process.
     const metrics = app.getAppMetrics?.() ?? []
 
-    // best-effort: pick the renderer process for the focused window, fallback to first renderer.
-    const webContentsId = this.window.webContents?.id
-    const rendererMetric =
-      metrics.find((m: any) => m?.type === 'Tab' && m?.webContentsId === webContentsId) ??
-      metrics.find((m: any) => m?.type === 'Tab')
+    const totalCpu = metrics.reduce((acc, m) => acc + (m.cpu?.percentCPUUsage ?? 0), 0)
+    const totalMemoryWorkingSet = metrics.reduce((acc, m) => acc + (m.memory?.workingSetSize ?? 0), 0)
 
-    const appMetrics = rendererMetric
-      ? {
-          pid: rendererMetric.pid,
-          type: rendererMetric.type,
-          cpu: rendererMetric.cpu
-            ? {
-                percentCPUUsage: rendererMetric.cpu.percentCPUUsage,
-                idleWakeupsPerSecond: rendererMetric.cpu.idleWakeupsPerSecond,
-              }
-            : undefined,
-          memory: rendererMetric.memory
-            ? {
-                workingSetSize: rendererMetric.memory.workingSetSize,
-                peakWorkingSetSize: rendererMetric.memory.peakWorkingSetSize,
-                privateBytes: rendererMetric.memory.privateBytes,
-              }
-            : undefined,
-        }
+    const appMetrics = {
+      pid: process.pid,
+      type: 'Total',
+      cpu: {
+        percentCPUUsage: totalCpu,
+      },
+      memory: {
+        workingSetSize: totalMemoryWorkingSet,
+      },
+    }
+
+    // process.getProcessMemoryInfo is available in the main process.
+    // Use node:process (Electron augments it). Keep this best-effort to avoid breaking the overlay.
+    const processMemoryInfo = process.getProcessMemoryInfo
+      ? await (process.getProcessMemoryInfo() as any)
       : undefined
 
-    // process.getProcessMemoryInfo is available in main.
-    const processMemoryInfo = await (electronProcess.getProcessMemoryInfo?.() as any)
+    const getFriendlyName = (type: string, name?: string) => {
+      if (name) return name
+      switch (type) {
+        case 'Browser':
+          return 'Main Process'
+        case 'Tab':
+          return 'Window / Renderer'
+        case 'GPU':
+          return 'GPU Process'
+        case 'Utility':
+          return 'Utility Process'
+        case 'Zygote':
+          return 'Zygote Process'
+        case 'SandboxHelper':
+          return 'Sandbox Helper'
+        case 'PepperPlugin':
+          return 'Plugin'
+        case 'PepperPluginBroker':
+          return 'Plugin Broker'
+        case 'Crashpad':
+          return 'Crashpad Handler'
+        default:
+          return type || 'Unknown'
+      }
+    }
+
+    const cpuCulprits = [...metrics]
+      .filter((m) => typeof m?.cpu?.percentCPUUsage === 'number')
+      .sort((a, b) => b.cpu.percentCPUUsage - a.cpu.percentCPUUsage)
+      .slice(0, 3)
+      .map((m) => ({
+        name: getFriendlyName(m.type, m.name),
+        type: m.type,
+        pid: m.pid,
+        percentCPUUsage: m.cpu.percentCPUUsage,
+      }))
+
+    const memoryCulprits = [...metrics]
+      .filter((m) => typeof m?.memory?.workingSetSize === 'number')
+      .sort((a, b) => b.memory.workingSetSize - a.memory.workingSetSize)
+      .slice(0, 3)
+      .map((m) => ({
+        name: getFriendlyName(m.type, m.name),
+        type: m.type,
+        pid: m.pid,
+        memoryMb: m.memory.workingSetSize / 1024,
+      }))
 
     return {
       timestamp,
       appMetrics,
       processMemoryInfo,
       eventLoopLagMs: this.lagSampler.getStats(),
+      topCulprits: { cpu: cpuCulprits, memory: memoryCulprits },
     }
   }
 }

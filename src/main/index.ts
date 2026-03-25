@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow, nativeImage } from 'electron'
+import { app, shell, BrowserWindow, nativeImage, dialog } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { initManagers } from './managers'
@@ -25,6 +25,22 @@ async function createWindow(): Promise<void> {
 
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
+  })
+
+  mainWindow.on('unresponsive', async () => {
+    const { response } = await dialog.showMessageBox(mainWindow, {
+      type: 'warning',
+      title: 'Application Unresponsive',
+      message: 'The application is taking a while to respond.',
+      detail: 'Do you want to force reload the app, or keep waiting?',
+      buttons: ['Reload App', 'Keep Waiting'],
+      defaultId: 1,
+      cancelId: 1,
+    })
+    
+    if (response === 0) {
+      mainWindow.reload()
+    }
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {

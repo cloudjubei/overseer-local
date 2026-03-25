@@ -183,15 +183,9 @@ export default function ChatView() {
       const isValidContext = (ctx: ChatContext | undefined): boolean => {
         if (!ctx) return false
         if (activeSelectionType === 'group' && activeGroupId) {
-          return ctx.type === 'GROUP' || ctx.type === 'GROUP_TOPIC'
-        } else {
-          const key = getChatContextKey(ctx)
-          const projectChats = chatsByProjectId[activeProjectId ?? ''] || []
-          return (
-            projectChats.some((c) => c.key === key) ||
-            (ctx.type === 'PROJECT' && ctx.projectId === activeProjectId)
-          )
+          return ctx.groupId === activeGroupId
         }
+        return ctx.projectId === activeProjectId
       }
 
       // 1. Handle hash navigation first

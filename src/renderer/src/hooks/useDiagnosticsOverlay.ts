@@ -25,13 +25,16 @@ export function useDiagnosticsOverlay(options?: {
   const memSeriesRef = useRef<SeriesPoint[]>([])
   const lagSeriesRef = useRef<SeriesPoint[]>([])
 
+  // We need state to trigger re-renders when the series updates
+  const [renderTick, setRenderTick] = useState(0)
+
   const series = useMemo(
     () => ({
       cpu: cpuSeriesRef.current,
       memoryMb: memSeriesRef.current,
       lagP95: lagSeriesRef.current,
     }),
-    [],
+    [renderTick],
   )
 
   useEffect(() => {
@@ -47,12 +50,16 @@ export function useDiagnosticsOverlay(options?: {
 
         const t = snap.timestamp
         const cpu = snap.appMetrics?.cpu?.percentCPUUsage
-        const memKb = snap.processMemoryInfo?.residentSet
+        const memKb = snap.appMetrics?.memory?.workingSetSize
         const lag = snap.eventLoopLagMs?.p95
 
-        if (typeof cpu === 'number') pushPoint(cpuSeriesRef.current, { t, v: cpu }, maxPoints)
-        if (typeof memKb === 'number') pushPoint(memSeriesRef.current, { t, v: memKb / 1024 }, maxPoints)
-        if (typeof lag === 'number') pushPoint(lagSeriesRef.current, { t, v: lag }, maxPoints)
+        // The hooks memoize the refs array instance but we need React to trigger a re-render
+        // when points are added, so we create a new array or use state updates to force re-render.
+        if (typeof cpu === 'number') cpuSeriesRef.current = [...cpuSeriesRef.current, { t, v: cpu }].slice(-maxPoints)
+        if (typeof memKb === 'number') memSeriesRef.current = [...memSeriesRef.current, { t, v: memKb / 1024 }].slice(-maxPoints)
+        if (typeof lag === 'number') lagSeriesRef.current = [...lagSeriesRef.current, { t, v: lag }].slice(-maxPoints)
+
+        setRenderTick((v) => v + 1)
       } catch (e: any) {
         if (cancelled) return
         setError(e?.message ?? String(e))

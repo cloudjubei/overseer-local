@@ -37,4 +37,8 @@ export type DiagnosticsSnapshot = {
     p95: number
     max: number
   }
+  topCulprits?: {
+    cpu: Array<{ name: string; type: string; pid: number; percentCPUUsage: number }>
+    memory: Array<{ name: string; type: string; pid: number; memoryMb: number }>
+  }
 }
