@@ -1,6 +1,6 @@
 {
   "id": "ecf88224-b321-466d-ae28-df14b593f40c",
-  "status": "=",
+  "status": "-",
   "title": "Project Creation & Import Wizard",
   "description": "As a user, I want a guided, multi-step wizard when adding a project so that I can seamlessly create new projects with local file structures and remote repositories, or easily import existing ones.",
   "features": [
@@ -35,6 +35,15 @@
       "createdAt": "2026-03-17T16:31:40.635Z",
       "updatedAt": "2026-03-24T12:27:47.733Z",
       "completedAt": "2026-03-24T12:27:47.733Z"
+    },
+    {
+      "id": "495273b2-1e46-41d4-9fc6-9c75eb4cdbf4",
+      "status": "-",
+      "title": "Step 2b - Import Existing Project Screen",
+      "description": "A dedicated import flow within the wizard that allows users to bring an existing project into Overseer Local through three supported import modes: (1) importing a `project.json` file that contains the full project definition, (2) importing an existing local folder as a local-only project, and (3) importing an existing local folder where a Git repository is detected and repository details can be pre-filled automatically.\n\nAcceptance criteria:\n- The import path is a first-class branch of the project wizard, separate from the new-project creation path.\n- The user can choose between `project.json` import and local-folder import.\n- Selecting a `project.json` file reads the project definition and pre-fills all supported project details in the wizard.\n- Invalid, unreadable, or incomplete `project.json` files surface clear validation errors and prevent completion until resolved.\n- Selecting a local folder validates that the path exists and is readable.\n- If the selected local folder does not contain Git metadata, the project can still be imported as a local-only project.\n- If the selected local folder contains a detectable Git repository, the wizard identifies it automatically and pre-fills relevant repository information.\n- The user can review and edit imported or detected values before final confirmation.\n- The final confirmation step clearly shows which import mode is being used and what local/Git metadata will be saved.\n- Error states for invalid paths, unreadable folders, malformed project definitions, and failed Git detection are actionable and non-destructive.",
+      "context": [],
+      "createdAt": "2026-03-25T01:10:39.447Z",
+      "updatedAt": "2026-03-25T01:10:39.447Z"
     }
   ],
   "createdAt": "2026-03-17T16:29:48.208Z",
