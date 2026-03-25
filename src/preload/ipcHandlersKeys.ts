@@ -139,6 +139,9 @@ const IPC_HANDLER_KEYS = {
   FACTORY_TESTS_GET_LAST_RESULT_E2E: 'factory:tests:get-last-result-e2e',
   FACTORY_TESTS_GET_LAST_COVERAGE: 'factory:tests:get-last-coverage',
 
+  // Code Intel
+  CODE_INTEL_DETECT_ENVIRONMENT: 'code-intel:detect-environment',
+
   // Database status
   DB_SUBSCRIBE: 'db:subscribe',
   DB_CONNECT: 'db:connect',

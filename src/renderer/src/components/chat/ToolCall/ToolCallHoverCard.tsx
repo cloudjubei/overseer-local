@@ -63,6 +63,7 @@ export default function ToolCallHoverCard({
     if (toolName === 'grepFiles') return undefined
 
     if (toolName === 'listContents') return tryString(extract(args, ['path']))
+    if (toolName === 'getAstOutline') return tryString(extract(args, ['path']))
     return undefined
   })()
 
@@ -434,6 +435,70 @@ export default function ToolCallHoverCard({
             ) : (
               <div className="text-[11px] text-[var(--text-secondary)]">No results</div>
             )
+          ) : null}
+        </div>
+      )
+    }
+
+    if (n === 'getAstOutline') {
+      const raw = extract(result, ['result']) || extract(result, ['nodes']) || result
+      const items = Array.isArray(raw) ? raw : []
+
+      return (
+        <div className="text-xs space-y-1">
+          {items.length > 0 ? (
+            <div>
+              <SectionTitle>AST Outline</SectionTitle>
+              <PreLimited
+                lines={items.map(
+                  (it: any) =>
+                    `${String(it.kind || '').padEnd(25)} ${it.name} (L${it.startLine}-L${it.endLine})`,
+                )}
+                maxLines={15}
+                renderTruncationMessage={(omitted) => <>+ {omitted} more nodes</>}
+              />
+            </div>
+          ) : resultType === 'success' ? (
+            <div className="text-[11px] text-[var(--text-secondary)]">No nodes</div>
+          ) : null}
+        </div>
+      )
+    }
+
+    if (n === 'getCode') {
+      const requestedNamesRaw = extract(args, ['names'])
+      const requestedNames: string[] = Array.isArray(requestedNamesRaw)
+        ? requestedNamesRaw.filter((it: any): it is string => typeof it === 'string')
+        : []
+
+      const rawResults =
+        extract(result, ['result']) ||
+        extract(result, ['results']) ||
+        extract(result, ['items']) ||
+        result
+
+      const resultCount = Array.isArray(rawResults)
+        ? rawResults.length
+        : rawResults && typeof rawResults === 'object'
+          ? Object.keys(rawResults).length
+          : 0
+
+      return (
+        <div className="text-xs space-y-1">
+          <SectionTitle>Names</SectionTitle>
+          {requestedNames.length > 0 ? (
+            <PreLimited lines={requestedNames} maxLines={10} />
+          ) : (
+            <div className="text-[11px] text-[var(--text-secondary)]">No names</div>
+          )}
+
+          {resultType === 'success' ? (
+            <div>
+              <SectionTitle>Results</SectionTitle>
+              <div className="text-[11px] text-[var(--text-secondary)]">
+                {resultCount} result{resultCount === 1 ? '' : 's'}
+              </div>
+            </div>
           ) : null}
         </div>
       )

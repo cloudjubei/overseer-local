@@ -7,6 +7,7 @@ import { ProjectWizardCodeStep, ProjectWizardCodeState } from './ProjectWizardCo
 import { ProjectWizardGitStep, ProjectWizardGitState } from './ProjectWizardGitStep'
 import { projectsService } from '@renderer/services/projectsService'
 import { gitService } from '@renderer/services/gitService'
+import { codeIntelService } from '@renderer/services/codeIntelService'
 import { useProjectsGroups } from '@renderer/contexts/ProjectsGroupsContext'
 import Spinner from '@renderer/components/ui/Spinner'
 
@@ -34,7 +35,7 @@ export function ProjectWizardModal({ isOpen, onClose, onComplete, initialGroupId
   const [error, setError] = useState<string | null>(null)
   const [createdProjectId, setCreatedProjectId] = useState<string | null>(null)
 
-  const { setProjectGroup } = useProjectsGroups()
+  const { setProjectGroup, setProjectScopeGroups, groups } = useProjectsGroups()
 
   React.useEffect(() => {
     if (initialGroupId && !groupData.groupIds.includes(initialGroupId)) {
@@ -84,18 +85,26 @@ export function ProjectWizardModal({ isOpen, onClose, onComplete, initialGroupId
         setIsSaving(true)
         setError(null)
         try {
+          const initialMainGroup = initialGroupId
+            ? groups.find((g) => g.id === initialGroupId && g.type === 'MAIN')
+            : undefined
+
           const payload = {
             id: createData.id,
             title: createData.title,
             path: createData.path,
             description: createData.description || '',
+            repo_url: '',
             metadata: { icon: createData.icon },
             active: true,
-            mainGroupId: initialGroupId || undefined,
+            mainGroupId: initialMainGroup?.id,
           }
           
           const newProject = await projectsService.createProject(payload)
-          setCreatedProjectId(newProject?.id || payload.id)
+          if (!newProject?.id) {
+            throw new Error('Project creation did not return a created project.')
+          }
+          setCreatedProjectId(newProject.id)
           setStep(3)
         } catch (e: any) {
           setError(e?.message || String(e))
@@ -130,10 +139,22 @@ export function ProjectWizardModal({ isOpen, onClose, onComplete, initialGroupId
     setError(null)
     try {
       const patch: any = {}
-      if (groupData.groupIds.length > 0) {
-        patch.scopeGroupIds = groupData.groupIds
-        // Also ensure mainGroupId is set if not already
-        patch.mainGroupId = groupData.groupIds[0]
+      
+      const scopeGroupIds = groupData.groupIds.filter(id => {
+        const group = groups.find(g => g.id === id)
+        return group?.type === 'SCOPE'
+      })
+
+      const mainGroupId = groupData.groupIds.find(id => {
+        const group = groups.find(g => g.id === id)
+        return group?.type === 'MAIN'
+      }) || initialGroupId
+
+      if (scopeGroupIds.length > 0) {
+        patch.scopeGroupIds = scopeGroupIds
+      }
+      if (mainGroupId) {
+        patch.mainGroupId = mainGroupId
       }
       
       if (codeData && codeData.isCodeProject) {
@@ -151,15 +172,16 @@ export function ProjectWizardModal({ isOpen, onClose, onComplete, initialGroupId
          await projectsService.updateProject(createdProjectId, patch)
       }
 
-      // If they had groupIds, call setProjectGroup for the main one just to be safe with contexts
-      if (groupData.groupIds.length > 0) {
-         for (const gid of groupData.groupIds) {
-           await setProjectGroup(createdProjectId, gid)
-         }
+      if (mainGroupId) {
+        await setProjectGroup(createdProjectId, mainGroupId)
       }
+      await setProjectScopeGroups(createdProjectId, scopeGroupIds)
 
-      // Initialize Git & start monitors
-      await gitService.startProject(createdProjectId, { init: gitData?.initGit })
+      try {
+        await gitService.startProject(createdProjectId, { init: gitData?.initGit })
+      } catch (gitError) {
+        console.warn('[ProjectWizardModal] git start failed during project creation', gitError)
+      }
 
       onComplete()
     } catch (e: any) {
@@ -238,6 +260,8 @@ export function ProjectWizardModal({ isOpen, onClose, onComplete, initialGroupId
                 )}
                 {step === 4 && (
                   <ProjectWizardCodeStep
+                    projectPath={createData?.path}
+                    detectEnvironment={codeIntelService.detectEnvironment}
                     initialState={codeData || undefined}
                     onStateChange={(state, valid) => {
                       setCodeData(prev => {

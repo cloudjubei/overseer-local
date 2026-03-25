@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@renderer/components/ui/Select'
+import React, { useState, useEffect, useRef } from 'react'
 import { KNOWN_LANGUAGES, KNOWN_FRAMEWORKS_BY_LANGUAGE } from '@renderer/services/projectsService'
 import { coerceLanguage } from './languageCoercion'
-import type { ProgrammingLanguage } from 'thefactory-tools'
+import type { DetectedEnvironment, ProgrammingLanguage } from 'thefactory-tools'
 
 export interface ProjectWizardCodeState {
   isCodeProject: boolean
@@ -14,15 +13,19 @@ export interface ProjectWizardCodeState {
 }
 
 interface ProjectWizardCodeStepProps {
+  projectPath?: string
+  detectEnvironment?: (dirPath: string) => Promise<DetectedEnvironment>
   initialState?: Partial<ProjectWizardCodeState>
   onStateChange: (state: ProjectWizardCodeState, isValid: boolean) => void
 }
 
-export function ProjectWizardCodeStep({ initialState, onStateChange }: ProjectWizardCodeStepProps) {
+export function ProjectWizardCodeStep({ projectPath, detectEnvironment, initialState, onStateChange }: ProjectWizardCodeStepProps) {
   const [isCodeProject, setIsCodeProject] = useState(initialState?.isCodeProject ?? false)
   const [languageInput, setLanguageInput] = useState<string>(initialState?.languageInput ?? initialState?.language ?? '')
   const [language, setLanguage] = useState<ProgrammingLanguage | 'other' | ''>(initialState?.language || '')
   const [framework, setFramework] = useState(initialState?.framework || '')
+  const detectedPathRef = useRef<string | null>(null)
+  const hasManualChangesRef = useRef(Boolean(initialState))
 
   useEffect(() => {
     if (!isCodeProject) {
@@ -34,6 +37,10 @@ export function ProjectWizardCodeStep({ initialState, onStateChange }: ProjectWi
     onStateChange({ isCodeProject, languageInput, language, framework }, isValid)
   }, [isCodeProject, languageInput, language, framework])
 
+  useEffect(() => {
+    hasManualChangesRef.current = true
+  }, [isCodeProject, languageInput, framework])
+
   const availableFrameworks =
     language && language !== 'other'
       ? KNOWN_FRAMEWORKS_BY_LANGUAGE[language as keyof typeof KNOWN_FRAMEWORKS_BY_LANGUAGE] || []
@@ -43,6 +50,35 @@ export function ProjectWizardCodeStep({ initialState, onStateChange }: ProjectWi
   useEffect(() => {
     setLanguage(coerceLanguage(languageInput) as any)
   }, [languageInput])
+
+  useEffect(() => {
+    if (!projectPath || !detectEnvironment) return
+    if (detectedPathRef.current === projectPath) return
+    if (hasManualChangesRef.current && initialState) return
+
+    let cancelled = false
+    detectedPathRef.current = projectPath
+
+    ;(async () => {
+      try {
+        const detected = await detectEnvironment(projectPath)
+        if (cancelled) return
+
+        const detectedLanguage = detected.language || ''
+        const detectedFramework = detected.frameworks?.[0] || ''
+        setIsCodeProject(detected.isCodeProject)
+        setLanguageInput(detectedLanguage)
+        setLanguage(detectedLanguage)
+        setFramework(detectedFramework)
+      } catch (error) {
+        console.warn('[ProjectWizardCodeStep] detectEnvironment failed', error)
+      }
+    })()
+
+    return () => {
+      cancelled = true
+    }
+  }, [projectPath, detectEnvironment, initialState])
 
   return (
     <div className="flex flex-col gap-6 w-[500px]">
@@ -84,22 +120,24 @@ export function ProjectWizardCodeStep({ initialState, onStateChange }: ProjectWi
               )}
             </div>
 
-            {availableFrameworks.length > 0 && (
+            {true && (
               <div className="flex flex-col gap-1.5">
                 <label className="text-sm font-medium text-text-primary">Framework</label>
-                <Select value={framework || 'none'} onValueChange={(v) => setFramework(v === 'none' ? '' : v)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a framework (optional)" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">None</SelectItem>
-                    {availableFrameworks.map((fw) => (
-                      <SelectItem key={fw} value={fw}>
-                        {fw.charAt(0).toUpperCase() + fw.slice(1)}
-                      </SelectItem>
+                <input
+                  className="ui-input"
+                  value={framework}
+                  onChange={(e) => setFramework(e.target.value)}
+                  placeholder="e.g. react, vue, django, spring (free text)"
+                  list="project-wizard-known-frameworks"
+                />
+                <datalist id="project-wizard-known-frameworks">
+                  {availableFrameworks
+                    .filter((f) => f !== 'other')
+                    .map((fw) => (
+                      <option key={fw} value={fw} />
                     ))}
-                  </SelectContent>
-                </Select>
+                  <option value="other" />
+                </datalist>
               </div>
             )}
           </div>

@@ -14,6 +14,7 @@ import DocumentIngestionManager from '../logic/document_ingestion/DocumentIngest
 import FactoryCompletionManager from '../logic/factory/FactoryCompletionManager'
 import FactoryLLMCostsManager from '../logic/factory/FactoryLLMCostsManager'
 import FactoryTestsManager from '../logic/factory/FactoryTestsManager'
+import CodeIntelManager from '../logic/code_intel/CodeIntelManager'
 import LLMConfigsManager from '../logic/llm/LLMConfigsManager'
 import GitCredentialsManager from '../logic/git/GitCredentialsManager'
 import GitManager from '../logic/git/GitManager'
@@ -32,6 +33,7 @@ export let documentIngestionManager: DocumentIngestionManager | undefined
 export let factoryToolsManager: FactoryToolsManager | undefined
 export let factoryCompletionManager: FactoryCompletionManager | undefined
 export let factoryTestsManager: FactoryTestsManager | undefined
+export let codeIntelManager: CodeIntelManager | undefined
 export let llmConfigsManager: LLMConfigsManager | undefined
 export let gitCredentialsManager: GitCredentialsManager | undefined
 export let gitManager: GitManager | undefined
@@ -61,6 +63,7 @@ export async function initManagers(projectRoot: string, mainWindow: BrowserWindo
   factoryLLMCostsManager = new FactoryLLMCostsManager(projectRoot, mainWindow, databaseManager)
   liveDataManager = new LiveDataManager(projectRoot, mainWindow, factoryLLMCostsManager)
   factoryTestsManager = new FactoryTestsManager(projectRoot, mainWindow, projectsManager)
+  codeIntelManager = new CodeIntelManager(projectRoot, mainWindow, projectsManager)
   factoryToolsManager = new FactoryToolsManager(
     projectRoot,
     mainWindow,
@@ -97,6 +100,7 @@ export async function initManagers(projectRoot: string, mainWindow: BrowserWindo
     factoryToolsManager,
     factoryCompletionManager,
     factoryTestsManager,
+    codeIntelManager,
     llmConfigsManager,
   ]
 
