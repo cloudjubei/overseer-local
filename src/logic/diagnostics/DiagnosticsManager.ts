@@ -1,5 +1,6 @@
 import type { BrowserWindow } from 'electron'
-import { app, process as electronProcess } from 'electron'
+import { app } from 'electron'
+import process from 'node:process'
 import BaseManager from '../BaseManager'
 import IPC_HANDLER_KEYS from '../../preload/ipcHandlersKeys'
 import type { DiagnosticsSnapshot } from '../../types/diagnostics'
@@ -110,8 +111,11 @@ export default class DiagnosticsManager extends BaseManager {
         }
       : undefined
 
-    // process.getProcessMemoryInfo is available in main.
-    const processMemoryInfo = await (electronProcess.getProcessMemoryInfo?.() as any)
+    // process.getProcessMemoryInfo is available in the main process.
+    // Use node:process (Electron augments it). Keep this best-effort to avoid breaking the overlay.
+    const processMemoryInfo = process.getProcessMemoryInfo
+      ? await (process.getProcessMemoryInfo() as any)
+      : undefined
 
     return {
       timestamp,

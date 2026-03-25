@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "-",
+  "status": "+",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -3054,7 +3054,7 @@
     },
     {
       "id": "e19a92eb-4ad6-4375-8701-b947c78fbd67",
-      "status": "-",
+      "status": "+",
       "title": "CPU/Memory usage tracking",
       "description": "sometimes the app hangs or can produce huge CPU spikes as well as memory usage, for dev mode (configurable in @src/renderer/src/screens/SettingsView.tsx ) we want to display a view in the bottom right that can be minimised/opened further and that will overlay everything else.\nThis view should show diagnostic data and anything that can help us diagnose CPU/Memory spikes.\n\nCode was added in:\n@src/logic/diagnostics/DiagnosticsManager.ts , @src/renderer/src/components/ui/DiagnosticsOverlay.tsx , @src/renderer/src/hooks/useDiagnosticsOverlay.ts , @src/renderer/src/services/diagnosticsService.ts and @src/types/diagnostics.ts",
       "context": [
@@ -3067,10 +3067,12 @@
       ],
       "blockers": [],
       "createdAt": "2026-03-25T11:03:01.933Z",
-      "updatedAt": "2026-03-25T11:32:04.342Z",
-      "rejection": "When I launch this I see:\n\ndiagnostics:get-snapshot failed TypeError: Cannot read properties of undefined (reading 'getProcessMemoryInfo')\n    at DiagnosticsManager.getSnapshot (/Users/cloud/Documents/Work/overseer-local/out/main/index.js:2988:54)\n    at handlers.<computed> [as diagnostics:get-snapshot] (/Users/cloud/Documents/Work/overseer-local/out/main/index.js:2967:76)\n    at /Users/cloud/Documents/Work/overseer-local/out/main/index.js:239:46\n    at Session.<anonymous> (node:electron/js2c/browser_init:2:107293)\n    at Session.emit (node:events:519:28)"
+      "updatedAt": "2026-03-25T11:46:20.873Z",
+      "rejection": "When I launch this I see:\n\ndiagnostics:get-snapshot failed TypeError: Cannot read properties of undefined (reading 'getProcessMemoryInfo')\n    at DiagnosticsManager.getSnapshot (/Users/cloud/Documents/Work/overseer-local/out/main/index.js:2988:54)\n    at handlers.<computed> [as diagnostics:get-snapshot] (/Users/cloud/Documents/Work/overseer-local/out/main/index.js:2967:76)\n    at /Users/cloud/Documents/Work/overseer-local/out/main/index.js:239:46\n    at Session.<anonymous> (node:electron/js2c/browser_init:2:107293)\n    at Session.emit (node:events:519:28)",
+      "completedAt": "2026-03-25T11:46:20.873Z"
     }
   ],
   "createdAt": "2025-09-16T13:05:37.984Z",
-  "updatedAt": "2025-11-05T00:22:06.741Z"
+  "updatedAt": "2025-11-05T00:22:06.741Z",
+  "completedAt": "2026-03-25T11:46:20.873Z"
 }
