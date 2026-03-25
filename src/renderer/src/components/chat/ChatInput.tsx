@@ -474,7 +474,7 @@ export default function ChatInput({
                   placeholder={placeholderText}
                   rows={1}
                   disabled={false}
-                  className="w-full resize-none bg-transparent px-2 py-1 outline-none text-[var(--text-primary)]"
+                  className="w-full resize-none bg-transparent px-2 py-1 outline-none"
                   style={{ ...maxHeightStyle, overflowY: 'auto' }}
                   ariaLabel="Message input"
                   inputRef={textareaRef}

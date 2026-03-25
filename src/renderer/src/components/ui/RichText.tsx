@@ -3,6 +3,8 @@ import FileDisplay from './FileDisplay'
 import { useFiles } from '../../contexts/FilesContext'
 import DependencyBullet from '../stories/DependencyBullet'
 import { FileMeta } from 'thefactory-tools'
+import { IconFolder } from './icons/Icons'
+import { renderFileSuggestionIcon } from '../chat/fileSuggestionIcons'
 
 // Renders text into rich content:
 // - @file/path.ext mentions -> inline File chip with hover preview (display mode)
@@ -66,34 +68,14 @@ function tokenize(
   return parts
 }
 
-function isRangeInsideToken(params: {
-  tokenStart: number
-  tokenEnd: number
-  caretPos: number
-  key: 'Backspace' | 'Delete'
-}): boolean {
-  const { tokenStart, tokenEnd, caretPos, key } = params
-  // With a collapsed selection, Backspace affects the char before caret, Delete affects the char after.
-  // Treat "backspacing into" a token as caret being immediately after it.
-  if (key === 'Backspace') return caretPos === tokenEnd
-  if (key === 'Delete') return caretPos === tokenStart
-  return false
-}
-
 export function RichText({
   text,
   variant = 'display',
   inputEditRange,
-  onRequestEditToken,
 }: {
   text: string | null | undefined
   variant?: 'display' | 'input'
-  // When rendering in input mode, if provided, suppress chip styling for any mention whose
-  // raw token range intersects this range (render as plain text for editing UX at caret).
   inputEditRange?: { start: number; end: number } | null
-  // Input-mode only: allow the parent textarea to intercept backspace/delete into a token and
-  // request an edit range to be selected.
-  onRequestEditToken?: (range: { start: number; end: number }) => void
 }) {
   const { filesByPath } = useFiles()
   const segments = React.useMemo(() => tokenize(text || ''), [text])
@@ -126,10 +108,9 @@ export function RichText({
           }
 
           const isFile = seg.type === 'file'
+          const isFolder = isFile && !seg.value.split('/').pop()?.includes('.')
           const label = raw
 
-          // Important: overlay is pointer-events:none to preserve native textarea selection.
-          // But we can still embed metadata for the textarea to read by mapping positions.
           return (
             <span
               key={idx}
@@ -144,15 +125,30 @@ export function RichText({
               data-token-end={end}
               data-token-raw={raw}
             >
-              <span className="file-mentions-token__label">{label}</span>
               {isFile ? (
-                <span
+                <>
+                  <span className="file-mentions-token__icon" aria-hidden>
+                    {isFolder ? (
+                      <IconFolder className="w-4 h-4" />
+                    ) : (
+                      renderFileSuggestionIcon({ path: seg.value, kind: 'file' }, 'w-4 h-4')
+                    )}
+                  </span>
+                  <span className="file-mentions-token__label">{label}</span>
+                </>
+              ) : (
+                <span className="file-mentions-token__label">{label}</span>
+              )}
+              {isFile ? (
+                <button
+                  type="button"
                   className="file-mentions-token__remove"
-                  aria-hidden
+                  aria-label={`Remove ${seg.value}`}
                   title="Remove"
+                  tabIndex={-1}
                 >
                   ×
-                </span>
+                </button>
               ) : null}
             </span>
           )
@@ -223,21 +219,6 @@ export function RichText({
               navigateOnClick={false}
               showMeta={false}
               className="inline"
-              trailing={
-                <button
-                  type="button"
-                  className="inline-file-chip__remove"
-                  aria-label={`Remove ${meta.name}`}
-                  title="Remove"
-                  onClick={(e) => {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    // Display-mode remove not wired by default; consumer can intercept via event delegation
-                  }}
-                >
-                  ×
-                </button>
-              }
             />
           </span>
         )
@@ -248,4 +229,4 @@ export function RichText({
 
 export default RichText
 
-export { tokenize, isRangeInsideToken }
+export { tokenize }

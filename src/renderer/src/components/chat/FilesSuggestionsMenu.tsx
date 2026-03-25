@@ -31,7 +31,8 @@ export default function FilesSuggestionsMenu({
       {matches.map((path, idx) => {
         const meta = filesByPath[path]
         const name = meta?.name || path.split('/').pop() || path
-        const type = meta?.type || inferFileType(path)
+        const isFolder = !meta && !name.includes('.')
+        const type = isFolder ? 'directory' : (meta?.type || inferFileType(path))
         const size = meta?.size ?? undefined
         const mtime = meta?.mtime ?? undefined
         const ctime = meta?.ctime ?? undefined
@@ -41,7 +42,7 @@ export default function FilesSuggestionsMenu({
               file={{ name, absolutePath: path, relativePath: path, type, size, mtime, ctime }}
               density="compact"
               interactive
-              showPreviewOnHover
+              showPreviewOnHover={!isFolder}
               onClick={() => onSelect(path)}
             />
           </div>

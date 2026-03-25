@@ -19,9 +19,19 @@ export function useFilesAutocomplete(params: {
   // Debounce expensive work during typing.
   const debounceTimerRef = useRef<number | null>(null)
 
-  // Pre-normalize paths for cheap case-insensitive matching.
   const filesIndex = useMemo(() => {
-    return (filesList || []).map((path) => ({ path, lower: path.toLowerCase() }))
+    return (filesList || []).map((path) => {
+      const parts = path.split('/').filter(Boolean)
+      const basename = parts[parts.length - 1] || path
+      const isFolder = !basename.includes('.')
+      return {
+        path,
+        lower: path.toLowerCase(),
+        basename,
+        basenameLower: basename.toLowerCase(),
+        isFolder,
+      }
+    })
   }, [filesList])
 
   function getCursorCoordinates(textarea: HTMLTextAreaElement, pos: number) {
@@ -105,15 +115,37 @@ export function useFilesAutocomplete(params: {
       return
     }
 
-    // Filter + cap results to keep UI fast.
-    const filtered: string[] = []
-    for (let i = 0; i < filesIndex.length; i++) {
-      const it = filesIndex[i]
-      if (it.lower.includes(queryLower)) {
-        filtered.push(it.path)
-        if (filtered.length >= 50) break
-      }
-    }
+    const filtered = filesIndex
+      .filter((it) => it.lower.includes(queryLower) || it.basenameLower.includes(queryLower))
+      .sort((a, b) => {
+        const aBaseStarts = a.basenameLower.startsWith(queryLower) ? 0 : 1
+        const bBaseStarts = b.basenameLower.startsWith(queryLower) ? 0 : 1
+        if (aBaseStarts !== bBaseStarts) return aBaseStarts - bBaseStarts
+
+        const aPathStarts = a.lower.startsWith(queryLower) ? 0 : 1
+        const bPathStarts = b.lower.startsWith(queryLower) ? 0 : 1
+        if (aPathStarts !== bPathStarts) return aPathStarts - bPathStarts
+
+        const aSegmentExact = a.basenameLower === queryLower ? 0 : 1
+        const bSegmentExact = b.basenameLower === queryLower ? 0 : 1
+        if (aSegmentExact !== bSegmentExact) return aSegmentExact - bSegmentExact
+
+        const aFolderBoost = a.isFolder ? 0 : 1
+        const bFolderBoost = b.isFolder ? 0 : 1
+        if (aFolderBoost !== bFolderBoost && queryLower.includes('/')) return aFolderBoost - bFolderBoost
+
+        if (a.basename.length !== b.basename.length) return a.basename.length - b.basename.length
+
+        if (a.basenameLower !== b.basenameLower) {
+          const baseCmp = a.basenameLower.localeCompare(b.basenameLower)
+          if (baseCmp !== 0) return baseCmp
+        }
+
+        if (a.path.length !== b.path.length) return a.path.length - b.path.length
+        return a.path.localeCompare(b.path)
+      })
+      .slice(0, 50)
+      .map((it) => it.path)
 
     setMatches(filtered)
     setMentionStart(start)
@@ -140,16 +172,15 @@ export function useFilesAutocomplete(params: {
     const textarea = textareaRef.current
     if (!textarea || mentionStart === null) return
     const currentText = textarea.value
-    const currentPos = textarea.selectionStart
-    const before = currentText.slice(0, mentionStart)
-    const after = currentText.slice(currentPos)
+    const currentPos = textarea.selectionStart ?? 0
+    const wordEnd = currentPos
+    const beforeMention = currentText.slice(0, mentionStart)
+    const afterMention = currentText.slice(wordEnd)
 
-    // Insert the selected path followed by a single space
-    const newText = `${before}@${path} ${after}`
+    const newText = `${beforeMention}@${path} ${afterMention}`
     setInput(newText)
 
-    // Place caret after the inserted trailing space so typing continues outside the mention
-    const newPos = before.length + 1 + path.length + 1
+    const newPos = beforeMention.length + 1 + path.length + 1
     setTimeout(() => {
       textarea.focus()
       textarea.setSelectionRange(newPos, newPos)
