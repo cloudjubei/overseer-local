@@ -142,6 +142,9 @@ const IPC_HANDLER_KEYS = {
   // Code Intel
   CODE_INTEL_DETECT_ENVIRONMENT: 'code-intel:detect-environment',
 
+  // Diagnostics
+  DIAGNOSTICS_GET_SNAPSHOT: 'diagnostics:get-snapshot',
+
   // Database status
   DB_SUBSCRIBE: 'db:subscribe',
   DB_CONNECT: 'db:connect',

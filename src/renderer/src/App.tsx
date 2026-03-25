@@ -10,7 +10,7 @@ import { ProjectsProvider } from './contexts/ProjectContext'
 import { useTheme } from './hooks/useTheme'
 import useLiveData from './hooks/useLiveData'
 import LoadingScreen from './screens/LoadingScreen'
-import { AppSettingsProvider } from './contexts/AppSettingsContext'
+import { AppSettingsProvider, useAppSettings } from './contexts/AppSettingsContext'
 import { NotificationClickHandler } from './hooks/useNotifications'
 import { LLMConfigProvider } from './contexts/LLMConfigContext'
 import { AgentsProvider } from './contexts/AgentsContext'
@@ -22,6 +22,7 @@ import { GitProvider } from './contexts/GitContext'
 import { NotificationSoundBootstrap } from './hooks/useNotifications'
 import { CostsProvider } from './contexts/CostsContext'
 import MainView from './navigation/main/MainView'
+import DiagnosticsOverlay from './components/ui/DiagnosticsOverlay'
 
 function ServicesBootstrap() {
   const { init } = useLiveData()
@@ -75,6 +76,7 @@ function App() {
 
 function MainApp() {
   const { initTheme } = useTheme()
+  const { appSettings } = useAppSettings()
   const [bootComplete, setBootComplete] = useState(false)
 
   useEffect(() => {
@@ -94,6 +96,7 @@ function MainApp() {
     <div className="flex h-full w-full overflow-hidden">
       <MainView />
       <ModalHost />
+      <DiagnosticsOverlay enabled={!!appSettings.userPreferences.showDiagnosticsOverlay} />
     </div>
   )
 }

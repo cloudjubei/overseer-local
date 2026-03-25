@@ -1,6 +1,6 @@
 {
   "id": "f67e8921-b197-40c9-9154-e95db8f27deb",
-  "status": "-",
+  "status": "?",
   "title": "UI Improvements",
   "description": "Various UI improvements to the app",
   "features": [
@@ -3053,7 +3053,7 @@
     },
     {
       "id": "e19a92eb-4ad6-4375-8701-b947c78fbd67",
-      "status": "-",
+      "status": "?",
       "title": "CPU/Memory usage tracking",
       "description": "sometimes the app hangs or can produce huge CPU spikes as well as memory usage, for dev mode (configurable in @src/renderer/src/screens/SettingsView.tsx ) we want to display a view in the bottom right that can be minimised/opened further and that will overlay everything else.\nThis view should show diagnostic data and anything that can help us diagnose CPU/Memory spikes.",
       "context": [
@@ -3061,7 +3061,8 @@
       ],
       "blockers": [],
       "createdAt": "2026-03-25T11:03:01.933Z",
-      "updatedAt": "2026-03-25T11:03:01.933Z"
+      "updatedAt": "2026-03-25T11:12:34.225Z",
+      "rejection": "Blocked: Agent loop exceeded max turns"
     }
   ],
   "createdAt": "2025-09-16T13:05:37.984Z",
