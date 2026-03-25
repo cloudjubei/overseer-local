@@ -3040,7 +3040,7 @@
     },
     {
       "id": "341a9c1e-8388-4570-a073-7b5fed9c0f14",
-      "status": "-",
+      "status": "+",
       "title": "Timeline improvements",
       "description": "In @src/renderer/src/screens/ProjectTimelineView.tsx  we need a few updates:\n- the timeline should always show AT THE END (i.e. today/now), so after it renders it must scroll there (no animation, it should just show this way).\n- we need to show features as 1 row, and stories as the 2nd row in every single view.\n- the first column (showing that it's either stories or features), should never scroll, only the columns after.\n- in every single view the items (features or stories) show overlapping each other, they never should. The rows need to be high enough to accommodate all items. The easiest way to do this is to make  each cell scrollable, and the rows themselves to be much higher to begin with.\n- we need to standardise the items so that features and stories display in the same style, but obviously will show their respective cards on hover. Right now for stories, they also go outside the parent column (they extend outside the edges), that shouldn't happen, the columns can simply be wider and these items can occupy the max amount of space + a tiny bit of padding.\n- when showing the \"All projects\" view, simply stack Features/Stories one after the other per project (but add a new column in front of these that specify which project it is, and just like Features/Stories - this shouldn't scroll but should be sticky).\n- make sure this display is not killing the cpu/gpu, and that we do some clever view caching as there could be a lot of things displayed for this.",
       "context": [
@@ -3048,7 +3048,8 @@
       ],
       "blockers": [],
       "createdAt": "2026-03-25T11:01:13.248Z",
-      "updatedAt": "2026-03-25T11:01:13.248Z"
+      "updatedAt": "2026-03-25T11:08:15.569Z",
+      "completedAt": "2026-03-25T11:08:15.569Z"
     },
     {
       "id": "e19a92eb-4ad6-4375-8701-b947c78fbd67",
