@@ -1,6 +1,12 @@
 import React, { memo, useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
-import type { CompletionMessage, CompletionToolMessage, ToolResultType } from 'thefactory-tools'
+import type {
+  CompletionAssistantMessage,
+  CompletionMessage,
+  CompletionToolMessage,
+  ModelPrice,
+  ToolResultType,
+} from 'thefactory-tools'
 import { inferFileType } from 'thefactory-tools/utils'
 
 import ErrorBubble from '../ui/ErrorBubble'
@@ -12,13 +18,25 @@ import ToolCallCard from './ToolCallCard'
 
 import { IconToolbox, IconDelete, IconRefresh } from '../ui/icons/Icons'
 import { Switch } from '../ui/Switch'
+import Tooltip from '../ui/Tooltip'
 
 import { messageIso } from '@renderer/utils/chat'
 import { formatDurationMs, formatFriendlyTimestamp } from '@renderer/utils/time'
+import { getPrice } from '@renderer/services/pricingService'
 
 function formatUSD(n?: number) {
   if (n == null || Number.isNaN(n)) return undefined
   return `$${n.toFixed(4)}`
+}
+
+function safeNumber(n: unknown): number {
+  return typeof n === 'number' && isFinite(n) ? n : 0
+}
+
+function isAssistantWithUsageAndModel(
+  m: CompletionMessage,
+): m is CompletionAssistantMessage & { model: { provider: string; model: string } } {
+  return m.role === 'assistant' && !!m.usage && !!m.model
 }
 
 export type ToolPreview =
@@ -70,6 +88,105 @@ function CollapsibleContent({
         </button>
       ) : null}
     </div>
+  )
+}
+
+function AssistantUsageChip({ msg }: { msg: CompletionAssistantMessage & { model: any } }) {
+  const [price, setPrice] = useState<ModelPrice | undefined>(undefined)
+
+  useEffect(() => {
+    let cancelled = false
+    const provider = msg.model?.provider
+    const model = msg.model?.model
+    if (!provider || !model) {
+      setPrice(undefined)
+      return
+    }
+
+    const run = async () => {
+      try {
+        const next = await getPrice(provider, model)
+        if (!cancelled) setPrice(next)
+      } catch {
+        if (!cancelled) setPrice(undefined)
+      }
+    }
+
+    void run()
+    return () => {
+      cancelled = true
+    }
+  }, [msg.model?.model, msg.model?.provider])
+
+  const usage = msg.usage
+  const promptTokens = safeNumber(usage?.promptTokens)
+  const completionTokens = safeNumber(usage?.completionTokens)
+  const cachedReadInputTokens = safeNumber((usage as any)?.cachedReadInputTokens)
+  const storedCostUSD = typeof usage?.cost === 'number' ? usage.cost : undefined
+
+  const inputRate = safeNumber(price?.inputPerMTokensUSD)
+  const outputRate = safeNumber(price?.outputPerMTokensUSD)
+  const cacheReadRate = safeNumber((price as any)?.cacheReadInputPerMTokensUSD)
+  const canEstimate = inputRate > 0 || outputRate > 0 || cacheReadRate > 0
+
+  const estimatedPromptUSD = canEstimate && inputRate > 0 ? (promptTokens * inputRate) / 1_000_000 : 0
+  const estimatedCachedReadUSD =
+    canEstimate && cacheReadRate > 0
+      ? (cachedReadInputTokens * cacheReadRate) / 1_000_000
+      : canEstimate && inputRate > 0
+        ? (cachedReadInputTokens * inputRate) / 1_000_000
+        : 0
+  const estimatedOutputUSD =
+    canEstimate && outputRate > 0 ? (completionTokens * outputRate) / 1_000_000 : 0
+  const estimatedCostUSD =
+    canEstimate ? estimatedPromptUSD + estimatedCachedReadUSD + estimatedOutputUSD : undefined
+
+  const displayCostUSD = typeof storedCostUSD === 'number' ? storedCostUSD : estimatedCostUSD
+  const cacheRatio = cachedReadInputTokens / Math.max(1, promptTokens + cachedReadInputTokens)
+
+  const tooltipContent = (
+    <div className="min-w-[220px] text-xs text-[var(--text-primary)]">
+      <div className="font-semibold mb-2">Message usage</div>
+      <div className="space-y-1">
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-[var(--text-secondary)]">Cost</span>
+          <span>{formatUSD(displayCostUSD) || '—'}</span>
+        </div>
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-[var(--text-secondary)]">Input</span>
+          <span>{Math.round(promptTokens).toLocaleString()}</span>
+        </div>
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-[var(--text-secondary)]">Output</span>
+          <span>{Math.round(completionTokens).toLocaleString()}</span>
+        </div>
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-[var(--text-secondary)]">Cached read</span>
+          <span>{Math.round(cachedReadInputTokens).toLocaleString()}</span>
+        </div>
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-[var(--text-secondary)]">Cache ratio</span>
+          <span>{Math.round(cacheRatio * 100).toLocaleString()}%</span>
+        </div>
+      </div>
+      {typeof storedCostUSD !== 'number' && typeof displayCostUSD === 'number' ? (
+        <div className="mt-2 text-[10px] text-[var(--text-secondary)] opacity-80">
+          Estimated from current pricing.
+        </div>
+      ) : null}
+    </div>
+  )
+
+  return (
+    <Tooltip content={tooltipContent} placement="top" delayMs={150}>
+      <button
+        type="button"
+        className="text-[11px] text-[var(--text-secondary)] inline-flex items-center gap-1 border border-[var(--border-subtle)] bg-[var(--surface-overlay)] rounded-full px-2 py-[2px] hover:bg-[var(--surface-raised)] transition-colors"
+        aria-label="Show message usage"
+      >
+        <span className="font-medium">$</span>
+      </button>
+    </Tooltip>
   )
 }
 
@@ -245,13 +362,6 @@ function MessageRow({
     return formatDurationMs(end - start)
   }, [globalIndex, isAssistant, iso, messagesToDisplay])
 
-  const assistantCostLabel = useMemo(() => {
-    if (!isAssistant) return undefined
-    const cost = (msg as any)?.usage?.cost
-    if (typeof cost !== 'number') return undefined
-    return formatUSD(cost)
-  }, [isAssistant, msg])
-
   return (
     <div data-msg-idx={globalIndex} data-msg-role={role} data-msg-iso={iso || ''}>
       {showCutoff && (
@@ -311,19 +421,18 @@ function MessageRow({
         >
           <div className={['flex-col', isUser ? 'items-start' : 'items-end'].join(' ')}>
             {isAssistant ? (
-              <div className="w-full flex justify-between items-baseline">
-                {(msg as any).showModel && (msg as any).model ? (
-                  <div className="text-[11px] text-[var(--text-secondary)] mb-1 inline-flex items-center gap-1 border border-[var(--border-subtle)] bg-[var(--surface-overlay)] rounded-full px-2 py-[2px]">
-                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-[var(--accent-primary)]" />
-                    {(msg as any).model.model}
-                  </div>
-                ) : (
-                  <div />
-                )}
-                {ts || thinkingLabel || assistantCostLabel ? (
-                  <div className="text-[10px] leading-4 text-[var(--text-secondary)] mb-1 opacity-80 select-none flex items-baseline gap-1">
-                    {assistantCostLabel ? <span>{assistantCostLabel}</span> : null}
-                    {assistantCostLabel && (thinkingLabel || ts) ? <span>·</span> : null}
+              <div className="w-full flex justify-between items-baseline gap-2">
+                <div className="mb-1 inline-flex items-center gap-1 min-w-0">
+                  {(msg as any).showModel && (msg as any).model ? (
+                    <div className="text-[11px] text-[var(--text-secondary)] inline-flex items-center gap-1 border border-[var(--border-subtle)] bg-[var(--surface-overlay)] rounded-full px-2 py-[2px] min-w-0">
+                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-[var(--accent-primary)]" />
+                      <span className="truncate">{(msg as any).model.model}</span>
+                    </div>
+                  ) : null}
+                  {isAssistantWithUsageAndModel(msg) ? <AssistantUsageChip msg={msg} /> : null}
+                </div>
+                {ts || thinkingLabel ? (
+                  <div className="text-[10px] leading-4 text-[var(--text-secondary)] mb-1 opacity-80 select-none flex items-baseline gap-1 whitespace-nowrap">
                     {thinkingLabel ? <span>{`+${thinkingLabel}`}</span> : null}
                     {thinkingLabel && ts ? <span>·</span> : null}
                     {ts ? <span>{ts}</span> : null}
