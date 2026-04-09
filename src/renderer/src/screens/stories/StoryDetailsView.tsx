@@ -62,10 +62,11 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null)
   const [dropIndex, setDropIndex] = useState<number | null>(null)
   const [dropPosition, setDropPosition] = useState<'before' | 'after' | null>(null)
-  const { activeProjectId: projectId, getStoryDisplayIndex } = useProjectContext()
+  const { activeProjectId: projectId } = useProjectContext()
   const {
     storiesById,
-    updateStoryStatus,
+    updateStory,
+    getStoryDisplayIndex,
     updateFeature,
     reorderFeatures,
     getBlockers,
@@ -104,7 +105,7 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
 
   const storyDisplayIndex = useMemo(() => {
     if (!projectId) return '?'
-    return getStoryDisplayIndex(projectId, storyId)
+    return getStoryDisplayIndex(storyId)
   }, [projectId, storyId, getStoryDisplayIndex])
 
   const sortedFeaturesBase = useMemo(() => {
@@ -175,7 +176,7 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
 
   const handleStoryStatusChange = async (storyId: string, status: Status) => {
     try {
-      await updateStoryStatus(storyId, status)
+      await updateStory(storyId, { status })
     } catch (e) {
       console.error('Failed to update status', e)
     }

@@ -350,9 +350,9 @@ export default function ChatsNavigationSidebar({
   mode,
 }: ChatsNavigationSidebarProps) {
   const { projectId: activeProjectId, project } = useActiveProject()
-  const { projects, getStoryDisplayIndex } = useProjectContext()
+  const { projects } = useProjectContext()
   const { activeSelectionType, activeGroupId, groups } = useProjectsGroups()
-  const { storiesById, featuresById } = useStories()
+  const { storiesById, featuresById, getStoryDisplayIndex } = useStories()
   const { chatsByProjectId, chatsByGroupId } = useChats()
   const { appSettings } = useAppSettings()
 
@@ -433,7 +433,7 @@ export default function ChatsNavigationSidebar({
       if (type === 'STORY' || type === 'FEATURE') {
         const sid: string | undefined = ctx.storyId
         if (!sid) return false
-        return getStoryDisplayIndex(activeProjectId, sid) !== undefined
+        return getStoryDisplayIndex(sid) !== undefined
       }
       return false
     })
@@ -532,7 +532,7 @@ export default function ChatsNavigationSidebar({
         const sid = (ctx as any).storyId as string | undefined
         if (!sid) continue
         const storyTitle = getStoryTitle(sid)
-        const storyIndex = getStoryDisplayIndex(activeProjectId, sid)
+        const storyIndex = getStoryDisplayIndex(sid)
         let group = byStory.get(sid)
         if (!group) {
           group = {

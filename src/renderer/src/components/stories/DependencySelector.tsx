@@ -16,11 +16,10 @@ export const DependencySelector: React.FC<DependencySelectorProps> = ({
   currentFeatureId,
   existingDeps = [],
 }) => {
-  const { project, projectId } = useActiveProject()
-  const { getStoryDisplayIndex } = useProjectContext()
+  const { project } = useActiveProject()
   const [search, setSearch] = useState('')
   const [selected, setSelected] = useState<Set<string>>(new Set(existingDeps))
-  const { storiesById, getFeatureDisplayIndex } = useStories()
+  const { storiesById, getStoryDisplayIndex, getFeatureDisplayIndex } = useStories()
 
   const q = search.trim().toLowerCase()
 
@@ -39,7 +38,7 @@ export const DependencySelector: React.FC<DependencySelectorProps> = ({
   }
 
   function doesStoryMatch(story: Story, q: string): boolean {
-    const display = `${getStoryDisplayIndex(projectId, story.id)}`
+    const display = `${getStoryDisplayIndex(story.id)}`
     return (
       display.toLowerCase().includes(q) ||
       story.title.toLowerCase().includes(q) ||
@@ -48,7 +47,7 @@ export const DependencySelector: React.FC<DependencySelectorProps> = ({
   }
 
   function doesFeatureMatch(story: Story, f: Feature, q: string): boolean {
-    const display = `${getStoryDisplayIndex(projectId, story.id)}.${getFeatureDisplayIndex(story.id, f.id)}`
+    const display = `${getStoryDisplayIndex(story.id)}.${getFeatureDisplayIndex(story.id, f.id)}`
     return (
       display.toLowerCase().includes(q) ||
       f.title.toLowerCase().includes(q) ||
@@ -62,12 +61,10 @@ export const DependencySelector: React.FC<DependencySelectorProps> = ({
     const storyDep = `${storyId}`
     const isDisabled = existingDeps.includes(storyDep)
     const storyMatches = !q || doesStoryMatch(story, q)
-    const matchingFeatures = story.features.filter(
-      (f) => !q || doesFeatureMatch(story, f, q),
-    )
+    const matchingFeatures = story.features.filter((f) => !q || doesFeatureMatch(story, f, q))
     if (!storyMatches && matchingFeatures.length === 0) return null
 
-    const display = `${getStoryDisplayIndex(projectId, storyId)}`
+    const display = `${getStoryDisplayIndex(storyId)}`
 
     return (
       <li key={storyId}>
@@ -109,7 +106,7 @@ export const DependencySelector: React.FC<DependencySelectorProps> = ({
   }
 
   const storyIds = Object.keys(storiesById).sort(
-    (a, b) => (getStoryDisplayIndex(projectId, a) || 0) - (getStoryDisplayIndex(projectId, b) || 0),
+    (a, b) => (getStoryDisplayIndex(a) || 0) - (getStoryDisplayIndex(b) || 0),
   )
 
   return (
@@ -126,9 +123,7 @@ export const DependencySelector: React.FC<DependencySelectorProps> = ({
           <h3 className="text-lg font-semibold">{project.title}</h3>
         </div>
         {storyIds.length > 0 && (
-          <ul className="space-y-2">
-            {storyIds.map((storyId) => renderStoryItem(storyId))}
-          </ul>
+          <ul className="space-y-2">{storyIds.map((storyId) => renderStoryItem(storyId))}</ul>
         )}
       </div>
       <button

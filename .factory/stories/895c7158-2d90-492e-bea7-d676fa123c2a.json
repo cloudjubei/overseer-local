@@ -1,6 +1,6 @@
 {
   "id": "895c7158-2d90-492e-bea7-d676fa123c2a",
-  "status": "-",
+  "status": "=",
   "title": "File Suggestion Improvements",
   "description": "Improvements to the file suggestions feature in the chat input area.",
   "features": [
@@ -51,5 +51,5 @@
     }
   ],
   "createdAt": "2026-03-24T15:48:37.871Z",
-  "updatedAt": "2026-03-24T15:48:37.871Z"
+  "updatedAt": "2026-04-09T23:41:52.563Z"
 }

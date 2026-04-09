@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useStories } from '../contexts/StoriesContext'
-import { useActiveProject, useProjectContext } from '../contexts/ProjectContext'
+import { useActiveProject } from '../contexts/ProjectContext'
 
 type RefItem = {
   ref: string
@@ -20,9 +20,8 @@ export function useReferencesAutocomplete(params: {
   mirrorRef: React.RefObject<HTMLDivElement | null>
 }) {
   const { project, projectId } = useActiveProject()
-  const { getStoryDisplayIndex } = useProjectContext()
   const { input, setInput, textareaRef, mirrorRef } = params
-  const { storiesById, getFeatureDisplayIndex } = useStories()
+  const { storiesById, getStoryDisplayIndex, getFeatureDisplayIndex } = useStories()
 
   // Build a reference index and pre-normalize search fields.
   // NOTE: This can still be sizable, but it only recomputes when stories/project change.
@@ -31,7 +30,7 @@ export function useReferencesAutocomplete(params: {
 
     const refs: RefItem[] = []
     for (const story of Object.values(storiesById)) {
-      const storyDisplay = `${getStoryDisplayIndex(projectId, story.id)}`
+      const storyDisplay = `${getStoryDisplayIndex(story.id)}`
       const storyTitle = story.title || ''
       refs.push({
         ref: `${story.id}`,
