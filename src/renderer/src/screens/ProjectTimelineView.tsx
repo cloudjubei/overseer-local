@@ -205,7 +205,7 @@ function AddLabelForm({
 export default function ProjectTimelineView() {
   const { projectId, project } = useActiveProject()
   const { projects } = useProjectContext()
-  const { storiesById } = useStories()
+  const { storiesById, storyIdsByProject } = useStories()
   const { navigateStoryDetails } = useNavigator()
 
   const [labels, setLabels] = React.useState<TimelineLabel[]>([])
@@ -253,13 +253,14 @@ export default function ProjectTimelineView() {
 
   const storyProjectIdByStoryId = React.useMemo(() => {
     const out: Record<string, string> = {}
-    for (const p of projects) {
-      for (const storyId of p.storyIds || []) {
-        out[storyId] = p.id
+    for (const p of Object.keys(storyIdsByProject)) {
+      const storyIds = storyIdsByProject[p]
+      for (const storyId of storyIds) {
+        out[storyId] = p
       }
     }
     return out
-  }, [projects])
+  }, [storyIdsByProject])
 
   const displayedStories = React.useMemo(() => {
     if (showAllProjects) {
@@ -271,7 +272,7 @@ export default function ProjectTimelineView() {
         .filter((story: any) => !!story.projectId)
     }
     if (!project) return []
-    return project.storyIds
+    return storyIdsByProject[project.id]
       .map((id) => {
         const story = storiesById[id]
         return story

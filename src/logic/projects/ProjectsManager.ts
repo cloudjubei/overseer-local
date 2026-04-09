@@ -7,7 +7,6 @@ import {
   ProjectSpecCreateInput,
   ProjectSpecEditInput,
   ProjectTools,
-  ReorderPayload,
 } from 'thefactory-tools'
 import BaseManager from '../BaseManager'
 
@@ -39,11 +38,9 @@ export default class ProjectsManager extends BaseManager {
       this.updateProject(projectId, patch)
     handlers[IPC_HANDLER_KEYS.PROJECTS_DELETE] = ({ projectId }) =>
       this.tools.deleteProject(projectId)
-    handlers[IPC_HANDLER_KEYS.PROJECTS_STORY_REORDER] = async ({ projectId, payload }) =>
-      this.reorderStory(projectId, payload)
     handlers[IPC_HANDLER_KEYS.PROJECTS_SELECT_DIRECTORY] = async () => {
       const result = await dialog.showOpenDialog(this.window, {
-        properties: ['openDirectory', 'createDirectory']
+        properties: ['openDirectory', 'createDirectory'],
       })
       if (result.canceled || result.filePaths.length === 0) {
         return null
@@ -78,17 +75,5 @@ export default class ProjectsManager extends BaseManager {
   }
   async deleteProject(projectId: string): Promise<void> {
     return await this.tools.deleteProject(projectId)
-  }
-  async getStoryIdFromIndex(projectId: string, index: number): Promise<string | undefined> {
-    return await this.tools.getStoryIdFromIndex(projectId, index)
-  }
-  async reorderStory(projectId: string, payload: ReorderPayload): Promise<ProjectSpec | undefined> {
-    return await this.tools.reorderStory(projectId, payload)
-  }
-  async addStory(projectId: string, storyId: string): Promise<ProjectSpec | undefined> {
-    return await this.tools.addProjectStory(projectId, storyId)
-  }
-  async deleteStory(projectId: string, storyId: string): Promise<ProjectSpec | undefined> {
-    return await this.tools.deleteProjectStory(projectId, storyId)
   }
 }

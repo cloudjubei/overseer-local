@@ -6,7 +6,6 @@ const IPC_HANDLER_KEYS = {
   PROJECTS_CREATE: 'projects:create',
   PROJECTS_UPDATE: 'projects:update',
   PROJECTS_DELETE: 'projects:delete',
-  PROJECTS_STORY_REORDER: 'projects:reorder-story',
   PROJECTS_SELECT_DIRECTORY: 'projects:select-directory',
 
   // ProjectsGroups
@@ -67,13 +66,14 @@ const IPC_HANDLER_KEYS = {
   STORIES_GET: 'stories:get',
   STORIES_CREATE: 'stories:create',
   STORIES_UPDATE: 'stories:update',
-  STORIES_UPDATE_STATUS: 'stories:update-status',
   STORIES_DELETE: 'stories:delete',
+  STORIES_GET_ORDER: 'stories:get-order',
+  STORIES_REORDER: 'stories:reorder',
   STORIES_FEATURE_GET: 'stories-feature:get',
   STORIES_FEATURE_ADD: 'stories-feature:add',
   STORIES_FEATURE_UPDATE: 'stories-feature:update',
   STORIES_FEATURE_DELETE: 'stories-feature:delete',
-  STORIES_FEATURES_REORDER: 'stories-features:reorder',
+  STORIES_FEATURE_REORDER: 'stories-feature:reorder',
 
   // Settings
   SETTINGS_SUBSCRIBE: 'preferences:subscribe',

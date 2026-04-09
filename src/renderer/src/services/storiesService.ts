@@ -48,12 +48,9 @@ export type StoriesService = {
     storyId: string,
     patch: StoryEditInput,
   ) => Promise<Story | undefined>
-  updateStoryStatus: (
-    projectId: string,
-    storyId: string,
-    status: Status,
-  ) => Promise<Story | undefined>
   deleteStory: (projectId: string, storyId: string) => Promise<void>
+  getStoriesOrder: (projectId: string) => Promise<string[] | undefined>
+  reorderStory: (projectId: string, payload: ReorderPayload) => Promise<string[] | undefined>
   getFeature: (projectId: string, featureId: string) => Promise<Feature | undefined>
   addFeature: (
     projectId: string,

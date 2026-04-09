@@ -15,9 +15,6 @@ export type ProjectContextValue = {
 
   setActiveProjectId: (id: string | undefined) => void
   getProjectById: (id: string) => ProjectSpec | undefined
-  reorderStory: (projectId: string, payload: ReorderPayload) => Promise<ProjectSpec | undefined>
-
-  getStoryDisplayIndex: (projectId: string, storyId: string) => number | undefined
 }
 
 const ProjectContext = createContext<ProjectContextValue | null>(null)
@@ -29,7 +26,6 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
   const [activeProjectId, setActiveProjectIdState] = useState<string | undefined>(MAIN_PROJECT)
   const [projects, setProjects] = useState<ProjectSpec[]>([])
 
-  // Load projects and subscribe to updates
   const update = async () => {
     const projects = await projectsService.listProjects()
     setProjects(projects)
@@ -112,29 +108,6 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
     return activeProjectId ? getProjectById(activeProjectId) : undefined
   }, [projects, activeProjectId, getProjectById])
 
-  const reorderStory = async (
-    projectId: string,
-    payload: ReorderPayload,
-  ): Promise<ProjectSpec | undefined> => {
-    const newProject = await projectsService.reorderStory(projectId, payload)
-    if (newProject) {
-      setProjects((prev) => prev.map((p) => (p.id !== projectId ? p : newProject)))
-    }
-    return newProject
-  }
-
-  const getStoryDisplayIndex = useCallback(
-    (projectId: string, storyId: string): number | undefined => {
-      const p = projects.find((p) => p.id === projectId)
-      if (!p) return undefined
-
-      const index = p.storyIds.indexOf(storyId)
-      if (index !== -1) return index + 1 // 1-based index
-      return
-    },
-    [projects],
-  )
-
   const value = useMemo<ProjectContextValue>(
     () => ({
       isLoaded,
@@ -143,19 +116,8 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
       setActiveProjectId,
       projects,
       getProjectById,
-      reorderStory,
-      getStoryDisplayIndex,
     }),
-    [
-      isLoaded,
-      activeProjectId,
-      activeProject,
-      setActiveProjectId,
-      projects,
-      getProjectById,
-      reorderStory,
-      getStoryDisplayIndex,
-    ],
+    [isLoaded, activeProjectId, activeProject, setActiveProjectId, projects, getProjectById],
   )
 
   return <ProjectContext.Provider value={value}>{children}</ProjectContext.Provider>

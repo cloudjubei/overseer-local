@@ -46,10 +46,12 @@ const STORIES_API = {
     ipcRenderer.invoke(IPC_HANDLER_KEYS.STORIES_CREATE, { projectId, input }),
   updateStory: (projectId, storyId, patch) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.STORIES_UPDATE, { projectId, storyId, patch }),
-  updateStoryStatus: (projectId, storyId, status) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.STORIES_UPDATE_STATUS, { projectId, storyId, status }),
   deleteStory: (projectId, storyId) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.STORIES_DELETE, { projectId, storyId }),
+  getStoriesOrder: (projectId) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.STORIES_GET_ORDER, { projectId }),
+  reorderStory: (projectId, payload) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.STORIES_REORDER, { projectId, payload }),
   getFeature: (projectId, featureId) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.STORIES_FEATURE_GET, { projectId, featureId }),
   addFeature: (projectId, storyId, input) =>
@@ -63,8 +65,8 @@ const STORIES_API = {
     }),
   deleteFeature: (projectId, storyId, featureId) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.STORIES_FEATURE_DELETE, { projectId, storyId, featureId }),
-  reorderFeatures: (projectId, storyId, payload) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.STORIES_FEATURES_REORDER, { projectId, storyId, payload }),
+  reorderFeature: (projectId, storyId, payload) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.STORIES_FEATURE_REORDER, { projectId, storyId, payload }),
 }
 
 const COMPLETION_API = {
@@ -195,8 +197,6 @@ const PROJECTS_API = {
   updateProject: (projectId, patch) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTS_UPDATE, { projectId, patch }),
   deleteProject: (projectId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTS_DELETE, { projectId }),
-  reorderStory: (projectId, payload) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTS_STORY_REORDER, { projectId, payload }),
   selectDirectory: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTS_SELECT_DIRECTORY),
 }
 

@@ -10,7 +10,6 @@ import { projectsService } from '../services/projectsService'
 import { useProjectContext } from './ProjectContext'
 import {
   Feature,
-  ProjectSpec,
   Story,
   StoryCreateInput,
   StoryEditInput,
@@ -18,18 +17,18 @@ import {
   FeatureEditInput,
   ReorderPayload,
   StoryUpdate,
-  Status,
 } from 'thefactory-tools'
 
-// Define the context value type based on useStories return value
 export type StoriesContextValue = {
   storyIdsByProject: Record<string, string[]>
+  storyOrdersByProject: Record<string, string[]>
   storiesById: Record<string, Story>
   featuresById: Record<string, Feature>
   createStory: (updates: StoryCreateInput) => Promise<Story | undefined>
   updateStory: (storyId: string, updates: StoryEditInput) => Promise<Story | undefined>
-  updateStoryStatus: (storyId: string, status: Status) => Promise<Story | undefined>
   deleteStory: (storyId: string) => Promise<void>
+  reorderStory: (payload: ReorderPayload) => Promise<string[] | undefined>
+  getStoryDisplayIndex: (storyId: string) => number | undefined
   addFeature: (storyId: string, updates: FeatureCreateInput) => Promise<Story | undefined>
   updateFeature: (
     storyId: string,
@@ -38,7 +37,6 @@ export type StoriesContextValue = {
   ) => Promise<Story | undefined>
   deleteFeature: (storyId: string, featureId: string) => Promise<Story | undefined>
   reorderFeatures: (storyId: string, payload: ReorderPayload) => Promise<Story | undefined>
-  reorderStory: (payload: ReorderPayload) => Promise<ProjectSpec | undefined>
   getBlockers: (storyId: string, featureId?: string) => (ResolvedRef | InvalidRefError)[]
   getBlockersOutbound: (id: string) => ResolvedRef[]
   resolveDependency: (dependency: string) => ResolvedRef | InvalidRefError
@@ -87,31 +85,28 @@ type InternalStoryUpdate = {
   projectId: string
   isDelete: boolean
   story: Story | undefined
+  isOrderUpdate: boolean
+  order: string[] | undefined
 }
 
 export function StoriesProvider({ children }: { children: React.ReactNode }) {
-  const {
-    activeProject,
-    projects,
-    reorderStory: reorderProjectStory,
-    getStoryDisplayIndex,
-  } = useProjectContext()
+  const { activeProject, projects } = useProjectContext()
 
   const [storyIdsByProject, setStoryIdsByProject] = useState<Record<string, string[]>>({})
+  const [storyOrdersByProject, setStoryOrdersByProject] = useState<Record<string, string[]>>({})
   const [storiesById, setStoriesById] = useState<Record<string, Story>>({})
   const [featuresById, setFeaturesById] = useState<Record<string, Feature>>({})
   const [blockersOutboundById, _] = useState<Record<string, ResolvedRef[]>>({})
 
-  // Compute display index mappings directly from all projects and stories
   const storyDisplayToId = useMemo(() => {
     const mapping: Record<string, string> = {}
-    projects.forEach((project) => {
-      project.storyIds.forEach((storyId, idx) => {
+    Object.values(storyOrdersByProject).forEach((orders) => {
+      orders.forEach((storyId, idx) => {
         mapping[`${idx + 1}`] = storyId
       })
     })
     return mapping
-  }, [projects])
+  }, [storyOrdersByProject])
 
   const featureDisplayToIdByStory = useMemo(() => {
     const mapping: Record<string, Record<string, string>> = {}
@@ -139,10 +134,16 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
   const updateStories = useCallback(
     (stories: InternalStoryUpdate[]) => {
       const newStoryIdsByProject: Record<string, string[]> = { ...storyIdsByProject }
+      const newStoryOrdersByProject: Record<string, string[]> = { ...storyOrdersByProject }
       const newStoriesById: Record<string, Story> = { ...storiesById }
       const newFeaturesById: Record<string, Feature> = { ...featuresById }
 
-      for (const { storyId, projectId, isDelete, story } of stories) {
+      for (const { storyId, projectId, isDelete, story, isOrderUpdate, order } of stories) {
+        if (order) {
+          newStoryOrdersByProject[projectId] = order
+          if (isOrderUpdate) continue
+        }
+
         const currentStoryIds = (newStoryIdsByProject[projectId] ?? []).filter((s) => s !== storyId)
         newStoryIdsByProject[projectId] = isDelete ? currentStoryIds : [...currentStoryIds, storyId]
 
@@ -162,6 +163,7 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
       }
 
       setStoryIdsByProject(newStoryIdsByProject)
+      setStoryOrdersByProject(newStoryOrdersByProject)
       setStoriesById(newStoriesById)
       setFeaturesById(newFeaturesById)
     },
@@ -174,8 +176,10 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
       const projectId = storyUpdate.projectId
       const isDelete = storyUpdate.type === 'delete'
       const story = storyUpdate.story
+      const isOrderUpdate = storyUpdate.type === 'order'
+      const order = storyUpdate.order
 
-      updateStories([{ storyId, projectId, isDelete, story }])
+      updateStories([{ storyId, projectId, isDelete, story, isOrderUpdate, order }])
     },
     [updateStories],
   )
@@ -187,7 +191,25 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
       try {
         const stories = await storiesService.listStories(projectId)
         for (const story of stories) {
-          updates.push({ storyId: story.id, projectId, isDelete: false, story })
+          updates.push({
+            storyId: story.id,
+            projectId,
+            isDelete: false,
+            story,
+            isOrderUpdate: false,
+            order: undefined,
+          })
+        }
+        const order = await storiesService.getStoriesOrder(projectId)
+        if (order) {
+          updates.push({
+            storyId: '',
+            projectId,
+            isDelete: false,
+            story: undefined,
+            isOrderUpdate: true,
+            order,
+          })
         }
       } catch (e) {
         console.error('StoriesContext update error: ', e)
@@ -205,6 +227,18 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
     update()
   }, [])
 
+  const getStoryDisplayIndex = useCallback(
+    (storyId: string): number | undefined => {
+      if (activeProject) {
+        const order = storyOrdersByProject[activeProject.id]
+        if (!order) return undefined
+        const index = order.indexOf(storyId)
+        if (index !== -1) return index + 1 // 1-based index
+      }
+      return
+    },
+    [activeProject, storyOrdersByProject],
+  )
   const normalizeDependency = useCallback(
     (dependency: string): string => {
       if (!activeProject) return dependency
@@ -236,7 +270,7 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
       if (!story) {
         return { id: normalized, code: 'STORY_NOT_FOUND', message: "Story wasn't found" }
       }
-      const sIndex = getStoryDisplayIndex(activeProject.id, story.id)
+      const sIndex = getStoryDisplayIndex(story.id)
 
       if (parts.length > 1) {
         const feature = featuresById[parts[1]]
@@ -289,6 +323,8 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
             projectId: activeProject.id,
             isDelete: false,
             story,
+            isOrderUpdate: false,
+            order: undefined,
           },
         ])
       }
@@ -301,8 +337,8 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
     async (storyId: string, updates: StoryEditInput): Promise<Story | undefined> => {
       if (activeProject) {
         const normalized: any = { ...updates }
-        if (Array.isArray((updates as any).blockers)) {
-          normalized.blockers = (updates as any).blockers.map((d: string) => normalizeDependency(d))
+        if (updates.blockers) {
+          normalized.blockers = updates.blockers.map((d: string) => normalizeDependency(d))
         }
 
         const s = await storiesService.updateStory(activeProject.id, storyId, normalized)
@@ -313,6 +349,8 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
               projectId: activeProject.id,
               isDelete: false,
               story: s,
+              isOrderUpdate: false,
+              order: undefined,
             },
           ])
         }
@@ -320,25 +358,6 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
       return
     },
     [activeProject, normalizeDependency, updateStories],
-  )
-  const updateStoryStatus = useCallback(
-    async (storyId: string, status: Status): Promise<Story | undefined> => {
-      if (activeProject) {
-        const s = await storiesService.updateStoryStatus(activeProject.id, storyId, status)
-        if (s) {
-          updateStories([
-            {
-              storyId: s.id,
-              projectId: activeProject.id,
-              isDelete: false,
-              story: s,
-            },
-          ])
-        }
-      }
-      return
-    },
-    [activeProject, updateStories],
   )
 
   const deleteStory = useCallback(
@@ -351,11 +370,22 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
             projectId: activeProject.id,
             isDelete: true,
             story: undefined,
+            isOrderUpdate: false,
+            order: undefined,
           },
         ])
       }
     },
     [activeProject, updateStories],
+  )
+  const reorderStory = useCallback(
+    async (payload: ReorderPayload): Promise<string[] | undefined> => {
+      if (activeProject) {
+        return await storiesService.reorderStory(activeProject.id, payload)
+      }
+      return
+    },
+    [activeProject],
   )
 
   const addFeature = useCallback(
@@ -373,6 +403,8 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
               projectId: activeProject.id,
               isDelete: false,
               story: s,
+              isOrderUpdate: false,
+              order: undefined,
             },
           ])
         }
@@ -406,6 +438,8 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
               projectId: activeProject.id,
               isDelete: false,
               story: s,
+              isOrderUpdate: false,
+              order: undefined,
             },
           ])
         }
@@ -426,6 +460,8 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
               projectId: activeProject.id,
               isDelete: false,
               story: s,
+              isOrderUpdate: false,
+              order: undefined,
             },
           ])
         }
@@ -446,6 +482,8 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
               projectId: activeProject.id,
               isDelete: false,
               story: s,
+              isOrderUpdate: false,
+              order: undefined,
             },
           ])
         }
@@ -453,15 +491,6 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
       return
     },
     [activeProject, updateStories],
-  )
-  const reorderStory = useCallback(
-    async (payload: ReorderPayload): Promise<ProjectSpec | undefined> => {
-      if (activeProject) {
-        return await reorderProjectStory(activeProject.id, payload)
-      }
-      return
-    },
-    [activeProject, reorderProjectStory],
   )
 
   const getBlockers = useCallback(
@@ -484,17 +513,18 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo<StoriesContextValue>(
     () => ({
       storyIdsByProject,
+      storyOrdersByProject,
       storiesById,
       featuresById,
       createStory,
       updateStory,
-      updateStoryStatus,
       deleteStory,
+      reorderStory,
+      getStoryDisplayIndex,
       addFeature,
       updateFeature,
       deleteFeature,
       reorderFeatures,
-      reorderStory,
       getBlockersOutbound,
       getBlockers,
       resolveDependency,
@@ -503,17 +533,18 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
     }),
     [
       storyIdsByProject,
+      storyOrdersByProject,
       storiesById,
       featuresById,
       createStory,
       updateStory,
-      updateStoryStatus,
       deleteStory,
+      reorderStory,
+      getStoryDisplayIndex,
       addFeature,
       updateFeature,
       deleteFeature,
       reorderFeatures,
-      reorderStory,
       getBlockersOutbound,
       getBlockers,
       resolveDependency,

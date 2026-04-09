@@ -6,9 +6,7 @@ import {
   Feature,
   FeatureCreateInput,
   FeatureEditInput,
-  ProjectSpec,
   ReorderPayload,
-  Status,
   Story,
   StoryChangeHandler,
   StoryCreateInput,
@@ -46,10 +44,12 @@ export default class StoriesManager extends BaseManager {
       this.createStory(projectId, input)
     handlers[IPC_HANDLER_KEYS.STORIES_UPDATE] = ({ projectId, storyId, patch }) =>
       this.updateStory(projectId, storyId, patch)
-    handlers[IPC_HANDLER_KEYS.STORIES_UPDATE_STATUS] = ({ projectId, storyId, status }) =>
-      this.updateStoryStatus(projectId, storyId, status)
     handlers[IPC_HANDLER_KEYS.STORIES_DELETE] = ({ projectId, storyId }) =>
       this.deleteStory(projectId, storyId)
+    handlers[IPC_HANDLER_KEYS.STORIES_GET_ORDER] = async ({ projectId }) =>
+      this.getStoriesOrder(projectId)
+    handlers[IPC_HANDLER_KEYS.STORIES_REORDER] = async ({ projectId, payload }) =>
+      this.reorderStory(projectId, payload)
     handlers[IPC_HANDLER_KEYS.STORIES_FEATURE_GET] = ({ projectId, storyId, featureId }) =>
       this.getFeature(projectId, storyId, featureId)
     handlers[IPC_HANDLER_KEYS.STORIES_FEATURE_ADD] = ({ projectId, storyId, input }) =>
@@ -62,8 +62,8 @@ export default class StoriesManager extends BaseManager {
     }) => this.updateFeature(projectId, storyId, featureId, patch)
     handlers[IPC_HANDLER_KEYS.STORIES_FEATURE_DELETE] = ({ projectId, storyId, featureId }) =>
       this.deleteFeature(projectId, storyId, featureId)
-    handlers[IPC_HANDLER_KEYS.STORIES_FEATURES_REORDER] = async ({ projectId, storyId, payload }) =>
-      this.reorderFeatures(projectId, storyId, payload)
+    handlers[IPC_HANDLER_KEYS.STORIES_FEATURE_REORDER] = async ({ projectId, storyId, payload }) =>
+      this.reorderFeature(projectId, storyId, payload)
 
     return handlers
   }
@@ -86,18 +86,10 @@ export default class StoriesManager extends BaseManager {
     return tools?.getStory(storyId)
   }
   async createStory(projectId: string, storyData: StoryCreateInput): Promise<Story | undefined> {
-    const project = await this.projectsManager.getProject(projectId)
-    if (!project) return
-
     const tools = await this.getTools(projectId)
     if (!tools) return
 
-    const newStory = await tools.addStory(storyData)
-    if (newStory) {
-      await this.projectsManager.addStory(projectId, newStory.id)
-      return newStory
-    }
-    return
+    return await tools.addStory(storyData)
   }
   async updateStory(
     projectId: string,
@@ -107,24 +99,23 @@ export default class StoriesManager extends BaseManager {
     const tools = await this.getTools(projectId)
     return await tools?.updateStory(storyId, patch)
   }
-  async updateStoryStatus(
-    projectId: string,
-    storyId: string,
-    status: Status,
-  ): Promise<Story | undefined> {
-    const tools = await this.getTools(projectId)
-    return await tools?.updateStoryStatus(storyId, status)
-  }
 
-  async deleteStory(projectId: string, storyId: string): Promise<ProjectSpec | undefined> {
-    const project = await this.projectsManager.getProject(projectId)
-    if (!project) return
-
+  async deleteStory(projectId: string, storyId: string) {
     const tools = await this.getTools(projectId)
     if (!tools) return
 
     await tools.deleteStory(storyId)
-    return await this.projectsManager.deleteStory(projectId, storyId)
+  }
+
+  async getStoriesOrder(projectId: string): Promise<string[] | undefined> {
+    const tools = await this.getTools(projectId)
+    if (!tools) return
+    return await tools.getStoriesOrder()
+  }
+  async reorderStory(projectId: string, payload: ReorderPayload): Promise<string[] | undefined> {
+    const tools = await this.getTools(projectId)
+    if (!tools) return
+    return await tools.reorderStory(payload)
   }
 
   async getFeature(
@@ -164,14 +155,14 @@ export default class StoriesManager extends BaseManager {
     if (!tools) return
     return await tools.deleteFeature(storyId, featureId)
   }
-  async reorderFeatures(
+  async reorderFeature(
     projectId: string,
     storyId: string,
     payload: ReorderPayload,
   ): Promise<Story | undefined> {
     const tools = await this.getTools(projectId)
     if (!tools) return
-    return await tools.reorderFeatures(storyId, payload)
+    return await tools.reorderFeature(storyId, payload)
   }
 
   async addChangeHandler(projectId: string, handler: StoryChangeHandler): Promise<void> {

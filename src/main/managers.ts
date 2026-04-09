@@ -49,7 +49,12 @@ export async function initManagers(projectRoot: string, mainWindow: BrowserWindo
   storiesManager = new StoriesManager(projectRoot, mainWindow, projectsManager)
   filesManager = new FilesManager(projectRoot, mainWindow, projectsManager, databaseManager)
   settingsManager = new SettingsManager(projectRoot, mainWindow)
-  notificationsManager = new NotificationsManager(projectRoot, mainWindow, settingsManager, projectsManager)
+  notificationsManager = new NotificationsManager(
+    projectRoot,
+    mainWindow,
+    settingsManager,
+    projectsManager,
+  )
   chatsManager = new ChatsManager(projectRoot, mainWindow)
   documentIngestionManager = new DocumentIngestionManager(
     projectRoot,
@@ -66,7 +71,7 @@ export async function initManagers(projectRoot: string, mainWindow: BrowserWindo
   factoryLLMCostsManager = new FactoryLLMCostsManager(projectRoot, mainWindow, databaseManager)
   liveDataManager = new LiveDataManager(projectRoot, mainWindow, factoryLLMCostsManager)
   factoryTestsManager = new FactoryTestsManager(projectRoot, mainWindow, projectsManager)
-  codeIntelManager = new CodeIntelManager(projectRoot, mainWindow, projectsManager)
+  codeIntelManager = new CodeIntelManager(projectRoot, mainWindow)
   factoryToolsManager = new FactoryToolsManager(
     projectRoot,
     mainWindow,
