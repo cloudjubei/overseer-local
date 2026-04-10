@@ -7,6 +7,9 @@ const IPC_HANDLER_KEYS = {
   PROJECTS_UPDATE: 'projects:update',
   PROJECTS_DELETE: 'projects:delete',
   PROJECTS_SELECT_DIRECTORY: 'projects:select-directory',
+  PROJECTS_SELECT_FILE: 'projects:select-file',
+  PROJECTS_READ_FILE_OUTSIDE: 'projects:read-file-outside',
+  PROJECTS_CHECK_DIRECTORY_EXISTS: 'projects:check-directory-exists',
 
   // ProjectsGroups
   PROJECTSGROUPS_SUBSCRIBE: 'projectsgroups:subscribe',

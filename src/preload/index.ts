@@ -198,6 +198,9 @@ const PROJECTS_API = {
     ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTS_UPDATE, { projectId, patch }),
   deleteProject: (projectId) => ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTS_DELETE, { projectId }),
   selectDirectory: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTS_SELECT_DIRECTORY),
+  selectFile: (filters) => ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTS_SELECT_FILE, { filters }),
+  readFileOutside: (filePath) => ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTS_READ_FILE_OUTSIDE, { filePath }),
+  checkDirectoryExists: (dirPath) => ipcRenderer.invoke(IPC_HANDLER_KEYS.PROJECTS_CHECK_DIRECTORY_EXISTS, { dirPath }),
 }
 
 const CODE_INTEL_API = {

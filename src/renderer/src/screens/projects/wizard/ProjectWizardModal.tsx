@@ -5,6 +5,8 @@ import { ProjectWizardCreateStep, ProjectWizardCreateState } from './ProjectWiza
 import { ProjectWizardGroupStep, ProjectWizardGroupState } from './ProjectWizardGroupStep'
 import { ProjectWizardCodeStep, ProjectWizardCodeState } from './ProjectWizardCodeStep'
 import { ProjectWizardGitStep, ProjectWizardGitState } from './ProjectWizardGitStep'
+import { ProjectWizardImportModeStep, ImportMode } from './ProjectWizardImportModeStep'
+import { ProjectWizardConfirmationStep } from './ProjectWizardConfirmationStep'
 import { projectsService } from '@renderer/services/projectsService'
 import { gitService } from '@renderer/services/gitService'
 import { codeIntelService } from '@renderer/services/codeIntelService'
@@ -29,6 +31,7 @@ export function ProjectWizardModal({ isOpen, onClose, onComplete, initialGroupId
   const [groupData, setGroupData] = useState<ProjectWizardGroupState>({ groupIds: [] })
   const [codeData, setCodeData] = useState<ProjectWizardCodeState | null>(null)
   const [gitData, setGitData] = useState<ProjectWizardGitState | null>(null)
+  const [importMode, setImportMode] = useState<ImportMode | null>(null)
   
   const [isValid, setIsValid] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
@@ -52,6 +55,7 @@ export function ProjectWizardModal({ isOpen, onClose, onComplete, initialGroupId
       setGroupData({ groupIds: initialGroupId ? [initialGroupId] : [] })
       setCodeData(null)
       setGitData(null)
+      setImportMode(null)
       setIsValid(false)
       setIsSaving(false)
       setError(null)
@@ -69,17 +73,13 @@ export function ProjectWizardModal({ isOpen, onClose, onComplete, initialGroupId
       if (step === 2) {
         setFlowType(null)
       }
-      // If we've already created the project, maybe we shouldn't allow going back to step 2?
-      // Actually, standard wizards usually lock the creation step once done, but for now we'll just allow navigating if it's UI only.
-      // Since it creates the project on "Next" from Step 2, if they go back and change something, it's tricky.
-      // Let's just allow going back for now and only create if createdProjectId is null.
       setStep(step - 1)
     }
   }
 
   const handleNext = async () => {
-    if (step === 2 && flowType === 'create') {
-      if (!createData) return
+    const doCreateProject = async () => {
+      if (!createData) return false
       
       if (!createdProjectId) {
         setIsSaving(true)
@@ -105,31 +105,44 @@ export function ProjectWizardModal({ isOpen, onClose, onComplete, initialGroupId
             throw new Error('Project creation did not return a created project.')
           }
           setCreatedProjectId(newProject.id)
-          setStep(3)
+          return true
         } catch (e: any) {
           setError(e?.message || String(e))
-          return
+          return false
         } finally {
           setIsSaving(false)
         }
       } else {
-        // Already created, just move to next
-        setStep(3)
+        return true
       }
-    } else if (step === 3) {
-      setStep(4)
-    } else if (step === 4) {
-      setStep(5)
+    }
+
+    if (flowType === 'create') {
+      if (step === 2) {
+        const success = await doCreateProject()
+        if (success) setStep(3)
+      } else if (step === 3) {
+        setStep(4)
+      } else if (step === 4) {
+        setStep(5)
+      }
+    } else if (flowType === 'import') {
+      if (step === 2) {
+        setStep(3)
+      } else if (step === 3) {
+        const success = await doCreateProject()
+        if (success) setStep(4)
+      } else if (step === 4) {
+        setStep(5)
+      } else if (step === 5) {
+        setStep(6)
+      } else if (step === 6) {
+        setStep(7)
+      }
     }
   }
 
   const handleFinish = async () => {
-    if (flowType === 'import') {
-      // Not implemented in this feature
-      onComplete()
-      return
-    }
-
     if (!createdProjectId) {
       onComplete()
       return
@@ -195,13 +208,17 @@ export function ProjectWizardModal({ isOpen, onClose, onComplete, initialGroupId
 
   const getStepTitle = () => {
     if (step === 1) return 'Add Project'
-    if (flowType === 'import') return 'Import Project'
-    if (step === 2) return 'Create New Project'
-    if (step === 3) return 'Assign Groups'
-    if (step === 4) return 'Project Type'
-    if (step === 5) return 'Source Control'
+    if (flowType === 'import' && step === 2) return 'Import Mode'
+    if (flowType === 'import' && step === 7) return 'Confirm Import'
+    if (step === 2 && flowType === 'create') return 'Create New Project'
+    if (step === 3 && flowType === 'import') return 'Review Project Details'
+    if ((step === 3 && flowType === 'create') || (step === 4 && flowType === 'import')) return 'Assign Groups'
+    if ((step === 4 && flowType === 'create') || (step === 5 && flowType === 'import')) return 'Project Type'
+    if ((step === 5 && flowType === 'create') || (step === 6 && flowType === 'import')) return 'Source Control'
     return 'Add Project'
   }
+
+  const isFinalStep = (flowType === 'create' && step === 5) || (flowType === 'import' && step === 7)
 
   return (
     <Modal
@@ -232,75 +249,95 @@ export function ProjectWizardModal({ isOpen, onClose, onComplete, initialGroupId
         
         {step > 1 && (
           <div className="flex-1 flex flex-col">
-            {flowType === 'create' ? (
-              <div className="flex-1 flex justify-center overflow-y-auto pt-4">
-                {step === 2 && (
-                  <ProjectWizardCreateStep 
-                    initialState={createData || undefined}
-                    onStateChange={(state, valid) => {
-                      setCreateData(prev => {
-                        if (JSON.stringify(prev) === JSON.stringify(state)) return prev
-                        return state
-                      })
-                      setIsValid(valid)
-                    }}
-                  />
-                )}
-                {step === 3 && (
-                  <ProjectWizardGroupStep
-                    initialState={groupData}
-                    onStateChange={(state, valid) => {
-                      setGroupData(prev => {
-                        if (JSON.stringify(prev) === JSON.stringify(state)) return prev
-                        return state
-                      })
-                      setIsValid(valid)
-                    }}
-                  />
-                )}
-                {step === 4 && (
-                  <ProjectWizardCodeStep
-                    projectPath={createData?.path}
-                    detectEnvironment={codeIntelService.detectEnvironment}
-                    initialState={codeData || undefined}
-                    onStateChange={(state, valid) => {
-                      setCodeData(prev => {
-                        if (JSON.stringify(prev) === JSON.stringify(state)) return prev
-                        return state
-                      })
-                      setIsValid(valid)
-                    }}
-                  />
-                )}
-                {step === 5 && (
-                  <ProjectWizardGitStep
-                    initialState={gitData || undefined}
-                    onStateChange={(state, valid) => {
-                      setGitData(prev => {
-                        if (JSON.stringify(prev) === JSON.stringify(state)) return prev
-                        return state
-                      })
-                      setIsValid(valid)
-                    }}
-                  />
-                )}
-              </div>
-            ) : (
-              <div className="flex-1 flex flex-col items-center justify-center text-text-secondary">
-                <p>Import steps will be implemented here.</p>
-              </div>
-            )}
+            <div className="flex-1 flex justify-center overflow-y-auto pt-4">
+              {flowType === 'import' && step === 2 && (
+                <ProjectWizardImportModeStep
+                  onStateChange={(data, valid) => {
+                    if (data) {
+                      setImportMode(data.importMode)
+                      if (data.createData) setCreateData(prev => ({ ...prev, ...data.createData }) as ProjectWizardCreateState)
+                      if (data.codeData) setCodeData(prev => ({ ...prev, ...data.codeData }) as ProjectWizardCodeState)
+                      if (data.gitData) setGitData(prev => ({ ...prev, ...data.gitData }) as ProjectWizardGitState)
+                    }
+                    setIsValid(valid)
+                  }}
+                />
+              )}
+
+              {((step === 2 && flowType === 'create') || (step === 3 && flowType === 'import')) && (
+                <ProjectWizardCreateStep 
+                  initialState={createData || undefined}
+                  onStateChange={(state, valid) => {
+                    setCreateData(prev => {
+                      if (JSON.stringify(prev) === JSON.stringify(state)) return prev
+                      return state
+                    })
+                    setIsValid(valid)
+                  }}
+                />
+              )}
+
+              {((step === 3 && flowType === 'create') || (step === 4 && flowType === 'import')) && (
+                <ProjectWizardGroupStep
+                  initialState={groupData}
+                  onStateChange={(state, valid) => {
+                    setGroupData(prev => {
+                      if (JSON.stringify(prev) === JSON.stringify(state)) return prev
+                      return state
+                    })
+                    setIsValid(valid)
+                  }}
+                />
+              )}
+
+              {((step === 4 && flowType === 'create') || (step === 5 && flowType === 'import')) && (
+                <ProjectWizardCodeStep
+                  projectPath={createData?.path}
+                  detectEnvironment={codeIntelService.detectEnvironment}
+                  initialState={codeData || undefined}
+                  onStateChange={(state, valid) => {
+                    setCodeData(prev => {
+                      if (JSON.stringify(prev) === JSON.stringify(state)) return prev
+                      return state
+                    })
+                    setIsValid(valid)
+                  }}
+                />
+              )}
+
+              {((step === 5 && flowType === 'create') || (step === 6 && flowType === 'import')) && (
+                <ProjectWizardGitStep
+                  initialState={gitData || undefined}
+                  onStateChange={(state, valid) => {
+                    setGitData(prev => {
+                      if (JSON.stringify(prev) === JSON.stringify(state)) return prev
+                      return state
+                    })
+                    setIsValid(valid)
+                  }}
+                />
+              )}
+
+              {flowType === 'import' && step === 7 && (
+                <ProjectWizardConfirmationStep
+                  importMode={importMode!}
+                  createData={createData}
+                  codeData={codeData}
+                  gitData={gitData}
+                />
+              )}
+            </div>
             
             <div className="mt-4 flex justify-between pt-4 border-t border-border">
               <button 
                 className="btn btn-secondary" 
                 onClick={handleBack} 
-                disabled={isSaving || (step === 3 && !!createdProjectId)}
+                disabled={isSaving || ((flowType === 'create' && step === 3) || (flowType === 'import' && step === 4)) && !!createdProjectId}
               >
                 Back
               </button>
               
-              {flowType === 'create' && step < 5 ? (
+              {!isFinalStep ? (
                 <button 
                   className="btn btn-primary" 
                   onClick={handleNext} 
@@ -308,7 +345,7 @@ export function ProjectWizardModal({ isOpen, onClose, onComplete, initialGroupId
                 >
                   Next
                 </button>
-              ) : flowType === 'create' && step === 5 ? (
+              ) : (
                 <button 
                   className="btn btn-primary" 
                   onClick={handleFinish} 
@@ -316,8 +353,6 @@ export function ProjectWizardModal({ isOpen, onClose, onComplete, initialGroupId
                 >
                   Finish Setup
                 </button>
-              ) : (
-                <button className="btn btn-primary" onClick={onComplete}>Finish (Mock)</button>
               )}
             </div>
           </div>

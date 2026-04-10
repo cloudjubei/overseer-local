@@ -20,6 +20,9 @@ export type ProjectsService = {
   ) => Promise<ProjectSpec | undefined>
   deleteProject: (projectId: string) => Promise<void>
   selectDirectory: () => Promise<string | null>
+  selectFile: (filters?: any[]) => Promise<string | null>
+  readFileOutside: (filePath: string) => Promise<string>
+  checkDirectoryExists: (dirPath: string) => Promise<boolean>
 }
 
 export const projectsService: ProjectsService = { ...window.projectsService }

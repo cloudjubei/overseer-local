@@ -47,6 +47,33 @@ export default class ProjectsManager extends BaseManager {
       }
       return result.filePaths[0]
     }
+    handlers[IPC_HANDLER_KEYS.PROJECTS_SELECT_FILE] = async ({ filters }: any = {}) => {
+      const result = await dialog.showOpenDialog(this.window, {
+        properties: ['openFile'],
+        filters: filters || [],
+      })
+      if (result.canceled || result.filePaths.length === 0) {
+        return null
+      }
+      return result.filePaths[0]
+    }
+    handlers[IPC_HANDLER_KEYS.PROJECTS_READ_FILE_OUTSIDE] = async ({ filePath }: { filePath: string }) => {
+      try {
+        const fs = require('fs')
+        return await fs.promises.readFile(filePath, 'utf8')
+      } catch (e: any) {
+        throw new Error(`Failed to read file: ${e.message}`)
+      }
+    }
+    handlers[IPC_HANDLER_KEYS.PROJECTS_CHECK_DIRECTORY_EXISTS] = async ({ dirPath }: { dirPath: string }) => {
+      try {
+        const fs = require('fs')
+        const stat = await fs.promises.stat(dirPath)
+        return stat.isDirectory()
+      } catch {
+        return false
+      }
+    }
 
     return handlers
   }
