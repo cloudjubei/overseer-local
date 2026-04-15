@@ -61,10 +61,10 @@ export interface UserPreferences {
 export type StoryViewMode = 'list' | 'board'
 export type StoryListViewSorting = 'index_asc' | 'index_desc' | 'status_asc' | 'status_desc'
 
-
 export interface NotificationProjectSettings {
   // Controls whether notifications of a category are created at all (requires App-level toggle to also be enabled)
   notificationsEnabled: Record<NotificationCategory, boolean>
+  badgesEnabled: Record<NotificationCategory, boolean>
 }
 
 export interface ProjectSettings {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { KNOWN_LANGUAGES, KNOWN_FRAMEWORKS_BY_LANGUAGE } from '@renderer/services/projectsService'
 import { coerceLanguage } from './languageCoercion'
-import type { DetectedEnvironment, ProgrammingLanguage } from 'thefactory-tools'
+import type { CodeIntelDetectedEnvironment, ProgrammingLanguage } from 'thefactory-tools'
 
 export interface ProjectWizardCodeState {
   isCodeProject: boolean
@@ -14,15 +14,24 @@ export interface ProjectWizardCodeState {
 
 interface ProjectWizardCodeStepProps {
   projectPath?: string
-  detectEnvironment?: (dirPath: string) => Promise<DetectedEnvironment>
+  detectEnvironment?: (dirPath: string) => Promise<CodeIntelDetectedEnvironment>
   initialState?: Partial<ProjectWizardCodeState>
   onStateChange: (state: ProjectWizardCodeState, isValid: boolean) => void
 }
 
-export function ProjectWizardCodeStep({ projectPath, detectEnvironment, initialState, onStateChange }: ProjectWizardCodeStepProps) {
+export function ProjectWizardCodeStep({
+  projectPath,
+  detectEnvironment,
+  initialState,
+  onStateChange,
+}: ProjectWizardCodeStepProps) {
   const [isCodeProject, setIsCodeProject] = useState(initialState?.isCodeProject ?? false)
-  const [languageInput, setLanguageInput] = useState<string>(initialState?.languageInput ?? initialState?.language ?? '')
-  const [language, setLanguage] = useState<ProgrammingLanguage | 'other' | ''>(initialState?.language || '')
+  const [languageInput, setLanguageInput] = useState<string>(
+    initialState?.languageInput ?? initialState?.language ?? '',
+  )
+  const [language, setLanguage] = useState<ProgrammingLanguage | 'other' | ''>(
+    initialState?.language || '',
+  )
   const [framework, setFramework] = useState(initialState?.framework || '')
   const detectedPathRef = useRef<string | null>(null)
   const hasManualChangesRef = useRef(Boolean(initialState))
@@ -58,7 +67,6 @@ export function ProjectWizardCodeStep({ projectPath, detectEnvironment, initialS
 
     let cancelled = false
     detectedPathRef.current = projectPath
-
     ;(async () => {
       try {
         const detected = await detectEnvironment(projectPath)
@@ -115,7 +123,8 @@ export function ProjectWizardCodeStep({ projectPath, detectEnvironment, initialS
               </datalist>
               {language === 'other' && languageInput.trim() !== '' && (
                 <div className="text-xs text-text-secondary">
-                  Unrecognized language. We’ll save it as <span className="font-medium">other</span>.
+                  Unrecognized language. We’ll save it as <span className="font-medium">other</span>
+                  .
                 </div>
               )}
             </div>

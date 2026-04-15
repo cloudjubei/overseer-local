@@ -22,7 +22,7 @@ export default class NotificationsManager extends BaseManager {
     projectRoot: string,
     window: BrowserWindow,
     settingsManager: SettingsManager,
-    projectsManager?: ProjectsManager
+    projectsManager?: ProjectsManager,
   ) {
     super(projectRoot, window)
 
@@ -35,10 +35,12 @@ export default class NotificationsManager extends BaseManager {
     await this.__getStorage('main')
 
     if (this.projectsManager) {
-      this.projectsManager.getTools().subscribe((update) => {
-        const projectId = update.project?.id ?? (update as any).projectId
-        if (!projectId) return
-        if (update.type === 'delete' || (update.type === 'change' && update.project?.active === false)) {
+      this.projectsManager.getTools().subscribe(async (update) => {
+        const projectId = update.projectId
+        if (
+          update.type === 'delete' ||
+          (update.type === 'change' && update.project?.active === false)
+        ) {
           this.markAllNotificationsAsRead(projectId)
           if (this.storages[projectId]) {
             delete this.storages[projectId]

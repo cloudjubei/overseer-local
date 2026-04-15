@@ -6,10 +6,11 @@
     "projects": [
       "thefactory-tools",
       "thefactory-db",
-      "thefactory-knowledge"
+      "thefactory-knowledge",
+      "thefactory-backend"
     ],
     "createdAt": "2025-10-16T19:17:03.151Z",
-    "updatedAt": "2025-10-16T19:17:46.872Z"
+    "updatedAt": "2026-04-15T22:38:43.427Z"
   },
   {
     "title": "OSC",

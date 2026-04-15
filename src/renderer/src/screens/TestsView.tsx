@@ -186,7 +186,7 @@ function TestsInner() {
                 )}
 
                 {!isRunningTests && !testsError && results && (
-                  <TestResultsView projectId={projectId} results={results} />
+                  <TestResultsView projectId={projectId!} results={results} />
                 )}
 
                 {!isRunningTests && !testsError && !results && !showNoTestsCta && (
@@ -224,7 +224,7 @@ function TestsInner() {
                 )}
 
                 {!isRunningE2ETests && !testsErrorE2E && resultsE2E && (
-                  <TestResultsView projectId={projectId} results={resultsE2E} />
+                  <TestResultsView projectId={projectId!} results={resultsE2E} />
                 )}
 
                 {!isRunningE2ETests && !testsErrorE2E && !resultsE2E && (

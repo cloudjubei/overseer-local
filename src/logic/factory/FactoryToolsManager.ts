@@ -52,7 +52,10 @@ export default class FactoryToolsManager extends BaseManager {
     this.projectsManager.getTools().subscribe(async (update) => {
       const projectId = update.project?.id ?? (update as any).projectId
       if (!projectId) return
-      if (update.type === 'delete' || (update.type === 'change' && update.project?.active === false)) {
+      if (
+        update.type === 'delete' ||
+        (update.type === 'change' && update.project?.active === false)
+      ) {
         await this.toolsLock.lock()
         delete this.agentToolsMap[projectId]
         this.toolsLock.unlock()
@@ -117,14 +120,6 @@ export default class FactoryToolsManager extends BaseManager {
     const webSearchApiKeys = appSettings?.webSearchApiKeys
     const connectionString = this.databaseManager.getConnectionString()
     const storyTools = (await this.storiesManager.getTools(projectId))!
-
-    //TODO: at some point we really have to consolidate this as there's this strong dependency
-    storyTools.createStory = async (title, description) => {
-      return this.storiesManager.createStory(projectId, { title, description })
-    }
-    storyTools.deleteStory = async (storyId) => {
-      await this.storiesManager.deleteStory(projectId, storyId)
-    }
 
     const tools = await createTools(
       projectId,

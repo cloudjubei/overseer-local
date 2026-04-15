@@ -53,7 +53,7 @@ export default function StoryCreateView({ onRequestClose }: { onRequestClose?: (
     (): ChatContext => ({
       type: 'PROJECT_TOPIC',
       projectId: projectId!,
-      projectTopic: 'createStory',
+      topicId: 'createStory',
     }),
     [projectId],
   )

@@ -12,8 +12,6 @@ export function getNotificationTitleForContext(ctx: ChatContext): string {
       return 'Project Topic chat update'
     case 'STORY':
       return 'Story chat update'
-    case 'STORY_TOPIC':
-      return 'Story Topic chat update'
     case 'AGENT_RUN_STORY':
       return 'Agent story run chat update'
     case 'FEATURE':

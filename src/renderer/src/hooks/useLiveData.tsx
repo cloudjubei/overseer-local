@@ -29,7 +29,9 @@ export default function useLiveData() {
 
   const updateCurrentServices = (statuses: LiveDataProviderStatus[]) => {
     setAllServices(statuses)
-    recomputeVisible(statuses, projectId)
+    if (projectId) {
+      recomputeVisible(statuses, projectId)
+    }
   }
 
   const init = () => {
@@ -46,7 +48,9 @@ export default function useLiveData() {
     }
   }, [])
   useEffect(() => {
-    recomputeVisible(allServices, projectId)
+    if (projectId) {
+      recomputeVisible(allServices, projectId)
+    }
   }, [projectId])
 
   const triggerUpdate = async (serviceId: string): Promise<LiveDataProviderStatus | undefined> => {
