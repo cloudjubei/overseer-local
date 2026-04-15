@@ -18,7 +18,7 @@ export type WizardFlowType = 'create' | 'import' | null
 interface ProjectWizardModalProps {
   isOpen: boolean
   onClose: () => void
-  onComplete: () => void
+  onComplete: (projectId?: string) => void
   initialGroupId: string | null
 }
 
@@ -196,7 +196,7 @@ export function ProjectWizardModal({ isOpen, onClose, onComplete, initialGroupId
         console.warn('[ProjectWizardModal] git start failed during project creation', gitError)
       }
 
-      onComplete()
+      onComplete(createdProjectId)
     } catch (e: any) {
       setError(e?.message || String(e))
     } finally {

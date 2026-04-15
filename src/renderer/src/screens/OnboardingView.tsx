@@ -1,9 +1,11 @@
 import React, { useState } from 'react'
 import { ProjectWizardModal } from './projects/wizard/ProjectWizardModal'
 import { IconPlus } from '../components/ui/icons/Icons'
+import { useProjectContext } from '../contexts/ProjectContext'
 
 export default function OnboardingView() {
   const [isWizardOpen, setIsWizardOpen] = useState(false)
+  const { setActiveProjectId } = useProjectContext()
 
   return (
     <div className="flex h-full w-full flex-col items-center justify-center p-8 text-center bg-neutral-50 dark:bg-neutral-900">
@@ -27,7 +29,12 @@ export default function OnboardingView() {
       <ProjectWizardModal
         isOpen={isWizardOpen}
         onClose={() => setIsWizardOpen(false)}
-        onComplete={() => setIsWizardOpen(false)}
+        onComplete={(projectId) => {
+          setIsWizardOpen(false)
+          if (projectId) {
+            setActiveProjectId(projectId)
+          }
+        }}
         initialGroupId={null}
       />
     </div>

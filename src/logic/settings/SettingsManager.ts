@@ -17,8 +17,6 @@ export default class SettingsManager extends BaseManager {
   }
 
   async init(): Promise<void> {
-    await this.__loadProjectSettings('main')
-
     await super.init()
   }
 

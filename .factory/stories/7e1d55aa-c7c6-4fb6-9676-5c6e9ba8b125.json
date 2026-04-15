@@ -1,6 +1,6 @@
 {
   "id": "7e1d55aa-c7c6-4fb6-9676-5c6e9ba8b125",
-  "status": "-",
+  "status": "+",
   "title": "Initial User Onboarding & Dynamic Project Selection",
   "description": "As a user, when I open the app for the first time, I want to be guided to create my first project so that I can start using the application immediately. When I return to the app, I want it to automatically select my most recently used project instead of relying on a hardcoded 'MAIN' placeholder. This story covers the full removal of the hardcoded 'MAIN' project, dynamic active project resolution on startup, and a dedicated onboarding flow for first-time users.",
   "features": [
@@ -36,14 +36,16 @@
     },
     {
       "id": "4f68a2b4-c81a-4bdd-a988-f5f41e9fd4d2",
-      "status": "-",
+      "status": "+",
       "title": "Integrate Project Wizard into Onboarding",
       "description": "Connect the newly drafted 'Project Manager Wizard' directly into the Onboarding Flow. Completing the wizard creates the first project and transitions the user into the main application, setting that newly created project as active. The onboarding flow smoothly utilizes the Project Wizard. Upon completion, the app navigates to the main workspace with the new project active.",
       "context": [],
       "createdAt": "2026-03-17T19:26:21.675Z",
-      "updatedAt": "2026-03-17T19:26:21.675Z"
+      "updatedAt": "2026-04-15T23:38:32.298Z",
+      "completedAt": "2026-04-15T23:38:32.298Z"
     }
   ],
   "createdAt": "2026-03-17T19:21:19.928Z",
-  "updatedAt": "2026-03-17T19:21:19.928Z"
+  "updatedAt": "2026-03-17T19:21:19.928Z",
+  "completedAt": "2026-04-15T23:38:32.298Z"
 }

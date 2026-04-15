@@ -32,8 +32,6 @@ export default class NotificationsManager extends BaseManager {
   }
 
   async init(): Promise<void> {
-    await this.__getStorage('main')
-
     if (this.projectsManager) {
       this.projectsManager.getTools().subscribe(async (update) => {
         const projectId = update.projectId

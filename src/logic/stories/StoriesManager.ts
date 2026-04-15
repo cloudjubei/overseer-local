@@ -29,8 +29,6 @@ export default class StoriesManager extends BaseManager {
   }
 
   async init(): Promise<void> {
-    await this.getTools('main')
-
     await super.init()
   }
 
