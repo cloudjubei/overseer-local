@@ -9,11 +9,7 @@ import type {
   CompletionSettings,
 } from 'thefactory-tools'
 
-export type LLMProviderType = 'openai' | 'anthropic' | 'gemini' | 'xai' | 'local' | 'custom'
-
 export type ChatsService = {
-  // listModels: (config: LLMConfig) => Promise<string[]>
-
   subscribe: (callback: (chatUpdate: ChatUpdate) => void) => () => void
   listChats: (projectId?: string) => Promise<Chat[]>
   createChat: (input: ChatCreateInput) => Promise<Chat>

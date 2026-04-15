@@ -89,7 +89,7 @@ export default class ChatsManager extends BaseManager {
     entityId: string,
     title?: string,
   ): Promise<Chat> {
-    return await this.tools.createTopicChat(type, entityId, title)
+    return await this.tools.createTopicChat({ type, entityId, title })
   }
   async updateChat(chatContext: ChatContext, patch: ChatEditInput): Promise<Chat | undefined> {
     return await this.tools.updateChat(chatContext, patch)

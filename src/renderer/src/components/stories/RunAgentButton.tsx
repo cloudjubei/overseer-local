@@ -1,11 +1,11 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import type { AgentType } from 'thefactory-tools'
+import type { AgentRunType } from 'thefactory-tools'
 import { IconPlay } from '../ui/icons/Icons'
 import { Button } from '../ui/Button'
 
-const AGENTS_ORDER: AgentType[] = ['speccer', 'planner', 'contexter', 'tester', 'developer']
-const AGENTS_LABELS: Record<AgentType, string> = {
+const AGENTS_ORDER: AgentRunType[] = ['speccer', 'planner', 'contexter', 'tester', 'developer']
+const AGENTS_LABELS: Record<AgentRunType, string> = {
   speccer: 'Speccer',
   planner: 'Planner',
   contexter: 'Contexter',
@@ -68,8 +68,8 @@ function computePosition(
 
 type PickerProps = {
   anchorEl: HTMLElement
-  value?: AgentType
-  onSelect: (s: AgentType) => void
+  value?: AgentRunType
+  onSelect: (s: AgentRunType) => void
   onClose: () => void
 }
 
@@ -97,7 +97,7 @@ export function AgentTypePicker({ anchorEl, value = 'developer', onSelect, onClo
 
   useOutsideClick([panelRef], onClose)
 
-  const [active, setActive] = useState<AgentType>(value)
+  const [active, setActive] = useState<AgentRunType>(value)
   useEffect(() => setActive(value), [value])
 
   useEffect(() => {
@@ -171,7 +171,7 @@ export function AgentTypePicker({ anchorEl, value = 'developer', onSelect, onClo
 
 export type RunAgentButtonProps = {
   className?: string
-  onClick: (next: AgentType) => void
+  onClick: (next: AgentRunType) => void
 }
 
 export default function RunAgentButton({ className = '', onClick }: RunAgentButtonProps) {
@@ -192,7 +192,7 @@ export default function RunAgentButton({ className = '', onClick }: RunAgentButt
 
   const handleOpen = () => setOpen(true)
   const handleClose = () => setOpen(false)
-  const handleSelect = (t: AgentType) => {
+  const handleSelect = (t: AgentRunType) => {
     onClick(t)
     setOpen(false)
   }

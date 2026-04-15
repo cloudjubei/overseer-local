@@ -109,19 +109,19 @@ export default class FilesManager extends BaseManager {
     }
     await tools.writeFile(relPath, content, encoding)
   }
-  async renamePath(projectId: string, srcRel: string, dstRel: string) {
+  async renamePath(projectId: string, src: string, dst: string) {
     const tools = await this.__getTools(projectId)
     if (!tools) {
       return
     }
-    await tools.renamePath(srcRel, dstRel)
+    await tools.renamePaths([{ src, dst }])
   }
   async deletePath(projectId: string, relPath: string) {
     const tools = await this.__getTools(projectId)
     if (!tools) {
       return
     }
-    await tools.deletePath(relPath)
+    await tools.deletePaths([relPath])
   }
   async searchFiles(projectId: string, query: string, relPath: string = '.') {
     const tools = await this.__getTools(projectId)

@@ -19,6 +19,7 @@ import type { GitService } from '@renderer/services/gitService'
 import type { GitCredentialsService } from '@renderer/services/gitCredentialsService'
 import type { LLMConfigsService } from '@renderer/services/llmConfigsService'
 import type { CodeIntelService } from '@renderer/services/codeIntelService'
+import type { DiagnosticsService } from '@renderer/services/diagnosticsService'
 
 declare global {
   interface Window {
@@ -43,6 +44,7 @@ declare global {
     gitService: GitService
     gitCredentialsService: GitCredentialsService
     llmConfigsService: LLMConfigsService
+    diagnosticsService: DiagnosticsService
   }
 }
 export {}

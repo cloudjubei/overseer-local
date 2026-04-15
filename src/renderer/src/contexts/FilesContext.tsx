@@ -75,7 +75,7 @@ export function FilesProvider({ children }: { children: React.ReactNode }) {
   }
 
   const update = async () => {
-    const result = await filesService.getAllFileStats(projectId)
+    const result = await filesService.getAllFileStats(projectId!)
     updateCurrentFiles(normalizeFiles(result))
   }
 
@@ -109,14 +109,14 @@ export function FilesProvider({ children }: { children: React.ReactNode }) {
     path: string,
     encoding: BufferEncoding = 'utf8',
   ): Promise<string | undefined> => {
-    return await filesService.readFile(projectId, path, encoding)
+    return await filesService.readFile(projectId!, path, encoding)
   }
   const writeFile = async (path: string, content: string): Promise<void> => {
-    await filesService.writeFile(projectId, path, content)
+    await filesService.writeFile(projectId!, path, content)
   }
 
   const uploadFile = async (name: string, content: string): Promise<string | undefined> => {
-    return await filesService.uploadFile(projectId, name, content)
+    return await filesService.uploadFile(projectId!, name, content)
   }
 
   const value = useMemo<FilesContextValue>(

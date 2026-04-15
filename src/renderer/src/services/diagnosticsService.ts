@@ -1,6 +1,10 @@
 import type { DiagnosticsSnapshot } from 'src/types/diagnostics'
 
-export const diagnosticsService = {
+export type DiagnosticsService = {
+  getSnapshot: () => Promise<DiagnosticsSnapshot>
+}
+
+export const diagnosticsService: DiagnosticsService = {
   getSnapshot: async (): Promise<DiagnosticsSnapshot> => {
     return await window.diagnosticsService.getSnapshot()
   },

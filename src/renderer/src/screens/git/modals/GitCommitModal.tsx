@@ -65,7 +65,7 @@ export default function GitCommitModal({
     }
   }
 
-  const header = (
+  const title = (
     <div className="flex flex-col gap-1.5">
       <div className="text-base font-semibold">Prepare commit</div>
       <div className="text-xs text-neutral-600 dark:text-neutral-400">
@@ -95,7 +95,7 @@ export default function GitCommitModal({
   )
 
   return (
-    <Modal isOpen onClose={onRequestClose} header={header} footer={footer} width="md">
+    <Modal isOpen onClose={onRequestClose} title={title} footer={footer} size="md">
       <div className="flex flex-col gap-4">
         {opError && (
           <div className="p-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm rounded border border-red-200 dark:border-red-800/30 whitespace-pre-wrap">

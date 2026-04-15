@@ -85,8 +85,7 @@ export default class GitManager extends BaseManager {
       this.push(projectId, remote, branch)
     handlers[IPC_HANDLER_KEYS.GIT_PULL] = ({ projectId, remote, branch }) =>
       this.pull(projectId, remote, branch)
-    handlers[IPC_HANDLER_KEYS.GIT_FETCH] = ({ projectId, remote }) =>
-      this.fetch(projectId, remote)
+    handlers[IPC_HANDLER_KEYS.GIT_FETCH] = ({ projectId, remote }) => this.fetch(projectId, remote)
     handlers[IPC_HANDLER_KEYS.GIT_CREATE_BRANCH] = ({ projectId, name, checkoutAfter }) =>
       this.createBranch(projectId, name, checkoutAfter)
     handlers[IPC_HANDLER_KEYS.GIT_DELETE_REMOTE_BRANCH] = ({ projectId, name }) =>
@@ -126,7 +125,7 @@ export default class GitManager extends BaseManager {
       this.applyStash(projectId, options)
     handlers[IPC_HANDLER_KEYS.GIT_REMOVE_STASH] = ({ projectId, options }) =>
       this.removeStash(projectId, options)
-    
+
     handlers[IPC_HANDLER_KEYS.GIT_APPLY_PATCH] = ({ projectId, options }) =>
       this.applyPatch(projectId, options)
 
@@ -145,7 +144,7 @@ export default class GitManager extends BaseManager {
 
     try {
       if (options?.init) {
-        // Run git init logic via tools. gitInit() doesn't currently exist directly in GitTools, 
+        // Run git init logic via tools. gitInit() doesn't currently exist directly in GitTools,
         // but it is done through tools.init() where it handles creating the repo if needed, or we can just rely on tools.init()
         await tools.init()
       }
@@ -278,10 +277,7 @@ export default class GitManager extends BaseManager {
     return await tools.pull(remote, branch)
   }
 
-  private async fetch(
-    projectId: string,
-    remote?: string,
-  ): Promise<GitOpResult | undefined> {
+  private async fetch(projectId: string, remote?: string): Promise<GitOpResult | undefined> {
     const tools = await this.getTools(projectId)
     if (!tools) return
     return await tools.fetch(remote)
@@ -357,7 +353,7 @@ export default class GitManager extends BaseManager {
   ): Promise<GitFileChange[]> {
     const tools = await this.getTools(projectId)
     if (!tools) return []
-    return tools.getGitDiff(options)
+    return tools.gitDiff(options)
   }
 
   private async stage(projectId: string, paths: string[]): Promise<GitOpResult | undefined> {
@@ -400,7 +396,7 @@ export default class GitManager extends BaseManager {
   ): Promise<GitLogResult | undefined> {
     const tools = await this.getTools(projectId)
     if (!tools) return
-    return tools.getGitLog(options)
+    return tools.gitLog(options)
   }
 
   private async resetAll(projectId: string): Promise<GitOpResult | undefined> {

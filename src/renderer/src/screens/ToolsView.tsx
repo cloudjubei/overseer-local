@@ -142,7 +142,7 @@ const ToolsScreen: React.FC = () => {
     setExecutionError(null)
 
     try {
-      const result = await factoryToolsService.executeTool(projectId, selectedTool.name, args)
+      const result = await factoryToolsService.executeTool(projectId!, selectedTool.name, args)
       setExecutionResult(result)
     } catch (err: any) {
       console.error('Failed to execute tool:', err)

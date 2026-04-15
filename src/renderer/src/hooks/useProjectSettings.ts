@@ -10,6 +10,11 @@ export const DEFAULT_PROJECT_SETTINGS: ProjectSettings = {
       chat_messages: true,
       git_changes: true,
     },
+    badgesEnabled: {
+      agent_runs: true,
+      chat_messages: true,
+      git_changes: true,
+    },
   },
 }
 export function useProjectSettings() {
