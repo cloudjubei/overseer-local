@@ -11,17 +11,18 @@
       "description": "Remove all startup logic, database seeding, and state management defaults that force the existence or selection of a 'MAIN' project. The app no longer creates a 'MAIN' project on startup. The data layer supports a state where zero projects exist.",
       "context": [],
       "createdAt": "2026-03-17T19:26:21.667Z",
-      "updatedAt": "2026-04-15T21:46:23.707Z",
+      "updatedAt": "2026-04-15T23:32:23.808Z",
       "completedAt": "2026-04-15T21:46:23.707Z"
     },
     {
       "id": "8fb56664-55ed-4fb7-a442-4e1a01b26f16",
-      "status": "-",
+      "status": "+",
       "title": "Dynamic Active Project Resolution",
       "description": "Implement logic on application startup to query existing projects. If projects exist, determine the 'top' project (e.g., by 'lastAccessed' or 'createdAt' timestamp) and automatically set it as the active project in the global state. Returning users are automatically placed into their most relevant project. The active project state dynamically reflects the 'top' project from the database.",
       "context": [],
       "createdAt": "2026-03-17T19:26:21.671Z",
-      "updatedAt": "2026-03-17T19:26:21.671Z"
+      "updatedAt": "2026-04-15T23:34:29.386Z",
+      "completedAt": "2026-04-15T23:34:29.386Z"
     },
     {
       "id": "c39ae1c6-9de4-455b-9935-3f288990f65c",

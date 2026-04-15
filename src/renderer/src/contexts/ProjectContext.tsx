@@ -61,23 +61,55 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   useEffect(() => {
-    if (appSettings && initialLoad) {
-      if (appSettings.userPreferences.lastActiveProjectId) {
-        setActiveProjectIdState(appSettings.userPreferences.lastActiveProjectId)
+    if (!isLoaded || !appSettings || !initialLoad) return
+
+    let nextActiveId = appSettings.userPreferences.lastActiveProjectId
+
+    if (!nextActiveId || !projects.some((p) => p.id === nextActiveId)) {
+      if (projects.length > 0) {
+        const topProject = [...projects].sort((a, b) => {
+          const aTime = new Date(a.updatedAt || a.createdAt || 0).getTime()
+          const bTime = new Date(b.updatedAt || b.createdAt || 0).getTime()
+          return bTime - aTime
+        })[0]
+        nextActiveId = topProject?.id
+      } else {
+        nextActiveId = undefined
       }
-      setInitialLoad(false)
     }
-  }, [appSettings])
+
+    if (nextActiveId !== activeProjectId) {
+      setActiveProjectIdState(nextActiveId)
+      if (nextActiveId) {
+        setUserPreferences({ lastActiveProjectId: nextActiveId })
+      }
+    }
+    
+    setInitialLoad(false)
+  }, [isLoaded, appSettings, initialLoad, projects, activeProjectId, setUserPreferences])
 
   useEffect(() => {
-    if (!projects || projects.length === 0) return
-    if (activeProjectId === undefined) return
-    const exists = projects.some((p) => p.id === activeProjectId)
-    if (!exists) {
-      // Active project no longer exists; reset to first available project or undefined
-      setActiveProjectIdState(projects[0]?.id ?? undefined)
+    if (!isLoaded || initialLoad) return
+    
+    if (!projects || projects.length === 0) {
+      if (activeProjectId !== undefined) {
+        setActiveProjectIdState(undefined)
+      }
+      return
     }
-  }, [projects, activeProjectId])
+    
+    if (activeProjectId !== undefined) {
+      const exists = projects.some((p) => p.id === activeProjectId)
+      if (!exists) {
+        const topProject = [...projects].sort((a, b) => {
+          const aTime = new Date(a.updatedAt || a.createdAt || 0).getTime()
+          const bTime = new Date(b.updatedAt || b.createdAt || 0).getTime()
+          return bTime - aTime
+        })[0]
+        setActiveProjectIdState(topProject?.id)
+      }
+    }
+  }, [projects, activeProjectId, isLoaded, initialLoad])
 
   const setActiveProjectId = useCallback(
     (id: string | undefined) => {
