@@ -26,12 +26,13 @@
     },
     {
       "id": "c39ae1c6-9de4-455b-9935-3f288990f65c",
-      "status": "-",
+      "status": "+",
       "title": "First-Time User Onboarding Flow",
       "description": "Create a routing mechanism that detects when zero projects exist in the database. When this happens, redirect the user to a dedicated Onboarding Flow. Users with no projects see the onboarding screen. The main dashboard is inaccessible until at least one project is created.",
       "context": [],
       "createdAt": "2026-03-17T19:26:21.673Z",
-      "updatedAt": "2026-03-17T19:26:21.673Z"
+      "updatedAt": "2026-04-15T23:36:31.267Z",
+      "completedAt": "2026-04-15T23:36:31.267Z"
     },
     {
       "id": "4f68a2b4-c81a-4bdd-a988-f5f41e9fd4d2",

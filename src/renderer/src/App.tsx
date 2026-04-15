@@ -6,7 +6,7 @@ import { ShortcutsBootstrap, ShortcutsProvider } from './hooks/useShortcuts'
 import CommandMenu from './components/ui/CommandMenu'
 import ShortcutsHelp from './components/ui/ShortcutsHelp'
 import { ProjectsGroupsProvider } from './contexts/ProjectsGroupsContext'
-import { ProjectsProvider } from './contexts/ProjectContext'
+import { ProjectsProvider, useProjectContext } from './contexts/ProjectContext'
 import { useTheme } from './hooks/useTheme'
 import useLiveData from './hooks/useLiveData'
 import LoadingScreen from './screens/LoadingScreen'
@@ -22,6 +22,7 @@ import { GitProvider } from './contexts/GitContext'
 import { NotificationSoundBootstrap } from './hooks/useNotifications'
 import { CostsProvider } from './contexts/CostsContext'
 import MainView from './navigation/main/MainView'
+import OnboardingView from './screens/OnboardingView'
 import DiagnosticsOverlay from './components/ui/DiagnosticsOverlay'
 
 function ServicesBootstrap() {
@@ -77,6 +78,7 @@ function App() {
 function MainApp() {
   const { initTheme } = useTheme()
   const { appSettings } = useAppSettings()
+  const { isLoaded: isProjectsLoaded, projects } = useProjectContext()
   const [bootComplete, setBootComplete] = useState(false)
 
   useEffect(() => {
@@ -87,14 +89,16 @@ function MainApp() {
     setBootComplete(true)
   }, [])
 
-  if (!bootComplete) {
+  if (!bootComplete || !isProjectsLoaded) {
     // Show loading screen first; it will load app settings and preferences via useAppSettings
     return <LoadingScreen onLoaded={handleLoaded} />
   }
 
+  const needsOnboarding = projects.length === 0
+
   return (
     <div className="flex h-full w-full overflow-hidden">
-      <MainView />
+      {needsOnboarding ? <OnboardingView /> : <MainView />}
       <ModalHost />
       <DiagnosticsOverlay enabled={!!appSettings.userPreferences.showDiagnosticsOverlay} />
     </div>
