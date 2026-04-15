@@ -4071,6 +4071,35 @@
         "path": "src/renderer/src/components/ui/icons/IconXCircle.tsx",
         "dependencies": []
       },
+      "ImportExtractedData": {
+        "path": "src/renderer/src/screens/projects/wizard/ProjectWizardImportModeStep.tsx",
+        "dependencies": [
+          "ProjectWizardGitState",
+          "Partial",
+          "ProjectWizardCodeState",
+          "ProjectWizardCreateState",
+          "ImportMode",
+          "@renderer/components/ui/Button/Button",
+          "@renderer/components/ui/Button",
+          "@renderer/components/ui/icons/Icons/IconFolder",
+          "@renderer/components/ui/icons/Icons/IconDocument",
+          "@renderer/components/ui/icons/Icons",
+          "@renderer/services/projectsService/projectsService",
+          "@renderer/services/projectsService"
+        ]
+      },
+      "ImportMode": {
+        "path": "src/renderer/src/screens/projects/wizard/ProjectWizardImportModeStep.tsx",
+        "dependencies": [
+          "@renderer/components/ui/Button/Button",
+          "@renderer/components/ui/Button",
+          "@renderer/components/ui/icons/Icons/IconFolder",
+          "@renderer/components/ui/icons/Icons/IconDocument",
+          "@renderer/components/ui/icons/Icons",
+          "@renderer/services/projectsService/projectsService",
+          "@renderer/services/projectsService"
+        ]
+      },
       "initManagers": {
         "path": "src/main/managers.ts",
         "dependencies": [
@@ -5527,6 +5556,12 @@
           "thefactory-tools/DetectedEnvironment"
         ]
       },
+      "ProjectWizardConfirmationStep": {
+        "path": "src/renderer/src/screens/projects/wizard/ProjectWizardConfirmationStep.tsx",
+        "dependencies": [
+          "ProjectWizardConfirmationStepProps"
+        ]
+      },
       "ProjectWizardCreateState": {
         "path": "src/renderer/src/screens/projects/wizard/ProjectWizardCreateStep.tsx",
         "dependencies": [
@@ -5581,14 +5616,33 @@
           "@renderer/contexts/ProjectsGroupsContext"
         ]
       },
+      "ProjectWizardImportModeStep": {
+        "path": "src/renderer/src/screens/projects/wizard/ProjectWizardImportModeStep.tsx",
+        "dependencies": [
+          "ProjectWizardGitState",
+          "Partial",
+          "ProjectWizardCreateState",
+          "ProjectWizardCodeState",
+          "ImportMode",
+          "ProjectWizardImportModeStepProps",
+          "@renderer/components/ui/Button/Button",
+          "@renderer/components/ui/Button",
+          "@renderer/components/ui/icons/Icons/IconFolder",
+          "@renderer/components/ui/icons/Icons/IconDocument",
+          "@renderer/components/ui/icons/Icons",
+          "@renderer/services/projectsService/projectsService",
+          "@renderer/services/projectsService"
+        ]
+      },
       "ProjectWizardModal": {
         "path": "src/renderer/src/screens/projects/wizard/ProjectWizardModal.tsx",
         "dependencies": [
-          "WizardFlowType",
           "ProjectWizardGitState",
           "ProjectWizardCodeState",
-          "ProjectWizardGroupState",
           "ProjectWizardCreateState",
+          "WizardFlowType",
+          "ImportMode",
+          "ProjectWizardGroupState",
           "ProjectWizardModalProps",
           "@renderer/components/ui/Modal/Modal",
           "@renderer/components/ui/Modal",
@@ -10694,6 +10748,35 @@
         "path": "renderer/src/components/ui/icons/IconXCircle.tsx",
         "dependencies": []
       },
+      "ImportExtractedData": {
+        "path": "renderer/src/screens/projects/wizard/ProjectWizardImportModeStep.tsx",
+        "dependencies": [
+          "ProjectWizardGitState",
+          "Partial",
+          "ProjectWizardCodeState",
+          "ProjectWizardCreateState",
+          "ImportMode",
+          "@renderer/components/ui/Button/Button",
+          "@renderer/components/ui/Button",
+          "@renderer/components/ui/icons/Icons/IconFolder",
+          "@renderer/components/ui/icons/Icons/IconDocument",
+          "@renderer/components/ui/icons/Icons",
+          "@renderer/services/projectsService/projectsService",
+          "@renderer/services/projectsService"
+        ]
+      },
+      "ImportMode": {
+        "path": "renderer/src/screens/projects/wizard/ProjectWizardImportModeStep.tsx",
+        "dependencies": [
+          "@renderer/components/ui/Button/Button",
+          "@renderer/components/ui/Button",
+          "@renderer/components/ui/icons/Icons/IconFolder",
+          "@renderer/components/ui/icons/Icons/IconDocument",
+          "@renderer/components/ui/icons/Icons",
+          "@renderer/services/projectsService/projectsService",
+          "@renderer/services/projectsService"
+        ]
+      },
       "initManagers": {
         "path": "main/managers.ts",
         "dependencies": [
@@ -12150,6 +12233,12 @@
           "thefactory-tools/DetectedEnvironment"
         ]
       },
+      "ProjectWizardConfirmationStep": {
+        "path": "renderer/src/screens/projects/wizard/ProjectWizardConfirmationStep.tsx",
+        "dependencies": [
+          "ProjectWizardConfirmationStepProps"
+        ]
+      },
       "ProjectWizardCreateState": {
         "path": "renderer/src/screens/projects/wizard/ProjectWizardCreateStep.tsx",
         "dependencies": [
@@ -12204,14 +12293,33 @@
           "@renderer/contexts/ProjectsGroupsContext"
         ]
       },
+      "ProjectWizardImportModeStep": {
+        "path": "renderer/src/screens/projects/wizard/ProjectWizardImportModeStep.tsx",
+        "dependencies": [
+          "ProjectWizardGitState",
+          "Partial",
+          "ProjectWizardCreateState",
+          "ProjectWizardCodeState",
+          "ImportMode",
+          "ProjectWizardImportModeStepProps",
+          "@renderer/components/ui/Button/Button",
+          "@renderer/components/ui/Button",
+          "@renderer/components/ui/icons/Icons/IconFolder",
+          "@renderer/components/ui/icons/Icons/IconDocument",
+          "@renderer/components/ui/icons/Icons",
+          "@renderer/services/projectsService/projectsService",
+          "@renderer/services/projectsService"
+        ]
+      },
       "ProjectWizardModal": {
         "path": "renderer/src/screens/projects/wizard/ProjectWizardModal.tsx",
         "dependencies": [
-          "WizardFlowType",
           "ProjectWizardGitState",
           "ProjectWizardCodeState",
-          "ProjectWizardGroupState",
           "ProjectWizardCreateState",
+          "WizardFlowType",
+          "ImportMode",
+          "ProjectWizardGroupState",
           "ProjectWizardModalProps",
           "@renderer/components/ui/Modal/Modal",
           "@renderer/components/ui/Modal",

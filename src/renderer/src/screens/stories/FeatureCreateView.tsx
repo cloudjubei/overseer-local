@@ -3,7 +3,7 @@ import FeatureForm, { FeatureFormValues } from '@renderer/components/stories/Fea
 import { useToast } from '@renderer/components/ui/Toast'
 import { AlertDialog, Modal } from '@renderer/components/ui/Modal'
 import { useStories } from '@renderer/contexts/StoriesContext'
-import { MAIN_PROJECT, useActiveProject } from '@renderer/contexts/ProjectContext'
+import { useActiveProject } from '@renderer/contexts/ProjectContext'
 import { ChatContext } from 'thefactory-tools'
 import { ChatSidebarModalPanel } from '@renderer/components/chat'
 
@@ -60,14 +60,8 @@ export default function FeatureCreateView({
     const ids = storyIdsByProject[projectId] || []
     if (ids.length === 0) return
 
-    // If not main project, preselect the latest story (last in list)
-    if (projectId !== MAIN_PROJECT) {
-      setSelectedStoryId(ids[ids.length - 1])
-      return
-    }
-
-    // For main project, keep previous behavior: preselect only when exactly one story
-    if (ids.length === 1) setSelectedStoryId(ids[0])
+    // Preselect the latest story (last in list)
+    setSelectedStoryId(ids[ids.length - 1])
   }, [projectId, storyIdsByProject, selectedStoryId])
 
   const projectStories = useMemo(() => {

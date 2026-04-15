@@ -45,7 +45,7 @@ export interface AppSettings {
 export type StoryListStatusFilter = 'all' | 'not-done' | '-' | '~' | '+' | '=' | '?'
 
 export interface UserPreferences {
-  lastActiveProjectId: string
+  lastActiveProjectId?: string
   storiesViewMode: StoryViewMode
   storiesListViewSorting: StoryListViewSorting
   storiesListViewStatusFilter: StoryListStatusFilter

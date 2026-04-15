@@ -6,12 +6,13 @@
   "features": [
     {
       "id": "2a07590c-b438-423c-8e07-1c26c7e9197d",
-      "status": "-",
+      "status": "+",
       "title": "Deprecate Hardcoded 'MAIN' Project Initialization",
       "description": "Remove all startup logic, database seeding, and state management defaults that force the existence or selection of a 'MAIN' project. The app no longer creates a 'MAIN' project on startup. The data layer supports a state where zero projects exist.",
       "context": [],
       "createdAt": "2026-03-17T19:26:21.667Z",
-      "updatedAt": "2026-03-17T19:26:21.667Z"
+      "updatedAt": "2026-04-15T21:46:23.707Z",
+      "completedAt": "2026-04-15T21:46:23.707Z"
     },
     {
       "id": "8fb56664-55ed-4fb7-a442-4e1a01b26f16",

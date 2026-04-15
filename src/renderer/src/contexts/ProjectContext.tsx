@@ -1,9 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
-import type { ProjectSpec, ProjectUpdate, ReorderPayload } from 'thefactory-tools'
+import type { ProjectSpec, ProjectUpdate } from 'thefactory-tools'
 import { projectsService } from '../services/projectsService'
 import { useAppSettings } from '../contexts/AppSettingsContext'
-
-export const MAIN_PROJECT = 'main'
 
 export type ProjectContextValue = {
   isLoaded: boolean
@@ -23,7 +21,7 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
   const { isAppSettingsLoaded, appSettings, setUserPreferences } = useAppSettings()
   const [isLoaded, setIsLoaded] = useState(false)
   const [initialLoad, setInitialLoad] = useState(true)
-  const [activeProjectId, setActiveProjectIdState] = useState<string | undefined>(MAIN_PROJECT)
+  const [activeProjectId, setActiveProjectIdState] = useState<string | undefined>(undefined)
   const [projects, setProjects] = useState<ProjectSpec[]>([])
 
   const update = async () => {
@@ -66,8 +64,6 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
     if (appSettings && initialLoad) {
       if (appSettings.userPreferences.lastActiveProjectId) {
         setActiveProjectIdState(appSettings.userPreferences.lastActiveProjectId)
-      } else {
-        setActiveProjectIdState(MAIN_PROJECT)
       }
       setInitialLoad(false)
     }
@@ -78,7 +74,8 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
     if (activeProjectId === undefined) return
     const exists = projects.some((p) => p.id === activeProjectId)
     if (!exists) {
-      setActiveProjectIdState(MAIN_PROJECT)
+      // Active project no longer exists; reset to first available project or undefined
+      setActiveProjectIdState(projects[0]?.id ?? undefined)
     }
   }, [projects, activeProjectId])
 

@@ -22,10 +22,7 @@ export function useMediaQuery(query: string) {
   return matches
 }
 
-export function useAccentClass(seed: string, isMain: boolean): string {
-  if (isMain) {
-    return 'nav-item nav-accent-gray'
-  }
+export function useAccentClass(seed: string, _isMain?: boolean): string {
   const n = [...seed].reduce((a, c) => a + c.charCodeAt(0), 0)
   const i = n % 3
   switch (i) {

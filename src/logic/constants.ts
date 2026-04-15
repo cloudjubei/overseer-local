@@ -2,7 +2,7 @@ import { AppSettings, ProjectSettings } from '../types/settings'
 
 export const DEFAULT_APP_SETTINGS: AppSettings = {
   userPreferences: {
-    lastActiveProjectId: 'main',
+    lastActiveProjectId: undefined,
     storiesViewMode: 'list',
     storiesListViewSorting: 'index_desc',
     storiesListViewStatusFilter: 'all',

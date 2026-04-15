@@ -4,7 +4,6 @@ import Tooltip from '../../components/ui/Tooltip'
 import NotificationBadge, { getBadgeColorClass } from '../../components/stories/NotificationBadge'
 import SpinnerWithDot from '../../components/ui/SpinnerWithDot'
 import { renderProjectIcon } from '@renderer/screens/projects/projectIcons'
-import { MAIN_PROJECT } from '../../contexts/ProjectContext'
 import { useNotifications } from '@renderer/hooks/useNotifications'
 import { useAppSettings } from '../../contexts/AppSettingsContext'
 import { classNames, useAccentClass } from '../utils'
@@ -35,8 +34,7 @@ export default function ProjectNavItem({
   const agentColorClass = getBadgeColorClass(agentBadgeColor, true)
   const gitColorClass = getBadgeColorClass(gitBadgeColor)
 
-  const isMainProject = (id?: string) => id === MAIN_PROJECT
-  const accent = useAccentClass(p.id, isMainProject(p.id))
+  const accent = useAccentClass(p.id, false)
 
   const st = getProjectBadgeState(p.id)
   const activeRuns = st.agent_runs.running
@@ -46,7 +44,7 @@ export default function ProjectNavItem({
   const gitIncoming = st.git_changes.incoming
   const gitUncommitted = st.git_changes.uncommitted
 
-  const iconKey = p.metadata?.icon || (isMainProject(p.id) ? 'collection' : 'folder')
+  const iconKey = p.metadata?.icon || 'folder'
   const projectIcon = renderProjectIcon(iconKey)
 
   const showAgents = isBadgeEnabled('agent_runs') && activeRuns > 0 && !active
