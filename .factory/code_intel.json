@@ -5031,6 +5031,13 @@
           "NotificationMetadata"
         ]
       },
+      "OnboardingView": {
+        "path": "src/renderer/src/screens/OnboardingView.tsx",
+        "dependencies": [
+          "IconPlus",
+          "ProjectWizardModal"
+        ]
+      },
       "ParsedHunk": {
         "path": "src/renderer/src/components/chat/tool-popups/diffUtils.tsx",
         "dependencies": [
@@ -11693,6 +11700,13 @@
           "NotificationMetadata"
         ]
       },
+      "OnboardingView": {
+        "path": "renderer/src/screens/OnboardingView.tsx",
+        "dependencies": [
+          "IconPlus",
+          "ProjectWizardModal"
+        ]
+      },
       "ParsedHunk": {
         "path": "renderer/src/components/chat/tool-popups/diffUtils.tsx",
         "dependencies": [
@@ -14520,73 +14534,60 @@
     "path": "node_modules/thefactory-db",
     "members": {
       "assertDocumentInput": {
-        "path": "dist/validation.d.ts",
+        "path": "dist/validation.js",
         "dependencies": []
       },
       "assertDocumentPatch": {
-        "path": "dist/validation.d.ts",
+        "path": "dist/validation.js",
         "dependencies": []
       },
       "assertEntityInput": {
-        "path": "dist/validation.d.ts",
+        "path": "dist/validation.js",
         "dependencies": []
       },
       "assertEntityPatch": {
-        "path": "dist/validation.d.ts",
+        "path": "dist/validation.js",
         "dependencies": []
       },
       "assertMatchParams": {
-        "path": "dist/validation.d.ts",
-        "dependencies": [
-          "MatchParams"
-        ]
+        "path": "dist/validation.js",
+        "dependencies": []
       },
       "assertSearchDocumentsForExactArgs": {
-        "path": "dist/validation.d.ts",
-        "dependencies": [
-          "SearchDocumentsForExactArgs"
-        ]
+        "path": "dist/validation.js",
+        "dependencies": []
       },
       "assertSearchDocumentsForKeywordsArgs": {
-        "path": "dist/validation.d.ts",
-        "dependencies": [
-          "SearchDocumentsForKeywordsArgs"
-        ]
+        "path": "dist/validation.js",
+        "dependencies": []
       },
       "assertSearchDocumentsForPathsArgs": {
-        "path": "dist/validation.d.ts",
-        "dependencies": [
-          "SearchDocumentsForPathsArgs"
-        ]
+        "path": "dist/validation.js",
+        "dependencies": []
       },
       "assertSearchEntitiesForExactArgs": {
-        "path": "dist/validation.d.ts",
-        "dependencies": [
-          "SearchEntitiesForExactArgs"
-        ]
+        "path": "dist/validation.js",
+        "dependencies": []
       },
       "assertSearchEntitiesForKeywordsArgs": {
-        "path": "dist/validation.d.ts",
-        "dependencies": [
-          "SearchEntitiesForKeywordsArgs"
-        ]
+        "path": "dist/validation.js",
+        "dependencies": []
       },
       "assertSearchParams": {
-        "path": "dist/validation.d.ts",
-        "dependencies": [
-          "SearchParams"
-        ]
+        "path": "dist/validation.js",
+        "dependencies": []
       },
       "buildEmbeddingTextForDoc": {
-        "path": "dist/utils.d.ts",
+        "path": "dist/utils.js",
         "dependencies": []
       },
       "createDatabase": {
-        "path": "dist/runtime.d.ts",
+        "path": "dist/runtime.js",
         "dependencies": [
-          "DatabaseHandle",
-          "Promise",
-          "CreateDatabaseOptions"
+          "pg/Pool",
+          "crypto/randomBytes",
+          "testcontainers/GenericContainer",
+          "testcontainers/Wait"
         ]
       },
       "CreateDatabaseOptions": {
@@ -14596,62 +14597,39 @@
         ]
       },
       "createDocumentApi": {
-        "path": "dist/client/documents.d.ts",
+        "path": "dist/client/documents.js",
         "dependencies": [
-          "Promise",
-          "SearchDocumentsForExactArgs",
-          "SearchDocumentsForKeywordsArgs",
-          "SearchDocumentsForPathsArgs",
-          "Document",
-          "MatchParams",
-          "DocumentWithScore",
-          "SearchParams",
-          "DocumentPatch",
-          "DocumentUpsertInput",
-          "DocumentInput",
-          "EmbeddingProvider",
-          "Logger",
-          "DB"
+          "JSON"
         ]
       },
       "createEntityApi": {
-        "path": "dist/client/entities.d.ts",
+        "path": "dist/client/entities.js",
         "dependencies": [
-          "Promise",
-          "SearchEntitiesForExactArgs",
-          "SearchEntitiesForKeywordsArgs",
-          "Entity",
-          "MatchParams",
-          "EntityWithScore",
-          "SearchParams",
-          "EntityPatch",
-          "EntityInput",
-          "EmbeddingProvider",
-          "Logger",
-          "DB"
+          "Object",
+          "JSON"
         ]
       },
       "createLocalEmbeddingProvider": {
-        "path": "dist/utils/embeddings.d.ts",
+        "path": "dist/utils/embeddings.js",
         "dependencies": [
-          "EmbeddingProvider",
-          "Promise"
+          "Array",
+          "@xenova/transformers/pipeline",
+          "@xenova/transformers/env"
         ]
       },
       "createLogger": {
-        "path": "dist/logger.d.ts",
+        "path": "dist/logger.js",
         "description": "Creates a new logger instance with the specified log level.",
-        "dependencies": [
-          "Logger",
-          "LogLevel"
-        ]
+        "dependencies": []
       },
       "createReusableDatabase": {
-        "path": "dist/runtime.d.ts",
-        "description": "Ensure a long-lived local Postgres+pgvector container exists and is running.",
+        "path": "dist/runtime.js",
         "dependencies": [
-          "Promise",
-          "CreateReusableDatabaseOptions"
+          "String",
+          "pg/Pool",
+          "crypto/randomBytes",
+          "testcontainers/GenericContainer",
+          "testcontainers/Wait"
         ]
       },
       "CreateReusableDatabaseOptions": {
@@ -14682,10 +14660,12 @@
         ]
       },
       "destroyDatabase": {
-        "path": "dist/runtime.d.ts",
+        "path": "dist/runtime.js",
         "dependencies": [
-          "Promise",
-          "DatabaseHandle"
+          "pg/Pool",
+          "crypto/randomBytes",
+          "testcontainers/GenericContainer",
+          "testcontainers/Wait"
         ]
       },
       "Document": {
@@ -14770,15 +14750,12 @@
         ]
       },
       "escapeLikePattern": {
-        "path": "dist/utils.d.ts",
+        "path": "dist/utils.js",
         "dependencies": []
       },
       "getDatabaseInfo": {
-        "path": "dist/migrations/runner.d.ts",
+        "path": "dist/migrations/runner.js",
         "dependencies": [
-          "DatabaseInfo",
-          "Promise",
-          "OpenDbOptions",
           "pg/Pool"
         ]
       },
@@ -14798,11 +14775,8 @@
         "dependencies": []
       },
       "migrateDatabase": {
-        "path": "dist/migrations/runner.d.ts",
+        "path": "dist/migrations/runner.js",
         "dependencies": [
-          "Promise",
-          "MigrateOptions",
-          "OpenDbOptions",
           "pg/Pool"
         ]
       },
@@ -14822,10 +14796,8 @@
         ]
       },
       "migration001": {
-        "path": "dist/migrations/001-init.d.ts",
-        "dependencies": [
-          "Migration"
-        ]
+        "path": "dist/migrations/001-init.js",
+        "dependencies": []
       },
       "MigrationContext": {
         "path": "dist/migrations/types.d.ts",
@@ -14835,26 +14807,20 @@
         ]
       },
       "migrations": {
-        "path": "dist/migrations/index.d.ts",
-        "dependencies": [
-          "Migration"
-        ]
+        "path": "dist/migrations/index.js",
+        "dependencies": []
       },
       "normalizeDocPath": {
-        "path": "dist/utils.d.ts",
+        "path": "dist/utils.js",
         "dependencies": []
       },
       "normalizePathPrefix": {
-        "path": "dist/utils.d.ts",
+        "path": "dist/utils.js",
         "dependencies": []
       },
       "openDatabase": {
-        "path": "dist/client/openDatabase.d.ts",
-        "dependencies": [
-          "TheFactoryDb",
-          "Promise",
-          "OpenDbOptions"
-        ]
+        "path": "dist/client/openDatabase.js",
+        "dependencies": []
       },
       "OpenDbOptions": {
         "path": "dist/types.d.ts",
@@ -14864,16 +14830,13 @@
         ]
       },
       "openPostgres": {
-        "path": "dist/connection.d.ts",
-        "description": "Opens a new PostgreSQL connection pool and verifies connectivity.",
+        "path": "dist/connection.js",
         "dependencies": [
-          "DB",
-          "Promise",
           "pg/Pool"
         ]
       },
       "prepareQuery": {
-        "path": "dist/utils.d.ts",
+        "path": "dist/utils.js",
         "dependencies": []
       },
       "SearchDocumentsForExactArgs": {
@@ -14912,11 +14875,11 @@
         ]
       },
       "SQL": {
-        "path": "dist/sql.d.ts",
+        "path": "dist/sql.js",
         "dependencies": []
       },
       "stringifyJsonValues": {
-        "path": "dist/utils/json.d.ts",
+        "path": "dist/utils/json.js",
         "dependencies": []
       },
       "TheFactoryDb": {
@@ -14943,14 +14906,12 @@
         ]
       },
       "toTokens": {
-        "path": "dist/utils.d.ts",
+        "path": "dist/utils.js",
         "dependencies": []
       },
       "toVectorLiteral": {
-        "path": "dist/utils.d.ts",
-        "dependencies": [
-          "ArrayLike"
-        ]
+        "path": "dist/utils.js",
+        "dependencies": []
       }
     }
   },
@@ -14958,20 +14919,17 @@
     "path": "node_modules/thefactory-tools",
     "members": {
       "addStoryToOrder": {
-        "path": "dist/story/storyOrder.d.ts",
+        "path": "dist/story/storyOrder.js",
         "dependencies": [
-          "Promise"
+          "node:path"
         ]
       },
       "AGENT_RESPONSE_EXAMPLE": {
-        "path": "dist/completion/completionConstants.d.ts",
-        "dependencies": [
-          "src/agent/agentTypes/AgentResponse",
-          "src/agent/agentTypes"
-        ]
+        "path": "dist/completion/completionConstants.js",
+        "dependencies": []
       },
       "AGENT_RUN_CONTEXT": {
-        "path": "dist/chats/chatsConstants.d.ts",
+        "path": "dist/chats/chatsConstants.js",
         "dependencies": []
       },
       "AgentResponse": {
@@ -15116,37 +15074,31 @@
         ]
       },
       "ALL_CHAT_AGENT_TOOLS": {
-        "path": "dist/chats/chatsConstants.d.ts",
+        "path": "dist/chats/chatsConstants.js",
         "dependencies": []
       },
       "appendCost": {
-        "path": "dist/llmCosts/LLMCostsTools.d.ts",
+        "path": "dist/llmCosts/LLMCostsTools.js",
         "dependencies": [
-          "Promise",
-          "ChatContext",
-          "LLMModel",
-          "ModelUsage",
-          "PricingState"
+          "COST_LEDGER_ENTRY_ENTITY_TYPE",
+          "thefactory-db/openDatabase"
         ]
       },
       "applyLedgerEntryToAggregate": {
-        "path": "dist/llmCosts/llmCostsHelpers.d.ts",
-        "dependencies": [
-          "LLMCostAggregateContent",
-          "LLMCostLedgerEntryContent",
-          "thefactory-db/TheFactoryDb"
-        ]
-      },
-      "applyPatchPerHunkWithMiniHunks": {
-        "path": "dist/file/patch/FileMiniHunkPatch.d.ts",
+        "path": "dist/llmCosts/llmCostsHelpers.js",
         "dependencies": []
       },
-      "astEditNode": {
-        "path": "dist/codeIntel/ast/astEditNode.d.ts",
+      "applyPatchPerHunkWithMiniHunks": {
+        "path": "dist/file/patch/FileMiniHunkPatch.js",
         "dependencies": [
-          "AstEditResult",
-          "Promise",
-          "CodeIntelInternalState"
+          "diff/applyPatch"
+        ]
+      },
+      "astEditNode": {
+        "path": "dist/codeIntel/ast/astEditNode.js",
+        "dependencies": [
+          "diff/createPatch",
+          "node:fs/promises"
         ]
       },
       "AstEditResult": {
@@ -15154,11 +15106,9 @@
         "dependencies": []
       },
       "astGetOutline": {
-        "path": "dist/codeIntel/ast/astGetOutline.d.ts",
+        "path": "dist/codeIntel/ast/astGetOutline.js",
         "dependencies": [
-          "AstOutlineNode",
-          "Promise",
-          "CodeIntelInternalState"
+          "node:fs/promises"
         ]
       },
       "AstOutlineNode": {
@@ -15166,121 +15116,76 @@
         "dependencies": []
       },
       "astRenameSymbol": {
-        "path": "dist/codeIntel/ast/astRenameSymbol.d.ts",
+        "path": "dist/codeIntel/ast/astRenameSymbol.js",
         "dependencies": [
-          "AstEditResult",
-          "Promise",
-          "CodeIntelInternalState"
+          "diff/createPatch",
+          "node:fs/promises"
         ]
       },
       "atomicWriteFile": {
-        "path": "dist/codeIntel/ast/astShared.d.ts",
+        "path": "dist/codeIntel/ast/astShared.js",
         "dependencies": [
-          "Promise",
-          "web-tree-sitter/Parser"
+          "web-tree-sitter/Parser",
+          "node:fs/promises"
         ]
       },
       "base64ToUtf8": {
-        "path": "dist/utils.d.ts",
+        "path": "dist/utils.js",
         "dependencies": []
       },
       "baseFromDependencyToken": {
-        "path": "dist/codeIntel/codeIntelUtils.d.ts",
+        "path": "dist/codeIntel/codeIntelUtils.js",
         "dependencies": []
       },
       "buildAgentEnvelopeSchema": {
-        "path": "dist/completion/providers/completionProviderUtils.d.ts",
+        "path": "dist/completion/providers/completionProviderUtils.js",
         "description": "Provider-compatible schema for the agent envelope.",
-        "dependencies": [
-          "StructuredOutputSchema",
-          "LLMProvider"
-        ]
+        "dependencies": []
       },
       "buildAnthropicMessagesRequest": {
-        "path": "dist/completion/providers/completionProviderAnthropic.d.ts",
-        "dependencies": [
-          "ToolCall",
-          "NormalizedUsage",
-          "Record",
-          "CompletionMessage",
-          "LLMConfig"
-        ]
+        "path": "dist/completion/providers/completionProviderAnthropic.js",
+        "dependencies": []
       },
       "buildCustomRequest": {
-        "path": "dist/completion/providers/completionProviderCustom.d.ts",
+        "path": "dist/completion/providers/completionProviderCustom.js",
         "dependencies": [
-          "ToolCall",
-          "NormalizedUsage",
-          "Record",
-          "CompletionMessage",
-          "LLMConfig"
+          "JSON"
         ]
       },
       "buildDeepSeekRequest": {
-        "path": "dist/completion/providers/completionProviderDeepSeek.d.ts",
-        "dependencies": [
-          "ToolCall",
-          "NormalizedUsage",
-          "Record",
-          "CompletionMessage",
-          "LLMConfig"
-        ]
+        "path": "dist/completion/providers/completionProviderDeepSeek.js",
+        "dependencies": []
       },
       "buildGeminiGenerateContentRequest": {
-        "path": "dist/completion/providers/completionProviderGemini.d.ts",
-        "dependencies": [
-          "ToolCall",
-          "NormalizedUsage",
-          "Record",
-          "CompletionMessage",
-          "LLMConfig"
-        ]
+        "path": "dist/completion/providers/completionProviderGemini.js",
+        "dependencies": []
       },
       "buildHttpsUrlWithToken": {
-        "path": "dist/git/gitUtils.d.ts",
+        "path": "dist/git/gitUtils.js",
         "dependencies": []
       },
       "buildLlamaRequest": {
-        "path": "dist/completion/providers/completionProviderLlama.d.ts",
+        "path": "dist/completion/providers/completionProviderLlama.js",
         "description": "LLaMA provider implementation.",
-        "dependencies": [
-          "Record",
-          "CompletionMessage",
-          "LLMConfig"
-        ]
+        "dependencies": []
       },
       "buildOpenAIResponsesRequest": {
-        "path": "dist/completion/providers/completionProviderOpenAI.d.ts",
-        "dependencies": [
-          "ToolCall",
-          "NormalizedUsage",
-          "Record",
-          "CompletionMessage",
-          "LLMConfig"
-        ]
+        "path": "dist/completion/providers/completionProviderOpenAI.js",
+        "dependencies": []
       },
       "buildProviderRequest": {
-        "path": "dist/completion/providers/completionProviderHelpers.d.ts",
-        "dependencies": [
-          "BuiltProviderRequest",
-          "CompletionMessage",
-          "LLMConfig"
-        ]
+        "path": "dist/completion/providers/completionProviderHelpers.js",
+        "dependencies": []
       },
       "buildQwenRequest": {
-        "path": "dist/completion/providers/completionProviderQwen.d.ts",
+        "path": "dist/completion/providers/completionProviderQwen.js",
         "description": "Qwen provider implementation.",
-        "dependencies": [
-          "Record",
-          "CompletionMessage",
-          "LLMConfig"
-        ]
+        "dependencies": []
       },
       "buildTestResult": {
-        "path": "dist/testRunner/testRunnerHelpers.d.ts",
+        "path": "dist/testRunner/testRunnerHelpers.js",
         "dependencies": [
-          "TestResult",
-          "BuildTestResultArgs"
+          "node:fs/promises"
         ]
       },
       "BuildTestResultArgs": {
@@ -15288,37 +15193,22 @@
         "dependencies": []
       },
       "buildTestTempFolderName": {
-        "path": "dist/test/testUtils.d.ts",
+        "path": "dist/test/testUtils.js",
         "description": "Build a deterministic temp folder name segment for a given test.",
         "dependencies": []
       },
       "buildToolSignature": {
-        "path": "dist/completion/completionUtils.d.ts",
-        "dependencies": [
-          "AgentToolSchema",
-          "src/agent/agentTypes.js/ToolCall",
-          "src/agent/agentTypes.js/ToolCallWithResult",
-          "src/agent/agentTypes.js/ToolResult",
-          "src/agent/agentTypes.js"
-        ]
+        "path": "dist/completion/completionUtils.js",
+        "dependencies": []
       },
       "buildToolSignatures": {
-        "path": "dist/completion/completionUtils.d.ts",
-        "dependencies": [
-          "src/agent/agentTypes.js/ToolCall",
-          "src/agent/agentTypes.js/ToolCallWithResult",
-          "src/agent/agentTypes.js/ToolResult",
-          "src/agent/agentTypes.js"
-        ]
+        "path": "dist/completion/completionUtils.js",
+        "dependencies": []
       },
       "buildXAIRequest": {
-        "path": "dist/completion/providers/completionProviderXAI.d.ts",
+        "path": "dist/completion/providers/completionProviderXAI.js",
         "description": "xAI provider implementation.",
-        "dependencies": [
-          "Record",
-          "CompletionMessage",
-          "LLMConfig"
-        ]
+        "dependencies": []
       },
       "BuiltProviderRequest": {
         "path": "dist/completion/providers/completionProviderHelpers.d.ts",
@@ -15329,28 +15219,21 @@
         ]
       },
       "bytesSlice": {
-        "path": "dist/codeIntel/codeIntelUtils.d.ts",
+        "path": "dist/codeIntel/codeIntelUtils.js",
         "dependencies": []
       },
       "calculateCost": {
-        "path": "dist/llmCosts/LLMCostsTools.d.ts",
+        "path": "dist/llmCosts/LLMCostsTools.js",
         "dependencies": [
-          "ModelUsage",
-          "PricingState"
+          "thefactory-db/openDatabase"
         ]
       },
       "callCompletionTools": {
-        "path": "dist/completion/CompletionTools.d.ts",
-        "dependencies": [
-          "CompletionToolResults",
-          "Promise",
-          "AbortSignal",
-          "ToolCallWithResult",
-          "ToolCall"
-        ]
+        "path": "dist/completion/CompletionTools.js",
+        "dependencies": []
       },
       "CANONICAL_PRICES_URL": {
-        "path": "dist/llmCosts/llmCostsConstants.d.ts",
+        "path": "dist/llmCosts/llmCostsConstants.js",
         "dependencies": []
       },
       "Chat": {
@@ -15547,15 +15430,15 @@
         "dependencies": []
       },
       "CHATS_DIR_NAME": {
-        "path": "dist/constants.d.ts",
+        "path": "dist/constants.js",
         "dependencies": []
       },
       "CHATS_GROUPS_DIR_NAME": {
-        "path": "dist/constants.d.ts",
+        "path": "dist/constants.js",
         "dependencies": []
       },
       "CHATS_PROJECTS_DIR_NAME": {
-        "path": "dist/constants.d.ts",
+        "path": "dist/constants.js",
         "dependencies": []
       },
       "ChatSettings": {
@@ -15612,7 +15495,7 @@
         "dependencies": []
       },
       "classifyDocumentType": {
-        "path": "dist/file/fileUtils.d.ts",
+        "path": "dist/file/fileUtils.js",
         "dependencies": []
       },
       "CodeIntelCatalogue": {
@@ -15686,11 +15569,9 @@
         ]
       },
       "CodeIntelMember": {
-        "path": "dist/codeIntel/codeIntelTypes.d.ts",
+        "path": "dist/codeIntel/codeIntelTypes.js",
         "description": "Rich description of a single code member, including its source text and dependency references.",
-        "dependencies": [
-          "CodeIntelMemberKind"
-        ]
+        "dependencies": []
       },
       "CodeIntelMemberEntry": {
         "path": "dist/codeIntel/codeIntelTypes.d.ts",
@@ -15804,46 +15685,28 @@
         ]
       },
       "COMPLETION_DYNAMIC_CONTEXT": {
-        "path": "dist/completion/completionConstants.d.ts",
-        "dependencies": [
-          "src/agent/agentTypes/AgentResponse",
-          "src/agent/agentTypes"
-        ]
+        "path": "dist/completion/completionConstants.js",
+        "dependencies": []
       },
       "COMPLETION_INTERACTION_MESSAGE_INSTRUCTIONS": {
-        "path": "dist/completion/completionConstants.d.ts",
-        "dependencies": [
-          "src/agent/agentTypes/AgentResponse",
-          "src/agent/agentTypes"
-        ]
+        "path": "dist/completion/completionConstants.js",
+        "dependencies": []
       },
       "COMPLETION_INTERACTION_TOOLS_INSTRUCTIONS": {
-        "path": "dist/completion/completionConstants.d.ts",
-        "dependencies": [
-          "src/agent/agentTypes/AgentResponse",
-          "src/agent/agentTypes"
-        ]
+        "path": "dist/completion/completionConstants.js",
+        "dependencies": []
       },
       "COMPLETION_PROTOCOL_INSTRUCTIONS": {
-        "path": "dist/completion/completionConstants.d.ts",
-        "dependencies": [
-          "src/agent/agentTypes/AgentResponse",
-          "src/agent/agentTypes"
-        ]
+        "path": "dist/completion/completionConstants.js",
+        "dependencies": []
       },
       "COMPLETION_TOOLS_INSTRUCTIONS": {
-        "path": "dist/completion/completionConstants.d.ts",
-        "dependencies": [
-          "src/agent/agentTypes/AgentResponse",
-          "src/agent/agentTypes"
-        ]
+        "path": "dist/completion/completionConstants.js",
+        "dependencies": []
       },
       "COMPLETION_TRUNCATION_INFO": {
-        "path": "dist/completion/completionConstants.d.ts",
-        "dependencies": [
-          "src/agent/agentTypes/AgentResponse",
-          "src/agent/agentTypes"
-        ]
+        "path": "dist/completion/completionConstants.js",
+        "dependencies": []
       },
       "CompletionArgs": {
         "path": "dist/agentRunner/agentRunnerTypes.d.ts",
@@ -16019,66 +15882,57 @@
         ]
       },
       "computeCostsFromLLMConfig": {
-        "path": "dist/llmCosts/llmCostsUtils.d.ts",
-        "dependencies": [
-          "LLMConfig"
-        ]
+        "path": "dist/llmCosts/llmCostsUtils.js",
+        "dependencies": []
       },
       "computeOverallCoverageStatus": {
-        "path": "dist/testRunner/testRunnerHelpers.d.ts",
+        "path": "dist/testRunner/testRunnerHelpers.js",
         "dependencies": [
-          "CoverageStatus",
-          "CoverageResult"
+          "node:fs/promises"
         ]
       },
       "computeOverallTestStatus": {
-        "path": "dist/testRunner/testRunnerHelpers.d.ts",
+        "path": "dist/testRunner/testRunnerHelpers.js",
         "dependencies": [
-          "TestStatus",
-          "TestResult"
+          "node:fs/promises"
         ]
       },
       "constructSystemPrompt": {
-        "path": "dist/agentRunner/AgentRunnerIsolatedTools.d.ts",
-        "dependencies": [
-          "ExternalFilesResult",
-          "FilesResult",
-          "Feature",
-          "Story"
-        ]
+        "path": "dist/agentRunner/AgentRunnerIsolatedTools.js",
+        "dependencies": []
       },
       "convertFloat": {
-        "path": "dist/utils.d.ts",
+        "path": "dist/utils.js",
         "dependencies": []
       },
       "convertInteger": {
-        "path": "dist/utils.d.ts",
+        "path": "dist/utils.js",
         "dependencies": []
       },
       "copyTree": {
-        "path": "dist/file/fileHelpers.d.ts",
+        "path": "dist/file/fileHelpers.js",
         "dependencies": [
-          "Promise"
+          "node:fs/promises"
         ]
       },
       "COST_AGGREGATE_ENTITY_TYPE": {
-        "path": "dist/llmCosts/llmCostsConstants.d.ts",
+        "path": "dist/llmCosts/llmCostsConstants.js",
         "dependencies": []
       },
       "COST_GROUP_ID_ALL": {
-        "path": "dist/llmCosts/llmCostsConstants.d.ts",
+        "path": "dist/llmCosts/llmCostsConstants.js",
         "dependencies": []
       },
       "COST_LEDGER_ENTRY_ENTITY_TYPE": {
-        "path": "dist/llmCosts/llmCostsConstants.d.ts",
+        "path": "dist/llmCosts/llmCostsConstants.js",
         "dependencies": []
       },
       "COST_MODEL_KEY_SEPARATOR": {
-        "path": "dist/llmCosts/llmCostsConstants.d.ts",
+        "path": "dist/llmCosts/llmCostsConstants.js",
         "dependencies": []
       },
       "COST_PROJECT_ID_GENERAL": {
-        "path": "dist/llmCosts/llmCostsConstants.d.ts",
+        "path": "dist/llmCosts/llmCostsConstants.js",
         "dependencies": []
       },
       "CoverageFileResult": {
@@ -16115,120 +15969,99 @@
         "dependencies": []
       },
       "createAgentRunnerTools": {
-        "path": "dist/agentRunner/AgentRunnerTools.d.ts",
+        "path": "dist/agentRunner/AgentRunnerTools.js",
         "description": "Wraps completion + chat persistence to provide a simple API for",
         "dependencies": [
-          "AgentRunnerTools"
+          "node:fs/promises"
         ]
       },
       "createAgentTools": {
-        "path": "dist/agent/AgentTools.d.ts",
+        "path": "dist/agent/AgentTools.js",
         "dependencies": [
-          "AgentTools",
-          "Tools"
+          "diff/createPatch"
         ]
       },
       "createChatsTools": {
-        "path": "dist/chats/ChatsTools.d.ts",
+        "path": "dist/chats/ChatsTools.js",
         "dependencies": [
-          "ChatsTools"
+          "node:fs/promises"
         ]
       },
       "createCodeIntelTools": {
-        "path": "dist/codeIntel/CodeIntelTools.d.ts",
+        "path": "dist/codeIntel/CodeIntelTools.js",
         "dependencies": [
-          "CodeIntelTools",
-          "CodeIntelToolsOptions"
+          "ROOT",
+          "node:fs/promises"
         ]
       },
       "createCompileTools": {
-        "path": "dist/compile/CompileTools.d.ts",
+        "path": "dist/compile/CompileTools.js",
         "dependencies": [
-          "CompileTools"
+          "node:fs/promises"
         ]
       },
       "createCompletionTools": {
-        "path": "dist/completion/CompletionTools.d.ts",
-        "dependencies": [
-          "CompletionTools"
-        ]
+        "path": "dist/completion/CompletionTools.js",
+        "dependencies": []
       },
       "createCompletionWithToolsParams": {
-        "path": "dist/completion/completionHelpers.d.ts",
+        "path": "dist/completion/completionHelpers.js",
         "description": "Create a reusable CompletionWithToolsParams object that persists completion lifecycle events",
-        "dependencies": [
-          "CompletionWithToolsParams",
-          "LLMCostsTools",
-          "Promise",
-          "ToolCall",
-          "CompletionSettings",
-          "CompletionRequest",
-          "ChatsTools"
-        ]
+        "dependencies": []
       },
       "createDynamicContextMarkdown": {
-        "path": "dist/completion/completionUtils.d.ts",
-        "dependencies": [
-          "ChatDynamicContext",
-          "src/agent/agentTypes.js/ToolCall",
-          "src/agent/agentTypes.js/ToolCallWithResult",
-          "src/agent/agentTypes.js/ToolResult",
-          "src/agent/agentTypes.js"
-        ]
+        "path": "dist/completion/completionUtils.js",
+        "dependencies": []
       },
       "createFileTools": {
-        "path": "dist/file/FileTools.d.ts",
+        "path": "dist/file/FileTools.js",
         "dependencies": [
-          "FileTools"
+          "diff/createPatch",
+          "diff/applyPatch",
+          "thefactory-db/openDatabase",
+          "node:fs/promises"
         ]
       },
       "createGitTools": {
-        "path": "dist/git/GitTools.d.ts",
+        "path": "dist/git/GitTools.js",
         "dependencies": [
-          "GitTools",
-          "GithubCredentials"
+          "ROOT",
+          "node:fs/promises"
         ]
       },
       "createLLMCostsTools": {
-        "path": "dist/llmCosts/LLMCostsTools.d.ts",
+        "path": "dist/llmCosts/LLMCostsTools.js",
         "dependencies": [
-          "LLMCostsTools"
+          "thefactory-db/openDatabase"
         ]
       },
       "createMessageSystemPrompt": {
-        "path": "dist/completion/completionUtils.d.ts",
-        "dependencies": [
-          "src/agent/agentTypes.js/ToolCall",
-          "src/agent/agentTypes.js/ToolCallWithResult",
-          "src/agent/agentTypes.js/ToolResult",
-          "src/agent/agentTypes.js"
-        ]
+        "path": "dist/completion/completionUtils.js",
+        "dependencies": []
       },
       "createProjectsGroupsTools": {
-        "path": "dist/projectsgroups/ProjectsGroupsTools.d.ts",
+        "path": "dist/projectsgroups/ProjectsGroupsTools.js",
         "dependencies": [
-          "ProjectsGroupsTools"
+          "node:path"
         ]
       },
       "createProjectTools": {
-        "path": "dist/project/ProjectTools.d.ts",
+        "path": "dist/project/ProjectTools.js",
         "description": "Factory creating ProjectTools bound to the project root.",
         "dependencies": [
-          "ProjectTools"
+          "node:fs/promises"
         ]
       },
       "createStoryTools": {
-        "path": "dist/story/StoryTools.d.ts",
+        "path": "dist/story/StoryTools.js",
         "dependencies": [
-          "StoryTools"
+          "node:fs/promises"
         ]
       },
       "createTempDir": {
-        "path": "dist/test/testHelpers.d.ts",
+        "path": "dist/test/testHelpers.js",
         "dependencies": [
-          "TempDir",
-          "Promise",
-          "CreateTempDirOptions"
+          "node:fs/promises"
         ]
       },
       "CreateTempDirOptions": {
@@ -16236,23 +16069,20 @@
         "dependencies": []
       },
       "createTestRunId": {
-        "path": "dist/test/testUtils.d.ts",
+        "path": "dist/test/testUtils.js",
         "description": "Create a short random id suitable for folder names.",
         "dependencies": []
       },
       "createTestRunnerTools": {
-        "path": "dist/testRunner/TestRunnerTools.d.ts",
+        "path": "dist/testRunner/TestRunnerTools.js",
         "dependencies": [
-          "TestRunnerTools"
+          "node:fs/promises"
         ]
       },
       "createTestTempDir": {
-        "path": "dist/test/testHelpers.d.ts",
-        "description": "Create an isolated temp directory for a single test.",
+        "path": "dist/test/testHelpers.js",
         "dependencies": [
-          "TestTempDirDisposable",
-          "Promise",
-          "CreateTestTempDirOptions"
+          "node:fs/promises"
         ]
       },
       "CreateTestTempDirOptions": {
@@ -16261,37 +16091,25 @@
         "dependencies": []
       },
       "createTools": {
-        "path": "dist/tools/Tools.d.ts",
-        "description": "Compose and return the unified Tools object for a project. It aggregates",
+        "path": "dist/tools/Tools.js",
         "dependencies": [
-          "Tools",
-          "Promise",
-          "GithubCredentials",
-          "WebSearchApiKeys",
-          "StoryTools"
+          "thefactory-db/createDatabase"
         ]
       },
       "createToolUseSystemPrompt": {
-        "path": "dist/completion/completionUtils.d.ts",
-        "dependencies": [
-          "src/agent/agentTypes.js/ToolCall",
-          "src/agent/agentTypes.js/ToolCallWithResult",
-          "src/agent/agentTypes.js/ToolResult",
-          "src/agent/agentTypes.js"
-        ]
+        "path": "dist/completion/completionUtils.js",
+        "dependencies": []
       },
       "createWebTools": {
-        "path": "dist/web/WebTools.d.ts",
+        "path": "dist/web/WebTools.js",
         "dependencies": [
-          "WebTools",
-          "WebSearchApiKeys"
+          "jsdom/JSDOM",
+          "@mozilla/readability/Readability"
         ]
       },
       "createZeroAggregate": {
-        "path": "dist/llmCosts/llmCostsUtils.d.ts",
-        "dependencies": [
-          "LLMCostAggregateContent"
-        ]
+        "path": "dist/llmCosts/llmCostsUtils.js",
+        "dependencies": []
       },
       "CSharpFramework": {
         "path": "dist/project/projectTypes.d.ts",
@@ -16302,192 +16120,168 @@
         "dependencies": []
       },
       "DEFAULT_AGENT_COMPLETION_SETTINGS": {
-        "path": "dist/chats/chatsConstants.d.ts",
+        "path": "dist/chats/chatsConstants.js",
         "dependencies": [
-          "CompletionSettings"
+          "DEFAULT_AGENT_MESSAGES_TO_SEND",
+          "DEFAULT_AGENT_MAX_TURNS",
+          "DEFAULT_AGENT_HISTORY_SUMMARIZATION",
+          "DEFAULT_AGENT_MESSAGE_SANITIZATION"
         ]
       },
       "DEFAULT_AGENT_HISTORY_SUMMARIZATION": {
-        "path": "dist/chats/chatsConstants.d.ts",
-        "dependencies": [
-          "CompletionHistorySummarization"
-        ]
+        "path": "dist/chats/chatsConstants.js",
+        "dependencies": []
       },
       "DEFAULT_AGENT_MAX_TURNS": {
-        "path": "dist/chats/chatsConstants.d.ts",
+        "path": "dist/chats/chatsConstants.js",
         "dependencies": []
       },
       "DEFAULT_AGENT_MESSAGE_SANITIZATION": {
-        "path": "dist/chats/chatsConstants.d.ts",
-        "dependencies": [
-          "CompletionMessageSanitization"
-        ]
+        "path": "dist/chats/chatsConstants.js",
+        "dependencies": []
       },
       "DEFAULT_AGENT_MESSAGES_TO_SEND": {
-        "path": "dist/chats/chatsConstants.d.ts",
+        "path": "dist/chats/chatsConstants.js",
         "dependencies": []
       },
       "DEFAULT_AUTO_CALL_TOOLS": {
-        "path": "dist/chats/chatsConstants.d.ts",
+        "path": "dist/chats/chatsConstants.js",
         "dependencies": []
       },
       "DEFAULT_AVAILABLE_TOOLS": {
-        "path": "dist/chats/chatsConstants.d.ts",
+        "path": "dist/chats/chatsConstants.js",
         "dependencies": []
       },
       "DEFAULT_CHAT_MAX_TURNS": {
-        "path": "dist/chats/chatsConstants.d.ts",
+        "path": "dist/chats/chatsConstants.js",
         "dependencies": []
       },
       "DEFAULT_CHAT_MESSAGES_SEND": {
-        "path": "dist/chats/chatsConstants.d.ts",
+        "path": "dist/chats/chatsConstants.js",
         "dependencies": []
       },
       "DEFAULT_CHAT_PROMPTS": {
-        "path": "dist/chats/chatsConstants.d.ts",
-        "dependencies": []
+        "path": "dist/chats/chatsConstants.js",
+        "dependencies": [
+          "When"
+        ]
       },
       "DEFAULT_CHAT_SANITIZATION_KEEP_LAST_MESSAGES": {
-        "path": "dist/chats/chatsConstants.d.ts",
+        "path": "dist/chats/chatsConstants.js",
         "dependencies": []
       },
       "DEFAULT_CHAT_SUMMARIZATION_KEEP_TURNS": {
-        "path": "dist/chats/chatsConstants.d.ts",
+        "path": "dist/chats/chatsConstants.js",
         "dependencies": []
       },
       "DEFAULT_CHAT_SUMMARIZATION_MAX_OPS": {
-        "path": "dist/chats/chatsConstants.d.ts",
+        "path": "dist/chats/chatsConstants.js",
         "dependencies": []
       },
       "DEFAULT_CHATS_SETTINGS": {
-        "path": "dist/chats/chatsConstants.d.ts",
+        "path": "dist/chats/chatsConstants.js",
         "dependencies": [
-          "ChatsSettings"
+          "DEFAULT_CHAT_PROMPTS",
+          "DEFAULT_COMPLETION_SETTINGS",
+          "DEFAULT_AGENT_COMPLETION_SETTINGS"
         ]
       },
       "DEFAULT_CODE_EXTS": {
-        "path": "dist/file/fileConstants.d.ts",
-        "dependencies": [
-          "Set"
-        ]
+        "path": "dist/file/fileConstants.js",
+        "dependencies": []
       },
       "DEFAULT_COMPLETION_SETTINGS": {
-        "path": "dist/chats/chatsConstants.d.ts",
+        "path": "dist/chats/chatsConstants.js",
         "dependencies": [
-          "CompletionSettings"
+          "DEFAULT_CHAT_MAX_TURNS",
+          "DEFAULT_CHAT_MESSAGES_SEND",
+          "DEFAULT_AVAILABLE_TOOLS",
+          "DEFAULT_AUTO_CALL_TOOLS",
+          "DEFAULT_CHAT_SUMMARIZATION_KEEP_TURNS",
+          "DEFAULT_CHAT_SUMMARIZATION_MAX_OPS",
+          "DEFAULT_CHAT_SANITIZATION_KEEP_LAST_MESSAGES"
         ]
       },
       "DEFAULT_CONFIG_CODE_FILES": {
-        "path": "dist/file/fileConstants.d.ts",
-        "dependencies": [
-          "Set"
-        ]
+        "path": "dist/file/fileConstants.js",
+        "dependencies": []
       },
       "DEFAULT_PRICES": {
-        "path": "dist/llmCosts/llmCostsConstants.d.ts",
+        "path": "dist/llmCosts/llmCostsConstants.js",
         "dependencies": []
       },
       "DEFAULT_PROVIDER_ENDPOINTS": {
-        "path": "dist/completion/providers/completionProviderUtils.d.ts",
-        "dependencies": [
-          "LLMProvider",
-          "Record"
-        ]
+        "path": "dist/completion/providers/completionProviderUtils.js",
+        "dependencies": []
       },
       "deleteStoryFromOrder": {
-        "path": "dist/story/storyOrder.d.ts",
+        "path": "dist/story/storyOrder.js",
         "dependencies": [
-          "Promise"
+          "node:path"
         ]
       },
       "detectPackageLanguage": {
-        "path": "dist/codeIntel/codeIntelHelpers.d.ts",
+        "path": "dist/codeIntel/codeIntelHelpers.js",
         "dependencies": [
-          "CodeIntelPackageDetection",
-          "Promise"
+          "node:fs/promises"
         ]
       },
       "detectProjectEnvironment": {
-        "path": "dist/codeIntel/environment/codeIntelEnvironment.d.ts",
+        "path": "dist/codeIntel/environment/codeIntelEnvironment.js",
         "dependencies": [
-          "CodeIntelDetectedEnvironment",
-          "Promise"
+          "node:fs/promises"
         ]
       },
       "enrichConfigWithPricing": {
-        "path": "dist/agentRunner/agentRunnerUtils.d.ts",
+        "path": "dist/agentRunner/agentRunnerUtils.js",
         "description": "Best-effort enrichment of missing pricing fields on llmConfig.",
-        "dependencies": [
-          "LLMConfig",
-          "LLMCostsTools"
-        ]
+        "dependencies": []
       },
       "enrichToolCallArgs": {
-        "path": "dist/agentRunner/agentRunnerUtils.d.ts",
-        "dependencies": [
-          "ToolCall",
-          "ChatContext"
-        ]
+        "path": "dist/agentRunner/agentRunnerUtils.js",
+        "dependencies": []
       },
       "ensureChatsSettings": {
-        "path": "dist/chats/chatsHelpers.d.ts",
-        "dependencies": [
-          "ChatsSettings",
-          "Promise"
-        ]
+        "path": "dist/chats/chatsHelpers.js",
+        "dependencies": []
       },
       "ensureDir": {
-        "path": "dist/file/fileHelpers.d.ts",
+        "path": "dist/file/fileHelpers.js",
         "dependencies": [
-          "Promise"
+          "node:fs/promises"
         ]
       },
       "ensureDirSync": {
-        "path": "dist/file/fileHelpers.d.ts",
+        "path": "dist/file/fileHelpers.js",
         "dependencies": [
-          "node:fs"
+          "node:fs/promises"
         ]
       },
       "ensureParserInit": {
-        "path": "dist/codeIntel/languagePackLoader.d.ts",
+        "path": "dist/codeIntel/languagePackLoader.js",
         "dependencies": [
-          "Promise",
+          "node:url/fileURLToPath",
           "web-tree-sitter/Language"
         ]
       },
       "estimateCostFromUsage": {
-        "path": "dist/llmCosts/llmCostsUtils.d.ts",
-        "dependencies": [
-          "ModelUsage",
-          "ModelPrice"
-        ]
+        "path": "dist/llmCosts/llmCostsUtils.js",
+        "dependencies": []
       },
       "estimateTokensFromMessages": {
-        "path": "dist/completion/completionUtils.d.ts",
-        "dependencies": [
-          "CompletionMessageRole",
-          "TokenizableMessage",
-          "src/agent/agentTypes.js/ToolCall",
-          "src/agent/agentTypes.js/ToolCallWithResult",
-          "src/agent/agentTypes.js/ToolResult",
-          "src/agent/agentTypes.js"
-        ]
+        "path": "dist/completion/completionUtils.js",
+        "dependencies": []
       },
       "estimateTokensFromText": {
-        "path": "dist/completion/completionUtils.d.ts",
-        "dependencies": [
-          "src/agent/agentTypes.js/ToolCall",
-          "src/agent/agentTypes.js/ToolCallWithResult",
-          "src/agent/agentTypes.js/ToolResult",
-          "src/agent/agentTypes.js"
-        ]
+        "path": "dist/completion/completionUtils.js",
+        "dependencies": []
       },
       "ExternalFilesResult": {
         "path": "dist/completion/completionTypes.d.ts",
         "dependencies": []
       },
       "FACTORY_DIR_NAME": {
-        "path": "dist/constants.d.ts",
+        "path": "dist/constants.js",
         "dependencies": []
       },
       "Feature": {
@@ -16497,7 +16291,7 @@
         ]
       },
       "FEATURE_CONTEXT": {
-        "path": "dist/chats/chatsConstants.d.ts",
+        "path": "dist/chats/chatsConstants.js",
         "dependencies": []
       },
       "FeatureCreateInput": {
@@ -16516,24 +16310,16 @@
         ]
       },
       "fetchExternalFiles": {
-        "path": "dist/completion/completionHelpers.d.ts",
-        "dependencies": [
-          "ExternalFilesResult",
-          "Promise"
-        ]
+        "path": "dist/completion/completionHelpers.js",
+        "dependencies": []
       },
       "fetchExternalFilesSafe": {
-        "path": "dist/completion/completionHelpers.d.ts",
-        "dependencies": [
-          "ExternalFilesResult",
-          "Promise"
-        ]
+        "path": "dist/completion/completionHelpers.js",
+        "dependencies": []
       },
       "FILE_TOOLS": {
-        "path": "dist/completion/completionHistorySummarizer.d.ts",
-        "dependencies": [
-          "Set"
-        ]
+        "path": "dist/completion/completionHistorySummarizer.js",
+        "dependencies": []
       },
       "FileChangeHandler": {
         "path": "dist/file/fileTypes.d.ts",
@@ -16557,12 +16343,9 @@
         ]
       },
       "FilesWatcher": {
-        "path": "dist/file/watcher/FilesWatcher.d.ts",
+        "path": "dist/file/watcher/FilesWatcher.js",
         "dependencies": [
-          "Promise",
-          "FileUpdate",
-          "FileChangeHandler",
-          "chokidar/Matcher"
+          "chokidar"
         ]
       },
       "FileTools": {
@@ -16596,28 +16379,22 @@
         "dependencies": []
       },
       "filterEmptyAssistantMessages": {
-        "path": "dist/completion/providers/completionProviderHelpers.d.ts",
-        "dependencies": [
-          "CompletionMessage"
-        ]
+        "path": "dist/completion/providers/completionProviderHelpers.js",
+        "dependencies": []
       },
       "findAllOccurrences": {
-        "path": "dist/codeIntel/codeIntelUtils.d.ts",
+        "path": "dist/codeIntel/codeIntelUtils.js",
         "dependencies": []
       },
       "findNextAvailableFeature": {
-        "path": "dist/story/StoryTools.d.ts",
+        "path": "dist/story/StoryTools.js",
         "dependencies": [
-          "Feature",
-          "Set",
-          "Story"
+          "node:fs/promises"
         ]
       },
       "findPackagesForMember": {
-        "path": "dist/codeIntel/codeIntelUtils.d.ts",
-        "dependencies": [
-          "CodeIntelInternalState"
-        ]
+        "path": "dist/codeIntel/codeIntelUtils.js",
+        "dependencies": []
       },
       "FrameworkName": {
         "path": "dist/project/projectTypes.d.ts",
@@ -16654,306 +16431,261 @@
         ]
       },
       "GENERAL_OMISSION_RECEIPT": {
-        "path": "dist/completion/completionConstants.d.ts",
-        "dependencies": [
-          "src/agent/agentTypes/AgentResponse",
-          "src/agent/agentTypes"
-        ]
+        "path": "dist/completion/completionConstants.js",
+        "dependencies": []
       },
       "getAbsolutePath": {
-        "path": "dist/file/fileHelpers.d.ts",
+        "path": "dist/file/fileHelpers.js",
         "description": "Join a project-relative path with the absolute project root to produce a filesystem path.",
         "dependencies": [
-          "node:fs"
+          "node:fs/promises"
         ]
       },
       "getAgentFile": {
-        "path": "dist/helpers.d.ts",
+        "path": "dist/helpers.js",
         "dependencies": [
-          "AgentRunType"
+          "best-effort-json-parser/parse"
         ]
       },
       "getAllowedToolSchemas": {
-        "path": "dist/completion/providers/providerToolSchemas.d.ts",
-        "dependencies": [
-          "AgentToolSchema"
-        ]
+        "path": "dist/completion/providers/providerToolSchemas.js",
+        "dependencies": []
       },
       "getChatContext": {
-        "path": "dist/chats/chatsUtils.d.ts",
-        "dependencies": [
-          "ChatContext"
-        ]
+        "path": "dist/chats/chatsUtils.js",
+        "dependencies": []
       },
       "getChatContextFolder": {
-        "path": "dist/chats/chatsUtils.d.ts",
-        "dependencies": [
-          "ChatContext"
-        ]
+        "path": "dist/chats/chatsUtils.js",
+        "dependencies": []
       },
       "getChatContextFromFilename": {
-        "path": "dist/chats/chatsUtils.d.ts",
-        "dependencies": [
-          "ChatContext"
-        ]
+        "path": "dist/chats/chatsUtils.js",
+        "dependencies": []
       },
       "getChatContextKey": {
-        "path": "dist/chats/chatsUtils.d.ts",
+        "path": "dist/chats/chatsUtils.js",
         "description": "Returns a stable string identifier for a chat context.",
-        "dependencies": [
-          "ChatContext"
-        ]
+        "dependencies": []
       },
       "getChatContextPath": {
-        "path": "dist/chats/chatsUtils.d.ts",
-        "dependencies": [
-          "ChatContext"
-        ]
+        "path": "dist/chats/chatsUtils.js",
+        "dependencies": []
       },
       "getChatKeysForContext": {
-        "path": "dist/llmCosts/llmCostsHelpers.d.ts",
-        "dependencies": [
-          "ChatContext",
-          "thefactory-db/TheFactoryDb"
-        ]
+        "path": "dist/llmCosts/llmCostsHelpers.js",
+        "dependencies": []
       },
       "getChatsDir": {
-        "path": "dist/chats/chatsUtils.d.ts",
+        "path": "dist/chats/chatsUtils.js",
         "dependencies": []
       },
       "getChatsGroupsFolder": {
-        "path": "dist/chats/chatsUtils.d.ts",
+        "path": "dist/chats/chatsUtils.js",
         "dependencies": []
       },
       "getChatsProjectsFolder": {
-        "path": "dist/chats/chatsUtils.d.ts",
+        "path": "dist/chats/chatsUtils.js",
         "dependencies": []
       },
       "getChatsSettingsDir": {
-        "path": "dist/chats/chatsUtils.d.ts",
+        "path": "dist/chats/chatsUtils.js",
         "dependencies": []
       },
       "getChatsSettingsPath": {
-        "path": "dist/chats/chatsUtils.d.ts",
+        "path": "dist/chats/chatsUtils.js",
         "dependencies": []
       },
       "getCodeIntelPath": {
-        "path": "dist/helpers.d.ts",
-        "dependencies": []
+        "path": "dist/helpers.js",
+        "dependencies": [
+          "best-effort-json-parser/parse"
+        ]
       },
       "getCost": {
-        "path": "dist/llmCosts/LLMCostsTools.d.ts",
+        "path": "dist/llmCosts/LLMCostsTools.js",
         "dependencies": [
-          "LLMCostAggregateContent",
-          "Promise"
+          "thefactory-db/openDatabase"
         ]
       },
       "getDefaultChatPrompt": {
-        "path": "dist/chats/chatsUtils.d.ts",
-        "dependencies": [
-          "ChatContext"
-        ]
-      },
-      "getDefaultChatSettings": {
-        "path": "dist/chats/chatsUtils.d.ts",
-        "dependencies": [
-          "ChatSettings",
-          "ChatContext"
-        ]
-      },
-      "getEmptyUsage": {
-        "path": "dist/completion/completionUtils.d.ts",
-        "dependencies": [
-          "CompletionUsage",
-          "src/agent/agentTypes.js/ToolCall",
-          "src/agent/agentTypes.js/ToolCallWithResult",
-          "src/agent/agentTypes.js/ToolResult",
-          "src/agent/agentTypes.js"
-        ]
-      },
-      "getFactoryToolsDocsDir": {
-        "path": "dist/helpers.d.ts",
+        "path": "dist/chats/chatsUtils.js",
         "dependencies": []
       },
-      "getFileContent": {
-        "path": "dist/git/gitHelpers.d.ts",
-        "description": "Retrieve the full content of a file at a given git ref using 'git show <ref>:<filePath>'.",
+      "getDefaultChatSettings": {
+        "path": "dist/chats/chatsUtils.js",
+        "dependencies": []
+      },
+      "getEmptyUsage": {
+        "path": "dist/completion/completionUtils.js",
+        "dependencies": []
+      },
+      "getFactoryToolsDocsDir": {
+        "path": "dist/helpers.js",
         "dependencies": [
-          "Promise"
+          "best-effort-json-parser/parse"
         ]
       },
+      "getFileContent": {
+        "path": "dist/git/gitHelpers.js",
+        "dependencies": []
+      },
       "getFileStats": {
-        "path": "dist/file/fileHelpers.d.ts",
+        "path": "dist/file/fileHelpers.js",
         "dependencies": [
-          "FileMeta",
-          "Promise"
+          "node:fs/promises"
         ]
       },
       "getGroupMemberProjectIds": {
-        "path": "dist/projectsgroups/projectsGroupsUtils.d.ts",
+        "path": "dist/projectsgroups/projectsGroupsUtils.js",
         "description": "Return all project IDs that are members of the given group.",
-        "dependencies": [
-          "ProjectSpec"
-        ]
+        "dependencies": []
       },
       "getGroupMemberProjects": {
-        "path": "dist/projectsgroups/projectsGroupsUtils.d.ts",
+        "path": "dist/projectsgroups/projectsGroupsUtils.js",
         "description": "Return all projects that are members of the given group.",
-        "dependencies": [
-          "ProjectSpec"
-        ]
+        "dependencies": []
       },
       "getIsDev": {
-        "path": "dist/logger.d.ts",
+        "path": "dist/logger.js",
         "dependencies": []
       },
       "getLastCoverageResultsPath": {
-        "path": "dist/helpers.d.ts",
-        "dependencies": []
+        "path": "dist/helpers.js",
+        "dependencies": [
+          "best-effort-json-parser/parse"
+        ]
       },
       "getLastE2ERunResultsPath": {
-        "path": "dist/helpers.d.ts",
-        "dependencies": []
+        "path": "dist/helpers.js",
+        "dependencies": [
+          "best-effort-json-parser/parse"
+        ]
       },
       "getLastRunResultsPath": {
-        "path": "dist/helpers.d.ts",
-        "dependencies": []
+        "path": "dist/helpers.js",
+        "dependencies": [
+          "best-effort-json-parser/parse"
+        ]
       },
       "getLLMModel": {
-        "path": "dist/completion/completionUtils.d.ts",
-        "dependencies": [
-          "LLMModel",
-          "LLMConfig",
-          "src/agent/agentTypes.js/ToolCall",
-          "src/agent/agentTypes.js/ToolCallWithResult",
-          "src/agent/agentTypes.js/ToolResult",
-          "src/agent/agentTypes.js"
-        ]
+        "path": "dist/completion/completionUtils.js",
+        "dependencies": []
       },
       "getLLMModelKey": {
-        "path": "dist/llmCosts/llmCostsUtils.d.ts",
-        "dependencies": [
-          "LLMModel"
-        ]
+        "path": "dist/llmCosts/llmCostsUtils.js",
+        "dependencies": []
       },
       "getLoggerConfig": {
-        "path": "dist/logger.d.ts",
-        "dependencies": [
-          "LoggerConfig"
-        ]
+        "path": "dist/logger.js",
+        "dependencies": []
       },
       "getPrice": {
-        "path": "dist/llmCosts/LLMCostsTools.d.ts",
+        "path": "dist/llmCosts/LLMCostsTools.js",
         "dependencies": [
-          "ModelPrice",
-          "PricingState"
+          "thefactory-db/openDatabase"
         ]
       },
       "getProject": {
-        "path": "dist/project/ProjectTools.d.ts",
-        "description": "Read a single project specification by id by merging registry entry + project config.",
+        "path": "dist/project/ProjectTools.js",
         "dependencies": [
-          "ProjectSpec",
-          "Promise"
+          "node:fs/promises"
         ]
       },
       "getProjectPath": {
-        "path": "dist/helpers.d.ts",
-        "dependencies": []
+        "path": "dist/helpers.js",
+        "dependencies": [
+          "best-effort-json-parser/parse"
+        ]
       },
       "getProjectsDir": {
-        "path": "dist/helpers.d.ts",
-        "dependencies": []
+        "path": "dist/helpers.js",
+        "dependencies": [
+          "best-effort-json-parser/parse"
+        ]
       },
       "getProjectsGroups": {
-        "path": "dist/projectsgroups/ProjectsGroupsTools.d.ts",
-        "description": "Read the projects groups store (.factory/projects_groups.json). Returns an empty array when missing.",
+        "path": "dist/projectsgroups/ProjectsGroupsTools.js",
         "dependencies": [
-          "ProjectsGroups",
-          "Promise"
+          "node:path"
         ]
       },
       "getProjectsGroupsPath": {
-        "path": "dist/helpers.d.ts",
-        "dependencies": []
-      },
-      "getProviderEndpoint": {
-        "path": "dist/completion/providers/completionProviderUtils.d.ts",
+        "path": "dist/helpers.js",
         "dependencies": [
-          "LLMProvider"
+          "best-effort-json-parser/parse"
         ]
       },
-      "getRunPath": {
-        "path": "dist/helpers.d.ts",
+      "getProviderEndpoint": {
+        "path": "dist/completion/providers/completionProviderUtils.js",
         "dependencies": []
+      },
+      "getRunPath": {
+        "path": "dist/helpers.js",
+        "dependencies": [
+          "best-effort-json-parser/parse"
+        ]
       },
       "getRunsDir": {
-        "path": "dist/helpers.d.ts",
+        "path": "dist/helpers.js",
         "description": "Return the absolute path to the runs directory under .factory/runs.",
-        "dependencies": []
+        "dependencies": [
+          "best-effort-json-parser/parse"
+        ]
       },
       "getStoriesDir": {
-        "path": "dist/helpers.d.ts",
-        "dependencies": []
+        "path": "dist/helpers.js",
+        "dependencies": [
+          "best-effort-json-parser/parse"
+        ]
       },
       "getStoriesOrder": {
-        "path": "dist/story/storyOrder.d.ts",
+        "path": "dist/story/storyOrder.js",
         "dependencies": [
-          "Promise"
+          "node:path"
         ]
       },
       "getStoryIdFromIndex": {
-        "path": "dist/story/storyOrder.d.ts",
+        "path": "dist/story/storyOrder.js",
         "dependencies": [
-          "Promise"
+          "node:path"
         ]
       },
       "getStoryOrderPath": {
-        "path": "dist/story/storyOrder.d.ts",
-        "dependencies": []
+        "path": "dist/story/storyOrder.js",
+        "dependencies": [
+          "node:path"
+        ]
       },
       "getStoryPath": {
-        "path": "dist/helpers.d.ts",
-        "dependencies": []
+        "path": "dist/helpers.js",
+        "dependencies": [
+          "best-effort-json-parser/parse"
+        ]
       },
       "getStrategyForLanguage": {
-        "path": "dist/codeIntel/CodeIntelTools.d.ts",
+        "path": "dist/codeIntel/CodeIntelTools.js",
         "dependencies": [
-          "CodeIntelLanguageStrategy",
-          "CodeIntelDetectedLanguage"
+          "node:fs/promises"
         ]
       },
       "getTestsDir": {
-        "path": "dist/helpers.d.ts",
-        "dependencies": []
+        "path": "dist/helpers.js",
+        "dependencies": [
+          "best-effort-json-parser/parse"
+        ]
       },
       "getToolCall": {
-        "path": "dist/completion/completionUtils.d.ts",
-        "dependencies": [
-          "ToolCall",
-          "ToolCallWithResult",
-          "src/agent/agentTypes.js/ToolCall",
-          "src/agent/agentTypes.js/ToolCallWithResult",
-          "src/agent/agentTypes.js/ToolResult",
-          "src/agent/agentTypes.js"
-        ]
+        "path": "dist/completion/completionUtils.js",
+        "dependencies": []
       },
       "getToolResult": {
-        "path": "dist/completion/completionUtils.d.ts",
-        "dependencies": [
-          "ToolResult",
-          "ToolCallWithResult",
-          "src/agent/agentTypes.js/ToolCall",
-          "src/agent/agentTypes.js/ToolCallWithResult",
-          "src/agent/agentTypes.js/ToolResult",
-          "src/agent/agentTypes.js"
-        ]
+        "path": "dist/completion/completionUtils.js",
+        "dependencies": []
       },
       "getUsage": {
-        "path": "dist/completion/providers/completionProviderHelpers.d.ts",
-        "dependencies": [
-          "CompletionMessage"
-        ]
+        "path": "dist/completion/providers/completionProviderHelpers.js",
+        "dependencies": []
       },
       "GitAddStashOptions": {
         "path": "dist/git/gitTypes.d.ts",
@@ -17455,25 +17187,27 @@
         "dependencies": []
       },
       "guessCodeProjectInfo": {
-        "path": "dist/project/projectHelpers.d.ts",
+        "path": "dist/project/projectHelpers.js",
         "dependencies": [
-          "ProjectCodeInfo",
-          "Promise"
+          "node:fs/promises"
         ]
       },
       "guessLanguageFromExt": {
-        "path": "dist/file/fileUtils.d.ts",
+        "path": "dist/file/fileUtils.js",
         "dependencies": []
       },
       "hasTreeSitterParseErrors": {
-        "path": "dist/codeIntel/ast/astShared.d.ts",
+        "path": "dist/codeIntel/ast/astShared.js",
         "dependencies": [
-          "web-tree-sitter/Parser"
+          "web-tree-sitter/Parser",
+          "node:fs/promises"
         ]
       },
       "hunkHasOperations": {
-        "path": "dist/file/patch/FileMiniHunkPatch.d.ts",
-        "dependencies": []
+        "path": "dist/file/patch/FileMiniHunkPatch.js",
+        "dependencies": [
+          "diff/applyPatch"
+        ]
       },
       "IFactoryTools": {
         "path": "dist/tools/types.d.ts",
@@ -17483,102 +17217,90 @@
         ]
       },
       "IGNORED_DIRS_REGEX": {
-        "path": "dist/file/fileConstants.d.ts",
-        "dependencies": [
-          "RegExp"
-        ]
+        "path": "dist/file/fileConstants.js",
+        "dependencies": []
       },
       "IGNORED_FILES_REGEX": {
-        "path": "dist/file/fileConstants.d.ts",
-        "dependencies": [
-          "RegExp"
-        ]
+        "path": "dist/file/fileConstants.js",
+        "dependencies": []
       },
       "IGNORED_GIT_COPY_FILES": {
-        "path": "dist/file/fileConstants.d.ts",
+        "path": "dist/file/fileConstants.js",
         "dependencies": []
       },
       "IGNORED_MERGE_FILES_REGEX": {
-        "path": "dist/file/fileConstants.d.ts",
-        "dependencies": [
-          "RegExp"
-        ]
+        "path": "dist/file/fileConstants.js",
+        "dependencies": []
       },
       "IGNORED_TEST_FILES_REGEX": {
-        "path": "dist/file/fileConstants.d.ts",
-        "dependencies": [
-          "RegExp"
-        ]
+        "path": "dist/file/fileConstants.js",
+        "dependencies": []
       },
       "IGNORED_TOP_LEVEL_DIRS": {
-        "path": "dist/codeIntel/codeIntelConstants.d.ts",
-        "dependencies": [
-          "Set"
-        ]
+        "path": "dist/codeIntel/codeIntelConstants.js",
+        "dependencies": []
       },
       "indexToLineNumber": {
-        "path": "dist/codeIntel/codeIntelUtils.d.ts",
+        "path": "dist/codeIntel/codeIntelUtils.js",
         "dependencies": []
       },
       "inferFileType": {
-        "path": "dist/file/fileUtils.d.ts",
+        "path": "dist/file/fileUtils.js",
         "dependencies": []
       },
       "initParser": {
-        "path": "dist/codeIntel/internal/treeSitter.d.ts",
+        "path": "dist/codeIntel/internal/treeSitter.js",
         "description": "Initializes the Tree-sitter WASM module.",
         "dependencies": [
-          "Promise"
+          "web-tree-sitter/Parser"
         ]
       },
       "isCodeFile": {
-        "path": "dist/file/fileUtils.d.ts",
+        "path": "dist/file/fileUtils.js",
         "dependencies": []
       },
       "isLikelyText": {
-        "path": "dist/file/fileUtils.d.ts",
+        "path": "dist/file/fileUtils.js",
         "dependencies": []
       },
       "isOmissionReceipt": {
-        "path": "dist/file/FileTools.d.ts",
-        "dependencies": []
+        "path": "dist/file/FileTools.js",
+        "dependencies": [
+          "diff/createPatch",
+          "diff/applyPatch",
+          "thefactory-db/openDatabase",
+          "node:fs/promises"
+        ]
       },
       "isPathAccessible": {
-        "path": "dist/file/fileHelpers.d.ts",
+        "path": "dist/file/fileHelpers.js",
         "dependencies": [
-          "Promise"
+          "node:fs/promises"
         ]
       },
       "isPlainObject": {
-        "path": "dist/codeIntel/codeIntelUtils.d.ts",
-        "dependencies": [
-          "Record"
-        ]
-      },
-      "isProjectInGroup": {
-        "path": "dist/projectsgroups/projectsGroupsUtils.d.ts",
-        "description": "Check if a project is a member of a specific group.",
-        "dependencies": [
-          "ProjectSpec"
-        ]
-      },
-      "isTestFileName": {
-        "path": "dist/testRunner/testRunnerHelpers.d.ts",
+        "path": "dist/codeIntel/codeIntelUtils.js",
         "dependencies": []
       },
-      "isTextualContentType": {
-        "path": "dist/completion/completionUtils.d.ts",
+      "isProjectInGroup": {
+        "path": "dist/projectsgroups/projectsGroupsUtils.js",
+        "description": "Check if a project is a member of a specific group.",
+        "dependencies": []
+      },
+      "isTestFileName": {
+        "path": "dist/testRunner/testRunnerHelpers.js",
         "dependencies": [
-          "src/agent/agentTypes.js/ToolCall",
-          "src/agent/agentTypes.js/ToolCallWithResult",
-          "src/agent/agentTypes.js/ToolResult",
-          "src/agent/agentTypes.js"
+          "node:fs/promises"
         ]
       },
+      "isTextualContentType": {
+        "path": "dist/completion/completionUtils.js",
+        "dependencies": []
+      },
       "isWithinRoot": {
-        "path": "dist/file/fileHelpers.d.ts",
+        "path": "dist/file/fileHelpers.js",
         "dependencies": [
-          "node:fs"
+          "node:fs/promises"
         ]
       },
       "JavaFramework": {
@@ -17598,36 +17320,28 @@
         "dependencies": []
       },
       "JS_TS_CONFIGS": {
-        "path": "dist/codeIntel/codeIntelConstants.d.ts",
+        "path": "dist/codeIntel/codeIntelConstants.js",
         "dependencies": []
       },
       "JS_TS_EXTS": {
-        "path": "dist/codeIntel/codeIntelConstants.d.ts",
-        "dependencies": [
-          "Set"
-        ]
+        "path": "dist/codeIntel/codeIntelConstants.js",
+        "dependencies": []
       },
       "JSONSchema": {
         "path": "dist/tools/types.d.ts",
         "dependencies": []
       },
       "KNOWN_FRAMEWORKS_BY_LANGUAGE": {
-        "path": "dist/project/projectConstants.d.ts",
-        "dependencies": [
-          "FrameworksByLanguage"
-        ]
+        "path": "dist/project/projectConstants.js",
+        "dependencies": []
       },
       "KNOWN_LANGUAGES": {
-        "path": "dist/project/projectConstants.d.ts",
-        "dependencies": [
-          "ProgrammingLanguage"
-        ]
+        "path": "dist/project/projectConstants.js",
+        "dependencies": []
       },
       "KNOWN_TEST_FRAMEWORKS_BY_LANGUAGE": {
-        "path": "dist/project/projectConstants.d.ts",
-        "dependencies": [
-          "TestFrameworksByLanguage"
-        ]
+        "path": "dist/project/projectConstants.js",
+        "dependencies": []
       },
       "KotlinFramework": {
         "path": "dist/project/projectTypes.d.ts",
@@ -17638,26 +17352,16 @@
         "dependencies": []
       },
       "limit": {
-        "path": "dist/logger.d.ts",
+        "path": "dist/logger.js",
         "dependencies": []
       },
       "listBranches": {
-        "path": "dist/git/gitHelpers.d.ts",
-        "dependencies": [
-          "GitBranchDetails",
-          "GitOpResult",
-          "Promise",
-          "GitListBranchesScope"
-        ]
+        "path": "dist/git/gitHelpers.js",
+        "dependencies": []
       },
       "listUnifiedBranches": {
-        "path": "dist/git/gitHelpers.d.ts",
-        "description": "Build a unified list of branches combining local and remote presence.",
-        "dependencies": [
-          "GitUnifiedBranch",
-          "GitOpResult",
-          "Promise"
-        ]
+        "path": "dist/git/gitHelpers.js",
+        "dependencies": []
       },
       "LLMConfig": {
         "path": "dist/completion/completionTypes.d.ts",
@@ -17728,38 +17432,32 @@
         "dependencies": []
       },
       "loadBuiltInDefaults": {
-        "path": "dist/llmCosts/llmCostsUtils.d.ts",
-        "dependencies": [
-          "ModelPrice"
-        ]
+        "path": "dist/llmCosts/llmCostsUtils.js",
+        "dependencies": []
       },
       "loadDefaultLanguages": {
-        "path": "dist/codeIntel/languagePackLoader.d.ts",
+        "path": "dist/codeIntel/languagePackLoader.js",
         "dependencies": [
-          "web-tree-sitter/Language",
-          "Record",
-          "Promise"
+          "node:url/fileURLToPath",
+          "web-tree-sitter/Language"
         ]
       },
       "loadLanguage": {
-        "path": "dist/codeIntel/languagePackLoader.d.ts",
+        "path": "dist/codeIntel/languagePackLoader.js",
         "dependencies": [
-          "web-tree-sitter/Language",
-          "SupportedLanguage",
-          "Promise"
+          "node:url/fileURLToPath",
+          "web-tree-sitter/Language"
         ]
       },
       "loadLanguages": {
-        "path": "dist/codeIntel/languagePackLoader.d.ts",
+        "path": "dist/codeIntel/languagePackLoader.js",
         "dependencies": [
-          "web-tree-sitter/Language",
-          "SupportedLanguage",
-          "Record",
-          "Promise"
+          "node:url/fileURLToPath",
+          "web-tree-sitter/Language"
         ]
       },
       "logger": {
-        "path": "dist/logger.d.ts",
+        "path": "dist/logger.js",
         "dependencies": []
       },
       "LoggerConfig": {
@@ -17767,25 +17465,16 @@
         "dependencies": []
       },
       "makeTruncationReceiptString": {
-        "path": "dist/completion/completionMessageSanitizer.d.ts",
+        "path": "dist/completion/completionMessageSanitizer.js",
         "dependencies": []
       },
       "mapJsonTypeToSignature": {
-        "path": "dist/completion/completionUtils.d.ts",
-        "dependencies": [
-          "src/agent/agentTypes.js/ToolCall",
-          "src/agent/agentTypes.js/ToolCallWithResult",
-          "src/agent/agentTypes.js/ToolResult",
-          "src/agent/agentTypes.js"
-        ]
+        "path": "dist/completion/completionUtils.js",
+        "dependencies": []
       },
       "markSupersededTrailingConfirmations": {
-        "path": "dist/agentRunner/agentRunnerUtils.d.ts",
-        "dependencies": [
-          "Promise",
-          "ChatContext",
-          "ChatsTools"
-        ]
+        "path": "dist/agentRunner/agentRunnerUtils.js",
+        "dependencies": []
       },
       "MatchAgentResponse": {
         "path": "dist/agent/agentTypes.d.ts",
@@ -17794,25 +17483,17 @@
         ]
       },
       "matchCostAggregateEntity": {
-        "path": "dist/llmCosts/llmCostsHelpers.d.ts",
-        "dependencies": [
-          "LLMCostAggregateEntity",
-          "Promise",
-          "thefactory-db/TheFactoryDb"
-        ]
+        "path": "dist/llmCosts/llmCostsHelpers.js",
+        "dependencies": []
       },
       "MAX_TEXT_ATTACHMENT_BYTES": {
-        "path": "dist/completion/completionConstants.d.ts",
-        "dependencies": [
-          "src/agent/agentTypes/AgentResponse",
-          "src/agent/agentTypes"
-        ]
+        "path": "dist/completion/completionConstants.js",
+        "dependencies": []
       },
       "migrateHistoricalCosts": {
-        "path": "dist/llmCosts/LLMCostsTools.d.ts",
+        "path": "dist/llmCosts/LLMCostsTools.js",
         "dependencies": [
-          "Promise",
-          "PricingState"
+          "thefactory-db/openDatabase"
         ]
       },
       "ModelPrice": {
@@ -17828,19 +17509,19 @@
         ]
       },
       "moveChatsTools": {
-        "path": "dist/chats/ChatsTools.d.ts",
+        "path": "dist/chats/ChatsTools.js",
         "dependencies": [
-          "Promise"
+          "node:fs/promises"
         ]
       },
       "moveStoryTools": {
-        "path": "dist/story/StoryTools.d.ts",
+        "path": "dist/story/StoryTools.js",
         "dependencies": [
-          "Promise"
+          "node:fs/promises"
         ]
       },
       "normalizeDependency": {
-        "path": "dist/codeIntel/codeIntelUtils.d.ts",
+        "path": "dist/codeIntel/codeIntelUtils.js",
         "dependencies": []
       },
       "NormalizedUsage": {
@@ -17848,79 +17529,74 @@
         "dependencies": []
       },
       "normalizePackageMembers": {
-        "path": "dist/codeIntel/codeIntelUtils.d.ts",
+        "path": "dist/codeIntel/codeIntelUtils.js",
         "dependencies": [
-          "CodeIntelMemberEntry",
-          "Record"
+          "Array"
         ]
       },
       "normalizeTool": {
-        "path": "dist/agent/agentUtils.d.ts",
+        "path": "dist/agent/agentUtils.js",
         "dependencies": []
       },
       "normalizeToolCalls": {
-        "path": "dist/completion/providers/completionProviderHelpers.d.ts",
-        "dependencies": [
-          "ToolCall"
-        ]
+        "path": "dist/completion/providers/completionProviderHelpers.js",
+        "dependencies": []
       },
       "normalizeWorkspacePath": {
-        "path": "dist/compile/compileHelpers.d.ts",
-        "dependencies": []
+        "path": "dist/compile/compileHelpers.js",
+        "dependencies": [
+          "node:path"
+        ]
       },
       "parseAgentResponse": {
-        "path": "dist/agent/agentHelpers.d.ts",
-        "dependencies": [
-          "AgentResponse"
-        ]
-      },
-      "parseAgentResponseSafe": {
-        "path": "dist/agent/agentHelpers.d.ts",
-        "dependencies": [
-          "AgentResponse"
-        ]
-      },
-      "parseFirstValidJson": {
-        "path": "dist/helpers.d.ts",
+        "path": "dist/agent/agentHelpers.js",
         "dependencies": []
       },
-      "parseIstanbulCoverageJson": {
-        "path": "dist/testRunner/testRunnerHelpers.d.ts",
+      "parseAgentResponseSafe": {
+        "path": "dist/agent/agentHelpers.js",
+        "dependencies": []
+      },
+      "parseFirstValidJson": {
+        "path": "dist/helpers.js",
         "dependencies": [
-          "CoverageResult"
+          "best-effort-json-parser/parse"
+        ]
+      },
+      "parseIstanbulCoverageJson": {
+        "path": "dist/testRunner/testRunnerHelpers.js",
+        "dependencies": [
+          "node:fs/promises"
         ]
       },
       "parsePythonCompileOutput": {
-        "path": "dist/compile/compileHelpers.d.ts",
+        "path": "dist/compile/compileHelpers.js",
         "dependencies": [
-          "CompileDiagnostic"
+          "node:path"
         ]
       },
       "parseSourceFile": {
-        "path": "dist/codeIntel/ast/astShared.d.ts",
+        "path": "dist/codeIntel/ast/astShared.js",
         "dependencies": [
           "web-tree-sitter/Parser",
-          "Promise"
+          "node:fs/promises"
         ]
       },
       "parseStatusPorcelain": {
-        "path": "dist/git/gitUtils.d.ts",
+        "path": "dist/git/gitUtils.js",
         "dependencies": [
-          "GitStatusPorcelain"
+          "Array"
         ]
       },
       "parseTscOutput": {
-        "path": "dist/compile/compileHelpers.d.ts",
+        "path": "dist/compile/compileHelpers.js",
         "dependencies": [
-          "CompileDiagnostic"
+          "node:path"
         ]
       },
       "parseUnifiedDiff": {
-        "path": "dist/git/gitUtils.d.ts",
+        "path": "dist/git/gitUtils.js",
         "description": "Parse a unified diff patch string into structured hunks and lines.",
-        "dependencies": [
-          "GitDiffHunk"
-        ]
+        "dependencies": []
       },
       "PhpFramework": {
         "path": "dist/project/projectTypes.d.ts",
@@ -17931,15 +17607,18 @@
         "dependencies": []
       },
       "prefixLineNumbers": {
-        "path": "dist/file/FileTools.d.ts",
+        "path": "dist/file/FileTools.js",
         "description": "Prefix each line with its 1-based absolute line number.",
-        "dependencies": []
+        "dependencies": [
+          "diff/createPatch",
+          "diff/applyPatch",
+          "thefactory-db/openDatabase",
+          "node:fs/promises"
+        ]
       },
       "preprocessMessages": {
-        "path": "dist/agentRunner/agentRunnerUtils.d.ts",
-        "dependencies": [
-          "CompletionMessage"
-        ]
+        "path": "dist/agentRunner/agentRunnerUtils.js",
+        "dependencies": []
       },
       "PreviewToolNotSupportedResult": {
         "path": "dist/agent/agentTypes.d.ts",
@@ -17971,7 +17650,7 @@
         "dependencies": []
       },
       "PROJECT_CONTEXT": {
-        "path": "dist/chats/chatsConstants.d.ts",
+        "path": "dist/chats/chatsConstants.js",
         "dependencies": []
       },
       "ProjectChangeHandler": {
@@ -18011,11 +17690,11 @@
         ]
       },
       "PROJECTS_DIR_NAME": {
-        "path": "dist/constants.d.ts",
+        "path": "dist/constants.js",
         "dependencies": []
       },
       "PROJECTS_GROUP_CONTEXT": {
-        "path": "dist/chats/chatsConstants.d.ts",
+        "path": "dist/chats/chatsConstants.js",
         "dependencies": []
       },
       "ProjectsGroup": {
@@ -18134,14 +17813,12 @@
         "dependencies": []
       },
       "PY_CONFIGS": {
-        "path": "dist/codeIntel/codeIntelConstants.d.ts",
+        "path": "dist/codeIntel/codeIntelConstants.js",
         "dependencies": []
       },
       "PY_EXTS": {
-        "path": "dist/codeIntel/codeIntelConstants.d.ts",
-        "dependencies": [
-          "Set"
-        ]
+        "path": "dist/codeIntel/codeIntelConstants.js",
+        "dependencies": []
       },
       "PythonFramework": {
         "path": "dist/project/projectTypes.d.ts",
@@ -18152,21 +17829,17 @@
         "dependencies": []
       },
       "READ_OMISSION_RECEIPT": {
-        "path": "dist/completion/completionConstants.d.ts",
-        "dependencies": [
-          "src/agent/agentTypes/AgentResponse",
-          "src/agent/agentTypes"
-        ]
+        "path": "dist/completion/completionConstants.js",
+        "dependencies": []
       },
       "READ_TOOL_NAMES": {
-        "path": "dist/completion/completionMessageSanitizer.d.ts",
+        "path": "dist/completion/completionMessageSanitizer.js",
         "dependencies": []
       },
       "readDirectory": {
-        "path": "dist/file/fileHelpers.d.ts",
+        "path": "dist/file/fileHelpers.js",
         "dependencies": [
-          "Dirent",
-          "Promise"
+          "node:fs/promises"
         ]
       },
       "ReadFileRangeQuery": {
@@ -18178,15 +17851,14 @@
         "dependencies": []
       },
       "redact": {
-        "path": "dist/logger.d.ts",
+        "path": "dist/logger.js",
         "dependencies": []
       },
       "refreshPrices": {
-        "path": "dist/llmCosts/LLMCostsTools.d.ts",
+        "path": "dist/llmCosts/LLMCostsTools.js",
         "dependencies": [
-          "PricingState",
-          "Promise",
-          "PricingStorage"
+          "Object",
+          "thefactory-db/openDatabase"
         ]
       },
       "ReorderPayload": {
@@ -18194,36 +17866,24 @@
         "dependencies": []
       },
       "reorderStory": {
-        "path": "dist/story/storyOrder.d.ts",
+        "path": "dist/story/storyOrder.js",
         "dependencies": [
-          "Promise",
-          "ReorderPayload"
+          "node:path"
         ]
       },
       "resolveFeatureInfoForCommit": {
-        "path": "dist/git/gitUtils.d.ts",
-        "description": "Resolve FeatureInfo for a commit using provided resolvers and conservative fallback heuristics.",
-        "dependencies": [
-          "GitFeatureInfo",
-          "Promise",
-          "GitFeatureInfoOptions",
-          "GitFeatureInfoResolverContext",
-          "GitCommitInfo"
-        ]
+        "path": "dist/git/gitUtils.js",
+        "dependencies": []
       },
       "resolvePythonCommand": {
-        "path": "dist/testRunner/testRunnerHelpers.d.ts",
+        "path": "dist/testRunner/testRunnerHelpers.js",
         "dependencies": [
-          "Promise"
+          "node:fs/promises"
         ]
       },
       "resumeCompletionTools": {
-        "path": "dist/completion/CompletionTools.d.ts",
-        "dependencies": [
-          "CompletionResponseTurns",
-          "Promise",
-          "CompletionResumeParams"
-        ]
+        "path": "dist/completion/CompletionTools.js",
+        "dependencies": []
       },
       "ResumeCompletionToolsArgs": {
         "path": "dist/agentRunner/agentRunnerTypes.d.ts",
@@ -18234,7 +17894,7 @@
         ]
       },
       "roundMoneyUSD": {
-        "path": "dist/llmCosts/llmCostsUtils.d.ts",
+        "path": "dist/llmCosts/llmCostsUtils.js",
         "dependencies": []
       },
       "RubyFramework": {
@@ -18246,25 +17906,23 @@
         "dependencies": []
       },
       "runCommand": {
-        "path": "dist/process/processHelpers.d.ts",
+        "path": "dist/process/processHelpers.js",
         "dependencies": [
-          "CommandResult",
-          "Promise",
-          "RunOptions"
+          "node:child_process/spawn"
         ]
       },
       "runGit": {
-        "path": "dist/git/gitHelpers.d.ts",
+        "path": "dist/git/gitHelpers.js",
         "dependencies": [
-          "GitExecResult",
-          "Promise"
+          "INDEX_LOCK_MAX_RETRIES",
+          "INDEX_LOCK_RETRY_BASE_DELAY_MS"
         ]
       },
       "runJestCoverage": {
-        "path": "dist/testRunner/testRunnerHelpers.d.ts",
+        "path": "dist/testRunner/testRunnerHelpers.js",
         "dependencies": [
-          "CoverageResult",
-          "Promise"
+          "ROOT",
+          "node:fs/promises"
         ]
       },
       "RunOptions": {
@@ -18275,23 +17933,21 @@
         ]
       },
       "runPythonCoverage": {
-        "path": "dist/testRunner/testRunnerHelpers.d.ts",
+        "path": "dist/testRunner/testRunnerHelpers.js",
         "dependencies": [
-          "CoverageResult",
-          "Promise",
-          "ProjectCodeInfo"
+          "ROOT",
+          "node:fs/promises"
         ]
       },
       "runPythonCoverageDir": {
-        "path": "dist/testRunner/testRunnerHelpers.d.ts",
+        "path": "dist/testRunner/testRunnerHelpers.js",
         "dependencies": [
-          "CoverageResult",
-          "Promise",
-          "ProjectCodeInfo"
+          "ROOT",
+          "node:fs/promises"
         ]
       },
       "RUNS_DIR_NAME": {
-        "path": "dist/constants.d.ts",
+        "path": "dist/constants.js",
         "dependencies": []
       },
       "RunTestsOptions": {
@@ -18299,10 +17955,10 @@
         "dependencies": []
       },
       "runVitestCoverage": {
-        "path": "dist/testRunner/testRunnerHelpers.d.ts",
+        "path": "dist/testRunner/testRunnerHelpers.js",
         "dependencies": [
-          "CoverageResult",
-          "Promise"
+          "ROOT",
+          "node:fs/promises"
         ]
       },
       "RustFramework": {
@@ -18314,59 +17970,51 @@
         "dependencies": []
       },
       "safeGit": {
-        "path": "dist/git/gitHelpers.d.ts",
-        "dependencies": [
-          "GitOpResult",
-          "Promise"
-        ]
+        "path": "dist/git/gitHelpers.js",
+        "dependencies": []
       },
       "safeReadJSON": {
-        "path": "dist/file/fileHelpers.d.ts",
+        "path": "dist/file/fileHelpers.js",
         "dependencies": [
-          "T",
-          "Promise"
+          "node:fs/promises"
         ]
       },
       "safeReadJSONSync": {
-        "path": "dist/file/fileHelpers.d.ts",
+        "path": "dist/file/fileHelpers.js",
         "dependencies": [
-          "T"
+          "node:fs/promises"
         ]
       },
       "safeStringify": {
-        "path": "dist/logger.d.ts",
-        "dependencies": []
+        "path": "dist/logger.js",
+        "dependencies": [
+          "JSON"
+        ]
       },
       "safeStringifyJson": {
-        "path": "dist/completion/completionUtils.d.ts",
+        "path": "dist/completion/completionUtils.js",
         "dependencies": [
-          "src/agent/agentTypes.js/ToolCall",
-          "src/agent/agentTypes.js/ToolCallWithResult",
-          "src/agent/agentTypes.js/ToolResult",
-          "src/agent/agentTypes.js"
+          "JSON"
         ]
       },
       "safeWriteJSON": {
-        "path": "dist/file/fileHelpers.d.ts",
+        "path": "dist/file/fileHelpers.js",
         "dependencies": [
-          "Promise"
+          "node:fs/promises"
         ]
       },
       "safeWriteJSONSync": {
-        "path": "dist/file/fileHelpers.d.ts",
+        "path": "dist/file/fileHelpers.js",
         "dependencies": [
-          "node:fs"
+          "node:fs/promises"
         ]
       },
       "sanitizeMessagesForLLM": {
-        "path": "dist/completion/completionMessageSanitizer.d.ts",
-        "dependencies": [
-          "CompletionMessage",
-          "CompletionMessageSanitization"
-        ]
+        "path": "dist/completion/completionMessageSanitizer.js",
+        "dependencies": []
       },
       "sanitizeTestName": {
-        "path": "dist/test/testUtils.d.ts",
+        "path": "dist/test/testUtils.js",
         "description": "Create a stable, human-readable folder name component.",
         "dependencies": []
       },
@@ -18380,60 +18028,50 @@
         ]
       },
       "serializeCatalogueForCompare": {
-        "path": "dist/codeIntel/codeIntelUtils.d.ts",
-        "dependencies": [
-          "CodeIntelCatalogue"
-        ]
+        "path": "dist/codeIntel/codeIntelUtils.js",
+        "dependencies": []
       },
       "setFactoryDebug": {
-        "path": "dist/logger.d.ts",
+        "path": "dist/logger.js",
         "dependencies": []
       },
       "setLoggerConfig": {
-        "path": "dist/logger.d.ts",
-        "dependencies": [
-          "LoggerConfig",
-          "Partial"
-        ]
+        "path": "dist/logger.js",
+        "dependencies": []
       },
       "setProjectActive": {
-        "path": "dist/project/ProjectTools.d.ts",
+        "path": "dist/project/ProjectTools.js",
         "dependencies": [
-          "ProjectSpec",
-          "Promise"
+          "node:fs/promises"
         ]
       },
       "SETTINGS_DIR_NAME": {
-        "path": "dist/constants.d.ts",
+        "path": "dist/constants.js",
         "dependencies": []
       },
       "sliceMessagesByLogicalGroups": {
-        "path": "dist/completion/completionUtils.d.ts",
+        "path": "dist/completion/completionUtils.js",
         "description": "Slice conversation history by logical message groups.",
-        "dependencies": [
-          "CompletionMessage",
-          "src/agent/agentTypes.js/ToolCall",
-          "src/agent/agentTypes.js/ToolCallWithResult",
-          "src/agent/agentTypes.js/ToolResult",
-          "src/agent/agentTypes.js"
-        ]
+        "dependencies": []
       },
       "sortCatalogue": {
-        "path": "dist/codeIntel/codeIntelUtils.d.ts",
-        "dependencies": [
-          "CodeIntelCatalogue"
-        ]
+        "path": "dist/codeIntel/codeIntelUtils.js",
+        "dependencies": []
       },
       "splitHunkIntoMiniHunks": {
-        "path": "dist/file/patch/FileMiniHunkPatch.d.ts",
-        "dependencies": []
+        "path": "dist/file/patch/FileMiniHunkPatch.js",
+        "dependencies": [
+          "diff/applyPatch"
+        ]
       },
       "splitUnifiedDiffIntoHunks": {
-        "path": "dist/file/patch/FileMiniHunkPatch.d.ts",
-        "dependencies": []
+        "path": "dist/file/patch/FileMiniHunkPatch.js",
+        "dependencies": [
+          "diff/applyPatch"
+        ]
       },
       "stamp": {
-        "path": "dist/logger.d.ts",
+        "path": "dist/logger.js",
         "dependencies": []
       },
       "Status": {
@@ -18441,7 +18079,7 @@
         "dependencies": []
       },
       "STORIES_DIR_NAME": {
-        "path": "dist/constants.d.ts",
+        "path": "dist/constants.js",
         "dependencies": []
       },
       "Story": {
@@ -18452,12 +18090,14 @@
         ]
       },
       "STORY_CONTEXT": {
-        "path": "dist/chats/chatsConstants.d.ts",
+        "path": "dist/chats/chatsConstants.js",
         "dependencies": []
       },
       "STORY_ORDER_FILE_NAME": {
-        "path": "dist/story/storyOrder.d.ts",
-        "dependencies": []
+        "path": "dist/story/storyOrder.js",
+        "dependencies": [
+          "node:path"
+        ]
       },
       "StoryChangeHandler": {
         "path": "dist/story/storyTypes.d.ts",
@@ -18520,33 +18160,27 @@
         ]
       },
       "sumCoverageStats": {
-        "path": "dist/testRunner/testRunnerHelpers.d.ts",
+        "path": "dist/testRunner/testRunnerHelpers.js",
         "dependencies": [
-          "CoverageStats"
+          "node:fs/promises"
         ]
       },
       "summarizeDiagnostics": {
-        "path": "dist/compile/compileUtils.d.ts",
-        "dependencies": [
-          "CompileSummary",
-          "CompileDiagnostic"
-        ]
+        "path": "dist/compile/compileUtils.js",
+        "dependencies": []
       },
       "summarizeHistory": {
-        "path": "dist/completion/completionHistorySummarizer.d.ts",
-        "dependencies": [
-          "CompletionMessage",
-          "SummarizeOptions"
-        ]
+        "path": "dist/completion/completionHistorySummarizer.js",
+        "dependencies": []
       },
       "SummarizeOptions": {
         "path": "dist/completion/completionHistorySummarizer.d.ts",
         "dependencies": []
       },
       "sumTestStats": {
-        "path": "dist/testRunner/testRunnerHelpers.d.ts",
+        "path": "dist/testRunner/testRunnerHelpers.js",
         "dependencies": [
-          "TestStats"
+          "node:fs/promises"
         ]
       },
       "SupportedLanguage": {
@@ -18556,10 +18190,8 @@
         ]
       },
       "supportedLanguageForFile": {
-        "path": "dist/codeIntel/codeIntelUtils.d.ts",
-        "dependencies": [
-          "SupportedLanguage"
-        ]
+        "path": "dist/codeIntel/codeIntelUtils.js",
+        "dependencies": []
       },
       "SwiftFramework": {
         "path": "dist/project/projectTypes.d.ts",
@@ -18570,7 +18202,7 @@
         "dependencies": []
       },
       "TEMP_DIR_NAME": {
-        "path": "dist/constants.d.ts",
+        "path": "dist/constants.js",
         "dependencies": []
       },
       "TempDir": {
@@ -18586,7 +18218,7 @@
         ]
       },
       "TEST_TEMP_DIR_NAME": {
-        "path": "dist/test/testConstants.d.ts",
+        "path": "dist/test/testConstants.js",
         "dependencies": []
       },
       "TestChangeHandler": {
@@ -18661,7 +18293,7 @@
         ]
       },
       "TESTS_DIR_NAME": {
-        "path": "dist/constants.d.ts",
+        "path": "dist/constants.js",
         "dependencies": []
       },
       "TestSkip": {
@@ -18704,17 +18336,12 @@
         "dependencies": []
       },
       "TEXT_EXTS": {
-        "path": "dist/file/fileConstants.d.ts",
-        "dependencies": [
-          "Set"
-        ]
+        "path": "dist/file/fileConstants.js",
+        "dependencies": []
       },
       "TEXTUAL_MIME_PREFIXES": {
-        "path": "dist/completion/completionConstants.d.ts",
-        "dependencies": [
-          "src/agent/agentTypes/AgentResponse",
-          "src/agent/agentTypes"
-        ]
+        "path": "dist/completion/completionConstants.js",
+        "dependencies": []
       },
       "TokenizableMessage": {
         "path": "dist/completion/completionUtils.d.ts",
@@ -18727,11 +18354,8 @@
         ]
       },
       "TOOL_USAGE": {
-        "path": "dist/completion/completionConstants.d.ts",
-        "dependencies": [
-          "src/agent/agentTypes/AgentResponse",
-          "src/agent/agentTypes"
-        ]
+        "path": "dist/completion/completionConstants.js",
+        "dependencies": []
       },
       "ToolCall": {
         "path": "dist/agent/agentTypes.d.ts",
@@ -18778,54 +18402,42 @@
         ]
       },
       "ToolSchemas": {
-        "path": "dist/tools/generated/ToolSchemas.d.ts",
-        "dependencies": [
-          "AgentToolSchema",
-          "Record"
-        ]
+        "path": "dist/tools/generated/ToolSchemas.js",
+        "dependencies": []
       },
       "TOP_LEVEL_CODE_EXTS": {
-        "path": "dist/codeIntel/codeIntelConstants.d.ts",
-        "dependencies": [
-          "Set"
-        ]
+        "path": "dist/codeIntel/codeIntelConstants.js",
+        "dependencies": []
       },
       "TOP_LEVEL_CONFIG_FILES": {
-        "path": "dist/codeIntel/codeIntelConstants.d.ts",
-        "dependencies": [
-          "Set"
-        ]
+        "path": "dist/codeIntel/codeIntelConstants.js",
+        "dependencies": []
       },
       "toPrompt": {
-        "path": "dist/completion/completionUtils.d.ts",
-        "dependencies": [
-          "src/agent/agentTypes.js/ToolCall",
-          "src/agent/agentTypes.js/ToolCallWithResult",
-          "src/agent/agentTypes.js/ToolResult",
-          "src/agent/agentTypes.js"
-        ]
+        "path": "dist/completion/completionUtils.js",
+        "dependencies": []
       },
       "transformToRelative": {
-        "path": "dist/file/fileHelpers.d.ts",
+        "path": "dist/file/fileHelpers.js",
         "dependencies": [
-          "node:fs"
+          "node:fs/promises"
         ]
       },
       "truncateDeepStrings": {
-        "path": "dist/completion/providers/completionProviderUtils.d.ts",
+        "path": "dist/completion/providers/completionProviderUtils.js",
         "description": "Truncate deep string values in an object to prevent massive context payloads.",
         "dependencies": []
       },
       "tryReadText": {
-        "path": "dist/file/fileHelpers.d.ts",
+        "path": "dist/file/fileHelpers.js",
         "dependencies": [
-          "Promise"
+          "node:fs/promises"
         ]
       },
       "tryReadTextSync": {
-        "path": "dist/file/fileHelpers.d.ts",
+        "path": "dist/file/fileHelpers.js",
         "dependencies": [
-          "node:fs"
+          "node:fs/promises"
         ]
       },
       "TypeScriptFramework": {
@@ -18841,66 +18453,52 @@
         ]
       },
       "uniqueLines": {
-        "path": "dist/git/gitUtils.d.ts",
+        "path": "dist/git/gitUtils.js",
         "dependencies": []
       },
       "updateProject": {
-        "path": "dist/project/ProjectTools.d.ts",
+        "path": "dist/project/ProjectTools.js",
         "dependencies": [
-          "ProjectSpec",
-          "Promise",
-          "ProjectSpecEditInput"
+          "node:fs/promises"
         ]
       },
       "upsertCostAggregate": {
-        "path": "dist/llmCosts/llmCostsHelpers.d.ts",
+        "path": "dist/llmCosts/llmCostsHelpers.js",
         "dependencies": [
-          "Promise",
-          "LLMCostLedgerEntryContent",
-          "thefactory-db/TheFactoryDb"
+          "COST_AGGREGATE_ENTITY_TYPE"
         ]
       },
       "uuidv4": {
-        "path": "dist/utils.d.ts",
+        "path": "dist/utils.js",
         "dependencies": []
       },
       "validateCatalogue": {
-        "path": "dist/codeIntel/codeIntelHelpers.d.ts",
+        "path": "dist/codeIntel/codeIntelHelpers.js",
         "dependencies": [
-          "CodeIntelValidationIssue",
-          "CodeIntelCatalogue"
+          "Array",
+          "node:fs/promises"
         ]
       },
       "validateProjectCodeInfo": {
-        "path": "dist/project/projectTypeValidations.d.ts",
-        "dependencies": [
-          "ValidationResult",
-          "ProjectCodeInfo"
-        ]
+        "path": "dist/project/projectTypeValidations.js",
+        "dependencies": []
       },
       "validateProjectConfig": {
-        "path": "dist/project/projectTypeValidations.d.ts",
-        "dependencies": [
-          "ValidationResult",
-          "ProjectConfig"
-        ]
+        "path": "dist/project/projectTypeValidations.js",
+        "dependencies": []
       },
       "validateProjectRegistryEntry": {
-        "path": "dist/project/projectTypeValidations.d.ts",
-        "dependencies": [
-          "ValidationResult",
-          "ProjectRegistryEntry"
-        ]
+        "path": "dist/project/projectTypeValidations.js",
+        "dependencies": []
       },
       "ValidationResult": {
         "path": "dist/types.d.ts",
         "dependencies": []
       },
       "walkAndIndex": {
-        "path": "dist/file/fileHelpers.d.ts",
+        "path": "dist/file/fileHelpers.js",
         "dependencies": [
-          "Promise",
-          "FileMeta"
+          "node:fs/promises"
         ]
       },
       "WebReadURLsResult": {
@@ -18951,14 +18549,11 @@
         ]
       },
       "WRITE_OMISSION_RECEIPT": {
-        "path": "dist/completion/completionConstants.d.ts",
-        "dependencies": [
-          "src/agent/agentTypes/AgentResponse",
-          "src/agent/agentTypes"
-        ]
+        "path": "dist/completion/completionConstants.js",
+        "dependencies": []
       },
       "WRITE_TOOL_NAMES": {
-        "path": "dist/completion/completionMessageSanitizer.d.ts",
+        "path": "dist/completion/completionMessageSanitizer.js",
         "dependencies": []
       },
       "WriteExactReplaceQuery": {
@@ -18970,22 +18565,26 @@
         "dependencies": []
       },
       "writeFuzzyPatch": {
-        "path": "dist/file/patch/FileFuzzyPatch.d.ts",
+        "path": "dist/file/patch/FileFuzzyPatch.js",
         "dependencies": [
-          "Promise"
+          "diff/applyPatch",
+          "diff/createPatch",
+          "node:fs/promises"
         ]
       },
       "writeFuzzyPatchLegacy": {
-        "path": "dist/file/patch/FileFuzzyPatch.d.ts",
+        "path": "dist/file/patch/FileFuzzyPatch.js",
         "dependencies": [
-          "Promise"
+          "diff/applyPatch",
+          "diff/createPatch",
+          "node:fs/promises"
         ]
       },
       "writeStructuredDiffToFile": {
-        "path": "dist/file/patch/FileStructuredPatch.d.ts",
+        "path": "dist/file/patch/FileStructuredPatch.js",
         "dependencies": [
-          "Promise",
-          "StructuredDiff"
+          "diff/createPatch",
+          "node:fs/promises"
         ]
       }
     }
@@ -18998,7 +18597,7 @@
         "dependencies": []
       },
       "DNS": {
-        "path": "dist/v35.d.ts",
+        "path": "dist/v35.js",
         "dependencies": []
       },
       "HashFunction": {
@@ -19020,33 +18619,23 @@
         ]
       },
       "stringToBytes": {
-        "path": "dist/v35.d.ts",
-        "dependencies": [
-          "Uint8Array"
-        ]
+        "path": "dist/v35.js",
+        "dependencies": []
       },
       "unsafeStringify": {
-        "path": "dist/stringify.d.ts",
-        "dependencies": [
-          "Uint8Array"
-        ]
+        "path": "dist/stringify.js",
+        "dependencies": []
       },
       "updateV1State": {
-        "path": "dist/v1.d.ts",
-        "dependencies": [
-          "V1State",
-          "Uint8Array"
-        ]
+        "path": "dist/v1.js",
+        "dependencies": []
       },
       "updateV7State": {
-        "path": "dist/v7.d.ts",
-        "dependencies": [
-          "V7State",
-          "Uint8Array"
-        ]
+        "path": "dist/v7.js",
+        "dependencies": []
       },
       "URL": {
-        "path": "dist/v35.d.ts",
+        "path": "dist/v35.js",
         "dependencies": []
       },
       "UUIDTypes": {
@@ -19071,10 +18660,8 @@
         ]
       },
       "v1ToV6": {
-        "path": "dist/v1ToV6.d.ts",
-        "dependencies": [
-          "Uint8Array"
-        ]
+        "path": "dist/v1ToV6.js",
+        "dependencies": []
       },
       "v3": {
         "path": "dist/v3.d.ts",
@@ -19085,13 +18672,8 @@
         ]
       },
       "v35": {
-        "path": "dist/v35.d.ts",
-        "dependencies": [
-          "TBuf",
-          "UUIDTypes",
-          "Uint8Array",
-          "HashFunction"
-        ]
+        "path": "dist/v35.js",
+        "dependencies": []
       },
       "v4": {
         "path": "dist/v4.d.ts",
@@ -19118,10 +18700,8 @@
         ]
       },
       "v6ToV1": {
-        "path": "dist/v6ToV1.d.ts",
-        "dependencies": [
-          "Uint8Array"
-        ]
+        "path": "dist/v6ToV1.js",
+        "dependencies": []
       },
       "v7": {
         "path": "dist/v7.d.ts",
