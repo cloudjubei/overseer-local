@@ -566,30 +566,43 @@ export default function ToolCallHoverCard({
       return <InlineOldNew oldVal={delPath} newVal={'(deleted)'} />
     }
 
-    //TODO: fix incomplete args (no storyId/featureId) + hacks
-    if (n === 'createFeature') {
-      const isComplete = !isInFlight && !!result?.id
-      const storyId = args.storyId
-      const story = isComplete ? { ...result } : ({ id: storyId } as any)
-      const feature = isComplete ? story.features[story.features.length - 1] : ({ ...args } as any)
+    if (n === 'addFeature') {
+      const storyId = tryString(extract(args, ['storyId']))
+      const featureInput = (extract(args, ['featureInput']) || {}) as any
+      const resultStory = result && typeof result === 'object' ? result : undefined
+      const isComplete = !isInFlight && !!resultStory?.id
+      const story = isComplete ? { ...resultStory } : ({ id: storyId } as any)
+      const feature = isComplete
+        ? story.features?.[story.features.length - 1]
+        : ({
+            ...featureInput,
+            id: 'new-feature',
+          } as any)
+      const featureId = tryString(feature?.id)
+      const navigateStoryId = tryString(resultStory?.id) || storyId
+
       return (
         <FeatureCardRaw
           project={project!}
           story={story}
           feature={feature}
           isNew={!isComplete}
-          onPillClick={isComplete ? () => navigateStoryDetails(storyId, result.id) : undefined}
+          onPillClick={
+            isComplete && navigateStoryId && featureId
+              ? () => navigateStoryDetails(navigateStoryId, featureId)
+              : undefined
+          }
         />
       )
     }
 
-    //TODO: fix incomplete args
-    if (n === 'createStory') {
+    if (n === 'addStory') {
+      const storyInput = (extract(args, ['input']) || {}) as any
       const isComplete = !isInFlight && !!result?.id
       return (
         <StoryCardRaw
           project={project!}
-          story={result || args}
+          story={result || storyInput}
           isNew={!isComplete}
           onPillClick={
             isComplete ? () => navigateStoryDetails(result.id, undefined, true) : undefined
