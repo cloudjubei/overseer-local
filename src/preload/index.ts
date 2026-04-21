@@ -448,6 +448,8 @@ const LLM_CONFIGS_API = {
   getRecentChatIds: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.LLM_CONFIGS_GET_RECENT_CHAT),
   bumpRecent: (context, id, limit) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.LLM_CONFIGS_BUMP_RECENT, { context, id, limit }),
+  listAvailableModels: (config) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.LLM_CONFIGS_LIST_AVAILABLE_MODELS, { config }),
 }
 
 if (process.contextIsolated) {

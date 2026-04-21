@@ -65,7 +65,13 @@ export function LLMConfigProvider({ children }: { children: React.ReactNode }) {
     return
   }, [configs, activeAgentRunConfigId])
 
-  const isAgentRunConfigured = useMemo(() => !!activeAgentRunConfig?.apiKey, [activeAgentRunConfig])
+  const isAgentRunConfigured = useMemo(() => {
+    if (!activeAgentRunConfig?.provider || !activeAgentRunConfig?.model) return false
+    if (activeAgentRunConfig.provider === 'custom') {
+      return !!activeAgentRunConfig.apiUrlOverride
+    }
+    return !!activeAgentRunConfig.apiKey
+  }, [activeAgentRunConfig])
 
   const recentAgentRunConfigs: LLMConfig[] = useMemo(() => {
     const map = new Map(configs.map((c) => [c.id, c] as const))
@@ -88,7 +94,13 @@ export function LLMConfigProvider({ children }: { children: React.ReactNode }) {
     return
   }, [configs, activeChatConfigId])
 
-  const isChatConfigured = useMemo(() => !!activeChatConfig?.apiKey, [activeChatConfig])
+  const isChatConfigured = useMemo(() => {
+    if (!activeChatConfig?.provider || !activeChatConfig?.model) return false
+    if (activeChatConfig.provider === 'custom') {
+      return !!activeChatConfig.apiUrlOverride
+    }
+    return !!activeChatConfig.apiKey
+  }, [activeChatConfig])
 
   const recentChatConfigs: LLMConfig[] = useMemo(() => {
     const map = new Map(configs.map((c) => [c.id, c] as const))

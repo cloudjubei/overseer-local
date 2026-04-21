@@ -1,6 +1,6 @@
 import type { BrowserWindow } from 'electron'
 import { v4 as uuidv4 } from 'uuid'
-import type { LLMConfig } from 'thefactory-tools'
+import { listAvailableModels, type LLMConfig, type LLMModel } from 'thefactory-tools'
 import IPC_HANDLER_KEYS from '../../preload/ipcHandlersKeys'
 import BaseManager from '../BaseManager'
 import AppStorage from '../settings/AppStorage'
@@ -91,6 +91,8 @@ export default class LLMConfigsManager extends BaseManager {
 
     handlers[IPC_HANDLER_KEYS.LLM_CONFIGS_BUMP_RECENT] = ({ context, id, limit }) =>
       this.bumpRecent(context, id, limit)
+    handlers[IPC_HANDLER_KEYS.LLM_CONFIGS_LIST_AVAILABLE_MODELS] = ({ config }) =>
+      this.listAvailableModels(config)
 
     return handlers
   }
@@ -166,6 +168,12 @@ export default class LLMConfigsManager extends BaseManager {
 
   getRecentChatIds(): string[] {
     return this.cache.recentChatConfigIds
+  }
+
+  async listAvailableModels(config: Omit<LLMConfig, 'id'> | LLMConfig): Promise<LLMModel[]> {
+    const normalized = normalizeConfig(config)
+    if (!normalized) return []
+    return await listAvailableModels(normalized)
   }
 
   bumpRecent(context: LLMConfigContext, id: string, limit = 10): void {

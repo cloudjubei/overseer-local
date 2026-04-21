@@ -1,4 +1,4 @@
-import type { LLMConfig } from 'thefactory-tools'
+import type { LLMConfig, LLMModel } from 'thefactory-tools'
 
 export type LLMConfigsState = {
   configs: LLMConfig[]
@@ -14,6 +14,7 @@ export type LLMConfigsService = {
   subscribe: (callback: () => void) => () => void
 
   list: () => Promise<LLMConfigsState>
+  listAvailableModels: (config: Omit<LLMConfig, 'id'> | LLMConfig) => Promise<LLMModel[]>
   add: (input: Omit<LLMConfig, 'id'>) => Promise<LLMConfig>
   update: (id: string, patch: Partial<LLMConfig>) => Promise<LLMConfig | undefined>
   remove: (id: string) => Promise<void>

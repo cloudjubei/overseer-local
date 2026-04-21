@@ -3576,7 +3576,9 @@
         "dependencies": [
           "electron/BrowserWindow",
           "uuid/v4",
-          "thefactory-tools/LLMConfig"
+          "thefactory-tools/listAvailableModels",
+          "thefactory-tools/type LLMConfig",
+          "thefactory-tools/type LLMModel"
         ]
       },
       "LLMConfigContextValue": {
@@ -3607,22 +3609,28 @@
       "LLMConfigsManager": {
         "path": "src/logic/llm/LLMConfigsManager.ts",
         "dependencies": [
-          "thefactory-tools/LLMConfig",
+          "LLMConfig",
           "LLMConfigsState",
           "LLMConfigContext",
-          "Partial",
+          "LLMModel",
+          "Promise",
           "Omit",
+          "Partial",
           "Record",
           "electron/BrowserWindow",
           "AppStorage",
-          "uuid/v4"
+          "uuid/v4",
+          "thefactory-tools/listAvailableModels",
+          "thefactory-tools/type LLMConfig",
+          "thefactory-tools/type LLMModel"
         ]
       },
       "llmConfigsService": {
         "path": "src/renderer/src/services/llmConfigsService.ts",
         "dependencies": [
           "LLMConfigsService",
-          "thefactory-tools/LLMConfig"
+          "thefactory-tools/LLMConfig",
+          "thefactory-tools/LLMModel"
         ]
       },
       "LLMConfigsService": {
@@ -3633,15 +3641,19 @@
           "thefactory-tools/LLMConfig",
           "Partial",
           "Omit",
+          "thefactory-tools/LLMModel",
           "LLMConfigsState"
         ]
       },
       "LLMConfigsState": {
         "path": "src/logic/llm/LLMConfigsManager.ts",
         "dependencies": [
-          "thefactory-tools/LLMConfig",
+          "LLMConfig",
           "electron/BrowserWindow",
-          "uuid/v4"
+          "uuid/v4",
+          "thefactory-tools/listAvailableModels",
+          "thefactory-tools/type LLMConfig",
+          "thefactory-tools/type LLMModel"
         ]
       },
       "LLMSettings": {
@@ -5171,6 +5183,8 @@
           "@renderer/components/ui/Toast",
           "@renderer/contexts/LLMConfigContext/useLLMConfig",
           "@renderer/contexts/LLMConfigContext",
+          "@renderer/services/llmConfigsService/llmConfigsService",
+          "@renderer/services/llmConfigsService",
           "thefactory-tools/utils/DEFAULT_PROVIDER_ENDPOINTS",
           "thefactory-tools/utils"
         ]
@@ -10278,7 +10292,9 @@
         "dependencies": [
           "electron/BrowserWindow",
           "uuid/v4",
-          "thefactory-tools/LLMConfig"
+          "thefactory-tools/listAvailableModels",
+          "thefactory-tools/type LLMConfig",
+          "thefactory-tools/type LLMModel"
         ]
       },
       "LLMConfigContextValue": {
@@ -10309,22 +10325,28 @@
       "LLMConfigsManager": {
         "path": "logic/llm/LLMConfigsManager.ts",
         "dependencies": [
-          "thefactory-tools/LLMConfig",
+          "LLMConfig",
           "LLMConfigsState",
           "LLMConfigContext",
-          "Partial",
+          "LLMModel",
+          "Promise",
           "Omit",
+          "Partial",
           "Record",
           "electron/BrowserWindow",
           "AppStorage",
-          "uuid/v4"
+          "uuid/v4",
+          "thefactory-tools/listAvailableModels",
+          "thefactory-tools/type LLMConfig",
+          "thefactory-tools/type LLMModel"
         ]
       },
       "llmConfigsService": {
         "path": "renderer/src/services/llmConfigsService.ts",
         "dependencies": [
           "LLMConfigsService",
-          "thefactory-tools/LLMConfig"
+          "thefactory-tools/LLMConfig",
+          "thefactory-tools/LLMModel"
         ]
       },
       "LLMConfigsService": {
@@ -10335,15 +10357,19 @@
           "thefactory-tools/LLMConfig",
           "Partial",
           "Omit",
+          "thefactory-tools/LLMModel",
           "LLMConfigsState"
         ]
       },
       "LLMConfigsState": {
         "path": "logic/llm/LLMConfigsManager.ts",
         "dependencies": [
-          "thefactory-tools/LLMConfig",
+          "LLMConfig",
           "electron/BrowserWindow",
-          "uuid/v4"
+          "uuid/v4",
+          "thefactory-tools/listAvailableModels",
+          "thefactory-tools/type LLMConfig",
+          "thefactory-tools/type LLMModel"
         ]
       },
       "LLMSettings": {
@@ -11873,6 +11899,8 @@
           "@renderer/components/ui/Toast",
           "@renderer/contexts/LLMConfigContext/useLLMConfig",
           "@renderer/contexts/LLMConfigContext",
+          "@renderer/services/llmConfigsService/llmConfigsService",
+          "@renderer/services/llmConfigsService",
           "thefactory-tools/utils/DEFAULT_PROVIDER_ENDPOINTS",
           "thefactory-tools/utils"
         ]

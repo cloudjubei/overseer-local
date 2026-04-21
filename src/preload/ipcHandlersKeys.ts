@@ -98,6 +98,7 @@ const IPC_HANDLER_KEYS = {
   LLM_CONFIGS_SET_ACTIVE_CHAT: 'llm-configs:set-active-chat',
   LLM_CONFIGS_GET_RECENT_CHAT: 'llm-configs:get-recent-chat',
   LLM_CONFIGS_BUMP_RECENT: 'llm-configs:bump-recent',
+  LLM_CONFIGS_LIST_AVAILABLE_MODELS: 'llm-configs:list-available-models',
 
   // Notifications
   NOTIFICATIONS_ON_OPEN: 'notifications:on-open',

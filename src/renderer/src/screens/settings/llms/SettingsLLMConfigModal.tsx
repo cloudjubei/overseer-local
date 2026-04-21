@@ -10,19 +10,20 @@ import {
 } from '@renderer/components/ui/Select'
 import { useToast } from '@renderer/components/ui/Toast'
 import { useLLMConfig } from '@renderer/contexts/LLMConfigContext'
+import { llmConfigsService } from '@renderer/services/llmConfigsService'
 import React, { useEffect, useMemo, useState } from 'react'
 import { LLMConfig, LLMProvider } from 'thefactory-tools'
 import { DEFAULT_PROVIDER_ENDPOINTS } from 'thefactory-tools/utils'
 
-const PROVIDER_MODELS: Record<Exclude<LLMProvider, 'custom'>, string[]> = {
-  openai: ['gpt-5.2', 'gpt-5.2-codex', 'gpt-5.2-pro'],
-  anthropic: ['claude-opus-4-6', 'claude-haiku-4-6', 'claude-sonnet-4-6'],
-  gemini: ['gemini-3.1-pro', 'gemini-3.1-flash', 'gemini-3.1-pro-custom-tools'],
-  deepseek: ['deepseek-v3.2'],
-  xai: ['grok-4'],
-  qwen: ['qwen3-32b'],
-  llama: ['llama-4-maverick-17b'],
-}
+const PROVIDERS: Array<{ value: LLMProvider; label: string }> = [
+  { value: 'openai', label: 'OpenAI' },
+  { value: 'anthropic', label: 'Anthropic' },
+  { value: 'gemini', label: 'Gemini' },
+  { value: 'xai', label: 'xAI (Grok)' },
+  { value: 'custom', label: 'Custom' },
+]
+
+const PROVIDERS_WITH_MODEL_LISTING = new Set<LLMProvider>(['openai', 'anthropic', 'gemini', 'deepseek', 'custom'])
 
 export default function SettingsLLMConfigModal({
   mode,
@@ -40,7 +41,7 @@ export default function SettingsLLMConfigModal({
 
   const [modelsLoading, setModelsLoading] = useState(false)
   const [modelsError, setModelsError] = useState<string | null>(null)
-  const [modelMode, setModelMode] = useState<'preset' | 'custom'>('preset')
+  const [modelMode, setModelMode] = useState<'preset' | 'custom'>('custom')
   const [availableModels, setAvailableModels] = useState<string[]>([])
 
   const [form, setForm] = useState<LLMConfig>(
@@ -54,16 +55,50 @@ export default function SettingsLLMConfigModal({
       },
   )
 
-  useEffect(() => {
-    if (existing) {
-      setForm(existing)
-      const presets =
-        existing.provider === 'custom'
-          ? []
-          : PROVIDER_MODELS[existing.provider as keyof typeof PROVIDER_MODELS] || []
-      setAvailableModels(presets)
-      setModelMode(presets.includes(existing.model) ? 'preset' : 'custom')
+  const applyModelOptions = (models: string[], currentModel: string) => {
+    const uniqueModels = Array.from(new Set(models.filter((m) => typeof m === 'string' && m.trim().length > 0)))
+    setAvailableModels(uniqueModels)
+    setModelMode(uniqueModels.includes(currentModel) ? 'preset' : 'custom')
+  }
+
+  const loadAvailableModels = async (config: LLMConfig, options?: { silent?: boolean }) => {
+    if (!PROVIDERS_WITH_MODEL_LISTING.has(config.provider)) {
+      applyModelOptions([], config.model)
+      setModelsError(null)
+      return
     }
+
+    setModelsLoading(true)
+    setModelsError(null)
+
+    try {
+      const models = await llmConfigsService.listAvailableModels(config)
+      const names = models.map((item) => item.model)
+      applyModelOptions(names, config.model)
+    } catch (e) {
+      applyModelOptions([], config.model)
+      const description = e instanceof Error ? e.message : String(e)
+      setModelsError(description)
+      if (!options?.silent) {
+        toast({ title: 'Failed to load models', description, variant: 'error' })
+      }
+    } finally {
+      setModelsLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    const next =
+      existing || {
+        id: '',
+        name: '',
+        provider: 'openai' as LLMProvider,
+        apiKey: '',
+        model: '',
+      }
+
+    setForm(next)
+    void loadAvailableModels(next, { silent: true })
   }, [existing])
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -75,27 +110,19 @@ export default function SettingsLLMConfigModal({
   }
 
   const onProviderChange = (value: LLMProvider) => {
-    setForm((prev) => {
-      const next: LLMConfig = {
-        ...prev,
-        provider: value,
-        // reset model when provider changes
-        model: '',
-      }
-
-      return next
-    })
-
-    setModelsError(null)
-
-    if (value === 'custom') {
-      setAvailableModels([])
-      setModelMode('custom')
-    } else {
-      const presets = PROVIDER_MODELS[value as keyof typeof PROVIDER_MODELS] || []
-      setAvailableModels(presets)
-      setModelMode('preset')
+    const endpoint = value === 'custom' ? '' : DEFAULT_PROVIDER_ENDPOINTS[value]
+    const next: LLMConfig = {
+      ...form,
+      provider: value,
+      model: '',
+      apiUrlOverride: endpoint || undefined,
     }
+
+    setForm(next)
+    setModelsError(null)
+    setAvailableModels([])
+    setModelMode('custom')
+    void loadAvailableModels(next, { silent: true })
   }
 
   const handleModelSelect = (value: string) => {
@@ -105,25 +132,6 @@ export default function SettingsLLMConfigModal({
     } else {
       setModelMode('preset')
       setForm((prev) => ({ ...prev, model: value }))
-    }
-  }
-
-  const loadLocalModels = async () => {
-    setModelsLoading(true)
-    setModelsError(null)
-    try {
-      // TODO: when chatsService supports it:
-      // const models = await chatsService.listModels(form)
-      const models: string[] = []
-      setAvailableModels(models)
-      if (!models.includes(form.model)) {
-        setForm((prev) => ({ ...prev, model: '' }))
-      }
-    } catch (e) {
-      setModelsError('Failed to load models from local provider. Is it running?')
-      toast({ title: 'Failed to load models', description: String(e), variant: 'error' })
-    } finally {
-      setModelsLoading(false)
     }
   }
 
@@ -153,11 +161,8 @@ export default function SettingsLLMConfigModal({
     onRequestClose()
   }
 
-  const providerModels = useMemo(() => {
-    if (form.provider === 'custom') return availableModels
-    return availableModels
-  }, [form.provider, availableModels])
-
+  const providerSupportsRefresh = PROVIDERS_WITH_MODEL_LISTING.has(form.provider)
+  const providerModels = useMemo(() => availableModels, [availableModels])
   const isChatActive = isEdit && existing ? activeChatConfigId === existing.id : false
 
   return (
@@ -207,63 +212,55 @@ export default function SettingsLLMConfigModal({
               <SelectValue placeholder="Select provider" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="openai">OpenAI</SelectItem>
-              <SelectItem value="anthropic">Anthropic</SelectItem>
-              <SelectItem value="gemini">Gemini</SelectItem>
-              <SelectItem value="xai">xAI (Grok)</SelectItem>
-              <SelectItem value="local">Local (OpenAI-compatible)</SelectItem>
-              <SelectItem value="custom">Custom</SelectItem>
+              {PROVIDERS.map((provider) => (
+                <SelectItem key={provider.value} value={provider.value}>
+                  {provider.label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
 
         <div>
-          <label htmlFor="apiUrlOverride" className="block text-sm font-medium mb-1">
-            API URL Override
-          </label>
-          <Input
-            id="apiUrlOverride"
-            name="apiUrlOverride"
-            placeholder={
-              form.provider === 'custom' ? DEFAULT_PROVIDER_ENDPOINTS.custom('') : 'Optional'
-            }
-            value={form.apiUrlOverride ?? ''}
-            onChange={onChange}
-          />
-          <p className="text-[12px] text-[var(--text-secondary)] mt-1">
-            Leave empty to use the provider default. Set only for local/custom endpoints.
-          </p>
-        </div>
-
-        <div>
-          <label htmlFor="apiKey" className="block textsm font-medium mb-1">
-            API Key
+          <label htmlFor="apiKey" className="block text-sm font-medium mb-1">
+            API Key {form.provider === 'custom' ? '(optional)' : ''}
           </label>
           <Input
             id="apiKey"
             name="apiKey"
-            placeholder="sk-..."
+            type="password"
+            placeholder={form.provider === 'custom' ? 'Optional bearer token' : 'sk-...'}
             value={form.apiKey}
             onChange={onChange}
           />
-          <p className="text-[12px] text-[var(--text-secondary)] mt-1">
-            Some local providers may not require an API key.
-          </p>
         </div>
 
         <div>
-          <div className="flex items-center justify-between">
-            <label htmlFor="model" className="block text-sm font-medium mb-1">
+          <label htmlFor="apiUrlOverride" className="block text-sm font-medium mb-1">
+            API URL {form.provider === 'custom' ? '' : '(optional)'}
+          </label>
+          <Input
+            id="apiUrlOverride"
+            name="apiUrlOverride"
+            placeholder={form.provider === 'custom' ? 'http://localhost:1234/v1/chat/completions' : 'Optional provider endpoint override'}
+            value={form.apiUrlOverride || ''}
+            onChange={onChange}
+          />
+        </div>
+
+        <div>
+          <div className="mb-1 flex items-center justify-between gap-2">
+            <label htmlFor="model" className="block text-sm font-medium">
               Model
             </label>
-            {form.provider === 'custom' && (
+            {providerSupportsRefresh && (
               <Button
                 type="button"
-                onClick={loadLocalModels}
+                onClick={() => void loadAvailableModels(form)}
                 disabled={modelsLoading}
                 variant="outline"
               >
-                {modelsLoading ? 'Loading…' : 'Load Available Models'}
+                {modelsLoading ? 'Loading…' : 'Refresh Models'}
               </Button>
             )}
           </div>
