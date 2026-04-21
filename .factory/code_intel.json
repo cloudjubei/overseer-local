@@ -15185,6 +15185,7 @@
       "buildTestResult": {
         "path": "dist/testRunner/testRunnerHelpers.js",
         "dependencies": [
+          "node:module/createRequire",
           "node:fs/promises"
         ]
       },
@@ -15888,12 +15889,14 @@
       "computeOverallCoverageStatus": {
         "path": "dist/testRunner/testRunnerHelpers.js",
         "dependencies": [
+          "node:module/createRequire",
           "node:fs/promises"
         ]
       },
       "computeOverallTestStatus": {
         "path": "dist/testRunner/testRunnerHelpers.js",
         "dependencies": [
+          "node:module/createRequire",
           "node:fs/promises"
         ]
       },
@@ -15977,9 +15980,7 @@
       },
       "createAgentTools": {
         "path": "dist/agent/AgentTools.js",
-        "dependencies": [
-          "diff/createPatch"
-        ]
+        "dependencies": []
       },
       "createChatsTools": {
         "path": "dist/chats/ChatsTools.js",
@@ -17290,6 +17291,7 @@
       "isTestFileName": {
         "path": "dist/testRunner/testRunnerHelpers.js",
         "dependencies": [
+          "node:module/createRequire",
           "node:fs/promises"
         ]
       },
@@ -17553,6 +17555,7 @@
       "parseIstanbulCoverageJson": {
         "path": "dist/testRunner/testRunnerHelpers.js",
         "dependencies": [
+          "node:module/createRequire",
           "node:fs/promises"
         ]
       },
@@ -17859,13 +17862,29 @@
           "node:path"
         ]
       },
+      "ResolvedNodeBinaryCommand": {
+        "path": "dist/testRunner/testRunnerHelpers.d.ts",
+        "dependencies": []
+      },
       "resolveFeatureInfoForCommit": {
         "path": "dist/git/gitUtils.js",
+        "dependencies": []
+      },
+      "resolveNodeBinaryCommand": {
+        "path": "dist/testRunner/testRunnerHelpers.js",
+        "dependencies": [
+          "node:module/createRequire",
+          "node:fs/promises"
+        ]
+      },
+      "ResolveNodeBinaryOptions": {
+        "path": "dist/testRunner/testRunnerHelpers.d.ts",
         "dependencies": []
       },
       "resolvePythonCommand": {
         "path": "dist/testRunner/testRunnerHelpers.js",
         "dependencies": [
+          "node:module/createRequire",
           "node:fs/promises"
         ]
       },
@@ -17910,6 +17929,7 @@
         "path": "dist/testRunner/testRunnerHelpers.js",
         "dependencies": [
           "ROOT",
+          "node:module/createRequire",
           "node:fs/promises"
         ]
       },
@@ -17924,6 +17944,7 @@
         "path": "dist/testRunner/testRunnerHelpers.js",
         "dependencies": [
           "ROOT",
+          "node:module/createRequire",
           "node:fs/promises"
         ]
       },
@@ -17931,6 +17952,7 @@
         "path": "dist/testRunner/testRunnerHelpers.js",
         "dependencies": [
           "ROOT",
+          "node:module/createRequire",
           "node:fs/promises"
         ]
       },
@@ -17946,6 +17968,7 @@
         "path": "dist/testRunner/testRunnerHelpers.js",
         "dependencies": [
           "ROOT",
+          "node:module/createRequire",
           "node:fs/promises"
         ]
       },
@@ -18150,6 +18173,7 @@
       "sumCoverageStats": {
         "path": "dist/testRunner/testRunnerHelpers.js",
         "dependencies": [
+          "node:module/createRequire",
           "node:fs/promises"
         ]
       },
@@ -18168,6 +18192,7 @@
       "sumTestStats": {
         "path": "dist/testRunner/testRunnerHelpers.js",
         "dependencies": [
+          "node:module/createRequire",
           "node:fs/promises"
         ]
       },

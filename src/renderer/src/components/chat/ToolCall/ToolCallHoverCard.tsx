@@ -12,23 +12,16 @@ import { PreLimited } from './components/PreLimited'
 import { InlineOldNew } from './components/InlineOldNew'
 import { NewContentOnly } from './components/NewContentOnly'
 import { ReorderList } from './components/ReorderList'
+import { StoryUpdatePreview, FeatureUpdatePreview } from './components/StoryFeatureUpdatePreview'
+import ListStoriesPreview, { coerceStoriesList } from './components/ListStoriesPreview'
 
 import { extract, isCompletelyNewFile, tryString } from './utils'
 import { StoryCardRaw } from '@renderer/components/stories/StoryCard'
 import { WriteToolsPreview } from './renderers/WriteToolsPreview'
-import { TextToolsPreview } from './renderers/TextToolsPreview'
 import { WriteMultiToolsPreview } from './renderers/WriteMultiToolsPreview'
 import StoryAndFeatureCallout from '@renderer/components/stories/StoryAndFeatureCallout'
 
 import { useNavigator } from '@renderer/navigation/Navigator'
-
-function SmallBadge({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="inline-flex items-center rounded border border-[var(--border-subtle)] bg-[var(--surface-base)] px-1 py-0 text-[10px] font-medium text-[var(--text-secondary)]">
-      {children}
-    </span>
-  )
-}
 
 export default function ToolCallHoverCard({
   toolCall,
@@ -80,7 +73,7 @@ export default function ToolCallHoverCard({
       return !isNew
     }
 
-    if (toolName === 'updateStoryDescription' || toolName === 'updateFeatureDescription') {
+    if (toolName === 'updateStory' || toolName === 'updateFeature') {
       return isInFlight
     }
 
@@ -129,43 +122,71 @@ export default function ToolCallHoverCard({
       )
     }
 
-    if (n === 'updateStoryDescription' || n === 'updateFeatureDescription') {
+    if (n === 'updateStory') {
+      const storyId = tryString(extract(args, ['storyId']))
+      const patch = (extract(args, ['patch']) || {}) as Record<string, unknown>
+      const story = storyId ? storiesById[storyId] : undefined
+
       return (
-        <TextToolsPreview
-          toolCall={toolCall}
+        <StoryUpdatePreview
+          project={project}
+          story={story}
+          patch={patch}
           result={result}
-          resultType={resultType}
           sideBySide={sideBySide}
-          projectId={projectId}
-          storiesById={storiesById}
-          featuresById={featuresById}
+          isComplete={!isInFlight}
+        />
+      )
+    }
+
+    if (n === 'updateFeature') {
+      const storyId = tryString(extract(args, ['storyId']))
+      const featureId = tryString(extract(args, ['featureId']))
+      const patch = (extract(args, ['patch']) || {}) as Record<string, unknown>
+      const story = storyId ? storiesById[storyId] : undefined
+      const feature = featureId ? featuresById[featureId] : undefined
+
+      return (
+        <FeatureUpdatePreview
+          project={project}
+          story={story}
+          feature={feature}
+          patch={patch}
+          result={result}
+          sideBySide={sideBySide}
+          isComplete={!isInFlight}
         />
       )
     }
 
     // ── existing local renderers ──
     if (n === 'readPaths') {
-      const files: string[] = Array.isArray(extract(args, ['paths'])) ? extract(args, ['paths']) : []
+      const files: string[] = Array.isArray(extract(args, ['paths']))
+        ? extract(args, ['paths'])
+        : []
       const withLineNumbers = extract(args, ['lineNumbers'])
       const resultMap = result && typeof result === 'object' && !Array.isArray(result) ? result : {}
 
       return (
         <div className="text-xs space-y-1">
           {withLineNumbers ? (
-            <div className="mb-2">
-              <SmallBadge>lineNumbers</SmallBadge>
-            </div>
+            <div className="mb-2">{/* <SmallBadge>lineNumbers</SmallBadge> */}</div>
           ) : null}
           {files.length > 0 ? (
             files.map((file, idx) => {
               const content = typeof resultMap[file] === 'string' ? resultMap[file] : undefined
-              const suffix = resultType === 'success' && typeof content === 'string' ? `: ${content.length} chars` : ''
+              const suffix =
+                resultType === 'success' && typeof content === 'string'
+                  ? `: ${content.length} chars`
+                  : ''
 
               return (
                 <Row key={file || idx} className="flex items-center gap-1.5 flex-wrap">
                   <span className="font-mono text-[11px]">{file || '(unknown)'}</span>
                   {suffix ? (
-                    <span className="font-mono text-[11px] text-[var(--text-secondary)]">{suffix}</span>
+                    <span className="font-mono text-[11px] text-[var(--text-secondary)]">
+                      {suffix}
+                    </span>
                   ) : null}
                 </Row>
               )
@@ -181,15 +202,13 @@ export default function ToolCallHoverCard({
       const queries = extract(args, ['queries'])
       const safe = Array.isArray(queries) ? queries : []
       const resultMap = result && typeof result === 'object' && !Array.isArray(result) ? result : {}
-      
+
       const anyWithLineNumbers = safe.some((q: any) => extract(q, ['lineNumbers']))
 
       return (
         <div className="text-xs space-y-1">
           {anyWithLineNumbers ? (
-            <div className="mb-2">
-              <SmallBadge>lineNumbers</SmallBadge>
-            </div>
+            <div className="mb-2 text-[10px] font-medium text-[var(--text-secondary)]">lineNumbers</div>
           ) : null}
           {safe.length > 0 ? (
             safe.map((q: any, idx: number) => {
@@ -197,7 +216,10 @@ export default function ToolCallHoverCard({
               const startLine = extract(q, ['startLine'])
               const endLine = extract(q, ['endLine'])
               const content = typeof resultMap[path] === 'string' ? resultMap[path] : undefined
-              const suffix = resultType === 'success' && typeof content === 'string' ? `: ${content.length} chars` : ''
+              const suffix =
+                resultType === 'success' && typeof content === 'string'
+                  ? `: ${content.length} chars`
+                  : ''
 
               return (
                 <Row key={`${path}-${idx}`} className="flex items-center gap-1.5 flex-wrap">
@@ -205,7 +227,9 @@ export default function ToolCallHoverCard({
                     L{String(startLine ?? '?')}:L{String(endLine ?? '?')} {path}
                   </span>
                   {suffix ? (
-                    <span className="font-mono text-[11px] text-[var(--text-secondary)]">{suffix}</span>
+                    <span className="font-mono text-[11px] text-[var(--text-secondary)]">
+                      {suffix}
+                    </span>
                   ) : null}
                 </Row>
               )
@@ -229,17 +253,22 @@ export default function ToolCallHoverCard({
               const path = tryString(extract(q, ['path'])) || '(unknown)'
               const pattern = tryString(extract(q, ['pattern'])) || ''
               const matches = Array.isArray(resultMap[path]) ? resultMap[path] : undefined
-              const suffix = resultType === 'success' && matches ? `: ${matches.length} matches` : ''
+              const suffix =
+                resultType === 'success' && matches ? `: ${matches.length} matches` : ''
 
               return (
                 <div key={`${path}-${idx}`} className="space-y-0.5">
                   <Row>
-                    <span className="font-mono text-[11px] break-words">{pattern || '(no pattern)'}</span>
+                    <span className="font-mono text-[11px] break-words">
+                      {pattern || '(no pattern)'}
+                    </span>
                   </Row>
                   <Row className="flex items-center gap-1.5 flex-wrap">
                     <span className="font-mono text-[11px]">{path}</span>
                     {suffix ? (
-                      <span className="font-mono text-[11px] text-[var(--text-secondary)]">{suffix}</span>
+                      <span className="font-mono text-[11px] text-[var(--text-secondary)]">
+                        {suffix}
+                      </span>
                     ) : null}
                   </Row>
                 </div>
@@ -320,16 +349,18 @@ export default function ToolCallHoverCard({
       const includePatch = extract(options, ['includePatch'])
       const includeStructured = extract(options, ['includeStructured'])
 
-      const files =
-        (extract(result, ['files']) ?? extract(result, ['diffs']) ?? extract(result, ['entries']) ?? []) as any[]
+      const files = (extract(result, ['files']) ??
+        extract(result, ['diffs']) ??
+        extract(result, ['entries']) ??
+        []) as any[]
 
       return (
         <div className="text-xs space-y-1">
           <Row className="flex items-center gap-1.5 flex-wrap">
             <span className="text-[var(--text-secondary)]">mode:</span>
             <span className="font-mono text-[11px]">{staged ? 'staged' : 'unstaged'}</span>
-            {includePatch ? <SmallBadge>patch</SmallBadge> : null}
-            {includeStructured ? <SmallBadge>structured</SmallBadge> : null}
+            {includePatch ? <span className="text-[10px] font-medium text-[var(--text-secondary)]">patch</span> : null}
+            {includeStructured ? <span className="text-[10px] font-medium text-[var(--text-secondary)]">structured</span> : null}
           </Row>
 
           {safePaths.length > 0 ? (
@@ -358,12 +389,18 @@ export default function ToolCallHoverCard({
                       <Row key={`${path}-${idx}`} className="flex items-center gap-1.5 flex-wrap">
                         <span className="font-mono text-[11px]">{path}</span>
                         {typeof added === 'number' ? (
-                          <span className="font-mono text-[11px] text-[var(--text-secondary)]">+{added}</span>
+                          <span className="font-mono text-[11px] text-[var(--text-secondary)]">
+                            +{added}
+                          </span>
                         ) : null}
                         {typeof removed === 'number' ? (
-                          <span className="font-mono text-[11px] text-[var(--text-secondary)]">-{removed}</span>
+                          <span className="font-mono text-[11px] text-[var(--text-secondary)]">
+                            -{removed}
+                          </span>
                         ) : null}
-                        {truncated ? <SmallBadge>patch truncated</SmallBadge> : null}
+                        {truncated ? (
+                          <span className="text-[10px] font-medium text-[var(--text-secondary)]">patch truncated</span>
+                        ) : null}
                       </Row>
                     )
                   })}
@@ -438,6 +475,11 @@ export default function ToolCallHoverCard({
           ) : null}
         </div>
       )
+    }
+
+    if (n === 'listStories') {
+      const stories = coerceStoriesList(result)
+      return <ListStoriesPreview stories={stories} />
     }
 
     if (n === 'getAstOutline') {
@@ -547,18 +589,6 @@ export default function ToolCallHoverCard({
       const dstPath = tryString(extract(args, ['dst'])) || tryString(extract(result, ['dst']))
 
       return <InlineOldNew oldVal={srcPath} newVal={dstPath} />
-    }
-
-    if (n === 'updateStoryTitle') {
-      const oldVal = result ? undefined : storiesById[args.storyId]?.title
-      const newVal = tryString(extract(args, ['title']))
-      return <InlineOldNew oldVal={oldVal} newVal={newVal} />
-    }
-
-    if (n === 'updateFeatureTitle') {
-      const oldVal = result ? undefined : featuresById[args.featureId]?.title
-      const newVal = tryString(extract(args, ['title']))
-      return <InlineOldNew oldVal={oldVal} newVal={newVal} />
     }
 
     if (n === 'deletePath') {
