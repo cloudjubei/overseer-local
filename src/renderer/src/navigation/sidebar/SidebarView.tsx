@@ -201,10 +201,9 @@ export default function SidebarView({
       </div>
 
       <nav
-        className="flex-1 overflow-y-auto px-2 pb-4 scrollbar-thin overflow-x-hidden"
-        style={hideScrollStyle}
+        className="flex-1 flex flex-col px-2 overflow-hidden"
       >
-        <ul className="nav-list" role="list" onKeyDown={onKeyDownList}>
+        <ul className="nav-list shrink-0" role="list" onKeyDown={onKeyDownList}>
           {displayedNavItems.map((item, i) => (
             <StaticNavItem
               key={item.id}
@@ -227,10 +226,10 @@ export default function SidebarView({
           ))}
         </ul>
 
-        <div className="nav-sep" aria-hidden />
+        <div className="nav-sep shrink-0" aria-hidden />
 
         {!effectiveCollapsed && (
-          <div className="px-3" aria-hidden>
+          <div className="px-3 shrink-0" aria-hidden>
             <div
               style={{
                 color: 'var(--text-secondary)',
@@ -256,7 +255,11 @@ export default function SidebarView({
           </div>
         )}
 
-        <ul className="nav-list" aria-label="Projects">
+        <ul
+          className="nav-list flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin pb-2"
+          style={hideScrollStyle}
+          aria-label="Projects"
+        >
           {activeProjects.length == 0 && (
             <li className="nav-li">
               <div

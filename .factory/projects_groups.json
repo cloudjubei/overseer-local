@@ -21,10 +21,11 @@
       "osc-compass-web-user",
       "osc-compass-web-admin",
       "osc-compass-website",
-      "osc-compass-telegram"
+      "osc-compass-telegram",
+      "compass-docs"
     ],
     "createdAt": "2025-10-16T19:16:52.656Z",
-    "updatedAt": "2025-11-21T12:00:50.995Z"
+    "updatedAt": "2026-04-20T21:26:59.600Z"
   },
   {
     "id": "9d03b28b-4491-4868-9bf8-1d66ed32679c",
