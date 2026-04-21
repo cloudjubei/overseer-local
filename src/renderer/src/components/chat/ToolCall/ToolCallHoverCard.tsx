@@ -208,7 +208,9 @@ export default function ToolCallHoverCard({
       return (
         <div className="text-xs space-y-1">
           {anyWithLineNumbers ? (
-            <div className="mb-2 text-[10px] font-medium text-[var(--text-secondary)]">lineNumbers</div>
+            <div className="mb-2 text-[10px] font-medium text-[var(--text-secondary)]">
+              lineNumbers
+            </div>
           ) : null}
           {safe.length > 0 ? (
             safe.map((q: any, idx: number) => {
@@ -359,8 +361,14 @@ export default function ToolCallHoverCard({
           <Row className="flex items-center gap-1.5 flex-wrap">
             <span className="text-[var(--text-secondary)]">mode:</span>
             <span className="font-mono text-[11px]">{staged ? 'staged' : 'unstaged'}</span>
-            {includePatch ? <span className="text-[10px] font-medium text-[var(--text-secondary)]">patch</span> : null}
-            {includeStructured ? <span className="text-[10px] font-medium text-[var(--text-secondary)]">structured</span> : null}
+            {includePatch ? (
+              <span className="text-[10px] font-medium text-[var(--text-secondary)]">patch</span>
+            ) : null}
+            {includeStructured ? (
+              <span className="text-[10px] font-medium text-[var(--text-secondary)]">
+                structured
+              </span>
+            ) : null}
           </Row>
 
           {safePaths.length > 0 ? (
@@ -399,7 +407,9 @@ export default function ToolCallHoverCard({
                           </span>
                         ) : null}
                         {truncated ? (
-                          <span className="text-[10px] font-medium text-[var(--text-secondary)]">patch truncated</span>
+                          <span className="text-[10px] font-medium text-[var(--text-secondary)]">
+                            patch truncated
+                          </span>
                         ) : null}
                       </Row>
                     )

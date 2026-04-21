@@ -68,7 +68,7 @@ export type StoriesService = {
     storyId: string,
     featureId: string,
   ) => Promise<Story | undefined>
-  reorderFeatures: (
+  reorderFeature: (
     projectId: string,
     storyId: string,
     payload: ReorderPayload,

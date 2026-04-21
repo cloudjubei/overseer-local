@@ -32,8 +32,6 @@ export function TextToolsPreview({
   const isInFlight =
     resultType === 'pending' || resultType === 'running' || resultType === 'require_confirmation'
 
-  if (toolName !== 'updateStoryDescription' && toolName !== 'updateFeatureDescription') return null
-
   // New description comes from the tool call args.
   const newDescriptionArg = useMemo(() => {
     return tryString(extract(args, ['description']))
@@ -111,13 +109,7 @@ export function TextToolsPreview({
     )
   }
 
-  // Finished state:
-  // - updateStoryDescription: show result.description (it is the Story)
-  // - updateFeatureDescription: result is a Story (not the Feature), so ALWAYS show args.description
-  const finalText =
-    toolName === 'updateFeatureDescription'
-      ? newDescriptionArg
-      : tryString(extract(result, ['description']))
+  const finalText = tryString(extract(result, ['description']))
 
   return <NewContentOnly text={finalText} label={'Updated description'} />
 }

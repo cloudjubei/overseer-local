@@ -20,7 +20,14 @@ type FeatureField =
   | 'completedAt'
   | 'files'
 
-const STORY_FIELDS: StoryField[] = ['title', 'description', 'status', 'blockers', 'rejection', 'completedAt']
+const STORY_FIELDS: StoryField[] = [
+  'title',
+  'description',
+  'status',
+  'blockers',
+  'rejection',
+  'completedAt',
+]
 const FEATURE_FIELDS: FeatureField[] = [
   'title',
   'description',
@@ -70,7 +77,10 @@ function FieldDiff({
   const beforeText = formatValue(before)
   const afterText = formatValue(after)
   const hasChanges = beforeText !== afterText
-  const patch = useMemo(() => buildSimpleUnifiedDiff(label, beforeText, afterText), [label, beforeText, afterText])
+  const patch = useMemo(
+    () => buildSimpleUnifiedDiff(label, beforeText, afterText),
+    [label, beforeText, afterText],
+  )
 
   return (
     <div className="space-y-1 min-w-0">
@@ -106,7 +116,12 @@ export function StoryUpdatePreview({
   sideBySide: boolean
   isComplete: boolean
 }) {
-  const resultStory = result && typeof result === 'object' && !Array.isArray(result) ? (result as Story) : undefined
+  const resultObject =
+    result?.patch && typeof result?.patch === 'string' ? JSON.parse(result.patch) : result
+  const resultStory =
+    resultObject && typeof resultObject === 'object' && !Array.isArray(resultObject)
+      ? (resultObject as Story)
+      : undefined
   const nextStory = resultStory ?? (story ? ({ ...story, ...patch } as Story) : undefined)
   const patchKeys = changedKeys(patch, STORY_FIELDS)
 
@@ -124,7 +139,9 @@ export function StoryUpdatePreview({
         <div className="flex items-center gap-2 flex-wrap">
           <SmallBadge>story</SmallBadge>
           {story?.id || nextStory?.id ? (
-            <span className="font-mono text-[11px] text-[var(--text-secondary)]">{story?.id || nextStory?.id}</span>
+            <span className="font-mono text-[11px] text-[var(--text-secondary)]">
+              {story?.id || nextStory?.id}
+            </span>
           ) : null}
         </div>
       </div>
@@ -132,7 +149,13 @@ export function StoryUpdatePreview({
       {patchKeys.length > 0 ? (
         <div className="space-y-2 min-w-0">
           {patchKeys.map((key) => (
-            <FieldDiff key={key} label={key} before={story?.[key]} after={nextStory?.[key]} sideBySide={sideBySide} />
+            <FieldDiff
+              key={key}
+              label={key}
+              before={story?.[key]}
+              after={nextStory?.[key]}
+              sideBySide={sideBySide}
+            />
           ))}
         </div>
       ) : (
@@ -159,7 +182,8 @@ export function FeatureUpdatePreview({
   sideBySide: boolean
   isComplete: boolean
 }) {
-  const resultStory = result && typeof result === 'object' && !Array.isArray(result) ? (result as Story) : undefined
+  const resultStory =
+    result && typeof result === 'object' && !Array.isArray(result) ? (result as Story) : undefined
   const featureIdFromPatch = tryString(extract(patch, ['id']))
   const targetFeatureId = feature?.id || featureIdFromPatch
   const resultFeature = resultStory?.features?.find((item) => item.id === targetFeatureId)
@@ -180,7 +204,9 @@ export function FeatureUpdatePreview({
         <div className="flex items-center gap-2 flex-wrap">
           <SmallBadge>feature</SmallBadge>
           {feature?.id || nextFeature?.id ? (
-            <span className="font-mono text-[11px] text-[var(--text-secondary)]">{feature?.id || nextFeature?.id}</span>
+            <span className="font-mono text-[11px] text-[var(--text-secondary)]">
+              {feature?.id || nextFeature?.id}
+            </span>
           ) : null}
         </div>
         {story?.id || resultStory?.id ? (

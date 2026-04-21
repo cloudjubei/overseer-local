@@ -36,7 +36,7 @@ export type StoriesContextValue = {
     updates: FeatureEditInput,
   ) => Promise<Story | undefined>
   deleteFeature: (storyId: string, featureId: string) => Promise<Story | undefined>
-  reorderFeatures: (storyId: string, payload: ReorderPayload) => Promise<Story | undefined>
+  reorderFeature: (storyId: string, payload: ReorderPayload) => Promise<Story | undefined>
   getBlockers: (storyId: string, featureId?: string) => (ResolvedRef | InvalidRefError)[]
   getBlockersOutbound: (id: string) => ResolvedRef[]
   resolveDependency: (dependency: string) => ResolvedRef | InvalidRefError
@@ -471,10 +471,10 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
     [activeProject, updateStories],
   )
 
-  const reorderFeatures = useCallback(
+  const reorderFeature = useCallback(
     async (storyId: string, payload: ReorderPayload): Promise<Story | undefined> => {
       if (activeProject) {
-        const s = await storiesService.reorderFeatures(activeProject.id, storyId, payload)
+        const s = await storiesService.reorderFeature(activeProject.id, storyId, payload)
         if (s) {
           updateStories([
             {
@@ -524,7 +524,7 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
       addFeature,
       updateFeature,
       deleteFeature,
-      reorderFeatures,
+      reorderFeature,
       getBlockersOutbound,
       getBlockers,
       resolveDependency,
@@ -544,7 +544,7 @@ export function StoriesProvider({ children }: { children: React.ReactNode }) {
       addFeature,
       updateFeature,
       deleteFeature,
-      reorderFeatures,
+      reorderFeature,
       getBlockersOutbound,
       getBlockers,
       resolveDependency,

@@ -68,7 +68,7 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
     updateStory,
     getStoryDisplayIndex,
     updateFeature,
-    reorderFeatures,
+    reorderFeature,
     getBlockers,
     getBlockersOutbound,
   } = useStories()
@@ -197,7 +197,7 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
     if (!story) return
     setSaving(true)
     try {
-      await reorderFeatures(story.id, { fromIndex, toIndex })
+      await reorderFeature(story.id, { fromIndex, toIndex })
     } catch (e: any) {
       alert(`Failed to reorder feature: ${e.message || e}`)
     } finally {
