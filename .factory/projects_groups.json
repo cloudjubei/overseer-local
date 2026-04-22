@@ -7,10 +7,11 @@
       "thefactory-tools",
       "thefactory-db",
       "thefactory-knowledge",
-      "thefactory-backend"
+      "thefactory-backend",
+      "thefactory-overseer-web"
     ],
     "createdAt": "2025-10-16T19:17:03.151Z",
-    "updatedAt": "2026-04-15T22:38:43.427Z"
+    "updatedAt": "2026-04-21T23:13:18.296Z"
   },
   {
     "title": "OSC",

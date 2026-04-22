@@ -10,7 +10,7 @@ export type FilesService = {
   writeFile: (
     projectId: string,
     relPath: string,
-    content: string | Buffer,
+    content: string,
     encoding?: BufferEncoding,
   ) => Promise<void>
   renamePath: (projectId: string, srcRel: string, dstRel: string) => Promise<void>

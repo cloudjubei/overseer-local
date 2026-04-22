@@ -23,7 +23,13 @@ const PROVIDERS: Array<{ value: LLMProvider; label: string }> = [
   { value: 'custom', label: 'Custom' },
 ]
 
-const PROVIDERS_WITH_MODEL_LISTING = new Set<LLMProvider>(['openai', 'anthropic', 'gemini', 'deepseek', 'custom'])
+const PROVIDERS_WITH_MODEL_LISTING = new Set<LLMProvider>([
+  'openai',
+  'anthropic',
+  'gemini',
+  'deepseek',
+  'custom',
+])
 
 export default function SettingsLLMConfigModal({
   mode,
@@ -56,7 +62,9 @@ export default function SettingsLLMConfigModal({
   )
 
   const applyModelOptions = (models: string[], currentModel: string) => {
-    const uniqueModels = Array.from(new Set(models.filter((m) => typeof m === 'string' && m.trim().length > 0)))
+    const uniqueModels = Array.from(
+      new Set(models.filter((m) => typeof m === 'string' && m.trim().length > 0)),
+    )
     setAvailableModels(uniqueModels)
     setModelMode(uniqueModels.includes(currentModel) ? 'preset' : 'custom')
   }
@@ -88,14 +96,13 @@ export default function SettingsLLMConfigModal({
   }
 
   useEffect(() => {
-    const next =
-      existing || {
-        id: '',
-        name: '',
-        provider: 'openai' as LLMProvider,
-        apiKey: '',
-        model: '',
-      }
+    const next = existing || {
+      id: '',
+      name: '',
+      provider: 'openai' as LLMProvider,
+      apiKey: '',
+      model: '',
+    }
 
     setForm(next)
     void loadAvailableModels(next, { silent: true })
@@ -110,12 +117,11 @@ export default function SettingsLLMConfigModal({
   }
 
   const onProviderChange = (value: LLMProvider) => {
-    const endpoint = value === 'custom' ? '' : DEFAULT_PROVIDER_ENDPOINTS[value]
     const next: LLMConfig = {
       ...form,
       provider: value,
       model: '',
-      apiUrlOverride: endpoint || undefined,
+      apiUrlOverride: undefined,
     }
 
     setForm(next)
@@ -138,14 +144,10 @@ export default function SettingsLLMConfigModal({
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    const needsUrlOverride = form.provider === 'custom'
-
-    if (!form.name || !form.provider || !form.model || (needsUrlOverride && !form.apiUrlOverride)) {
+    if (!form.name || !form.provider || !form.model) {
       toast({
         title: 'Missing fields',
-        description: needsUrlOverride
-          ? 'Please provide name, provider, API URL override, and model.'
-          : 'Please provide name, provider, and model.',
+        description: 'Please provide name, provider, and model.',
         variant: 'error',
       })
       return
@@ -242,7 +244,7 @@ export default function SettingsLLMConfigModal({
           <Input
             id="apiUrlOverride"
             name="apiUrlOverride"
-            placeholder={form.provider === 'custom' ? 'http://localhost:1234/v1/chat/completions' : 'Optional provider endpoint override'}
+            placeholder={DEFAULT_PROVIDER_ENDPOINTS[form.provider]('') ?? undefined}
             value={form.apiUrlOverride || ''}
             onChange={onChange}
           />

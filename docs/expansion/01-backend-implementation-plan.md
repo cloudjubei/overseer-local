@@ -1,7 +1,7 @@
 # thefactory-backend - Architecture & Implementation Plan (v3)
 
-**Updated:** 2026-04-16
-**Status:** Phase 1b complete — full feature parity API surface
+**Updated:** 2026-04-17
+**Status:** Phase 1b complete — REST/OpenAPI parity; see Remaining Work for doc drift and follow-up integration
 
 ---
 
@@ -63,7 +63,6 @@
 | Tools service | ✅ | src/services/toolsService.ts - global + per-project tool instances |
 | Project checkout service | ✅ | src/services/projectCheckoutService.ts - clone, pull, path resolution |
 | Server setup | ✅ | src/server.ts - Fastify app with all plugins, routes, lifecycle |
-| Docker setup | ✅ | Dockerfile + docker-compose.yml (backend + pgvector) |
 
 ### Phase 1a: Core API Routes ✅
 
@@ -311,23 +310,35 @@ Real-time event broadcasting via `/ws` endpoint:
 
 ## Remaining Work (Future Phases)
 
-### Phase 2: overseer-local Migration
-- [ ] Generate TypeScript types from OpenAPI spec (`openapi-typescript`)
-- [ ] Build API client layer in overseer-local
-- [ ] Replace all Managers with API client calls
-- [ ] Remove thefactory-tools/db direct dependencies from overseer-local
-- [ ] WebSocket event subscription in overseer-local
+### Phase 1 follow-ups 
+
+- [ ] Fix **API Route Summary** paths: stories/features/reorder must stay under `/api/v1/projects/:projectId/stories/...`; add missing routes such as `GET .../stories/order`, `GET .../stories/:storyId`, and `PATCH /api/v1/projects/:id/active`.
+- [ ] Clarify **WebSocket Events**: distinguish **transport + `wsBroadcast` helper** (done) from **emitting the named domain events** from routes/services (pending; listed below).
+- [ ] **WebSocket domain events**: call `wsBroadcast` from the appropriate route/service paths for the intended events (e.g. `projects:updated`, `stories:updated`, `chats:updated`, `completion:progress`, `files:changed`, `git:status-changed`, `tests:result`), plus tests that prove at least one client receives payloads after a mutation.
+- [ ] **`projectCheckoutService`**: register on Fastify (or inject via a thin facade) and use from project lifecycle / file-git routes where clone or `pull` should occur; today the module exists and is tested in isolation but is not wired in `server.ts`.
+- [ ] **`DATABASE_URL`**: thread `config.databaseUrl` into `createToolsService` (and any `thefactory-tools` factories that need a DB connection string) so env config matches the architecture diagram; today the value is loaded but not passed through.
+
+### Phase 2: Web App (completely mirrors overseer-local)
+
+- [ ] React web app consuming the backend API
+- [ ] Shared types from OpenAPI spec
+- [ ] Real-time updates via WebSocket
 
 ### Phase 3: Production Deployment
+
 - [ ] Railway/Fly.io deployment config
 - [ ] Push-to-deploy CI/CD pipeline
 - [ ] Environment variable management
 - [ ] Health monitoring and alerts
 
-### Phase 4: Web App
-- [ ] React web app consuming the backend API
-- [ ] Shared types from OpenAPI spec
-- [ ] Real-time updates via WebSocket
+### Phase 4: overseer-local Migration
+
+- [ ] Generate TypeScript types from OpenAPI spec (`openapi-typescript`)
+- [ ] Build API client layer in overseer-local
+- [ ] Replace all Managers with API client calls
+- [ ] Remove thefactory-tools/db direct dependencies from overseer-local
+- [ ] WebSocket event subscription in overseer-local (depends on backend emitting events above)
+
 
 ---
 

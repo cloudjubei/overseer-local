@@ -100,7 +100,7 @@ export default class FilesManager extends BaseManager {
   async writeFile(
     projectId: string,
     relPath: string,
-    content: string | Buffer,
+    content: string,
     encoding: BufferEncoding = 'utf8',
   ) {
     const tools = await this.__getTools(projectId)
