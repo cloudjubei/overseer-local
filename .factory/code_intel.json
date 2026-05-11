@@ -4294,8 +4294,13 @@
       "OnboardingView": {
         "path": "src/renderer/src/screens/OnboardingView.tsx",
         "dependencies": [
+          "Button",
           "IconPlus",
-          "ProjectWizardModal"
+          "ProjectWizardModal",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconPlus",
+          "thefactory-ui/web/icons"
         ]
       },
       "ParsedHunk": {
@@ -11035,8 +11040,13 @@
       "OnboardingView": {
         "path": "renderer/src/screens/OnboardingView.tsx",
         "dependencies": [
+          "Button",
           "IconPlus",
-          "ProjectWizardModal"
+          "ProjectWizardModal",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconPlus",
+          "thefactory-ui/web/icons"
         ]
       },
       "ParsedHunk": {

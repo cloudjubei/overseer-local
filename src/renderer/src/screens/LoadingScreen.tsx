@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { Spinner } from 'thefactory-ui/web'
 import { useAppSettings } from '../contexts/AppSettingsContext'
 import { dbService } from '../services/dbService'
 import { filesService } from '../services/filesService'
@@ -99,7 +100,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ onLoaded }) => {
       style={{ fontFamily: 'sans-serif' }}
     >
       <div className="flex flex-col items-center gap-3">
-        <div className="animate-spin h-8 w-8 border-4 border-gray-300 border-t-transparent rounded-full" />
+        <Spinner size={32} className="text-gray-400 dark:text-gray-500" />
         <div className="text-gray-700 dark:text-gray-200 text-sm">{statusText}</div>
       </div>
     </div>

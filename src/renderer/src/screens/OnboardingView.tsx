@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
+import { Button } from 'thefactory-ui/web'
+import { IconPlus } from 'thefactory-ui/web/icons'
 import { ProjectWizardModal } from './projects/wizard/ProjectWizardModal'
-import { IconPlus } from '../components/ui/icons/Icons'
 import { useProjectContext } from '../contexts/ProjectContext'
 
 export default function OnboardingView() {
@@ -17,13 +18,15 @@ export default function OnboardingView() {
           Get started by creating your first project. A project connects to your source code
           repository and organizes your tasks and AI context.
         </p>
-        <button
+        <Button
+          variant="primary"
+          size="lg"
           onClick={() => setIsWizardOpen(true)}
-          className="btn btn-primary inline-flex items-center justify-center gap-2 px-6 py-3 text-lg w-full"
+          className="w-full"
         >
           <IconPlus className="w-5 h-5" />
           Create First Project
-        </button>
+        </Button>
       </div>
 
       <ProjectWizardModal

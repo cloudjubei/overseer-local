@@ -1,6 +1,5 @@
 import React, { useId, useState, useEffect, useMemo } from 'react'
 import { Button } from '@renderer/components/ui/Button'
-import { IconFolder } from '@renderer/components/ui/icons/Icons'
 import { PROJECT_ICONS, renderProjectIcon } from '../projectIcons'
 import { Modal } from '@renderer/components/ui/Modal'
 import { projectsService } from '@renderer/services/projectsService'
@@ -179,7 +178,6 @@ export function ProjectWizardCreateStep({ initialState, onStateChange }: Project
                 }
               }}
             >
-              <IconFolder className="w-4 h-4 mr-2" />
               Browse...
             </Button>
           }
