@@ -114,7 +114,11 @@
           "thefactory-tools/AgentRunType",
           "HTMLDivElement",
           "PickerProps",
-          "react-dom/createPortal"
+          "react-dom/createPortal",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconPlay",
+          "thefactory-ui/web/icons"
         ]
       },
       "Alert": {
@@ -995,6 +999,8 @@
         "path": "src/renderer/src/components/stories/ContextFileChip.tsx",
         "dependencies": [
           "thefactory-tools/FileMeta",
+          "thefactory-ui/web/FileDisplay",
+          "thefactory-ui/web",
           "thefactory-tools/utils/inferFileType",
           "thefactory-tools/utils"
         ]
@@ -1186,7 +1192,10 @@
       "DependencyBulletProps": {
         "path": "src/renderer/src/components/stories/DependencyBullet.tsx",
         "dependencies": [
-          "react"
+          "thefactory-ui/web/Tooltip",
+          "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconXCircle",
+          "thefactory-ui/web/icons"
         ]
       },
       "DependencySelector": {
@@ -1381,7 +1390,9 @@
       "ExclamationChip": {
         "path": "src/renderer/src/components/stories/ExclamationChip.tsx",
         "dependencies": [
-          "IconExclamation"
+          "IconExclamation",
+          "thefactory-ui/web/icons/IconExclamation",
+          "thefactory-ui/web/icons"
         ]
       },
       "extract": {
@@ -1556,6 +1567,8 @@
           "thefactory-tools/Feature",
           "thefactory-tools/ProjectSpec",
           "thefactory-tools/Story",
+          "thefactory-ui/web/Markdown",
+          "thefactory-ui/web",
           "@renderer/contexts/AgentsContext/useAgents",
           "@renderer/contexts/AgentsContext",
           "@renderer/navigation/Navigator/useNavigator",
@@ -1575,6 +1588,8 @@
           "thefactory-tools/Story",
           "thefactory-tools/ProjectSpec",
           "react/useMemo",
+          "thefactory-ui/web/Markdown",
+          "thefactory-ui/web",
           "@renderer/contexts/AgentsContext/useAgents",
           "@renderer/contexts/AgentsContext",
           "@renderer/navigation/Navigator/useNavigator",
@@ -4829,8 +4844,6 @@
         "dependencies": [
           "@renderer/components/ui/Button/Button",
           "@renderer/components/ui/Button",
-          "@renderer/components/ui/icons/Icons/IconFolder",
-          "@renderer/components/ui/icons/Icons",
           "@renderer/components/ui/Modal/Modal",
           "@renderer/components/ui/Modal",
           "@renderer/services/projectsService/projectsService",
@@ -4843,8 +4856,6 @@
           "ProjectWizardCreateStepProps",
           "@renderer/components/ui/Button/Button",
           "@renderer/components/ui/Button",
-          "@renderer/components/ui/icons/Icons/IconFolder",
-          "@renderer/components/ui/icons/Icons",
           "@renderer/components/ui/Modal/Modal",
           "@renderer/components/ui/Modal",
           "@renderer/services/projectsService/projectsService",
@@ -5082,14 +5093,22 @@
           "thefactory-tools/AgentRunType",
           "HTMLDivElement",
           "RunAgentButtonProps",
-          "react-dom/createPortal"
+          "react-dom/createPortal",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconPlay",
+          "thefactory-ui/web/icons"
         ]
       },
       "RunAgentButtonProps": {
         "path": "src/renderer/src/components/stories/RunAgentButton.tsx",
         "dependencies": [
           "thefactory-tools/AgentRunType",
-          "react-dom/createPortal"
+          "react-dom/createPortal",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconPlay",
+          "thefactory-ui/web/icons"
         ]
       },
       "SafeText": {
@@ -5511,21 +5530,25 @@
           "StoryViewMode",
           "@renderer/navigation/Navigator/useNavigator",
           "@renderer/navigation/Navigator",
+          "thefactory-ui/web/SegmentedControl",
+          "thefactory-ui/web",
           "@renderer/contexts/ProjectContext/useActiveProject",
           "@renderer/contexts/ProjectContext/useProjectContext",
           "@renderer/contexts/ProjectContext",
           "@renderer/contexts/AgentsContext/useAgents",
           "@renderer/contexts/AgentsContext",
-          "@renderer/components/ui/icons/Icons/IconBoard",
-          "@renderer/components/ui/icons/Icons/IconEdit",
-          "@renderer/components/ui/icons/Icons/IconPlus",
-          "@renderer/components/ui/icons/Icons/IconList",
-          "@renderer/components/ui/icons/Icons/IconCalculator",
-          "@renderer/components/ui/icons/Icons",
+          "thefactory-ui/web/icons/IconBoard",
+          "thefactory-ui/web/icons/IconCalculator",
+          "thefactory-ui/web/icons/IconEdit",
+          "thefactory-ui/web/icons/IconList",
+          "thefactory-ui/web/icons/IconPlus",
+          "thefactory-ui/web/icons",
           "thefactory-tools/utils/getChatContextKey",
           "thefactory-tools/utils",
           "@renderer/components/ui/RichText/RichText",
           "@renderer/components/ui/RichText",
+          "thefactory-ui/web/Skeleton",
+          "thefactory-ui/web/SkeletonText",
           "@renderer/contexts/AppSettingsContext/useAppSettings",
           "@renderer/contexts/AppSettingsContext",
           "@renderer/contexts/StoriesContext/useStories",
@@ -5536,15 +5559,13 @@
           "src/types/settings/StoryListViewSorting",
           "src/types/settings/StoryViewMode",
           "src/types/settings",
-          "@renderer/components/ui/SegmentedControl",
           "@renderer/components/stories/DependencyBullet",
           "@renderer/components/stories/StatusControl",
           "@renderer/components/stories/ExclamationChip",
           "@renderer/components/chat/UsageModal",
           "@renderer/components/agents/AgentRunBullet",
           "@renderer/components/stories/RunAgentButton",
-          "@renderer/components/agents/ModelChip",
-          "@renderer/components/ui/Skeleton"
+          "@renderer/components/agents/ModelChip"
         ]
       },
       "storiesManager": {
@@ -5649,6 +5670,9 @@
           "DragEvent",
           "thefactory-tools/ProjectSpec",
           "thefactory-tools/Story",
+          "thefactory-ui/web/Markdown",
+          "thefactory-ui/web/Tooltip",
+          "thefactory-ui/web",
           "@renderer/contexts/StoriesContext/useStories",
           "@renderer/contexts/StoriesContext"
         ]
@@ -5662,6 +5686,9 @@
           "DragEvent",
           "thefactory-tools/Story",
           "thefactory-tools/ProjectSpec",
+          "thefactory-ui/web/Markdown",
+          "thefactory-ui/web/Tooltip",
+          "thefactory-ui/web",
           "@renderer/contexts/StoriesContext/useStories",
           "@renderer/contexts/StoriesContext"
         ]
@@ -6651,7 +6678,9 @@
       "WarningChip": {
         "path": "src/renderer/src/components/stories/WarningChip.tsx",
         "dependencies": [
-          "IconExclamation"
+          "IconExclamation",
+          "thefactory-ui/web/icons/IconExclamation",
+          "thefactory-ui/web/icons"
         ]
       },
       "WebSearchSettings": {
@@ -6860,7 +6889,11 @@
           "thefactory-tools/AgentRunType",
           "HTMLDivElement",
           "PickerProps",
-          "react-dom/createPortal"
+          "react-dom/createPortal",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconPlay",
+          "thefactory-ui/web/icons"
         ]
       },
       "Alert": {
@@ -7741,6 +7774,8 @@
         "path": "renderer/src/components/stories/ContextFileChip.tsx",
         "dependencies": [
           "thefactory-tools/FileMeta",
+          "thefactory-ui/web/FileDisplay",
+          "thefactory-ui/web",
           "thefactory-tools/utils/inferFileType",
           "thefactory-tools/utils"
         ]
@@ -7932,7 +7967,10 @@
       "DependencyBulletProps": {
         "path": "renderer/src/components/stories/DependencyBullet.tsx",
         "dependencies": [
-          "react"
+          "thefactory-ui/web/Tooltip",
+          "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconXCircle",
+          "thefactory-ui/web/icons"
         ]
       },
       "DependencySelector": {
@@ -8127,7 +8165,9 @@
       "ExclamationChip": {
         "path": "renderer/src/components/stories/ExclamationChip.tsx",
         "dependencies": [
-          "IconExclamation"
+          "IconExclamation",
+          "thefactory-ui/web/icons/IconExclamation",
+          "thefactory-ui/web/icons"
         ]
       },
       "extract": {
@@ -8302,6 +8342,8 @@
           "thefactory-tools/Feature",
           "thefactory-tools/ProjectSpec",
           "thefactory-tools/Story",
+          "thefactory-ui/web/Markdown",
+          "thefactory-ui/web",
           "@renderer/contexts/AgentsContext/useAgents",
           "@renderer/contexts/AgentsContext",
           "@renderer/navigation/Navigator/useNavigator",
@@ -8321,6 +8363,8 @@
           "thefactory-tools/Story",
           "thefactory-tools/ProjectSpec",
           "react/useMemo",
+          "thefactory-ui/web/Markdown",
+          "thefactory-ui/web",
           "@renderer/contexts/AgentsContext/useAgents",
           "@renderer/contexts/AgentsContext",
           "@renderer/navigation/Navigator/useNavigator",
@@ -11575,8 +11619,6 @@
         "dependencies": [
           "@renderer/components/ui/Button/Button",
           "@renderer/components/ui/Button",
-          "@renderer/components/ui/icons/Icons/IconFolder",
-          "@renderer/components/ui/icons/Icons",
           "@renderer/components/ui/Modal/Modal",
           "@renderer/components/ui/Modal",
           "@renderer/services/projectsService/projectsService",
@@ -11589,8 +11631,6 @@
           "ProjectWizardCreateStepProps",
           "@renderer/components/ui/Button/Button",
           "@renderer/components/ui/Button",
-          "@renderer/components/ui/icons/Icons/IconFolder",
-          "@renderer/components/ui/icons/Icons",
           "@renderer/components/ui/Modal/Modal",
           "@renderer/components/ui/Modal",
           "@renderer/services/projectsService/projectsService",
@@ -11828,14 +11868,22 @@
           "thefactory-tools/AgentRunType",
           "HTMLDivElement",
           "RunAgentButtonProps",
-          "react-dom/createPortal"
+          "react-dom/createPortal",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconPlay",
+          "thefactory-ui/web/icons"
         ]
       },
       "RunAgentButtonProps": {
         "path": "renderer/src/components/stories/RunAgentButton.tsx",
         "dependencies": [
           "thefactory-tools/AgentRunType",
-          "react-dom/createPortal"
+          "react-dom/createPortal",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconPlay",
+          "thefactory-ui/web/icons"
         ]
       },
       "SafeText": {
@@ -12257,21 +12305,25 @@
           "StoryViewMode",
           "@renderer/navigation/Navigator/useNavigator",
           "@renderer/navigation/Navigator",
+          "thefactory-ui/web/SegmentedControl",
+          "thefactory-ui/web",
           "@renderer/contexts/ProjectContext/useActiveProject",
           "@renderer/contexts/ProjectContext/useProjectContext",
           "@renderer/contexts/ProjectContext",
           "@renderer/contexts/AgentsContext/useAgents",
           "@renderer/contexts/AgentsContext",
-          "@renderer/components/ui/icons/Icons/IconBoard",
-          "@renderer/components/ui/icons/Icons/IconEdit",
-          "@renderer/components/ui/icons/Icons/IconPlus",
-          "@renderer/components/ui/icons/Icons/IconList",
-          "@renderer/components/ui/icons/Icons/IconCalculator",
-          "@renderer/components/ui/icons/Icons",
+          "thefactory-ui/web/icons/IconBoard",
+          "thefactory-ui/web/icons/IconCalculator",
+          "thefactory-ui/web/icons/IconEdit",
+          "thefactory-ui/web/icons/IconList",
+          "thefactory-ui/web/icons/IconPlus",
+          "thefactory-ui/web/icons",
           "thefactory-tools/utils/getChatContextKey",
           "thefactory-tools/utils",
           "@renderer/components/ui/RichText/RichText",
           "@renderer/components/ui/RichText",
+          "thefactory-ui/web/Skeleton",
+          "thefactory-ui/web/SkeletonText",
           "@renderer/contexts/AppSettingsContext/useAppSettings",
           "@renderer/contexts/AppSettingsContext",
           "@renderer/contexts/StoriesContext/useStories",
@@ -12282,15 +12334,13 @@
           "types/settings/StoryListViewSorting",
           "types/settings/StoryViewMode",
           "types/settings",
-          "@renderer/components/ui/SegmentedControl",
           "@renderer/components/stories/DependencyBullet",
           "@renderer/components/stories/StatusControl",
           "@renderer/components/stories/ExclamationChip",
           "@renderer/components/chat/UsageModal",
           "@renderer/components/agents/AgentRunBullet",
           "@renderer/components/stories/RunAgentButton",
-          "@renderer/components/agents/ModelChip",
-          "@renderer/components/ui/Skeleton"
+          "@renderer/components/agents/ModelChip"
         ]
       },
       "storiesManager": {
@@ -12395,6 +12445,9 @@
           "DragEvent",
           "thefactory-tools/ProjectSpec",
           "thefactory-tools/Story",
+          "thefactory-ui/web/Markdown",
+          "thefactory-ui/web/Tooltip",
+          "thefactory-ui/web",
           "@renderer/contexts/StoriesContext/useStories",
           "@renderer/contexts/StoriesContext"
         ]
@@ -12408,6 +12461,9 @@
           "DragEvent",
           "thefactory-tools/Story",
           "thefactory-tools/ProjectSpec",
+          "thefactory-ui/web/Markdown",
+          "thefactory-ui/web/Tooltip",
+          "thefactory-ui/web",
           "@renderer/contexts/StoriesContext/useStories",
           "@renderer/contexts/StoriesContext"
         ]
@@ -13397,7 +13453,9 @@
       "WarningChip": {
         "path": "renderer/src/components/stories/WarningChip.tsx",
         "dependencies": [
-          "IconExclamation"
+          "IconExclamation",
+          "thefactory-ui/web/icons/IconExclamation",
+          "thefactory-ui/web/icons"
         ]
       },
       "WebSearchSettings": {

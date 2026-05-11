@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigator } from '@renderer/navigation/Navigator'
 import BoardView from './BoardView'
-import SegmentedControl from '@renderer/components/ui/SegmentedControl'
+import { SegmentedControl } from 'thefactory-ui/web'
 import { useActiveProject, useProjectContext } from '@renderer/contexts/ProjectContext'
 import DependencyBullet from '@renderer/components/stories/DependencyBullet'
 import StatusControl, {
@@ -14,18 +14,18 @@ import { Status, Story } from 'thefactory-tools'
 import ExclamationChip from '@renderer/components/stories/ExclamationChip'
 import {
   IconBoard,
-  IconEdit,
-  IconPlus,
-  IconList,
   IconCalculator,
-} from '@renderer/components/ui/icons/Icons'
+  IconEdit,
+  IconList,
+  IconPlus,
+} from 'thefactory-ui/web/icons'
 import { getChatContextKey } from 'thefactory-tools/utils'
 import UsageModal from '@renderer/components/chat/UsageModal'
 import AgentRunBullet from '@renderer/components/agents/AgentRunBullet'
 import RunAgentButton from '@renderer/components/stories/RunAgentButton'
 import { RichText } from '@renderer/components/ui/RichText'
 import ModelChip from '@renderer/components/agents/ModelChip'
-import Skeleton, { SkeletonText } from '@renderer/components/ui/Skeleton'
+import { Skeleton, SkeletonText } from 'thefactory-ui/web'
 import { useAppSettings } from '@renderer/contexts/AppSettingsContext'
 import { useStories } from '@renderer/contexts/StoriesContext'
 import { ChatSidebarPanel } from '@renderer/components/chat'

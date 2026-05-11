@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import type { Feature, ProjectSpec, Status, Story } from 'thefactory-tools'
+import { Markdown } from 'thefactory-ui/web'
 import StatusControl from './StatusControl'
-import Markdown from '../ui/Markdown'
 import DependencyBullet from './DependencyBullet'
 import { useAgents } from '@renderer/contexts/AgentsContext'
 import { useNavigator } from '@renderer/navigation/Navigator'

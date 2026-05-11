@@ -1,4 +1,4 @@
-import { IconExclamation } from '../ui/icons/Icons'
+import { IconExclamation } from 'thefactory-ui/web/icons'
 
 export default function ExclamationChip({ title, tooltip }: { title: string; tooltip: string }) {
   return (

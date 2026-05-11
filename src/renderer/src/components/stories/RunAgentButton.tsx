@@ -1,8 +1,8 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import type { AgentRunType } from 'thefactory-tools'
-import { IconPlay } from '../ui/icons/Icons'
-import { Button } from '../ui/Button'
+import { Button } from 'thefactory-ui/web'
+import { IconPlay } from 'thefactory-ui/web/icons'
 
 const AGENTS_ORDER: AgentRunType[] = ['speccer', 'planner', 'contexter', 'tester', 'developer']
 const AGENTS_LABELS: Record<AgentRunType, string> = {

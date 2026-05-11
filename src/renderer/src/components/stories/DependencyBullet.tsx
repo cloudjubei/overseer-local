@@ -1,11 +1,11 @@
 import React from 'react'
 import { useNavigator } from '../../navigation/Navigator'
-import Tooltip from '../ui/Tooltip'
+import { Tooltip } from 'thefactory-ui/web'
+import { IconXCircle } from 'thefactory-ui/web/icons'
 import { StoryCard } from './StoryCard'
 import { FeatureCard } from './FeatureCard'
 import StatusControl from './StatusControl'
 import { useStories } from '../../contexts/StoriesContext'
-import { IconXCircle } from '../ui/icons/Icons'
 
 export interface DependencyBulletProps {
   className?: string

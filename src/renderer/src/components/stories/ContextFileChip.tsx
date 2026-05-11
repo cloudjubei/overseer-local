@@ -1,5 +1,5 @@
 import React from 'react'
-import FileDisplay from '../ui/FileDisplay'
+import { FileDisplay } from 'thefactory-ui/web'
 import WarningChip from './WarningChip'
 import { FileMeta } from 'thefactory-tools'
 import { inferFileType } from 'thefactory-tools/utils'
