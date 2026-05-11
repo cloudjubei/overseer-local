@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react'
 import StoryForm, { StoryFormValues } from '@renderer/components/stories/StoryForm'
 import { ConfirmDialog, Modal } from 'thefactory-ui/web'
-import { useToast } from '@renderer/components/ui/Toast'
+import { useToast } from 'thefactory-ui/web'
 import { useStories } from '@renderer/contexts/StoriesContext'
 import { ChatContext, StoryCreateInput } from 'thefactory-tools'
 import { useActiveProject } from '@renderer/contexts/ProjectContext'

@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import ModalHost from './navigation/ModalHost'
-import { ToastProvider } from './components/ui/Toast'
+import { ToastProvider } from 'thefactory-ui/web'
 import { NavigatorProvider } from './navigation/Navigator'
 import { ShortcutsBootstrap, ShortcutsProvider } from './hooks/useShortcuts'
 import CommandMenu from './components/ui/CommandMenu'

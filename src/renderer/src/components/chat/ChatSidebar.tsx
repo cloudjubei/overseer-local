@@ -20,7 +20,7 @@ import { getChatContextKey } from 'thefactory-tools/utils'
 import { useNotifications } from '@renderer/hooks/useNotifications'
 import type { ToolToggle } from './ChatSettingsDropdown'
 import { useChatDraft } from './hooks/useChatDraft'
-import { useToast } from '../ui/Toast'
+import { useToast } from 'thefactory-ui/web'
 
 import { ChatSidebarHeader } from './sidebar/ChatSidebarHeader'
 import { AgentRunBanner } from './sidebar/AgentRunBanner'

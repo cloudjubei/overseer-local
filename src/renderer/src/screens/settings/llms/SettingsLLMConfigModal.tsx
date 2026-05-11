@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@renderer/components/ui/Select'
-import { useToast } from '@renderer/components/ui/Toast'
+import { useToast } from 'thefactory-ui/web'
 import { useLLMConfig } from '@renderer/contexts/LLMConfigContext'
 import { llmConfigsService } from '@renderer/services/llmConfigsService'
 import React, { useEffect, useMemo, useState } from 'react'

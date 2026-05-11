@@ -6,7 +6,7 @@ import Tooltip from '@renderer/components/ui/Tooltip'
 import { GitConflictEntry } from 'thefactory-tools'
 import { gitService } from '@renderer/services/gitService'
 import { factoryToolsService } from '@renderer/services/factoryToolsService'
-import { useToast } from '@renderer/components/ui/Toast'
+import { useToast } from 'thefactory-ui/web'
 
 export type MergeConflictResolverProps = {
   projectId: string

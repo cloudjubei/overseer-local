@@ -70,21 +70,60 @@ Order is foundation → small screens → big screens. Each step lists files to 
 - **Compare:** loading text, spinner animation speed, error banner styling, button hover/pressed states match.
 - **Risk:** low — these screens are simple. Good warm-up before the heavy screens.
 
-#### Step 5 — Stories (list, board, modals)
+#### Step 5 — Stories
 
-- **Files:** [screens/StoriesView.tsx](../src/renderer/src/screens/StoriesView.tsx), [screens/stories/StoriesListView.tsx](../src/renderer/src/screens/stories/StoriesListView.tsx), [screens/stories/BoardView.tsx](../src/renderer/src/screens/stories/BoardView.tsx), [screens/stories/StoryDetailsView.tsx](../src/renderer/src/screens/stories/StoryDetailsView.tsx), and the story / feature create / edit / delete modals under `screens/stories/`.
-- **Swap:** `SegmentedControl` (list/board toggle), `Button`, `Modal`, `Input`, `Select`, `Switch`, `StatusChip`, `Tooltip`, `Field`, `Textarea`.
-- **Compare:** the list rows look identical (status icon, `done/total` chip, title, description, blockers, agent-run bullets); the board grid spaces columns the same; drag-reorder works; status pickers commit; the modals open / submit / close as before.
-- **Risk:** lots of primitives swapped at once. Split into **5a — list**, **5b — board**, **5c — modals** if any single PR gets thick.
+Split into five checkpoints so each visible chunk can be exercised in the desktop app before moving on.
+
+##### Step 5a — List view + leaf components _(shipped 2026-05-11)_
+
+- **Files:** [screens/stories/StoriesListView.tsx](../src/renderer/src/screens/stories/StoriesListView.tsx), [components/stories/StoryCard.tsx](../src/renderer/src/components/stories/StoryCard.tsx), [components/stories/FeatureCard.tsx](../src/renderer/src/components/stories/FeatureCard.tsx), [components/stories/RunAgentButton.tsx](../src/renderer/src/components/stories/RunAgentButton.tsx), [components/stories/DependencyBullet.tsx](../src/renderer/src/components/stories/DependencyBullet.tsx), [components/stories/WarningChip.tsx](../src/renderer/src/components/stories/WarningChip.tsx), [components/stories/ExclamationChip.tsx](../src/renderer/src/components/stories/ExclamationChip.tsx), [components/stories/ContextFileChip.tsx](../src/renderer/src/components/stories/ContextFileChip.tsx).
+- **Swap:** `SegmentedControl`, `Skeleton`, `SkeletonText`, `Markdown`, `Tooltip`, `Button`, `FileDisplay`, list-view icons (`IconBoard`, `IconCalculator`, `IconEdit`, `IconList`, `IconPlus`, `IconPlay`, `IconXCircle`, `IconExclamation`).
+
+##### Step 5b — Board view _(shipped 2026-05-11)_
+
+- **Files:** [screens/stories/BoardView.tsx](../src/renderer/src/screens/stories/BoardView.tsx).
+- **Swap:** `IconChevronLeft`, `IconChevronRight`.
+
+##### Step 5c — Modals + details view + forms _(shipped 2026-05-11)_
+
+- **Files:** [screens/stories/StoryCreateView.tsx](../src/renderer/src/screens/stories/StoryCreateView.tsx), [screens/stories/StoryEditView.tsx](../src/renderer/src/screens/stories/StoryEditView.tsx), [screens/stories/StoryDetailsView.tsx](../src/renderer/src/screens/stories/StoryDetailsView.tsx), [screens/stories/FeatureCreateView.tsx](../src/renderer/src/screens/stories/FeatureCreateView.tsx), [screens/stories/FeatureEditView.tsx](../src/renderer/src/screens/stories/FeatureEditView.tsx), [components/stories/FeatureForm.tsx](../src/renderer/src/components/stories/FeatureForm.tsx).
+- **Swap:** `Modal`, `AlertDialog → ConfirmDialog` (prop renames: `confirmText → confirmLabel`, `cancelText → cancelLabel`, `destructiveConfirm → destructive`, `disableOutsideClose → closeOnOverlayClick={false}`), `Button`, `IconDelete`, `IconPlus`, plus StoryDetailsView icons (`IconCalculator`, `IconChevron`, `IconEdit`, `IconPlus`).
+- **Upstream:** added `closeOnOverlayClick` and `closeOnEsc` props to `thefactory-ui`'s `ConfirmDialog`.
+
+##### Step 5d — `ConnectedRichText` wrapper + swap RichText consumers
+
+- **Why deferred from 5a/5c:** local `RichText` self-resolves files via `useFiles()` and renders `#`-references inline; the package version is decoupled and needs `onResolveFile` + `renderDependency` callbacks. Direct swap would lose the dependency-chip rendering.
+- **Files:** add a new [components/stories/ConnectedRichText.tsx](../src/renderer/src/components/stories/ConnectedRichText.tsx) (or under `components/ui/`) that wires the local context + `DependencyBullet` to the package's primitive. Then swap the two call sites: [screens/stories/StoriesListView.tsx](../src/renderer/src/screens/stories/StoriesListView.tsx) and [screens/stories/StoryDetailsView.tsx](../src/renderer/src/screens/stories/StoryDetailsView.tsx).
+- **Compare:** story title + description chips (`@file` mentions, `#` story/feature refs) render visually identical to before.
+
+##### Step 5e — `ToastProvider` + `useToast` lock-step swap
+
+- **Why a dedicated step:** swapping per-screen is unsafe — the local Provider sits at the App root; if any unmigrated consumer keeps importing local `useToast`, it loses its Provider after the swap. All four call sites (`StoryCreateView`, `StoryEditView`, `FeatureCreateView`, `FeatureEditView`) plus `SettingsLLMConfigModal` and `MergeConflictResolver` move together.
+- **Files:** [App.tsx](../src/renderer/src/App.tsx) — swap `ToastProvider` import + JSX. Six call sites — swap `import { useToast }` from `@renderer/components/ui/Toast` → `thefactory-ui/web`. The `toast({...})` call shape is identical (verified — same `{ id?, title?, description?, variant?, durationMs?, action? }`).
+- **Compare:** any toast that fires (e.g. "Story created successfully") renders through the package's Toast UI. Position, animation, dismiss behavior should match.
 
 #### Step 6 — Chat
 
-- **Files:** [screens/ChatView.tsx](../src/renderer/src/screens/ChatView.tsx), [components/chat/ChatSidebar.tsx](../src/renderer/src/components/chat/ChatSidebar.tsx), [components/chat/ChatsNavigationSidebar.tsx](../src/renderer/src/components/chat/ChatsNavigationSidebar.tsx), [components/chat/ChatInput.tsx](../src/renderer/src/components/chat/ChatInput.tsx), [components/chat/MessageList.tsx](../src/renderer/src/components/chat/MessageList.tsx), the `ToolCall*` family.
-- **Swap:** `FileMentionsTextarea`, `Button`, `Tooltip`, `Markdown`, `TypewriterText`, the diff / code primitives the tool-call renderers use, `IconAttach` / `IconSend`.
+Split into three checkpoints because two of the heavier primitives (`FileMentionsTextarea`, `FileSelector`) have decoupled-resolver gaps that need wrappers, and the existing local `ChatInput.tsx` is much richer than the package version.
+
+##### Step 6a — `FileSelector` wrapper + swap consumers
+
+- **Why first:** also unblocks the deferred swap in Stories' `FeatureForm.tsx` (which uses `FileSelector` for the context file picker). Local self-resolves files via `useFiles()`; package needs `files: UikitFileMeta[]` from the consumer and renames `selected → initialSelected`.
+- **Approach:** the package primitive is already complete — we just need a thin local wrapper (or per-call-site refactor) that pulls files from the local `FilesContext` and renames the prop. If only two call sites end up using it, inline is fine.
+- **Files:** [components/stories/FeatureForm.tsx](../src/renderer/src/components/stories/FeatureForm.tsx) (existing call site) + any Chat-side file picker.
+
+##### Step 6b — `FileMentionsTextarea` — decide upstream vs wrapper, then swap
+
+- **Why this is its own step:** the local version has internal `useReferencesAutocomplete` for `#`-style story/feature references, plus extra props (`id`, `style`, `disableAutocomplete`, `onFileMentionSelected`, `onReferenceSelected`, `inputRef`). The package version is decoupled but `#`-incomplete.
+- **Decision point:** either (a) **lift `#`-references upstream** into `thefactory-ui`'s `FileMentionsTextarea` as an optional `onSearchReferences?: (token) => RefSuggestion[]` callback (best for `thefactory-overseer-web` parity), or (b) **keep a thin local wrapper** that owns the references autocomplete and embeds the package's textarea for the file-mentions part.
+- **Files:** [components/chat/ChatInput.tsx](../src/renderer/src/components/chat/ChatInput.tsx), [components/stories/FeatureForm.tsx](../src/renderer/src/components/stories/FeatureForm.tsx).
+
+##### Step 6c — The rest of Chat (layout + everything else)
+
+- **Files:** [screens/ChatView.tsx](../src/renderer/src/screens/ChatView.tsx), [components/chat/ChatSidebar.tsx](../src/renderer/src/components/chat/ChatSidebar.tsx), [components/chat/ChatsNavigationSidebar.tsx](../src/renderer/src/components/chat/ChatsNavigationSidebar.tsx), [components/chat/MessageList.tsx](../src/renderer/src/components/chat/MessageList.tsx), the `ToolCall*` family.
+- **Swap:** `Button`, `Tooltip`, `Markdown`, `TypewriterText`, the diff / code primitives the tool-call renderers use, `IconAttach` / `IconSend`.
 - **Compare:** the composer auto-sizes to ~250 px max; `@` triggers file autocomplete; the attach button still uploads through the Electron IPC path; the send button enables only when there's content; aborting a turn shows the stop icon mid-composer; messages render markdown + code + tool-call cards identically.
-- **Risk:** `overseer-local`'s ChatInput is much richer than `thefactory-ui`'s `FileMentionsTextarea` (attachments, suggested-actions row, info popover, abort confirm dialog). One of two outcomes:
-  - The local `ChatInput.tsx` stays as a thin wrapper that owns the layout + extras and embeds `FileMentionsTextarea` for the actual editing surface. **Likely the right call.**
-  - Lift the missing affordances into `thefactory-ui`'s `FileMentionsTextarea` — but only if they make sense for `thefactory-overseer-web` too. Most do.
+- **Risk:** the local `ChatInput.tsx` owns rich extras (attachments, suggested-actions row, info popover, abort confirm dialog). Likely stays as a thin wrapper that embeds the package `FileMentionsTextarea` (per 6b) for the editing surface and owns everything around it.
 
 #### Step 7 — Files
 
@@ -157,14 +196,9 @@ Record here, with date, anything the user explicitly accepts as a deliberate dif
 
 ## D. Deferred swaps
 
-Components whose `thefactory-ui` equivalent is API-incompatible or feature-incomplete enough that an in-kind swap would be a regression. Each entry lists why and what needs to happen before we can swap.
+Components whose `thefactory-ui` equivalent is API-incompatible or feature-incomplete enough that an in-kind swap would be a regression. Each entry, when added, lists why and what needs to happen before we can swap. Items get scheduled into specific Steps above as soon as they have a concrete plan.
 
-- **`useToast` / `ToastProvider`** — _deferred during Step 5c (2026-05-11)_. Local `ToastProvider` is mounted in `App.tsx` and consumed by stories, settings, and git. To swap, the Provider and all `useToast` call sites must move in lock-step (otherwise un-swapped consumers lose their Provider). Dedicated mini-step before or during the screen that owns the last call site (most likely Step 11 / Settings).
-- **`RichText`** — _deferred during Step 5a (2026-05-11)_. Local version self-resolves files via the local `useFiles()` context and renders `#`-style story/feature references via the local `DependencyBullet`. Package version is decoupled — needs `onResolveFile` and `renderDependency` callbacks. Plan: write a thin `ConnectedRichText` wrapper in overseer-local that wires the local context + dependency rendering to the package's primitive, then swap consumers (StoriesListView, StoryDetailsView). Land before Step 13 cleanup.
-- **`FileMentionsTextarea`** — _deferred during Step 5c (2026-05-11)_. Local has internal `useReferencesAutocomplete` for `#`-style story/feature references plus extra props (`id`, `style`, `disableAutocomplete`, `onFileMentionSelected`, `onReferenceSelected`, `inputRef`). Package version is decoupled but feature-incomplete (no `#`-references). Plan: either (a) upstream the `#`-reference flow into `thefactory-ui` as an optional callback hook, or (b) keep a thin local wrapper that owns the autocomplete and embeds the package's textarea for editing. Decide when Chat (Step 6) lands — same constraint there.
-- **`FileSelector`** — _deferred during Step 5c (2026-05-11)_. Local self-resolves files via `useFiles()`; package requires the consumer to supply `files: UikitFileMeta[]` and renames `selected` → `initialSelected`. A clean swap is a small refactor at each call site (FeatureForm, etc.). Land alongside the `ConnectedRichText` wrapper since they share the same context-coupling pattern.
-
-_(empty)_
+_(empty — `RichText` is now Step 5d, `useToast/ToastProvider` is Step 5e, `FileSelector` is Step 6a, `FileMentionsTextarea` is Step 6b.)_
 
 ---
 

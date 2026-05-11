@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Button, ConfirmDialog, Modal } from 'thefactory-ui/web'
 import { IconDelete } from 'thefactory-ui/web/icons'
-import { useToast } from '@renderer/components/ui/Toast'
+import { useToast } from 'thefactory-ui/web'
 import type { ChatContext, Feature } from 'thefactory-tools'
 import { useStories } from '@renderer/contexts/StoriesContext'
 import FeatureForm, { FeatureFormValues } from '@renderer/components/stories/FeatureForm'

@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import FeatureForm, { FeatureFormValues } from '@renderer/components/stories/FeatureForm'
-import { useToast } from '@renderer/components/ui/Toast'
+import { useToast } from 'thefactory-ui/web'
 import { ConfirmDialog, Modal } from 'thefactory-ui/web'
 import { useStories } from '@renderer/contexts/StoriesContext'
 import { useActiveProject } from '@renderer/contexts/ProjectContext'
