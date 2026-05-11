@@ -32,12 +32,14 @@
 /* Semantic utilities (bridge for token-based classes) */
 @import './styles/utilities/semantic-utilities.css';
 
-@import 'tailwindcss/preflight';
-@import 'tailwindcss/utilities';
-@import 'tailwindcss/theme';
+/* Canonical Tailwind v4 entry — replaces the piecemeal `preflight`+`utilities`+
+   `theme` imports because those skip the `@layer theme, base, components,
+   utilities;` declaration that v4 needs for `@theme inline` blocks to register.
+   Must come BEFORE `thefactory-ui/web/styles` so the package's `@theme inline`
+   block sees the layer-order declaration and contributes theme colours
+   (matching the working playground setup). */
+@import 'tailwindcss';
 
-/* thefactory-ui — appended after local imports so anything local wins until
-   the conversion drains. See docs/conversion-plan.md. */
 @import 'thefactory-ui/web/styles';
 
 /* Root layout: make the app fill the window and avoid unexpected margins */

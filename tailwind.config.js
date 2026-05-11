@@ -1,6 +1,12 @@
 module.exports = {
   darkMode: ['class', '[data-theme="dark"]'],
-  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  content: [
+    './index.html',
+    './src/**/*.{js,ts,jsx,tsx}',
+    // thefactory-ui's compiled output uses theme-color utilities (bg-brand-600,
+    // text-emerald-400, etc.) that must be discovered by Tailwind here.
+    './node_modules/thefactory-ui/dist/**/*.{js,mjs}',
+  ],
   theme: {
     extend: {
       animation: {
