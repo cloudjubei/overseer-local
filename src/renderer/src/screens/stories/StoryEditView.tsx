@@ -1,14 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
 import StoryForm, { StoryFormValues } from '@renderer/components/stories/StoryForm'
-import { AlertDialog, Modal } from '@renderer/components/ui/Modal'
+import { Button, ConfirmDialog, Modal } from 'thefactory-ui/web'
+import { IconDelete } from 'thefactory-ui/web/icons'
 import { useToast } from '@renderer/components/ui/Toast'
 import { useNavigator } from '@renderer/navigation/Navigator'
 import { useStories } from '@renderer/contexts/StoriesContext'
 import { ChatContext, Story } from 'thefactory-tools'
 import { useActiveProject } from '@renderer/contexts/ProjectContext'
 import { ChatSidebarModalPanel } from '@renderer/components/chat'
-import { Button } from '@renderer/components/ui/Button'
-import { IconDelete } from '@renderer/components/ui/icons/Icons'
 
 export default function StoryEditView({
   storyId,
@@ -95,7 +94,6 @@ export default function StoryEditView({
         title="Edit Story"
         onClose={attemptClose}
         isOpen={true}
-        contentClassName="p-4 min-h-0 overflow-y-auto"
         footer={
           <div className="flex justify-between gap-2">
             {!initialValues ? (
@@ -160,25 +158,26 @@ export default function StoryEditView({
       {/* Always mount the chat panel; it starts collapsed by default */}
       <ChatSidebarModalPanel context={context} chatContextTitle="Story Chat" initialWidth={380} />
 
-      <AlertDialog
+      <ConfirmDialog
         isOpen={showAlert}
         onClose={() => setShowAlert(false)}
         description={alertMessage}
-        confirmText="DISCARD ALL"
-        cancelText="Go Back"
-        destructiveConfirm
-        disableOutsideClose
+        confirmLabel="DISCARD ALL"
+        cancelLabel="Go Back"
+        destructive
+        closeOnOverlayClick={false}
         onConfirm={() => {
           setShowAlert(false)
           doClose()
         }}
       />
-      <AlertDialog
+      <ConfirmDialog
         isOpen={showDeleteConfirm}
         onClose={() => setShowDeleteConfirm(false)}
         title="Delete Story"
         description="Are you sure you want to delete this story? This will also remove any features and blockers referencing it. This action cannot be undone."
-        confirmText="Delete"
+        confirmLabel="Delete"
+        destructive
         onConfirm={handleDelete}
       />
     </>

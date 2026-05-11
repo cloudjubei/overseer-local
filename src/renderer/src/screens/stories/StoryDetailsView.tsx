@@ -6,13 +6,8 @@ import { useActiveProject, useProjectContext } from '@renderer/contexts/ProjectC
 import { useAgents } from '@renderer/contexts/AgentsContext'
 import AgentRunBullet from '@renderer/components/agents/AgentRunBullet'
 import { ChatContext, Feature, Status, Story } from 'thefactory-tools'
-import {
-  IconBack,
-  IconCalculator,
-  IconChevron,
-  IconEdit,
-  IconPlus,
-} from '@renderer/components/ui/icons/Icons'
+import { IconCalculator, IconChevron, IconEdit, IconPlus } from 'thefactory-ui/web/icons'
+import { IconBack } from '@renderer/components/ui/icons/Icons'
 import ExclamationChip from '@renderer/components/stories/ExclamationChip'
 import RunAgentButton from '@renderer/components/stories/RunAgentButton'
 import { RichText } from '@renderer/components/ui/RichText'
@@ -20,7 +15,7 @@ import ModelChip from '@renderer/components/agents/ModelChip'
 import { getChatContextKey } from 'thefactory-tools/utils'
 import UsageModal from '@renderer/components/chat/UsageModal'
 import { StatusPicker, statusKey, STATUS_LABELS } from '@renderer/components/stories/StatusControl'
-import { Button } from '@renderer/components/ui/Button'
+import { Button } from 'thefactory-ui/web'
 import { useStories } from '@renderer/contexts/StoriesContext'
 import { ChatSidebarPanel } from '@renderer/components/chat'
 import { useAppSettings } from '@renderer/contexts/AppSettingsContext'

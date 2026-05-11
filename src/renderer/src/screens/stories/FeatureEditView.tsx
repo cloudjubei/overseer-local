@@ -1,11 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { AlertDialog, Modal } from '@renderer/components/ui/Modal'
+import { Button, ConfirmDialog, Modal } from 'thefactory-ui/web'
+import { IconDelete } from 'thefactory-ui/web/icons'
 import { useToast } from '@renderer/components/ui/Toast'
 import type { ChatContext, Feature } from 'thefactory-tools'
 import { useStories } from '@renderer/contexts/StoriesContext'
 import FeatureForm, { FeatureFormValues } from '@renderer/components/stories/FeatureForm'
-import { Button } from '@renderer/components/ui/Button'
-import { IconDelete } from '@renderer/components/ui/icons/Icons'
 import { useActiveProject } from '@renderer/contexts/ProjectContext'
 import { ChatSidebarModalPanel } from '@renderer/components/chat'
 
@@ -139,7 +138,6 @@ export default function FeatureEditView({
             </div>
           </div>
         }
-        contentClassName="p-4 min-h-0 overflow-y-auto"
       >
         {initialValues ? (
           <FeatureForm
@@ -165,27 +163,27 @@ export default function FeatureEditView({
       {/* Always mount the chat panel; it starts collapsed by default */}
       <ChatSidebarModalPanel context={context} chatContextTitle="Feature Chat" initialWidth={380} />
 
-      <AlertDialog
+      <ConfirmDialog
         isOpen={showAlert}
         onClose={() => setShowAlert(false)}
         description={alertMessage}
-        confirmText="DISCARD ALL"
-        cancelText="Go Back"
-        destructiveConfirm
-        disableOutsideClose
+        confirmLabel="DISCARD ALL"
+        cancelLabel="Go Back"
+        destructive
+        closeOnOverlayClick={false}
         onConfirm={() => {
           setShowAlert(false)
           doClose()
         }}
       />
-      <AlertDialog
+      <ConfirmDialog
         isOpen={showDeleteConfirm}
         onClose={() => setShowDeleteConfirm(false)}
         title="Delete Feature"
         description="Are you sure you want to delete this feature? This action cannot be undone."
-        confirmText="Delete"
-        destructiveConfirm
-        disableOutsideClose
+        confirmLabel="Delete"
+        destructive
+        closeOnOverlayClick={false}
         onConfirm={handleDelete}
       />
     </>

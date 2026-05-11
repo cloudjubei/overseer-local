@@ -155,6 +155,15 @@ Order is foundation → small screens → big screens. Each step lists files to 
 
 Record here, with date, anything the user explicitly accepts as a deliberate difference between the old local component and the new `thefactory-ui` one.
 
+## D. Deferred swaps
+
+Components whose `thefactory-ui` equivalent is API-incompatible or feature-incomplete enough that an in-kind swap would be a regression. Each entry lists why and what needs to happen before we can swap.
+
+- **`useToast` / `ToastProvider`** — _deferred during Step 5c (2026-05-11)_. Local `ToastProvider` is mounted in `App.tsx` and consumed by stories, settings, and git. To swap, the Provider and all `useToast` call sites must move in lock-step (otherwise un-swapped consumers lose their Provider). Dedicated mini-step before or during the screen that owns the last call site (most likely Step 11 / Settings).
+- **`RichText`** — _deferred during Step 5a (2026-05-11)_. Local version self-resolves files via the local `useFiles()` context and renders `#`-style story/feature references via the local `DependencyBullet`. Package version is decoupled — needs `onResolveFile` and `renderDependency` callbacks. Plan: write a thin `ConnectedRichText` wrapper in overseer-local that wires the local context + dependency rendering to the package's primitive, then swap consumers (StoriesListView, StoryDetailsView). Land before Step 13 cleanup.
+- **`FileMentionsTextarea`** — _deferred during Step 5c (2026-05-11)_. Local has internal `useReferencesAutocomplete` for `#`-style story/feature references plus extra props (`id`, `style`, `disableAutocomplete`, `onFileMentionSelected`, `onReferenceSelected`, `inputRef`). Package version is decoupled but feature-incomplete (no `#`-references). Plan: either (a) upstream the `#`-reference flow into `thefactory-ui` as an optional callback hook, or (b) keep a thin local wrapper that owns the autocomplete and embeds the package's textarea for editing. Decide when Chat (Step 6) lands — same constraint there.
+- **`FileSelector`** — _deferred during Step 5c (2026-05-11)_. Local self-resolves files via `useFiles()`; package requires the consumer to supply `files: UikitFileMeta[]` and renames `selected` → `initialSelected`. A clean swap is a small refactor at each call site (FeatureForm, etc.). Land alongside the `ConnectedRichText` wrapper since they share the same context-coupling pattern.
+
 _(empty)_
 
 ---

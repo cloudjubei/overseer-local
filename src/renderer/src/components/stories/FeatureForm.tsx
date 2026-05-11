@@ -5,11 +5,10 @@ import { DependencySelector } from './DependencySelector'
 import DependencyBullet from './DependencyBullet'
 import { FileSelector } from '@renderer/components/ui/FileSelector'
 import ContextFileChip from './ContextFileChip'
-import { IconDelete, IconPlus } from '@renderer/components/ui/icons/Icons'
+import { IconDelete, IconPlus } from 'thefactory-ui/web/icons'
 import FileMentionsTextarea from '@renderer/components/ui/FileMentionsTextarea'
 import { useStories } from '../../contexts/StoriesContext'
-import { Button } from '@renderer/components/ui/Button'
-import { Modal } from '@renderer/components/ui/Modal'
+import { Button, Modal } from 'thefactory-ui/web'
 import ProjectChip from '../agents/ProjectChip'
 
 export type FeatureFormValues = {

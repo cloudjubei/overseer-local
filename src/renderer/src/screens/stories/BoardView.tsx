@@ -5,7 +5,7 @@ import StatusControl, { STATUS_LABELS } from '@renderer/components/stories/Statu
 import { useNavigator } from '@renderer/navigation/Navigator'
 import { StoryCard, StoryCardRaw } from '@renderer/components/stories/StoryCard'
 import { useStories } from '@renderer/contexts/StoriesContext'
-import { IconChevronLeft, IconChevronRight } from '@renderer/components/ui/icons/Icons'
+import { IconChevronLeft, IconChevronRight } from 'thefactory-ui/web/icons'
 
 const STATUS_ORDER: Status[] = ['-', '~', '+', '=', '?']
 

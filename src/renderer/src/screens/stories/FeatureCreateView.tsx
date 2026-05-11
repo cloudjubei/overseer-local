@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import FeatureForm, { FeatureFormValues } from '@renderer/components/stories/FeatureForm'
 import { useToast } from '@renderer/components/ui/Toast'
-import { AlertDialog, Modal } from '@renderer/components/ui/Modal'
+import { ConfirmDialog, Modal } from 'thefactory-ui/web'
 import { useStories } from '@renderer/contexts/StoriesContext'
 import { useActiveProject } from '@renderer/contexts/ProjectContext'
 import { ChatContext } from 'thefactory-tools'
@@ -258,7 +258,6 @@ export default function FeatureCreateView({
             </div>
           </div>
         }
-        contentClassName="p-4 min-h-0 overflow-y-auto"
       >
         <div className="flex flex-col gap-3">
           {storySelector}
@@ -291,14 +290,14 @@ export default function FeatureCreateView({
         initialWidth={360}
       />
 
-      <AlertDialog
+      <ConfirmDialog
         isOpen={showAlert}
         onClose={() => setShowAlert(false)}
         description={alertMessage}
-        confirmText="DISCARD ALL"
-        cancelText="Go Back"
-        destructiveConfirm
-        disableOutsideClose
+        confirmLabel="DISCARD ALL"
+        cancelLabel="Go Back"
+        destructive
+        closeOnOverlayClick={false}
         onConfirm={() => {
           setShowAlert(false)
           doClose()

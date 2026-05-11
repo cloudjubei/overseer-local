@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react'
 import StoryForm, { StoryFormValues } from '@renderer/components/stories/StoryForm'
-import { AlertDialog, Modal } from '@renderer/components/ui/Modal'
+import { ConfirmDialog, Modal } from 'thefactory-ui/web'
 import { useToast } from '@renderer/components/ui/Toast'
 import { useStories } from '@renderer/contexts/StoriesContext'
 import { ChatContext, StoryCreateInput } from 'thefactory-tools'
@@ -68,7 +68,6 @@ export default function StoryCreateView({ onRequestClose }: { onRequestClose?: (
         isOpen={true}
         size={'md'}
         initialFocusRef={titleRef as React.RefObject<HTMLElement>}
-        contentClassName="p-4 min-h-0 overflow-y-auto"
         footer={
           <div className="flex justify-end gap-2">
             <button
@@ -111,14 +110,14 @@ export default function StoryCreateView({ onRequestClose }: { onRequestClose?: (
         initialWidth={360}
       />
 
-      <AlertDialog
+      <ConfirmDialog
         isOpen={showAlert}
         onClose={() => setShowAlert(false)}
         description={alertMessage}
-        confirmText="DISCARD ALL"
-        cancelText="Go Back"
-        destructiveConfirm
-        disableOutsideClose
+        confirmLabel="DISCARD ALL"
+        cancelLabel="Go Back"
+        destructive
+        closeOnOverlayClick={false}
         onConfirm={() => {
           setShowAlert(false)
           doClose()
