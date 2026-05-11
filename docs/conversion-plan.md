@@ -90,27 +90,23 @@ Split into five checkpoints so each visible chunk can be exercised in the deskto
 - **Swap:** `Modal`, `AlertDialog → ConfirmDialog` (prop renames: `confirmText → confirmLabel`, `cancelText → cancelLabel`, `destructiveConfirm → destructive`, `disableOutsideClose → closeOnOverlayClick={false}`), `Button`, `IconDelete`, `IconPlus`, plus StoryDetailsView icons (`IconCalculator`, `IconChevron`, `IconEdit`, `IconPlus`).
 - **Upstream:** added `closeOnOverlayClick` and `closeOnEsc` props to `thefactory-ui`'s `ConfirmDialog`.
 
-##### Step 5d — `ConnectedRichText` wrapper + swap RichText consumers
+##### Step 5d — Connected RichText wrapper + swap RichText consumers _(shipped 2026-05-12)_
 
-- **Why deferred from 5a/5c:** local `RichText` self-resolves files via `useFiles()` and renders `#`-references inline; the package version is decoupled and needs `onResolveFile` + `renderDependency` callbacks. Direct swap would lose the dependency-chip rendering.
-- **Files:** add a new [components/stories/ConnectedRichText.tsx](../src/renderer/src/components/stories/ConnectedRichText.tsx) (or under `components/ui/`) that wires the local context + `DependencyBullet` to the package's primitive. Then swap the two call sites: [screens/stories/StoriesListView.tsx](../src/renderer/src/screens/stories/StoriesListView.tsx) and [screens/stories/StoryDetailsView.tsx](../src/renderer/src/screens/stories/StoryDetailsView.tsx).
-- **Compare:** story title + description chips (`@file` mentions, `#` story/feature refs) render visually identical to before.
+- **Implementation:** rewrote the existing [components/ui/RichText.tsx](../src/renderer/src/components/ui/RichText.tsx) as a thin wrapper around the package primitive — kept the same module path / named export so no call-site changes were needed in [StoriesListView.tsx](../src/renderer/src/screens/stories/StoriesListView.tsx) or [StoryDetailsView.tsx](../src/renderer/src/screens/stories/StoryDetailsView.tsx). The wrapper supplies `onResolveFile` (pulling from local `useFiles()` with basename fallback) and `renderDependency` (rendering `<DependencyBullet>`).
+- **Testing note:** RichText only shows visible differences when text contains `@file/path.ext` mentions or `#story-id`/`#feature-id` references. Empty / plain-prose stories render identically to before. To exercise the new code paths visually, edit a story description to include something like `See @README.md, depends on #<some-story-id>` and confirm both render as chips/bullets.
 
-##### Step 5e — `ToastProvider` + `useToast` lock-step swap
+##### Step 5e — `ToastProvider` + `useToast` lock-step swap _(shipped 2026-05-12)_
 
-- **Why a dedicated step:** swapping per-screen is unsafe — the local Provider sits at the App root; if any unmigrated consumer keeps importing local `useToast`, it loses its Provider after the swap. All four call sites (`StoryCreateView`, `StoryEditView`, `FeatureCreateView`, `FeatureEditView`) plus `SettingsLLMConfigModal` and `MergeConflictResolver` move together.
-- **Files:** [App.tsx](../src/renderer/src/App.tsx) — swap `ToastProvider` import + JSX. Six call sites — swap `import { useToast }` from `@renderer/components/ui/Toast` → `thefactory-ui/web`. The `toast({...})` call shape is identical (verified — same `{ id?, title?, description?, variant?, durationMs?, action? }`).
-- **Compare:** any toast that fires (e.g. "Story created successfully") renders through the package's Toast UI. Position, animation, dismiss behavior should match.
+- **Implementation:** swapped [App.tsx](../src/renderer/src/App.tsx)'s `ToastProvider` import to `thefactory-ui/web`. All seven `useToast` call sites (4 stories views + `SettingsLLMConfigModal` + `MergeConflictResolver` + `ChatSidebar`) updated in lock-step. The `toast({...})` call shape is identical, so the only consumer-visible change is the styling of rendered toasts. Local [components/ui/Toast.tsx](../src/renderer/src/components/ui/Toast.tsx) is now orphaned — gets deleted in Step 13 cleanup.
 
 #### Step 6 — Chat
 
 Split into three checkpoints because two of the heavier primitives (`FileMentionsTextarea`, `FileSelector`) have decoupled-resolver gaps that need wrappers, and the existing local `ChatInput.tsx` is much richer than the package version.
 
-##### Step 6a — `FileSelector` wrapper + swap consumers
+##### Step 6a — `FileSelector` wrapper + swap consumers _(shipped 2026-05-12)_
 
-- **Why first:** also unblocks the deferred swap in Stories' `FeatureForm.tsx` (which uses `FileSelector` for the context file picker). Local self-resolves files via `useFiles()`; package needs `files: UikitFileMeta[]` from the consumer and renames `selected → initialSelected`.
-- **Approach:** the package primitive is already complete — we just need a thin local wrapper (or per-call-site refactor) that pulls files from the local `FilesContext` and renames the prop. If only two call sites end up using it, inline is fine.
-- **Files:** [components/stories/FeatureForm.tsx](../src/renderer/src/components/stories/FeatureForm.tsx) (existing call site) + any Chat-side file picker.
+- **Implementation:** rewrote [components/ui/FileSelector.tsx](../src/renderer/src/components/ui/FileSelector.tsx) as a thin wrapper around the package primitive — pulls files from local `useFiles()` and renames `selected → initialSelected`. Same module path / named export, no call-site change needed in [FeatureForm.tsx](../src/renderer/src/components/stories/FeatureForm.tsx). No Chat-side `FileSelector` consumer found (the chat composer uses `FileMentionsTextarea` for `@`-mentions but not a multi-pick selector).
+- **Upstream fix during Step 6a:** the package's `FileSelector` checkmark used `bg-brand-600`/`border-brand-600` named utilities, which aren't generated downstream when the consumer's Tailwind setup doesn't fully register the package's `@theme inline { --color-brand-* }` block. Switched to `bg-(--color-brand-600)`/`border-(--color-brand-600)` (Tailwind v4 arbitrary-value syntax) which reference the CSS variable directly. See "C. Accepted divergences" for the package-wide rule.
 
 ##### Step 6b — `FileMentionsTextarea` — decide upstream vs wrapper, then swap
 
@@ -193,6 +189,8 @@ Split into three checkpoints because two of the heavier primitives (`FileMention
 ## C. Accepted divergences
 
 Record here, with date, anything the user explicitly accepts as a deliberate difference between the old local component and the new `thefactory-ui` one.
+
+- **Custom theme colors use arb-value CSS-var syntax, not named utilities.** _2026-05-12._ When the package needs a colour from its own palette (e.g. `--color-brand-600`), it uses Tailwind v4's arbitrary-value syntax — `bg-(--color-brand-600)`, `border-(--color-brand-600)` — rather than named utilities like `bg-brand-600`. Reason: named utilities require the consumer's Tailwind to register the package's `@theme inline { --color-brand-N: var(--color-brand-N); }` block, which proved fragile downstream (didn't fire for overseer-local even with the canonical `@import "tailwindcss";` entry and the package path added to `content`). The arb-value form is robust because the CSS variable is always defined by the package's `tokens.css`. Tailwind v4's default-palette colours (emerald, teal, purple, …) still work as named utilities since they don't rely on the `@theme` block. Same rule now documented in [thefactory-ui ARCHITECTURE.md](../../thefactory-ui/docs/ARCHITECTURE.md) so future package contributors don't reintroduce it.
 
 ## D. Deferred swaps
 
