@@ -49,7 +49,7 @@ export default class ProjectsManager extends BaseManager {
     }
     handlers[IPC_HANDLER_KEYS.PROJECTS_SELECT_FILE] = async ({ filters }: any = {}) => {
       const result = await dialog.showOpenDialog(this.window, {
-        properties: ['openFile'],
+        properties: ['openFile', 'showHiddenFiles'],
         filters: filters || [],
       })
       if (result.canceled || result.filePaths.length === 0) {

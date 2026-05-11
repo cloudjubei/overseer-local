@@ -401,7 +401,7 @@
       "finishTurnOnErrors": true,
       "allowErrorResponses": false,
       "allowNoCallResponses": false,
-      "numberMessagesToSend": 20,
+      "numberMessagesToSend": 50,
       "availableTools": [
         "listContents",
         "searchFiles",
@@ -561,7 +561,7 @@
       "finishTurnOnErrors": true,
       "allowErrorResponses": false,
       "allowNoCallResponses": false,
-      "numberMessagesToSend": 20,
+      "numberMessagesToSend": 50,
       "availableTools": [
         "listContents",
         "searchFiles",

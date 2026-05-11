@@ -226,11 +226,11 @@ export default class FactoryCompletionManager extends BaseManager {
       isolated,
     }
 
-    const p = this.agentRunnerTools.startAgentRun(opts)
-    p.finally(() => {
+    const handle = this.agentRunnerTools.startAgentRun(opts)
+    handle.done.finally(() => {
       this.cleanupAbort(params.chatContext)
     })
-    return p
+    return handle.done
   }
 
   abortCompletion(chatContext: ChatContext) {

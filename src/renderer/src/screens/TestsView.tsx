@@ -15,7 +15,7 @@ import { Input } from '../components/ui/Input'
 
 function TestsInner() {
   const [activeTab, setActiveTab] = React.useState<'results' | 'e2e' | 'coverage'>('results')
-  const [e2eCommand, setE2ECommand] = React.useState<string>('')
+  const [e2eConfigPath, setE2EConfigPath] = React.useState<string>('')
 
   const { appSettings, setUserPreferences } = useAppSettings()
 
@@ -111,7 +111,7 @@ function TestsInner() {
     </Button>
   ) : isE2E ? (
     <Button
-      onClick={() => runTestsE2E(e2eCommand.length > 0 ? e2eCommand : undefined)}
+      onClick={() => runTestsE2E(e2eConfigPath.length > 0 ? e2eConfigPath : undefined)}
       loading={isRunningE2ETests}
       variant="primary"
       size="lg"
@@ -201,13 +201,13 @@ function TestsInner() {
               <div className="px-4 py-3 border-b border-neutral-100 dark:border-neutral-900 text-sm text-neutral-600 dark:text-neutral-400">
                 <p className="mb-2">Run End-to-End (E2E) tests.</p>
                 <p className="text-xs mb-2">
-                  By default, this will run the `test:e2e` script from your project's
-                  `package.json`.
+                  Provide a path to a project-relative E2E test config (e.g.
+                  `vitest.e2e.config.ts`). Leave empty to use the default config.
                 </p>
                 <Input
-                  placeholder="Override command (optional)"
-                  value={e2eCommand}
-                  onChange={(e) => setE2ECommand(e.target.value)}
+                  placeholder="E2E config path (optional)"
+                  value={e2eConfigPath}
+                  onChange={(e) => setE2EConfigPath(e.target.value)}
                 />
               </div>
               <div className="flex-1 min-h-0 overflow-auto p-4 space-y-3">

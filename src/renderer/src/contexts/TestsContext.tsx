@@ -23,7 +23,7 @@ export type TestsContextValue = {
   refreshTestsCatalog: () => Promise<void>
 
   runAllTests: () => Promise<void>
-  runTestsE2E: (command?: string) => Promise<void>
+  runTestsE2E: (configPath?: string) => Promise<void>
   runAllCoverages: () => Promise<void>
   resetTests: () => void
   resetTestsE2E: () => void
@@ -141,13 +141,13 @@ export function TestsProvider({ children }: { children: React.ReactNode }) {
   }, [projectId])
 
   const runTestsE2E = useCallback(
-    async (command?: string) => {
+    async (configPath?: string) => {
       if (!projectId) return
       setIsRunningE2ETests(true)
       setTestsErrorE2E(null)
       setResultsE2E(undefined)
       try {
-        const res = await factoryTestsService.runTestsE2E(projectId, command)
+        const res = await factoryTestsService.runTestsE2E(projectId, configPath)
         setResultsE2E(res)
       } catch (e: any) {
         setTestsErrorE2E(e?.message || String(e))
