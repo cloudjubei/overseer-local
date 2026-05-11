@@ -1,8 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import { ProjectsGroup, ProjectSpec } from 'thefactory-tools'
-import NotificationBadge, { getBadgeColorClass } from '../../components/stories/NotificationBadge'
-import SpinnerWithDot from '../../components/ui/SpinnerWithDot'
-import { IconFolder, IconFolderOpen, IconCollection } from '../../components/ui/icons/Icons'
+import {
+  NotificationBadge,
+  SpinnerWithDot,
+  getNotificationBadgeColorClass as getBadgeColorClass,
+} from 'thefactory-ui/web'
+import { IconFolder, IconFolderOpen } from 'thefactory-ui/web/icons'
+import { IconCollection } from '../../components/ui/icons/Icons'
 import ProjectNavItem from './ProjectNavItem'
 import { useNotifications } from '@renderer/hooks/useNotifications'
 import { useAppSettings } from '../../contexts/AppSettingsContext'

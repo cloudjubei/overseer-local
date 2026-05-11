@@ -1,9 +1,12 @@
 import React from 'react'
 import { NavDef } from './constants'
 import { classNames } from '../utils'
-import Tooltip from '../../components/ui/Tooltip'
-import NotificationBadge, { getBadgeColorClass } from '../../components/stories/NotificationBadge'
-import SpinnerWithDot from '../../components/ui/SpinnerWithDot'
+import {
+  NotificationBadge,
+  SpinnerWithDot,
+  Tooltip,
+  getNotificationBadgeColorClass as getBadgeColorClass,
+} from 'thefactory-ui/web'
 import { useNotifications } from '@renderer/hooks/useNotifications'
 import { useAppSettings } from '../../contexts/AppSettingsContext'
 

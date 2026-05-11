@@ -1,8 +1,11 @@
 import React from 'react'
 import { ProjectSpec } from 'thefactory-tools'
-import Tooltip from '../../components/ui/Tooltip'
-import NotificationBadge, { getBadgeColorClass } from '../../components/stories/NotificationBadge'
-import SpinnerWithDot from '../../components/ui/SpinnerWithDot'
+import {
+  NotificationBadge,
+  SpinnerWithDot,
+  Tooltip,
+  getNotificationBadgeColorClass as getBadgeColorClass,
+} from 'thefactory-ui/web'
 import { renderProjectIcon } from '@renderer/screens/projects/projectIcons'
 import { useNotifications } from '@renderer/hooks/useNotifications'
 import { useAppSettings } from '../../contexts/AppSettingsContext'

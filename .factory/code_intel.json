@@ -2589,6 +2589,13 @@
           "GroupNavItemProps",
           "thefactory-tools/ProjectsGroup",
           "thefactory-tools/ProjectSpec",
+          "thefactory-ui/web/NotificationBadge",
+          "thefactory-ui/web/SpinnerWithDot",
+          "thefactory-ui/web/getNotificationBadgeColorClass",
+          "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconFolder",
+          "thefactory-ui/web/icons/IconFolderOpen",
+          "thefactory-ui/web/icons",
           "@renderer/hooks/useNotifications/useNotifications",
           "@renderer/hooks/useNotifications"
         ]
@@ -3710,6 +3717,8 @@
         "path": "src/renderer/src/navigation/main/MainView.tsx",
         "dependencies": [
           "HTMLButtonElement",
+          "thefactory-ui/web/icons/IconMenu",
+          "thefactory-ui/web/icons",
           "@renderer/contexts/ProjectsGroupsContext/useProjectsGroups",
           "@renderer/contexts/ProjectsGroupsContext"
         ]
@@ -4606,6 +4615,11 @@
         "dependencies": [
           "ProjectNavItemProps",
           "thefactory-tools/ProjectSpec",
+          "thefactory-ui/web/NotificationBadge",
+          "thefactory-ui/web/SpinnerWithDot",
+          "thefactory-ui/web/Tooltip",
+          "thefactory-ui/web/getNotificationBadgeColorClass",
+          "thefactory-ui/web",
           "@renderer/screens/projects/projectIcons/renderProjectIcon",
           "@renderer/screens/projects/projectIcons",
           "@renderer/hooks/useNotifications/useNotifications",
@@ -5286,6 +5300,9 @@
           "MutableRefObject",
           "@renderer/hooks/useNotifications/useNotifications",
           "@renderer/hooks/useNotifications",
+          "thefactory-ui/web/icons/IconMenu",
+          "thefactory-ui/web/icons/IconWarningTriangle",
+          "thefactory-ui/web/icons",
           "@renderer/utils/hideScrollStyle/hideScrollStyle",
           "@renderer/utils/hideScrollStyle",
           "thefactory-tools/ProjectSpec"
@@ -5301,6 +5318,9 @@
           "SidebarProps",
           "@renderer/hooks/useNotifications/useNotifications",
           "@renderer/hooks/useNotifications",
+          "thefactory-ui/web/icons/IconMenu",
+          "thefactory-ui/web/icons/IconWarningTriangle",
+          "thefactory-ui/web/icons",
           "@renderer/utils/hideScrollStyle/hideScrollStyle",
           "@renderer/utils/hideScrollStyle"
         ]
@@ -5378,6 +5398,11 @@
         "dependencies": [
           "ReactNode",
           "StaticNavItemProps",
+          "thefactory-ui/web/NotificationBadge",
+          "thefactory-ui/web/SpinnerWithDot",
+          "thefactory-ui/web/Tooltip",
+          "thefactory-ui/web/getNotificationBadgeColorClass",
+          "thefactory-ui/web",
           "@renderer/hooks/useNotifications/useNotifications",
           "@renderer/hooks/useNotifications"
         ]
@@ -9305,6 +9330,13 @@
           "GroupNavItemProps",
           "thefactory-tools/ProjectsGroup",
           "thefactory-tools/ProjectSpec",
+          "thefactory-ui/web/NotificationBadge",
+          "thefactory-ui/web/SpinnerWithDot",
+          "thefactory-ui/web/getNotificationBadgeColorClass",
+          "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconFolder",
+          "thefactory-ui/web/icons/IconFolderOpen",
+          "thefactory-ui/web/icons",
           "@renderer/hooks/useNotifications/useNotifications",
           "@renderer/hooks/useNotifications"
         ]
@@ -10426,6 +10458,8 @@
         "path": "renderer/src/navigation/main/MainView.tsx",
         "dependencies": [
           "HTMLButtonElement",
+          "thefactory-ui/web/icons/IconMenu",
+          "thefactory-ui/web/icons",
           "@renderer/contexts/ProjectsGroupsContext/useProjectsGroups",
           "@renderer/contexts/ProjectsGroupsContext"
         ]
@@ -11322,6 +11356,11 @@
         "dependencies": [
           "ProjectNavItemProps",
           "thefactory-tools/ProjectSpec",
+          "thefactory-ui/web/NotificationBadge",
+          "thefactory-ui/web/SpinnerWithDot",
+          "thefactory-ui/web/Tooltip",
+          "thefactory-ui/web/getNotificationBadgeColorClass",
+          "thefactory-ui/web",
           "@renderer/screens/projects/projectIcons/renderProjectIcon",
           "@renderer/screens/projects/projectIcons",
           "@renderer/hooks/useNotifications/useNotifications",
@@ -12002,6 +12041,9 @@
           "MutableRefObject",
           "@renderer/hooks/useNotifications/useNotifications",
           "@renderer/hooks/useNotifications",
+          "thefactory-ui/web/icons/IconMenu",
+          "thefactory-ui/web/icons/IconWarningTriangle",
+          "thefactory-ui/web/icons",
           "@renderer/utils/hideScrollStyle/hideScrollStyle",
           "@renderer/utils/hideScrollStyle",
           "thefactory-tools/ProjectSpec"
@@ -12017,6 +12059,9 @@
           "SidebarProps",
           "@renderer/hooks/useNotifications/useNotifications",
           "@renderer/hooks/useNotifications",
+          "thefactory-ui/web/icons/IconMenu",
+          "thefactory-ui/web/icons/IconWarningTriangle",
+          "thefactory-ui/web/icons",
           "@renderer/utils/hideScrollStyle/hideScrollStyle",
           "@renderer/utils/hideScrollStyle"
         ]
@@ -12094,6 +12139,11 @@
         "dependencies": [
           "ReactNode",
           "StaticNavItemProps",
+          "thefactory-ui/web/NotificationBadge",
+          "thefactory-ui/web/SpinnerWithDot",
+          "thefactory-ui/web/Tooltip",
+          "thefactory-ui/web/getNotificationBadgeColorClass",
+          "thefactory-ui/web",
           "@renderer/hooks/useNotifications/useNotifications",
           "@renderer/hooks/useNotifications"
         ]

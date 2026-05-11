@@ -48,6 +48,7 @@
     "tailwind-merge": "^3.3.1",
     "thefactory-db": "1.0.6",
     "thefactory-tools": "file:../thefactory-tools",
+    "thefactory-ui": "file:../thefactory-ui",
     "uuid": "^13.0.0"
   },
   "devDependencies": {

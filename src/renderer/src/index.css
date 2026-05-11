@@ -36,6 +36,10 @@
 @import 'tailwindcss/utilities';
 @import 'tailwindcss/theme';
 
+/* thefactory-ui — appended after local imports so anything local wins until
+   the conversion drains. See docs/conversion-plan.md. */
+@import 'thefactory-ui/web/styles';
+
 /* Root layout: make the app fill the window and avoid unexpected margins */
 html,
 body,
