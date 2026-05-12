@@ -1899,6 +1899,11 @@
           "HTMLInputElement",
           "Set",
           "FC",
+          "thefactory-ui/web/icons/IconChevron",
+          "thefactory-ui/web/icons/IconDocument",
+          "thefactory-ui/web/icons/IconFolder",
+          "thefactory-ui/web/icons/IconFolderOpen",
+          "thefactory-ui/web/icons",
           "thefactory-tools/FileMeta"
         ]
       },
@@ -3819,13 +3824,17 @@
         "dependencies": [
           "MarkdownEditorProps",
           "FC",
-          "thefactory-tools/FileMeta"
+          "thefactory-tools/FileMeta",
+          "thefactory-ui/web/Markdown",
+          "thefactory-ui/web"
         ]
       },
       "MarkdownEditorProps": {
         "path": "src/renderer/src/components/files/MarkdownEditor.tsx",
         "dependencies": [
-          "thefactory-tools/FileMeta"
+          "thefactory-tools/FileMeta",
+          "thefactory-ui/web/Markdown",
+          "thefactory-ui/web"
         ]
       },
       "MarkdownMessage": {
@@ -8775,6 +8784,11 @@
           "HTMLInputElement",
           "Set",
           "FC",
+          "thefactory-ui/web/icons/IconChevron",
+          "thefactory-ui/web/icons/IconDocument",
+          "thefactory-ui/web/icons/IconFolder",
+          "thefactory-ui/web/icons/IconFolderOpen",
+          "thefactory-ui/web/icons",
           "thefactory-tools/FileMeta"
         ]
       },
@@ -10695,13 +10709,17 @@
         "dependencies": [
           "MarkdownEditorProps",
           "FC",
-          "thefactory-tools/FileMeta"
+          "thefactory-tools/FileMeta",
+          "thefactory-ui/web/Markdown",
+          "thefactory-ui/web"
         ]
       },
       "MarkdownEditorProps": {
         "path": "renderer/src/components/files/MarkdownEditor.tsx",
         "dependencies": [
-          "thefactory-tools/FileMeta"
+          "thefactory-tools/FileMeta",
+          "thefactory-ui/web/Markdown",
+          "thefactory-ui/web"
         ]
       },
       "MarkdownMessage": {

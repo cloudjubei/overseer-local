@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useUnsavedChanges } from '../../navigation/UnsavedChanges'
 import { useFiles } from '../../contexts/FilesContext'
 import { FileMeta } from 'thefactory-tools'
-import Markdown from '../ui/Markdown'
+import { Markdown } from 'thefactory-ui/web'
 
 export type MarkdownEditorProps = {
   file: FileMeta

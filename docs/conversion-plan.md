@@ -134,12 +134,14 @@ Split into three checkpoints because two of the heavier primitives (`FileMention
   - **`Modal contentClassName` restored** (UsageModal, ChatDynamicContextModal, **and the System Prompt modal** opened by the 2nd button in the chat sidebar header — same regression class, missed in the first pass): the prop was wholesale-dropped in Step 5c on the assumption the default `p-4 overflow-y-auto` body wrapper covered every case. These three modals all need full-bleed content (their first child supplies the padded gray background). Reintroduced `contentClassName?: string` on the package `Modal`; all three call sites now pass `contentClassName="!p-0"`. Default behaviour unchanged for the four `StoryCreateView` / `StoryEditView` / `FeatureCreateView` / `FeatureEditView` modals from Step 5c — they were genuinely fine without the prop.
   - **Icons lifted**: `IconBack`, `IconCode`, `IconCollection`, `IconNotAllowed`, `IconRefreshChat`, `IconScroll`, `IconStop` are now in `thefactory-ui/web/icons`. The mixed local-import workarounds in StoryDetailsView, GroupNavItem, ChatSidebarHeader, StatusIcon, ToolCallCard are gone — those files now import everything from the package barrel.
 
-#### Step 7 — Files
+#### Step 7 — Files _(shipped 2026-05-12)_
 
-- **Files:** [screens/FilesView.tsx](../src/renderer/src/screens/FilesView.tsx) plus any file-viewer / editor / search component under `screens/` or `components/`.
-- **Swap:** `Input` (the search box), `Button`, `Spinner`, `Alert`, the icons used by the file tree, `Markdown` (for `.md` preview if the viewer uses it).
-- **Compare:** tree expand/collapse, file-content rendering, search filtering, upload + delete actions.
-- **Risk:** `overseer-local`'s `MarkdownEditor` (the editable variant) has no `thefactory-ui` equivalent yet — keep it local for now. Note this in "Accepted divergences" so it's not forgotten.
+- **Implementation:** the actual Files surface in `overseer-local` is much smaller than the original plan suggested — no search box, no `Alert`/`Button`/`Spinner` in [FilesView.tsx](../src/renderer/src/screens/FilesView.tsx); only icons and a markdown previewer. Two files changed:
+  - [FilesView.tsx](../src/renderer/src/screens/FilesView.tsx): swapped `IconChevron`, `IconDocument`, `IconFolder`, `IconFolderOpen` to `thefactory-ui/web/icons`.
+  - [components/files/MarkdownEditor.tsx](../src/renderer/src/components/files/MarkdownEditor.tsx): swapped `Markdown` to `thefactory-ui/web`. `MarkdownEditor` itself stays local — it owns the edit state, unsaved-changes prompt, and write-back flow; the package just renders the preview half.
+- **Upstream:**
+  - Ported `IconDocument` into `thefactory-ui/src/web/icons/`.
+  - Added `allowHtml?: boolean` prop to `<Markdown>` — gates `rehype-raw` + `rehype-sanitize` (with a permissive schema for `className`, `target`, `rel`). The chat surface still uses the default `allowHtml={false}`; `MarkdownEditor` opts in. Added `rehype-raw` + `rehype-sanitize` to `thefactory-ui` dependencies.
 
 #### Step 8 — Git
 
