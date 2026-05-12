@@ -74,10 +74,7 @@ export function GitStashModal({ projectId, onRequestClose, onSuccess }: GitStash
           Keep staged files (keep-index)
         </label>
         
-        <div className="flex justify-end gap-2 mt-4">
-          <Button variant="secondary" onClick={onRequestClose} disabled={busy}>
-            Cancel
-          </Button>
+        <div className="flex justify-end mt-4">
           <Button variant="primary" onClick={handleStash} disabled={busy || !message.trim()}>
             Stash Changes
           </Button>

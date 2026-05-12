@@ -1,7 +1,5 @@
 import React from 'react'
-import SegmentedControl from '../components/ui/SegmentedControl'
-import { Button } from '../components/ui/Button'
-import Spinner from '../components/ui/Spinner'
+import { Button, Input, SegmentedControl, Spinner } from 'thefactory-ui/web'
 import TestResultsView from '../components/tests/TestResults'
 import CoverageReport from '../components/tests/CoverageReport'
 import { TestsProvider, useTests } from '../contexts/TestsContext'
@@ -11,7 +9,6 @@ import { useActiveProject } from '../contexts/ProjectContext'
 import { ChatSidebarPanel } from '../components/chat'
 import { ChatContext } from 'thefactory-tools'
 import { useAppSettings } from '../contexts/AppSettingsContext'
-import { Input } from '../components/ui/Input'
 
 function TestsInner() {
   const [activeTab, setActiveTab] = React.useState<'results' | 'e2e' | 'coverage'>('results')

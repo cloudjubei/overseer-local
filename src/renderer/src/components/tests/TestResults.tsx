@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { filesService } from '../../services/filesService'
-import Spinner from '../ui/Spinner'
+import { Spinner } from 'thefactory-ui/web'
 import { TestFailure, TestResult, TestsResult } from 'thefactory-tools'
 
 function CodeSnippet({

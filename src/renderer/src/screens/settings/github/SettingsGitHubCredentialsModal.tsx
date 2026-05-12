@@ -1,6 +1,5 @@
-import { Button } from '@renderer/components/ui/Button'
-import { Input } from '@renderer/components/ui/Input'
-import { Modal } from '@renderer/components/ui/Modal'
+import { Button, Input, Modal } from 'thefactory-ui/web'
+import { IconSave } from 'thefactory-ui/web/icons'
 import { useGitHubCredentials } from '@renderer/contexts/GitHubCredentialsContext'
 import React, { useEffect, useState } from 'react'
 
@@ -116,11 +115,14 @@ export default function SettingsGitHubCredentialsModal({
             Token is stored securely in the main process.
           </p>
         </div>
-        <div className="flex justify-end gap-2 pt-2">
-          <Button type="button" variant="outline" onClick={onRequestClose}>
-            Cancel
-          </Button>
-          <Button type="submit">Save</Button>
+        <div className="flex justify-end pt-2">
+          {isEdit ? (
+            <Button type="submit" variant="secondary" size="icon" title="Save" aria-label="Save">
+              <IconSave className="w-4 h-4" />
+            </Button>
+          ) : (
+            <Button type="submit">Add</Button>
+          )}
         </div>
       </form>
     </Modal>

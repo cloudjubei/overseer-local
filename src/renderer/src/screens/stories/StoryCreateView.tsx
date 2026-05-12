@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react'
 import StoryForm, { StoryFormValues } from '@renderer/components/stories/StoryForm'
-import { ConfirmDialog, Modal } from 'thefactory-ui/web'
+import { Button, ConfirmDialog, Modal } from 'thefactory-ui/web'
 import { useToast } from 'thefactory-ui/web'
 import { useStories } from '@renderer/contexts/StoriesContext'
 import { ChatContext, StoryCreateInput } from 'thefactory-tools'
@@ -70,24 +70,16 @@ export default function StoryCreateView({ onRequestClose }: { onRequestClose?: (
         initialFocusRef={titleRef as React.RefObject<HTMLElement>}
         footer={
           <div className="flex justify-end gap-2">
-            <button
-              type="button"
-              className="btn-secondary"
-              onClick={attemptClose}
-              disabled={submitting}
-            >
-              Cancel
-            </button>
-            <button
+            <Button
               type="submit"
-              className="btn"
               form={formId}
               disabled={submitting}
+              loading={submitting}
               aria-keyshortcuts="Control+Enter Meta+Enter"
               title="Cmd/Ctrl+Enter to submit"
             >
               Create Story
-            </button>
+            </Button>
           </div>
         }
       >

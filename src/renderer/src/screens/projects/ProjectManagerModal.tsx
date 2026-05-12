@@ -13,6 +13,7 @@ import {
   IconArrowRightMini,
   IconBack,
 } from '@renderer/components/ui/icons/Icons'
+import { IconSave } from 'thefactory-ui/web/icons'
 import {
   Select,
   SelectContent,
@@ -329,11 +330,6 @@ export default function ProjectManagerModal({
             <IconBack className="w-4 h-4" />
           </Button>
         )}
-        {(mode === 'create' || mode === 'edit') && (
-          <Button variant="secondary" onClick={() => setMode('list')}>
-            Cancel
-          </Button>
-        )}
       </div>
 
       {/* Right-side primary actions */}
@@ -348,9 +344,23 @@ export default function ProjectManagerModal({
             <IconPlus className="w-4 h-4" />
           </Button>
         )}
-        {(mode === 'create' || mode === 'edit') && (
+        {mode === 'create' && (
           <Button type="submit" form={formId} disabled={saving}>
-            {mode === 'create' ? 'Create' : 'Save'}
+            Create
+          </Button>
+        )}
+        {mode === 'edit' && (
+          <Button
+            type="submit"
+            form={formId}
+            variant="secondary"
+            size="icon"
+            disabled={saving}
+            loading={saving}
+            title="Save"
+            aria-label="Save"
+          >
+            <IconSave className="w-4 h-4" />
           </Button>
         )}
       </div>

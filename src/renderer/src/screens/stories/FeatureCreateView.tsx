@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import FeatureForm, { FeatureFormValues } from '@renderer/components/stories/FeatureForm'
 import { useToast } from 'thefactory-ui/web'
-import { ConfirmDialog, Modal } from 'thefactory-ui/web'
+import { Button, ConfirmDialog, Modal } from 'thefactory-ui/web'
 import { useStories } from '@renderer/contexts/StoriesContext'
 import { useActiveProject } from '@renderer/contexts/ProjectContext'
 import { ChatContext } from 'thefactory-tools'
@@ -237,24 +237,16 @@ export default function FeatureCreateView({
           <div className="flex justify-between gap-2">
             <span />
             <div className="flex justify-end gap-2">
-              <button
-                type="button"
-                className="btn-secondary"
-                onClick={attemptClose}
-                disabled={submitting}
-              >
-                Cancel
-              </button>
-              <button
+              <Button
                 type="submit"
-                className="btn"
                 form={formId}
                 disabled={submitting || !selectedStoryId}
+                loading={submitting}
                 aria-keyshortcuts="Control+Enter Meta+Enter"
                 title="Cmd/Ctrl+Enter to submit"
               >
-                Save Changes
-              </button>
+                Create Feature
+              </Button>
             </div>
           </div>
         }

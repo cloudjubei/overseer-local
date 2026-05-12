@@ -9,6 +9,7 @@ import {
   IconEdit,
   IconPlus,
 } from '@renderer/components/ui/icons/Icons'
+import { IconSave } from 'thefactory-ui/web/icons'
 import { Switch } from '@renderer/components/ui/Switch'
 import {
   Select,
@@ -62,13 +63,23 @@ function GroupNameModal({
             placeholder="New group"
           />
         </div>
-        <div className="flex justify-end gap-2 mt-1">
-          <Button variant="secondary" type="button" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button type="submit" disabled={!name.trim()}>
-            {confirmText}
-          </Button>
+        <div className="flex justify-end mt-1">
+          {confirmText === 'Save' ? (
+            <Button
+              type="submit"
+              variant="secondary"
+              size="icon"
+              disabled={!name.trim()}
+              title="Save"
+              aria-label="Save"
+            >
+              <IconSave className="w-4 h-4" />
+            </Button>
+          ) : (
+            <Button type="submit" disabled={!name.trim()}>
+              {confirmText}
+            </Button>
+          )}
         </div>
       </form>
     </Modal>

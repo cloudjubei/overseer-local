@@ -1,5 +1,5 @@
-import { Button } from '../../../components/ui/Button'
-import { IconEdit, IconDelete, IconPlus } from '../../../components/ui/icons/Icons'
+import { Button } from 'thefactory-ui/web'
+import { IconDelete, IconEdit, IconPlus } from 'thefactory-ui/web/icons'
 import { useLLMConfig } from '../../../contexts/LLMConfigContext'
 import { useNavigator } from '../../../navigation/Navigator'
 

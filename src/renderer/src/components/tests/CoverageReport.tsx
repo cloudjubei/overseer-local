@@ -2,9 +2,9 @@ import React from 'react'
 import { useNavigator } from '../../navigation/Navigator'
 import { useStories } from '../../contexts/StoriesContext'
 import { useActiveProject } from '../../contexts/ProjectContext'
-import { Button } from '../ui/Button'
+import { Button } from 'thefactory-ui/web'
 import { CoverageFileStats, CoverageResult } from 'thefactory-tools'
-import { IconDoubleUp } from '../ui/icons/Icons'
+import { IconDoubleUp } from 'thefactory-ui/web/icons'
 
 function pctColor(p: number) {
   if (p >= 90) return 'text-green-700 dark:text-green-300'

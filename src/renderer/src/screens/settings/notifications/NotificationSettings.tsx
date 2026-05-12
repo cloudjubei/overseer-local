@@ -5,7 +5,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../../../components/ui/Select'
-import { Switch } from '../../../components/ui/Switch'
+import { Switch } from 'thefactory-ui/web'
 import { useNotifications } from '../../../hooks/useNotifications'
 import { useProjectSettings } from '../../../hooks/useProjectSettings'
 import { useAppSettings } from '../../../contexts/AppSettingsContext'

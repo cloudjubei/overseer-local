@@ -79,9 +79,6 @@ export default function GitCommitModal({
         {stagedCount} file(s) staged
       </div>
       <div className="flex items-center gap-2">
-        <Button onClick={onRequestClose} variant="secondary" disabled={busy}>
-          Cancel
-        </Button>
         <Button
           onClick={onCommit}
           loading={busy}

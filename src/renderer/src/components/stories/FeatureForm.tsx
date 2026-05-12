@@ -5,7 +5,7 @@ import { DependencySelector } from './DependencySelector'
 import DependencyBullet from './DependencyBullet'
 import { FileSelector } from '@renderer/components/ui/FileSelector'
 import ContextFileChip from './ContextFileChip'
-import { IconDelete, IconPlus } from 'thefactory-ui/web/icons'
+import { IconDelete, IconPlus, IconSave } from 'thefactory-ui/web/icons'
 import FileMentionsTextarea from '@renderer/components/ui/FileMentionsTextarea'
 import { useStories } from '../../contexts/StoriesContext'
 import { Button, Modal } from 'thefactory-ui/web'
@@ -395,23 +395,36 @@ export default function FeatureForm({
             </Button>
           ) : null}
           <div className="flex justify-end gap-2 flex-1">
-            <button
+            <Button
               type="button"
-              className="btn-secondary"
+              variant="secondary"
               onClick={() => onCancel()}
               disabled={submitting}
             >
               Cancel
-            </button>
-            <button
-              type="submit"
-              className="btn"
-              disabled={!canSubmit}
-              aria-keyshortcuts="Control+Enter Meta+Enter"
-              title="Cmd/Ctrl+Enter to submit"
-            >
-              {isCreate ? 'Create Feature' : 'Save Changes'}
-            </button>
+            </Button>
+            {isCreate ? (
+              <Button
+                type="submit"
+                disabled={!canSubmit}
+                aria-keyshortcuts="Control+Enter Meta+Enter"
+                title="Cmd/Ctrl+Enter to submit"
+              >
+                Create Feature
+              </Button>
+            ) : (
+              <Button
+                type="submit"
+                variant="secondary"
+                size="icon"
+                disabled={!canSubmit}
+                aria-keyshortcuts="Control+Enter Meta+Enter"
+                title="Save (Cmd/Ctrl+Enter)"
+                aria-label="Save"
+              >
+                <IconSave className="w-4 h-4" />
+              </Button>
+            )}
           </div>
         </div>
       )}

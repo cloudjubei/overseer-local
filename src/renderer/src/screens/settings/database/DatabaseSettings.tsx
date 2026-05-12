@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Button } from '../../../components/ui/Button'
+import { Button } from 'thefactory-ui/web'
 import { useAppSettings } from '../../../contexts/AppSettingsContext'
 import { dbService } from '../../../services/dbService'
 import { documentIngestionService } from '../../../services/documentIngestionService'

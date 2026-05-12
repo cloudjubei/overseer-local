@@ -1,5 +1,5 @@
 import { useAppSettings } from '../../../contexts/AppSettingsContext'
-import { Switch } from '../../../components/ui/Switch'
+import { Switch } from 'thefactory-ui/web'
 
 export default function DeveloperSettings() {
   const { appSettings, setUserPreferences } = useAppSettings()

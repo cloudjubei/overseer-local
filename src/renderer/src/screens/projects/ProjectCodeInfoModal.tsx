@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Modal } from '@renderer/components/ui/Modal'
 import { Button } from '@renderer/components/ui/Button'
+import { IconSave } from 'thefactory-ui/web/icons'
 import {
   Select,
   SelectContent,
@@ -128,12 +129,16 @@ export function ProjectCodeInfoModal({ codeInfo, onSave, onClose }: ProjectCodeI
           </Select>
         </div>
       </div>
-      <div className="flex justify-end gap-2 mt-4">
-        <Button variant="secondary" onClick={onClose}>
-          Cancel
-        </Button>
-        <Button onClick={handleSave} disabled={!(language && framework && testFramework)}>
-          Save
+      <div className="flex justify-end mt-4">
+        <Button
+          onClick={handleSave}
+          variant="secondary"
+          size="icon"
+          disabled={!(language && framework && testFramework)}
+          title="Save"
+          aria-label="Save"
+        >
+          <IconSave className="w-4 h-4" />
         </Button>
       </div>
     </Modal>

@@ -5,7 +5,8 @@ import { useActiveProject, useProjectContext } from '../contexts/ProjectContext'
 import { dbService } from '../services/dbService'
 import type { Entity, EntityInput } from 'thefactory-db'
 import { useNavigator } from '../navigation/Navigator'
-import { Switch } from '../components/ui/Switch'
+import { Button, Modal, SegmentedControl, Switch } from 'thefactory-ui/web'
+import { IconSave } from 'thefactory-ui/web/icons'
 
 import type {
   HoverInfo,
@@ -72,26 +73,17 @@ function TimelineToolbar({
     <div className="shrink-0 border-b border-default p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-raised">
       <div className="flex items-center gap-3">
         <h2 className="text-lg font-semibold tracking-tight">Timeline</h2>
-        <div className="flex items-center bg-base border border-subtle rounded-md p-1">
-          <button
-            onClick={() => setZoom('day')}
-            className={`px-3 py-1 text-xs font-medium rounded-sm ${zoom === 'day' ? 'bg-accent-primary text-inverted shadow-sm' : 'text-muted hover:text-primary hover:bg-raised'}`}
-          >
-            Day
-          </button>
-          <button
-            onClick={() => setZoom('week')}
-            className={`px-3 py-1 text-xs font-medium rounded-sm ${zoom === 'week' ? 'bg-accent-primary text-inverted shadow-sm' : 'text-muted hover:text-primary hover:bg-raised'}`}
-          >
-            Week
-          </button>
-          <button
-            onClick={() => setZoom('month')}
-            className={`px-3 py-1 text-xs font-medium rounded-sm ${zoom === 'month' ? 'bg-accent-primary text-inverted shadow-sm' : 'text-muted hover:text-primary hover:bg-raised'}`}
-          >
-            Month
-          </button>
-        </div>
+        <SegmentedControl
+          size="sm"
+          ariaLabel="Timeline zoom"
+          value={zoom}
+          onChange={(v) => setZoom(v as typeof zoom)}
+          options={[
+            { value: 'day', label: 'Day' },
+            { value: 'week', label: 'Week' },
+            { value: 'month', label: 'Month' },
+          ]}
+        />
       </div>
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
@@ -104,12 +96,9 @@ function TimelineToolbar({
             onCheckedChange={setShowAllProjects}
           />
         </div>
-        <button
-          onClick={() => setIsAdding(!isAdding)}
-          className="px-3 py-1.5 text-sm font-medium border border-default rounded bg-base hover:bg-raised shadow-sm"
-        >
+        <Button variant="secondary" size="sm" onClick={() => setIsAdding(!isAdding)}>
           {isAdding ? 'Cancel' : 'Add label…'}
-        </button>
+        </Button>
       </div>
     </div>
   )
@@ -189,13 +178,9 @@ function AddLabelForm({
           </select>
         </div>
         <div className="sm:col-span-1">
-          <button
-            type="submit"
-            className="h-9 w-full rounded bg-accent-primary text-inverted hover:bg-accent-hover text-sm font-medium focus:outline-none focus-visible:ring-2 ring-offset-1"
-            disabled={loading}
-          >
-            Save
-          </button>
+          <Button type="submit" variant="primary" disabled={loading} className="w-full">
+            Add
+          </Button>
         </div>
       </div>
     </form>
@@ -944,18 +929,13 @@ export default function ProjectTimelineView() {
       />
 
       {editingId ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/30" onClick={closeEdit} />
-          <form
-            onSubmit={onSaveEdit}
-            className="relative z-10 w-[520px] max-w-[95vw] rounded-md border border-default bg-base shadow-lg p-4 space-y-3"
-          >
-            <div className="text-sm font-medium text-primary">Edit timeline label</div>
+        <Modal isOpen={true} onClose={closeEdit} title="Edit timeline label" size="lg">
+          <form onSubmit={onSaveEdit} className="space-y-3">
             <div className="grid gap-2 sm:grid-cols-5 items-end">
               <div className="flex flex-col gap-1 sm:col-span-2">
-                <label className="text-xs text-muted">Row label</label>
+                <label className="text-xs text-(--text-muted)">Row label</label>
                 <input
-                  className="h-9 rounded border border-default bg-raised px-2 text-sm text-primary focus:outline-none focus-visible:ring-2 ring-offset-1"
+                  className="h-9 rounded border border-(--border-default) bg-(--surface-raised) px-2 text-sm text-(--text-primary) focus:outline-none focus-visible:ring-2 ring-offset-1"
                   value={editLabel}
                   onChange={(e) => setEditLabel(e.target.value)}
                   placeholder="e.g. Milestone A"
@@ -963,28 +943,28 @@ export default function ProjectTimelineView() {
                 />
               </div>
               <div className="flex flex-col gap-1 sm:col-span-3">
-                <label className="text-xs text-muted">Description (optional)</label>
+                <label className="text-xs text-(--text-muted)">Description (optional)</label>
                 <input
-                  className="h-9 rounded border border-default bg-raised px-2 text-sm text-primary focus:outline-none focus-visible:ring-2 ring-offset-1"
+                  className="h-9 rounded border border-(--border-default) bg-(--surface-raised) px-2 text-sm text-(--text-primary) focus:outline-none focus-visible:ring-2 ring-offset-1"
                   value={editDescription}
                   onChange={(e) => setEditDescription(e.target.value)}
                   placeholder="Short note"
                 />
               </div>
               <div className="flex flex-col gap-1 sm:col-span-2">
-                <label className="text-xs text-muted">When</label>
+                <label className="text-xs text-(--text-muted)">When</label>
                 <input
                   type="datetime-local"
-                  className="h-9 rounded border border-default bg-raised px-2 text-sm text-primary focus:outline-none focus-visible:ring-2 ring-offset-1"
+                  className="h-9 rounded border border-(--border-default) bg-(--surface-raised) px-2 text-sm text-(--text-primary) focus:outline-none focus-visible:ring-2 ring-offset-1"
                   value={editTimestamp}
                   onChange={(e) => setEditTimestamp(e.target.value)}
                   required
                 />
               </div>
               <div className="flex flex-col gap-1 sm:col-span-2">
-                <label className="text-xs text-muted">Scope</label>
+                <label className="text-xs text-(--text-muted)">Scope</label>
                 <select
-                  className="h-9 rounded border border-default bg-raised px-2 text-sm text-primary focus:outline-none focus-visible:ring-2 ring-offset-1"
+                  className="h-9 rounded border border-(--border-default) bg-(--surface-raised) px-2 text-sm text-(--text-primary) focus:outline-none focus-visible:ring-2 ring-offset-1"
                   value={editScope}
                   onChange={(e) => setEditScope(e.target.value as any)}
                 >
@@ -993,34 +973,26 @@ export default function ProjectTimelineView() {
                 </select>
               </div>
               <div className="sm:col-span-1 flex justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={onDeleteEdit}
-                  className="h-9 px-3 text-sm rounded border border-subtle bg-raised text-red-600 hover:bg-base"
-                >
+                <Button type="button" variant="danger" onClick={onDeleteEdit} disabled={savingEdit}>
                   Delete
-                </button>
+                </Button>
               </div>
             </div>
-            <div className="flex justify-end gap-2 pt-2">
-              <button
-                type="button"
-                onClick={closeEdit}
-                className="px-3 py-1.5 text-sm rounded border border-subtle bg-raised hover:bg-base text-primary"
-                disabled={savingEdit}
-              >
-                Cancel
-              </button>
-              <button
+            <div className="flex justify-end pt-2">
+              <Button
                 type="submit"
-                className="px-3 py-1.5 text-sm rounded bg-accent-primary text-inverted hover:bg-accent-hover focus:outline-none focus-visible:ring-2 ring-offset-1 disabled:opacity-60"
+                variant="secondary"
+                size="icon"
+                loading={savingEdit}
                 disabled={savingEdit}
+                title="Save"
+                aria-label="Save"
               >
-                {savingEdit ? 'Saving…' : 'Save'}
-              </button>
+                <IconSave className="w-4 h-4" />
+              </Button>
             </div>
           </form>
-        </div>
+        </Modal>
       ) : null}
     </div>
   )

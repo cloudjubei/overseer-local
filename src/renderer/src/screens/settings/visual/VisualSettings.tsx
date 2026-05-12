@@ -1,5 +1,5 @@
 import { useCallback } from 'react'
-import { Button } from '../../../components/ui/Button'
+import { Button } from 'thefactory-ui/web'
 import { useTheme, type Theme } from '../../../hooks/useTheme'
 import { useAppSettings } from '../../../contexts/AppSettingsContext'
 import { ShortcutsConfig, ShortcutsModifier } from 'src/types/settings'

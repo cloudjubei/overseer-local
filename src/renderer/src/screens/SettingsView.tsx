@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import CollapsibleSidebar from '../components/ui/CollapsibleSidebar'
+import { CollapsibleSidebar } from 'thefactory-ui/web'
 
 // Subviews
 import VisualSettings from './settings/visual/VisualSettings'
@@ -9,14 +9,14 @@ import GitHubSettings from './settings/github/GitHubSettings'
 import WebSearchSettings from './settings/websearch/WebSearchSettings'
 import DatabaseSettings from './settings/database/DatabaseSettings'
 import {
+  IconBell,
+  IconCpu,
+  IconDatabase,
+  IconGitHub,
   IconPalette,
   IconRobot,
-  IconBell,
-  IconGitHub,
   IconSearch,
-  IconDatabase,
-  IconCpu,
-} from '../components/ui/icons/Icons'
+} from 'thefactory-ui/web/icons'
 
 import DeveloperSettings from './settings/developer/DeveloperSettings'
 

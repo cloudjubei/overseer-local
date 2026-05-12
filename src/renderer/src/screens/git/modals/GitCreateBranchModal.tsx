@@ -77,10 +77,7 @@ export function GitCreateBranchModal({
           Checkout after create
         </label>
         {error && <div className="text-xs text-red-600 dark:text-red-400">{error}</div>}
-        <div className="flex justify-end gap-2 mt-4">
-          <Button variant="secondary" onClick={onRequestClose} disabled={busy}>
-            Cancel
-          </Button>
+        <div className="flex justify-end mt-4">
           <Button variant="primary" onClick={handleCreate} disabled={busy || !name.trim()}>
             Create Branch
           </Button>

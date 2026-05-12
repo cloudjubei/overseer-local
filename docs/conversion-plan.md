@@ -22,6 +22,7 @@ When this conversion finishes, `thefactory-overseer-web` rebuilds against a corr
 
 ## A. Open questions
 
+- **Dead shorthand utility classes in [ProjectTimelineView.tsx](../src/renderer/src/screens/ProjectTimelineView.tsx).** The file uses ~40 instances of `bg-base`, `bg-raised`, `text-primary`, `text-muted`, `text-inverted`, `border-default`, `border-subtle`, `bg-accent-primary`, `bg-accent-hover` — none of which exist as compiled CSS classes in the built bundle. They silently fall through to no styling; the screen reads as fine only because the parent surface already has the page background. Surfaced when the edit-label popup (`fixed inset-0` over a `bg-black/30` backdrop) had no opaque background because `bg-base` resolved to nothing. **Patched the edit popup** by converting it to the package `<Modal>` (which carries its own opaque panel chrome) and rewriting the form's input/select classes to the `bg-(--surface-raised) border-(--border-default) text-(--text-primary)` Tailwind v4 arb-value form. **Open work:** sweep the rest of `ProjectTimelineView.tsx` and either rewrite each dead class to the arb-value form or — cleaner — replace them with package `<Surface>` / `<Field>` primitives where it makes sense.
 - **Why does the package's `tokens.css` `:root` block only partially merge into the consumer's CSS?** Surfaced during Step 8b verification: the DiffViewer toolbar referenced `bg-(--surface-muted)` but the variable was missing from the final compiled CSS bundle even though the package's `tokens.css` declares it. Patched for now by adding `--surface-muted` (and dark-mode value) to `src/renderer/src/styles/design-tokens.css`. Audited the package's runtime references — only `--surface-muted` was both used and missing; `--accent-secondary` is referenced from a JS class string but isn't declared in the package's tokens either, so it's a pre-existing dangling reference. **Open work:** trace whether Tailwind v4's `@import 'tailwindcss'` (which sits between the local `@import './styles/design-tokens.css'` and `@import 'thefactory-ui/web/styles'` in [index.css](../src/renderer/src/index.css)) is silently dropping the package's `:root` declarations that don't overlap with the local block's keys. Resolving this lets us delete the local `design-tokens.css` outright in Step 14 instead of forwarding every package token by hand.
 
 ---
@@ -189,33 +190,27 @@ The Git surface is ~5000 LoC across 26 files. Every primitive it touches (`Butto
 - **Implementation:** swapped `Button`, `Spinner`, `Tooltip` to `thefactory-ui/web` in [MergeConflictResolver.tsx](../src/renderer/src/screens/git/mergeConflict/MergeConflictResolver.tsx) (1099 lines, single file). `useToast` was already on the package. No new `ConfirmDialog` needed — the screen's discard flows are inline buttons, not modals.
 - **Inputs left local:** the toolbar checkboxes (Show context panes / Wrap / Ignore WS / Normalize EOL), the `<select>` for "Both order", the file-filter `<input>`, and the finalize-merge-message `<input>` already carry explicit border + bg classes that read correctly. None of them looked broken during a sweep of the screen, so they stay as-is rather than getting wrapped in `<Input>` / `<Select>` for the sake of it.
 
-#### Step 9 — Tests
+#### Step 9 — Tests _(shipped 2026-05-12)_
 
-- **Files:** [screens/TestsView.tsx](../src/renderer/src/screens/TestsView.tsx) plus any helper components.
-- **Swap:** `SegmentedControl` (tabs), `Button`, `Surface`, `Input` (e2e config-path field), `Alert`.
-- **Compare:** tab switching is instant, abort works, per-file result rows show stack frames the same way, coverage report colors match.
-- **Risk:** low — Tests is a tight screen.
+- **Implementation:** swapped `SegmentedControl`, `Button`, `Spinner`, `Input` (in [TestsView.tsx](../src/renderer/src/screens/TestsView.tsx)); `Spinner` (in [TestResults.tsx](../src/renderer/src/components/tests/TestResults.tsx)); `Button` + `IconDoubleUp` (in [CoverageReport.tsx](../src/renderer/src/components/tests/CoverageReport.tsx)). No `Alert` or `Surface` used in this screen — the original plan was over-specified.
 
-#### Step 10 — Tools
+#### Step 10 — Tools _(shipped 2026-05-12 — no-op)_
 
-- **Files:** [screens/ToolsView.tsx](../src/renderer/src/screens/ToolsView.tsx).
-- **Swap:** `Input` (search), `Button`, `Surface`, `Select`, `Switch`, `Field`, `Textarea`.
-- **Compare:** grouped tool list, per-parameter schema fields, execute + result rendering.
-- **Risk:** low.
+- **Implementation:** [ToolsView.tsx](../src/renderer/src/screens/ToolsView.tsx) doesn't import any local UI primitives. The grouped tool list / per-parameter inputs / execute button are all raw HTML in this screen. Nothing to migrate; recorded for completeness so the plan reads consistently.
 
-#### Step 11 — Settings
+#### Step 11 — Settings _(shipped 2026-05-12)_
 
-- **Files:** [screens/SettingsView.tsx](../src/renderer/src/screens/SettingsView.tsx) plus every subfolder under [screens/settings/](../src/renderer/src/screens/settings/) (visual / llms / notifications / github / websearch / database / developer).
-- **Swap:** `CollapsibleSidebar` (the settings nav), `Field`, `Input`, `Select`, `Switch`, `Button`, `Surface`, color-picker / toggles in the visual panel.
-- **Compare:** each category renders, saves, and survives a reload; the sidebar's collapsed/expanded state persists in `localStorage` under the same key as today.
-- **Risk:** there are seven category sub-pages, each independent — split into per-category PRs if any single one gets thick.
+- **Implementation:** swapped `CollapsibleSidebar` + 7 settings-nav icons in [SettingsView.tsx](../src/renderer/src/screens/SettingsView.tsx). Sub-page swaps: `Button` in [DatabaseSettings](../src/renderer/src/screens/settings/database/DatabaseSettings.tsx), `Switch` in [DeveloperSettings](../src/renderer/src/screens/settings/developer/DeveloperSettings.tsx), `Button` + `IconEdit`/`IconDelete`/`IconPlus` in [GitHubSettings](../src/renderer/src/screens/settings/github/GitHubSettings.tsx), `Button` in [VisualSettings](../src/renderer/src/screens/settings/visual/VisualSettings.tsx), `Button` + `Input` + `Modal` in [SettingsGitHubCredentialsModal](../src/renderer/src/screens/settings/github/SettingsGitHubCredentialsModal.tsx), `Button` + 3 icons in [LLMSettings](../src/renderer/src/screens/settings/llms/LLMSettings.tsx), `Switch` in [NotificationSettings](../src/renderer/src/screens/settings/notifications/NotificationSettings.tsx), `Button` + `Input` + `Modal` + `useToast` in [SettingsLLMConfigModal](../src/renderer/src/screens/settings/llms/SettingsLLMConfigModal.tsx).
+- **Upstream:** ported four icons into `thefactory-ui/web/icons` — `IconPalette`, `IconGitHub`, `IconDatabase`, `IconCpu` (the four settings-nav glyphs that weren't already on the package). The other three (`IconRobot`, `IconBell`, `IconSearch`) were already there.
+- **Deferred swap — Radix `Select` composite.** [NotificationSettings](../src/renderer/src/screens/settings/notifications/NotificationSettings.tsx) and [SettingsLLMConfigModal](../src/renderer/src/screens/settings/llms/SettingsLLMConfigModal.tsx) still import `Select` / `SelectContent` / `SelectItem` / `SelectTrigger` / `SelectValue` from the local Radix-backed [components/ui/Select.tsx](../src/renderer/src/components/ui/Select.tsx). The package's current `Select` is a thin native-`<select>` wrapper with a totally different API. In-kind swap would be a regression. Documented in section D below; lift to the package when a second consumer needs the rich version.
 
-#### Step 12 — Timeline
+#### Step 12 — Timeline _(shipped 2026-05-12)_
 
-- **Files:** [screens/ProjectTimelineView.tsx](../src/renderer/src/screens/ProjectTimelineView.tsx) and everything under [screens/projectTimeline/](../src/renderer/src/screens/projectTimeline/).
-- **Swap:** `SegmentedControl` (Day / Week / Month), `Switch` (All projects toggle), `Button`, `Tooltip`. The `TimelineHoverCard` is bespoke — leave it; just swap the primitives it uses inside.
-- **Compare:** the Gantt grid renders the same number of columns at each zoom, the year strip stays in sync with horizontal scroll, hover surfaces the right card, label create/edit through `dbService` still works (this path doesn't touch `thefactory-ui` and stays local).
-- **Risk:** the timeline is the largest single screen (~1000 lines). Don't try to refactor it during the migration; just swap primitives.
+- **Implementation:** [ProjectTimelineView.tsx](../src/renderer/src/screens/ProjectTimelineView.tsx) now imports `Switch`, `SegmentedControl`, and `Button` from `thefactory-ui/web`. The three helper files under [projectTimeline/](../src/renderer/src/screens/projectTimeline/) use only raw HTML for the time axis, Gantt rows, and the bespoke hover card — no swaps needed there.
+- **Polish surfaced during verification (same day):**
+  - **Day / Week / Month zoom toggle** was a hand-rolled triple-`<button>` cluster with `bg-accent-primary`/`text-muted` classes. Replaced with the package `<SegmentedControl size="sm">` so it matches every other tab-pill in the app (Stories list, Chat toggles, MarkdownEditor pane switch).
+  - **"Add label…" toggle** was a raw `<button>` with `bg-base hover:bg-raised`. Replaced with `<Button variant="secondary" size="sm">` so the surface, border, and hover states match standard buttons.
+  - **"Save" button** in the AddLabelForm — same rule, swapped from raw `<button>` with `bg-accent-primary` to `<Button variant="primary">` so primary-action geometry is uniform across the app. Form `<input>`s left as raw HTML since their styling already mirrors the package's `<Input>` and wrapping each in the primitive adds no visible polish here.
 
 ---
 
@@ -240,6 +235,19 @@ The Git surface is ~5000 LoC across 26 files. Every primitive it touches (`Butto
 
 ---
 
+## C.2 App-wide convention: "Save" actions are icon-only
+
+_2026-05-12._ Convention established when standardising the timeline. **Anywhere a button literally commits an edit-in-place ("Save"), it renders as `<Button variant="secondary" size="icon">` with the `IconSave` glyph + `aria-label="Save"` + `title="Save"` (and `loading={inFlight}` while saving).** This matches the `MarkdownEditor` shell shipped in Step 7.
+
+**Exceptions** — buttons that look like "save" but are conceptually a different action keep a text label:
+
+- **Create / Add flows** stay text: `Create Story`, `Create Feature`, `Add` (timeline label, GitHub-credentials modal, LLM-config modal), `Create` (project manager). When the action mints a new record, the affordance reads as a verb, not the floppy.
+- **Dual-mode modals** branch on their `mode` / `isEdit` flag: add-mode renders `<Button>Add</Button>`, edit-mode renders the icon-only Save. Pattern used in [SettingsGitHubCredentialsModal](../src/renderer/src/screens/settings/github/SettingsGitHubCredentialsModal.tsx), [SettingsLLMConfigModal](../src/renderer/src/screens/settings/llms/SettingsLLMConfigModal.tsx), [ProjectManagerModal](../src/renderer/src/screens/projects/ProjectManagerModal.tsx), [ProjectGroupsEditor's GroupNameModal](../src/renderer/src/screens/projects/ProjectGroupsEditor.tsx) (branches on the `confirmText` prop), [FeatureForm](../src/renderer/src/components/stories/FeatureForm.tsx) (branches on `isCreate`).
+- **The timeline's `AddLabelForm` Save button was renamed to `Add`** (the form creates a label, doesn't save an existing one).
+- **Modal Cancel buttons are removed entirely.** _2026-05-12 sweep._ The package `<Modal>` always renders an X close button (top right) and supports overlay-click dismissal — explicit "Cancel" buttons in modal footers are redundant chrome. Footer Cancel removed from: StoryCreate/EditView, FeatureCreate/EditView, SettingsGitHubCredentialsModal, SettingsLLMConfigModal, GitCommit/CreateBranch/CheckoutRemote/Stash/MergeModal, ProjectManagerModal, ProjectCodeInfoModal, ProjectGroupsEditor's GroupNameModal, ProjectTimelineView's edit-label modal. **Inline toggle Cancel buttons** stay (they swap a panel back to a default state, not dismiss a modal) — found in `LiveDataView`'s add-provider form toggle and `ProjectTimelineView`'s "Add label…" header toggle.
+
+Sweep landed across [StoryCreateView](../src/renderer/src/screens/stories/StoryCreateView.tsx), [StoryEditView](../src/renderer/src/screens/stories/StoryEditView.tsx), [FeatureCreateView](../src/renderer/src/screens/stories/FeatureCreateView.tsx) (note: the prior "Save Changes" label here was incorrect — the view creates a feature; corrected to "Create Feature"), [FeatureEditView](../src/renderer/src/screens/stories/FeatureEditView.tsx), [FeatureForm](../src/renderer/src/components/stories/FeatureForm.tsx) (branches on `isCreate`), [SettingsGitHubCredentialsModal](../src/renderer/src/screens/settings/github/SettingsGitHubCredentialsModal.tsx), [SettingsLLMConfigModal](../src/renderer/src/screens/settings/llms/SettingsLLMConfigModal.tsx), [ProjectManagerModal](../src/renderer/src/screens/projects/ProjectManagerModal.tsx) (Create stays text; Save branches to icon), [ProjectGroupsEditor's GroupNameModal](../src/renderer/src/screens/projects/ProjectGroupsEditor.tsx) (branches on `confirmText === 'Save'`), [ProjectTimelineView's per-row edit save + AddLabelForm Add](../src/renderer/src/screens/ProjectTimelineView.tsx). All the raw `<button className="btn">` / `<button className="btn-secondary">` pairs encountered in these surfaces were also flipped to the package `<Button>` primitive so Cancel + Save geometry is uniform.
+
 ## C. Accepted divergences
 
 Record here, with date, anything the user explicitly accepts as a deliberate difference between the old local component and the new `thefactory-ui` one.
@@ -250,7 +258,7 @@ Record here, with date, anything the user explicitly accepts as a deliberate dif
 
 Components whose `thefactory-ui` equivalent is API-incompatible or feature-incomplete enough that an in-kind swap would be a regression. Each entry, when added, lists why and what needs to happen before we can swap. Items get scheduled into specific Steps above as soon as they have a concrete plan.
 
-_(empty — `RichText` is now Step 5d, `useToast/ToastProvider` is Step 5e, `FileSelector` is Step 6a, `FileMentionsTextarea` is Step 6b.)_
+- **Radix `Select` composite (`Select` / `SelectContent` / `SelectItem` / `SelectTrigger` / `SelectValue`).** Two consumers ([NotificationSettings](../src/renderer/src/screens/settings/notifications/NotificationSettings.tsx), [SettingsLLMConfigModal](../src/renderer/src/screens/settings/llms/SettingsLLMConfigModal.tsx)) need the Radix-backed rich popover (custom item rendering, separate trigger/value). The package only ships a thin native `<select>` wrapper. Lift the Radix composite into `thefactory-ui` (likely as `SelectRoot` / `SelectMenu` to avoid clashing with the existing `Select`) when a third consumer surfaces or when Step 13 cleanup wants to delete the local file.
 
 ---
 

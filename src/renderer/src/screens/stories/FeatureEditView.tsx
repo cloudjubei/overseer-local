@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Button, ConfirmDialog, Modal } from 'thefactory-ui/web'
-import { IconDelete } from 'thefactory-ui/web/icons'
+import { IconDelete, IconSave } from 'thefactory-ui/web/icons'
 import { useToast } from 'thefactory-ui/web'
 import type { ChatContext, Feature } from 'thefactory-tools'
 import { useStories } from '@renderer/contexts/StoriesContext'
@@ -117,24 +117,19 @@ export default function FeatureEditView({
               </Button>
             )}
             <div className="flex justify-end gap-2">
-              <button
-                type="button"
-                className="btn-secondary"
-                onClick={attemptClose}
-                disabled={submitting}
-              >
-                Cancel
-              </button>
-              <button
+              <Button
                 type="submit"
-                className="btn"
                 form={formId}
+                variant="secondary"
+                size="icon"
                 disabled={submitting}
+                loading={submitting}
                 aria-keyshortcuts="Control+Enter Meta+Enter"
-                title="Cmd/Ctrl+Enter to submit"
+                title="Save (Cmd/Ctrl+Enter)"
+                aria-label="Save"
               >
-                Save Changes
-              </button>
+                <IconSave className="w-4 h-4" />
+              </Button>
             </div>
           </div>
         }

@@ -1112,7 +1112,11 @@
         "path": "src/renderer/src/components/tests/CoverageReport.tsx",
         "dependencies": [
           "thefactory-tools/CoverageFileStats",
-          "thefactory-tools/CoverageResult"
+          "thefactory-tools/CoverageResult",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconDoubleUp",
+          "thefactory-ui/web/icons"
         ]
       },
       "CpuUsage": {
@@ -1162,7 +1166,9 @@
         "path": "src/renderer/src/screens/settings/database/DatabaseSettings.tsx",
         "dependencies": [
           "Button",
-          "react/useState"
+          "react/useState",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web"
         ]
       },
       "datesPrompt": {
@@ -1255,7 +1261,9 @@
       "DeveloperSettings": {
         "path": "src/renderer/src/screens/settings/developer/DeveloperSettings.tsx",
         "dependencies": [
-          "Switch"
+          "Switch",
+          "thefactory-ui/web/Switch",
+          "thefactory-ui/web"
         ]
       },
       "diagnosticsManager": {
@@ -1947,8 +1955,12 @@
         "path": "src/renderer/src/components/tests/CoverageReport.tsx",
         "dependencies": [
           "Seg",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web",
           "thefactory-tools/CoverageFileStats",
-          "thefactory-tools/CoverageResult"
+          "thefactory-tools/CoverageResult",
+          "thefactory-ui/web/icons/IconDoubleUp",
+          "thefactory-ui/web/icons"
         ]
       },
       "generateHunkPatch": {
@@ -2315,7 +2327,13 @@
           "IconPlus",
           "IconEdit",
           "IconDelete",
-          "Use"
+          "Use",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconDelete",
+          "thefactory-ui/web/icons/IconEdit",
+          "thefactory-ui/web/icons/IconPlus",
+          "thefactory-ui/web/icons"
         ]
       },
       "GitLocalChanges": {
@@ -3777,7 +3795,13 @@
           "IconPlus",
           "IconEdit",
           "IconDelete",
-          "Local"
+          "Local",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconDelete",
+          "thefactory-ui/web/icons/IconEdit",
+          "thefactory-ui/web/icons/IconPlus",
+          "thefactory-ui/web/icons"
         ]
       },
       "LocalFileEntry": {
@@ -3913,17 +3937,16 @@
           "MergeConflictResolverProps",
           "@renderer/services/filesService/filesService",
           "@renderer/services/filesService",
-          "@renderer/components/ui/Button/Button",
-          "@renderer/components/ui/Button",
           "thefactory-tools/GitConflictEntry",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web/Spinner",
+          "thefactory-ui/web/Tooltip",
+          "thefactory-ui/web/useToast",
+          "thefactory-ui/web",
           "@renderer/services/gitService/gitService",
           "@renderer/services/gitService",
           "@renderer/services/factoryToolsService/factoryToolsService",
-          "@renderer/services/factoryToolsService",
-          "thefactory-ui/web/useToast",
-          "thefactory-ui/web",
-          "@renderer/components/ui/Spinner",
-          "@renderer/components/ui/Tooltip"
+          "@renderer/services/factoryToolsService"
         ]
       },
       "MergeConflictResolverProps": {
@@ -3932,16 +3955,15 @@
           "thefactory-tools/GitConflictEntry",
           "@renderer/services/filesService/filesService",
           "@renderer/services/filesService",
-          "@renderer/components/ui/Button/Button",
-          "@renderer/components/ui/Button",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web/Spinner",
+          "thefactory-ui/web/Tooltip",
+          "thefactory-ui/web/useToast",
+          "thefactory-ui/web",
           "@renderer/services/gitService/gitService",
           "@renderer/services/gitService",
           "@renderer/services/factoryToolsService/factoryToolsService",
-          "@renderer/services/factoryToolsService",
-          "thefactory-ui/web/useToast",
-          "thefactory-ui/web",
-          "@renderer/components/ui/Spinner",
-          "@renderer/components/ui/Tooltip"
+          "@renderer/services/factoryToolsService"
         ]
       },
       "MergePreferences": {
@@ -4256,6 +4278,8 @@
           "src/types/notifications/NotificationCategory",
           "Record",
           "src/types/settings/BadgeColor",
+          "thefactory-ui/web/Switch",
+          "thefactory-ui/web",
           "src/types/notifications",
           "src/types/settings"
         ]
@@ -4913,7 +4937,9 @@
           "Array",
           "Zoom",
           "HTMLDivElement",
-          "HoverInfo"
+          "HoverInfo",
+          "thefactory-ui/web/Switch",
+          "thefactory-ui/web"
         ]
       },
       "ProjectWizardCodeState": {
@@ -5304,12 +5330,10 @@
           "FormEvent",
           "HTMLInputElement",
           "ChangeEvent",
-          "@renderer/components/ui/Button/Button",
-          "@renderer/components/ui/Button",
-          "@renderer/components/ui/Input/Input",
-          "@renderer/components/ui/Input",
-          "@renderer/components/ui/Modal/Modal",
-          "@renderer/components/ui/Modal",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web/Input",
+          "thefactory-ui/web/Modal",
+          "thefactory-ui/web",
           "@renderer/contexts/GitHubCredentialsContext/useGitHubCredentials",
           "@renderer/contexts/GitHubCredentialsContext"
         ]
@@ -5322,20 +5346,17 @@
           "thefactory-tools/LLMConfig",
           "HTMLInputElement",
           "ChangeEvent",
-          "@renderer/components/ui/Button/Button",
-          "@renderer/components/ui/Button",
-          "@renderer/components/ui/Input/Input",
-          "@renderer/components/ui/Input",
-          "@renderer/components/ui/Modal/Modal",
-          "@renderer/components/ui/Modal",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web/Input",
+          "thefactory-ui/web/Modal",
+          "thefactory-ui/web/useToast",
+          "thefactory-ui/web",
           "@renderer/components/ui/Select/Select",
           "@renderer/components/ui/Select/SelectContent",
           "@renderer/components/ui/Select/SelectItem",
           "@renderer/components/ui/Select/SelectTrigger",
           "@renderer/components/ui/Select/SelectValue",
           "@renderer/components/ui/Select",
-          "thefactory-ui/web/useToast",
-          "thefactory-ui/web",
           "@renderer/contexts/LLMConfigContext/useLLMConfig",
           "@renderer/contexts/LLMConfigContext",
           "@renderer/services/llmConfigsService/llmConfigsService",
@@ -5388,7 +5409,17 @@
         "path": "src/renderer/src/screens/SettingsView.tsx",
         "dependencies": [
           "CategoryId",
-          "react/useState"
+          "react/useState",
+          "thefactory-ui/web/CollapsibleSidebar",
+          "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconBell",
+          "thefactory-ui/web/icons/IconCpu",
+          "thefactory-ui/web/icons/IconDatabase",
+          "thefactory-ui/web/icons/IconGitHub",
+          "thefactory-ui/web/icons/IconPalette",
+          "thefactory-ui/web/icons/IconRobot",
+          "thefactory-ui/web/icons/IconSearch",
+          "thefactory-ui/web/icons"
         ]
       },
       "Shortcut": {
@@ -5997,6 +6028,8 @@
           "thefactory-tools/TestsResult",
           "react/useEffect",
           "react/useState",
+          "thefactory-ui/web/Spinner",
+          "thefactory-ui/web",
           "thefactory-tools/TestFailure",
           "thefactory-tools/TestResult"
         ]
@@ -6032,6 +6065,11 @@
         "dependencies": [
           "TestsProvider",
           "TestsInner",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web/Input",
+          "thefactory-ui/web/SegmentedControl",
+          "thefactory-ui/web/Spinner",
+          "thefactory-ui/web",
           "thefactory-tools/ChatContext"
         ]
       },
@@ -6806,6 +6844,8 @@
           "HTMLInputElement",
           "KeyboardEvent",
           "react/useCallback",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web",
           "src/types/settings/ShortcutsConfig",
           "src/types/settings/ShortcutsModifier",
           "src/types/settings",
@@ -8031,7 +8071,11 @@
         "path": "renderer/src/components/tests/CoverageReport.tsx",
         "dependencies": [
           "thefactory-tools/CoverageFileStats",
-          "thefactory-tools/CoverageResult"
+          "thefactory-tools/CoverageResult",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconDoubleUp",
+          "thefactory-ui/web/icons"
         ]
       },
       "CpuUsage": {
@@ -8081,7 +8125,9 @@
         "path": "renderer/src/screens/settings/database/DatabaseSettings.tsx",
         "dependencies": [
           "Button",
-          "react/useState"
+          "react/useState",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web"
         ]
       },
       "datesPrompt": {
@@ -8174,7 +8220,9 @@
       "DeveloperSettings": {
         "path": "renderer/src/screens/settings/developer/DeveloperSettings.tsx",
         "dependencies": [
-          "Switch"
+          "Switch",
+          "thefactory-ui/web/Switch",
+          "thefactory-ui/web"
         ]
       },
       "diagnosticsManager": {
@@ -8866,8 +8914,12 @@
         "path": "renderer/src/components/tests/CoverageReport.tsx",
         "dependencies": [
           "Seg",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web",
           "thefactory-tools/CoverageFileStats",
-          "thefactory-tools/CoverageResult"
+          "thefactory-tools/CoverageResult",
+          "thefactory-ui/web/icons/IconDoubleUp",
+          "thefactory-ui/web/icons"
         ]
       },
       "generateHunkPatch": {
@@ -9234,7 +9286,13 @@
           "IconPlus",
           "IconEdit",
           "IconDelete",
-          "Use"
+          "Use",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconDelete",
+          "thefactory-ui/web/icons/IconEdit",
+          "thefactory-ui/web/icons/IconPlus",
+          "thefactory-ui/web/icons"
         ]
       },
       "GitLocalChanges": {
@@ -10696,7 +10754,13 @@
           "IconPlus",
           "IconEdit",
           "IconDelete",
-          "Local"
+          "Local",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconDelete",
+          "thefactory-ui/web/icons/IconEdit",
+          "thefactory-ui/web/icons/IconPlus",
+          "thefactory-ui/web/icons"
         ]
       },
       "LocalFileEntry": {
@@ -10832,17 +10896,16 @@
           "MergeConflictResolverProps",
           "@renderer/services/filesService/filesService",
           "@renderer/services/filesService",
-          "@renderer/components/ui/Button/Button",
-          "@renderer/components/ui/Button",
           "thefactory-tools/GitConflictEntry",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web/Spinner",
+          "thefactory-ui/web/Tooltip",
+          "thefactory-ui/web/useToast",
+          "thefactory-ui/web",
           "@renderer/services/gitService/gitService",
           "@renderer/services/gitService",
           "@renderer/services/factoryToolsService/factoryToolsService",
-          "@renderer/services/factoryToolsService",
-          "thefactory-ui/web/useToast",
-          "thefactory-ui/web",
-          "@renderer/components/ui/Spinner",
-          "@renderer/components/ui/Tooltip"
+          "@renderer/services/factoryToolsService"
         ]
       },
       "MergeConflictResolverProps": {
@@ -10851,16 +10914,15 @@
           "thefactory-tools/GitConflictEntry",
           "@renderer/services/filesService/filesService",
           "@renderer/services/filesService",
-          "@renderer/components/ui/Button/Button",
-          "@renderer/components/ui/Button",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web/Spinner",
+          "thefactory-ui/web/Tooltip",
+          "thefactory-ui/web/useToast",
+          "thefactory-ui/web",
           "@renderer/services/gitService/gitService",
           "@renderer/services/gitService",
           "@renderer/services/factoryToolsService/factoryToolsService",
-          "@renderer/services/factoryToolsService",
-          "thefactory-ui/web/useToast",
-          "thefactory-ui/web",
-          "@renderer/components/ui/Spinner",
-          "@renderer/components/ui/Tooltip"
+          "@renderer/services/factoryToolsService"
         ]
       },
       "MergePreferences": {
@@ -11175,6 +11237,8 @@
           "types/notifications/NotificationCategory",
           "Record",
           "types/settings/BadgeColor",
+          "thefactory-ui/web/Switch",
+          "thefactory-ui/web",
           "types/notifications",
           "types/settings"
         ]
@@ -11832,7 +11896,9 @@
           "Array",
           "Zoom",
           "HTMLDivElement",
-          "HoverInfo"
+          "HoverInfo",
+          "thefactory-ui/web/Switch",
+          "thefactory-ui/web"
         ]
       },
       "ProjectWizardCodeState": {
@@ -12223,12 +12289,10 @@
           "FormEvent",
           "HTMLInputElement",
           "ChangeEvent",
-          "@renderer/components/ui/Button/Button",
-          "@renderer/components/ui/Button",
-          "@renderer/components/ui/Input/Input",
-          "@renderer/components/ui/Input",
-          "@renderer/components/ui/Modal/Modal",
-          "@renderer/components/ui/Modal",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web/Input",
+          "thefactory-ui/web/Modal",
+          "thefactory-ui/web",
           "@renderer/contexts/GitHubCredentialsContext/useGitHubCredentials",
           "@renderer/contexts/GitHubCredentialsContext"
         ]
@@ -12241,20 +12305,17 @@
           "thefactory-tools/LLMConfig",
           "HTMLInputElement",
           "ChangeEvent",
-          "@renderer/components/ui/Button/Button",
-          "@renderer/components/ui/Button",
-          "@renderer/components/ui/Input/Input",
-          "@renderer/components/ui/Input",
-          "@renderer/components/ui/Modal/Modal",
-          "@renderer/components/ui/Modal",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web/Input",
+          "thefactory-ui/web/Modal",
+          "thefactory-ui/web/useToast",
+          "thefactory-ui/web",
           "@renderer/components/ui/Select/Select",
           "@renderer/components/ui/Select/SelectContent",
           "@renderer/components/ui/Select/SelectItem",
           "@renderer/components/ui/Select/SelectTrigger",
           "@renderer/components/ui/Select/SelectValue",
           "@renderer/components/ui/Select",
-          "thefactory-ui/web/useToast",
-          "thefactory-ui/web",
           "@renderer/contexts/LLMConfigContext/useLLMConfig",
           "@renderer/contexts/LLMConfigContext",
           "@renderer/services/llmConfigsService/llmConfigsService",
@@ -12307,7 +12368,17 @@
         "path": "renderer/src/screens/SettingsView.tsx",
         "dependencies": [
           "CategoryId",
-          "react/useState"
+          "react/useState",
+          "thefactory-ui/web/CollapsibleSidebar",
+          "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconBell",
+          "thefactory-ui/web/icons/IconCpu",
+          "thefactory-ui/web/icons/IconDatabase",
+          "thefactory-ui/web/icons/IconGitHub",
+          "thefactory-ui/web/icons/IconPalette",
+          "thefactory-ui/web/icons/IconRobot",
+          "thefactory-ui/web/icons/IconSearch",
+          "thefactory-ui/web/icons"
         ]
       },
       "Shortcut": {
@@ -12916,6 +12987,8 @@
           "thefactory-tools/TestsResult",
           "react/useEffect",
           "react/useState",
+          "thefactory-ui/web/Spinner",
+          "thefactory-ui/web",
           "thefactory-tools/TestFailure",
           "thefactory-tools/TestResult"
         ]
@@ -12951,6 +13024,11 @@
         "dependencies": [
           "TestsProvider",
           "TestsInner",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web/Input",
+          "thefactory-ui/web/SegmentedControl",
+          "thefactory-ui/web/Spinner",
+          "thefactory-ui/web",
           "thefactory-tools/ChatContext"
         ]
       },
@@ -13725,6 +13803,8 @@
           "HTMLInputElement",
           "KeyboardEvent",
           "react/useCallback",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web",
           "types/settings/ShortcutsConfig",
           "types/settings/ShortcutsModifier",
           "types/settings",

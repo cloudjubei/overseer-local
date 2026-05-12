@@ -838,9 +838,6 @@ export default function GitMergeModal(props: GitMergeModalProps) {
         size="md"
         footer={
           <div className="flex items-center justify-end gap-2 w-full">
-            <Button onClick={() => setConfirmOpen(false)} variant="secondary">
-              Cancel
-            </Button>
             <Button
               onClick={() => {
                 setConfirmOpen(false)
