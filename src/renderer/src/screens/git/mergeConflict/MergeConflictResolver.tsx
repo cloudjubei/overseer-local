@@ -1,12 +1,9 @@
 import React from 'react'
 import { filesService } from '@renderer/services/filesService'
-import { Button } from '@renderer/components/ui/Button'
-import Spinner from '@renderer/components/ui/Spinner'
-import Tooltip from '@renderer/components/ui/Tooltip'
 import { GitConflictEntry } from 'thefactory-tools'
+import { Button, Spinner, Tooltip, useToast } from 'thefactory-ui/web'
 import { gitService } from '@renderer/services/gitService'
 import { factoryToolsService } from '@renderer/services/factoryToolsService'
-import { useToast } from 'thefactory-ui/web'
 
 export type MergeConflictResolverProps = {
   projectId: string
