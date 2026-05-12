@@ -22,7 +22,7 @@ When this conversion finishes, `thefactory-overseer-web` rebuilds against a corr
 
 ## A. Open questions
 
-_(empty — record any blockers here as they come up)_
+- **Why does the package's `tokens.css` `:root` block only partially merge into the consumer's CSS?** Surfaced during Step 8b verification: the DiffViewer toolbar referenced `bg-(--surface-muted)` but the variable was missing from the final compiled CSS bundle even though the package's `tokens.css` declares it. Patched for now by adding `--surface-muted` (and dark-mode value) to `src/renderer/src/styles/design-tokens.css`. Audited the package's runtime references — only `--surface-muted` was both used and missing; `--accent-secondary` is referenced from a JS class string but isn't declared in the package's tokens either, so it's a pre-existing dangling reference. **Open work:** trace whether Tailwind v4's `@import 'tailwindcss'` (which sits between the local `@import './styles/design-tokens.css'` and `@import 'thefactory-ui/web/styles'` in [index.css](../src/renderer/src/index.css)) is silently dropping the package's `:root` declarations that don't overlap with the local block's keys. Resolving this lets us delete the local `design-tokens.css` outright in Step 14 instead of forwarding every package token by hand.
 
 ---
 
@@ -166,12 +166,13 @@ The Git surface is ~5000 LoC across 26 files. Every primitive it touches (`Butto
   - DiffViewer Row 3 (selection actions toolbar) — added `gap-2` to the parent flex so there's an unconditional 8 px gap between the left cluster (Stage / Discard Selected) and the right cluster (Resolve Conflicts / Exit Selection). Previously the `flex-1` on the left section let the right cluster shrink up against it at narrow widths.
   - GitLocalChanges vertical `<ResizeHandle>` (between file lists and diff viewer) — bumped from `z-10` → `z-30` so the handle stays above every sticky element inside the diff viewer. The diff stacks sticky elements at multiple z's: left-gutter columns at `z-10`, hunk headers and the inner row labels at `z-20`. Anything below `z-30` got painted over in some region. [src/renderer/src/screens/git/GitLocalChanges.tsx](../src/renderer/src/screens/git/GitLocalChanges.tsx).
 
-##### Step 8b — Top-level views + DiffViewer
+##### Step 8b — Top-level views + DiffViewer _(shipped 2026-05-12)_
 
-- **Files:** [screens/GitView.tsx](../src/renderer/src/screens/GitView.tsx), [screens/git/GitBranchDetailsPanel.tsx](../src/renderer/src/screens/git/GitBranchDetailsPanel.tsx), [screens/git/GitCommitChanges.tsx](../src/renderer/src/screens/git/GitCommitChanges.tsx), [screens/git/GitLocalChanges.tsx](../src/renderer/src/screens/git/GitLocalChanges.tsx).
-- **Swap:** `Spinner`, `Tooltip`, `ResizeHandle`, `PathDisplay`, `DiffViewer` (+ any parsing helpers if used directly).
-- **Compare:** 3-panel layout (sidebar / center stacked / action rail) doesn't reflow; branch selection drives the center pane; the diff renders correctly on a real commit including rename + content edits + binary additions, not just a one-line text change.
-- **Risk:** `DiffViewer` is the most complex compound in `thefactory-ui` — exercise it against a real, multi-file commit.
+- **Implementation:** swapped `Spinner`, `Tooltip`, `ResizeHandle`, `PathDisplay`, `DiffViewer`, plus the `StructuredUnifiedDiff` + `IntraMode` imports that 8a left behind. Five files changed: [screens/git/GitBranchDetailsPanel.tsx](../src/renderer/src/screens/git/GitBranchDetailsPanel.tsx), [screens/git/GitCommitChanges.tsx](../src/renderer/src/screens/git/GitCommitChanges.tsx), [screens/git/GitLocalChanges.tsx](../src/renderer/src/screens/git/GitLocalChanges.tsx), [screens/git/common/GitFileDiffItem.tsx](../src/renderer/src/screens/git/common/GitFileDiffItem.tsx). [screens/GitView.tsx](../src/renderer/src/screens/GitView.tsx) needed no swap — it only imports screen-sibling components.
+- **Now orphaned for the Git surface (still used by chat tool-popups; deleted in Step 13):** [components/ui/DiffViewer.tsx](../src/renderer/src/components/ui/DiffViewer.tsx). The local [components/chat/tool-popups/diffUtils.tsx](../src/renderer/src/components/chat/tool-popups/diffUtils.tsx) stays — `WriteToolsPreview`, `WriteMultiToolsPreview`, `SimpleUnifiedDiff`, `InlineTextDiff` chat-side consumers still go through it. They get swapped to `thefactory-ui/web` in a follow-up; not part of Step 8.
+- **Upstream:** ported the Step 8a polish that's specific to the diff component into `thefactory-ui` so it landed when the swap flipped — Stage Hunk + Stage Selected recoloured teal → green, and the Row 3 toolbar parent given `gap-2`. The local copies in `components/ui/DiffViewer.tsx` and `components/chat/tool-popups/diffUtils.tsx` retain the same polish for now since they're still mounted in chat — when Step 13 deletes them, the package version becomes the sole copy.
+- **Polish surfaced during verification (same day):**
+  - Added `--surface-muted` to [src/renderer/src/styles/design-tokens.css](../src/renderer/src/styles/design-tokens.css) for both light (`#f3f4f6`) and dark (`#0e141d`). The package's `DiffViewer` toolbar uses `bg-(--surface-muted)` (file-name row, view-options row, selection-actions row); before the patch the variable was undefined in the compiled CSS, the `var()` resolved to nothing, and the rows rendered white instead of the expected light gray. See the Open Question above for the deeper layer-order cause.
 
 ##### Step 8c — Modals (commit / create-branch / checkout / stash / merge)
 

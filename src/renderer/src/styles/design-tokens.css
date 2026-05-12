@@ -112,6 +112,7 @@
   --surface-base: var(--color-gray-50);
   --surface-raised: #ffffff;
   --surface-overlay: #ffffff;
+  --surface-muted: #f3f4f6;
   /* Hover surface for subtle hover states */
   --surface-hover: color-mix(in srgb, var(--border-default) 20%, transparent);
   /* Aliases for legacy tokens used in some components */
@@ -267,6 +268,7 @@
   --surface-base: #0b0f14;
   --surface-raised: #121821;
   --surface-overlay: #1a2230;
+  --surface-muted: #0e141d;
   --surface-hover: color-mix(in srgb, #ffffff 8%, transparent);
   --surface-0: var(--surface-base);
   --surface-1: var(--surface-raised);

@@ -1,7 +1,7 @@
 import React from 'react'
 import { GitMergeReportFile } from 'thefactory-tools'
 import { IconChevron } from 'thefactory-ui/web/icons'
-import { StructuredUnifiedDiff, IntraMode } from '@renderer/components/chat/tool-popups/diffUtils'
+import { StructuredUnifiedDiff, type IntraMode } from 'thefactory-ui/web'
 import GitFileStatusIcon from './GitFileStatusIcon'
 
 function extractBadges(file: GitMergeReportFile): string[] {

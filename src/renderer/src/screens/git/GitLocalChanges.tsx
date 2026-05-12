@@ -1,11 +1,7 @@
 import React, { forwardRef, useImperativeHandle } from 'react'
-import Spinner from '@renderer/components/ui/Spinner'
-import Tooltip from '@renderer/components/ui/Tooltip'
 import { gitService } from '@renderer/services/gitService'
 import { filesService } from '@renderer/services/filesService'
-import { IntraMode } from '@renderer/components/chat/tool-popups/diffUtils'
-import { ResizeHandle } from '@renderer/components/ui/ResizeHandle'
-import { DiffViewer } from '@renderer/components/ui/DiffViewer'
+import { DiffViewer, ResizeHandle, Spinner, Tooltip, type IntraMode } from 'thefactory-ui/web'
 import GitFileRow, { LocalFileEntry } from './common/GitFileRow'
 import { useLocalStorage } from '@renderer/hooks/useLocalStorage'
 

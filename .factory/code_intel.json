@@ -2060,7 +2060,10 @@
           "PointerEvent",
           "HTMLElement",
           "HTMLDivElement",
-          "thefactory-tools/GitUnifiedBranch"
+          "thefactory-tools/GitUnifiedBranch",
+          "thefactory-ui/web/ResizeHandle",
+          "thefactory-ui/web/Spinner",
+          "thefactory-ui/web"
         ]
       },
       "GitCheckoutRemoteModal": {
@@ -2085,7 +2088,12 @@
           "HTMLElement",
           "thefactory-tools/GitDiffSummary",
           "@renderer/services/gitService/gitService",
-          "@renderer/services/gitService"
+          "@renderer/services/gitService",
+          "thefactory-ui/web/DiffViewer",
+          "thefactory-ui/web/PathDisplay",
+          "thefactory-ui/web/ResizeHandle",
+          "thefactory-ui/web/Spinner",
+          "thefactory-ui/web"
         ]
       },
       "GitCommitGraph": {
@@ -2246,9 +2254,9 @@
           "thefactory-tools/GitMergeReportFile",
           "thefactory-ui/web/icons/IconChevron",
           "thefactory-ui/web/icons",
-          "@renderer/components/chat/tool-popups/diffUtils/StructuredUnifiedDiff",
-          "@renderer/components/chat/tool-popups/diffUtils/IntraMode",
-          "@renderer/components/chat/tool-popups/diffUtils"
+          "thefactory-ui/web/StructuredUnifiedDiff",
+          "thefactory-ui/web/type IntraMode",
+          "thefactory-ui/web"
         ]
       },
       "GitFileRow": {
@@ -2328,16 +2336,14 @@
           "@renderer/services/gitService",
           "@renderer/services/filesService/filesService",
           "@renderer/services/filesService",
-          "@renderer/components/chat/tool-popups/diffUtils/IntraMode",
-          "@renderer/components/chat/tool-popups/diffUtils",
-          "@renderer/components/ui/ResizeHandle/ResizeHandle",
-          "@renderer/components/ui/ResizeHandle",
-          "@renderer/components/ui/DiffViewer/DiffViewer",
-          "@renderer/components/ui/DiffViewer",
+          "thefactory-ui/web/DiffViewer",
+          "thefactory-ui/web/ResizeHandle",
+          "thefactory-ui/web/Spinner",
+          "thefactory-ui/web/Tooltip",
+          "thefactory-ui/web/type IntraMode",
+          "thefactory-ui/web",
           "@renderer/hooks/useLocalStorage/useLocalStorage",
-          "@renderer/hooks/useLocalStorage",
-          "@renderer/components/ui/Spinner",
-          "@renderer/components/ui/Tooltip"
+          "@renderer/hooks/useLocalStorage"
         ]
       },
       "GitLocalChangesProps": {
@@ -2348,16 +2354,14 @@
           "@renderer/services/gitService",
           "@renderer/services/filesService/filesService",
           "@renderer/services/filesService",
-          "@renderer/components/chat/tool-popups/diffUtils/IntraMode",
-          "@renderer/components/chat/tool-popups/diffUtils",
-          "@renderer/components/ui/ResizeHandle/ResizeHandle",
-          "@renderer/components/ui/ResizeHandle",
-          "@renderer/components/ui/DiffViewer/DiffViewer",
-          "@renderer/components/ui/DiffViewer",
+          "thefactory-ui/web/DiffViewer",
+          "thefactory-ui/web/ResizeHandle",
+          "thefactory-ui/web/Spinner",
+          "thefactory-ui/web/Tooltip",
+          "thefactory-ui/web/type IntraMode",
+          "thefactory-ui/web",
           "@renderer/hooks/useLocalStorage/useLocalStorage",
-          "@renderer/hooks/useLocalStorage",
-          "@renderer/components/ui/Spinner",
-          "@renderer/components/ui/Tooltip"
+          "@renderer/hooks/useLocalStorage"
         ]
       },
       "GitLocalChangesRef": {
@@ -2368,16 +2372,14 @@
           "@renderer/services/gitService",
           "@renderer/services/filesService/filesService",
           "@renderer/services/filesService",
-          "@renderer/components/chat/tool-popups/diffUtils/IntraMode",
-          "@renderer/components/chat/tool-popups/diffUtils",
-          "@renderer/components/ui/ResizeHandle/ResizeHandle",
-          "@renderer/components/ui/ResizeHandle",
-          "@renderer/components/ui/DiffViewer/DiffViewer",
-          "@renderer/components/ui/DiffViewer",
+          "thefactory-ui/web/DiffViewer",
+          "thefactory-ui/web/ResizeHandle",
+          "thefactory-ui/web/Spinner",
+          "thefactory-ui/web/Tooltip",
+          "thefactory-ui/web/type IntraMode",
+          "thefactory-ui/web",
           "@renderer/hooks/useLocalStorage/useLocalStorage",
-          "@renderer/hooks/useLocalStorage",
-          "@renderer/components/ui/Spinner",
-          "@renderer/components/ui/Tooltip"
+          "@renderer/hooks/useLocalStorage"
         ]
       },
       "gitManager": {
@@ -3805,16 +3807,14 @@
           "@renderer/services/gitService",
           "@renderer/services/filesService/filesService",
           "@renderer/services/filesService",
-          "@renderer/components/chat/tool-popups/diffUtils/IntraMode",
-          "@renderer/components/chat/tool-popups/diffUtils",
-          "@renderer/components/ui/ResizeHandle/ResizeHandle",
-          "@renderer/components/ui/ResizeHandle",
-          "@renderer/components/ui/DiffViewer/DiffViewer",
-          "@renderer/components/ui/DiffViewer",
+          "thefactory-ui/web/DiffViewer",
+          "thefactory-ui/web/ResizeHandle",
+          "thefactory-ui/web/Spinner",
+          "thefactory-ui/web/Tooltip",
+          "thefactory-ui/web/type IntraMode",
+          "thefactory-ui/web",
           "@renderer/hooks/useLocalStorage/useLocalStorage",
-          "@renderer/hooks/useLocalStorage",
-          "@renderer/components/ui/Spinner",
-          "@renderer/components/ui/Tooltip"
+          "@renderer/hooks/useLocalStorage"
         ]
       },
       "looksLikeDiffPatchText": {
@@ -8986,7 +8986,10 @@
           "PointerEvent",
           "HTMLElement",
           "HTMLDivElement",
-          "thefactory-tools/GitUnifiedBranch"
+          "thefactory-tools/GitUnifiedBranch",
+          "thefactory-ui/web/ResizeHandle",
+          "thefactory-ui/web/Spinner",
+          "thefactory-ui/web"
         ]
       },
       "GitCheckoutRemoteModal": {
@@ -9011,7 +9014,12 @@
           "HTMLElement",
           "thefactory-tools/GitDiffSummary",
           "@renderer/services/gitService/gitService",
-          "@renderer/services/gitService"
+          "@renderer/services/gitService",
+          "thefactory-ui/web/DiffViewer",
+          "thefactory-ui/web/PathDisplay",
+          "thefactory-ui/web/ResizeHandle",
+          "thefactory-ui/web/Spinner",
+          "thefactory-ui/web"
         ]
       },
       "GitCommitGraph": {
@@ -9172,9 +9180,9 @@
           "thefactory-tools/GitMergeReportFile",
           "thefactory-ui/web/icons/IconChevron",
           "thefactory-ui/web/icons",
-          "@renderer/components/chat/tool-popups/diffUtils/StructuredUnifiedDiff",
-          "@renderer/components/chat/tool-popups/diffUtils/IntraMode",
-          "@renderer/components/chat/tool-popups/diffUtils"
+          "thefactory-ui/web/StructuredUnifiedDiff",
+          "thefactory-ui/web/type IntraMode",
+          "thefactory-ui/web"
         ]
       },
       "GitFileRow": {
@@ -9254,16 +9262,14 @@
           "@renderer/services/gitService",
           "@renderer/services/filesService/filesService",
           "@renderer/services/filesService",
-          "@renderer/components/chat/tool-popups/diffUtils/IntraMode",
-          "@renderer/components/chat/tool-popups/diffUtils",
-          "@renderer/components/ui/ResizeHandle/ResizeHandle",
-          "@renderer/components/ui/ResizeHandle",
-          "@renderer/components/ui/DiffViewer/DiffViewer",
-          "@renderer/components/ui/DiffViewer",
+          "thefactory-ui/web/DiffViewer",
+          "thefactory-ui/web/ResizeHandle",
+          "thefactory-ui/web/Spinner",
+          "thefactory-ui/web/Tooltip",
+          "thefactory-ui/web/type IntraMode",
+          "thefactory-ui/web",
           "@renderer/hooks/useLocalStorage/useLocalStorage",
-          "@renderer/hooks/useLocalStorage",
-          "@renderer/components/ui/Spinner",
-          "@renderer/components/ui/Tooltip"
+          "@renderer/hooks/useLocalStorage"
         ]
       },
       "GitLocalChangesProps": {
@@ -9274,16 +9280,14 @@
           "@renderer/services/gitService",
           "@renderer/services/filesService/filesService",
           "@renderer/services/filesService",
-          "@renderer/components/chat/tool-popups/diffUtils/IntraMode",
-          "@renderer/components/chat/tool-popups/diffUtils",
-          "@renderer/components/ui/ResizeHandle/ResizeHandle",
-          "@renderer/components/ui/ResizeHandle",
-          "@renderer/components/ui/DiffViewer/DiffViewer",
-          "@renderer/components/ui/DiffViewer",
+          "thefactory-ui/web/DiffViewer",
+          "thefactory-ui/web/ResizeHandle",
+          "thefactory-ui/web/Spinner",
+          "thefactory-ui/web/Tooltip",
+          "thefactory-ui/web/type IntraMode",
+          "thefactory-ui/web",
           "@renderer/hooks/useLocalStorage/useLocalStorage",
-          "@renderer/hooks/useLocalStorage",
-          "@renderer/components/ui/Spinner",
-          "@renderer/components/ui/Tooltip"
+          "@renderer/hooks/useLocalStorage"
         ]
       },
       "GitLocalChangesRef": {
@@ -9294,16 +9298,14 @@
           "@renderer/services/gitService",
           "@renderer/services/filesService/filesService",
           "@renderer/services/filesService",
-          "@renderer/components/chat/tool-popups/diffUtils/IntraMode",
-          "@renderer/components/chat/tool-popups/diffUtils",
-          "@renderer/components/ui/ResizeHandle/ResizeHandle",
-          "@renderer/components/ui/ResizeHandle",
-          "@renderer/components/ui/DiffViewer/DiffViewer",
-          "@renderer/components/ui/DiffViewer",
+          "thefactory-ui/web/DiffViewer",
+          "thefactory-ui/web/ResizeHandle",
+          "thefactory-ui/web/Spinner",
+          "thefactory-ui/web/Tooltip",
+          "thefactory-ui/web/type IntraMode",
+          "thefactory-ui/web",
           "@renderer/hooks/useLocalStorage/useLocalStorage",
-          "@renderer/hooks/useLocalStorage",
-          "@renderer/components/ui/Spinner",
-          "@renderer/components/ui/Tooltip"
+          "@renderer/hooks/useLocalStorage"
         ]
       },
       "gitManager": {
@@ -10731,16 +10733,14 @@
           "@renderer/services/gitService",
           "@renderer/services/filesService/filesService",
           "@renderer/services/filesService",
-          "@renderer/components/chat/tool-popups/diffUtils/IntraMode",
-          "@renderer/components/chat/tool-popups/diffUtils",
-          "@renderer/components/ui/ResizeHandle/ResizeHandle",
-          "@renderer/components/ui/ResizeHandle",
-          "@renderer/components/ui/DiffViewer/DiffViewer",
-          "@renderer/components/ui/DiffViewer",
+          "thefactory-ui/web/DiffViewer",
+          "thefactory-ui/web/ResizeHandle",
+          "thefactory-ui/web/Spinner",
+          "thefactory-ui/web/Tooltip",
+          "thefactory-ui/web/type IntraMode",
+          "thefactory-ui/web",
           "@renderer/hooks/useLocalStorage/useLocalStorage",
-          "@renderer/hooks/useLocalStorage",
-          "@renderer/components/ui/Spinner",
-          "@renderer/components/ui/Tooltip"
+          "@renderer/hooks/useLocalStorage"
         ]
       },
       "looksLikeDiffPatchText": {
