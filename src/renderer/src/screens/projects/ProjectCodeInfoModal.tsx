@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react'
-import { Button, Modal } from 'thefactory-ui/web'
-import { IconSave } from 'thefactory-ui/web/icons'
 import {
+  Button,
+  Modal,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@renderer/components/ui/Select'
+} from 'thefactory-ui/web'
+import { IconSave } from 'thefactory-ui/web/icons'
 import type {
   ProjectCodeInfo,
   ProgrammingLanguage,

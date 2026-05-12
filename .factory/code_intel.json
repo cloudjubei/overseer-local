@@ -49,7 +49,13 @@
           "SelectTrigger",
           "SelectValue",
           "SelectContent",
-          "SelectItem"
+          "SelectItem",
+          "thefactory-ui/web/Select",
+          "thefactory-ui/web/SelectContent",
+          "thefactory-ui/web/SelectItem",
+          "thefactory-ui/web/SelectTrigger",
+          "thefactory-ui/web/SelectValue",
+          "thefactory-ui/web"
         ]
       },
       "AgentRunBanner": {
@@ -3527,12 +3533,11 @@
           "NewServiceForm",
           "Record",
           "react/useState",
-          "@renderer/components/ui/Select/Select",
-          "@renderer/components/ui/Select/SelectContent",
-          "@renderer/components/ui/Select/SelectItem",
-          "@renderer/components/ui/Select/SelectTrigger",
-          "@renderer/components/ui/Select/SelectValue",
-          "@renderer/components/ui/Select",
+          "thefactory-ui/web/Select",
+          "thefactory-ui/web/SelectContent",
+          "thefactory-ui/web/SelectItem",
+          "thefactory-ui/web/SelectTrigger",
+          "thefactory-ui/web/SelectValue",
           "thefactory-ui/web/Switch",
           "thefactory-ui/web",
           "@renderer/contexts/ProjectContext/useActiveProject",
@@ -4081,6 +4086,11 @@
           "src/types/notifications/NotificationCategory",
           "Record",
           "src/types/settings/BadgeColor",
+          "thefactory-ui/web/Select",
+          "thefactory-ui/web/SelectContent",
+          "thefactory-ui/web/SelectItem",
+          "thefactory-ui/web/SelectTrigger",
+          "thefactory-ui/web/SelectValue",
           "thefactory-ui/web/Switch",
           "thefactory-ui/web",
           "src/types/notifications",
@@ -4401,15 +4411,14 @@
           "react/useEffect",
           "thefactory-ui/web/Button",
           "thefactory-ui/web/Modal",
+          "thefactory-ui/web/Select",
+          "thefactory-ui/web/SelectContent",
+          "thefactory-ui/web/SelectItem",
+          "thefactory-ui/web/SelectTrigger",
+          "thefactory-ui/web/SelectValue",
           "thefactory-ui/web",
           "thefactory-ui/web/icons/IconSave",
           "thefactory-ui/web/icons",
-          "@renderer/components/ui/Select/Select",
-          "@renderer/components/ui/Select/SelectContent",
-          "@renderer/components/ui/Select/SelectItem",
-          "@renderer/components/ui/Select/SelectTrigger",
-          "@renderer/components/ui/Select/SelectValue",
-          "@renderer/components/ui/Select",
           "thefactory-tools/ProjectCodeInfo",
           "thefactory-tools/constants/KNOWN_FRAMEWORKS_BY_LANGUAGE",
           "thefactory-tools/constants/KNOWN_LANGUAGES",
@@ -4433,14 +4442,13 @@
           "@renderer/contexts/GitHubCredentialsContext",
           "thefactory-ui/web/Button",
           "thefactory-ui/web/Modal",
+          "thefactory-ui/web/Select",
+          "thefactory-ui/web/SelectContent",
+          "thefactory-ui/web/SelectItem",
+          "thefactory-ui/web/SelectTrigger",
+          "thefactory-ui/web/SelectValue",
           "thefactory-ui/web/Switch",
           "thefactory-ui/web",
-          "@renderer/components/ui/Select/Select",
-          "@renderer/components/ui/Select/SelectContent",
-          "@renderer/components/ui/Select/SelectItem",
-          "@renderer/components/ui/Select/SelectTrigger",
-          "@renderer/components/ui/Select/SelectValue",
-          "@renderer/components/ui/Select",
           "@renderer/contexts/ProjectsGroupsContext/useProjectsGroups",
           "@renderer/contexts/ProjectsGroupsContext"
         ]
@@ -4455,14 +4463,13 @@
           "@renderer/contexts/GitHubCredentialsContext",
           "thefactory-ui/web/Button",
           "thefactory-ui/web/Modal",
+          "thefactory-ui/web/Select",
+          "thefactory-ui/web/SelectContent",
+          "thefactory-ui/web/SelectItem",
+          "thefactory-ui/web/SelectTrigger",
+          "thefactory-ui/web/SelectValue",
           "thefactory-ui/web/Switch",
           "thefactory-ui/web",
-          "@renderer/components/ui/Select/Select",
-          "@renderer/components/ui/Select/SelectContent",
-          "@renderer/components/ui/Select/SelectItem",
-          "@renderer/components/ui/Select/SelectTrigger",
-          "@renderer/components/ui/Select/SelectValue",
-          "@renderer/components/ui/Select",
           "@renderer/contexts/ProjectsGroupsContext/useProjectsGroups",
           "@renderer/contexts/ProjectsGroupsContext"
         ]
@@ -4497,6 +4504,11 @@
           "@renderer/contexts/ProjectsGroupsContext",
           "thefactory-ui/web/Button",
           "thefactory-ui/web/Modal",
+          "thefactory-ui/web/Select",
+          "thefactory-ui/web/SelectContent",
+          "thefactory-ui/web/SelectItem",
+          "thefactory-ui/web/SelectTrigger",
+          "thefactory-ui/web/SelectValue",
           "thefactory-ui/web/Switch",
           "thefactory-ui/web",
           "thefactory-ui/web/icons/IconArrowLeftMini",
@@ -4505,13 +4517,7 @@
           "thefactory-ui/web/icons/IconEdit",
           "thefactory-ui/web/icons/IconPlus",
           "thefactory-ui/web/icons/IconSave",
-          "thefactory-ui/web/icons",
-          "@renderer/components/ui/Select/Select",
-          "@renderer/components/ui/Select/SelectContent",
-          "@renderer/components/ui/Select/SelectItem",
-          "@renderer/components/ui/Select/SelectTrigger",
-          "@renderer/components/ui/Select/SelectValue",
-          "@renderer/components/ui/Select"
+          "thefactory-ui/web/icons"
         ]
       },
       "ProjectIcon": {
@@ -4531,6 +4537,11 @@
           "HTMLInputElement",
           "thefactory-ui/web/Button",
           "thefactory-ui/web/Modal",
+          "thefactory-ui/web/Select",
+          "thefactory-ui/web/SelectContent",
+          "thefactory-ui/web/SelectItem",
+          "thefactory-ui/web/SelectTrigger",
+          "thefactory-ui/web/SelectValue",
           "thefactory-ui/web/Spinner",
           "thefactory-ui/web",
           "thefactory-ui/web/icons/IconArrowLeftMini",
@@ -4545,12 +4556,6 @@
           "@renderer/services/projectsService",
           "@renderer/contexts/ProjectContext/useProjectContext",
           "@renderer/contexts/ProjectContext",
-          "@renderer/components/ui/Select/Select",
-          "@renderer/components/ui/Select/SelectContent",
-          "@renderer/components/ui/Select/SelectItem",
-          "@renderer/components/ui/Select/SelectTrigger",
-          "@renderer/components/ui/Select/SelectValue",
-          "@renderer/components/ui/Select",
           "@renderer/contexts/ProjectsGroupsContext/useProjectsGroups",
           "@renderer/contexts/ProjectsGroupsContext"
         ]
@@ -5045,45 +5050,6 @@
           "ReactNode"
         ]
       },
-      "Select": {
-        "path": "src/renderer/src/components/ui/Select.tsx",
-        "dependencies": [
-          "react"
-        ]
-      },
-      "SelectContent": {
-        "path": "src/renderer/src/components/ui/Select.tsx",
-        "dependencies": [
-          "ComponentPropsWithoutRef",
-          "ElementRef"
-        ]
-      },
-      "SelectGroup": {
-        "path": "src/renderer/src/components/ui/Select.tsx",
-        "dependencies": [
-          "react"
-        ]
-      },
-      "SelectItem": {
-        "path": "src/renderer/src/components/ui/Select.tsx",
-        "dependencies": [
-          "ComponentPropsWithoutRef",
-          "ElementRef"
-        ]
-      },
-      "SelectTrigger": {
-        "path": "src/renderer/src/components/ui/Select.tsx",
-        "dependencies": [
-          "ComponentPropsWithoutRef",
-          "ElementRef"
-        ]
-      },
-      "SelectValue": {
-        "path": "src/renderer/src/components/ui/Select.tsx",
-        "dependencies": [
-          "react"
-        ]
-      },
       "SettingsGitHubCredentialsModal": {
         "path": "src/renderer/src/screens/settings/github/SettingsGitHubCredentialsModal.tsx",
         "dependencies": [
@@ -5111,16 +5077,15 @@
           "thefactory-ui/web/Button",
           "thefactory-ui/web/Input",
           "thefactory-ui/web/Modal",
+          "thefactory-ui/web/Select",
+          "thefactory-ui/web/SelectContent",
+          "thefactory-ui/web/SelectItem",
+          "thefactory-ui/web/SelectTrigger",
+          "thefactory-ui/web/SelectValue",
           "thefactory-ui/web/useToast",
           "thefactory-ui/web",
           "thefactory-ui/web/icons/IconSave",
           "thefactory-ui/web/icons",
-          "@renderer/components/ui/Select/Select",
-          "@renderer/components/ui/Select/SelectContent",
-          "@renderer/components/ui/Select/SelectItem",
-          "@renderer/components/ui/Select/SelectTrigger",
-          "@renderer/components/ui/Select/SelectValue",
-          "@renderer/components/ui/Select",
           "@renderer/contexts/LLMConfigContext/useLLMConfig",
           "@renderer/contexts/LLMConfigContext",
           "@renderer/services/llmConfigsService/llmConfigsService",
@@ -6686,7 +6651,13 @@
           "SelectTrigger",
           "SelectValue",
           "SelectContent",
-          "SelectItem"
+          "SelectItem",
+          "thefactory-ui/web/Select",
+          "thefactory-ui/web/SelectContent",
+          "thefactory-ui/web/SelectItem",
+          "thefactory-ui/web/SelectTrigger",
+          "thefactory-ui/web/SelectValue",
+          "thefactory-ui/web"
         ]
       },
       "AgentRunBanner": {
@@ -10164,12 +10135,11 @@
           "NewServiceForm",
           "Record",
           "react/useState",
-          "@renderer/components/ui/Select/Select",
-          "@renderer/components/ui/Select/SelectContent",
-          "@renderer/components/ui/Select/SelectItem",
-          "@renderer/components/ui/Select/SelectTrigger",
-          "@renderer/components/ui/Select/SelectValue",
-          "@renderer/components/ui/Select",
+          "thefactory-ui/web/Select",
+          "thefactory-ui/web/SelectContent",
+          "thefactory-ui/web/SelectItem",
+          "thefactory-ui/web/SelectTrigger",
+          "thefactory-ui/web/SelectValue",
           "thefactory-ui/web/Switch",
           "thefactory-ui/web",
           "@renderer/contexts/ProjectContext/useActiveProject",
@@ -10718,6 +10688,11 @@
           "types/notifications/NotificationCategory",
           "Record",
           "types/settings/BadgeColor",
+          "thefactory-ui/web/Select",
+          "thefactory-ui/web/SelectContent",
+          "thefactory-ui/web/SelectItem",
+          "thefactory-ui/web/SelectTrigger",
+          "thefactory-ui/web/SelectValue",
           "thefactory-ui/web/Switch",
           "thefactory-ui/web",
           "types/notifications",
@@ -11038,15 +11013,14 @@
           "react/useEffect",
           "thefactory-ui/web/Button",
           "thefactory-ui/web/Modal",
+          "thefactory-ui/web/Select",
+          "thefactory-ui/web/SelectContent",
+          "thefactory-ui/web/SelectItem",
+          "thefactory-ui/web/SelectTrigger",
+          "thefactory-ui/web/SelectValue",
           "thefactory-ui/web",
           "thefactory-ui/web/icons/IconSave",
           "thefactory-ui/web/icons",
-          "@renderer/components/ui/Select/Select",
-          "@renderer/components/ui/Select/SelectContent",
-          "@renderer/components/ui/Select/SelectItem",
-          "@renderer/components/ui/Select/SelectTrigger",
-          "@renderer/components/ui/Select/SelectValue",
-          "@renderer/components/ui/Select",
           "thefactory-tools/ProjectCodeInfo",
           "thefactory-tools/constants/KNOWN_FRAMEWORKS_BY_LANGUAGE",
           "thefactory-tools/constants/KNOWN_LANGUAGES",
@@ -11070,14 +11044,13 @@
           "@renderer/contexts/GitHubCredentialsContext",
           "thefactory-ui/web/Button",
           "thefactory-ui/web/Modal",
+          "thefactory-ui/web/Select",
+          "thefactory-ui/web/SelectContent",
+          "thefactory-ui/web/SelectItem",
+          "thefactory-ui/web/SelectTrigger",
+          "thefactory-ui/web/SelectValue",
           "thefactory-ui/web/Switch",
           "thefactory-ui/web",
-          "@renderer/components/ui/Select/Select",
-          "@renderer/components/ui/Select/SelectContent",
-          "@renderer/components/ui/Select/SelectItem",
-          "@renderer/components/ui/Select/SelectTrigger",
-          "@renderer/components/ui/Select/SelectValue",
-          "@renderer/components/ui/Select",
           "@renderer/contexts/ProjectsGroupsContext/useProjectsGroups",
           "@renderer/contexts/ProjectsGroupsContext"
         ]
@@ -11092,14 +11065,13 @@
           "@renderer/contexts/GitHubCredentialsContext",
           "thefactory-ui/web/Button",
           "thefactory-ui/web/Modal",
+          "thefactory-ui/web/Select",
+          "thefactory-ui/web/SelectContent",
+          "thefactory-ui/web/SelectItem",
+          "thefactory-ui/web/SelectTrigger",
+          "thefactory-ui/web/SelectValue",
           "thefactory-ui/web/Switch",
           "thefactory-ui/web",
-          "@renderer/components/ui/Select/Select",
-          "@renderer/components/ui/Select/SelectContent",
-          "@renderer/components/ui/Select/SelectItem",
-          "@renderer/components/ui/Select/SelectTrigger",
-          "@renderer/components/ui/Select/SelectValue",
-          "@renderer/components/ui/Select",
           "@renderer/contexts/ProjectsGroupsContext/useProjectsGroups",
           "@renderer/contexts/ProjectsGroupsContext"
         ]
@@ -11134,6 +11106,11 @@
           "@renderer/contexts/ProjectsGroupsContext",
           "thefactory-ui/web/Button",
           "thefactory-ui/web/Modal",
+          "thefactory-ui/web/Select",
+          "thefactory-ui/web/SelectContent",
+          "thefactory-ui/web/SelectItem",
+          "thefactory-ui/web/SelectTrigger",
+          "thefactory-ui/web/SelectValue",
           "thefactory-ui/web/Switch",
           "thefactory-ui/web",
           "thefactory-ui/web/icons/IconArrowLeftMini",
@@ -11142,13 +11119,7 @@
           "thefactory-ui/web/icons/IconEdit",
           "thefactory-ui/web/icons/IconPlus",
           "thefactory-ui/web/icons/IconSave",
-          "thefactory-ui/web/icons",
-          "@renderer/components/ui/Select/Select",
-          "@renderer/components/ui/Select/SelectContent",
-          "@renderer/components/ui/Select/SelectItem",
-          "@renderer/components/ui/Select/SelectTrigger",
-          "@renderer/components/ui/Select/SelectValue",
-          "@renderer/components/ui/Select"
+          "thefactory-ui/web/icons"
         ]
       },
       "ProjectIcon": {
@@ -11168,6 +11139,11 @@
           "HTMLInputElement",
           "thefactory-ui/web/Button",
           "thefactory-ui/web/Modal",
+          "thefactory-ui/web/Select",
+          "thefactory-ui/web/SelectContent",
+          "thefactory-ui/web/SelectItem",
+          "thefactory-ui/web/SelectTrigger",
+          "thefactory-ui/web/SelectValue",
           "thefactory-ui/web/Spinner",
           "thefactory-ui/web",
           "thefactory-ui/web/icons/IconArrowLeftMini",
@@ -11182,12 +11158,6 @@
           "@renderer/services/projectsService",
           "@renderer/contexts/ProjectContext/useProjectContext",
           "@renderer/contexts/ProjectContext",
-          "@renderer/components/ui/Select/Select",
-          "@renderer/components/ui/Select/SelectContent",
-          "@renderer/components/ui/Select/SelectItem",
-          "@renderer/components/ui/Select/SelectTrigger",
-          "@renderer/components/ui/Select/SelectValue",
-          "@renderer/components/ui/Select",
           "@renderer/contexts/ProjectsGroupsContext/useProjectsGroups",
           "@renderer/contexts/ProjectsGroupsContext"
         ]
@@ -11682,45 +11652,6 @@
           "ReactNode"
         ]
       },
-      "Select": {
-        "path": "renderer/src/components/ui/Select.tsx",
-        "dependencies": [
-          "react"
-        ]
-      },
-      "SelectContent": {
-        "path": "renderer/src/components/ui/Select.tsx",
-        "dependencies": [
-          "ComponentPropsWithoutRef",
-          "ElementRef"
-        ]
-      },
-      "SelectGroup": {
-        "path": "renderer/src/components/ui/Select.tsx",
-        "dependencies": [
-          "react"
-        ]
-      },
-      "SelectItem": {
-        "path": "renderer/src/components/ui/Select.tsx",
-        "dependencies": [
-          "ComponentPropsWithoutRef",
-          "ElementRef"
-        ]
-      },
-      "SelectTrigger": {
-        "path": "renderer/src/components/ui/Select.tsx",
-        "dependencies": [
-          "ComponentPropsWithoutRef",
-          "ElementRef"
-        ]
-      },
-      "SelectValue": {
-        "path": "renderer/src/components/ui/Select.tsx",
-        "dependencies": [
-          "react"
-        ]
-      },
       "SettingsGitHubCredentialsModal": {
         "path": "renderer/src/screens/settings/github/SettingsGitHubCredentialsModal.tsx",
         "dependencies": [
@@ -11748,16 +11679,15 @@
           "thefactory-ui/web/Button",
           "thefactory-ui/web/Input",
           "thefactory-ui/web/Modal",
+          "thefactory-ui/web/Select",
+          "thefactory-ui/web/SelectContent",
+          "thefactory-ui/web/SelectItem",
+          "thefactory-ui/web/SelectTrigger",
+          "thefactory-ui/web/SelectValue",
           "thefactory-ui/web/useToast",
           "thefactory-ui/web",
           "thefactory-ui/web/icons/IconSave",
           "thefactory-ui/web/icons",
-          "@renderer/components/ui/Select/Select",
-          "@renderer/components/ui/Select/SelectContent",
-          "@renderer/components/ui/Select/SelectItem",
-          "@renderer/components/ui/Select/SelectTrigger",
-          "@renderer/components/ui/Select/SelectValue",
-          "@renderer/components/ui/Select",
           "@renderer/contexts/LLMConfigContext/useLLMConfig",
           "@renderer/contexts/LLMConfigContext",
           "@renderer/services/llmConfigsService/llmConfigsService",

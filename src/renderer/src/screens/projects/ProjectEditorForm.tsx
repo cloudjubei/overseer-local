@@ -3,14 +3,16 @@ import { PROJECT_ICONS, renderProjectIcon } from './projectIcons'
 import { useGitHubCredentials } from '@renderer/contexts/GitHubCredentialsContext'
 import { ProjectCodeInfoModal } from './ProjectCodeInfoModal'
 import { CodeInfoChip } from './CodeInfoChip'
-import { Button, Modal, Switch } from 'thefactory-ui/web'
 import {
+  Button,
+  Modal,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@renderer/components/ui/Select'
+  Switch,
+} from 'thefactory-ui/web'
 import { useProjectsGroups } from '@renderer/contexts/ProjectsGroupsContext'
 
 function TextInput({ label, value, onChange, placeholder, disabled, inputRef, action }: any) {

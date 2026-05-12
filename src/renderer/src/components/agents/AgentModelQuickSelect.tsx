@@ -1,4 +1,10 @@
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/Select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from 'thefactory-ui/web'
 import { useNavigator } from '../../navigation/Navigator'
 import { useLLMConfig } from '../../contexts/LLMConfigContext'
 

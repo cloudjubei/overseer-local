@@ -1,6 +1,15 @@
 import React, { useRef, useState } from 'react'
 import { useProjectsGroups } from '@renderer/contexts/ProjectsGroupsContext'
-import { Button, Modal, Switch } from 'thefactory-ui/web'
+import {
+  Button,
+  Modal,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Switch,
+} from 'thefactory-ui/web'
 import {
   IconArrowLeftMini,
   IconArrowRightMini,
@@ -9,13 +18,6 @@ import {
   IconPlus,
   IconSave,
 } from 'thefactory-ui/web/icons'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@renderer/components/ui/Select'
 
 function GroupNameModal({
   title,

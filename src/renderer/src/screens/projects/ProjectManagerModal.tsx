@@ -1,5 +1,14 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { Button, Modal, Spinner } from 'thefactory-ui/web'
+import {
+  Button,
+  Modal,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Spinner,
+} from 'thefactory-ui/web'
 import {
   IconArrowLeftMini,
   IconArrowRightMini,
@@ -12,13 +21,6 @@ import {
 import { projectsService } from '@renderer/services/projectsService'
 import { useProjectContext } from '@renderer/contexts/ProjectContext'
 import { PROJECT_ICONS, renderProjectIcon } from './projectIcons'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@renderer/components/ui/Select'
 import { validateProjectClient } from './validateProject'
 import { ProjectEditorForm } from './ProjectEditorForm'
 import { useProjectsGroups } from '@renderer/contexts/ProjectsGroupsContext'

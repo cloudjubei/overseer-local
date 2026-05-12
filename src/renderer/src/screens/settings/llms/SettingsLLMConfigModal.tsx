@@ -1,12 +1,15 @@
-import { Button, Input, Modal, useToast } from 'thefactory-ui/web'
-import { IconSave } from 'thefactory-ui/web/icons'
 import {
+  Button,
+  Input,
+  Modal,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@renderer/components/ui/Select'
+  useToast,
+} from 'thefactory-ui/web'
+import { IconSave } from 'thefactory-ui/web/icons'
 import { useLLMConfig } from '@renderer/contexts/LLMConfigContext'
 import { llmConfigsService } from '@renderer/services/llmConfigsService'
 import React, { useEffect, useMemo, useState } from 'react'
