@@ -133,11 +133,11 @@ export default function GitCommitGraphRow({
               style={{ width: colWidths.description }}
             >
               {commit.refs && commit.refs.length > 0 && (
-                <span className="inline-flex gap-1 mr-2 flex-wrap">
+                <span className="inline-flex gap-1 mr-2 flex-nowrap overflow-hidden align-middle max-w-full">
                   {commit.refs.map((r, idx) => (
                     <span
                       key={idx}
-                      className={`px-1 rounded text-[9px] uppercase tracking-wider ${
+                      className={`px-1 rounded text-[9px] uppercase tracking-wider shrink-0 whitespace-nowrap ${
                         r.type === 'HEAD'
                           ? 'bg-sky-100 text-sky-800 border border-sky-200 dark:bg-sky-900/50 dark:text-sky-300 dark:border-sky-800'
                           : r.type === 'branch'

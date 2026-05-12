@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
-import { Modal } from '@renderer/components/ui/Modal'
-import { Button } from '@renderer/components/ui/Button'
+import { Button, Modal } from 'thefactory-ui/web'
 import { gitService } from '@renderer/services/gitService'
 
 export type GitStashModalProps = {

@@ -50,12 +50,12 @@ export default function GitFileRow({
       </div>
 
       <div className="grid items-center shrink-0 min-h-[20px] justify-items-end pl-2">
-        {/* The Pills fade out on row hover to make space for actions */}
-        <div className="col-start-1 row-start-1 flex items-center justify-end opacity-100 group-hover:opacity-0 transition-opacity">
+        {/* The Pills fade out on row hover to make space for actions; never interactive */}
+        <div className="col-start-1 row-start-1 flex items-center justify-end opacity-100 group-hover:opacity-0 transition-opacity pointer-events-none">
           <GitFileChangesPills patch={file.patch} />
         </div>
-        {/* Actions fade in on row hover */}
-        <div className="col-start-1 row-start-1 flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        {/* Actions fade in on row hover; relative + z-10 + pointer-events keeps clicks reliable even with the pills layer in the same grid cell */}
+        <div className="col-start-1 row-start-1 relative z-10 flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none group-hover:pointer-events-auto">
           {file.isConflicted && onResolveConflict && (
             <Tooltip content={'Resolve Conflict'} placement="bottom">
               <button

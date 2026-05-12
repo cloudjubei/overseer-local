@@ -314,6 +314,10 @@ export default function GitView() {
         onOpenMerge={openMerge}
         onSelectBranchBySha={onSelectBranchBySha}
         onResolveConflict={handleResolveConflict}
+        onLocalStatusChange={(count) => {
+          setChangedCount(count)
+          setIsClean(count === 0)
+        }}
       />
 
       <GitActionsPanel

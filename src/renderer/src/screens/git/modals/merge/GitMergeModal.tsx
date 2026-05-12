@@ -1,7 +1,4 @@
 import React from 'react'
-import { Modal } from '@renderer/components/ui/Modal'
-import Spinner from '@renderer/components/ui/Spinner'
-import { Button } from '@renderer/components/ui/Button'
 import { useProjectContext } from '@renderer/contexts/ProjectContext'
 import {
   GitMergeReport,
@@ -10,14 +7,19 @@ import {
   GitConflictEntry,
   CoverageResult,
 } from 'thefactory-tools'
-import SegmentedControl from '@renderer/components/ui/SegmentedControl'
+import {
+  Button,
+  Modal,
+  SegmentedControl,
+  Spinner,
+  Tooltip,
+  type IntraMode,
+} from 'thefactory-ui/web'
+import { IconFastMerge } from 'thefactory-ui/web/icons'
 import { factoryTestsService } from '@renderer/services/factoryTestsService'
 import { gitService } from '@renderer/services/gitService'
-import { IconFastMerge } from '@renderer/components/ui/icons/Icons'
-import Tooltip from '@renderer/components/ui/Tooltip'
 import { useGit } from '@renderer/contexts/GitContext'
 import MergeConflictResolver from '@renderer/screens/git/mergeConflict/MergeConflictResolver'
-import { IntraMode } from '@renderer/components/chat/tool-popups/diffUtils'
 import GitFileDiffItem from '../../common/GitFileDiffItem'
 
 export type GitMergeModalProps = {

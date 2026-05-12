@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
-import { Modal } from '@renderer/components/ui/Modal'
-import { Button } from '@renderer/components/ui/Button'
+import { Button, Input, Modal } from 'thefactory-ui/web'
 import { gitService } from '@renderer/services/gitService'
 
 export type GitCreateBranchModalProps = {
@@ -57,9 +56,8 @@ export function GitCreateBranchModal({
           <label className="text-xs font-semibold text-neutral-700 dark:text-neutral-300">
             Branch Name
           </label>
-          <input
+          <Input
             autoFocus
-            className="input input-bordered w-full text-sm"
             placeholder="e.g. feature/my-new-idea"
             value={name}
             onChange={(e) => setName(e.target.value)}

@@ -15,6 +15,7 @@ export function GitBranchDetailsPanel({
   changedCount,
   onSelectBranchBySha,
   onResolveConflict,
+  onLocalStatusChange,
 }: {
   projectId?: string
   loading: boolean
@@ -30,6 +31,8 @@ export function GitBranchDetailsPanel({
   onSelectBranchBySha?: (sha: string) => void
   /** Bubbled up from GitLocalChanges when user clicks Resolve Conflict on a file */
   onResolveConflict?: (filePath: string) => void
+  /** Bubbled up from GitLocalChanges whenever its internal working-tree status reloads — lets the parent keep `changedCount` in sync without polling. */
+  onLocalStatusChange?: (count: number) => void
 }) {
   const [selectedCommitSha, setSelectedCommitSha] = useState<string | undefined>(undefined)
 
@@ -145,6 +148,17 @@ export function GitBranchDetailsPanel({
                   projectId={projectId}
                   className="flex-1 min-h-0"
                   onResolveConflict={onResolveConflict}
+                  onStatusChange={
+                    onLocalStatusChange
+                      ? (s) =>
+                          onLocalStatusChange(
+                            (s.staged?.length ?? 0) +
+                              (s.unstaged?.length ?? 0) +
+                              (s.untracked?.length ?? 0) +
+                              (s.conflicts?.length ?? 0),
+                          )
+                      : undefined
+                  }
                 />
               ) : (
                 <GitCommitChanges
