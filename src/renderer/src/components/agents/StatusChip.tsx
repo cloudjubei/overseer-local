@@ -5,8 +5,8 @@ import {
   IconLoader,
   IconStopCircle,
   IconXCircle,
-} from '../ui/icons/Icons'
-import Tooltip from '../ui/Tooltip'
+} from 'thefactory-ui/web/icons'
+import { Tooltip } from 'thefactory-ui/web'
 
 export function StatusIcon({ state, className }: { state: ChatState; className?: string }) {
   switch (state) {

@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react'
-import Tooltip from '../ui/Tooltip'
+import { Tooltip } from 'thefactory-ui/web'
 import { useProjectContext } from '../../contexts/ProjectContext'
 import { useNavigator } from '../../navigation/Navigator'
 

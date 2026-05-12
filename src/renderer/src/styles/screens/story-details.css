@@ -235,9 +235,9 @@
   justify-content: center;
   width: 20px;
   height: 20px;
-  border-color: var(transparent);
-  background: var(transparent);
-  color: var(transparent);
+  border-color: transparent;
+  background: transparent;
+  color: transparent;
 }
 
 /* Collapsible Overview */

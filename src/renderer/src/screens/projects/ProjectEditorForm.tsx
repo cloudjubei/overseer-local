@@ -3,7 +3,7 @@ import { PROJECT_ICONS, renderProjectIcon } from './projectIcons'
 import { useGitHubCredentials } from '@renderer/contexts/GitHubCredentialsContext'
 import { ProjectCodeInfoModal } from './ProjectCodeInfoModal'
 import { CodeInfoChip } from './CodeInfoChip'
-import { Switch } from '@renderer/components/ui/Switch'
+import { Button, Modal, Switch } from 'thefactory-ui/web'
 import {
   Select,
   SelectContent,
@@ -12,8 +12,6 @@ import {
   SelectValue,
 } from '@renderer/components/ui/Select'
 import { useProjectsGroups } from '@renderer/contexts/ProjectsGroupsContext'
-import { Modal } from '@renderer/components/ui/Modal'
-import { Button } from '@renderer/components/ui/Button'
 
 function TextInput({ label, value, onChange, placeholder, disabled, inputRef, action }: any) {
   const id = React.useId()

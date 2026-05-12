@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
-import Tooltip from '../ui/Tooltip'
-import { IconArrowLeftMini, IconArrowRightMini } from '../ui/icons/Icons'
+import { Tooltip } from 'thefactory-ui/web'
+import { IconArrowLeftMini, IconArrowRightMini } from 'thefactory-ui/web/icons'
 import type { Chat } from 'thefactory-tools'
 
 export default function TokensChip({ run }: { run: Chat }) {

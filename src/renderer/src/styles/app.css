@@ -1,0 +1,28 @@
+html,
+body,
+#root {
+  height: 100%;
+  overflow: hidden;
+}
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  color: var(--text-primary);
+  background: var(--surface-base);
+}
+
+h1,
+h2,
+h3 {
+  color: var(--accent-primary);
+}
+
+.empty {
+  padding: 12px;
+  color: var(--text-secondary);
+}

@@ -1,19 +1,17 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { Modal } from '@renderer/components/ui/Modal'
-import { projectsService } from '@renderer/services/projectsService'
-import { useProjectContext } from '@renderer/contexts/ProjectContext'
-import { Button } from '@renderer/components/ui/Button'
-import { PROJECT_ICONS, renderProjectIcon } from './projectIcons'
-import Spinner from '@renderer/components/ui/Spinner'
+import { Button, Modal, Spinner } from 'thefactory-ui/web'
 import {
-  IconDelete,
-  IconEdit,
-  IconPlus,
   IconArrowLeftMini,
   IconArrowRightMini,
   IconBack,
-} from '@renderer/components/ui/icons/Icons'
-import { IconSave } from 'thefactory-ui/web/icons'
+  IconDelete,
+  IconEdit,
+  IconPlus,
+  IconSave,
+} from 'thefactory-ui/web/icons'
+import { projectsService } from '@renderer/services/projectsService'
+import { useProjectContext } from '@renderer/contexts/ProjectContext'
+import { PROJECT_ICONS, renderProjectIcon } from './projectIcons'
 import {
   Select,
   SelectContent,

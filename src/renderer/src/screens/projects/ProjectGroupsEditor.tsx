@@ -1,16 +1,14 @@
 import React, { useRef, useState } from 'react'
 import { useProjectsGroups } from '@renderer/contexts/ProjectsGroupsContext'
-import { Button } from '@renderer/components/ui/Button'
-import { Modal } from '@renderer/components/ui/Modal'
+import { Button, Modal, Switch } from 'thefactory-ui/web'
 import {
   IconArrowLeftMini,
   IconArrowRightMini,
   IconDelete,
   IconEdit,
   IconPlus,
-} from '@renderer/components/ui/icons/Icons'
-import { IconSave } from 'thefactory-ui/web/icons'
-import { Switch } from '@renderer/components/ui/Switch'
+  IconSave,
+} from 'thefactory-ui/web/icons'
 import {
   Select,
   SelectContent,

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Modal } from '@renderer/components/ui/Modal'
+import { Modal, Spinner } from 'thefactory-ui/web'
 import { ProjectWizardTypeStep } from './ProjectWizardTypeStep'
 import { ProjectWizardCreateStep, ProjectWizardCreateState } from './ProjectWizardCreateStep'
 import { ProjectWizardGroupStep, ProjectWizardGroupState } from './ProjectWizardGroupStep'
@@ -11,7 +11,6 @@ import { projectsService } from '@renderer/services/projectsService'
 import { gitService } from '@renderer/services/gitService'
 import { codeIntelService } from '@renderer/services/codeIntelService'
 import { useProjectsGroups } from '@renderer/contexts/ProjectsGroupsContext'
-import Spinner from '@renderer/components/ui/Spinner'
 
 export type WizardFlowType = 'create' | 'import' | null
 

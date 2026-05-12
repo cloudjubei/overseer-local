@@ -70,7 +70,16 @@
           "react/useEffect",
           "react/useMemo",
           "react/useState",
+          "thefactory-ui/web/icons/IconChevron",
+          "thefactory-ui/web/icons/IconDelete",
+          "thefactory-ui/web/icons/IconStopCircle",
+          "thefactory-ui/web/icons/IconThumbDown",
+          "thefactory-ui/web/icons/IconThumbUp",
+          "thefactory-ui/web/icons",
           "thefactory-tools/Chat",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web/DotBadge",
+          "thefactory-ui/web",
           "@renderer/hooks/useNotifications/useNotifications",
           "@renderer/hooks/useNotifications",
           "@renderer/contexts/CostsContext/useCosts",
@@ -86,7 +95,16 @@
           "react/useEffect",
           "react/useMemo",
           "react/useState",
+          "thefactory-ui/web/icons/IconChevron",
+          "thefactory-ui/web/icons/IconDelete",
+          "thefactory-ui/web/icons/IconStopCircle",
+          "thefactory-ui/web/icons/IconThumbDown",
+          "thefactory-ui/web/icons/IconThumbUp",
+          "thefactory-ui/web/icons",
           "thefactory-tools/LLMConfig",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web/DotBadge",
+          "thefactory-ui/web",
           "@renderer/hooks/useNotifications/useNotifications",
           "@renderer/hooks/useNotifications",
           "@renderer/contexts/CostsContext/useCosts",
@@ -130,28 +148,6 @@
           "thefactory-ui/web",
           "thefactory-ui/web/icons/IconPlay",
           "thefactory-ui/web/icons"
-        ]
-      },
-      "Alert": {
-        "path": "src/renderer/src/components/ui/Alert.tsx",
-        "dependencies": [
-          "ReactNode",
-          "AlertVariant"
-        ]
-      },
-      "AlertDialog": {
-        "path": "src/renderer/src/components/ui/Modal.tsx",
-        "dependencies": [
-          "HTMLButtonElement",
-          "RefObject",
-          "HTMLElement",
-          "ReactNode"
-        ]
-      },
-      "AlertVariant": {
-        "path": "src/renderer/src/components/ui/Alert.tsx",
-        "dependencies": [
-          "react"
         ]
       },
       "AppSettings": {
@@ -273,19 +269,6 @@
           "@renderer/components/stories/StatusControl"
         ]
       },
-      "BranchChip": {
-        "path": "src/renderer/src/components/ui/BranchChip.tsx",
-        "dependencies": [
-          "BranchChipType"
-        ]
-      },
-      "BranchChipType": {
-        "path": "src/renderer/src/components/ui/BranchChip.tsx",
-        "description": "BranchChip — reusable inline badge for branch metadata.",
-        "dependencies": [
-          "react"
-        ]
-      },
       "buildAllProjectsRows": {
         "path": "src/renderer/src/screens/projectTimeline/timelineItemUtils.ts",
         "dependencies": [
@@ -316,36 +299,6 @@
         "path": "src/renderer/src/components/chat/ToolCall/utils.ts",
         "dependencies": [
           "diff/createTwoFilesPatch"
-        ]
-      },
-      "Button": {
-        "path": "src/renderer/src/components/ui/Button.tsx",
-        "dependencies": [
-          "ButtonProps",
-          "HTMLButtonElement",
-          "@radix-ui/react-slot/Slot"
-        ]
-      },
-      "ButtonProps": {
-        "path": "src/renderer/src/components/ui/Button.tsx",
-        "dependencies": [
-          "ButtonSize",
-          "ButtonVariant",
-          "HTMLButtonElement",
-          "ButtonHTMLAttributes",
-          "@radix-ui/react-slot/Slot"
-        ]
-      },
-      "ButtonSize": {
-        "path": "src/renderer/src/components/ui/Button.tsx",
-        "dependencies": [
-          "@radix-ui/react-slot/Slot"
-        ]
-      },
-      "ButtonVariant": {
-        "path": "src/renderer/src/components/ui/Button.tsx",
-        "dependencies": [
-          "@radix-ui/react-slot/Slot"
         ]
       },
       "ChatDraft": {
@@ -829,9 +782,10 @@
           "thefactory-tools/ChatContextGroupTopic",
           "thefactory-tools/ChatContextProjectTopic",
           "thefactory-tools/ChatContextStory",
+          "thefactory-ui/web/CollapsibleSidebar",
+          "thefactory-ui/web/DotBadge",
           "thefactory-ui/web/SegmentedControl",
           "thefactory-ui/web",
-          "thefactory-ui/web/DotBadge",
           "thefactory-tools/utils/getChatContextKey",
           "thefactory-tools/utils/getChatContext",
           "thefactory-tools/utils",
@@ -846,10 +800,6 @@
           "@renderer/components/chat/ChatsNavigationSidebar",
           "@renderer/components/chat/ChatTopicCreateModal"
         ]
-      },
-      "Chip": {
-        "path": "src/renderer/src/components/ui/Chip.tsx",
-        "dependencies": []
       },
       "clamp": {
         "path": "src/renderer/src/screens/projectTimeline/timelineDateUtils.ts",
@@ -872,21 +822,14 @@
           "clsx/clsx"
         ]
       },
-      "Code": {
-        "path": "src/renderer/src/components/ui/Code.tsx",
-        "dependencies": [
-          "CodeProps",
-          "react/useMemo",
-          "prismjs/highlight"
-        ]
-      },
       "CodeInfoChip": {
         "path": "src/renderer/src/screens/projects/CodeInfoChip.tsx",
         "dependencies": [
           "CodeInfoChipProps",
+          "thefactory-ui/web/Tooltip",
+          "thefactory-ui/web",
           "@renderer/utils/utils/cn",
-          "@renderer/utils/utils",
-          "@renderer/components/ui/Tooltip"
+          "@renderer/utils/utils"
         ]
       },
       "codeIntelManager": {
@@ -934,26 +877,6 @@
           "@renderer/contexts/StoriesContext/useStories",
           "@renderer/contexts/StoriesContext",
           "@renderer/components/stories/DependencyBullet"
-        ]
-      },
-      "CollapsibleSidebar": {
-        "path": "src/renderer/src/components/ui/CollapsibleSidebar.tsx",
-        "dependencies": [
-          "KeyboardEvent",
-          "HTMLButtonElement",
-          "SetStateAction",
-          "Dispatch",
-          "Props",
-          "@renderer/screens/projects/projectIcons/renderProjectIcon",
-          "@renderer/screens/projects/projectIcons"
-        ]
-      },
-      "CollapsibleSidebarItem": {
-        "path": "src/renderer/src/components/ui/CollapsibleSidebar.tsx",
-        "dependencies": [
-          "ReactNode",
-          "@renderer/screens/projects/projectIcons/renderProjectIcon",
-          "@renderer/screens/projects/projectIcons"
         ]
       },
       "CommandMenu": {
@@ -1007,16 +930,6 @@
           "thefactory-tools/CompletionMessage"
         ]
       },
-      "components": {
-        "path": "src/renderer/src/components/ui/Markdown.tsx",
-        "dependencies": [
-          "Components",
-          "Partial",
-          "react/FC",
-          "react/memo",
-          "react/useMemo"
-        ]
-      },
       "computeCommitGraph": {
         "path": "src/renderer/src/screens/git/commitGraph/gitCommitGraphUtils.ts",
         "dependencies": [
@@ -1064,12 +977,17 @@
       "CostChip": {
         "path": "src/renderer/src/components/agents/CostChip.tsx",
         "dependencies": [
-          "CostChipProps"
+          "CostChipProps",
+          "thefactory-ui/web/Tooltip",
+          "thefactory-ui/web"
         ]
       },
       "CostChipProps": {
         "path": "src/renderer/src/components/agents/CostChip.tsx",
-        "dependencies": []
+        "dependencies": [
+          "thefactory-ui/web/Tooltip",
+          "thefactory-ui/web"
+        ]
       },
       "CostsContextValue": {
         "path": "src/renderer/src/contexts/CostsContext.tsx",
@@ -1338,24 +1256,6 @@
           "Date"
         ]
       },
-      "DiffViewer": {
-        "path": "src/renderer/src/components/ui/DiffViewer.tsx",
-        "dependencies": [
-          "IntraMode",
-          "Set",
-          "DiffViewerProps",
-          "@renderer/screens/git/common/GitFileChangesPills/GitFileChangesPills",
-          "@renderer/screens/git/common/GitFileChangesPills"
-        ]
-      },
-      "DiffViewerProps": {
-        "path": "src/renderer/src/components/ui/DiffViewer.tsx",
-        "dependencies": [
-          "IntraMode",
-          "@renderer/screens/git/common/GitFileChangesPills/GitFileChangesPills",
-          "@renderer/screens/git/common/GitFileChangesPills"
-        ]
-      },
       "DirNode": {
         "path": "src/renderer/src/contexts/FilesContext.tsx",
         "dependencies": [
@@ -1396,19 +1296,6 @@
         "path": "src/renderer/src/services/documentIngestionService.ts",
         "dependencies": [
           "Promise"
-        ]
-      },
-      "DotBadge": {
-        "path": "src/renderer/src/components/ui/DotBadge.tsx",
-        "dependencies": [
-          "DotBadgeProps",
-          "FC"
-        ]
-      },
-      "DotBadgeProps": {
-        "path": "src/renderer/src/components/ui/DotBadge.tsx",
-        "dependencies": [
-          "react"
         ]
       },
       "EnhancedMessage": {
@@ -1676,6 +1563,7 @@
           "Partial",
           "thefactory-ui/web/useToast",
           "thefactory-ui/web",
+          "thefactory-ui/web/Button",
           "thefactory-ui/web/ConfirmDialog",
           "thefactory-ui/web/Modal",
           "@renderer/contexts/StoriesContext/useStories",
@@ -1702,6 +1590,7 @@
           "thefactory-ui/web/Modal",
           "thefactory-ui/web",
           "thefactory-ui/web/icons/IconDelete",
+          "thefactory-ui/web/icons/IconSave",
           "thefactory-ui/web/icons",
           "thefactory-ui/web/useToast",
           "@renderer/contexts/StoriesContext/useStories",
@@ -1724,6 +1613,7 @@
           "@renderer/components/ui/FileSelector",
           "thefactory-ui/web/icons/IconDelete",
           "thefactory-ui/web/icons/IconPlus",
+          "thefactory-ui/web/icons/IconSave",
           "thefactory-ui/web/icons",
           "thefactory-ui/web/Button",
           "thefactory-ui/web/Modal",
@@ -1739,6 +1629,7 @@
           "@renderer/components/ui/FileSelector",
           "thefactory-ui/web/icons/IconDelete",
           "thefactory-ui/web/icons/IconPlus",
+          "thefactory-ui/web/icons/IconSave",
           "thefactory-ui/web/icons",
           "thefactory-ui/web/Button",
           "thefactory-ui/web/Modal",
@@ -1759,39 +1650,9 @@
           "@renderer/components/stories/FeatureCard"
         ]
       },
-      "FileDisplay": {
-        "path": "src/renderer/src/components/ui/FileDisplay.tsx",
-        "dependencies": [
-          "Record",
-          "CSSProperties",
-          "FileDisplayProps",
-          "FC",
-          "thefactory-tools/FileMeta",
-          "thefactory-tools/utils/inferFileType",
-          "thefactory-tools/utils"
-        ]
-      },
-      "FileDisplayProps": {
-        "path": "src/renderer/src/components/ui/FileDisplay.tsx",
-        "dependencies": [
-          "MouseEvent",
-          "thefactory-tools/FileMeta",
-          "ReactNode",
-          "thefactory-tools/utils/inferFileType",
-          "thefactory-tools/utils"
-        ]
-      },
       "fileHash": {
         "path": "src/renderer/src/navigation/FilesNavigation.ts",
         "dependencies": []
-      },
-      "FileKind": {
-        "path": "src/renderer/src/components/ui/FileDisplay.tsx",
-        "dependencies": [
-          "thefactory-tools/FileMeta",
-          "thefactory-tools/utils/inferFileType",
-          "thefactory-tools/utils"
-        ]
       },
       "FileMentionsTextarea": {
         "path": "src/renderer/src/components/ui/FileMentionsTextarea.tsx",
@@ -3449,11 +3310,11 @@
           "ProjectWizardCodeState",
           "ProjectWizardCreateState",
           "ImportMode",
-          "@renderer/components/ui/Button/Button",
-          "@renderer/components/ui/Button",
-          "@renderer/components/ui/icons/Icons/IconFolder",
-          "@renderer/components/ui/icons/Icons/IconDocument",
-          "@renderer/components/ui/icons/Icons",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconDocument",
+          "thefactory-ui/web/icons/IconFolder",
+          "thefactory-ui/web/icons",
           "@renderer/services/projectsService/projectsService",
           "@renderer/services/projectsService"
         ]
@@ -3461,11 +3322,11 @@
       "ImportMode": {
         "path": "src/renderer/src/screens/projects/wizard/ProjectWizardImportModeStep.tsx",
         "dependencies": [
-          "@renderer/components/ui/Button/Button",
-          "@renderer/components/ui/Button",
-          "@renderer/components/ui/icons/Icons/IconFolder",
-          "@renderer/components/ui/icons/Icons/IconDocument",
-          "@renderer/components/ui/icons/Icons",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconDocument",
+          "thefactory-ui/web/icons/IconFolder",
+          "thefactory-ui/web/icons",
           "@renderer/services/projectsService/projectsService",
           "@renderer/services/projectsService"
         ]
@@ -3487,13 +3348,6 @@
         "path": "src/renderer/src/components/chat/tool-popups/InlineTextDiff.tsx",
         "dependencies": [
           "IntraMode"
-        ]
-      },
-      "Input": {
-        "path": "src/renderer/src/components/ui/Input.tsx",
-        "dependencies": [
-          "InputProps",
-          "HTMLInputElement"
         ]
       },
       "IntraMode": {
@@ -3526,12 +3380,6 @@
         "path": "src/renderer/src/screens/projectTimeline/timelineDateUtils.ts",
         "dependencies": [
           "Date"
-        ]
-      },
-      "JsonView": {
-        "path": "src/renderer/src/components/ui/JsonView.tsx",
-        "dependencies": [
-          "JSON"
         ]
       },
       "KNOWN_FRAMEWORKS_BY_LANGUAGE": {
@@ -3685,8 +3533,8 @@
           "@renderer/components/ui/Select/SelectTrigger",
           "@renderer/components/ui/Select/SelectValue",
           "@renderer/components/ui/Select",
-          "@renderer/components/ui/Switch/Switch",
-          "@renderer/components/ui/Switch",
+          "thefactory-ui/web/Switch",
+          "thefactory-ui/web",
           "@renderer/contexts/ProjectContext/useActiveProject",
           "@renderer/contexts/ProjectContext",
           "src/types/liveDataTypes/LiveDataProvider",
@@ -3868,15 +3716,6 @@
           "thefactory-db/Entity"
         ]
       },
-      "Markdown": {
-        "path": "src/renderer/src/components/ui/Markdown.tsx",
-        "dependencies": [
-          "MemoizedReactMarkdown",
-          "react/FC",
-          "react/memo",
-          "react/useMemo"
-        ]
-      },
       "MarkdownEditor": {
         "path": "src/renderer/src/components/files/MarkdownEditor.tsx",
         "dependencies": [
@@ -3893,24 +3732,6 @@
           "thefactory-tools/FileMeta",
           "thefactory-ui/web/MarkdownEditor",
           "thefactory-ui/web"
-        ]
-      },
-      "MarkdownMessage": {
-        "path": "src/renderer/src/components/ui/Markdown.tsx",
-        "dependencies": [
-          "Markdown",
-          "react/FC",
-          "react/memo",
-          "react/useMemo"
-        ]
-      },
-      "MemoizedReactMarkdown": {
-        "path": "src/renderer/src/components/ui/Markdown.tsx",
-        "dependencies": [
-          "Options",
-          "react/FC",
-          "react/memo",
-          "react/useMemo"
         ]
       },
       "MenuPosition": {
@@ -4029,16 +3850,6 @@
           "thefactory-ui/web"
         ]
       },
-      "Modal": {
-        "path": "src/renderer/src/components/ui/Modal.tsx",
-        "dependencies": [
-          "KeyboardEvent",
-          "MouseEvent",
-          "HTMLElement",
-          "HTMLDivElement",
-          "ModalProps"
-        ]
-      },
       "ModalHost": {
         "path": "src/renderer/src/navigation/ModalHost.tsx",
         "dependencies": [
@@ -4049,14 +3860,6 @@
           "@renderer/screens/projects/ProjectManagerModal",
           "@renderer/screens/git/modals/merge/GitMergeModal",
           "@renderer/screens/git/modals/GitCommitModal"
-        ]
-      },
-      "ModalProps": {
-        "path": "src/renderer/src/components/ui/Modal.tsx",
-        "dependencies": [
-          "ReactNode",
-          "HTMLElement",
-          "RefObject"
         ]
       },
       "ModalRoute": {
@@ -4462,10 +4265,6 @@
           "ParsedHunk"
         ]
       },
-      "PathDisplay": {
-        "path": "src/renderer/src/components/ui/PathDisplay.tsx",
-        "dependencies": []
-      },
       "PendingBranch": {
         "path": "src/renderer/src/contexts/GitContext.tsx",
         "dependencies": [
@@ -4586,7 +4385,9 @@
       "ProjectChip": {
         "path": "src/renderer/src/components/agents/ProjectChip.tsx",
         "dependencies": [
-          "MouseEvent"
+          "MouseEvent",
+          "thefactory-ui/web/Tooltip",
+          "thefactory-ui/web"
         ]
       },
       "ProjectCodeInfoModal": {
@@ -4598,10 +4399,11 @@
           "ProjectCodeInfoModalProps",
           "react/useState",
           "react/useEffect",
-          "@renderer/components/ui/Modal/Modal",
-          "@renderer/components/ui/Modal",
-          "@renderer/components/ui/Button/Button",
-          "@renderer/components/ui/Button",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web/Modal",
+          "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconSave",
+          "thefactory-ui/web/icons",
           "@renderer/components/ui/Select/Select",
           "@renderer/components/ui/Select/SelectContent",
           "@renderer/components/ui/Select/SelectItem",
@@ -4629,8 +4431,10 @@
           "ProjectEditorFormProps",
           "@renderer/contexts/GitHubCredentialsContext/useGitHubCredentials",
           "@renderer/contexts/GitHubCredentialsContext",
-          "@renderer/components/ui/Switch/Switch",
-          "@renderer/components/ui/Switch",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web/Modal",
+          "thefactory-ui/web/Switch",
+          "thefactory-ui/web",
           "@renderer/components/ui/Select/Select",
           "@renderer/components/ui/Select/SelectContent",
           "@renderer/components/ui/Select/SelectItem",
@@ -4638,11 +4442,7 @@
           "@renderer/components/ui/Select/SelectValue",
           "@renderer/components/ui/Select",
           "@renderer/contexts/ProjectsGroupsContext/useProjectsGroups",
-          "@renderer/contexts/ProjectsGroupsContext",
-          "@renderer/components/ui/Modal/Modal",
-          "@renderer/components/ui/Modal",
-          "@renderer/components/ui/Button/Button",
-          "@renderer/components/ui/Button"
+          "@renderer/contexts/ProjectsGroupsContext"
         ]
       },
       "ProjectEditorFormProps": {
@@ -4653,8 +4453,10 @@
           "Dispatch",
           "@renderer/contexts/GitHubCredentialsContext/useGitHubCredentials",
           "@renderer/contexts/GitHubCredentialsContext",
-          "@renderer/components/ui/Switch/Switch",
-          "@renderer/components/ui/Switch",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web/Modal",
+          "thefactory-ui/web/Switch",
+          "thefactory-ui/web",
           "@renderer/components/ui/Select/Select",
           "@renderer/components/ui/Select/SelectContent",
           "@renderer/components/ui/Select/SelectItem",
@@ -4662,11 +4464,7 @@
           "@renderer/components/ui/Select/SelectValue",
           "@renderer/components/ui/Select",
           "@renderer/contexts/ProjectsGroupsContext/useProjectsGroups",
-          "@renderer/contexts/ProjectsGroupsContext",
-          "@renderer/components/ui/Modal/Modal",
-          "@renderer/components/ui/Modal",
-          "@renderer/components/ui/Button/Button",
-          "@renderer/components/ui/Button"
+          "@renderer/contexts/ProjectsGroupsContext"
         ]
       },
       "ProjectGitStatus": {
@@ -4697,18 +4495,17 @@
           "GroupNameModal",
           "@renderer/contexts/ProjectsGroupsContext/useProjectsGroups",
           "@renderer/contexts/ProjectsGroupsContext",
-          "@renderer/components/ui/Button/Button",
-          "@renderer/components/ui/Button",
-          "@renderer/components/ui/Modal/Modal",
-          "@renderer/components/ui/Modal",
-          "@renderer/components/ui/icons/Icons/IconArrowLeftMini",
-          "@renderer/components/ui/icons/Icons/IconArrowRightMini",
-          "@renderer/components/ui/icons/Icons/IconDelete",
-          "@renderer/components/ui/icons/Icons/IconEdit",
-          "@renderer/components/ui/icons/Icons/IconPlus",
-          "@renderer/components/ui/icons/Icons",
-          "@renderer/components/ui/Switch/Switch",
-          "@renderer/components/ui/Switch",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web/Modal",
+          "thefactory-ui/web/Switch",
+          "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconArrowLeftMini",
+          "thefactory-ui/web/icons/IconArrowRightMini",
+          "thefactory-ui/web/icons/IconDelete",
+          "thefactory-ui/web/icons/IconEdit",
+          "thefactory-ui/web/icons/IconPlus",
+          "thefactory-ui/web/icons/IconSave",
+          "thefactory-ui/web/icons",
           "@renderer/components/ui/Select/Select",
           "@renderer/components/ui/Select/SelectContent",
           "@renderer/components/ui/Select/SelectItem",
@@ -4732,21 +4529,22 @@
           "ViewMode",
           "Record",
           "HTMLInputElement",
-          "@renderer/components/ui/Modal/Modal",
-          "@renderer/components/ui/Modal",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web/Modal",
+          "thefactory-ui/web/Spinner",
+          "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconArrowLeftMini",
+          "thefactory-ui/web/icons/IconArrowRightMini",
+          "thefactory-ui/web/icons/IconBack",
+          "thefactory-ui/web/icons/IconDelete",
+          "thefactory-ui/web/icons/IconEdit",
+          "thefactory-ui/web/icons/IconPlus",
+          "thefactory-ui/web/icons/IconSave",
+          "thefactory-ui/web/icons",
           "@renderer/services/projectsService/projectsService",
           "@renderer/services/projectsService",
           "@renderer/contexts/ProjectContext/useProjectContext",
           "@renderer/contexts/ProjectContext",
-          "@renderer/components/ui/Button/Button",
-          "@renderer/components/ui/Button",
-          "@renderer/components/ui/icons/Icons/IconDelete",
-          "@renderer/components/ui/icons/Icons/IconEdit",
-          "@renderer/components/ui/icons/Icons/IconPlus",
-          "@renderer/components/ui/icons/Icons/IconArrowLeftMini",
-          "@renderer/components/ui/icons/Icons/IconArrowRightMini",
-          "@renderer/components/ui/icons/Icons/IconBack",
-          "@renderer/components/ui/icons/Icons",
           "@renderer/components/ui/Select/Select",
           "@renderer/components/ui/Select/SelectContent",
           "@renderer/components/ui/Select/SelectItem",
@@ -4754,8 +4552,7 @@
           "@renderer/components/ui/Select/SelectValue",
           "@renderer/components/ui/Select",
           "@renderer/contexts/ProjectsGroupsContext/useProjectsGroups",
-          "@renderer/contexts/ProjectsGroupsContext",
-          "@renderer/components/ui/Spinner"
+          "@renderer/contexts/ProjectsGroupsContext"
         ]
       },
       "ProjectNavItem": {
@@ -4938,8 +4735,13 @@
           "Zoom",
           "HTMLDivElement",
           "HoverInfo",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web/Modal",
+          "thefactory-ui/web/SegmentedControl",
           "thefactory-ui/web/Switch",
-          "thefactory-ui/web"
+          "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconSave",
+          "thefactory-ui/web/icons"
         ]
       },
       "ProjectWizardCodeState": {
@@ -4972,10 +4774,9 @@
       "ProjectWizardCreateState": {
         "path": "src/renderer/src/screens/projects/wizard/ProjectWizardCreateStep.tsx",
         "dependencies": [
-          "@renderer/components/ui/Button/Button",
-          "@renderer/components/ui/Button",
-          "@renderer/components/ui/Modal/Modal",
-          "@renderer/components/ui/Modal",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web/Modal",
+          "thefactory-ui/web",
           "@renderer/services/projectsService/projectsService",
           "@renderer/services/projectsService"
         ]
@@ -4984,10 +4785,9 @@
         "path": "src/renderer/src/screens/projects/wizard/ProjectWizardCreateStep.tsx",
         "dependencies": [
           "ProjectWizardCreateStepProps",
-          "@renderer/components/ui/Button/Button",
-          "@renderer/components/ui/Button",
-          "@renderer/components/ui/Modal/Modal",
-          "@renderer/components/ui/Modal",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web/Modal",
+          "thefactory-ui/web",
           "@renderer/services/projectsService/projectsService",
           "@renderer/services/projectsService"
         ]
@@ -5028,11 +4828,11 @@
           "ProjectWizardCodeState",
           "ImportMode",
           "ProjectWizardImportModeStepProps",
-          "@renderer/components/ui/Button/Button",
-          "@renderer/components/ui/Button",
-          "@renderer/components/ui/icons/Icons/IconFolder",
-          "@renderer/components/ui/icons/Icons/IconDocument",
-          "@renderer/components/ui/icons/Icons",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconDocument",
+          "thefactory-ui/web/icons/IconFolder",
+          "thefactory-ui/web/icons",
           "@renderer/services/projectsService/projectsService",
           "@renderer/services/projectsService"
         ]
@@ -5047,8 +4847,9 @@
           "ImportMode",
           "ProjectWizardGroupState",
           "ProjectWizardModalProps",
-          "@renderer/components/ui/Modal/Modal",
-          "@renderer/components/ui/Modal",
+          "thefactory-ui/web/Modal",
+          "thefactory-ui/web/Spinner",
+          "thefactory-ui/web",
           "@renderer/services/projectsService/projectsService",
           "@renderer/services/projectsService",
           "@renderer/services/gitService/gitService",
@@ -5056,8 +4857,7 @@
           "@renderer/services/codeIntelService/codeIntelService",
           "@renderer/services/codeIntelService",
           "@renderer/contexts/ProjectsGroupsContext/useProjectsGroups",
-          "@renderer/contexts/ProjectsGroupsContext",
-          "@renderer/components/ui/Spinner"
+          "@renderer/contexts/ProjectsGroupsContext"
         ]
       },
       "ProjectWizardTypeStep": {
@@ -5127,21 +4927,6 @@
         "path": "src/renderer/src/components/chat/ToolCall/components/ReorderList.tsx",
         "dependencies": [
           "react"
-        ]
-      },
-      "ResizeHandle": {
-        "path": "src/renderer/src/components/ui/ResizeHandle.tsx",
-        "dependencies": [
-          "ResizeHandleProps"
-        ]
-      },
-      "ResizeHandleProps": {
-        "path": "src/renderer/src/components/ui/ResizeHandle.tsx",
-        "dependencies": [
-          "CSSProperties",
-          "HTMLDivElement",
-          "MouseEvent",
-          "PointerEvent"
         ]
       },
       "ResolvedFeatureRef": {
@@ -5254,35 +5039,10 @@
           "thefactory-ui/web/icons"
         ]
       },
-      "SafeText": {
-        "path": "src/renderer/src/components/ui/SafeText.tsx",
-        "dependencies": []
-      },
       "SectionTitle": {
         "path": "src/renderer/src/components/chat/ToolCall/components/SectionTitle.tsx",
         "dependencies": [
           "ReactNode"
-        ]
-      },
-      "SegmentedControl": {
-        "path": "src/renderer/src/components/ui/SegmentedControl.tsx",
-        "dependencies": [
-          "HTMLButtonElement",
-          "KeyboardEvent",
-          "HTMLDivElement",
-          "Props"
-        ]
-      },
-      "SegmentedOption": {
-        "path": "src/renderer/src/components/ui/SegmentedControl.tsx",
-        "dependencies": [
-          "ReactNode"
-        ]
-      },
-      "SegmentedSize": {
-        "path": "src/renderer/src/components/ui/SegmentedControl.tsx",
-        "dependencies": [
-          "react"
         ]
       },
       "Select": {
@@ -5334,6 +5094,8 @@
           "thefactory-ui/web/Input",
           "thefactory-ui/web/Modal",
           "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconSave",
+          "thefactory-ui/web/icons",
           "@renderer/contexts/GitHubCredentialsContext/useGitHubCredentials",
           "@renderer/contexts/GitHubCredentialsContext"
         ]
@@ -5351,6 +5113,8 @@
           "thefactory-ui/web/Modal",
           "thefactory-ui/web/useToast",
           "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconSave",
+          "thefactory-ui/web/icons",
           "@renderer/components/ui/Select/Select",
           "@renderer/components/ui/Select/SelectContent",
           "@renderer/components/ui/Select/SelectItem",
@@ -5509,44 +5273,6 @@
           "IntraMode"
         ]
       },
-      "Skeleton": {
-        "path": "src/renderer/src/components/ui/Skeleton.tsx",
-        "dependencies": [
-          "CSSProperties"
-        ]
-      },
-      "SkeletonText": {
-        "path": "src/renderer/src/components/ui/Skeleton.tsx",
-        "dependencies": [
-          "Skeleton"
-        ]
-      },
-      "Spinner": {
-        "path": "src/renderer/src/components/ui/Spinner.tsx",
-        "dependencies": [
-          "SpinnerProps"
-        ]
-      },
-      "SpinnerProps": {
-        "path": "src/renderer/src/components/ui/Spinner.tsx",
-        "dependencies": []
-      },
-      "SpinnerWithDot": {
-        "path": "src/renderer/src/components/ui/SpinnerWithDot.tsx",
-        "dependencies": [
-          "SpinnerWithDotProps"
-        ]
-      },
-      "SpinnerWithDotProps": {
-        "path": "src/renderer/src/components/ui/SpinnerWithDot.tsx",
-        "dependencies": [
-          "react"
-        ]
-      },
-      "splitPath": {
-        "path": "src/renderer/src/components/ui/PathDisplay.tsx",
-        "dependencies": []
-      },
       "startOfDay": {
         "path": "src/renderer/src/screens/projectTimeline/timelineDateUtils.ts",
         "dependencies": [
@@ -5589,7 +5315,15 @@
       "StatusChip": {
         "path": "src/renderer/src/components/agents/StatusChip.tsx",
         "dependencies": [
-          "thefactory-tools/ChatState"
+          "thefactory-tools/ChatState",
+          "thefactory-ui/web/icons/IconCheckCircle",
+          "thefactory-ui/web/icons/IconLightbulb",
+          "thefactory-ui/web/icons/IconLoader",
+          "thefactory-ui/web/icons/IconStopCircle",
+          "thefactory-ui/web/icons/IconXCircle",
+          "thefactory-ui/web/icons",
+          "thefactory-ui/web/Tooltip",
+          "thefactory-ui/web"
         ]
       },
       "StatusControl": {
@@ -5859,6 +5593,7 @@
           "thefactory-tools/StoryCreateInput",
           "StoryFormValues",
           "HTMLInputElement",
+          "thefactory-ui/web/Button",
           "thefactory-ui/web/ConfirmDialog",
           "thefactory-ui/web/Modal",
           "thefactory-ui/web",
@@ -5941,6 +5676,7 @@
           "thefactory-ui/web/Modal",
           "thefactory-ui/web",
           "thefactory-ui/web/icons/IconDelete",
+          "thefactory-ui/web/icons/IconSave",
           "thefactory-ui/web/icons",
           "thefactory-ui/web/useToast",
           "@renderer/navigation/Navigator/useNavigator",
@@ -6011,16 +5747,6 @@
           "Set",
           "IntraMode"
         ]
-      },
-      "Switch": {
-        "path": "src/renderer/src/components/ui/Switch.tsx",
-        "dependencies": [
-          "SwitchProps"
-        ]
-      },
-      "SwitchProps": {
-        "path": "src/renderer/src/components/ui/Switch.tsx",
-        "dependencies": []
       },
       "TestResultsView": {
         "path": "src/renderer/src/components/tests/TestResults.tsx",
@@ -6144,30 +5870,16 @@
           "thefactory-db/Entity"
         ]
       },
-      "ToastProvider": {
-        "path": "src/renderer/src/components/ui/Toast.tsx",
-        "dependencies": [
-          "ToastCtx",
-          "ReactNode",
-          "react-dom/createPortal"
-        ]
-      },
-      "ToastView": {
-        "path": "src/renderer/src/components/ui/Toast.tsx",
-        "dependencies": [
-          "CSSProperties",
-          "HTMLDivElement",
-          "PointerEvent",
-          "Element",
-          "ToastItem",
-          "react-dom/createPortal"
-        ]
-      },
       "TokensChip": {
         "path": "src/renderer/src/components/agents/TokensChip.tsx",
         "dependencies": [
           "thefactory-tools/Chat",
-          "react/useMemo"
+          "react/useMemo",
+          "thefactory-ui/web/Tooltip",
+          "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconArrowLeftMini",
+          "thefactory-ui/web/icons/IconArrowRightMini",
+          "thefactory-ui/web/icons"
         ]
       },
       "toLines": {
@@ -6245,33 +5957,6 @@
           "@renderer/utils/time",
           "@renderer/services/pricingService/getPrice",
           "@renderer/services/pricingService"
-        ]
-      },
-      "Tooltip": {
-        "path": "src/renderer/src/components/ui/Tooltip.tsx",
-        "dependencies": [
-          "Event",
-          "Node",
-          "EventTarget",
-          "HTMLElement",
-          "MouseEvent",
-          "PointerEvent",
-          "KeyboardEvent",
-          "ResizeObserver",
-          "HTMLDivElement",
-          "TooltipProps",
-          "react-dom/createPortal"
-        ]
-      },
-      "TooltipProps": {
-        "path": "src/renderer/src/components/ui/Tooltip.tsx",
-        "dependencies": [
-          "HTMLElement",
-          "RefObject",
-          "CSSProperties",
-          "IntrinsicElements",
-          "ReactNode",
-          "react-dom/createPortal"
         ]
       },
       "ToolToggle": {
@@ -6800,13 +6485,6 @@
           "react/useState"
         ]
       },
-      "useToast": {
-        "path": "src/renderer/src/components/ui/Toast.tsx",
-        "dependencies": [
-          "ToastCtx",
-          "react-dom/createPortal"
-        ]
-      },
       "useTypewriter": {
         "path": "src/renderer/src/hooks/useTypewriter.ts",
         "description": "Typewriter hook that progressively reveals the provided text.",
@@ -6916,8 +6594,9 @@
       "WizardFlowType": {
         "path": "src/renderer/src/screens/projects/wizard/ProjectWizardModal.tsx",
         "dependencies": [
-          "@renderer/components/ui/Modal/Modal",
-          "@renderer/components/ui/Modal",
+          "thefactory-ui/web/Modal",
+          "thefactory-ui/web/Spinner",
+          "thefactory-ui/web",
           "@renderer/services/projectsService/projectsService",
           "@renderer/services/projectsService",
           "@renderer/services/gitService/gitService",
@@ -6925,8 +6604,7 @@
           "@renderer/services/codeIntelService/codeIntelService",
           "@renderer/services/codeIntelService",
           "@renderer/contexts/ProjectsGroupsContext/useProjectsGroups",
-          "@renderer/contexts/ProjectsGroupsContext",
-          "@renderer/components/ui/Spinner"
+          "@renderer/contexts/ProjectsGroupsContext"
         ]
       },
       "WriteMultiToolsPreview": {
@@ -7029,7 +6707,16 @@
           "react/useEffect",
           "react/useMemo",
           "react/useState",
+          "thefactory-ui/web/icons/IconChevron",
+          "thefactory-ui/web/icons/IconDelete",
+          "thefactory-ui/web/icons/IconStopCircle",
+          "thefactory-ui/web/icons/IconThumbDown",
+          "thefactory-ui/web/icons/IconThumbUp",
+          "thefactory-ui/web/icons",
           "thefactory-tools/Chat",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web/DotBadge",
+          "thefactory-ui/web",
           "@renderer/hooks/useNotifications/useNotifications",
           "@renderer/hooks/useNotifications",
           "@renderer/contexts/CostsContext/useCosts",
@@ -7045,7 +6732,16 @@
           "react/useEffect",
           "react/useMemo",
           "react/useState",
+          "thefactory-ui/web/icons/IconChevron",
+          "thefactory-ui/web/icons/IconDelete",
+          "thefactory-ui/web/icons/IconStopCircle",
+          "thefactory-ui/web/icons/IconThumbDown",
+          "thefactory-ui/web/icons/IconThumbUp",
+          "thefactory-ui/web/icons",
           "thefactory-tools/LLMConfig",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web/DotBadge",
+          "thefactory-ui/web",
           "@renderer/hooks/useNotifications/useNotifications",
           "@renderer/hooks/useNotifications",
           "@renderer/contexts/CostsContext/useCosts",
@@ -7089,28 +6785,6 @@
           "thefactory-ui/web",
           "thefactory-ui/web/icons/IconPlay",
           "thefactory-ui/web/icons"
-        ]
-      },
-      "Alert": {
-        "path": "renderer/src/components/ui/Alert.tsx",
-        "dependencies": [
-          "ReactNode",
-          "AlertVariant"
-        ]
-      },
-      "AlertDialog": {
-        "path": "renderer/src/components/ui/Modal.tsx",
-        "dependencies": [
-          "HTMLButtonElement",
-          "RefObject",
-          "HTMLElement",
-          "ReactNode"
-        ]
-      },
-      "AlertVariant": {
-        "path": "renderer/src/components/ui/Alert.tsx",
-        "dependencies": [
-          "react"
         ]
       },
       "AppSettings": {
@@ -7232,19 +6906,6 @@
           "@renderer/components/stories/StatusControl"
         ]
       },
-      "BranchChip": {
-        "path": "renderer/src/components/ui/BranchChip.tsx",
-        "dependencies": [
-          "BranchChipType"
-        ]
-      },
-      "BranchChipType": {
-        "path": "renderer/src/components/ui/BranchChip.tsx",
-        "description": "BranchChip — reusable inline badge for branch metadata.",
-        "dependencies": [
-          "react"
-        ]
-      },
       "buildAllProjectsRows": {
         "path": "renderer/src/screens/projectTimeline/timelineItemUtils.ts",
         "dependencies": [
@@ -7275,36 +6936,6 @@
         "path": "renderer/src/components/chat/ToolCall/utils.ts",
         "dependencies": [
           "diff/createTwoFilesPatch"
-        ]
-      },
-      "Button": {
-        "path": "renderer/src/components/ui/Button.tsx",
-        "dependencies": [
-          "ButtonProps",
-          "HTMLButtonElement",
-          "@radix-ui/react-slot/Slot"
-        ]
-      },
-      "ButtonProps": {
-        "path": "renderer/src/components/ui/Button.tsx",
-        "dependencies": [
-          "ButtonSize",
-          "ButtonVariant",
-          "HTMLButtonElement",
-          "ButtonHTMLAttributes",
-          "@radix-ui/react-slot/Slot"
-        ]
-      },
-      "ButtonSize": {
-        "path": "renderer/src/components/ui/Button.tsx",
-        "dependencies": [
-          "@radix-ui/react-slot/Slot"
-        ]
-      },
-      "ButtonVariant": {
-        "path": "renderer/src/components/ui/Button.tsx",
-        "dependencies": [
-          "@radix-ui/react-slot/Slot"
         ]
       },
       "ChatDraft": {
@@ -7788,9 +7419,10 @@
           "thefactory-tools/ChatContextGroupTopic",
           "thefactory-tools/ChatContextProjectTopic",
           "thefactory-tools/ChatContextStory",
+          "thefactory-ui/web/CollapsibleSidebar",
+          "thefactory-ui/web/DotBadge",
           "thefactory-ui/web/SegmentedControl",
           "thefactory-ui/web",
-          "thefactory-ui/web/DotBadge",
           "thefactory-tools/utils/getChatContextKey",
           "thefactory-tools/utils/getChatContext",
           "thefactory-tools/utils",
@@ -7805,10 +7437,6 @@
           "@renderer/components/chat/ChatsNavigationSidebar",
           "@renderer/components/chat/ChatTopicCreateModal"
         ]
-      },
-      "Chip": {
-        "path": "renderer/src/components/ui/Chip.tsx",
-        "dependencies": []
       },
       "clamp": {
         "path": "renderer/src/screens/projectTimeline/timelineDateUtils.ts",
@@ -7831,21 +7459,14 @@
           "clsx/clsx"
         ]
       },
-      "Code": {
-        "path": "renderer/src/components/ui/Code.tsx",
-        "dependencies": [
-          "CodeProps",
-          "react/useMemo",
-          "prismjs/highlight"
-        ]
-      },
       "CodeInfoChip": {
         "path": "renderer/src/screens/projects/CodeInfoChip.tsx",
         "dependencies": [
           "CodeInfoChipProps",
+          "thefactory-ui/web/Tooltip",
+          "thefactory-ui/web",
           "@renderer/utils/utils/cn",
-          "@renderer/utils/utils",
-          "@renderer/components/ui/Tooltip"
+          "@renderer/utils/utils"
         ]
       },
       "codeIntelManager": {
@@ -7893,26 +7514,6 @@
           "@renderer/contexts/StoriesContext/useStories",
           "@renderer/contexts/StoriesContext",
           "@renderer/components/stories/DependencyBullet"
-        ]
-      },
-      "CollapsibleSidebar": {
-        "path": "renderer/src/components/ui/CollapsibleSidebar.tsx",
-        "dependencies": [
-          "KeyboardEvent",
-          "HTMLButtonElement",
-          "SetStateAction",
-          "Dispatch",
-          "Props",
-          "@renderer/screens/projects/projectIcons/renderProjectIcon",
-          "@renderer/screens/projects/projectIcons"
-        ]
-      },
-      "CollapsibleSidebarItem": {
-        "path": "renderer/src/components/ui/CollapsibleSidebar.tsx",
-        "dependencies": [
-          "ReactNode",
-          "@renderer/screens/projects/projectIcons/renderProjectIcon",
-          "@renderer/screens/projects/projectIcons"
         ]
       },
       "CommandMenu": {
@@ -7966,16 +7567,6 @@
           "thefactory-tools/CompletionMessage"
         ]
       },
-      "components": {
-        "path": "renderer/src/components/ui/Markdown.tsx",
-        "dependencies": [
-          "Components",
-          "Partial",
-          "react/FC",
-          "react/memo",
-          "react/useMemo"
-        ]
-      },
       "computeCommitGraph": {
         "path": "renderer/src/screens/git/commitGraph/gitCommitGraphUtils.ts",
         "dependencies": [
@@ -8023,12 +7614,17 @@
       "CostChip": {
         "path": "renderer/src/components/agents/CostChip.tsx",
         "dependencies": [
-          "CostChipProps"
+          "CostChipProps",
+          "thefactory-ui/web/Tooltip",
+          "thefactory-ui/web"
         ]
       },
       "CostChipProps": {
         "path": "renderer/src/components/agents/CostChip.tsx",
-        "dependencies": []
+        "dependencies": [
+          "thefactory-ui/web/Tooltip",
+          "thefactory-ui/web"
+        ]
       },
       "CostsContextValue": {
         "path": "renderer/src/contexts/CostsContext.tsx",
@@ -8297,24 +7893,6 @@
           "Date"
         ]
       },
-      "DiffViewer": {
-        "path": "renderer/src/components/ui/DiffViewer.tsx",
-        "dependencies": [
-          "IntraMode",
-          "Set",
-          "DiffViewerProps",
-          "@renderer/screens/git/common/GitFileChangesPills/GitFileChangesPills",
-          "@renderer/screens/git/common/GitFileChangesPills"
-        ]
-      },
-      "DiffViewerProps": {
-        "path": "renderer/src/components/ui/DiffViewer.tsx",
-        "dependencies": [
-          "IntraMode",
-          "@renderer/screens/git/common/GitFileChangesPills/GitFileChangesPills",
-          "@renderer/screens/git/common/GitFileChangesPills"
-        ]
-      },
       "DirNode": {
         "path": "renderer/src/contexts/FilesContext.tsx",
         "dependencies": [
@@ -8355,19 +7933,6 @@
         "path": "renderer/src/services/documentIngestionService.ts",
         "dependencies": [
           "Promise"
-        ]
-      },
-      "DotBadge": {
-        "path": "renderer/src/components/ui/DotBadge.tsx",
-        "dependencies": [
-          "DotBadgeProps",
-          "FC"
-        ]
-      },
-      "DotBadgeProps": {
-        "path": "renderer/src/components/ui/DotBadge.tsx",
-        "dependencies": [
-          "react"
         ]
       },
       "EnhancedMessage": {
@@ -8635,6 +8200,7 @@
           "Partial",
           "thefactory-ui/web/useToast",
           "thefactory-ui/web",
+          "thefactory-ui/web/Button",
           "thefactory-ui/web/ConfirmDialog",
           "thefactory-ui/web/Modal",
           "@renderer/contexts/StoriesContext/useStories",
@@ -8661,6 +8227,7 @@
           "thefactory-ui/web/Modal",
           "thefactory-ui/web",
           "thefactory-ui/web/icons/IconDelete",
+          "thefactory-ui/web/icons/IconSave",
           "thefactory-ui/web/icons",
           "thefactory-ui/web/useToast",
           "@renderer/contexts/StoriesContext/useStories",
@@ -8683,6 +8250,7 @@
           "@renderer/components/ui/FileSelector",
           "thefactory-ui/web/icons/IconDelete",
           "thefactory-ui/web/icons/IconPlus",
+          "thefactory-ui/web/icons/IconSave",
           "thefactory-ui/web/icons",
           "thefactory-ui/web/Button",
           "thefactory-ui/web/Modal",
@@ -8698,6 +8266,7 @@
           "@renderer/components/ui/FileSelector",
           "thefactory-ui/web/icons/IconDelete",
           "thefactory-ui/web/icons/IconPlus",
+          "thefactory-ui/web/icons/IconSave",
           "thefactory-ui/web/icons",
           "thefactory-ui/web/Button",
           "thefactory-ui/web/Modal",
@@ -8718,39 +8287,9 @@
           "@renderer/components/stories/FeatureCard"
         ]
       },
-      "FileDisplay": {
-        "path": "renderer/src/components/ui/FileDisplay.tsx",
-        "dependencies": [
-          "Record",
-          "CSSProperties",
-          "FileDisplayProps",
-          "FC",
-          "thefactory-tools/FileMeta",
-          "thefactory-tools/utils/inferFileType",
-          "thefactory-tools/utils"
-        ]
-      },
-      "FileDisplayProps": {
-        "path": "renderer/src/components/ui/FileDisplay.tsx",
-        "dependencies": [
-          "MouseEvent",
-          "thefactory-tools/FileMeta",
-          "ReactNode",
-          "thefactory-tools/utils/inferFileType",
-          "thefactory-tools/utils"
-        ]
-      },
       "fileHash": {
         "path": "renderer/src/navigation/FilesNavigation.ts",
         "dependencies": []
-      },
-      "FileKind": {
-        "path": "renderer/src/components/ui/FileDisplay.tsx",
-        "dependencies": [
-          "thefactory-tools/FileMeta",
-          "thefactory-tools/utils/inferFileType",
-          "thefactory-tools/utils"
-        ]
       },
       "FileMentionsTextarea": {
         "path": "renderer/src/components/ui/FileMentionsTextarea.tsx",
@@ -10408,11 +9947,11 @@
           "ProjectWizardCodeState",
           "ProjectWizardCreateState",
           "ImportMode",
-          "@renderer/components/ui/Button/Button",
-          "@renderer/components/ui/Button",
-          "@renderer/components/ui/icons/Icons/IconFolder",
-          "@renderer/components/ui/icons/Icons/IconDocument",
-          "@renderer/components/ui/icons/Icons",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconDocument",
+          "thefactory-ui/web/icons/IconFolder",
+          "thefactory-ui/web/icons",
           "@renderer/services/projectsService/projectsService",
           "@renderer/services/projectsService"
         ]
@@ -10420,11 +9959,11 @@
       "ImportMode": {
         "path": "renderer/src/screens/projects/wizard/ProjectWizardImportModeStep.tsx",
         "dependencies": [
-          "@renderer/components/ui/Button/Button",
-          "@renderer/components/ui/Button",
-          "@renderer/components/ui/icons/Icons/IconFolder",
-          "@renderer/components/ui/icons/Icons/IconDocument",
-          "@renderer/components/ui/icons/Icons",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconDocument",
+          "thefactory-ui/web/icons/IconFolder",
+          "thefactory-ui/web/icons",
           "@renderer/services/projectsService/projectsService",
           "@renderer/services/projectsService"
         ]
@@ -10446,13 +9985,6 @@
         "path": "renderer/src/components/chat/tool-popups/InlineTextDiff.tsx",
         "dependencies": [
           "IntraMode"
-        ]
-      },
-      "Input": {
-        "path": "renderer/src/components/ui/Input.tsx",
-        "dependencies": [
-          "InputProps",
-          "HTMLInputElement"
         ]
       },
       "IntraMode": {
@@ -10485,12 +10017,6 @@
         "path": "renderer/src/screens/projectTimeline/timelineDateUtils.ts",
         "dependencies": [
           "Date"
-        ]
-      },
-      "JsonView": {
-        "path": "renderer/src/components/ui/JsonView.tsx",
-        "dependencies": [
-          "JSON"
         ]
       },
       "KNOWN_FRAMEWORKS_BY_LANGUAGE": {
@@ -10644,8 +10170,8 @@
           "@renderer/components/ui/Select/SelectTrigger",
           "@renderer/components/ui/Select/SelectValue",
           "@renderer/components/ui/Select",
-          "@renderer/components/ui/Switch/Switch",
-          "@renderer/components/ui/Switch",
+          "thefactory-ui/web/Switch",
+          "thefactory-ui/web",
           "@renderer/contexts/ProjectContext/useActiveProject",
           "@renderer/contexts/ProjectContext",
           "types/liveDataTypes/LiveDataProvider",
@@ -10827,15 +10353,6 @@
           "thefactory-db/Entity"
         ]
       },
-      "Markdown": {
-        "path": "renderer/src/components/ui/Markdown.tsx",
-        "dependencies": [
-          "MemoizedReactMarkdown",
-          "react/FC",
-          "react/memo",
-          "react/useMemo"
-        ]
-      },
       "MarkdownEditor": {
         "path": "renderer/src/components/files/MarkdownEditor.tsx",
         "dependencies": [
@@ -10852,24 +10369,6 @@
           "thefactory-tools/FileMeta",
           "thefactory-ui/web/MarkdownEditor",
           "thefactory-ui/web"
-        ]
-      },
-      "MarkdownMessage": {
-        "path": "renderer/src/components/ui/Markdown.tsx",
-        "dependencies": [
-          "Markdown",
-          "react/FC",
-          "react/memo",
-          "react/useMemo"
-        ]
-      },
-      "MemoizedReactMarkdown": {
-        "path": "renderer/src/components/ui/Markdown.tsx",
-        "dependencies": [
-          "Options",
-          "react/FC",
-          "react/memo",
-          "react/useMemo"
         ]
       },
       "MenuPosition": {
@@ -10988,16 +10487,6 @@
           "thefactory-ui/web"
         ]
       },
-      "Modal": {
-        "path": "renderer/src/components/ui/Modal.tsx",
-        "dependencies": [
-          "KeyboardEvent",
-          "MouseEvent",
-          "HTMLElement",
-          "HTMLDivElement",
-          "ModalProps"
-        ]
-      },
       "ModalHost": {
         "path": "renderer/src/navigation/ModalHost.tsx",
         "dependencies": [
@@ -11008,14 +10497,6 @@
           "@renderer/screens/projects/ProjectManagerModal",
           "@renderer/screens/git/modals/merge/GitMergeModal",
           "@renderer/screens/git/modals/GitCommitModal"
-        ]
-      },
-      "ModalProps": {
-        "path": "renderer/src/components/ui/Modal.tsx",
-        "dependencies": [
-          "ReactNode",
-          "HTMLElement",
-          "RefObject"
         ]
       },
       "ModalRoute": {
@@ -11421,10 +10902,6 @@
           "ParsedHunk"
         ]
       },
-      "PathDisplay": {
-        "path": "renderer/src/components/ui/PathDisplay.tsx",
-        "dependencies": []
-      },
       "PendingBranch": {
         "path": "renderer/src/contexts/GitContext.tsx",
         "dependencies": [
@@ -11545,7 +11022,9 @@
       "ProjectChip": {
         "path": "renderer/src/components/agents/ProjectChip.tsx",
         "dependencies": [
-          "MouseEvent"
+          "MouseEvent",
+          "thefactory-ui/web/Tooltip",
+          "thefactory-ui/web"
         ]
       },
       "ProjectCodeInfoModal": {
@@ -11557,10 +11036,11 @@
           "ProjectCodeInfoModalProps",
           "react/useState",
           "react/useEffect",
-          "@renderer/components/ui/Modal/Modal",
-          "@renderer/components/ui/Modal",
-          "@renderer/components/ui/Button/Button",
-          "@renderer/components/ui/Button",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web/Modal",
+          "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconSave",
+          "thefactory-ui/web/icons",
           "@renderer/components/ui/Select/Select",
           "@renderer/components/ui/Select/SelectContent",
           "@renderer/components/ui/Select/SelectItem",
@@ -11588,8 +11068,10 @@
           "ProjectEditorFormProps",
           "@renderer/contexts/GitHubCredentialsContext/useGitHubCredentials",
           "@renderer/contexts/GitHubCredentialsContext",
-          "@renderer/components/ui/Switch/Switch",
-          "@renderer/components/ui/Switch",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web/Modal",
+          "thefactory-ui/web/Switch",
+          "thefactory-ui/web",
           "@renderer/components/ui/Select/Select",
           "@renderer/components/ui/Select/SelectContent",
           "@renderer/components/ui/Select/SelectItem",
@@ -11597,11 +11079,7 @@
           "@renderer/components/ui/Select/SelectValue",
           "@renderer/components/ui/Select",
           "@renderer/contexts/ProjectsGroupsContext/useProjectsGroups",
-          "@renderer/contexts/ProjectsGroupsContext",
-          "@renderer/components/ui/Modal/Modal",
-          "@renderer/components/ui/Modal",
-          "@renderer/components/ui/Button/Button",
-          "@renderer/components/ui/Button"
+          "@renderer/contexts/ProjectsGroupsContext"
         ]
       },
       "ProjectEditorFormProps": {
@@ -11612,8 +11090,10 @@
           "Dispatch",
           "@renderer/contexts/GitHubCredentialsContext/useGitHubCredentials",
           "@renderer/contexts/GitHubCredentialsContext",
-          "@renderer/components/ui/Switch/Switch",
-          "@renderer/components/ui/Switch",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web/Modal",
+          "thefactory-ui/web/Switch",
+          "thefactory-ui/web",
           "@renderer/components/ui/Select/Select",
           "@renderer/components/ui/Select/SelectContent",
           "@renderer/components/ui/Select/SelectItem",
@@ -11621,11 +11101,7 @@
           "@renderer/components/ui/Select/SelectValue",
           "@renderer/components/ui/Select",
           "@renderer/contexts/ProjectsGroupsContext/useProjectsGroups",
-          "@renderer/contexts/ProjectsGroupsContext",
-          "@renderer/components/ui/Modal/Modal",
-          "@renderer/components/ui/Modal",
-          "@renderer/components/ui/Button/Button",
-          "@renderer/components/ui/Button"
+          "@renderer/contexts/ProjectsGroupsContext"
         ]
       },
       "ProjectGitStatus": {
@@ -11656,18 +11132,17 @@
           "GroupNameModal",
           "@renderer/contexts/ProjectsGroupsContext/useProjectsGroups",
           "@renderer/contexts/ProjectsGroupsContext",
-          "@renderer/components/ui/Button/Button",
-          "@renderer/components/ui/Button",
-          "@renderer/components/ui/Modal/Modal",
-          "@renderer/components/ui/Modal",
-          "@renderer/components/ui/icons/Icons/IconArrowLeftMini",
-          "@renderer/components/ui/icons/Icons/IconArrowRightMini",
-          "@renderer/components/ui/icons/Icons/IconDelete",
-          "@renderer/components/ui/icons/Icons/IconEdit",
-          "@renderer/components/ui/icons/Icons/IconPlus",
-          "@renderer/components/ui/icons/Icons",
-          "@renderer/components/ui/Switch/Switch",
-          "@renderer/components/ui/Switch",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web/Modal",
+          "thefactory-ui/web/Switch",
+          "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconArrowLeftMini",
+          "thefactory-ui/web/icons/IconArrowRightMini",
+          "thefactory-ui/web/icons/IconDelete",
+          "thefactory-ui/web/icons/IconEdit",
+          "thefactory-ui/web/icons/IconPlus",
+          "thefactory-ui/web/icons/IconSave",
+          "thefactory-ui/web/icons",
           "@renderer/components/ui/Select/Select",
           "@renderer/components/ui/Select/SelectContent",
           "@renderer/components/ui/Select/SelectItem",
@@ -11691,21 +11166,22 @@
           "ViewMode",
           "Record",
           "HTMLInputElement",
-          "@renderer/components/ui/Modal/Modal",
-          "@renderer/components/ui/Modal",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web/Modal",
+          "thefactory-ui/web/Spinner",
+          "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconArrowLeftMini",
+          "thefactory-ui/web/icons/IconArrowRightMini",
+          "thefactory-ui/web/icons/IconBack",
+          "thefactory-ui/web/icons/IconDelete",
+          "thefactory-ui/web/icons/IconEdit",
+          "thefactory-ui/web/icons/IconPlus",
+          "thefactory-ui/web/icons/IconSave",
+          "thefactory-ui/web/icons",
           "@renderer/services/projectsService/projectsService",
           "@renderer/services/projectsService",
           "@renderer/contexts/ProjectContext/useProjectContext",
           "@renderer/contexts/ProjectContext",
-          "@renderer/components/ui/Button/Button",
-          "@renderer/components/ui/Button",
-          "@renderer/components/ui/icons/Icons/IconDelete",
-          "@renderer/components/ui/icons/Icons/IconEdit",
-          "@renderer/components/ui/icons/Icons/IconPlus",
-          "@renderer/components/ui/icons/Icons/IconArrowLeftMini",
-          "@renderer/components/ui/icons/Icons/IconArrowRightMini",
-          "@renderer/components/ui/icons/Icons/IconBack",
-          "@renderer/components/ui/icons/Icons",
           "@renderer/components/ui/Select/Select",
           "@renderer/components/ui/Select/SelectContent",
           "@renderer/components/ui/Select/SelectItem",
@@ -11713,8 +11189,7 @@
           "@renderer/components/ui/Select/SelectValue",
           "@renderer/components/ui/Select",
           "@renderer/contexts/ProjectsGroupsContext/useProjectsGroups",
-          "@renderer/contexts/ProjectsGroupsContext",
-          "@renderer/components/ui/Spinner"
+          "@renderer/contexts/ProjectsGroupsContext"
         ]
       },
       "ProjectNavItem": {
@@ -11897,8 +11372,13 @@
           "Zoom",
           "HTMLDivElement",
           "HoverInfo",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web/Modal",
+          "thefactory-ui/web/SegmentedControl",
           "thefactory-ui/web/Switch",
-          "thefactory-ui/web"
+          "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconSave",
+          "thefactory-ui/web/icons"
         ]
       },
       "ProjectWizardCodeState": {
@@ -11931,10 +11411,9 @@
       "ProjectWizardCreateState": {
         "path": "renderer/src/screens/projects/wizard/ProjectWizardCreateStep.tsx",
         "dependencies": [
-          "@renderer/components/ui/Button/Button",
-          "@renderer/components/ui/Button",
-          "@renderer/components/ui/Modal/Modal",
-          "@renderer/components/ui/Modal",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web/Modal",
+          "thefactory-ui/web",
           "@renderer/services/projectsService/projectsService",
           "@renderer/services/projectsService"
         ]
@@ -11943,10 +11422,9 @@
         "path": "renderer/src/screens/projects/wizard/ProjectWizardCreateStep.tsx",
         "dependencies": [
           "ProjectWizardCreateStepProps",
-          "@renderer/components/ui/Button/Button",
-          "@renderer/components/ui/Button",
-          "@renderer/components/ui/Modal/Modal",
-          "@renderer/components/ui/Modal",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web/Modal",
+          "thefactory-ui/web",
           "@renderer/services/projectsService/projectsService",
           "@renderer/services/projectsService"
         ]
@@ -11987,11 +11465,11 @@
           "ProjectWizardCodeState",
           "ImportMode",
           "ProjectWizardImportModeStepProps",
-          "@renderer/components/ui/Button/Button",
-          "@renderer/components/ui/Button",
-          "@renderer/components/ui/icons/Icons/IconFolder",
-          "@renderer/components/ui/icons/Icons/IconDocument",
-          "@renderer/components/ui/icons/Icons",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconDocument",
+          "thefactory-ui/web/icons/IconFolder",
+          "thefactory-ui/web/icons",
           "@renderer/services/projectsService/projectsService",
           "@renderer/services/projectsService"
         ]
@@ -12006,8 +11484,9 @@
           "ImportMode",
           "ProjectWizardGroupState",
           "ProjectWizardModalProps",
-          "@renderer/components/ui/Modal/Modal",
-          "@renderer/components/ui/Modal",
+          "thefactory-ui/web/Modal",
+          "thefactory-ui/web/Spinner",
+          "thefactory-ui/web",
           "@renderer/services/projectsService/projectsService",
           "@renderer/services/projectsService",
           "@renderer/services/gitService/gitService",
@@ -12015,8 +11494,7 @@
           "@renderer/services/codeIntelService/codeIntelService",
           "@renderer/services/codeIntelService",
           "@renderer/contexts/ProjectsGroupsContext/useProjectsGroups",
-          "@renderer/contexts/ProjectsGroupsContext",
-          "@renderer/components/ui/Spinner"
+          "@renderer/contexts/ProjectsGroupsContext"
         ]
       },
       "ProjectWizardTypeStep": {
@@ -12086,21 +11564,6 @@
         "path": "renderer/src/components/chat/ToolCall/components/ReorderList.tsx",
         "dependencies": [
           "react"
-        ]
-      },
-      "ResizeHandle": {
-        "path": "renderer/src/components/ui/ResizeHandle.tsx",
-        "dependencies": [
-          "ResizeHandleProps"
-        ]
-      },
-      "ResizeHandleProps": {
-        "path": "renderer/src/components/ui/ResizeHandle.tsx",
-        "dependencies": [
-          "CSSProperties",
-          "HTMLDivElement",
-          "MouseEvent",
-          "PointerEvent"
         ]
       },
       "ResolvedFeatureRef": {
@@ -12213,35 +11676,10 @@
           "thefactory-ui/web/icons"
         ]
       },
-      "SafeText": {
-        "path": "renderer/src/components/ui/SafeText.tsx",
-        "dependencies": []
-      },
       "SectionTitle": {
         "path": "renderer/src/components/chat/ToolCall/components/SectionTitle.tsx",
         "dependencies": [
           "ReactNode"
-        ]
-      },
-      "SegmentedControl": {
-        "path": "renderer/src/components/ui/SegmentedControl.tsx",
-        "dependencies": [
-          "HTMLButtonElement",
-          "KeyboardEvent",
-          "HTMLDivElement",
-          "Props"
-        ]
-      },
-      "SegmentedOption": {
-        "path": "renderer/src/components/ui/SegmentedControl.tsx",
-        "dependencies": [
-          "ReactNode"
-        ]
-      },
-      "SegmentedSize": {
-        "path": "renderer/src/components/ui/SegmentedControl.tsx",
-        "dependencies": [
-          "react"
         ]
       },
       "Select": {
@@ -12293,6 +11731,8 @@
           "thefactory-ui/web/Input",
           "thefactory-ui/web/Modal",
           "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconSave",
+          "thefactory-ui/web/icons",
           "@renderer/contexts/GitHubCredentialsContext/useGitHubCredentials",
           "@renderer/contexts/GitHubCredentialsContext"
         ]
@@ -12310,6 +11750,8 @@
           "thefactory-ui/web/Modal",
           "thefactory-ui/web/useToast",
           "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconSave",
+          "thefactory-ui/web/icons",
           "@renderer/components/ui/Select/Select",
           "@renderer/components/ui/Select/SelectContent",
           "@renderer/components/ui/Select/SelectItem",
@@ -12468,44 +11910,6 @@
           "IntraMode"
         ]
       },
-      "Skeleton": {
-        "path": "renderer/src/components/ui/Skeleton.tsx",
-        "dependencies": [
-          "CSSProperties"
-        ]
-      },
-      "SkeletonText": {
-        "path": "renderer/src/components/ui/Skeleton.tsx",
-        "dependencies": [
-          "Skeleton"
-        ]
-      },
-      "Spinner": {
-        "path": "renderer/src/components/ui/Spinner.tsx",
-        "dependencies": [
-          "SpinnerProps"
-        ]
-      },
-      "SpinnerProps": {
-        "path": "renderer/src/components/ui/Spinner.tsx",
-        "dependencies": []
-      },
-      "SpinnerWithDot": {
-        "path": "renderer/src/components/ui/SpinnerWithDot.tsx",
-        "dependencies": [
-          "SpinnerWithDotProps"
-        ]
-      },
-      "SpinnerWithDotProps": {
-        "path": "renderer/src/components/ui/SpinnerWithDot.tsx",
-        "dependencies": [
-          "react"
-        ]
-      },
-      "splitPath": {
-        "path": "renderer/src/components/ui/PathDisplay.tsx",
-        "dependencies": []
-      },
       "startOfDay": {
         "path": "renderer/src/screens/projectTimeline/timelineDateUtils.ts",
         "dependencies": [
@@ -12548,7 +11952,15 @@
       "StatusChip": {
         "path": "renderer/src/components/agents/StatusChip.tsx",
         "dependencies": [
-          "thefactory-tools/ChatState"
+          "thefactory-tools/ChatState",
+          "thefactory-ui/web/icons/IconCheckCircle",
+          "thefactory-ui/web/icons/IconLightbulb",
+          "thefactory-ui/web/icons/IconLoader",
+          "thefactory-ui/web/icons/IconStopCircle",
+          "thefactory-ui/web/icons/IconXCircle",
+          "thefactory-ui/web/icons",
+          "thefactory-ui/web/Tooltip",
+          "thefactory-ui/web"
         ]
       },
       "StatusControl": {
@@ -12818,6 +12230,7 @@
           "thefactory-tools/StoryCreateInput",
           "StoryFormValues",
           "HTMLInputElement",
+          "thefactory-ui/web/Button",
           "thefactory-ui/web/ConfirmDialog",
           "thefactory-ui/web/Modal",
           "thefactory-ui/web",
@@ -12900,6 +12313,7 @@
           "thefactory-ui/web/Modal",
           "thefactory-ui/web",
           "thefactory-ui/web/icons/IconDelete",
+          "thefactory-ui/web/icons/IconSave",
           "thefactory-ui/web/icons",
           "thefactory-ui/web/useToast",
           "@renderer/navigation/Navigator/useNavigator",
@@ -12970,16 +12384,6 @@
           "Set",
           "IntraMode"
         ]
-      },
-      "Switch": {
-        "path": "renderer/src/components/ui/Switch.tsx",
-        "dependencies": [
-          "SwitchProps"
-        ]
-      },
-      "SwitchProps": {
-        "path": "renderer/src/components/ui/Switch.tsx",
-        "dependencies": []
       },
       "TestResultsView": {
         "path": "renderer/src/components/tests/TestResults.tsx",
@@ -13103,30 +12507,16 @@
           "thefactory-db/Entity"
         ]
       },
-      "ToastProvider": {
-        "path": "renderer/src/components/ui/Toast.tsx",
-        "dependencies": [
-          "ToastCtx",
-          "ReactNode",
-          "react-dom/createPortal"
-        ]
-      },
-      "ToastView": {
-        "path": "renderer/src/components/ui/Toast.tsx",
-        "dependencies": [
-          "CSSProperties",
-          "HTMLDivElement",
-          "PointerEvent",
-          "Element",
-          "ToastItem",
-          "react-dom/createPortal"
-        ]
-      },
       "TokensChip": {
         "path": "renderer/src/components/agents/TokensChip.tsx",
         "dependencies": [
           "thefactory-tools/Chat",
-          "react/useMemo"
+          "react/useMemo",
+          "thefactory-ui/web/Tooltip",
+          "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconArrowLeftMini",
+          "thefactory-ui/web/icons/IconArrowRightMini",
+          "thefactory-ui/web/icons"
         ]
       },
       "toLines": {
@@ -13204,33 +12594,6 @@
           "@renderer/utils/time",
           "@renderer/services/pricingService/getPrice",
           "@renderer/services/pricingService"
-        ]
-      },
-      "Tooltip": {
-        "path": "renderer/src/components/ui/Tooltip.tsx",
-        "dependencies": [
-          "Event",
-          "Node",
-          "EventTarget",
-          "HTMLElement",
-          "MouseEvent",
-          "PointerEvent",
-          "KeyboardEvent",
-          "ResizeObserver",
-          "HTMLDivElement",
-          "TooltipProps",
-          "react-dom/createPortal"
-        ]
-      },
-      "TooltipProps": {
-        "path": "renderer/src/components/ui/Tooltip.tsx",
-        "dependencies": [
-          "HTMLElement",
-          "RefObject",
-          "CSSProperties",
-          "IntrinsicElements",
-          "ReactNode",
-          "react-dom/createPortal"
         ]
       },
       "ToolToggle": {
@@ -13759,13 +13122,6 @@
           "react/useState"
         ]
       },
-      "useToast": {
-        "path": "renderer/src/components/ui/Toast.tsx",
-        "dependencies": [
-          "ToastCtx",
-          "react-dom/createPortal"
-        ]
-      },
       "useTypewriter": {
         "path": "renderer/src/hooks/useTypewriter.ts",
         "description": "Typewriter hook that progressively reveals the provided text.",
@@ -13875,8 +13231,9 @@
       "WizardFlowType": {
         "path": "renderer/src/screens/projects/wizard/ProjectWizardModal.tsx",
         "dependencies": [
-          "@renderer/components/ui/Modal/Modal",
-          "@renderer/components/ui/Modal",
+          "thefactory-ui/web/Modal",
+          "thefactory-ui/web/Spinner",
+          "thefactory-ui/web",
           "@renderer/services/projectsService/projectsService",
           "@renderer/services/projectsService",
           "@renderer/services/gitService/gitService",
@@ -13884,8 +13241,7 @@
           "@renderer/services/codeIntelService/codeIntelService",
           "@renderer/services/codeIntelService",
           "@renderer/contexts/ProjectsGroupsContext/useProjectsGroups",
-          "@renderer/contexts/ProjectsGroupsContext",
-          "@renderer/components/ui/Spinner"
+          "@renderer/contexts/ProjectsGroupsContext"
         ]
       },
       "WriteMultiToolsPreview": {

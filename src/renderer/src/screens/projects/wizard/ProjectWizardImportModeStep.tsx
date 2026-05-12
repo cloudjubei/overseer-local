@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
-import { Button } from '@renderer/components/ui/Button'
-import { IconFolder, IconDocument } from '@renderer/components/ui/icons/Icons'
+import { Button } from 'thefactory-ui/web'
+import { IconDocument, IconFolder } from 'thefactory-ui/web/icons'
 import { projectsService } from '@renderer/services/projectsService'
 import { ProjectWizardCreateState } from './ProjectWizardCreateStep'
 import { ProjectWizardCodeState } from './ProjectWizardCodeStep'

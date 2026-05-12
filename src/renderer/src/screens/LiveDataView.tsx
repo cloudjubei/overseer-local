@@ -6,7 +6,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@renderer/components/ui/Select'
-import { Switch } from '@renderer/components/ui/Switch'
+import { Switch } from 'thefactory-ui/web'
 import useLiveData from '@renderer/hooks/useLiveData'
 import { useActiveProject } from '@renderer/contexts/ProjectContext'
 import {

@@ -14,6 +14,11 @@ export default defineConfig({
       alias: {
         '@renderer': resolve('src/renderer/src'),
       },
+      // `thefactory-ui` is linked via `file:` and has its own `node_modules/react`.
+      // Without dedupe, Vite resolves bare `react` imports from the symlinked
+      // package's tree, so the renderer ends up with two React copies and hooks
+      // (e.g. `ToastProvider`'s `useState`) fail with "Cannot read properties of null".
+      dedupe: ['react', 'react-dom'],
     },
     plugins: [react()],
   },

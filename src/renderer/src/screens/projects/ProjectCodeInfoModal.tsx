@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Modal } from '@renderer/components/ui/Modal'
-import { Button } from '@renderer/components/ui/Button'
+import { Button, Modal } from 'thefactory-ui/web'
 import { IconSave } from 'thefactory-ui/web/icons'
 import {
   Select,

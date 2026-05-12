@@ -16,10 +16,8 @@ import type {
   ChatContextProjectTopic,
   ChatContextStory,
 } from 'thefactory-tools'
-import CollapsibleSidebar from '../components/ui/CollapsibleSidebar'
 import ChatsNavigationSidebar from '@renderer/components/chat/ChatsNavigationSidebar'
-import { SegmentedControl } from 'thefactory-ui/web'
-import { DotBadge } from 'thefactory-ui/web'
+import { CollapsibleSidebar, DotBadge, SegmentedControl } from 'thefactory-ui/web'
 import { getChatContextKey, getChatContext } from 'thefactory-tools/utils'
 import { useAppSettings } from '@renderer/contexts/AppSettingsContext'
 import { useNotifications } from '@renderer/hooks/useNotifications'

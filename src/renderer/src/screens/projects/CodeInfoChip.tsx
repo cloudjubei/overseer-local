@@ -1,5 +1,5 @@
 import { renderLanguageIcon } from './codeInfoIcons'
-import Tooltip from '@renderer/components/ui/Tooltip'
+import { Tooltip } from 'thefactory-ui/web'
 import { cn } from '@renderer/utils/utils'
 
 interface CodeInfoChipProps {

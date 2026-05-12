@@ -1,7 +1,6 @@
 import React, { useId, useState, useEffect, useMemo } from 'react'
-import { Button } from '@renderer/components/ui/Button'
+import { Button, Modal } from 'thefactory-ui/web'
 import { PROJECT_ICONS, renderProjectIcon } from '../projectIcons'
-import { Modal } from '@renderer/components/ui/Modal'
 import { projectsService } from '@renderer/services/projectsService'
 
 function TextInput({ label, value, onChange, placeholder, action, disabled }: any) {

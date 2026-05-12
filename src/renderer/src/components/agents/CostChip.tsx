@@ -1,4 +1,4 @@
-import Tooltip from '../ui/Tooltip'
+import { Tooltip } from 'thefactory-ui/web'
 
 export type CostChipProps = {
   provider: string

@@ -8,15 +8,14 @@ import {
   IconStopCircle,
   IconThumbDown,
   IconThumbUp,
-} from '../ui/icons/Icons'
+} from 'thefactory-ui/web/icons'
 import ProjectChip from './ProjectChip'
 import CostChip from './CostChip'
 import TokensChip from './TokensChip'
 import type { Chat, LLMConfig } from 'thefactory-tools'
-import { Button } from '../ui/Button'
+import { Button, DotBadge } from 'thefactory-ui/web'
 import { formatDate, formatHmsCompact, formatTime } from '../../utils/time'
 import { useAgents } from '../../contexts/AgentsContext'
-import DotBadge from '../ui/DotBadge'
 import { useNotifications } from '@renderer/hooks/useNotifications'
 import { useCosts } from '@renderer/contexts/CostsContext'
 import { getChatContextKey } from 'thefactory-tools/utils'
