@@ -1900,10 +1900,13 @@
           "Set",
           "FC",
           "thefactory-ui/web/icons/IconChevron",
-          "thefactory-ui/web/icons/IconDocument",
           "thefactory-ui/web/icons/IconFolder",
           "thefactory-ui/web/icons/IconFolderOpen",
+          "thefactory-ui/web/icons/IconMenu",
           "thefactory-ui/web/icons",
+          "thefactory-ui/web/FileTypeIcon",
+          "thefactory-ui/web/Tooltip",
+          "thefactory-ui/web",
           "thefactory-tools/FileMeta"
         ]
       },
@@ -3824,16 +3827,16 @@
         "dependencies": [
           "MarkdownEditorProps",
           "FC",
-          "thefactory-tools/FileMeta",
-          "thefactory-ui/web/Markdown",
-          "thefactory-ui/web"
+          "thefactory-ui/web/MarkdownEditor",
+          "thefactory-ui/web",
+          "thefactory-tools/FileMeta"
         ]
       },
       "MarkdownEditorProps": {
         "path": "src/renderer/src/components/files/MarkdownEditor.tsx",
         "dependencies": [
           "thefactory-tools/FileMeta",
-          "thefactory-ui/web/Markdown",
+          "thefactory-ui/web/MarkdownEditor",
           "thefactory-ui/web"
         ]
       },
@@ -8785,10 +8788,13 @@
           "Set",
           "FC",
           "thefactory-ui/web/icons/IconChevron",
-          "thefactory-ui/web/icons/IconDocument",
           "thefactory-ui/web/icons/IconFolder",
           "thefactory-ui/web/icons/IconFolderOpen",
+          "thefactory-ui/web/icons/IconMenu",
           "thefactory-ui/web/icons",
+          "thefactory-ui/web/FileTypeIcon",
+          "thefactory-ui/web/Tooltip",
+          "thefactory-ui/web",
           "thefactory-tools/FileMeta"
         ]
       },
@@ -10709,16 +10715,16 @@
         "dependencies": [
           "MarkdownEditorProps",
           "FC",
-          "thefactory-tools/FileMeta",
-          "thefactory-ui/web/Markdown",
-          "thefactory-ui/web"
+          "thefactory-ui/web/MarkdownEditor",
+          "thefactory-ui/web",
+          "thefactory-tools/FileMeta"
         ]
       },
       "MarkdownEditorProps": {
         "path": "renderer/src/components/files/MarkdownEditor.tsx",
         "dependencies": [
           "thefactory-tools/FileMeta",
-          "thefactory-ui/web/Markdown",
+          "thefactory-ui/web/MarkdownEditor",
           "thefactory-ui/web"
         ]
       },

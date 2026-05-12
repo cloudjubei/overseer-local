@@ -1,12 +1,17 @@
 import React, { useEffect, useState } from 'react'
+import { MarkdownEditor as PackageMarkdownEditor } from 'thefactory-ui/web'
 import { useUnsavedChanges } from '../../navigation/UnsavedChanges'
 import { useFiles } from '../../contexts/FilesContext'
 import { FileMeta } from 'thefactory-tools'
-import { Markdown } from 'thefactory-ui/web'
 
 export type MarkdownEditorProps = {
   file: FileMeta
 }
+
+// Local wrapper around `thefactory-ui`'s `MarkdownEditor` shell. Owns the
+// file load / write-back via `FilesContext` and the navigation-guard for
+// unsaved changes. The shell handles the two-pane layout, the pane-
+// visibility switch, the per-pane labels, and the icon save button.
 
 export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ file }) => {
   const { readFile, writeFile } = useFiles()
@@ -31,11 +36,12 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ file }) => {
     return () => {
       mounted = false
     }
-  }, [file.relativePath!])
+  }, [file.relativePath])
 
   async function handleSave() {
     try {
       await writeFile(file.relativePath!, value)
+      setDirty(false)
     } catch (e) {
       console.error('Save failed', e)
       alert('Failed to save file')
@@ -43,64 +49,18 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ file }) => {
   }
 
   return (
-    <div className="md-editor" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 8,
-          padding: '8px 12px',
-          borderBottom: '1px solid var(--border-subtle)',
-        }}
-      >
-        <strong style={{ flex: 1 }}>{file.name}</strong>
-        {saveSupported && (
-          <button className="btn" disabled={!dirty} onClick={handleSave}>
-            Save
-          </button>
-        )}
-      </div>
-      {loading ? (
-        <div style={{ padding: 16 }}>Loading...</div>
-      ) : (
-        <div
-          style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0, flex: 1, minHeight: 0 }}
-        >
-          <div
-            style={{
-              padding: 8,
-              borderRight: '1px solid var(--border-subtle)',
-              display: 'flex',
-              flexDirection: 'column',
-            }}
-          >
-            <textarea
-              value={value}
-              onChange={(e) => {
-                setValue(e.target.value)
-                setDirty(true)
-              }}
-              style={{
-                flex: 1,
-                resize: 'none',
-                width: '100%',
-                border: 'none',
-                outline: 'none',
-                fontFamily: 'var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace)',
-                fontSize: 13,
-                lineHeight: 1.5,
-              }}
-              spellCheck={false}
-            />
-          </div>
-          <div style={{ padding: 12, overflow: 'auto' }}>
-            <div className="md-preview">
-              <Markdown text={value || ''} allowHtml />
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+    <PackageMarkdownEditor
+      title={file.name}
+      value={value}
+      onChange={(next) => {
+        setValue(next)
+        setDirty(true)
+      }}
+      onSave={saveSupported ? handleSave : undefined}
+      isDirty={dirty}
+      loading={loading}
+      allowHtml
+    />
   )
 }
 

@@ -3,7 +3,10 @@ import { useFiles, DirNode } from '../contexts/FilesContext'
 import { MarkdownEditor } from '../components/files/MarkdownEditor'
 import BasicFileViewer from '../components/files/BasicFileViewer'
 import { goToFile, parseFileFromHash } from '../navigation/FilesNavigation'
-import { IconChevron, IconDocument, IconFolder, IconFolderOpen } from 'thefactory-ui/web/icons'
+import { IconChevron, IconFolder, IconFolderOpen, IconMenu } from 'thefactory-ui/web/icons'
+import { FileTypeIcon, Tooltip } from 'thefactory-ui/web'
+
+const FILES_PANE_COLLAPSED_KEY = 'files-pane-collapsed'
 import { FileMeta } from 'thefactory-tools'
 
 function isMarkdown(f: FileMeta) {
@@ -40,6 +43,15 @@ export const FilesView: React.FC = () => {
   const [query, setQuery] = useState('')
   const [openSet, setOpenSet] = useState<Set<string>>(() => new Set([''])) // '' is root
   const searchRef = useRef<HTMLInputElement | null>(null)
+  const [paneCollapsed, setPaneCollapsed] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false
+    return window.localStorage.getItem(FILES_PANE_COLLAPSED_KEY) === '1'
+  })
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    window.localStorage.setItem(FILES_PANE_COLLAPSED_KEY, paneCollapsed ? '1' : '0')
+  }, [paneCollapsed])
 
   useEffect(() => {
     function syncFromHash() {
@@ -155,7 +167,7 @@ export const FilesView: React.FC = () => {
                   title={f.name}
                   aria-current={isSel ? 'true' : undefined}
                 >
-                  <IconDocument className='w-4 h-4 opacity-80 mt-[2px]' />
+                  <FileTypeIcon name={f.name} size={16} className='mt-0.5 shrink-0' />
                   <div className='min-w-0 flex-1'>
                     <div className='truncate text-text-primary'>{f.name}</div>
                     <div className='text-[10px] text-text-muted'>
@@ -189,54 +201,77 @@ export const FilesView: React.FC = () => {
   }
 
   return (
-    <div className='files-view grid h-full' style={{ gridTemplateColumns: '320px 1fr' }}>
+    <div
+      className='files-view grid h-full'
+      style={{ gridTemplateColumns: paneCollapsed ? '40px 1fr' : '320px 1fr' }}
+    >
       {/* Left panel: file tree — uses flex-col so the tree area scrolls independently */}
       <aside
         className='flex flex-col h-full min-h-0 overflow-hidden'
         style={{ borderRight: '1px solid var(--border-subtle)' }}
       >
-        {/* Fixed header: search bar */}
+        {/* Fixed header: collapse toggle + search bar */}
         <div
           className='flex-shrink-0 flex p-2 gap-2 items-center'
           style={{ borderBottom: '1px solid var(--border-subtle)' }}
         >
-          <strong className='flex-1'>Files</strong>
-          <input
-            ref={searchRef}
-            type='search'
-            placeholder='Search files'
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className='ui-input'
-            style={{ width: 160 }}
-            aria-label='Search files'
-          />
-        </div>
-        {/* Scrollable file tree */}
-        <div className='flex-1 min-h-0 overflow-y-auto'>
-          {!directoryTree ? (
-            <div className='p-3'>Loading index...</div>
-          ) : files.length === 0 ? (
-            <div className='p-3' style={{ color: 'var(--text-muted)' }}>
-              No files found.
-            </div>
-          ) : (
-            <div className='px-2 py-2'>
-              <DirTree
-                node={
-                  query.trim()
-                    ? filterDir(directoryTree, filterMatch) || {
-                        ...directoryTree,
-                        dirs: [],
-                        files: [],
-                      }
-                    : directoryTree
-                }
-                level={0}
+          <Tooltip
+            content={paneCollapsed ? 'Expand files pane' : 'Collapse files pane'}
+            placement='right'
+          >
+            <button
+              type='button'
+              onClick={() => setPaneCollapsed((v) => !v)}
+              aria-label={paneCollapsed ? 'Expand files pane' : 'Collapse files pane'}
+              aria-expanded={!paneCollapsed}
+              className='inline-flex items-center justify-center w-6 h-6 rounded-md hover:bg-(--surface-hover) shrink-0'
+            >
+              <IconMenu className='w-4 h-4 opacity-70' />
+            </button>
+          </Tooltip>
+          {!paneCollapsed && (
+            <>
+              <strong className='flex-1'>Files</strong>
+              <input
+                ref={searchRef}
+                type='search'
+                placeholder='Search files'
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                className='ui-input'
+                style={{ width: 160 }}
+                aria-label='Search files'
               />
-            </div>
+            </>
           )}
         </div>
+        {/* Scrollable file tree — hidden when collapsed */}
+        {!paneCollapsed && (
+          <div className='flex-1 min-h-0 overflow-y-auto'>
+            {!directoryTree ? (
+              <div className='p-3'>Loading index...</div>
+            ) : files.length === 0 ? (
+              <div className='p-3' style={{ color: 'var(--text-muted)' }}>
+                No files found.
+              </div>
+            ) : (
+              <div className='px-2 py-2'>
+                <DirTree
+                  node={
+                    query.trim()
+                      ? filterDir(directoryTree, filterMatch) || {
+                          ...directoryTree,
+                          dirs: [],
+                          files: [],
+                        }
+                      : directoryTree
+                  }
+                  level={0}
+                />
+              </div>
+            )}
+          </div>
+        )}
       </aside>
       {/* Right panel: file content — scrolls independently */}
       <main className='h-full min-h-0 min-w-0 overflow-auto'>
