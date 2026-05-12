@@ -165,7 +165,7 @@ export function DiffViewer({
 
         {/* Row 3 — selection actions + Resolve Conflicts + Select Lines (only in edit mode) */}
         {path && isEditable && (
-          <div className="px-2 border-t border-neutral-200 dark:border-neutral-700 flex items-center h-[50px]">
+          <div className="px-2 border-t border-neutral-200 dark:border-neutral-700 flex items-center gap-2 h-[50px]">
             {/* Left: stage/discard selected (only in selection mode) */}
             <div className="flex items-center gap-2 flex-1">
               {selectable && (
@@ -175,7 +175,7 @@ export function DiffViewer({
                     disabled={!hasSelection}
                     className={`px-3 py-1 rounded text-[11px] font-medium transition-colors ${
                       hasSelection
-                        ? 'bg-teal-600 hover:bg-teal-700 active:bg-teal-800 text-white'
+                        ? 'bg-green-600 hover:bg-green-700 active:bg-green-800 text-white'
                         : 'bg-neutral-200 dark:bg-neutral-800 text-neutral-400 dark:text-neutral-600 cursor-not-allowed'
                     }`}
                   >

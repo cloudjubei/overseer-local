@@ -613,7 +613,7 @@ export const GitLocalChanges = forwardRef<GitLocalChangesRef, GitLocalChangesPro
 
         <ResizeHandle
           orientation="vertical"
-          className="absolute top-0 bottom-0 z-10"
+          className="absolute top-0 bottom-0 z-30"
           style={{ left: leftWidth - 6 }}
           hitBoxSize={12}
           onResizeStart={onVertResizeStart}

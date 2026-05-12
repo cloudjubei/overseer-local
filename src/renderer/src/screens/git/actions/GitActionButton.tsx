@@ -1,5 +1,5 @@
 import React from 'react'
-import Tooltip from '../../../components/ui/Tooltip'
+import { Tooltip } from 'thefactory-ui/web'
 
 export default function GitActionButton({
   icon,

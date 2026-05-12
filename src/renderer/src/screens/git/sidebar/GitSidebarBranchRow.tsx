@@ -1,6 +1,5 @@
 import { GitUnifiedBranch } from 'thefactory-tools'
-import { IconArrowUp } from '../../../components/ui/icons/IconArrowUp'
-import { IconArrowDown } from '../../../components/ui/icons/IconArrowDown'
+import { IconArrowDown, IconArrowUp } from 'thefactory-ui/web/icons'
 
 export default function GitSidebarBranchRow({
   branch,
@@ -62,12 +61,12 @@ export default function GitSidebarBranchRow({
           {!isRemoteSection && (
             <span className="flex items-center gap-0.5 shrink-0">
               {branch.isLocal && (
-                <span className="px-1 py-0.5 text-[9px] leading-none rounded bg-neutral-100 dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400 font-medium">
+                <span className="px-1 py-0.5 text-[9px] leading-none rounded border border-neutral-300 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400 font-medium">
                   L
                 </span>
               )}
               {branch.isRemote && (
-                <span className="px-1 py-0.5 text-[9px] leading-none rounded bg-sky-100 dark:bg-sky-900/40 text-sky-600 dark:text-sky-400 font-medium">
+                <span className="px-1 py-0.5 text-[9px] leading-none rounded border border-sky-300 dark:border-sky-700/60 bg-sky-100 dark:bg-sky-900/40 text-sky-600 dark:text-sky-400 font-medium">
                   R
                 </span>
               )}

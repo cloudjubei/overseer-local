@@ -10,7 +10,18 @@
         "path": "src/renderer/src/screens/git/actions/GitActionsPanel.tsx",
         "dependencies": [
           "react/useState",
-          "thefactory-tools/GitUnifiedBranch"
+          "thefactory-tools/GitUnifiedBranch",
+          "thefactory-ui/web/icons/IconArchive",
+          "thefactory-ui/web/icons/IconArrowDown",
+          "thefactory-ui/web/icons/IconBranch",
+          "thefactory-ui/web/icons/IconChevronDown",
+          "thefactory-ui/web/icons/IconCommit",
+          "thefactory-ui/web/icons/IconDelete",
+          "thefactory-ui/web/icons/IconDoubleUp",
+          "thefactory-ui/web/icons/IconFastMerge",
+          "thefactory-ui/web/icons/IconPullRequest",
+          "thefactory-ui/web/icons/IconRefresh",
+          "thefactory-ui/web/icons"
         ]
       },
       "addDays": {
@@ -2013,14 +2024,27 @@
       "GitActionButton": {
         "path": "src/renderer/src/screens/git/actions/GitActionButton.tsx",
         "dependencies": [
-          "ReactNode"
+          "ReactNode",
+          "thefactory-ui/web/Tooltip",
+          "thefactory-ui/web"
         ]
       },
       "GitActionsPanel": {
         "path": "src/renderer/src/screens/git/actions/GitActionsPanel.tsx",
         "dependencies": [
           "thefactory-tools/GitUnifiedBranch",
-          "react/useState"
+          "react/useState",
+          "thefactory-ui/web/icons/IconArchive",
+          "thefactory-ui/web/icons/IconArrowDown",
+          "thefactory-ui/web/icons/IconBranch",
+          "thefactory-ui/web/icons/IconChevronDown",
+          "thefactory-ui/web/icons/IconCommit",
+          "thefactory-ui/web/icons/IconDelete",
+          "thefactory-ui/web/icons/IconDoubleUp",
+          "thefactory-ui/web/icons/IconFastMerge",
+          "thefactory-ui/web/icons/IconPullRequest",
+          "thefactory-ui/web/icons/IconRefresh",
+          "thefactory-ui/web/icons"
         ]
       },
       "GitBadgeSubToggles": {
@@ -2077,7 +2101,9 @@
           "react/useRef",
           "react/useState",
           "@renderer/services/gitService/gitService",
-          "@renderer/services/gitService"
+          "@renderer/services/gitService",
+          "thefactory-ui/web/Spinner",
+          "thefactory-ui/web"
         ]
       },
       "GitCommitGraphHeader": {
@@ -2218,8 +2244,8 @@
         "dependencies": [
           "IntraMode",
           "thefactory-tools/GitMergeReportFile",
-          "@renderer/components/ui/icons/IconChevron/IconChevron",
-          "@renderer/components/ui/icons/IconChevron",
+          "thefactory-ui/web/icons/IconChevron",
+          "thefactory-ui/web/icons",
           "@renderer/components/chat/tool-popups/diffUtils/StructuredUnifiedDiff",
           "@renderer/components/chat/tool-popups/diffUtils/IntraMode",
           "@renderer/components/chat/tool-popups/diffUtils"
@@ -2231,15 +2257,13 @@
           "MouseEvent",
           "DragEvent",
           "LocalFileEntry",
-          "@renderer/components/ui/icons/Icons/IconDelete",
-          "@renderer/components/ui/icons/Icons",
-          "@renderer/components/ui/icons/IconRevert/IconRevert",
-          "@renderer/components/ui/icons/IconRevert",
-          "@renderer/components/ui/icons/IconFastMerge/IconFastMerge",
-          "@renderer/components/ui/icons/IconFastMerge",
-          "@renderer/components/ui/PathDisplay/PathDisplay",
-          "@renderer/components/ui/PathDisplay",
-          "@renderer/components/ui/Tooltip"
+          "thefactory-ui/web/PathDisplay",
+          "thefactory-ui/web/Tooltip",
+          "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconDelete",
+          "thefactory-ui/web/icons/IconFastMerge",
+          "thefactory-ui/web/icons/IconRevert",
+          "thefactory-ui/web/icons"
         ]
       },
       "GitFileStatusIcon": {
@@ -2562,7 +2586,14 @@
           "PointerEvent",
           "HTMLElement",
           "thefactory-tools/GitUnifiedBranch",
-          "thefactory-tools/GitStashListItem"
+          "thefactory-tools/GitStashListItem",
+          "thefactory-ui/web/ResizeHandle",
+          "thefactory-ui/web/Spinner",
+          "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconArchive",
+          "thefactory-ui/web/icons/IconBranch",
+          "thefactory-ui/web/icons/IconGlobe",
+          "thefactory-ui/web/icons"
         ]
       },
       "GitSidebarBranchFolder": {
@@ -2570,7 +2601,11 @@
         "dependencies": [
           "thefactory-tools/GitUnifiedBranch",
           "react/useState",
-          "react/useEffect"
+          "react/useEffect",
+          "thefactory-ui/web/icons/IconChevronDown",
+          "thefactory-ui/web/icons/IconFolder",
+          "thefactory-ui/web/icons/IconFolderOpen",
+          "thefactory-ui/web/icons"
         ]
       },
       "GitSidebarBranchList": {
@@ -2582,13 +2617,18 @@
       "GitSidebarBranchRow": {
         "path": "src/renderer/src/screens/git/sidebar/GitSidebarBranchRow.tsx",
         "dependencies": [
-          "thefactory-tools/GitUnifiedBranch"
+          "thefactory-tools/GitUnifiedBranch",
+          "thefactory-ui/web/icons/IconArrowDown",
+          "thefactory-ui/web/icons/IconArrowUp",
+          "thefactory-ui/web/icons"
         ]
       },
       "GitSidebarSectionHeader": {
         "path": "src/renderer/src/screens/git/sidebar/GitSidebarSectionHeader.tsx",
         "dependencies": [
-          "ReactNode"
+          "ReactNode",
+          "thefactory-ui/web/icons/IconChevronDown",
+          "thefactory-ui/web/icons"
         ]
       },
       "GitSidebarStashRow": {
@@ -3748,15 +3788,13 @@
       "LocalFileEntry": {
         "path": "src/renderer/src/screens/git/common/GitFileRow.tsx",
         "dependencies": [
-          "@renderer/components/ui/icons/Icons/IconDelete",
-          "@renderer/components/ui/icons/Icons",
-          "@renderer/components/ui/icons/IconRevert/IconRevert",
-          "@renderer/components/ui/icons/IconRevert",
-          "@renderer/components/ui/icons/IconFastMerge/IconFastMerge",
-          "@renderer/components/ui/icons/IconFastMerge",
-          "@renderer/components/ui/PathDisplay/PathDisplay",
-          "@renderer/components/ui/PathDisplay",
-          "@renderer/components/ui/Tooltip"
+          "thefactory-ui/web/PathDisplay",
+          "thefactory-ui/web/Tooltip",
+          "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconDelete",
+          "thefactory-ui/web/icons/IconFastMerge",
+          "thefactory-ui/web/icons/IconRevert",
+          "thefactory-ui/web/icons"
         ]
       },
       "LocalStatus": {
@@ -6898,7 +6936,18 @@
         "path": "renderer/src/screens/git/actions/GitActionsPanel.tsx",
         "dependencies": [
           "react/useState",
-          "thefactory-tools/GitUnifiedBranch"
+          "thefactory-tools/GitUnifiedBranch",
+          "thefactory-ui/web/icons/IconArchive",
+          "thefactory-ui/web/icons/IconArrowDown",
+          "thefactory-ui/web/icons/IconBranch",
+          "thefactory-ui/web/icons/IconChevronDown",
+          "thefactory-ui/web/icons/IconCommit",
+          "thefactory-ui/web/icons/IconDelete",
+          "thefactory-ui/web/icons/IconDoubleUp",
+          "thefactory-ui/web/icons/IconFastMerge",
+          "thefactory-ui/web/icons/IconPullRequest",
+          "thefactory-ui/web/icons/IconRefresh",
+          "thefactory-ui/web/icons"
         ]
       },
       "addDays": {
@@ -8901,14 +8950,27 @@
       "GitActionButton": {
         "path": "renderer/src/screens/git/actions/GitActionButton.tsx",
         "dependencies": [
-          "ReactNode"
+          "ReactNode",
+          "thefactory-ui/web/Tooltip",
+          "thefactory-ui/web"
         ]
       },
       "GitActionsPanel": {
         "path": "renderer/src/screens/git/actions/GitActionsPanel.tsx",
         "dependencies": [
           "thefactory-tools/GitUnifiedBranch",
-          "react/useState"
+          "react/useState",
+          "thefactory-ui/web/icons/IconArchive",
+          "thefactory-ui/web/icons/IconArrowDown",
+          "thefactory-ui/web/icons/IconBranch",
+          "thefactory-ui/web/icons/IconChevronDown",
+          "thefactory-ui/web/icons/IconCommit",
+          "thefactory-ui/web/icons/IconDelete",
+          "thefactory-ui/web/icons/IconDoubleUp",
+          "thefactory-ui/web/icons/IconFastMerge",
+          "thefactory-ui/web/icons/IconPullRequest",
+          "thefactory-ui/web/icons/IconRefresh",
+          "thefactory-ui/web/icons"
         ]
       },
       "GitBadgeSubToggles": {
@@ -8965,7 +9027,9 @@
           "react/useRef",
           "react/useState",
           "@renderer/services/gitService/gitService",
-          "@renderer/services/gitService"
+          "@renderer/services/gitService",
+          "thefactory-ui/web/Spinner",
+          "thefactory-ui/web"
         ]
       },
       "GitCommitGraphHeader": {
@@ -9106,8 +9170,8 @@
         "dependencies": [
           "IntraMode",
           "thefactory-tools/GitMergeReportFile",
-          "@renderer/components/ui/icons/IconChevron/IconChevron",
-          "@renderer/components/ui/icons/IconChevron",
+          "thefactory-ui/web/icons/IconChevron",
+          "thefactory-ui/web/icons",
           "@renderer/components/chat/tool-popups/diffUtils/StructuredUnifiedDiff",
           "@renderer/components/chat/tool-popups/diffUtils/IntraMode",
           "@renderer/components/chat/tool-popups/diffUtils"
@@ -9119,15 +9183,13 @@
           "MouseEvent",
           "DragEvent",
           "LocalFileEntry",
-          "@renderer/components/ui/icons/Icons/IconDelete",
-          "@renderer/components/ui/icons/Icons",
-          "@renderer/components/ui/icons/IconRevert/IconRevert",
-          "@renderer/components/ui/icons/IconRevert",
-          "@renderer/components/ui/icons/IconFastMerge/IconFastMerge",
-          "@renderer/components/ui/icons/IconFastMerge",
-          "@renderer/components/ui/PathDisplay/PathDisplay",
-          "@renderer/components/ui/PathDisplay",
-          "@renderer/components/ui/Tooltip"
+          "thefactory-ui/web/PathDisplay",
+          "thefactory-ui/web/Tooltip",
+          "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconDelete",
+          "thefactory-ui/web/icons/IconFastMerge",
+          "thefactory-ui/web/icons/IconRevert",
+          "thefactory-ui/web/icons"
         ]
       },
       "GitFileStatusIcon": {
@@ -9450,7 +9512,14 @@
           "PointerEvent",
           "HTMLElement",
           "thefactory-tools/GitUnifiedBranch",
-          "thefactory-tools/GitStashListItem"
+          "thefactory-tools/GitStashListItem",
+          "thefactory-ui/web/ResizeHandle",
+          "thefactory-ui/web/Spinner",
+          "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconArchive",
+          "thefactory-ui/web/icons/IconBranch",
+          "thefactory-ui/web/icons/IconGlobe",
+          "thefactory-ui/web/icons"
         ]
       },
       "GitSidebarBranchFolder": {
@@ -9458,7 +9527,11 @@
         "dependencies": [
           "thefactory-tools/GitUnifiedBranch",
           "react/useState",
-          "react/useEffect"
+          "react/useEffect",
+          "thefactory-ui/web/icons/IconChevronDown",
+          "thefactory-ui/web/icons/IconFolder",
+          "thefactory-ui/web/icons/IconFolderOpen",
+          "thefactory-ui/web/icons"
         ]
       },
       "GitSidebarBranchList": {
@@ -9470,13 +9543,18 @@
       "GitSidebarBranchRow": {
         "path": "renderer/src/screens/git/sidebar/GitSidebarBranchRow.tsx",
         "dependencies": [
-          "thefactory-tools/GitUnifiedBranch"
+          "thefactory-tools/GitUnifiedBranch",
+          "thefactory-ui/web/icons/IconArrowDown",
+          "thefactory-ui/web/icons/IconArrowUp",
+          "thefactory-ui/web/icons"
         ]
       },
       "GitSidebarSectionHeader": {
         "path": "renderer/src/screens/git/sidebar/GitSidebarSectionHeader.tsx",
         "dependencies": [
-          "ReactNode"
+          "ReactNode",
+          "thefactory-ui/web/icons/IconChevronDown",
+          "thefactory-ui/web/icons"
         ]
       },
       "GitSidebarStashRow": {
@@ -10636,15 +10714,13 @@
       "LocalFileEntry": {
         "path": "renderer/src/screens/git/common/GitFileRow.tsx",
         "dependencies": [
-          "@renderer/components/ui/icons/Icons/IconDelete",
-          "@renderer/components/ui/icons/Icons",
-          "@renderer/components/ui/icons/IconRevert/IconRevert",
-          "@renderer/components/ui/icons/IconRevert",
-          "@renderer/components/ui/icons/IconFastMerge/IconFastMerge",
-          "@renderer/components/ui/icons/IconFastMerge",
-          "@renderer/components/ui/PathDisplay/PathDisplay",
-          "@renderer/components/ui/PathDisplay",
-          "@renderer/components/ui/Tooltip"
+          "thefactory-ui/web/PathDisplay",
+          "thefactory-ui/web/Tooltip",
+          "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconDelete",
+          "thefactory-ui/web/icons/IconFastMerge",
+          "thefactory-ui/web/icons/IconRevert",
+          "thefactory-ui/web/icons"
         ]
       },
       "LocalStatus": {

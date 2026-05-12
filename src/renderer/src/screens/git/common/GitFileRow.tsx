@@ -1,9 +1,6 @@
 import React from 'react'
-import Tooltip from '@renderer/components/ui/Tooltip'
-import { IconDelete } from '@renderer/components/ui/icons/Icons'
-import { IconRevert } from '@renderer/components/ui/icons/IconRevert'
-import { IconFastMerge } from '@renderer/components/ui/icons/IconFastMerge'
-import { PathDisplay } from '@renderer/components/ui/PathDisplay'
+import { PathDisplay, Tooltip } from 'thefactory-ui/web'
+import { IconDelete, IconFastMerge, IconRevert } from 'thefactory-ui/web/icons'
 import GitFileStatusIcon from './GitFileStatusIcon'
 import { GitFileChangesPills } from './GitFileChangesPills'
 

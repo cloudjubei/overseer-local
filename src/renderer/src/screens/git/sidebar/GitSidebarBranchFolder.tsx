@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react'
 import { GitUnifiedBranch } from 'thefactory-tools'
-import { IconChevronDown } from '../../../components/ui/icons/Icons'
-import { IconFolder } from '../../../components/ui/icons/IconFolder'
-import { IconFolderOpen } from '../../../components/ui/icons/IconFolderOpen'
+import { IconChevronDown, IconFolder, IconFolderOpen } from 'thefactory-ui/web/icons'
 import GitSidebarBranchRow from './GitSidebarBranchRow'
 
 export default function GitSidebarBranchFolder({

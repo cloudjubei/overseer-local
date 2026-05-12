@@ -149,13 +149,43 @@ Split into three checkpoints because two of the heavier primitives (`FileMention
   - Added `<FileTypeIcon>` compound + `iconForExt` / `extFromTypeOrName` helpers (extracted from `FileDisplay`).
   - Added `<MarkdownEditor>` compound.
   - Added `IconSave` to the icon barrel.
+  - Added `hideLabels?: boolean` prop to `<SegmentedControl>` (labels become `sr-only` + `title` hover preserved). Used by `<MarkdownEditor>`'s pane-visibility switch for the icon-only look.
+  - `<MarkdownEditor>` save button now uses the package `<Button>` primitive (`variant="secondary"`, `size="icon"`) instead of a raw `<button>`, so it matches the standard surface-with-border button style used elsewhere.
 
 #### Step 8 — Git
 
-- **Files:** [screens/GitView.tsx](../src/renderer/src/screens/GitView.tsx) and everything under [screens/git/](../src/renderer/src/screens/git/).
-- **Swap:** `Button`, `ResizeHandle`, `Tooltip`, `DiffViewer` (+ its parsing helpers if used directly), the icons that drive the right-side action rail.
-- **Compare:** the 3-panel layout (sidebar / center stacked / action rail) doesn't reflow; branch selection drives the center pane; commit / push / pull / merge / checkout / create-branch modals open and submit; the diff renders correctly on a real commit.
-- **Risk:** `DiffViewer` is the most complex compound in `thefactory-ui`. Test against a commit that has rename + content edits + binary additions, not just a one-line text change.
+The Git surface is ~5000 LoC across 26 files. Every primitive it touches (`Button`, `Modal`, `Tooltip`, `Spinner`, `SegmentedControl`, `ResizeHandle`, `PathDisplay`, `DiffViewer`) and every icon it uses (`IconArchive`, `IconArrowDown`, `IconArrowUp`, `IconBranch`, `IconChevron`, `IconChevronDown`, `IconCommit`, `IconDelete`, `IconDoubleUp`, `IconFastMerge`, `IconFolder`, `IconFolderOpen`, `IconGlobe`, `IconPullRequest`, `IconRefresh`, `IconRevert`) is already in `thefactory-ui` — so this step is a primitive-import rewrite, not a feature lift. Split into four checkpoints so the desktop app can be exercised after each chunk.
+
+##### Step 8a — Common + sidebar + action rail + commit graph _(shipped 2026-05-12)_
+
+- **Implementation:** swapped imports across 9 files — [GitFileRow](../src/renderer/src/screens/git/common/GitFileRow.tsx), [GitFileDiffItem](../src/renderer/src/screens/git/common/GitFileDiffItem.tsx), [GitSidebar](../src/renderer/src/screens/git/sidebar/GitSidebar.tsx), [GitSidebarBranchRow](../src/renderer/src/screens/git/sidebar/GitSidebarBranchRow.tsx), [GitSidebarBranchFolder](../src/renderer/src/screens/git/sidebar/GitSidebarBranchFolder.tsx), [GitSidebarSectionHeader](../src/renderer/src/screens/git/sidebar/GitSidebarSectionHeader.tsx), [GitActionButton](../src/renderer/src/screens/git/actions/GitActionButton.tsx), [GitActionsPanel](../src/renderer/src/screens/git/actions/GitActionsPanel.tsx), [GitCommitGraph](../src/renderer/src/screens/git/commitGraph/GitCommitGraph.tsx). Swapped `Tooltip`, `Spinner`, `ResizeHandle`, `PathDisplay`, plus 13 icons (`IconArchive`, `IconArrowDown`, `IconArrowUp`, `IconBranch`, `IconChevron`, `IconChevronDown`, `IconCommit`, `IconDelete`, `IconDoubleUp`, `IconFastMerge`, `IconFolder`, `IconFolderOpen`, `IconGlobe`, `IconPullRequest`, `IconRefresh`, `IconRevert`).
+- **No prop drift** — every swap was a same-shape import rewrite. GitFileDiffItem's `StructuredUnifiedDiff` import stays local for now (covered by Step 8b's `DiffViewer` swap).
+- **Polish surfaced during verification (same day, all local — these files are still on the un-swapped local primitives until Step 8b):**
+  - Sidebar branch-row chips (`L` / `R`) — added a 1px subtle border (`border-neutral-300 dark:border-neutral-700` for `L`, `border-sky-300 dark:border-sky-700/60` for `R`) so they don't dissolve into the surrounding row hover-bg. [src/renderer/src/screens/git/sidebar/GitSidebarBranchRow.tsx](../src/renderer/src/screens/git/sidebar/GitSidebarBranchRow.tsx).
+  - **Stage Hunk** / **Stage Selected** buttons recoloured `bg-teal-600` → `bg-green-600` (with matching hover/active). Aligns with the additions-are-green convention used in the diff hunks themselves; the previous teal was visually disconnected. **Discard** stays `bg-red-600` (matches destructive convention). [src/renderer/src/components/chat/tool-popups/diffUtils.tsx](../src/renderer/src/components/chat/tool-popups/diffUtils.tsx), [src/renderer/src/components/ui/DiffViewer.tsx](../src/renderer/src/components/ui/DiffViewer.tsx).
+  - DiffViewer Row 3 (selection actions toolbar) — added `gap-2` to the parent flex so there's an unconditional 8 px gap between the left cluster (Stage / Discard Selected) and the right cluster (Resolve Conflicts / Exit Selection). Previously the `flex-1` on the left section let the right cluster shrink up against it at narrow widths.
+  - GitLocalChanges vertical `<ResizeHandle>` (between file lists and diff viewer) — bumped from `z-10` → `z-30` so the handle stays above every sticky element inside the diff viewer. The diff stacks sticky elements at multiple z's: left-gutter columns at `z-10`, hunk headers and the inner row labels at `z-20`. Anything below `z-30` got painted over in some region. [src/renderer/src/screens/git/GitLocalChanges.tsx](../src/renderer/src/screens/git/GitLocalChanges.tsx).
+
+##### Step 8b — Top-level views + DiffViewer
+
+- **Files:** [screens/GitView.tsx](../src/renderer/src/screens/GitView.tsx), [screens/git/GitBranchDetailsPanel.tsx](../src/renderer/src/screens/git/GitBranchDetailsPanel.tsx), [screens/git/GitCommitChanges.tsx](../src/renderer/src/screens/git/GitCommitChanges.tsx), [screens/git/GitLocalChanges.tsx](../src/renderer/src/screens/git/GitLocalChanges.tsx).
+- **Swap:** `Spinner`, `Tooltip`, `ResizeHandle`, `PathDisplay`, `DiffViewer` (+ any parsing helpers if used directly).
+- **Compare:** 3-panel layout (sidebar / center stacked / action rail) doesn't reflow; branch selection drives the center pane; the diff renders correctly on a real commit including rename + content edits + binary additions, not just a one-line text change.
+- **Risk:** `DiffViewer` is the most complex compound in `thefactory-ui` — exercise it against a real, multi-file commit.
+
+##### Step 8c — Modals (commit / create-branch / checkout / stash / merge)
+
+- **Files:** [screens/git/modals/GitCommitModal.tsx](../src/renderer/src/screens/git/modals/GitCommitModal.tsx), [GitCreateBranchModal.tsx](../src/renderer/src/screens/git/modals/GitCreateBranchModal.tsx), [GitCheckoutRemoteModal.tsx](../src/renderer/src/screens/git/modals/GitCheckoutRemoteModal.tsx), [GitStashModal.tsx](../src/renderer/src/screens/git/modals/GitStashModal.tsx), [modals/merge/GitMergeModal.tsx](../src/renderer/src/screens/git/modals/merge/GitMergeModal.tsx).
+- **Swap:** `Modal`, `Button`, `Spinner`, `SegmentedControl`, `Tooltip`, `IconFastMerge`.
+- **Compare:** every modal opens, submits, and closes; the merge modal's strategy switch + fast-merge button still works; stash list still selectable.
+- **Risk:** low — modals were already exercised in Step 5c (StoryCreate/Edit) so the package `<Modal>` is well-trodden by now.
+
+##### Step 8d — MergeConflictResolver
+
+- **Files:** [screens/git/mergeConflict/MergeConflictResolver.tsx](../src/renderer/src/screens/git/mergeConflict/MergeConflictResolver.tsx) (1099 lines — standalone enough to land alone).
+- **Swap:** `Button`, `Spinner`, `Tooltip`, plus a `ConfirmDialog` for any discard-conflict prompt that's currently inline.
+- **Compare:** the merge-conflict UI loads the conflicted files, accept-theirs / accept-ours / accept-both / hunk-level resolution still works, the bottom action bar enables/disables correctly.
+- **Risk:** medium — this screen is rarely exercised. Verify against a real merge-conflict state, not just a clean tree.
 
 #### Step 9 — Tests
 

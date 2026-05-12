@@ -1,5 +1,5 @@
 import React from 'react'
-import { IconChevronDown } from '../../../components/ui/icons/Icons'
+import { IconChevronDown } from 'thefactory-ui/web/icons'
 
 export default function GitSidebarSectionHeader({
   label,

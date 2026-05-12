@@ -430,7 +430,7 @@ export function StructuredUnifiedDiff(props: StructuredUnifiedDiffProps) {
                     className={`px-2 py-0.5 rounded text-[10px] font-medium text-white transition-colors ${
                       isStaged
                         ? 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800'
-                        : 'bg-teal-600 hover:bg-teal-700 active:bg-teal-800'
+                        : 'bg-green-600 hover:bg-green-700 active:bg-green-800'
                     }`}
                     onClick={(e) => {
                       e.stopPropagation()

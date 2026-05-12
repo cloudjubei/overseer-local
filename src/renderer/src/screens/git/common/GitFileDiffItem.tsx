@@ -1,6 +1,6 @@
 import React from 'react'
 import { GitMergeReportFile } from 'thefactory-tools'
-import { IconChevron } from '@renderer/components/ui/icons/IconChevron'
+import { IconChevron } from 'thefactory-ui/web/icons'
 import { StructuredUnifiedDiff, IntraMode } from '@renderer/components/chat/tool-popups/diffUtils'
 import GitFileStatusIcon from './GitFileStatusIcon'
 

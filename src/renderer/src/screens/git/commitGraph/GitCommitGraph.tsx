@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { GitLogCommit } from 'thefactory-tools'
 import { gitService } from '@renderer/services/gitService'
-import Spinner from '../../../components/ui/Spinner'
+import { Spinner } from 'thefactory-ui/web'
 import { computeCommitGraph, GraphNode } from './gitCommitGraphUtils'
 import GitCommitGraphRow from './GitCommitGraphRow'
 import GitCommitGraphHeader from './GitCommitGraphHeader'

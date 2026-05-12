@@ -1,14 +1,17 @@
 import { useState } from 'react'
 import { GitUnifiedBranch } from 'thefactory-tools'
-import { IconRefresh } from '../../../components/ui/icons/IconRefresh'
-import { IconBranch } from '../../../components/ui/icons/IconBranch'
-import { IconFastMerge } from '../../../components/ui/icons/IconFastMerge'
-import { IconCommit } from '../../../components/ui/icons/IconCommit'
-import { IconPullRequest } from '../../../components/ui/icons/IconPullRequest'
-import { IconDoubleUp } from '../../../components/ui/icons/IconDoubleUp'
-import { IconArchive } from '../../../components/ui/icons/IconArchive'
-import { IconDelete, IconArrowDown } from '../../../components/ui/icons/Icons'
-import { IconChevronDown } from '../../../components/ui/icons/IconChevronDown'
+import {
+  IconArchive,
+  IconArrowDown,
+  IconBranch,
+  IconChevronDown,
+  IconCommit,
+  IconDelete,
+  IconDoubleUp,
+  IconFastMerge,
+  IconPullRequest,
+  IconRefresh,
+} from 'thefactory-ui/web/icons'
 import { useProjectContext } from '../../../contexts/ProjectContext'
 import { useGit } from '../../../contexts/GitContext'
 import { gitService } from '../../../services/gitService'
