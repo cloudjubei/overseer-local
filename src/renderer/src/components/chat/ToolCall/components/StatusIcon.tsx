@@ -2,11 +2,11 @@ import React from 'react'
 import type { ToolResultType } from 'thefactory-tools'
 import {
   IconCheckmarkCircle,
+  IconError,
   IconHourglass,
   IconNotAllowed,
   IconStop,
-  IconError,
-} from '@renderer/components/ui/icons/Icons'
+} from 'thefactory-ui/web/icons'
 
 export function StatusIcon({ resultType }: { resultType?: ToolResultType }) {
   const size = 'w-3.5 h-3.5'

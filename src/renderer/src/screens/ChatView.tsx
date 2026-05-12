@@ -18,14 +18,14 @@ import type {
 } from 'thefactory-tools'
 import CollapsibleSidebar from '../components/ui/CollapsibleSidebar'
 import ChatsNavigationSidebar from '@renderer/components/chat/ChatsNavigationSidebar'
-import SegmentedControl from '@renderer/components/ui/SegmentedControl'
-import DotBadge from '@renderer/components/ui/DotBadge'
+import { SegmentedControl } from 'thefactory-ui/web'
+import { DotBadge } from 'thefactory-ui/web'
 import { getChatContextKey, getChatContext } from 'thefactory-tools/utils'
 import { useAppSettings } from '@renderer/contexts/AppSettingsContext'
 import { useNotifications } from '@renderer/hooks/useNotifications'
 import { useAgents } from '@renderer/contexts/AgentsContext'
 import ChatTopicCreateModal from '@renderer/components/chat/ChatTopicCreateModal'
-import { IconPlus } from '@renderer/components/ui/icons/Icons'
+import { IconPlus } from 'thefactory-ui/web/icons'
 
 function titleForContext(
   context: ChatContext,

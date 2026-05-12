@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import type { Story, ToolCall, ToolResultType } from 'thefactory-tools'
-import Code from '../../ui/Code'
+import { Code } from 'thefactory-ui/web'
 import { FeatureCardRaw } from '../../stories/FeatureCard'
 import { useStories } from '@renderer/contexts/StoriesContext'
 import { useActiveProject } from '@renderer/contexts/ProjectContext'

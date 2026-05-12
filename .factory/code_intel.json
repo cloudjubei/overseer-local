@@ -205,7 +205,9 @@
         "dependencies": [
           "FileDisplay",
           "thefactory-tools/utils/inferFileType",
-          "thefactory-tools/utils"
+          "thefactory-tools/utils",
+          "thefactory-ui/web/FileDisplay",
+          "thefactory-ui/web"
         ]
       },
       "BadgeColor": {
@@ -352,8 +354,8 @@
         "dependencies": [
           "ChatDynamicContextModalProps",
           "react/useMemo",
-          "@renderer/components/ui/Modal/Modal",
-          "@renderer/components/ui/Modal",
+          "thefactory-ui/web/Modal",
+          "thefactory-ui/web",
           "thefactory-tools/ChatDynamicContext"
         ]
       },
@@ -362,8 +364,8 @@
         "dependencies": [
           "thefactory-tools/ChatDynamicContext",
           "react/useMemo",
-          "@renderer/components/ui/Modal/Modal",
-          "@renderer/components/ui/Modal"
+          "thefactory-ui/web/Modal",
+          "thefactory-ui/web"
         ]
       },
       "ChatInput": {
@@ -376,7 +378,12 @@
           "Node",
           "MouseEvent",
           "HTMLDivElement",
-          "ChatInputProps"
+          "ChatInputProps",
+          "thefactory-ui/web/Tooltip",
+          "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconAttach",
+          "thefactory-ui/web/icons/IconSend",
+          "thefactory-ui/web/icons"
         ]
       },
       "ChatsContext": {
@@ -415,10 +422,9 @@
           "thefactory-tools/CompletionSettings",
           "thefactory-tools/CompletionHistorySummarization",
           "thefactory-tools/CompletionMessageSanitization",
-          "@renderer/components/ui/Button/Button",
-          "@renderer/components/ui/Button",
-          "@renderer/components/ui/Switch/Switch",
-          "@renderer/components/ui/Switch"
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web",
+          "thefactory-ui/web/Switch"
         ]
       },
       "ChatSettingsDropdownProps": {
@@ -435,10 +441,9 @@
           "thefactory-tools/ChatContext",
           "react/useEffect",
           "react/useRef",
-          "@renderer/components/ui/Button/Button",
-          "@renderer/components/ui/Button",
-          "@renderer/components/ui/Switch/Switch",
-          "@renderer/components/ui/Switch"
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web",
+          "thefactory-ui/web/Switch"
         ]
       },
       "ChatSidebar": {
@@ -482,8 +487,15 @@
           "ChatSidebarHeaderProps",
           "thefactory-tools/ChatContext",
           "thefactory-tools/CompletionSettings",
-          "@renderer/components/ui/Button/Button",
-          "@renderer/components/ui/Button"
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconCalculator",
+          "thefactory-ui/web/icons/IconChevron",
+          "thefactory-ui/web/icons/IconCode",
+          "thefactory-ui/web/icons/IconRefreshChat",
+          "thefactory-ui/web/icons/IconScroll",
+          "thefactory-ui/web/icons/IconSettings",
+          "thefactory-ui/web/icons"
         ]
       },
       "ChatSidebarHeaderProps": {
@@ -498,8 +510,15 @@
           "Dispatch",
           "HTMLButtonElement",
           "MutableRefObject",
-          "@renderer/components/ui/Button/Button",
-          "@renderer/components/ui/Button"
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconCalculator",
+          "thefactory-ui/web/icons/IconChevron",
+          "thefactory-ui/web/icons/IconCode",
+          "thefactory-ui/web/icons/IconRefreshChat",
+          "thefactory-ui/web/icons/IconScroll",
+          "thefactory-ui/web/icons/IconSettings",
+          "thefactory-ui/web/icons"
         ]
       },
       "ChatSidebarModalPanel": {
@@ -510,15 +529,18 @@
           "HTMLElement",
           "HTMLDivElement",
           "thefactory-tools/ChatContext",
-          "react-dom/createPortal"
+          "react-dom/createPortal",
+          "thefactory-ui/web/icons/IconChevron",
+          "thefactory-ui/web/icons/IconChat",
+          "thefactory-ui/web/icons"
         ]
       },
       "ChatSidebarModals": {
         "path": "src/renderer/src/components/chat/sidebar/ChatSidebarModals.tsx",
         "dependencies": [
           "ChatSidebarModalsProps",
-          "@renderer/components/ui/Modal/Modal",
-          "@renderer/components/ui/Modal"
+          "thefactory-ui/web/Modal",
+          "thefactory-ui/web"
         ]
       },
       "ChatSidebarModalsProps": {
@@ -527,8 +549,8 @@
           "SetStateAction",
           "Dispatch",
           "ChatState",
-          "@renderer/components/ui/Modal/Modal",
-          "@renderer/components/ui/Modal"
+          "thefactory-ui/web/Modal",
+          "thefactory-ui/web"
         ]
       },
       "ChatSidebarPanel": {
@@ -538,7 +560,12 @@
           "PointerEvent",
           "HTMLElement",
           "HTMLDivElement",
-          "thefactory-tools/ChatContext"
+          "thefactory-tools/ChatContext",
+          "thefactory-ui/web/icons/IconChevron",
+          "thefactory-ui/web/icons/IconChat",
+          "thefactory-ui/web/icons",
+          "thefactory-ui/web/ResizeHandle",
+          "thefactory-ui/web"
         ]
       },
       "ChatSidebarProps": {
@@ -621,21 +648,22 @@
           "thefactory-tools/ChatContextProject",
           "thefactory-tools/ChatContextProjectTopic",
           "thefactory-tools/ChatContextStory",
-          "@renderer/components/ui/icons/Icons/IconChevron",
-          "@renderer/components/ui/icons/Icons",
+          "thefactory-ui/web/icons/IconChevron",
+          "thefactory-ui/web/icons",
           "@renderer/hooks/useChatUnread/useChatUnread",
           "@renderer/hooks/useChatUnread",
+          "thefactory-ui/web/DotBadge",
+          "thefactory-ui/web",
           "thefactory-tools/utils/getChatContextKey",
           "thefactory-tools/utils",
           "@renderer/hooks/useChatThinking/useChatThinking",
           "@renderer/hooks/useChatThinking",
+          "thefactory-ui/web/SpinnerWithDot",
           "@renderer/contexts/AppSettingsContext/useAppSettings",
           "@renderer/contexts/AppSettingsContext",
           "@renderer/contexts/AgentsContext/useAgents",
           "@renderer/contexts/AgentsContext",
-          "@renderer/components/ui/DotBadge",
-          "@renderer/components/stories/NotificationBadge",
-          "@renderer/components/ui/SpinnerWithDot"
+          "@renderer/components/stories/NotificationBadge"
         ]
       },
       "ChatsNavigationSidebarProps": {
@@ -657,21 +685,22 @@
           "thefactory-tools/ChatContextProject",
           "thefactory-tools/ChatContextProjectTopic",
           "thefactory-tools/ChatContextStory",
-          "@renderer/components/ui/icons/Icons/IconChevron",
-          "@renderer/components/ui/icons/Icons",
+          "thefactory-ui/web/icons/IconChevron",
+          "thefactory-ui/web/icons",
           "@renderer/hooks/useChatUnread/useChatUnread",
           "@renderer/hooks/useChatUnread",
+          "thefactory-ui/web/DotBadge",
+          "thefactory-ui/web",
           "thefactory-tools/utils/getChatContextKey",
           "thefactory-tools/utils",
           "@renderer/hooks/useChatThinking/useChatThinking",
           "@renderer/hooks/useChatThinking",
+          "thefactory-ui/web/SpinnerWithDot",
           "@renderer/contexts/AppSettingsContext/useAppSettings",
           "@renderer/contexts/AppSettingsContext",
           "@renderer/contexts/AgentsContext/useAgents",
           "@renderer/contexts/AgentsContext",
-          "@renderer/components/ui/DotBadge",
-          "@renderer/components/stories/NotificationBadge",
-          "@renderer/components/ui/SpinnerWithDot"
+          "@renderer/components/stories/NotificationBadge"
         ]
       },
       "ChatsProvider": {
@@ -753,10 +782,9 @@
           "FormEvent",
           "HTMLInputElement",
           "Props",
-          "@renderer/components/ui/Modal/Modal",
-          "@renderer/components/ui/Modal",
-          "@renderer/components/ui/Button/Button",
-          "@renderer/components/ui/Button",
+          "thefactory-ui/web/Modal",
+          "thefactory-ui/web",
+          "thefactory-ui/web/Button",
           "@renderer/contexts/ProjectContext/useActiveProject",
           "@renderer/contexts/ProjectContext",
           "@renderer/contexts/ProjectsGroupsContext/useProjectsGroups",
@@ -790,6 +818,9 @@
           "thefactory-tools/ChatContextGroupTopic",
           "thefactory-tools/ChatContextProjectTopic",
           "thefactory-tools/ChatContextStory",
+          "thefactory-ui/web/SegmentedControl",
+          "thefactory-ui/web",
+          "thefactory-ui/web/DotBadge",
           "thefactory-tools/utils/getChatContextKey",
           "thefactory-tools/utils/getChatContext",
           "thefactory-tools/utils",
@@ -799,11 +830,9 @@
           "@renderer/hooks/useNotifications",
           "@renderer/contexts/AgentsContext/useAgents",
           "@renderer/contexts/AgentsContext",
-          "@renderer/components/ui/icons/Icons/IconPlus",
-          "@renderer/components/ui/icons/Icons",
+          "thefactory-ui/web/icons/IconPlus",
+          "thefactory-ui/web/icons",
           "@renderer/components/chat/ChatsNavigationSidebar",
-          "@renderer/components/ui/SegmentedControl",
-          "@renderer/components/ui/DotBadge",
           "@renderer/components/chat/ChatTopicCreateModal"
         ]
       },
@@ -1374,6 +1403,16 @@
           "thefactory-tools/ToolResultType",
           "thefactory-tools/utils/inferFileType",
           "thefactory-tools/utils",
+          "thefactory-ui/web/FileDisplay",
+          "thefactory-ui/web",
+          "thefactory-ui/web/TypewriterText",
+          "thefactory-ui/web/Markdown",
+          "thefactory-ui/web/icons/IconToolbox",
+          "thefactory-ui/web/icons/IconDelete",
+          "thefactory-ui/web/icons/IconRefresh",
+          "thefactory-ui/web/icons",
+          "thefactory-ui/web/Switch",
+          "thefactory-ui/web/Tooltip",
           "@renderer/utils/chat/messageIso",
           "@renderer/utils/chat",
           "@renderer/utils/time/formatDurationMs",
@@ -1848,6 +1887,8 @@
         "path": "src/renderer/src/components/chat/FilesSuggestionsMenu.tsx",
         "dependencies": [
           "MenuPosition",
+          "thefactory-ui/web/FileDisplay",
+          "thefactory-ui/web",
           "thefactory-tools/utils/inferFileType",
           "thefactory-tools/utils"
         ]
@@ -2615,6 +2656,7 @@
           "thefactory-ui/web/SpinnerWithDot",
           "thefactory-ui/web/getNotificationBadgeColorClass",
           "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconCollection",
           "thefactory-ui/web/icons/IconFolder",
           "thefactory-ui/web/icons/IconFolderOpen",
           "thefactory-ui/web/icons",
@@ -2648,8 +2690,8 @@
           "Partial",
           "HistorySummarizationSettingsProps",
           "thefactory-tools/CompletionSettings",
-          "@renderer/components/ui/Switch/Switch",
-          "@renderer/components/ui/Switch"
+          "thefactory-ui/web/Switch",
+          "thefactory-ui/web"
         ]
       },
       "HistorySummarizationSettingsProps": {
@@ -2659,8 +2701,8 @@
           "thefactory-tools/CompletionSettings",
           "Partial",
           "thefactory-tools/CompletionHistorySummarization",
-          "@renderer/components/ui/Switch/Switch",
-          "@renderer/components/ui/Switch"
+          "thefactory-ui/web/Switch",
+          "thefactory-ui/web"
         ]
       },
       "HoverInfo": {
@@ -3807,6 +3849,8 @@
       "MenuPosition": {
         "path": "src/renderer/src/components/chat/FilesSuggestionsMenu.tsx",
         "dependencies": [
+          "thefactory-ui/web/FileDisplay",
+          "thefactory-ui/web",
           "thefactory-tools/utils/inferFileType",
           "thefactory-tools/utils"
         ]
@@ -3890,6 +3934,16 @@
           "thefactory-tools/ToolResultType",
           "thefactory-tools/utils/inferFileType",
           "thefactory-tools/utils",
+          "thefactory-ui/web/FileDisplay",
+          "thefactory-ui/web",
+          "thefactory-ui/web/TypewriterText",
+          "thefactory-ui/web/Markdown",
+          "thefactory-ui/web/icons/IconToolbox",
+          "thefactory-ui/web/icons/IconDelete",
+          "thefactory-ui/web/icons/IconRefresh",
+          "thefactory-ui/web/icons",
+          "thefactory-ui/web/Switch",
+          "thefactory-ui/web/Tooltip",
           "@renderer/utils/chat/messageIso",
           "@renderer/utils/chat",
           "@renderer/utils/time/formatDurationMs",
@@ -3906,8 +3960,8 @@
           "thefactory-tools/CompletionSettings",
           "Partial",
           "thefactory-tools/CompletionMessageSanitization",
-          "@renderer/components/ui/Switch/Switch",
-          "@renderer/components/ui/Switch"
+          "thefactory-ui/web/Switch",
+          "thefactory-ui/web"
         ]
       },
       "Modal": {
@@ -5486,12 +5540,12 @@
         "path": "src/renderer/src/components/chat/ToolCall/components/StatusIcon.tsx",
         "dependencies": [
           "thefactory-tools/ToolResultType",
-          "@renderer/components/ui/icons/Icons/IconCheckmarkCircle",
-          "@renderer/components/ui/icons/Icons/IconHourglass",
-          "@renderer/components/ui/icons/Icons/IconNotAllowed",
-          "@renderer/components/ui/icons/Icons/IconStop",
-          "@renderer/components/ui/icons/Icons/IconError",
-          "@renderer/components/ui/icons/Icons"
+          "thefactory-ui/web/icons/IconCheckmarkCircle",
+          "thefactory-ui/web/icons/IconError",
+          "thefactory-ui/web/icons/IconHourglass",
+          "thefactory-ui/web/icons/IconNotAllowed",
+          "thefactory-ui/web/icons/IconStop",
+          "thefactory-ui/web/icons"
         ]
       },
       "statusKey": {
@@ -5769,13 +5823,12 @@
           "@renderer/contexts/ProjectContext",
           "@renderer/contexts/AgentsContext/useAgents",
           "@renderer/contexts/AgentsContext",
+          "thefactory-ui/web/icons/IconBack",
           "thefactory-ui/web/icons/IconCalculator",
           "thefactory-ui/web/icons/IconChevron",
           "thefactory-ui/web/icons/IconEdit",
           "thefactory-ui/web/icons/IconPlus",
           "thefactory-ui/web/icons",
-          "@renderer/components/ui/icons/Icons/IconBack",
-          "@renderer/components/ui/icons/Icons",
           "@renderer/components/ui/RichText/RichText",
           "@renderer/components/ui/RichText",
           "thefactory-tools/utils/getChatContextKey",
@@ -5949,6 +6002,8 @@
           "react/useEffect",
           "react/useMemo",
           "react/useState",
+          "thefactory-ui/web/Spinner",
+          "thefactory-ui/web",
           "@renderer/services/factoryToolsService/factoryToolsService",
           "@renderer/services/factoryToolsService"
         ]
@@ -6045,8 +6100,19 @@
         "dependencies": [
           "thefactory-tools/ToolResultType",
           "thefactory-tools/ToolCall",
+          "thefactory-ui/web/icons/IconCheckmarkCircle",
+          "thefactory-ui/web/icons/IconChevron",
+          "thefactory-ui/web/icons/IconError",
+          "thefactory-ui/web/icons/IconHourglass",
+          "thefactory-ui/web/icons/IconNotAllowed",
+          "thefactory-ui/web/icons/IconStop",
+          "thefactory-ui/web/icons",
+          "thefactory-ui/web/Code",
+          "thefactory-ui/web",
           "react/useMemo",
-          "react/useState"
+          "react/useState",
+          "thefactory-ui/web/Switch",
+          "thefactory-ui/web/Tooltip"
         ]
       },
       "ToolCallHoverCard": {
@@ -6057,6 +6123,8 @@
           "thefactory-tools/ToolResultType",
           "thefactory-tools/ToolCall",
           "thefactory-tools/Story",
+          "thefactory-ui/web/Code",
+          "thefactory-ui/web",
           "@renderer/contexts/StoriesContext/useStories",
           "@renderer/contexts/StoriesContext",
           "@renderer/contexts/ProjectContext/useActiveProject",
@@ -6079,6 +6147,16 @@
           "thefactory-tools/ToolResultType",
           "thefactory-tools/utils/inferFileType",
           "thefactory-tools/utils",
+          "thefactory-ui/web/FileDisplay",
+          "thefactory-ui/web",
+          "thefactory-ui/web/TypewriterText",
+          "thefactory-ui/web/Markdown",
+          "thefactory-ui/web/icons/IconToolbox",
+          "thefactory-ui/web/icons/IconDelete",
+          "thefactory-ui/web/icons/IconRefresh",
+          "thefactory-ui/web/icons",
+          "thefactory-ui/web/Switch",
+          "thefactory-ui/web/Tooltip",
           "@renderer/utils/chat/messageIso",
           "@renderer/utils/chat",
           "@renderer/utils/time/formatDurationMs",
@@ -6124,10 +6202,9 @@
           "thefactory-tools/CompletionSettings",
           "thefactory-tools/CompletionHistorySummarization",
           "thefactory-tools/CompletionMessageSanitization",
-          "@renderer/components/ui/Button/Button",
-          "@renderer/components/ui/Button",
-          "@renderer/components/ui/Switch/Switch",
-          "@renderer/components/ui/Switch"
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web",
+          "thefactory-ui/web/Switch"
         ]
       },
       "tryResumeAudioContext": {
@@ -6198,8 +6275,8 @@
           "react/useState",
           "thefactory-tools/CompletionAssistantMessage",
           "thefactory-tools/CompletionMessage",
-          "@renderer/components/ui/Modal/Modal",
-          "@renderer/components/ui/Modal",
+          "thefactory-ui/web/Modal",
+          "thefactory-ui/web",
           "@renderer/services/pricingService/getPrice",
           "@renderer/services/pricingService",
           "@renderer/contexts/CostsContext/useCosts",
@@ -6216,8 +6293,8 @@
           "thefactory-tools/CompletionAssistantMessage",
           "thefactory-tools/LLMCostAggregateContent",
           "thefactory-tools/ModelPrice",
-          "@renderer/components/ui/Modal/Modal",
-          "@renderer/components/ui/Modal",
+          "thefactory-ui/web/Modal",
+          "thefactory-ui/web",
           "@renderer/services/pricingService/getPrice",
           "@renderer/services/pricingService",
           "@renderer/contexts/CostsContext/useCosts",
@@ -6775,8 +6852,11 @@
           "Set",
           "thefactory-tools/ToolResultType",
           "thefactory-tools/ToolCall",
-          "@renderer/components/ui/icons/IconChevronRight/IconChevronRight",
-          "@renderer/components/ui/icons/IconChevronRight",
+          "thefactory-ui/web/PathDisplay",
+          "thefactory-ui/web/Spinner",
+          "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconChevronRight",
+          "thefactory-ui/web/icons",
           "@renderer/utils/utils/cn",
           "@renderer/utils/utils"
         ]
@@ -6785,7 +6865,10 @@
         "path": "src/renderer/src/components/chat/ToolCall/renderers/WriteToolsPreview.tsx",
         "dependencies": [
           "thefactory-tools/ToolResultType",
-          "thefactory-tools/ToolCall"
+          "thefactory-tools/ToolCall",
+          "thefactory-ui/web/Code",
+          "thefactory-ui/web",
+          "thefactory-ui/web/Spinner"
         ]
       },
       "Zoom": {
@@ -6998,7 +7081,9 @@
         "dependencies": [
           "FileDisplay",
           "thefactory-tools/utils/inferFileType",
-          "thefactory-tools/utils"
+          "thefactory-tools/utils",
+          "thefactory-ui/web/FileDisplay",
+          "thefactory-ui/web"
         ]
       },
       "BadgeColor": {
@@ -7145,8 +7230,8 @@
         "dependencies": [
           "ChatDynamicContextModalProps",
           "react/useMemo",
-          "@renderer/components/ui/Modal/Modal",
-          "@renderer/components/ui/Modal",
+          "thefactory-ui/web/Modal",
+          "thefactory-ui/web",
           "thefactory-tools/ChatDynamicContext"
         ]
       },
@@ -7155,8 +7240,8 @@
         "dependencies": [
           "thefactory-tools/ChatDynamicContext",
           "react/useMemo",
-          "@renderer/components/ui/Modal/Modal",
-          "@renderer/components/ui/Modal"
+          "thefactory-ui/web/Modal",
+          "thefactory-ui/web"
         ]
       },
       "ChatInput": {
@@ -7169,7 +7254,12 @@
           "Node",
           "MouseEvent",
           "HTMLDivElement",
-          "ChatInputProps"
+          "ChatInputProps",
+          "thefactory-ui/web/Tooltip",
+          "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconAttach",
+          "thefactory-ui/web/icons/IconSend",
+          "thefactory-ui/web/icons"
         ]
       },
       "ChatsContext": {
@@ -7208,10 +7298,9 @@
           "thefactory-tools/CompletionSettings",
           "thefactory-tools/CompletionHistorySummarization",
           "thefactory-tools/CompletionMessageSanitization",
-          "@renderer/components/ui/Button/Button",
-          "@renderer/components/ui/Button",
-          "@renderer/components/ui/Switch/Switch",
-          "@renderer/components/ui/Switch"
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web",
+          "thefactory-ui/web/Switch"
         ]
       },
       "ChatSettingsDropdownProps": {
@@ -7228,10 +7317,9 @@
           "thefactory-tools/ChatContext",
           "react/useEffect",
           "react/useRef",
-          "@renderer/components/ui/Button/Button",
-          "@renderer/components/ui/Button",
-          "@renderer/components/ui/Switch/Switch",
-          "@renderer/components/ui/Switch"
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web",
+          "thefactory-ui/web/Switch"
         ]
       },
       "ChatSidebar": {
@@ -7275,8 +7363,15 @@
           "ChatSidebarHeaderProps",
           "thefactory-tools/ChatContext",
           "thefactory-tools/CompletionSettings",
-          "@renderer/components/ui/Button/Button",
-          "@renderer/components/ui/Button"
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconCalculator",
+          "thefactory-ui/web/icons/IconChevron",
+          "thefactory-ui/web/icons/IconCode",
+          "thefactory-ui/web/icons/IconRefreshChat",
+          "thefactory-ui/web/icons/IconScroll",
+          "thefactory-ui/web/icons/IconSettings",
+          "thefactory-ui/web/icons"
         ]
       },
       "ChatSidebarHeaderProps": {
@@ -7291,8 +7386,15 @@
           "Dispatch",
           "HTMLButtonElement",
           "MutableRefObject",
-          "@renderer/components/ui/Button/Button",
-          "@renderer/components/ui/Button"
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconCalculator",
+          "thefactory-ui/web/icons/IconChevron",
+          "thefactory-ui/web/icons/IconCode",
+          "thefactory-ui/web/icons/IconRefreshChat",
+          "thefactory-ui/web/icons/IconScroll",
+          "thefactory-ui/web/icons/IconSettings",
+          "thefactory-ui/web/icons"
         ]
       },
       "ChatSidebarModalPanel": {
@@ -7303,15 +7405,18 @@
           "HTMLElement",
           "HTMLDivElement",
           "thefactory-tools/ChatContext",
-          "react-dom/createPortal"
+          "react-dom/createPortal",
+          "thefactory-ui/web/icons/IconChevron",
+          "thefactory-ui/web/icons/IconChat",
+          "thefactory-ui/web/icons"
         ]
       },
       "ChatSidebarModals": {
         "path": "renderer/src/components/chat/sidebar/ChatSidebarModals.tsx",
         "dependencies": [
           "ChatSidebarModalsProps",
-          "@renderer/components/ui/Modal/Modal",
-          "@renderer/components/ui/Modal"
+          "thefactory-ui/web/Modal",
+          "thefactory-ui/web"
         ]
       },
       "ChatSidebarModalsProps": {
@@ -7320,8 +7425,8 @@
           "SetStateAction",
           "Dispatch",
           "ChatState",
-          "@renderer/components/ui/Modal/Modal",
-          "@renderer/components/ui/Modal"
+          "thefactory-ui/web/Modal",
+          "thefactory-ui/web"
         ]
       },
       "ChatSidebarPanel": {
@@ -7331,7 +7436,12 @@
           "PointerEvent",
           "HTMLElement",
           "HTMLDivElement",
-          "thefactory-tools/ChatContext"
+          "thefactory-tools/ChatContext",
+          "thefactory-ui/web/icons/IconChevron",
+          "thefactory-ui/web/icons/IconChat",
+          "thefactory-ui/web/icons",
+          "thefactory-ui/web/ResizeHandle",
+          "thefactory-ui/web"
         ]
       },
       "ChatSidebarProps": {
@@ -7414,21 +7524,22 @@
           "thefactory-tools/ChatContextProject",
           "thefactory-tools/ChatContextProjectTopic",
           "thefactory-tools/ChatContextStory",
-          "@renderer/components/ui/icons/Icons/IconChevron",
-          "@renderer/components/ui/icons/Icons",
+          "thefactory-ui/web/icons/IconChevron",
+          "thefactory-ui/web/icons",
           "@renderer/hooks/useChatUnread/useChatUnread",
           "@renderer/hooks/useChatUnread",
+          "thefactory-ui/web/DotBadge",
+          "thefactory-ui/web",
           "thefactory-tools/utils/getChatContextKey",
           "thefactory-tools/utils",
           "@renderer/hooks/useChatThinking/useChatThinking",
           "@renderer/hooks/useChatThinking",
+          "thefactory-ui/web/SpinnerWithDot",
           "@renderer/contexts/AppSettingsContext/useAppSettings",
           "@renderer/contexts/AppSettingsContext",
           "@renderer/contexts/AgentsContext/useAgents",
           "@renderer/contexts/AgentsContext",
-          "@renderer/components/ui/DotBadge",
-          "@renderer/components/stories/NotificationBadge",
-          "@renderer/components/ui/SpinnerWithDot"
+          "@renderer/components/stories/NotificationBadge"
         ]
       },
       "ChatsNavigationSidebarProps": {
@@ -7450,21 +7561,22 @@
           "thefactory-tools/ChatContextProject",
           "thefactory-tools/ChatContextProjectTopic",
           "thefactory-tools/ChatContextStory",
-          "@renderer/components/ui/icons/Icons/IconChevron",
-          "@renderer/components/ui/icons/Icons",
+          "thefactory-ui/web/icons/IconChevron",
+          "thefactory-ui/web/icons",
           "@renderer/hooks/useChatUnread/useChatUnread",
           "@renderer/hooks/useChatUnread",
+          "thefactory-ui/web/DotBadge",
+          "thefactory-ui/web",
           "thefactory-tools/utils/getChatContextKey",
           "thefactory-tools/utils",
           "@renderer/hooks/useChatThinking/useChatThinking",
           "@renderer/hooks/useChatThinking",
+          "thefactory-ui/web/SpinnerWithDot",
           "@renderer/contexts/AppSettingsContext/useAppSettings",
           "@renderer/contexts/AppSettingsContext",
           "@renderer/contexts/AgentsContext/useAgents",
           "@renderer/contexts/AgentsContext",
-          "@renderer/components/ui/DotBadge",
-          "@renderer/components/stories/NotificationBadge",
-          "@renderer/components/ui/SpinnerWithDot"
+          "@renderer/components/stories/NotificationBadge"
         ]
       },
       "ChatsProvider": {
@@ -7546,10 +7658,9 @@
           "FormEvent",
           "HTMLInputElement",
           "Props",
-          "@renderer/components/ui/Modal/Modal",
-          "@renderer/components/ui/Modal",
-          "@renderer/components/ui/Button/Button",
-          "@renderer/components/ui/Button",
+          "thefactory-ui/web/Modal",
+          "thefactory-ui/web",
+          "thefactory-ui/web/Button",
           "@renderer/contexts/ProjectContext/useActiveProject",
           "@renderer/contexts/ProjectContext",
           "@renderer/contexts/ProjectsGroupsContext/useProjectsGroups",
@@ -7583,6 +7694,9 @@
           "thefactory-tools/ChatContextGroupTopic",
           "thefactory-tools/ChatContextProjectTopic",
           "thefactory-tools/ChatContextStory",
+          "thefactory-ui/web/SegmentedControl",
+          "thefactory-ui/web",
+          "thefactory-ui/web/DotBadge",
           "thefactory-tools/utils/getChatContextKey",
           "thefactory-tools/utils/getChatContext",
           "thefactory-tools/utils",
@@ -7592,11 +7706,9 @@
           "@renderer/hooks/useNotifications",
           "@renderer/contexts/AgentsContext/useAgents",
           "@renderer/contexts/AgentsContext",
-          "@renderer/components/ui/icons/Icons/IconPlus",
-          "@renderer/components/ui/icons/Icons",
+          "thefactory-ui/web/icons/IconPlus",
+          "thefactory-ui/web/icons",
           "@renderer/components/chat/ChatsNavigationSidebar",
-          "@renderer/components/ui/SegmentedControl",
-          "@renderer/components/ui/DotBadge",
           "@renderer/components/chat/ChatTopicCreateModal"
         ]
       },
@@ -8167,6 +8279,16 @@
           "thefactory-tools/ToolResultType",
           "thefactory-tools/utils/inferFileType",
           "thefactory-tools/utils",
+          "thefactory-ui/web/FileDisplay",
+          "thefactory-ui/web",
+          "thefactory-ui/web/TypewriterText",
+          "thefactory-ui/web/Markdown",
+          "thefactory-ui/web/icons/IconToolbox",
+          "thefactory-ui/web/icons/IconDelete",
+          "thefactory-ui/web/icons/IconRefresh",
+          "thefactory-ui/web/icons",
+          "thefactory-ui/web/Switch",
+          "thefactory-ui/web/Tooltip",
           "@renderer/utils/chat/messageIso",
           "@renderer/utils/chat",
           "@renderer/utils/time/formatDurationMs",
@@ -8641,6 +8763,8 @@
         "path": "renderer/src/components/chat/FilesSuggestionsMenu.tsx",
         "dependencies": [
           "MenuPosition",
+          "thefactory-ui/web/FileDisplay",
+          "thefactory-ui/web",
           "thefactory-tools/utils/inferFileType",
           "thefactory-tools/utils"
         ]
@@ -9408,6 +9532,7 @@
           "thefactory-ui/web/SpinnerWithDot",
           "thefactory-ui/web/getNotificationBadgeColorClass",
           "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconCollection",
           "thefactory-ui/web/icons/IconFolder",
           "thefactory-ui/web/icons/IconFolderOpen",
           "thefactory-ui/web/icons",
@@ -9441,8 +9566,8 @@
           "Partial",
           "HistorySummarizationSettingsProps",
           "thefactory-tools/CompletionSettings",
-          "@renderer/components/ui/Switch/Switch",
-          "@renderer/components/ui/Switch"
+          "thefactory-ui/web/Switch",
+          "thefactory-ui/web"
         ]
       },
       "HistorySummarizationSettingsProps": {
@@ -9452,8 +9577,8 @@
           "thefactory-tools/CompletionSettings",
           "Partial",
           "thefactory-tools/CompletionHistorySummarization",
-          "@renderer/components/ui/Switch/Switch",
-          "@renderer/components/ui/Switch"
+          "thefactory-ui/web/Switch",
+          "thefactory-ui/web"
         ]
       },
       "HoverInfo": {
@@ -10600,6 +10725,8 @@
       "MenuPosition": {
         "path": "renderer/src/components/chat/FilesSuggestionsMenu.tsx",
         "dependencies": [
+          "thefactory-ui/web/FileDisplay",
+          "thefactory-ui/web",
           "thefactory-tools/utils/inferFileType",
           "thefactory-tools/utils"
         ]
@@ -10683,6 +10810,16 @@
           "thefactory-tools/ToolResultType",
           "thefactory-tools/utils/inferFileType",
           "thefactory-tools/utils",
+          "thefactory-ui/web/FileDisplay",
+          "thefactory-ui/web",
+          "thefactory-ui/web/TypewriterText",
+          "thefactory-ui/web/Markdown",
+          "thefactory-ui/web/icons/IconToolbox",
+          "thefactory-ui/web/icons/IconDelete",
+          "thefactory-ui/web/icons/IconRefresh",
+          "thefactory-ui/web/icons",
+          "thefactory-ui/web/Switch",
+          "thefactory-ui/web/Tooltip",
           "@renderer/utils/chat/messageIso",
           "@renderer/utils/chat",
           "@renderer/utils/time/formatDurationMs",
@@ -10699,8 +10836,8 @@
           "thefactory-tools/CompletionSettings",
           "Partial",
           "thefactory-tools/CompletionMessageSanitization",
-          "@renderer/components/ui/Switch/Switch",
-          "@renderer/components/ui/Switch"
+          "thefactory-ui/web/Switch",
+          "thefactory-ui/web"
         ]
       },
       "Modal": {
@@ -12279,12 +12416,12 @@
         "path": "renderer/src/components/chat/ToolCall/components/StatusIcon.tsx",
         "dependencies": [
           "thefactory-tools/ToolResultType",
-          "@renderer/components/ui/icons/Icons/IconCheckmarkCircle",
-          "@renderer/components/ui/icons/Icons/IconHourglass",
-          "@renderer/components/ui/icons/Icons/IconNotAllowed",
-          "@renderer/components/ui/icons/Icons/IconStop",
-          "@renderer/components/ui/icons/Icons/IconError",
-          "@renderer/components/ui/icons/Icons"
+          "thefactory-ui/web/icons/IconCheckmarkCircle",
+          "thefactory-ui/web/icons/IconError",
+          "thefactory-ui/web/icons/IconHourglass",
+          "thefactory-ui/web/icons/IconNotAllowed",
+          "thefactory-ui/web/icons/IconStop",
+          "thefactory-ui/web/icons"
         ]
       },
       "statusKey": {
@@ -12562,13 +12699,12 @@
           "@renderer/contexts/ProjectContext",
           "@renderer/contexts/AgentsContext/useAgents",
           "@renderer/contexts/AgentsContext",
+          "thefactory-ui/web/icons/IconBack",
           "thefactory-ui/web/icons/IconCalculator",
           "thefactory-ui/web/icons/IconChevron",
           "thefactory-ui/web/icons/IconEdit",
           "thefactory-ui/web/icons/IconPlus",
           "thefactory-ui/web/icons",
-          "@renderer/components/ui/icons/Icons/IconBack",
-          "@renderer/components/ui/icons/Icons",
           "@renderer/components/ui/RichText/RichText",
           "@renderer/components/ui/RichText",
           "thefactory-tools/utils/getChatContextKey",
@@ -12742,6 +12878,8 @@
           "react/useEffect",
           "react/useMemo",
           "react/useState",
+          "thefactory-ui/web/Spinner",
+          "thefactory-ui/web",
           "@renderer/services/factoryToolsService/factoryToolsService",
           "@renderer/services/factoryToolsService"
         ]
@@ -12838,8 +12976,19 @@
         "dependencies": [
           "thefactory-tools/ToolResultType",
           "thefactory-tools/ToolCall",
+          "thefactory-ui/web/icons/IconCheckmarkCircle",
+          "thefactory-ui/web/icons/IconChevron",
+          "thefactory-ui/web/icons/IconError",
+          "thefactory-ui/web/icons/IconHourglass",
+          "thefactory-ui/web/icons/IconNotAllowed",
+          "thefactory-ui/web/icons/IconStop",
+          "thefactory-ui/web/icons",
+          "thefactory-ui/web/Code",
+          "thefactory-ui/web",
           "react/useMemo",
-          "react/useState"
+          "react/useState",
+          "thefactory-ui/web/Switch",
+          "thefactory-ui/web/Tooltip"
         ]
       },
       "ToolCallHoverCard": {
@@ -12850,6 +12999,8 @@
           "thefactory-tools/ToolResultType",
           "thefactory-tools/ToolCall",
           "thefactory-tools/Story",
+          "thefactory-ui/web/Code",
+          "thefactory-ui/web",
           "@renderer/contexts/StoriesContext/useStories",
           "@renderer/contexts/StoriesContext",
           "@renderer/contexts/ProjectContext/useActiveProject",
@@ -12872,6 +13023,16 @@
           "thefactory-tools/ToolResultType",
           "thefactory-tools/utils/inferFileType",
           "thefactory-tools/utils",
+          "thefactory-ui/web/FileDisplay",
+          "thefactory-ui/web",
+          "thefactory-ui/web/TypewriterText",
+          "thefactory-ui/web/Markdown",
+          "thefactory-ui/web/icons/IconToolbox",
+          "thefactory-ui/web/icons/IconDelete",
+          "thefactory-ui/web/icons/IconRefresh",
+          "thefactory-ui/web/icons",
+          "thefactory-ui/web/Switch",
+          "thefactory-ui/web/Tooltip",
           "@renderer/utils/chat/messageIso",
           "@renderer/utils/chat",
           "@renderer/utils/time/formatDurationMs",
@@ -12917,10 +13078,9 @@
           "thefactory-tools/CompletionSettings",
           "thefactory-tools/CompletionHistorySummarization",
           "thefactory-tools/CompletionMessageSanitization",
-          "@renderer/components/ui/Button/Button",
-          "@renderer/components/ui/Button",
-          "@renderer/components/ui/Switch/Switch",
-          "@renderer/components/ui/Switch"
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web",
+          "thefactory-ui/web/Switch"
         ]
       },
       "tryResumeAudioContext": {
@@ -12991,8 +13151,8 @@
           "react/useState",
           "thefactory-tools/CompletionAssistantMessage",
           "thefactory-tools/CompletionMessage",
-          "@renderer/components/ui/Modal/Modal",
-          "@renderer/components/ui/Modal",
+          "thefactory-ui/web/Modal",
+          "thefactory-ui/web",
           "@renderer/services/pricingService/getPrice",
           "@renderer/services/pricingService",
           "@renderer/contexts/CostsContext/useCosts",
@@ -13009,8 +13169,8 @@
           "thefactory-tools/CompletionAssistantMessage",
           "thefactory-tools/LLMCostAggregateContent",
           "thefactory-tools/ModelPrice",
-          "@renderer/components/ui/Modal/Modal",
-          "@renderer/components/ui/Modal",
+          "thefactory-ui/web/Modal",
+          "thefactory-ui/web",
           "@renderer/services/pricingService/getPrice",
           "@renderer/services/pricingService",
           "@renderer/contexts/CostsContext/useCosts",
@@ -13568,8 +13728,11 @@
           "Set",
           "thefactory-tools/ToolResultType",
           "thefactory-tools/ToolCall",
-          "@renderer/components/ui/icons/IconChevronRight/IconChevronRight",
-          "@renderer/components/ui/icons/IconChevronRight",
+          "thefactory-ui/web/PathDisplay",
+          "thefactory-ui/web/Spinner",
+          "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconChevronRight",
+          "thefactory-ui/web/icons",
           "@renderer/utils/utils/cn",
           "@renderer/utils/utils"
         ]
@@ -13578,7 +13741,10 @@
         "path": "renderer/src/components/chat/ToolCall/renderers/WriteToolsPreview.tsx",
         "dependencies": [
           "thefactory-tools/ToolResultType",
-          "thefactory-tools/ToolCall"
+          "thefactory-tools/ToolCall",
+          "thefactory-ui/web/Code",
+          "thefactory-ui/web",
+          "thefactory-ui/web/Spinner"
         ]
       },
       "Zoom": {

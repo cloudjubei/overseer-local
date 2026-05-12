@@ -1,5 +1,5 @@
 import { memo } from 'react'
-import Markdown from '../ui/Markdown'
+import { Markdown } from 'thefactory-ui/web'
 import { messageIso } from '@renderer/utils/chat'
 import { formatFriendlyTimestamp } from '@renderer/utils/time'
 import { CompletionMessage } from 'thefactory-tools'

@@ -1,6 +1,6 @@
 import type { CompletionMessageSanitization, CompletionSettings } from 'thefactory-tools'
 
-import { Switch } from '@renderer/components/ui/Switch'
+import { Switch } from 'thefactory-ui/web'
 
 export default function MessageSanitizationSettings({
   messageSanitization,

@@ -6,8 +6,8 @@ import type {
   CompletionMessageSanitization,
 } from 'thefactory-tools'
 
-import { Button } from '@renderer/components/ui/Button'
-import { Switch } from '@renderer/components/ui/Switch'
+import { Button } from 'thefactory-ui/web'
+import { Switch } from 'thefactory-ui/web'
 import HistorySummarizationSettings from './HistorySummarizationSettings'
 import MessageSanitizationSettings from './MessageSanitizationSettings'
 

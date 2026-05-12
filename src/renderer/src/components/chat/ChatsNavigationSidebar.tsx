@@ -14,13 +14,13 @@ import type {
   ChatContextProjectTopic,
   ChatContextStory,
 } from 'thefactory-tools'
-import { IconChevron } from '@renderer/components/ui/icons/Icons'
+import { IconChevron } from 'thefactory-ui/web/icons'
 import { useChatUnread } from '@renderer/hooks/useChatUnread'
-import DotBadge from '@renderer/components/ui/DotBadge'
+import { DotBadge } from 'thefactory-ui/web'
 import { getChatContextKey } from 'thefactory-tools/utils'
 import NotificationBadge from '@renderer/components/stories/NotificationBadge'
 import { useChatThinking } from '@renderer/hooks/useChatThinking'
-import SpinnerWithDot from '@renderer/components/ui/SpinnerWithDot'
+import { SpinnerWithDot } from 'thefactory-ui/web'
 import { useAppSettings } from '@renderer/contexts/AppSettingsContext'
 import { useAgents } from '@renderer/contexts/AgentsContext'
 

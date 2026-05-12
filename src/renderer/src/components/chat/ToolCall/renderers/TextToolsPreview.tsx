@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { ToolCall, ToolResultType } from 'thefactory-tools'
-import Spinner from '../../../ui/Spinner'
+import { Spinner } from 'thefactory-ui/web'
 
 import { factoryToolsService } from '@renderer/services/factoryToolsService'
 

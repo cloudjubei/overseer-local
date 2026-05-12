@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { Modal } from '@renderer/components/ui/Modal'
+import { Modal } from 'thefactory-ui/web'
 import type { ChatDynamicContext } from 'thefactory-tools'
 
 export type ChatDynamicContextModalProps = {
@@ -28,7 +28,7 @@ export default function ChatDynamicContextModal({
       onClose={onClose}
       title="Dynamic Context"
       size="xl"
-      contentClassName="flex-grow overflow-hidden p-0"
+      contentClassName="!p-0"
     >
       <div className="h-full max-h-[70vh] overflow-auto p-4 bg-[var(--surface-base)] text-sm text-[var(--text-secondary)]">
         {formatted ? (

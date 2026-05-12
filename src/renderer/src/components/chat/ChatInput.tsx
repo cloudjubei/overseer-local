@@ -2,8 +2,8 @@ import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useSta
 import { useFiles } from '../../contexts/FilesContext'
 import AttachmentList from './AttachmentList'
 import FileMentionsTextarea from '../ui/FileMentionsTextarea'
-import { IconAttach, IconSend } from '../ui/icons/Icons'
-import Tooltip from '../ui/Tooltip'
+import { Tooltip } from 'thefactory-ui/web'
+import { IconAttach, IconSend } from 'thefactory-ui/web/icons'
 
 type SendReason = 'user' | 'suggested_action'
 

@@ -5,8 +5,7 @@ import {
   SpinnerWithDot,
   getNotificationBadgeColorClass as getBadgeColorClass,
 } from 'thefactory-ui/web'
-import { IconFolder, IconFolderOpen } from 'thefactory-ui/web/icons'
-import { IconCollection } from '../../components/ui/icons/Icons'
+import { IconCollection, IconFolder, IconFolderOpen } from 'thefactory-ui/web/icons'
 import ProjectNavItem from './ProjectNavItem'
 import { useNotifications } from '@renderer/hooks/useNotifications'
 import { useAppSettings } from '../../contexts/AppSettingsContext'

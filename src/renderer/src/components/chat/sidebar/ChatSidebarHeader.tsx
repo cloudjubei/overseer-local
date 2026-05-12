@@ -1,16 +1,16 @@
 import React, { Dispatch, SetStateAction } from 'react'
 import type { ChatContext, CompletionSettings } from 'thefactory-tools'
-import { Button } from '@renderer/components/ui/Button'
+import { Button } from 'thefactory-ui/web'
 import ContextInfoButton from '../../ui/ContextInfoButton'
 import ModelChip from '../../agents/ModelChip'
 import {
-  IconSettings,
+  IconCalculator,
   IconChevron,
-  IconScroll,
-  IconRefreshChat,
   IconCode,
-} from '../../ui/icons/Icons'
-import { IconCalculator } from '../../ui/icons/IconCalculator'
+  IconRefreshChat,
+  IconScroll,
+  IconSettings,
+} from 'thefactory-ui/web/icons'
 import ChatSettingsDropdown, { type ToolToggle } from '../ChatSettingsDropdown'
 
 export type ChatSidebarHeaderProps = {

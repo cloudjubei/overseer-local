@@ -6,7 +6,7 @@ import type {
   ModelPrice,
 } from 'thefactory-tools'
 
-import { Modal } from '@renderer/components/ui/Modal'
+import { Modal } from 'thefactory-ui/web'
 import { getPrice } from '@renderer/services/pricingService'
 import { useCosts } from '@renderer/contexts/CostsContext'
 
@@ -348,7 +348,7 @@ export default function UsageModal({ isOpen, onClose, messages, chatKey }: Usage
       isOpen={isOpen}
       onClose={onClose}
       title="Usage"
-      contentClassName="flex-grow overflow-y-auto"
+      contentClassName="!p-0"
     >
       <div className="bg-[var(--surface-base)] text-sm text-[var(--text-secondary)]">
         <div className="space-y-6">

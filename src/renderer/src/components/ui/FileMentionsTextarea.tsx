@@ -117,26 +117,31 @@ export default function FileMentionsTextarea({
     [references, disableAutocomplete],
   )
 
+  // `style` + `id` go straight to the package primitive (which forwards
+  // `style` to the underlying textarea). Wrapping in an extra `<div>` here
+  // would (a) introduce a second scroll surface when consumers set
+  // `maxHeight` and (b) clip the absolutely-positioned mention dropdown when
+  // the wrapper has `overflow-y: auto`.
   return (
-    <div id={id} style={style}>
-      <FileMentionsTextareaPackage
-        ref={inputRef}
-        value={value}
-        onChange={onChange}
-        onSearchFiles={onSearchFiles}
-        onSearchReferences={onSearchReferences}
-        onAcceptFileMention={onFileMentionSelected}
-        onAcceptReference={onReferenceSelected}
-        placeholder={placeholder}
-        rows={rows}
-        disabled={disabled}
-        className={className}
-        ariaLabel={ariaLabel}
-        onKeyDown={onKeyDown}
-        onSelect={onSelect}
-        onMouseUp={onMouseUp}
-        onFocus={onFocus}
-      />
-    </div>
+    <FileMentionsTextareaPackage
+      ref={inputRef}
+      id={id}
+      value={value}
+      onChange={onChange}
+      onSearchFiles={onSearchFiles}
+      onSearchReferences={onSearchReferences}
+      onAcceptFileMention={onFileMentionSelected}
+      onAcceptReference={onReferenceSelected}
+      placeholder={placeholder}
+      rows={rows}
+      disabled={disabled}
+      className={className}
+      style={style}
+      ariaLabel={ariaLabel}
+      onKeyDown={onKeyDown}
+      onSelect={onSelect}
+      onMouseUp={onMouseUp}
+      onFocus={onFocus}
+    />
   )
 }

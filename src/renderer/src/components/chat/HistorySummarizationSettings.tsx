@@ -1,5 +1,5 @@
 import type { CompletionHistorySummarization, CompletionSettings } from 'thefactory-tools'
-import { Switch } from '@renderer/components/ui/Switch'
+import { Switch } from 'thefactory-ui/web'
 
 export type HistorySummarizationSettingsProps = {
   historySummarization?: CompletionHistorySummarization

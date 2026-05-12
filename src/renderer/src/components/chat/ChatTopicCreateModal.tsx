@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { Modal } from '@renderer/components/ui/Modal'
-import { Button } from '@renderer/components/ui/Button'
+import { Modal } from 'thefactory-ui/web'
+import { Button } from 'thefactory-ui/web'
 import { useActiveProject } from '@renderer/contexts/ProjectContext'
 import { useProjectsGroups } from '@renderer/contexts/ProjectsGroupsContext'
 import { useChats } from '@renderer/contexts/chats/ChatsContext'

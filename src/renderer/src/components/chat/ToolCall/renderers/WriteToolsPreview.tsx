@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react'
 import type { ToolCall, ToolResultType } from 'thefactory-tools'
-import Code from '../../../ui/Code'
-import Spinner from '../../../ui/Spinner'
+import { Code } from 'thefactory-ui/web'
+import { Spinner } from 'thefactory-ui/web'
 import { StructuredUnifiedDiff } from '../../tool-popups/diffUtils'
 import { buildUnifiedDiffIfPresent, extract, isCompletelyNewFile, tryString } from '../utils'
 

@@ -1,17 +1,17 @@
 import React from 'react'
 import {
   IconCheckmarkCircle,
-  IconError,
-  IconStop,
-  IconNotAllowed,
-  IconHourglass,
   IconChevron,
-} from '../ui/icons/Icons'
-import Code from '../ui/Code'
+  IconError,
+  IconHourglass,
+  IconNotAllowed,
+  IconStop,
+} from 'thefactory-ui/web/icons'
+import { Code } from 'thefactory-ui/web'
 import { useMemo, useState } from 'react'
-import { Switch } from '../ui/Switch'
+import { Switch } from 'thefactory-ui/web'
 import { ToolCall, ToolResultType } from 'thefactory-tools'
-import Tooltip from '../ui/Tooltip'
+import { Tooltip } from 'thefactory-ui/web'
 import ToolCallHoverCard from './ToolCall/ToolCallHoverCard'
 
 export type ToolCallCardProps = {

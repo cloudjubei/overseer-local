@@ -1,12 +1,11 @@
 import React, { useMemo, useState } from 'react'
 import type { ToolCall, ToolResultType } from 'thefactory-tools'
-import Spinner from '../../../ui/Spinner'
+import { PathDisplay, Spinner } from 'thefactory-ui/web'
 import { StructuredUnifiedDiff } from '../../tool-popups/diffUtils'
-import { PathDisplay } from '../../../ui/PathDisplay'
 import GitFileStatusIcon from '../../../../screens/git/common/GitFileStatusIcon'
 import { GitFileChangesPills } from '../../../../screens/git/common/GitFileChangesPills'
 import { tryString } from '../utils'
-import { IconChevronRight } from '@renderer/components/ui/icons/IconChevronRight'
+import { IconChevronRight } from 'thefactory-ui/web/icons'
 import { cn } from '@renderer/utils/utils'
 
 export function WriteMultiToolsPreview({

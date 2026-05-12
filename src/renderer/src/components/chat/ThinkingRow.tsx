@@ -1,5 +1,5 @@
 import React, { memo } from 'react'
-import Spinner from '../ui/Spinner'
+import { Spinner } from 'thefactory-ui/web'
 
 function ThinkingRow() {
   return (

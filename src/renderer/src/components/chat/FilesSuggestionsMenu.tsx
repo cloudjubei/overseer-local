@@ -1,4 +1,4 @@
-import FileDisplay from '../ui/FileDisplay'
+import { FileDisplay } from 'thefactory-ui/web'
 import { useFiles } from '../../contexts/FilesContext'
 import { inferFileType } from 'thefactory-tools/utils'
 
@@ -34,11 +34,10 @@ export default function FilesSuggestionsMenu({
         const type = meta?.type || inferFileType(path)
         const size = meta?.size ?? undefined
         const mtime = meta?.mtime ?? undefined
-        const ctime = meta?.ctime ?? undefined
         return (
           <div key={idx} role="option" className="px-1 py-0.5">
             <FileDisplay
-              file={{ name, absolutePath: path, relativePath: path, type, size, mtime, ctime }}
+              file={{ name, absolutePath: path, relativePath: path, type, size, mtime }}
               density="compact"
               interactive
               showPreviewOnHover

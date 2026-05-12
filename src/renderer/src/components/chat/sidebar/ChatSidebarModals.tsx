@@ -1,5 +1,5 @@
 import React, { Dispatch, SetStateAction } from 'react'
-import { Modal } from '@renderer/components/ui/Modal'
+import { Modal } from 'thefactory-ui/web'
 import UsageModal from '../UsageModal'
 import ChatDynamicContextModal from '../ChatDynamicContextModal'
 import type { ChatState } from '../../../contexts/chats/ChatsTypes'
@@ -33,6 +33,7 @@ export function ChatSidebarModals({
         isOpen={isPromptModalOpen}
         onClose={() => setIsPromptModalOpen(false)}
         title="System Prompt"
+        contentClassName="!p-0"
       >
         <div className="p-4 bg-[var(--surface-base)] text-sm text-[var(--text-secondary)] max-h-[70vh] overflow-auto">
           <pre className="whitespace-pre-wrap font-sans">{effectivePrompt}</pre>

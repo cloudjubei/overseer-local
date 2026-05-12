@@ -10,15 +10,15 @@ import type {
 import { inferFileType } from 'thefactory-tools/utils'
 
 import ErrorBubble from '../ui/ErrorBubble'
-import FileDisplay from '../ui/FileDisplay'
+import { FileDisplay } from 'thefactory-ui/web'
 import RichText from '../ui/RichText'
-import TypewriterText from '../ui/TypewriterText'
-import Markdown from '../ui/Markdown'
+import { TypewriterText } from 'thefactory-ui/web'
+import { Markdown } from 'thefactory-ui/web'
 import ToolCallCard from './ToolCallCard'
 
-import { IconToolbox, IconDelete, IconRefresh } from '../ui/icons/Icons'
-import { Switch } from '../ui/Switch'
-import Tooltip from '../ui/Tooltip'
+import { IconToolbox, IconDelete, IconRefresh } from 'thefactory-ui/web/icons'
+import { Switch } from 'thefactory-ui/web'
+import { Tooltip } from 'thefactory-ui/web'
 
 import { messageIso } from '@renderer/utils/chat'
 import { formatDurationMs, formatFriendlyTimestamp } from '@renderer/utils/time'
@@ -466,7 +466,7 @@ function MessageRow({
                     <RichText text={msg.content} />
                   </CollapsibleContent>
                 ) : globalIndex === animateAssistantIdx ? (
-                  <TypewriterText text={msg.content} renderer="markdown" />
+                  <TypewriterText text={msg.content} />
                 ) : isSystem ? (
                   <CollapsibleContent maxHeight={600}>
                     <Markdown text={msg.content} />
@@ -574,7 +574,6 @@ function MessageRow({
                 const type = meta?.type || inferFileType(path)
                 const size = meta?.size ?? undefined
                 const mtime = meta?.mtime ?? undefined
-                const ctime = meta?.ctime ?? undefined
 
                 return (
                   <FileDisplay
@@ -586,7 +585,6 @@ function MessageRow({
                       type,
                       size,
                       mtime,
-                      ctime,
                     }}
                     density="compact"
                     interactive

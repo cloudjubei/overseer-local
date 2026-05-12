@@ -1,8 +1,8 @@
 import React, { useMemo, useRef, useState, useEffect } from 'react'
 import ChatSidebar from './ChatSidebar'
 import type { ChatContext } from 'thefactory-tools'
-import { IconChevron, IconChat } from '../ui/icons/Icons'
-import { ResizeHandle } from '../ui/ResizeHandle'
+import { IconChevron, IconChat } from 'thefactory-ui/web/icons'
+import { ResizeHandle } from 'thefactory-ui/web'
 
 export default function ChatSidebarPanel({
   isOpen = true,

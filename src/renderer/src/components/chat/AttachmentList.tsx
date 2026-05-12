@@ -1,6 +1,6 @@
 import { inferFileType } from 'thefactory-tools/utils'
 import { useFiles } from '../../contexts/FilesContext'
-import FileDisplay from '../ui/FileDisplay'
+import { FileDisplay } from 'thefactory-ui/web'
 
 export default function AttachmentList({
   attachments,
@@ -21,11 +21,10 @@ export default function AttachmentList({
         const type = meta?.type || inferFileType(path)
         const size = meta?.size ?? undefined
         const mtime = meta?.mtime ?? undefined
-        const ctime = meta?.ctime ?? undefined
         return (
           <div key={`${idx}-${path}`} className="inline-flex items-center gap-1">
             <FileDisplay
-              file={{ name, absolutePath: path, relativePath: path, type, size, mtime, ctime }}
+              file={{ name, absolutePath: path, relativePath: path, type, size, mtime }}
               density="compact"
               interactive
               showPreviewOnHover
