@@ -254,9 +254,9 @@
           "@renderer/components/stories/StoryCard",
           "@renderer/contexts/StoriesContext/useStories",
           "@renderer/contexts/StoriesContext",
-          "@renderer/components/ui/icons/Icons/IconChevronLeft",
-          "@renderer/components/ui/icons/Icons/IconChevronRight",
-          "@renderer/components/ui/icons/Icons",
+          "thefactory-ui/web/icons/IconChevronLeft",
+          "thefactory-ui/web/icons/IconChevronRight",
+          "thefactory-ui/web/icons",
           "@renderer/components/stories/StatusControl"
         ]
       },
@@ -470,6 +470,8 @@
           "thefactory-tools/utils",
           "@renderer/hooks/useNotifications/useNotifications",
           "@renderer/hooks/useNotifications",
+          "thefactory-ui/web/useToast",
+          "thefactory-ui/web",
           "@renderer/contexts/ProjectsGroupsContext/useProjectsGroups",
           "@renderer/contexts/ProjectsGroupsContext"
         ]
@@ -562,6 +564,8 @@
           "thefactory-tools/utils",
           "@renderer/hooks/useNotifications/useNotifications",
           "@renderer/hooks/useNotifications",
+          "thefactory-ui/web/useToast",
+          "thefactory-ui/web",
           "@renderer/contexts/ProjectsGroupsContext/useProjectsGroups",
           "@renderer/contexts/ProjectsGroupsContext"
         ]
@@ -1612,11 +1616,10 @@
           "FeatureFormValues",
           "HTMLDivElement",
           "Partial",
-          "@renderer/components/ui/Toast/useToast",
-          "@renderer/components/ui/Toast",
-          "@renderer/components/ui/Modal/AlertDialog",
-          "@renderer/components/ui/Modal/Modal",
-          "@renderer/components/ui/Modal",
+          "thefactory-ui/web/useToast",
+          "thefactory-ui/web",
+          "thefactory-ui/web/ConfirmDialog",
+          "thefactory-ui/web/Modal",
           "@renderer/contexts/StoriesContext/useStories",
           "@renderer/contexts/StoriesContext",
           "@renderer/contexts/ProjectContext/useActiveProject",
@@ -1636,17 +1639,15 @@
           "react/useEffect",
           "react/useMemo",
           "react/useState",
-          "@renderer/components/ui/Modal/AlertDialog",
-          "@renderer/components/ui/Modal/Modal",
-          "@renderer/components/ui/Modal",
-          "@renderer/components/ui/Toast/useToast",
-          "@renderer/components/ui/Toast",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web/ConfirmDialog",
+          "thefactory-ui/web/Modal",
+          "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconDelete",
+          "thefactory-ui/web/icons",
+          "thefactory-ui/web/useToast",
           "@renderer/contexts/StoriesContext/useStories",
           "@renderer/contexts/StoriesContext",
-          "@renderer/components/ui/Button/Button",
-          "@renderer/components/ui/Button",
-          "@renderer/components/ui/icons/Icons/IconDelete",
-          "@renderer/components/ui/icons/Icons",
           "@renderer/contexts/ProjectContext/useActiveProject",
           "@renderer/contexts/ProjectContext",
           "@renderer/components/chat/ChatSidebarModalPanel",
@@ -1663,13 +1664,12 @@
           "Props",
           "@renderer/components/ui/FileSelector/FileSelector",
           "@renderer/components/ui/FileSelector",
-          "@renderer/components/ui/icons/Icons/IconDelete",
-          "@renderer/components/ui/icons/Icons/IconPlus",
-          "@renderer/components/ui/icons/Icons",
-          "@renderer/components/ui/Button/Button",
-          "@renderer/components/ui/Button",
-          "@renderer/components/ui/Modal/Modal",
-          "@renderer/components/ui/Modal",
+          "thefactory-ui/web/icons/IconDelete",
+          "thefactory-ui/web/icons/IconPlus",
+          "thefactory-ui/web/icons",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web/Modal",
+          "thefactory-ui/web",
           "@renderer/components/ui/FileMentionsTextarea"
         ]
       },
@@ -1679,13 +1679,12 @@
           "thefactory-tools/Status",
           "@renderer/components/ui/FileSelector/FileSelector",
           "@renderer/components/ui/FileSelector",
-          "@renderer/components/ui/icons/Icons/IconDelete",
-          "@renderer/components/ui/icons/Icons/IconPlus",
-          "@renderer/components/ui/icons/Icons",
-          "@renderer/components/ui/Button/Button",
-          "@renderer/components/ui/Button",
-          "@renderer/components/ui/Modal/Modal",
-          "@renderer/components/ui/Modal",
+          "thefactory-ui/web/icons/IconDelete",
+          "thefactory-ui/web/icons/IconPlus",
+          "thefactory-ui/web/icons",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web/Modal",
+          "thefactory-ui/web",
           "@renderer/components/ui/FileMentionsTextarea"
         ]
       },
@@ -1739,10 +1738,12 @@
       "FileMentionsTextarea": {
         "path": "src/renderer/src/components/ui/FileMentionsTextarea.tsx",
         "dependencies": [
-          "HTMLTextAreaElement",
-          "KeyboardEvent",
-          "HTMLDivElement",
-          "FileMentionsTextareaProps"
+          "ReferenceSuggestion",
+          "FileMentionsTextareaProps",
+          "thefactory-ui/web/FileMentionsTextarea",
+          "thefactory-ui/web/rankMentionMatches",
+          "thefactory-ui/web/type ReferenceSuggestion",
+          "thefactory-ui/web"
         ]
       },
       "FileMentionsTextareaProps": {
@@ -1754,7 +1755,11 @@
           "ReactEventHandler",
           "KeyboardEventHandler",
           "RefObject",
-          "CSSProperties"
+          "CSSProperties",
+          "thefactory-ui/web/FileMentionsTextarea",
+          "thefactory-ui/web/rankMentionMatches",
+          "thefactory-ui/web/type ReferenceSuggestion",
+          "thefactory-ui/web"
         ]
       },
       "FilesContextValue": {
@@ -1769,15 +1774,17 @@
       "FileSelector": {
         "path": "src/renderer/src/components/ui/FileSelector.tsx",
         "dependencies": [
-          "HTMLInputElement",
           "FileSelectorProps",
-          "FC"
+          "FC",
+          "thefactory-ui/web/FileSelector",
+          "thefactory-ui/web"
         ]
       },
       "FileSelectorProps": {
         "path": "src/renderer/src/components/ui/FileSelector.tsx",
         "dependencies": [
-          "react"
+          "thefactory-ui/web/FileSelector",
+          "thefactory-ui/web"
         ]
       },
       "filesManager": {
@@ -3826,8 +3833,8 @@
           "@renderer/services/gitService",
           "@renderer/services/factoryToolsService/factoryToolsService",
           "@renderer/services/factoryToolsService",
-          "@renderer/components/ui/Toast/useToast",
-          "@renderer/components/ui/Toast",
+          "thefactory-ui/web/useToast",
+          "thefactory-ui/web",
           "@renderer/components/ui/Spinner",
           "@renderer/components/ui/Tooltip"
         ]
@@ -3844,8 +3851,8 @@
           "@renderer/services/gitService",
           "@renderer/services/factoryToolsService/factoryToolsService",
           "@renderer/services/factoryToolsService",
-          "@renderer/components/ui/Toast/useToast",
-          "@renderer/components/ui/Toast",
+          "thefactory-ui/web/useToast",
+          "thefactory-ui/web",
           "@renderer/components/ui/Spinner",
           "@renderer/components/ui/Tooltip"
         ]
@@ -5061,7 +5068,20 @@
       "RichText": {
         "path": "src/renderer/src/components/ui/RichText.tsx",
         "dependencies": [
-          "thefactory-tools/FileMeta"
+          "RichTextProps",
+          "thefactory-ui/web/RichText",
+          "thefactory-ui/web/type RichTextProps",
+          "thefactory-ui/web"
+        ]
+      },
+      "RichTextProps": {
+        "path": "src/renderer/src/components/ui/RichText.tsx",
+        "dependencies": [
+          "PackageRichTextProps",
+          "Pick",
+          "thefactory-ui/web/RichText",
+          "thefactory-ui/web/type RichTextProps",
+          "thefactory-ui/web"
         ]
       },
       "Row": {
@@ -5217,8 +5237,8 @@
           "@renderer/components/ui/Select/SelectTrigger",
           "@renderer/components/ui/Select/SelectValue",
           "@renderer/components/ui/Select",
-          "@renderer/components/ui/Toast/useToast",
-          "@renderer/components/ui/Toast",
+          "thefactory-ui/web/useToast",
+          "thefactory-ui/web",
           "@renderer/contexts/LLMConfigContext/useLLMConfig",
           "@renderer/contexts/LLMConfigContext",
           "@renderer/services/llmConfigsService/llmConfigsService",
@@ -5711,11 +5731,10 @@
           "thefactory-tools/StoryCreateInput",
           "StoryFormValues",
           "HTMLInputElement",
-          "@renderer/components/ui/Modal/AlertDialog",
-          "@renderer/components/ui/Modal/Modal",
-          "@renderer/components/ui/Modal",
-          "@renderer/components/ui/Toast/useToast",
-          "@renderer/components/ui/Toast",
+          "thefactory-ui/web/ConfirmDialog",
+          "thefactory-ui/web/Modal",
+          "thefactory-ui/web",
+          "thefactory-ui/web/useToast",
           "@renderer/contexts/StoriesContext/useStories",
           "@renderer/contexts/StoriesContext",
           "@renderer/contexts/ProjectContext/useActiveProject",
@@ -5750,11 +5769,12 @@
           "@renderer/contexts/ProjectContext",
           "@renderer/contexts/AgentsContext/useAgents",
           "@renderer/contexts/AgentsContext",
+          "thefactory-ui/web/icons/IconCalculator",
+          "thefactory-ui/web/icons/IconChevron",
+          "thefactory-ui/web/icons/IconEdit",
+          "thefactory-ui/web/icons/IconPlus",
+          "thefactory-ui/web/icons",
           "@renderer/components/ui/icons/Icons/IconBack",
-          "@renderer/components/ui/icons/Icons/IconCalculator",
-          "@renderer/components/ui/icons/Icons/IconChevron",
-          "@renderer/components/ui/icons/Icons/IconEdit",
-          "@renderer/components/ui/icons/Icons/IconPlus",
           "@renderer/components/ui/icons/Icons",
           "@renderer/components/ui/RichText/RichText",
           "@renderer/components/ui/RichText",
@@ -5764,8 +5784,8 @@
           "@renderer/components/stories/StatusControl/statusKey",
           "@renderer/components/stories/StatusControl/STATUS_LABELS",
           "@renderer/components/stories/StatusControl",
-          "@renderer/components/ui/Button/Button",
-          "@renderer/components/ui/Button",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web",
           "@renderer/contexts/StoriesContext/useStories",
           "@renderer/contexts/StoriesContext",
           "@renderer/components/chat/ChatSidebarPanel",
@@ -5789,11 +5809,13 @@
           "react/useEffect",
           "react/useMemo",
           "react/useState",
-          "@renderer/components/ui/Modal/AlertDialog",
-          "@renderer/components/ui/Modal/Modal",
-          "@renderer/components/ui/Modal",
-          "@renderer/components/ui/Toast/useToast",
-          "@renderer/components/ui/Toast",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web/ConfirmDialog",
+          "thefactory-ui/web/Modal",
+          "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconDelete",
+          "thefactory-ui/web/icons",
+          "thefactory-ui/web/useToast",
           "@renderer/navigation/Navigator/useNavigator",
           "@renderer/navigation/Navigator",
           "@renderer/contexts/StoriesContext/useStories",
@@ -5802,10 +5824,6 @@
           "@renderer/contexts/ProjectContext",
           "@renderer/components/chat/ChatSidebarModalPanel",
           "@renderer/components/chat",
-          "@renderer/components/ui/Button/Button",
-          "@renderer/components/ui/Button",
-          "@renderer/components/ui/icons/Icons/IconDelete",
-          "@renderer/components/ui/icons/Icons",
           "@renderer/components/stories/StoryForm"
         ]
       },
@@ -7029,9 +7047,9 @@
           "@renderer/components/stories/StoryCard",
           "@renderer/contexts/StoriesContext/useStories",
           "@renderer/contexts/StoriesContext",
-          "@renderer/components/ui/icons/Icons/IconChevronLeft",
-          "@renderer/components/ui/icons/Icons/IconChevronRight",
-          "@renderer/components/ui/icons/Icons",
+          "thefactory-ui/web/icons/IconChevronLeft",
+          "thefactory-ui/web/icons/IconChevronRight",
+          "thefactory-ui/web/icons",
           "@renderer/components/stories/StatusControl"
         ]
       },
@@ -7245,6 +7263,8 @@
           "thefactory-tools/utils",
           "@renderer/hooks/useNotifications/useNotifications",
           "@renderer/hooks/useNotifications",
+          "thefactory-ui/web/useToast",
+          "thefactory-ui/web",
           "@renderer/contexts/ProjectsGroupsContext/useProjectsGroups",
           "@renderer/contexts/ProjectsGroupsContext"
         ]
@@ -7337,6 +7357,8 @@
           "thefactory-tools/utils",
           "@renderer/hooks/useNotifications/useNotifications",
           "@renderer/hooks/useNotifications",
+          "thefactory-ui/web/useToast",
+          "thefactory-ui/web",
           "@renderer/contexts/ProjectsGroupsContext/useProjectsGroups",
           "@renderer/contexts/ProjectsGroupsContext"
         ]
@@ -8387,11 +8409,10 @@
           "FeatureFormValues",
           "HTMLDivElement",
           "Partial",
-          "@renderer/components/ui/Toast/useToast",
-          "@renderer/components/ui/Toast",
-          "@renderer/components/ui/Modal/AlertDialog",
-          "@renderer/components/ui/Modal/Modal",
-          "@renderer/components/ui/Modal",
+          "thefactory-ui/web/useToast",
+          "thefactory-ui/web",
+          "thefactory-ui/web/ConfirmDialog",
+          "thefactory-ui/web/Modal",
           "@renderer/contexts/StoriesContext/useStories",
           "@renderer/contexts/StoriesContext",
           "@renderer/contexts/ProjectContext/useActiveProject",
@@ -8411,17 +8432,15 @@
           "react/useEffect",
           "react/useMemo",
           "react/useState",
-          "@renderer/components/ui/Modal/AlertDialog",
-          "@renderer/components/ui/Modal/Modal",
-          "@renderer/components/ui/Modal",
-          "@renderer/components/ui/Toast/useToast",
-          "@renderer/components/ui/Toast",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web/ConfirmDialog",
+          "thefactory-ui/web/Modal",
+          "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconDelete",
+          "thefactory-ui/web/icons",
+          "thefactory-ui/web/useToast",
           "@renderer/contexts/StoriesContext/useStories",
           "@renderer/contexts/StoriesContext",
-          "@renderer/components/ui/Button/Button",
-          "@renderer/components/ui/Button",
-          "@renderer/components/ui/icons/Icons/IconDelete",
-          "@renderer/components/ui/icons/Icons",
           "@renderer/contexts/ProjectContext/useActiveProject",
           "@renderer/contexts/ProjectContext",
           "@renderer/components/chat/ChatSidebarModalPanel",
@@ -8438,13 +8457,12 @@
           "Props",
           "@renderer/components/ui/FileSelector/FileSelector",
           "@renderer/components/ui/FileSelector",
-          "@renderer/components/ui/icons/Icons/IconDelete",
-          "@renderer/components/ui/icons/Icons/IconPlus",
-          "@renderer/components/ui/icons/Icons",
-          "@renderer/components/ui/Button/Button",
-          "@renderer/components/ui/Button",
-          "@renderer/components/ui/Modal/Modal",
-          "@renderer/components/ui/Modal",
+          "thefactory-ui/web/icons/IconDelete",
+          "thefactory-ui/web/icons/IconPlus",
+          "thefactory-ui/web/icons",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web/Modal",
+          "thefactory-ui/web",
           "@renderer/components/ui/FileMentionsTextarea"
         ]
       },
@@ -8454,13 +8472,12 @@
           "thefactory-tools/Status",
           "@renderer/components/ui/FileSelector/FileSelector",
           "@renderer/components/ui/FileSelector",
-          "@renderer/components/ui/icons/Icons/IconDelete",
-          "@renderer/components/ui/icons/Icons/IconPlus",
-          "@renderer/components/ui/icons/Icons",
-          "@renderer/components/ui/Button/Button",
-          "@renderer/components/ui/Button",
-          "@renderer/components/ui/Modal/Modal",
-          "@renderer/components/ui/Modal",
+          "thefactory-ui/web/icons/IconDelete",
+          "thefactory-ui/web/icons/IconPlus",
+          "thefactory-ui/web/icons",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web/Modal",
+          "thefactory-ui/web",
           "@renderer/components/ui/FileMentionsTextarea"
         ]
       },
@@ -8514,10 +8531,12 @@
       "FileMentionsTextarea": {
         "path": "renderer/src/components/ui/FileMentionsTextarea.tsx",
         "dependencies": [
-          "HTMLTextAreaElement",
-          "KeyboardEvent",
-          "HTMLDivElement",
-          "FileMentionsTextareaProps"
+          "ReferenceSuggestion",
+          "FileMentionsTextareaProps",
+          "thefactory-ui/web/FileMentionsTextarea",
+          "thefactory-ui/web/rankMentionMatches",
+          "thefactory-ui/web/type ReferenceSuggestion",
+          "thefactory-ui/web"
         ]
       },
       "FileMentionsTextareaProps": {
@@ -8529,7 +8548,11 @@
           "ReactEventHandler",
           "KeyboardEventHandler",
           "RefObject",
-          "CSSProperties"
+          "CSSProperties",
+          "thefactory-ui/web/FileMentionsTextarea",
+          "thefactory-ui/web/rankMentionMatches",
+          "thefactory-ui/web/type ReferenceSuggestion",
+          "thefactory-ui/web"
         ]
       },
       "FilesContextValue": {
@@ -8544,15 +8567,17 @@
       "FileSelector": {
         "path": "renderer/src/components/ui/FileSelector.tsx",
         "dependencies": [
-          "HTMLInputElement",
           "FileSelectorProps",
-          "FC"
+          "FC",
+          "thefactory-ui/web/FileSelector",
+          "thefactory-ui/web"
         ]
       },
       "FileSelectorProps": {
         "path": "renderer/src/components/ui/FileSelector.tsx",
         "dependencies": [
-          "react"
+          "thefactory-ui/web/FileSelector",
+          "thefactory-ui/web"
         ]
       },
       "filesManager": {
@@ -10601,8 +10626,8 @@
           "@renderer/services/gitService",
           "@renderer/services/factoryToolsService/factoryToolsService",
           "@renderer/services/factoryToolsService",
-          "@renderer/components/ui/Toast/useToast",
-          "@renderer/components/ui/Toast",
+          "thefactory-ui/web/useToast",
+          "thefactory-ui/web",
           "@renderer/components/ui/Spinner",
           "@renderer/components/ui/Tooltip"
         ]
@@ -10619,8 +10644,8 @@
           "@renderer/services/gitService",
           "@renderer/services/factoryToolsService/factoryToolsService",
           "@renderer/services/factoryToolsService",
-          "@renderer/components/ui/Toast/useToast",
-          "@renderer/components/ui/Toast",
+          "thefactory-ui/web/useToast",
+          "thefactory-ui/web",
           "@renderer/components/ui/Spinner",
           "@renderer/components/ui/Tooltip"
         ]
@@ -11836,7 +11861,20 @@
       "RichText": {
         "path": "renderer/src/components/ui/RichText.tsx",
         "dependencies": [
-          "thefactory-tools/FileMeta"
+          "RichTextProps",
+          "thefactory-ui/web/RichText",
+          "thefactory-ui/web/type RichTextProps",
+          "thefactory-ui/web"
+        ]
+      },
+      "RichTextProps": {
+        "path": "renderer/src/components/ui/RichText.tsx",
+        "dependencies": [
+          "PackageRichTextProps",
+          "Pick",
+          "thefactory-ui/web/RichText",
+          "thefactory-ui/web/type RichTextProps",
+          "thefactory-ui/web"
         ]
       },
       "Row": {
@@ -11992,8 +12030,8 @@
           "@renderer/components/ui/Select/SelectTrigger",
           "@renderer/components/ui/Select/SelectValue",
           "@renderer/components/ui/Select",
-          "@renderer/components/ui/Toast/useToast",
-          "@renderer/components/ui/Toast",
+          "thefactory-ui/web/useToast",
+          "thefactory-ui/web",
           "@renderer/contexts/LLMConfigContext/useLLMConfig",
           "@renderer/contexts/LLMConfigContext",
           "@renderer/services/llmConfigsService/llmConfigsService",
@@ -12486,11 +12524,10 @@
           "thefactory-tools/StoryCreateInput",
           "StoryFormValues",
           "HTMLInputElement",
-          "@renderer/components/ui/Modal/AlertDialog",
-          "@renderer/components/ui/Modal/Modal",
-          "@renderer/components/ui/Modal",
-          "@renderer/components/ui/Toast/useToast",
-          "@renderer/components/ui/Toast",
+          "thefactory-ui/web/ConfirmDialog",
+          "thefactory-ui/web/Modal",
+          "thefactory-ui/web",
+          "thefactory-ui/web/useToast",
           "@renderer/contexts/StoriesContext/useStories",
           "@renderer/contexts/StoriesContext",
           "@renderer/contexts/ProjectContext/useActiveProject",
@@ -12525,11 +12562,12 @@
           "@renderer/contexts/ProjectContext",
           "@renderer/contexts/AgentsContext/useAgents",
           "@renderer/contexts/AgentsContext",
+          "thefactory-ui/web/icons/IconCalculator",
+          "thefactory-ui/web/icons/IconChevron",
+          "thefactory-ui/web/icons/IconEdit",
+          "thefactory-ui/web/icons/IconPlus",
+          "thefactory-ui/web/icons",
           "@renderer/components/ui/icons/Icons/IconBack",
-          "@renderer/components/ui/icons/Icons/IconCalculator",
-          "@renderer/components/ui/icons/Icons/IconChevron",
-          "@renderer/components/ui/icons/Icons/IconEdit",
-          "@renderer/components/ui/icons/Icons/IconPlus",
           "@renderer/components/ui/icons/Icons",
           "@renderer/components/ui/RichText/RichText",
           "@renderer/components/ui/RichText",
@@ -12539,8 +12577,8 @@
           "@renderer/components/stories/StatusControl/statusKey",
           "@renderer/components/stories/StatusControl/STATUS_LABELS",
           "@renderer/components/stories/StatusControl",
-          "@renderer/components/ui/Button/Button",
-          "@renderer/components/ui/Button",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web",
           "@renderer/contexts/StoriesContext/useStories",
           "@renderer/contexts/StoriesContext",
           "@renderer/components/chat/ChatSidebarPanel",
@@ -12564,11 +12602,13 @@
           "react/useEffect",
           "react/useMemo",
           "react/useState",
-          "@renderer/components/ui/Modal/AlertDialog",
-          "@renderer/components/ui/Modal/Modal",
-          "@renderer/components/ui/Modal",
-          "@renderer/components/ui/Toast/useToast",
-          "@renderer/components/ui/Toast",
+          "thefactory-ui/web/Button",
+          "thefactory-ui/web/ConfirmDialog",
+          "thefactory-ui/web/Modal",
+          "thefactory-ui/web",
+          "thefactory-ui/web/icons/IconDelete",
+          "thefactory-ui/web/icons",
+          "thefactory-ui/web/useToast",
           "@renderer/navigation/Navigator/useNavigator",
           "@renderer/navigation/Navigator",
           "@renderer/contexts/StoriesContext/useStories",
@@ -12577,10 +12617,6 @@
           "@renderer/contexts/ProjectContext",
           "@renderer/components/chat/ChatSidebarModalPanel",
           "@renderer/components/chat",
-          "@renderer/components/ui/Button/Button",
-          "@renderer/components/ui/Button",
-          "@renderer/components/ui/icons/Icons/IconDelete",
-          "@renderer/components/ui/icons/Icons",
           "@renderer/components/stories/StoryForm"
         ]
       },
