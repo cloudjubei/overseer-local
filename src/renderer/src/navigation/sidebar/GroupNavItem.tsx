@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { ProjectsGroup, ProjectSpec } from 'thefactory-tools'
 import {
   NotificationBadge,
@@ -18,6 +18,14 @@ type GroupNavItemProps = {
   activeProjectId?: string
   activeSelectionType: 'project' | 'group'
   effectiveCollapsed: boolean
+  /** Whether this group's project list is currently expanded. Owned by the
+   *  parent so it survives navigation + persists to localStorage. */
+  isOpen: boolean
+  onToggleOpen: () => void
+  /** Called once if the active project lives in this group but the group
+   *  isn't yet open — lets the parent flip it open without overwriting an
+   *  intentional user-initiated collapse. */
+  onAutoOpen: () => void
   onGroupSelect: (groupId: string) => void
   onProjectSwitch: (projectId: string) => void
 }
@@ -31,16 +39,20 @@ export default function GroupNavItem({
   activeProjectId,
   activeSelectionType,
   effectiveCollapsed,
+  isOpen,
+  onToggleOpen,
+  onAutoOpen,
   onGroupSelect,
   onProjectSwitch,
 }: GroupNavItemProps) {
-  const [isOpen, setIsOpen] = useState(false)
   const { isBadgeEnabled, isGitBadgeSubToggleEnabled, getGroupBadgeState } = useNotifications()
   const { appSettings } = useAppSettings()
 
   const isScope = g.type === 'SCOPE'
 
-  // Auto-expand if the active project is in this group (MAIN only)
+  // Auto-expand if the active project is in this group (MAIN only). Never
+  // auto-collapses — if the user closed the group intentionally, navigating
+  // away and back leaves it closed.
   const isActiveProjectInGroup =
     !isScope &&
     activeSelectionType === 'project' &&
@@ -48,9 +60,8 @@ export default function GroupNavItem({
     groupProjects.some((p) => p.id === activeProjectId)
 
   useEffect(() => {
-    if (isActiveProjectInGroup) {
-      setIsOpen(true)
-    }
+    if (isActiveProjectInGroup && !isOpen) onAutoOpen()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isActiveProjectInGroup])
 
   const chatBadgeColor = appSettings?.notificationSystemSettings?.badgeColors?.chat_messages
@@ -119,7 +130,7 @@ export default function GroupNavItem({
           /* MAIN: clickable folder icon that toggles expand/collapse */
           <button
             type="button"
-            onClick={() => setIsOpen((prev) => !prev)}
+            onClick={onToggleOpen}
             className="flex items-center justify-center hover:bg-black/5 dark:hover:bg-white/10 h-full w-[42px] rounded-l shrink-0"
             aria-expanded={isOpen}
             aria-controls={`group-${g.id}`}

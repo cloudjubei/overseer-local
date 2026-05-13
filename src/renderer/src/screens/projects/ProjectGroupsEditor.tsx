@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react'
 import { useProjectsGroups } from '@renderer/contexts/ProjectsGroupsContext'
 import {
+  Alert,
   Button,
   Modal,
   Select,
@@ -10,6 +11,7 @@ import {
   SelectValue,
   Switch,
 } from 'thefactory-ui/web'
+import { extractErrorMessage } from '@renderer/utils/errorMessage'
 import {
   IconArrowLeftMini,
   IconArrowRightMini,
@@ -29,29 +31,39 @@ function GroupNameModal({
   title: string
   initialName?: string
   confirmText?: string
-  onConfirm: (name: string) => void
+  onConfirm: (name: string) => Promise<void> | void
   onClose: () => void
 }) {
   const [name, setName] = useState(initialName)
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    const n = name.trim()
+    if (!n || submitting) return
+    setSubmitting(true)
+    setError(null)
+    try {
+      await onConfirm(n)
+    } catch (err) {
+      setError(extractErrorMessage(err, 'Could not save this group. Try again.'))
+    } finally {
+      setSubmitting(false)
+    }
+  }
 
   return (
     <Modal
       isOpen={true}
-      onClose={onClose}
+      onClose={submitting ? () => undefined : onClose}
       title={title}
       size="sm"
       initialFocusRef={inputRef as React.RefObject<HTMLElement>}
     >
-      <form
-        className="flex flex-col gap-3"
-        onSubmit={(e) => {
-          e.preventDefault()
-          const n = name.trim()
-          if (!n) return
-          onConfirm(n)
-        }}
-      >
+      <form className="flex flex-col gap-3" onSubmit={onSubmit}>
+        {error && <Alert variant="error">{error}</Alert>}
         <div className="form-row">
           <label htmlFor="group-name">Group name</label>
           <input
@@ -69,14 +81,15 @@ function GroupNameModal({
               type="submit"
               variant="secondary"
               size="icon"
-              disabled={!name.trim()}
+              loading={submitting}
+              disabled={!name.trim() || submitting}
               title="Save"
               aria-label="Save"
             >
               <IconSave className="w-4 h-4" />
             </Button>
           ) : (
-            <Button type="submit" disabled={!name.trim()}>
+            <Button type="submit" loading={submitting} disabled={!name.trim() || submitting}>
               {confirmText}
             </Button>
           )}

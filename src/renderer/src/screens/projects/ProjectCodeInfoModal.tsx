@@ -58,13 +58,12 @@ export function ProjectCodeInfoModal({ codeInfo, onSave, onClose }: ProjectCodeI
   }
 
   const handleSave = () => {
-    if (language && framework && testFramework) {
-      onSave({
-        language,
-        framework,
-        testFramework,
-      })
-    }
+    if (!language) return
+    onSave({
+      language,
+      framework,
+      testFramework,
+    })
   }
 
   return (
@@ -134,7 +133,7 @@ export function ProjectCodeInfoModal({ codeInfo, onSave, onClose }: ProjectCodeI
           onClick={handleSave}
           variant="secondary"
           size="icon"
-          disabled={!(language && framework && testFramework)}
+          disabled={!language}
           title="Save"
           aria-label="Save"
         >

@@ -34,6 +34,24 @@ export default function SidebarView({
   const { getProjectBadgeState, getGroupBadgeState, getGroupOwnBadgeState } = useNotifications()
 
   const [collapsed, setCollapsed] = useState<boolean>(appSettings.userPreferences.sidebarCollapsed)
+  const [openGroupIds, setOpenGroupIds] = useState<Set<string>>(() => readOpenGroupIds())
+
+  const persistOpenGroupIds = (next: Set<string>) => {
+    setOpenGroupIds(next)
+    writeOpenGroupIds(next)
+  }
+  const toggleGroupOpen = (id: string) => {
+    const next = new Set(openGroupIds)
+    if (next.has(id)) next.delete(id)
+    else next.add(id)
+    persistOpenGroupIds(next)
+  }
+  const setGroupOpenTrue = (id: string) => {
+    if (openGroupIds.has(id)) return
+    const next = new Set(openGroupIds)
+    next.add(id)
+    persistOpenGroupIds(next)
+  }
 
   useEffect(() => {
     if (isAppSettingsLoaded) {
@@ -273,39 +291,90 @@ export default function SidebarView({
             </li>
           )}
 
-          {activeProjects
-            .filter((p) => !groupedProjectIds.has(p.id))
-            .map((p) => (
-              <ProjectNavItem
-                key={p.id}
-                project={p}
-                active={activeSelectionType === 'project' && activeProjectId === p.id}
-                effectiveCollapsed={effectiveCollapsed}
-                onSwitch={handleProjectSwitch}
-              />
-            ))}
+          {effectiveCollapsed ? (
+            // When collapsed, show ONLY the active selection — either the
+            // active group, or the active project (regardless of whether it
+            // lives inside a MAIN group). Everything else is hidden so the
+            // rail stays scannable at a glance.
+            (() => {
+              if (activeSelectionType === 'group' && activeGroupId) {
+                const g = activeGroups.find((gg) => gg.id === activeGroupId)
+                if (g) {
+                  const projectById = new Map(activeProjects.map((p) => [p.id, p]))
+                  const groupProjects = (g.projects || [])
+                    .map((pid) => projectById.get(pid))
+                    .filter(Boolean) as ProjectSpec[]
+                  return (
+                    <GroupNavItem
+                      key={g.id}
+                      group={g}
+                      groupProjects={groupProjects}
+                      isActiveGroup
+                      activeProjectId={activeProjectId}
+                      activeSelectionType={activeSelectionType}
+                      effectiveCollapsed
+                      isOpen={openGroupIds.has(g.id)}
+                      onToggleOpen={() => toggleGroupOpen(g.id)}
+                      onAutoOpen={() => setGroupOpenTrue(g.id)}
+                      onGroupSelect={handleGroupSelect}
+                      onProjectSwitch={handleProjectSwitch}
+                    />
+                  )
+                }
+              }
+              const activeP = activeProjects.find((p) => p.id === activeProjectId)
+              if (activeP) {
+                return (
+                  <ProjectNavItem
+                    key={activeP.id}
+                    project={activeP}
+                    active
+                    effectiveCollapsed
+                    onSwitch={handleProjectSwitch}
+                  />
+                )
+              }
+              return null
+            })()
+          ) : (
+            <>
+              {activeProjects
+                .filter((p) => !groupedProjectIds.has(p.id))
+                .map((p) => (
+                  <ProjectNavItem
+                    key={p.id}
+                    project={p}
+                    active={activeSelectionType === 'project' && activeProjectId === p.id}
+                    effectiveCollapsed={effectiveCollapsed}
+                    onSwitch={handleProjectSwitch}
+                  />
+                ))}
 
-          {!effectiveCollapsed &&
-            activeGroups.map((g) => {
-              const projectById = new Map(activeProjects.map((p) => [p.id, p]))
-              const groupProjects = (g.projects || [])
-                .map((pid) => projectById.get(pid))
-                .filter(Boolean) as ProjectSpec[]
+              {activeGroups.map((g) => {
+                const projectById = new Map(activeProjects.map((p) => [p.id, p]))
+                const groupProjects = (g.projects || [])
+                  .map((pid) => projectById.get(pid))
+                  .filter(Boolean) as ProjectSpec[]
 
-              return (
-                <GroupNavItem
-                  key={g.id}
-                  group={g}
-                  groupProjects={groupProjects}
-                  isActiveGroup={activeSelectionType === 'group' && activeGroupId === g.id}
-                  activeProjectId={activeProjectId}
-                  activeSelectionType={activeSelectionType}
-                  effectiveCollapsed={effectiveCollapsed}
-                  onGroupSelect={handleGroupSelect}
-                  onProjectSwitch={handleProjectSwitch}
-                />
-              )
-            })}
+                return (
+                  <GroupNavItem
+                    key={g.id}
+                    group={g}
+                    groupProjects={groupProjects}
+                    isActiveGroup={activeSelectionType === 'group' && activeGroupId === g.id}
+                    activeProjectId={activeProjectId}
+                    activeSelectionType={activeSelectionType}
+                    effectiveCollapsed={effectiveCollapsed}
+                    isOpen={openGroupIds.has(g.id)}
+                    onToggleOpen={() => toggleGroupOpen(g.id)}
+                    onAutoOpen={() => setGroupOpenTrue(g.id)}
+                    onGroupSelect={handleGroupSelect}
+                    onProjectSwitch={handleProjectSwitch}
+                  />
+                )
+              })}
+            </>
+          )}
         </ul>
       </nav>
 
@@ -340,4 +409,33 @@ export default function SidebarView({
       </div>
     </aside>
   )
+}
+
+const OPEN_GROUPS_LS_KEY = 'overseer-local:sidebar.openGroupIds'
+
+/** Read the persisted set of expanded sidebar group ids. Survives navigation
+ *  AND reloads — moving between projects/groups shouldn't reset which
+ *  folders the user had open. Mirrors the web sidebar's persistence. */
+function readOpenGroupIds(): Set<string> {
+  if (typeof window === 'undefined') return new Set()
+  try {
+    const raw = window.localStorage.getItem(OPEN_GROUPS_LS_KEY)
+    if (!raw) return new Set()
+    const parsed = JSON.parse(raw) as unknown
+    if (Array.isArray(parsed)) {
+      return new Set(parsed.filter((x): x is string => typeof x === 'string'))
+    }
+  } catch {
+    // unparseable / unavailable localStorage — fall through to empty set
+  }
+  return new Set()
+}
+
+function writeOpenGroupIds(ids: Set<string>) {
+  if (typeof window === 'undefined') return
+  try {
+    window.localStorage.setItem(OPEN_GROUPS_LS_KEY, JSON.stringify(Array.from(ids)))
+  } catch {
+    // ignore storage errors
+  }
 }

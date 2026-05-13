@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import {
   Button,
+  ConfirmDialog,
   Modal,
   Select,
   SelectContent,
@@ -68,10 +69,29 @@ export default function ProjectManagerModal({
 
   const [formErrors, setFormErrors] = useState<string[]>([])
   const [saving, setSaving] = useState(false)
+  const [discardOpen, setDiscardOpen] = useState(false)
   const titleRef = useRef<HTMLInputElement>(null)
 
+  // Flips to true on the first user-driven setForm in create/edit mode.
+  // Background resets (resetForm, startCreate, startEdit) flip it back to
+  // false. Mirrors the web modal so the parity stays tight.
+  const formDirtyRef = useRef(false)
+  const setFormTouched: typeof setForm = (next) => {
+    formDirtyRef.current = true
+    setForm(next)
+  }
+
   const doClose = () => {
+    if ((mode === 'create' || mode === 'edit') && formDirtyRef.current) {
+      setDiscardOpen(true)
+      return
+    }
     onRequestClose?.()
+  }
+
+  const attemptExitForm = () => {
+    if (formDirtyRef.current) setDiscardOpen(true)
+    else setMode('list')
   }
 
   // Only MAIN-type groups are considered for the sidebar grouping list
@@ -139,6 +159,7 @@ export default function ProjectManagerModal({
     setEditingId(null)
     setSelectedGroupId(null)
     setInitialGroupId(null)
+    formDirtyRef.current = false
   }
 
   function startCreate() {
@@ -172,6 +193,7 @@ export default function ProjectManagerModal({
     setSelectedGroupId(mainGroupId)
     setInitialGroupId(mainGroupId)
     setEditingId(p.id)
+    formDirtyRef.current = false
     setMode('edit')
   }
 
@@ -267,6 +289,7 @@ export default function ProjectManagerModal({
       return
     }
     setSaving(false)
+    formDirtyRef.current = false
     setMode('list')
   }
 
@@ -325,6 +348,16 @@ export default function ProjectManagerModal({
             variant="secondary"
             size="icon"
             onClick={() => setMode('list')}
+            title="Back to projects"
+          >
+            <IconBack className="w-4 h-4" />
+          </Button>
+        )}
+        {(mode === 'create' || mode === 'edit') && (
+          <Button
+            variant="secondary"
+            size="icon"
+            onClick={attemptExitForm}
             title="Back to projects"
           >
             <IconBack className="w-4 h-4" />
@@ -503,7 +536,7 @@ export default function ProjectManagerModal({
             <ProjectEditorForm
               mode={mode}
               form={form}
-              setForm={setForm}
+              setForm={setFormTouched}
               formErrors={formErrors}
               formId={formId}
               onSubmit={handleSubmit}
@@ -526,6 +559,21 @@ export default function ProjectManagerModal({
           }
         />
       )}
+      <ConfirmDialog
+        isOpen={discardOpen}
+        onClose={() => setDiscardOpen(false)}
+        onConfirm={() => {
+          setDiscardOpen(false)
+          formDirtyRef.current = false
+          resetForm()
+          setMode('list')
+        }}
+        title="Discard changes?"
+        description="You have unsaved changes in this project. Going back now will lose them."
+        confirmLabel="Discard"
+        cancelLabel="Keep editing"
+        destructive
+      />
     </>
   )
 }

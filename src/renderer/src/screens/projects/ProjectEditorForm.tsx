@@ -2,7 +2,7 @@ import React, { useMemo, useRef, useState } from 'react'
 import { PROJECT_ICONS, renderProjectIcon } from './projectIcons'
 import { useGitHubCredentials } from '@renderer/contexts/GitHubCredentialsContext'
 import { ProjectCodeInfoModal } from './ProjectCodeInfoModal'
-import { CodeInfoChip } from './CodeInfoChip'
+import { CodeInfoChip } from 'thefactory-ui/web'
 import {
   Button,
   Modal,
