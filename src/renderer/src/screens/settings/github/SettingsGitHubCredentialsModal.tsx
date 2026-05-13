@@ -1,4 +1,4 @@
-import { Button, Input, Modal } from 'thefactory-ui/web'
+import { Button, Input, Modal, SecretInput } from 'thefactory-ui/web'
 import { IconSave } from 'thefactory-ui/web/icons'
 import { useGitHubCredentials } from '@renderer/contexts/GitHubCredentialsContext'
 import React, { useEffect, useState } from 'react'
@@ -103,13 +103,13 @@ export default function SettingsGitHubCredentialsModal({
           <label htmlFor="token" className="block text-sm font-medium mb-1">
             Personal Access Token
           </label>
-          <Input
+          <SecretInput
             id="token"
             name="token"
             placeholder="ghp_..."
             value={form.token}
             onChange={onChange}
-            type="password"
+            revealConfirmDescription="The token will be visible until you leave this page."
           />
           <p className="text-[12px] text-[var(--text-secondary)] mt-1">
             Token is stored securely in the main process.

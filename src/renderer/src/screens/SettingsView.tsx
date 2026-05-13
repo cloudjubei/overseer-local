@@ -62,18 +62,22 @@ export default function SettingsView() {
       activeId={activeCategory}
       onSelect={(c) => setActiveCategory(c as CategoryId)}
       storageKey="settings-panel-collapsed"
-      headerTitle="Categories"
       headerSubtitle=""
     >
-      <div className="h-full min-h-0 overflow-y-auto p-4">
-        {activeCategory === 'visual' && <VisualSettings />}
-        {activeCategory === 'llms' && <LLMSettings />}
-        {activeCategory === 'notifications' && <NotificationSettings />}
-        {activeCategory === 'github' && <GitHubSettings />}
-        {activeCategory === 'websearch' && <WebSearchSettings />}
-        {activeCategory === 'database' && <DatabaseSettings />}
-        {activeCategory === 'developer' && <DeveloperSettings />}
-      </div>
+      {activeCategory === 'llms' ? (
+        <div className="h-full w-full min-h-0 overflow-hidden">
+          <LLMSettings />
+        </div>
+      ) : (
+        <div className="h-full min-h-0 overflow-y-auto p-4">
+          {activeCategory === 'visual' && <VisualSettings />}
+          {activeCategory === 'notifications' && <NotificationSettings />}
+          {activeCategory === 'github' && <GitHubSettings />}
+          {activeCategory === 'websearch' && <WebSearchSettings />}
+          {activeCategory === 'database' && <DatabaseSettings />}
+          {activeCategory === 'developer' && <DeveloperSettings />}
+        </div>
+      )}
     </CollapsibleSidebar>
   )
 }

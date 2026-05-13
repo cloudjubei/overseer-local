@@ -19,9 +19,9 @@ import { getPRUrl } from '../../../utils/gitPRUrl'
 import GitCommitModal from '../modals/GitCommitModal'
 import { GitCreateBranchModal } from '../modals/GitCreateBranchModal'
 import { GitStashModal } from '../modals/GitStashModal'
-import GitActionButton from './GitActionButton'
+import { ICON_RAIL_DEFAULT_WIDTH, IconRail, IconRailButton } from 'thefactory-ui/web'
 
-export const ACTIONS_RAIL_WIDTH = 60
+export const ACTIONS_RAIL_WIDTH = ICON_RAIL_DEFAULT_WIDTH
 
 export function GitActionsPanel({
   selectedBranch,
@@ -175,13 +175,10 @@ export function GitActionsPanel({
   }
 
   return (
-    <div
-      className="shrink-0 border-l border-neutral-200 dark:border-neutral-800 flex flex-col min-h-0 items-center py-2 overflow-x-hidden"
-      style={{ width: ACTIONS_RAIL_WIDTH }}
-    >
-      <div className="flex flex-col gap-2 items-center w-full px-2 overflow-y-auto overflow-x-hidden hide-scrollbar">
+    <>
+    <IconRail width={ACTIONS_RAIL_WIDTH}>
         {/* Always-visible */}
-        <GitActionButton
+        <IconRailButton
           icon={<IconRefresh className="w-5 h-5" />}
           label="Refresh"
           onClick={onRefresh}
@@ -196,7 +193,7 @@ export function GitActionsPanel({
         {selectedBranch && (
           <>
             {/* Commit: only if local branch is selected */}
-            <GitActionButton
+            <IconRailButton
               icon={<IconCommit className="w-5 h-5" />}
               label="Commit"
               onClick={() => setCommitModalOpen(true)}
@@ -213,14 +210,14 @@ export function GitActionsPanel({
             {/* Pull / Push only for local branches */}
             {selectedBranch.isLocal && (
               <>
-                <GitActionButton
+                <IconRailButton
                   icon={<IconArrowDown className="w-5 h-5" />}
                   label="Pull"
                   onClick={handlePull}
                   disabled={busy}
                   tooltip="Pull from remote"
                 />
-                <GitActionButton
+                <IconRailButton
                   icon={<IconDoubleUp className="w-5 h-5" />}
                   label="Push"
                   onClick={handlePush}
@@ -232,7 +229,7 @@ export function GitActionsPanel({
             )}
 
             {/* Fetch always available */}
-            <GitActionButton
+            <IconRailButton
               icon={<IconChevronDown className="w-5 h-5" />}
               label="Fetch"
               onClick={handleFetch}
@@ -241,7 +238,7 @@ export function GitActionsPanel({
             />
 
             {/* Branch: only when a local branch is active */}
-            <GitActionButton
+            <IconRailButton
               icon={<IconBranch className="w-5 h-5" />}
               label="Branch"
               onClick={() => setCreateBranchModalOpen(true)}
@@ -254,7 +251,7 @@ export function GitActionsPanel({
             />
 
             {/* Create PR */}
-            <GitActionButton
+            <IconRailButton
               icon={<IconPullRequest className="w-5 h-5" />}
               label="PR"
               onClick={handleCreatePR}
@@ -269,7 +266,7 @@ export function GitActionsPanel({
             {/* Switch + Merge: only if the selected branch is NOT the current one */}
             {!selectedBranch.current && (
               <>
-                <GitActionButton
+                <IconRailButton
                   icon={<IconBranch className="w-5 h-5" />}
                   label="Switch"
                   onClick={() => onSwitchToBranch(selectedBranch)}
@@ -280,7 +277,7 @@ export function GitActionsPanel({
                 />
                 {selectedBranch.isLocal && (
                   <>
-                    <GitActionButton
+                    <IconRailButton
                       icon={<IconFastMerge className="w-5 h-5" />}
                       label="Merge"
                       onClick={() => onOpenMerge(currentBranchName || 'main', selectedBranch.name)}
@@ -291,7 +288,7 @@ export function GitActionsPanel({
                           : 'Current branch unknown'
                       }
                     />
-                    <GitActionButton
+                    <IconRailButton
                       icon={<IconFastMerge className="w-5 h-5 transform rotate-180" />}
                       label="Merge In"
                       onClick={() => onOpenMerge(selectedBranch.name, currentBranchName || 'main')}
@@ -308,7 +305,7 @@ export function GitActionsPanel({
             )}
 
             {/* Stash: local branches only */}
-            <GitActionButton
+            <IconRailButton
               icon={<IconArchive className="w-5 h-5" />}
               label="Stash"
               onClick={() => setStashModalOpen(true)}
@@ -326,14 +323,14 @@ export function GitActionsPanel({
 
         {selectedStashRef && (
           <>
-            <GitActionButton
+            <IconRailButton
               icon={<IconCommit className="w-5 h-5" />}
               label="Apply"
               onClick={handleApplyStash}
               disabled={busy}
               tooltip="Apply this stash"
             />
-            <GitActionButton
+            <IconRailButton
               icon={<IconDelete className="w-5 h-5 text-red-600 dark:text-red-400" />}
               label="Drop"
               onClick={handleDeleteStash}
@@ -342,7 +339,7 @@ export function GitActionsPanel({
             />
           </>
         )}
-      </div>
+    </IconRail>
 
       {/* Modals */}
       {commitModalOpen && activeProjectId && selectedBranch && (
@@ -379,6 +376,6 @@ export function GitActionsPanel({
           }}
         />
       )}
-    </div>
+    </>
   )
 }

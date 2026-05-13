@@ -1,6 +1,6 @@
 import { useMemo, useState, useRef } from 'react'
 import type { DiagnosticsSnapshot } from 'src/types/diagnostics'
-import { IconCpu, IconMaximize, IconMinimize } from './icons/Icons'
+import { IconCpu, IconMaximize, IconMinimize } from 'thefactory-ui/web/icons'
 import { useDiagnosticsOverlay } from '../../hooks/useDiagnosticsOverlay'
 
 function fmtNumber(n: number | undefined, digits = 0) {

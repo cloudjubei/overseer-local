@@ -17,9 +17,9 @@ export type LLMConfigContextValue = {
   setActiveChat: (id: string) => void
   recentChatConfigs: LLMConfig[]
 
-  addConfig: (config: Omit<LLMConfig, 'id'>) => void
-  updateConfig: (id: string, updates: Partial<LLMConfig>) => void
-  removeConfig: (id: string) => void
+  addConfig: (config: Omit<LLMConfig, 'id'>) => Promise<LLMConfig>
+  updateConfig: (id: string, updates: Partial<LLMConfig>) => Promise<LLMConfig | undefined>
+  removeConfig: (id: string) => Promise<void>
 }
 
 const LLMConfigContext = createContext<LLMConfigContextValue | null>(null)
@@ -117,20 +117,25 @@ export function LLMConfigProvider({ children }: { children: React.ReactNode }) {
   )
 
   const addConfig = useCallback(
-    (config: Omit<LLMConfig, 'id'>) => {
-      llmConfigsService.add(config).then(() => refresh())
+    async (config: Omit<LLMConfig, 'id'>) => {
+      const result = await llmConfigsService.add(config)
+      await refresh()
+      return result
     },
     [refresh],
   )
   const updateConfig = useCallback(
-    (id: string, updates: Partial<LLMConfig>) => {
-      llmConfigsService.update(id, updates).then(() => refresh())
+    async (id: string, updates: Partial<LLMConfig>) => {
+      const result = await llmConfigsService.update(id, updates)
+      await refresh()
+      return result
     },
     [refresh],
   )
   const removeConfig = useCallback(
-    (id: string) => {
-      llmConfigsService.remove(id).then(() => refresh())
+    async (id: string) => {
+      await llmConfigsService.remove(id)
+      await refresh()
     },
     [refresh],
   )

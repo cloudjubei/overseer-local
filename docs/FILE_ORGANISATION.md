@@ -29,8 +29,8 @@ Top-Level Layout
     - services/: Renderer-side services (e.g., pricingService for LLM price lookup via IPC, dbService for DB status and ingestion triggers, and new timelineService for features and labels).
     - hooks/useShortcuts: Keyboard shortcuts provider; respects user-selected modifier and avoids interfering with text input.
     - settings/: AppSettings React context provider used app-wide (singleton).
-    - components/ui/icons: Central SVG icons. All icon components are exported from `Icons.tsx` and are accessible by name via the registry in `screens/projects/projectIcons.tsx`.
-      - Directive: When adding an icon, export it from `Icons.tsx` and register it in `PROJECT_ICON_REGISTRY` using kebab-case of the component name without the 'Icon' prefix (e.g., `IconCheckCircle` -> `check-circle`). Render with `renderProjectIcon('check-circle', className)`.
+    - components/ui: Local-only UI pieces — wrappers (`FileMentionsTextarea`, `FileSelector`, `RichText`) and project-specific composites (`CommandMenu`, `ContextInfoButton`, `ErrorBubble`, `DiagnosticsOverlay`, `ShortcutsHelp`). The icon set, the project-icon picker registry, primitive components and screen CSS all live in `thefactory-ui` — see [thefactory-ui/docs/ARCHITECTURE.md](../../thefactory-ui/docs/ARCHITECTURE.md).
+      - Directive: When adding an icon, add it to `thefactory-ui/src/web/icons/` and the `PROJECT_ICON_REGISTRY` in `thefactory-ui/src/web/compound/projectIcons.tsx`, then `npm run build` in the package. Never re-introduce a local icon barrel in this repo.
     - screens/git/: Git workflows UI (Git view tabs, merge modal, and future conflict resolution).
     - assets/: Renderer-local static assets (e.g., icons, sounds); new sounds for notifications live under `src/renderer/src/assets/sounds/`.
   - tools/: Developer and agent tooling (preview analyzer, factory integration, helpers).

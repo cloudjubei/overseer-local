@@ -11,7 +11,7 @@ import {
   IconToolbox,
   IconTests,
   IconBranch,
-} from '../../components/ui/icons/Icons'
+} from 'thefactory-ui/web/icons'
 
 export type NavDef = {
   id: string

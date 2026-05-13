@@ -1,7 +1,10 @@
 import {
+  Alert,
   Button,
+  ConfirmDialog,
   Input,
   Modal,
+  SecretInput,
   Select,
   SelectContent,
   SelectItem,
@@ -9,10 +12,11 @@ import {
   SelectValue,
   useToast,
 } from 'thefactory-ui/web'
-import { IconSave } from 'thefactory-ui/web/icons'
+import { IconChat, IconRobot, IconSave } from 'thefactory-ui/web/icons'
 import { useLLMConfig } from '@renderer/contexts/LLMConfigContext'
 import { llmConfigsService } from '@renderer/services/llmConfigsService'
-import React, { useEffect, useMemo, useState } from 'react'
+import { extractErrorMessage } from '@renderer/utils/errorMessage'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { LLMConfig, LLMProvider } from 'thefactory-tools'
 import { DEFAULT_PROVIDER_ENDPOINTS } from 'thefactory-tools/utils'
 
@@ -41,7 +45,15 @@ export default function SettingsLLMConfigModal({
   id?: string
   onRequestClose: () => void
 }) {
-  const { configs, addConfig, updateConfig, activeChatConfigId, setActiveChat } = useLLMConfig()
+  const {
+    configs,
+    addConfig,
+    updateConfig,
+    activeChatConfigId,
+    setActiveChat,
+    activeAgentRunConfigId,
+    setActiveAgentRun,
+  } = useLLMConfig()
   const { toast } = useToast()
   const isEdit = mode === 'edit'
   const existing = isEdit ? configs.find((c) => c.id === id) || null : null
@@ -50,24 +62,39 @@ export default function SettingsLLMConfigModal({
   const [modelsError, setModelsError] = useState<string | null>(null)
   const [modelMode, setModelMode] = useState<'preset' | 'custom'>('custom')
   const [availableModels, setAvailableModels] = useState<string[]>([])
+  const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
+  const [discardOpen, setDiscardOpen] = useState(false)
 
-  const [form, setForm] = useState<LLMConfig>(
-    () =>
-      existing || {
-        id: '',
-        name: '',
-        provider: 'openai',
-        apiKey: '',
-        model: '',
-      },
-  )
+  const initialForm: LLMConfig = existing || {
+    id: '',
+    name: '',
+    provider: 'openai',
+    apiKey: '',
+    model: '',
+  }
+  const [form, setForm] = useState<LLMConfig>(() => initialForm)
+
+  // Tracks whether the user has actually touched a form field. Background
+  // effects like the initial models load do NOT flip this — only user
+  // interaction does. So opening an existing config and closing without
+  // typing/clicking never triggers the discard prompt.
+  const dirtyRef = useRef(false)
+  const markDirty = () => {
+    dirtyRef.current = true
+  }
 
   const applyModelOptions = (models: string[], currentModel: string) => {
     const uniqueModels = Array.from(
       new Set(models.filter((m) => typeof m === 'string' && m.trim().length > 0)),
     )
     setAvailableModels(uniqueModels)
-    setModelMode(uniqueModels.includes(currentModel) ? 'preset' : 'custom')
+    // Reconcile mode only in one direction: if we're in 'preset' but the
+    // saved model is no longer in the available list, fall back to 'custom'
+    // so the value is still editable. NEVER flip 'custom' → 'preset'
+    // automatically — that would silently throw away the user's intent and
+    // make the custom input vanish on auto-load.
+    if (currentModel && !uniqueModels.includes(currentModel)) setModelMode('custom')
   }
 
   const loadAvailableModels = async (config: LLMConfig, options?: { silent?: boolean }) => {
@@ -110,6 +137,7 @@ export default function SettingsLLMConfigModal({
   }, [existing])
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    markDirty()
     const { name, value } = e.target
     setForm((prev) => ({
       ...prev,
@@ -118,6 +146,8 @@ export default function SettingsLLMConfigModal({
   }
 
   const onProviderChange = (value: LLMProvider) => {
+    if (value === form.provider) return // Radix syncing — not a real user change
+    markDirty()
     const next: LLMConfig = {
       ...form,
       provider: value,
@@ -134,61 +164,98 @@ export default function SettingsLLMConfigModal({
 
   const handleModelSelect = (value: string) => {
     if (value === 'custom') {
+      // Bail out if we're already in custom mode — defends against Radix
+      // firing onValueChange when the controlled value prop changes from a
+      // preset value to 'custom' due to a mode reconciliation.
+      if (modelMode === 'custom') return
+      markDirty()
       setModelMode('custom')
       setForm((prev) => ({ ...prev, model: '' }))
     } else {
+      if (modelMode === 'preset' && form.model === value) return
+      markDirty()
       setModelMode('preset')
       setForm((prev) => ({ ...prev, model: value }))
     }
   }
 
-  const onSubmit = (e: React.FormEvent) => {
+  const attemptClose = () => {
+    if (submitting) return
+    if (dirtyRef.current) setDiscardOpen(true)
+    else onRequestClose()
+  }
+
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (submitting) return
 
     if (!form.name || !form.provider || !form.model) {
-      toast({
-        title: 'Missing fields',
-        description: 'Please provide name, provider, and model.',
-        variant: 'error',
-      })
+      setSubmitError('Please provide name, provider, and model.')
       return
     }
 
-    if (isEdit) {
-      updateConfig(form.id!, { ...form })
-    } else {
-      const { id: _omit, ...toAdd } = form
-      addConfig(toAdd)
+    setSubmitting(true)
+    setSubmitError(null)
+    try {
+      if (isEdit) {
+        await updateConfig(form.id!, { ...form })
+      } else {
+        const { id: _omit, ...toAdd } = form
+        await addConfig(toAdd)
+      }
+      onRequestClose()
+    } catch (err) {
+      const message = extractErrorMessage(
+        err,
+        'The backend rejected this LLM configuration. Double-check the provider, model, API key, and URL override.',
+      )
+      setSubmitError(message)
+      toast({ title: 'Failed to save', description: message, variant: 'error' })
+    } finally {
+      setSubmitting(false)
     }
-
-    onRequestClose()
   }
 
   const providerSupportsRefresh = PROVIDERS_WITH_MODEL_LISTING.has(form.provider)
   const providerModels = useMemo(() => availableModels, [availableModels])
   const isChatActive = isEdit && existing ? activeChatConfigId === existing.id : false
+  const isAgentActive = isEdit && existing ? activeAgentRunConfigId === existing.id : false
 
   return (
     <Modal
       isOpen={true}
-      onClose={onRequestClose}
+      onClose={attemptClose}
       title={isEdit ? 'Edit LLM Configuration' : 'Add LLM Configuration'}
     >
+      {submitError && (
+        <div className="mb-3">
+          <Alert variant="error">{submitError}</Alert>
+        </div>
+      )}
       {isEdit && existing && (
-        <div className="mb-3 flex items-center justify-between">
-          <div className="text-sm">
-            Chat status:{' '}
-            {isChatActive ? (
-              <span className="badge badge--soft badge--info">Chat Active</span>
-            ) : (
-              <span className="text-[var(--text-secondary)]">Not chat active</span>
-            )}
-          </div>
-          {!isChatActive && (
-            <Button variant="outline" onClick={() => setActiveChat(existing.id!)}>
-              Set as Chat Active
-            </Button>
-          )}
+        <div className="mb-3 flex items-center gap-2">
+          <Button
+            type="button"
+            onClick={() => setActiveAgentRun(existing.id!)}
+            variant={isAgentActive ? 'secondary' : 'outline'}
+            size="sm"
+            disabled={isAgentActive}
+            title={isAgentActive ? 'Already active for agent runs' : 'Use for agent runs'}
+          >
+            <IconRobot className="w-4 h-4 mr-1" />
+            {isAgentActive ? 'Agent active' : 'Set Active'}
+          </Button>
+          <Button
+            type="button"
+            onClick={() => setActiveChat(existing.id!)}
+            variant={isChatActive ? 'secondary' : 'outline'}
+            size="sm"
+            disabled={isChatActive}
+            title={isChatActive ? 'Already active for chat' : 'Use for chat'}
+          >
+            <IconChat className="w-4 h-4 mr-1" />
+            {isChatActive ? 'Chat active' : 'Set Chat Active'}
+          </Button>
         </div>
       )}
 
@@ -228,13 +295,13 @@ export default function SettingsLLMConfigModal({
           <label htmlFor="apiKey" className="block text-sm font-medium mb-1">
             API Key {form.provider === 'custom' ? '(optional)' : ''}
           </label>
-          <Input
+          <SecretInput
             id="apiKey"
             name="apiKey"
-            type="password"
             placeholder={form.provider === 'custom' ? 'Optional bearer token' : 'sk-...'}
             value={form.apiKey}
             onChange={onChange}
+            revealConfirmDescription="The API key will be visible until you leave this page."
           />
         </div>
 
@@ -302,14 +369,36 @@ export default function SettingsLLMConfigModal({
 
         <div className="flex justify-end pt-2">
           {isEdit ? (
-            <Button type="submit" variant="secondary" size="icon" title="Save" aria-label="Save">
+            <Button
+              type="submit"
+              variant="secondary"
+              size="icon"
+              loading={submitting}
+              title="Save"
+              aria-label="Save"
+            >
               <IconSave className="w-4 h-4" />
             </Button>
           ) : (
-            <Button type="submit">Add</Button>
+            <Button type="submit" loading={submitting}>
+              Add
+            </Button>
           )}
         </div>
       </form>
+      <ConfirmDialog
+        isOpen={discardOpen}
+        onClose={() => setDiscardOpen(false)}
+        onConfirm={() => {
+          setDiscardOpen(false)
+          onRequestClose()
+        }}
+        title="Discard changes?"
+        description="You have unsaved changes in this LLM configuration. Closing now will lose them."
+        confirmLabel="Discard"
+        cancelLabel="Keep editing"
+        destructive
+      />
     </Modal>
   )
 }

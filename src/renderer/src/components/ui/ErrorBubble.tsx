@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { IconError } from './icons/Icons'
+import { IconError } from 'thefactory-ui/web/icons'
 
 interface ErrorBubbleProps {
   error: any

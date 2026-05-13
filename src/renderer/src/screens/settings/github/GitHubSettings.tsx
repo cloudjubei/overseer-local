@@ -12,7 +12,7 @@ export default function GitHubSettings() {
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-xl font-semibold">GitHub Credentials</h2>
         <Button onClick={() => openModal({ type: 'github-credentials-add' })}>
-          <IconPlus className="h-[20px] w-[20px]" />
+          <IconPlus className="h-5 w-5" />
         </Button>
       </div>
       <div className="border rounded-md divide-y">

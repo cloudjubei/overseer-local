@@ -2,8 +2,8 @@ import {
   IconFileAdded,
   IconFileDeleted,
   IconFileModified,
-} from '../../../components/ui/icons/Icons'
-import { IconWarningTriangle } from '../../../components/ui/icons/IconWarningTriangle'
+} from 'thefactory-ui/web/icons'
+import { IconWarningTriangle } from 'thefactory-ui/web/icons'
 
 export default function GitFileStatusIcon({
   status,

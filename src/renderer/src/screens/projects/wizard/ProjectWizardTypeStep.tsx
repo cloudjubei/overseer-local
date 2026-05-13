@@ -1,6 +1,6 @@
 import React from 'react'
 import { WizardFlowType } from './ProjectWizardModal'
-import { IconPlus, IconFolder } from '@renderer/components/ui/icons/Icons'
+import { IconPlus, IconFolder } from 'thefactory-ui/web/icons'
 
 interface ProjectWizardTypeStepProps {
   onSelect: (type: WizardFlowType) => void

@@ -2,7 +2,7 @@ import React, { useMemo } from 'react'
 import { useProjectsGroups } from '../contexts/ProjectsGroupsContext'
 import { useProjectContext } from '../contexts/ProjectContext'
 import { renderProjectIcon } from './projects/projectIcons'
-import { IconWarningTriangle } from '../components/ui/icons/Icons'
+import { IconWarningTriangle } from 'thefactory-ui/web/icons'
 import { useNavigator } from '../navigation/Navigator'
 
 export default function GroupHomeView() {
