@@ -17831,7 +17831,7 @@
     "path": "node_modules/thefactory-ui",
     "members": {
       "Alert": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "VARIANT_STYLE",
           "react/jsx-runtime/jsxs",
@@ -17907,7 +17907,7 @@
         ]
       },
       "applyMention": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -17933,7 +17933,7 @@
         ]
       },
       "applyReference": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -17963,7 +17963,7 @@
         "dependencies": []
       },
       "BranchChip": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -18042,7 +18042,7 @@
         "dependencies": []
       },
       "Button": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -18167,7 +18167,7 @@
         ]
       },
       "cn": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -18193,7 +18193,7 @@
         ]
       },
       "Code": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -18219,7 +18219,7 @@
         ]
       },
       "CodeInfoChip": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -18318,7 +18318,7 @@
         ]
       },
       "CollapsibleSidebar": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "MOBILE_DRAWER_WIDTH_PX",
           "react/jsx-runtime/jsxs",
@@ -18394,7 +18394,7 @@
         ]
       },
       "CommandPalette": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -18470,7 +18470,7 @@
         ]
       },
       "ConfirmDialog": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -18525,7 +18525,7 @@
         "dependencies": []
       },
       "CostChip": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -18583,7 +18583,7 @@
         "dependencies": []
       },
       "DiffViewer": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -18634,7 +18634,7 @@
         ]
       },
       "DotBadge": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -18690,7 +18690,7 @@
         ]
       },
       "Field": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -18740,7 +18740,7 @@
         ]
       },
       "FileDisplay": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "SIDE_COL_STYLE",
           "react/jsx-runtime/jsxs",
@@ -18821,7 +18821,7 @@
         ]
       },
       "FileMentionsTextarea_default": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -18873,7 +18873,7 @@
         ]
       },
       "FileSelector": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -18925,7 +18925,7 @@
         ]
       },
       "FileTypeIcon": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -18987,7 +18987,7 @@
         "dependencies": []
       },
       "generateHunkPatch": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -19013,7 +19013,7 @@
         ]
       },
       "generateSelectedPatch": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -19039,7 +19039,7 @@
         ]
       },
       "getNotificationBadgeColorClass": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "COLOR_CLASS",
           "react/jsx-runtime/jsxs",
@@ -19074,7 +19074,7 @@
         "dependencies": []
       },
       "ICON_RAIL_DEFAULT_WIDTH": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -20036,7 +20036,7 @@
         ]
       },
       "IconRail": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -20062,7 +20062,7 @@
         ]
       },
       "IconRailButton": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -20496,7 +20496,7 @@
         ]
       },
       "InlineTextDiff": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -20522,7 +20522,7 @@
         ]
       },
       "Input": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -20623,7 +20623,7 @@
         ]
       },
       "JsonView": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "JSON",
           "react/jsx-runtime/jsxs",
@@ -20686,7 +20686,7 @@
         "dependencies": []
       },
       "Markdown": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "REMARK_PLUGINS",
           "react/jsx-runtime/jsxs",
@@ -20713,7 +20713,7 @@
         ]
       },
       "MarkdownEditor": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "PANE_OPTIONS",
           "react/jsx-runtime/jsxs",
@@ -20839,7 +20839,7 @@
         ]
       },
       "Modal": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -20919,7 +20919,7 @@
         "dependencies": []
       },
       "NativeSelect": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -20996,7 +20996,7 @@
         ]
       },
       "NotificationBadge": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -21108,7 +21108,7 @@
         ]
       },
       "parseMention": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -21134,7 +21134,7 @@
         ]
       },
       "parseReference": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -21160,7 +21160,7 @@
         ]
       },
       "parseUnifiedDiff": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -21186,7 +21186,7 @@
         ]
       },
       "PathDisplay": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -21216,7 +21216,7 @@
         "dependencies": []
       },
       "PROJECT_ICON_REGISTRY": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "IconBack",
           "IconChevron",
@@ -21378,7 +21378,7 @@
         ]
       },
       "PROJECT_ICONS": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -21404,7 +21404,7 @@
         ]
       },
       "ProjectChip": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -21500,7 +21500,7 @@
         ]
       },
       "rankMentionMatches": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -21579,7 +21579,7 @@
         ]
       },
       "renderLanguageIcon": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -21605,7 +21605,7 @@
         ]
       },
       "renderProjectIcon": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -21631,7 +21631,7 @@
         ]
       },
       "ResizeHandle": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -21682,7 +21682,7 @@
         ]
       },
       "RichText": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "Math",
           "react/jsx-runtime/jsxs",
@@ -21735,7 +21735,7 @@
         ]
       },
       "SafeText": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -21785,7 +21785,7 @@
         ]
       },
       "SecretInput": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -21837,7 +21837,7 @@
         ]
       },
       "SegmentedControl": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -21937,7 +21937,7 @@
         ]
       },
       "Select": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -21963,7 +21963,7 @@
         ]
       },
       "SelectContent": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -21989,7 +21989,7 @@
         ]
       },
       "SelectGroup": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -22015,7 +22015,7 @@
         ]
       },
       "SelectItem": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -22041,7 +22041,7 @@
         ]
       },
       "SelectTrigger": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -22091,7 +22091,7 @@
         ]
       },
       "SelectValue": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -22157,7 +22157,7 @@
         ]
       },
       "ShortcutsHelpView": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -22208,7 +22208,7 @@
         ]
       },
       "SimpleSplitText": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -22234,7 +22234,7 @@
         ]
       },
       "SimpleUnifiedDiff": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -22260,7 +22260,7 @@
         ]
       },
       "Skeleton": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -22286,7 +22286,7 @@
         ]
       },
       "SkeletonText": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "Array",
           "react/jsx-runtime/jsxs",
@@ -22317,7 +22317,7 @@
         "dependencies": []
       },
       "Spinner": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -22367,7 +22367,7 @@
         ]
       },
       "SpinnerWithDot": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -22417,7 +22417,7 @@
         ]
       },
       "splitPath": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -22443,7 +22443,7 @@
         ]
       },
       "StatusChip": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -22494,7 +22494,7 @@
         ]
       },
       "StatusIcon": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -22535,7 +22535,7 @@
         "dependencies": []
       },
       "StructuredUnifiedDiff": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -22587,7 +22587,7 @@
         ]
       },
       "Surface": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -22665,7 +22665,7 @@
         ]
       },
       "Switch": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -22719,7 +22719,7 @@
         "dependencies": []
       },
       "Textarea": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -22770,7 +22770,7 @@
         ]
       },
       "TimeAxisHeader": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -22846,7 +22846,7 @@
         ]
       },
       "TimeAxisRow": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -22972,7 +22972,7 @@
         ]
       },
       "ToastProvider": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -23022,7 +23022,7 @@
         ]
       },
       "TokensChip": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -23072,7 +23072,7 @@
         ]
       },
       "Tooltip": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "Math",
           "react/jsx-runtime/jsxs",
@@ -23200,7 +23200,7 @@
         ]
       },
       "TurnChip": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -23226,7 +23226,7 @@
         ]
       },
       "TypewriterText": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
@@ -23309,7 +23309,7 @@
         ]
       },
       "useToast": {
-        "path": "dist/chunk-2CMYJPSA.js",
+        "path": "dist/chunk-T22LHREJ.js",
         "dependencies": [
           "react/jsx-runtime/jsxs",
           "react/jsx-runtime/jsx",
