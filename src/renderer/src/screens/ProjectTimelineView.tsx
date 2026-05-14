@@ -5,7 +5,15 @@ import { useActiveProject, useProjectContext } from '../contexts/ProjectContext'
 import { dbService } from '../services/dbService'
 import type { Entity, EntityInput } from 'thefactory-db'
 import { useNavigator } from '../navigation/Navigator'
-import { Button, Modal, SegmentedControl, Switch } from 'thefactory-ui/web'
+import {
+  Button,
+  Field,
+  Input,
+  Modal,
+  NativeSelect,
+  SegmentedControl,
+  Switch,
+} from 'thefactory-ui/web'
 import { IconSave } from 'thefactory-ui/web/icons'
 
 import type {
@@ -57,6 +65,7 @@ type YearStripGroup = HeaderGroup & { leftPx: number; widthPx: number }
 function TimelineToolbar({
   zoom,
   setZoom,
+  onToday,
   showAllProjects,
   setShowAllProjects,
   isAdding,
@@ -64,6 +73,7 @@ function TimelineToolbar({
 }: {
   zoom: Zoom
   setZoom: (z: Zoom) => void
+  onToday: () => void
   showAllProjects: boolean
   setShowAllProjects: (v: boolean) => void
   isAdding: boolean
@@ -72,7 +82,6 @@ function TimelineToolbar({
   return (
     <div className="shrink-0 border-b border-default p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-raised">
       <div className="flex items-center gap-3">
-        <h2 className="text-lg font-semibold tracking-tight">Timeline</h2>
         <SegmentedControl
           size="sm"
           ariaLabel="Timeline zoom"
@@ -84,6 +93,9 @@ function TimelineToolbar({
             { value: 'month', label: 'Month' },
           ]}
         />
+        <Button variant="outline" size="sm" onClick={onToday} title="Jump to today">
+          Today
+        </Button>
       </div>
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
@@ -105,7 +117,6 @@ function TimelineToolbar({
 }
 
 function AddLabelForm({
-  projectId,
   loading,
   onAddLabel,
   newLabel,
@@ -117,7 +128,6 @@ function AddLabelForm({
   scope,
   setScope,
 }: {
-  projectId: string | undefined
   loading: boolean
   onAddLabel: (e: React.FormEvent) => void
   newLabel: string
@@ -129,53 +139,52 @@ function AddLabelForm({
   scope: 'project' | '__global__'
   setScope: (v: 'project' | '__global__') => void
 }) {
-  void projectId
   return (
     <form
       onSubmit={onAddLabel}
       className="shrink-0 border-b border-default bg-raised p-4 flex flex-col gap-3"
     >
       <div className="text-sm font-medium text-primary">New timeline label</div>
-      <div className="grid gap-2 sm:grid-cols-5 items-end">
-        <div className="flex flex-col gap-1 sm:col-span-2">
-          <label className="text-xs text-muted">Row label</label>
-          <input
-            className="h-9 rounded border border-default bg-base px-2 text-sm text-primary focus:outline-none focus-visible:ring-2 ring-offset-1"
-            value={newLabel}
-            onChange={(e) => setNewLabel(e.target.value)}
-            placeholder="e.g. Milestone A"
-            required
-          />
+      <div className="grid gap-3 sm:grid-cols-5 items-end">
+        <div className="sm:col-span-2">
+          <Field label="Row label">
+            <Input
+              value={newLabel}
+              onChange={(e) => setNewLabel(e.target.value)}
+              placeholder="e.g. Milestone A"
+              required
+            />
+          </Field>
         </div>
-        <div className="flex flex-col gap-1 sm:col-span-3">
-          <label className="text-xs text-muted">Description (optional)</label>
-          <input
-            className="h-9 rounded border border-default bg-base px-2 text-sm text-primary focus:outline-none focus-visible:ring-2 ring-offset-1"
-            value={newDescription}
-            onChange={(e) => setNewDescription(e.target.value)}
-            placeholder="Short note"
-          />
+        <div className="sm:col-span-3">
+          <Field label="Description (optional)">
+            <Input
+              value={newDescription}
+              onChange={(e) => setNewDescription(e.target.value)}
+              placeholder="Short note"
+            />
+          </Field>
         </div>
-        <div className="flex flex-col gap-1 sm:col-span-2">
-          <label className="text-xs text-muted">When</label>
-          <input
-            type="datetime-local"
-            className="h-9 rounded border border-default bg-base px-2 text-sm text-primary focus:outline-none focus-visible:ring-2 ring-offset-1"
-            value={newTimestamp}
-            onChange={(e) => setNewTimestamp(e.target.value)}
-            required
-          />
+        <div className="sm:col-span-2">
+          <Field label="When">
+            <Input
+              type="datetime-local"
+              value={newTimestamp}
+              onChange={(e) => setNewTimestamp(e.target.value)}
+              required
+            />
+          </Field>
         </div>
-        <div className="flex flex-col gap-1 sm:col-span-2">
-          <label className="text-xs text-muted">Scope</label>
-          <select
-            className="h-9 rounded border border-default bg-base px-2 text-sm text-primary focus:outline-none focus-visible:ring-2 ring-offset-1"
-            value={scope}
-            onChange={(e) => setScope(e.target.value as any)}
-          >
-            <option value="project">This project</option>
-            <option value="__global__">All projects (global)</option>
-          </select>
+        <div className="sm:col-span-2">
+          <Field label="Scope">
+            <NativeSelect
+              value={scope}
+              onChange={(e) => setScope(e.target.value as 'project' | '__global__')}
+            >
+              <option value="project">This project</option>
+              <option value="__global__">All projects (global)</option>
+            </NativeSelect>
+          </Field>
         </div>
         <div className="sm:col-span-1">
           <Button type="submit" variant="primary" disabled={loading} className="w-full">
@@ -226,6 +235,7 @@ export default function ProjectTimelineView() {
   // Auto-scroll bookkeeping
   const hasInitialAutoScrolledRef = React.useRef(false)
   const prevZoomRef = React.useRef<Zoom>('day')
+  const prevShowAllProjectsRef = React.useRef(false)
 
   const prevProjectIdRef = React.useRef(projectId)
   React.useEffect(() => {
@@ -332,28 +342,31 @@ export default function ProjectTimelineView() {
 
   const { rawStartDate, rawEndDate } = React.useMemo(() => {
     const now = new Date()
-    const defaultStart = addDays(now, -DEFAULT_WINDOW_DAYS)
-    const defaultEnd = addDays(now, DEFAULT_WINDOW_DAYS)
+    const today = startOfDay(now)
+    const defaultStart = startOfDay(addDays(now, -DEFAULT_WINDOW_DAYS))
 
     if (timelineItems.length === 0) {
-      return { rawStartDate: startOfDay(defaultStart), rawEndDate: startOfDay(defaultEnd) }
+      return { rawStartDate: defaultStart, rawEndDate: today }
     }
 
-    const min = startOfDay(
+    const itemsMin = startOfDay(
       timelineItems.reduce(
         (min, x: TimelineLabel) =>
           new Date(x.content.timestamp) < min ? new Date(x.content.timestamp) : min,
         new Date(timelineItems[0].content.timestamp),
       ),
     )
-    const max = startOfDay(
+    const itemsMax = startOfDay(
       timelineItems.reduce(
         (max, x: any) =>
           new Date(x.content.timestamp) > max ? new Date(x.content.timestamp) : max,
         new Date(timelineItems[0].content.timestamp),
       ),
     )
-
+    // Always include today on the right edge so the timeline reflects the
+    // current date even when all items are in the past.
+    const min = itemsMin < defaultStart ? itemsMin : defaultStart
+    const max = itemsMax > today ? itemsMax : today
     return { rawStartDate: min, rawEndDate: max }
   }, [timelineItems])
 
@@ -546,31 +559,68 @@ export default function ProjectTimelineView() {
     }
   }, [])
 
-  // Auto-scroll to END (rightmost) on initial load or zoom change
+  const scrollLeftForDate = React.useCallback(
+    (target: Date): number => {
+      const idx =
+        zoom === 'day'
+          ? diffInDays(startAligned, target)
+          : zoom === 'week'
+            ? diffInWeeks(startAligned, target)
+            : diffInMonths(startAligned, target)
+      const clamped = Math.max(0, Math.min(unitCount - 1, idx))
+      return clamped * COLUMN_WIDTH_PX
+    },
+    [zoom, startAligned, unitCount],
+  )
+
+  const scrollToDate = React.useCallback(
+    (target: Date, behavior: ScrollBehavior = 'auto') => {
+      const el = rightScrollRef.current
+      if (!el) return
+      const colLeft = scrollLeftForDate(target)
+      const center = Math.max(0, colLeft - el.clientWidth / 2 + COLUMN_WIDTH_PX / 2)
+      el.scrollTo({ left: center, behavior })
+    },
+    [scrollLeftForDate],
+  )
+
+  const scrollToToday = React.useCallback(
+    (behavior: ScrollBehavior = 'auto') => scrollToDate(new Date(), behavior),
+    [scrollToDate],
+  )
+
+  // Auto-scroll to today on initial load, on zoom change, and whenever the
+  // user toggles All Projects.
   React.useEffect(() => {
     if (loading || units.length === 0) return
-
-    if (!hasInitialAutoScrolledRef.current || prevZoomRef.current !== zoom) {
+    const showAllChanged = prevShowAllProjectsRef.current !== showAllProjects
+    if (
+      !hasInitialAutoScrolledRef.current ||
+      prevZoomRef.current !== zoom ||
+      showAllChanged
+    ) {
       requestAnimationFrame(() => {
-        const container = rightScrollRef.current
-        if (!container) return
-        container.scrollTo({ left: container.scrollWidth, behavior: 'auto' })
+        scrollToToday('auto')
         hasInitialAutoScrolledRef.current = true
         prevZoomRef.current = zoom
+        prevShowAllProjectsRef.current = showAllProjects
       })
     }
-  }, [loading, units.length, zoom])
+  }, [loading, units.length, zoom, showAllProjects, scrollToToday])
 
   const onAddLabel = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!newLabel.trim()) return
+    const timestampIso = new Date(newTimestamp).toISOString()
     try {
-      setLoading(true)
+      // No global loading state here — the right pane stays mounted and the
+      // user keeps their scroll position. After the new label lands we
+      // scroll to its date column instead of resetting to today.
       const input: EntityInput = {
         projectId: scope === '__global__' ? '__global__' : (projectId ?? 'noproj'),
         type: ENTITY_TYPE,
         content: {
-          timestamp: new Date(newTimestamp).toISOString(),
+          timestamp: timestampIso,
           label: newLabel.trim(),
           description: newDescription.trim() || undefined,
         },
@@ -580,10 +630,9 @@ export default function ProjectTimelineView() {
       setIsAdding(false)
       setNewLabel('')
       setNewDescription('')
+      requestAnimationFrame(() => scrollToDate(new Date(timestampIso), 'auto'))
     } catch (err: any) {
       alert(`Failed to create label: ${err?.message || err}`)
-    } finally {
-      setLoading(false)
     }
   }
 
@@ -660,6 +709,7 @@ export default function ProjectTimelineView() {
       <TimelineToolbar
         zoom={zoom}
         setZoom={setZoom}
+        onToday={() => scrollToToday('smooth')}
         showAllProjects={showAllProjects}
         setShowAllProjects={setShowAllProjects}
         isAdding={isAdding}
@@ -668,7 +718,6 @@ export default function ProjectTimelineView() {
 
       {isAdding ? (
         <AddLabelForm
-          projectId={projectId}
           loading={loading}
           onAddLabel={onAddLabel}
           newLabel={newLabel}
@@ -691,21 +740,21 @@ export default function ProjectTimelineView() {
       <div className="flex-1 min-h-0 relative flex bg-base overflow-hidden">
         {/* LEFT PANE */}
         <div
-          className="flex flex-col shrink-0 border-r border-default bg-raised z-30 shadow-sm"
+          className="flex flex-col shrink-0 border-r border-default bg-base z-30 shadow-sm"
           style={{ width: (showAllProjects ? PROJECT_COL_WIDTH_PX : 0) + LEFT_COL_WIDTH_PX }}
         >
-          {/* Top-Left Header Cell */}
+          {/* Top-Left Header Cell — mirrors the right-pane blue header */}
           <div
-            className="shrink-0 flex items-center justify-between px-2 border-b border-default bg-raised"
+            className="shrink-0 flex items-center justify-between px-2 border-b border-default bg-blue-50"
             style={{ height: HEADER_HEIGHT_PX }}
           >
             <div className="flex items-center gap-1.5 cursor-default" title="Features">
-              <span className="w-2.5 h-2.5 rounded-[2px] bg-purple-200 border border-purple-500" />
+              <span className="w-2.5 h-2.5 rounded-xs bg-purple-200 border border-purple-500" />
               <span className="font-medium text-primary text-xs">{displayedFeatures.length}</span>
             </div>
             <div className="flex items-center gap-1.5 cursor-default" title="Stories">
               <span className="font-medium text-primary text-xs">{displayedStories.length}</span>
-              <span className="w-2.5 h-2.5 rounded-[2px] bg-emerald-200 border border-emerald-500" />
+              <span className="w-2.5 h-2.5 rounded-xs bg-emerald-200 border border-emerald-500" />
             </div>
           </div>
 
@@ -732,7 +781,7 @@ export default function ProjectTimelineView() {
                       style={{ width: PROJECT_COL_WIDTH_PX }}
                       title={row.projectTitle || ''}
                     >
-                      <span className="text-[11px] leading-tight font-medium text-primary text-center break-words overflow-hidden">
+                      <span className="text-[11px] leading-tight font-medium text-primary text-center wrap-break-word overflow-hidden">
                         {row.projectTitle || ''}
                       </span>
                     </div>
@@ -741,12 +790,12 @@ export default function ProjectTimelineView() {
                     className="flex-1 flex flex-col justify-center items-center p-2 min-w-0"
                     title={row.title}
                   >
-                    <span className="text-[11px] leading-tight font-medium text-primary text-center break-words overflow-hidden mb-2">
+                    <span className="text-[11px] leading-tight font-medium text-primary text-center wrap-break-word overflow-hidden mb-2">
                       {row.title}
                     </span>
                     {row.key.endsWith('-features') || row.key === 'features' ? (
                       <div className="flex items-center gap-1.5" title="Features in this row">
-                        <span className="w-2 h-2 rounded-[2px] bg-purple-200 border border-purple-500" />
+                        <span className="w-2 h-2 rounded-xs bg-purple-200 border border-purple-500" />
                         <span className="text-[10px] font-medium text-muted">
                           {row.items.length}
                         </span>
@@ -754,7 +803,7 @@ export default function ProjectTimelineView() {
                     ) : null}
                     {row.key.endsWith('-stories') || row.key === 'stories' ? (
                       <div className="flex items-center gap-1.5" title="Stories in this row">
-                        <span className="w-2 h-2 rounded-[2px] bg-emerald-200 border border-emerald-500" />
+                        <span className="w-2 h-2 rounded-xs bg-emerald-200 border border-emerald-500" />
                         <span className="text-[10px] font-medium text-muted">
                           {row.items.length}
                         </span>
@@ -815,7 +864,7 @@ export default function ProjectTimelineView() {
                     >
                       {visibleWidth > 0 ? (
                         <span
-                          className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 px-2 py-1 font-semibold text-[11px] uppercase tracking-wider whitespace-nowrap text-primary bg-raised rounded-sm"
+                          className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 px-2 py-1 font-semibold text-[11px] uppercase tracking-wider whitespace-nowrap text-primary"
                           style={{ left: labelLeft }}
                         >
                           {g.label}
@@ -838,12 +887,11 @@ export default function ProjectTimelineView() {
                   style={{ height: HEADER_HEIGHT_PX, minHeight: HEADER_HEIGHT_PX }}
                 >
                   <div
-                    className="absolute left-0 w-full flex bg-raised"
+                    className="absolute left-0 w-full flex"
                     style={{
                       top: YEAR_STRIP_HEIGHT_PX,
                       height: DATE_STRIP_HEIGHT_PX,
                       minHeight: DATE_STRIP_HEIGHT_PX,
-                      background: 'var(--color-raised)',
                     }}
                   >
                     {units.map((u, i) => {
@@ -857,13 +905,12 @@ export default function ProjectTimelineView() {
                           style={{
                             width: COLUMN_WIDTH_PX,
                             borderLeft: i > 0 ? '1px solid var(--border-subtle)' : 'none',
-                            background: isCurrentDay ? undefined : 'var(--color-raised)',
                           }}
                         >
                           <div className="flex items-center gap-1 min-w-0" title="Stories">
                             <span className="text-[10px] leading-none">{counts.stories}</span>
                             <span
-                              className={`w-2.5 h-2.5 rounded-[2px] border ${STORY_COUNT_COLOR}`}
+                              className={`w-2.5 h-2.5 rounded-xs border ${STORY_COUNT_COLOR}`}
                             />
                           </div>
                           <div className="min-w-0 text-center flex-1">
@@ -877,7 +924,7 @@ export default function ProjectTimelineView() {
                             title="Features"
                           >
                             <span
-                              className={`w-2.5 h-2.5 rounded-[2px] border ${FEATURE_COUNT_COLOR}`}
+                              className={`w-2.5 h-2.5 rounded-xs border ${FEATURE_COUNT_COLOR}`}
                             />
                             <span className="text-[10px] leading-none">{counts.features}</span>
                           </div>
@@ -920,60 +967,61 @@ export default function ProjectTimelineView() {
         </div>
       </div>
 
-      <TimelineHoverCard
-        hover={hover}
-        showAllProjects={showAllProjects}
-        storiesById={storiesById as any}
-        projects={projects as any}
-        activeProject={project as any}
-      />
+      <TimelineHoverCard hover={hover} storiesById={storiesById as any} />
 
       {editingId ? (
         <Modal isOpen={true} onClose={closeEdit} title="Edit timeline label" size="lg">
-          <form onSubmit={onSaveEdit} className="space-y-3">
-            <div className="grid gap-2 sm:grid-cols-5 items-end">
-              <div className="flex flex-col gap-1 sm:col-span-2">
-                <label className="text-xs text-(--text-muted)">Row label</label>
-                <input
-                  className="h-9 rounded border border-(--border-default) bg-(--surface-raised) px-2 text-sm text-(--text-primary) focus:outline-none focus-visible:ring-2 ring-offset-1"
-                  value={editLabel}
-                  onChange={(e) => setEditLabel(e.target.value)}
-                  placeholder="e.g. Milestone A"
-                  required
-                />
+          <form onSubmit={onSaveEdit} className="flex flex-col gap-3">
+            <div className="grid gap-3 sm:grid-cols-5 items-end">
+              <div className="sm:col-span-2">
+                <Field label="Row label">
+                  <Input
+                    value={editLabel}
+                    onChange={(e) => setEditLabel(e.target.value)}
+                    placeholder="e.g. Milestone A"
+                    required
+                  />
+                </Field>
               </div>
-              <div className="flex flex-col gap-1 sm:col-span-3">
-                <label className="text-xs text-(--text-muted)">Description (optional)</label>
-                <input
-                  className="h-9 rounded border border-(--border-default) bg-(--surface-raised) px-2 text-sm text-(--text-primary) focus:outline-none focus-visible:ring-2 ring-offset-1"
-                  value={editDescription}
-                  onChange={(e) => setEditDescription(e.target.value)}
-                  placeholder="Short note"
-                />
+              <div className="sm:col-span-3">
+                <Field label="Description (optional)">
+                  <Input
+                    value={editDescription}
+                    onChange={(e) => setEditDescription(e.target.value)}
+                    placeholder="Short note"
+                  />
+                </Field>
               </div>
-              <div className="flex flex-col gap-1 sm:col-span-2">
-                <label className="text-xs text-(--text-muted)">When</label>
-                <input
-                  type="datetime-local"
-                  className="h-9 rounded border border-(--border-default) bg-(--surface-raised) px-2 text-sm text-(--text-primary) focus:outline-none focus-visible:ring-2 ring-offset-1"
-                  value={editTimestamp}
-                  onChange={(e) => setEditTimestamp(e.target.value)}
-                  required
-                />
+              <div className="sm:col-span-2">
+                <Field label="When">
+                  <Input
+                    type="datetime-local"
+                    value={editTimestamp}
+                    onChange={(e) => setEditTimestamp(e.target.value)}
+                    required
+                  />
+                </Field>
               </div>
-              <div className="flex flex-col gap-1 sm:col-span-2">
-                <label className="text-xs text-(--text-muted)">Scope</label>
-                <select
-                  className="h-9 rounded border border-(--border-default) bg-(--surface-raised) px-2 text-sm text-(--text-primary) focus:outline-none focus-visible:ring-2 ring-offset-1"
-                  value={editScope}
-                  onChange={(e) => setEditScope(e.target.value as any)}
+              <div className="sm:col-span-2">
+                <Field label="Scope">
+                  <NativeSelect
+                    value={editScope}
+                    onChange={(e) =>
+                      setEditScope(e.target.value as 'project' | '__global__')
+                    }
+                  >
+                    <option value="project">This project</option>
+                    <option value="__global__">All projects (global)</option>
+                  </NativeSelect>
+                </Field>
+              </div>
+              <div className="sm:col-span-1 flex justify-end">
+                <Button
+                  type="button"
+                  variant="danger"
+                  onClick={onDeleteEdit}
+                  disabled={savingEdit}
                 >
-                  <option value="project">This project</option>
-                  <option value="__global__">All projects (global)</option>
-                </select>
-              </div>
-              <div className="sm:col-span-1 flex justify-end gap-2">
-                <Button type="button" variant="danger" onClick={onDeleteEdit} disabled={savingEdit}>
                   Delete
                 </Button>
               </div>
