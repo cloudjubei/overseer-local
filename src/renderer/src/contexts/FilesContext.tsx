@@ -50,8 +50,10 @@ export type FilesContextValue = {
   files: FileMeta[]
   filesByPath: Record<string, FileMeta>
   directoryTree: DirNode | null
-  readFile: (path: string) => Promise<string | undefined>
+  readFile: (path: string, encoding?: BufferEncoding) => Promise<string | undefined>
   writeFile: (path: string, content: string) => Promise<void>
+  renameFile: (from: string, to: string) => Promise<void>
+  deleteFile: (path: string) => Promise<void>
   uploadFile: (name: string, content: string) => Promise<string | undefined>
 }
 
@@ -115,6 +117,14 @@ export function FilesProvider({ children }: { children: React.ReactNode }) {
     await filesService.writeFile(projectId!, path, content)
   }
 
+  const renameFile = async (from: string, to: string): Promise<void> => {
+    await filesService.renamePath(projectId!, from, to)
+  }
+
+  const deleteFile = async (path: string): Promise<void> => {
+    await filesService.deletePath(projectId!, path)
+  }
+
   const uploadFile = async (name: string, content: string): Promise<string | undefined> => {
     return await filesService.uploadFile(projectId!, name, content)
   }
@@ -125,10 +135,12 @@ export function FilesProvider({ children }: { children: React.ReactNode }) {
       directoryTree,
       readFile,
       writeFile,
+      renameFile,
+      deleteFile,
       filesByPath,
       uploadFile,
     }),
-    [files, directoryTree, readFile, writeFile, filesByPath, uploadFile],
+    [files, directoryTree, readFile, writeFile, renameFile, deleteFile, filesByPath, uploadFile],
   )
   return <FilesContext.Provider value={value}>{children}</FilesContext.Provider>
 }

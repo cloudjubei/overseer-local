@@ -1,52 +1,56 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useFiles, DirNode } from '../contexts/FilesContext'
-import { MarkdownEditor } from '../components/files/MarkdownEditor'
-import BasicFileViewer from '../components/files/BasicFileViewer'
+
+import {
+  Alert,
+  Button,
+  FilePane,
+  FileTree,
+  Input,
+  Tooltip,
+  type FileTreeEntry,
+} from 'thefactory-ui/web'
+import { IconChevron, IconUpload } from 'thefactory-ui/web/icons'
+
+import { useFiles } from '../contexts/FilesContext'
 import { goToFile, parseFileFromHash } from '../navigation/FilesNavigation'
-import { IconChevron, IconFolder, IconFolderOpen, IconMenu } from 'thefactory-ui/web/icons'
-import { FileTypeIcon, Tooltip } from 'thefactory-ui/web'
 
 const FILES_PANE_COLLAPSED_KEY = 'files-pane-collapsed'
-import { FileMeta } from 'thefactory-tools'
 
-function isMarkdown(f: FileMeta) {
-  return f.ext === 'md' || f.ext === 'mdx'
-}
-
-function Caret({ open }: { open: boolean }) {
-  return (
-    <IconChevron
-      className='inline-block w-4 h-4 text-text-muted transition-transform'
-      style={{ transform: open ? 'rotate(90deg)' : 'rotate(0deg)' }}
-    />
-  )
-}
-
-function relTime(ms: number | undefined) {
-  if (!ms) return ''
-  const delta = Date.now() - ms
-  const sec = Math.round(delta / 1000)
-  if (sec < 60) return `${sec}s ago`
-  const min = Math.round(sec / 60)
-  if (min < 60) return `${min}m ago`
-  const hr = Math.round(min / 60)
-  if (hr < 24) return `${hr}h ago`
-  const d = Math.round(hr / 24)
-  if (d < 7) return `${d}d ago`
-  const w = Math.round(d / 7)
-  return `${w}w ago`
+function mimeTypeFor(path: string): string {
+  const lastDot = path.lastIndexOf('.')
+  if (lastDot === -1) return 'application/octet-stream'
+  const ext = path.slice(lastDot).toLowerCase()
+  const map: Record<string, string> = {
+    '.png': 'image/png',
+    '.jpg': 'image/jpeg',
+    '.jpeg': 'image/jpeg',
+    '.gif': 'image/gif',
+    '.webp': 'image/webp',
+    '.svg': 'image/svg+xml',
+    '.bmp': 'image/bmp',
+    '.ico': 'image/x-icon',
+    '.tif': 'image/tiff',
+    '.tiff': 'image/tiff',
+    '.pdf': 'application/pdf',
+  }
+  return map[ext] ?? 'application/octet-stream'
 }
 
 export const FilesView: React.FC = () => {
-  const { files, directoryTree } = useFiles()
+  const { files, readFile, writeFile, renameFile, deleteFile, uploadFile } = useFiles()
   const [selectedPath, setSelectedPath] = useState<string | null>(null)
   const [query, setQuery] = useState('')
-  const [openSet, setOpenSet] = useState<Set<string>>(() => new Set([''])) // '' is root
-  const searchRef = useRef<HTMLInputElement | null>(null)
   const [paneCollapsed, setPaneCollapsed] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false
     return window.localStorage.getItem(FILES_PANE_COLLAPSED_KEY) === '1'
   })
+
+  const [content, setContent] = useState<string | null>(null)
+  const [isContentLoading, setIsContentLoading] = useState(false)
+  const [contentError, setContentError] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const [uploadError, setUploadError] = useState<string | null>(null)
+  const [uploading, setUploading] = useState(false)
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -55,233 +59,209 @@ export const FilesView: React.FC = () => {
 
   useEffect(() => {
     function syncFromHash() {
-      const p = parseFileFromHash()
-      setSelectedPath(p)
+      setSelectedPath(parseFileFromHash())
     }
     window.addEventListener('hashchange', syncFromHash)
     syncFromHash()
     return () => window.removeEventListener('hashchange', syncFromHash)
   }, [])
 
-  useEffect(() => {
-    if (!selectedPath) return
-    const parts = selectedPath.split('/')
-    const dirParts = parts.slice(0, -1)
-    if (dirParts.length === 0) return
-    const prefixes = dirParts.map((_, i) => dirParts.slice(0, i + 1).join('/'))
-    setOpenSet((prev) => {
-      const next = new Set(prev)
-      next.add('')
-      prefixes.forEach((p) => next.add(p))
-      return next
-    })
-  }, [selectedPath])
-
-  const selectedFile = useMemo(() => {
-    if (!files.length) return undefined
-    const sp = selectedPath
-    if (sp) return files.find((f) => f.relativePath === sp) || undefined
-    return undefined
-  }, [files, selectedPath])
-
-  const handleToggleOpen = useCallback((dirRelPath: string) => {
-    setOpenSet((prev) => {
-      const next = new Set(prev)
-      if (next.has(dirRelPath)) next.delete(dirRelPath)
-      else next.add(dirRelPath)
-      return next
-    })
-  }, [])
-
-  const filterMatch = useCallback(
-    (name: string, path: string) => {
-      const q = query.trim().toLowerCase()
-      if (!q) return true
-      return name.toLowerCase().includes(q) || path.toLowerCase().includes(q)
-    },
-    [query],
+  const selectedMeta = useMemo(
+    () => (selectedPath ? files.find((f) => f.relativePath === selectedPath) : undefined),
+    [files, selectedPath],
   )
 
-  function DirTree({ node, level = 0 }: { node: DirNode; level?: number }) {
-    const isRoot = node.relPath === ''
-    const isOpen = openSet.has(node.relPath) || isRoot
-    const indent = level * 14
-
-    // Apply filtering: if query present, only show matching dirs/files, and auto-open matches
-    const q = query.trim()
-    const childDirs = useMemo(() => {
-      if (!q) return node.dirs
-      const result: DirNode[] = []
-      for (const d of node.dirs) {
-        const filteredChild = filterDir(d, filterMatch)
-        if (filteredChild) result.push(filteredChild)
-      }
-      return result
-    }, [node.dirs, q])
-
-    const childFiles = useMemo(() => {
-      if (!q) return node.files
-      return node.files.filter((f) => filterMatch(f.name, f.relativePath!))
-    }, [node.files, q])
-
-    return (
-      <div>
-        {!isRoot && (
-          <div className='flex items-center py-1' style={{ paddingLeft: indent }}>
-            <button
-              type='button'
-              onClick={() => handleToggleOpen(node.relPath)}
-              className='inline-flex h-6 w-6 items-center justify-center rounded-md text-text-muted hover:bg-[color:var(--border-subtle)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--focus-ring)]'
-              aria-label={isOpen ? 'Collapse folder' : 'Expand folder'}
-              title={isOpen ? 'Collapse' : 'Expand'}
-            >
-              <Caret open={isOpen} />
-            </button>
-            <button
-              type='button'
-              onClick={() => handleToggleOpen(node.relPath)}
-              className='group flex items-center gap-2 rounded-md px-1 text-sm text-text-primary hover:bg-[color:var(--border-subtle)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--focus-ring)]'
-              title={node.name}
-            >
-              {isOpen ? <IconFolderOpen className='w-4 h-4' /> : <IconFolder className='w-4 h-4' />}
-              <span className='truncate font-medium text-text-primary'>{node.name || 'root'}</span>
-              <span className='ml-auto mr-2 rounded-full border border-border-subtle px-2 py-[1px] text-[10px] text-text-muted bg-[color:var(--surface-raised)]'>
-                {node.files.length}
-              </span>
-            </button>
-          </div>
-        )}
-        {(isOpen || q) && (
-          <div>
-            {childDirs.map((d) => (
-              <DirTree key={`dir:${d.relPath}`} node={d} level={level + 1} />
-            ))}
-            {childFiles.map((f) => {
-              const isSel = selectedFile?.relativePath === f.relativePath
-              return (
-                <button
-                  key={`file:${f.relativePath!}`}
-                  className={`group flex w-full items-start gap-2 rounded-md px-2 py-1.5 text-left text-sm ${isSel ? 'bg-[color:var(--surface-raised)] border border-[color:var(--border-default)] shadow-[var(--shadow-1)]' : 'hover:bg-[color:var(--border-subtle)] focus-visible:ring-2 focus-visible:ring-[color:var(--focus-ring)]'}`}
-                  onClick={() => goToFile(f.relativePath!)}
-                  style={{ paddingLeft: level * 14 + 28 }}
-                  title={f.name}
-                  aria-current={isSel ? 'true' : undefined}
-                >
-                  <FileTypeIcon name={f.name} size={16} className='mt-0.5 shrink-0' />
-                  <div className='min-w-0 flex-1'>
-                    <div className='truncate text-text-primary'>{f.name}</div>
-                    <div className='text-[10px] text-text-muted'>
-                      {f.mtime ? `Updated ${relTime(f.mtime)}` : ''}
-                    </div>
-                  </div>
-                </button>
-              )
-            })}
-          </div>
-        )}
-      </div>
-    )
-  }
-
-  function filterDir(
-    node: DirNode,
-    match: (name: string, path: string) => boolean,
-  ): DirNode | null {
-    const filteredDirs: DirNode[] = []
-    for (const d of node.dirs) {
-      const fd = filterDir(d, match)
-      if (fd) filteredDirs.push(fd)
+  useEffect(() => {
+    if (!selectedPath) {
+      setContent(null)
+      setContentError(null)
+      return
     }
-    const filteredFiles = node.files.filter((f) => match(f.name, f.relativePath!))
-    const selfMatches = match(node.name, node.relPath)
-    if (selfMatches || filteredDirs.length > 0 || filteredFiles.length > 0) {
-      return { ...node, dirs: filteredDirs, files: filteredFiles }
+    let cancelled = false
+    setIsContentLoading(true)
+    setContent(null)
+    setContentError(null)
+    readFile(selectedPath, 'utf8')
+      .then((txt) => {
+        if (cancelled) return
+        setContent(txt ?? '')
+      })
+      .catch((err: unknown) => {
+        if (cancelled) return
+        setContentError(err instanceof Error ? err.message : String(err))
+      })
+      .finally(() => {
+        if (!cancelled) setIsContentLoading(false)
+      })
+    return () => {
+      cancelled = true
     }
-    return null
+  }, [selectedPath, readFile])
+
+  const treeEntries = useMemo<FileTreeEntry[]>(
+    () =>
+      files.map((f) => ({
+        relativePath: f.relativePath ?? f.absolutePath,
+        name: f.name,
+        type: f.type ?? f.ext ?? null,
+      })),
+    [files],
+  )
+
+  const getBinaryUrl = useCallback(
+    async (path: string) => {
+      const base64 = await readFile(path, 'base64')
+      if (base64 == null) throw new Error('Failed to read file')
+      return `data:${mimeTypeFor(path)};base64,${base64}`
+    },
+    [readFile],
+  )
+
+  const onWrite = useCallback(
+    async (path: string, next: string) => {
+      await writeFile(path, next)
+    },
+    [writeFile],
+  )
+
+  const onRename = useCallback(
+    async (from: string, to: string) => {
+      await renameFile(from, to)
+      goToFile(to)
+    },
+    [renameFile],
+  )
+
+  const onDelete = useCallback(
+    async (path: string) => {
+      await deleteFile(path)
+      goToFile('')
+    },
+    [deleteFile],
+  )
+
+  const onUploadClick = () => fileInputRef.current?.click()
+  const onFilePicked = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    setUploading(true)
+    setUploadError(null)
+    try {
+      const text = await file.text()
+      const uploaded = await uploadFile(file.name, text)
+      if (uploaded) goToFile(uploaded)
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : 'Failed to upload file')
+    } finally {
+      setUploading(false)
+    }
   }
 
   return (
-    <div
-      className='files-view grid h-full'
-      style={{ gridTemplateColumns: paneCollapsed ? '40px 1fr' : '320px 1fr' }}
-    >
-      {/* Left panel: file tree — uses flex-col so the tree area scrolls independently */}
+    <div className="flex flex-row w-full h-full overflow-hidden">
       <aside
-        className='flex flex-col h-full min-h-0 overflow-hidden'
-        style={{ borderRight: '1px solid var(--border-subtle)' }}
+        className="shrink-0 flex flex-col border-r overflow-hidden transition-[width]"
+        style={{
+          width: paneCollapsed ? 48 : '33%',
+          minWidth: paneCollapsed ? 48 : 280,
+          maxWidth: paneCollapsed ? 48 : 520,
+          borderColor: 'var(--border-subtle)',
+          background: 'var(--surface-base)',
+        }}
       >
-        {/* Fixed header: collapse toggle + search bar */}
         <div
-          className='flex-shrink-0 flex p-2 gap-2 items-center'
-          style={{ borderBottom: '1px solid var(--border-subtle)' }}
+          className={`flex items-center gap-2 px-2 py-2 shrink-0 ${
+            paneCollapsed ? 'justify-center' : 'justify-between'
+          }`}
         >
-          <Tooltip
-            content={paneCollapsed ? 'Expand files pane' : 'Collapse files pane'}
-            placement='right'
-          >
-            <button
-              type='button'
-              onClick={() => setPaneCollapsed((v) => !v)}
-              aria-label={paneCollapsed ? 'Expand files pane' : 'Collapse files pane'}
-              aria-expanded={!paneCollapsed}
-              className='inline-flex items-center justify-center w-6 h-6 rounded-md hover:bg-(--surface-hover) shrink-0'
-            >
-              <IconMenu className='w-4 h-4 opacity-70' />
-            </button>
-          </Tooltip>
           {!paneCollapsed && (
-            <>
-              <strong className='flex-1'>Files</strong>
-              <input
-                ref={searchRef}
-                type='search'
-                placeholder='Search files'
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                className='ui-input'
-                style={{ width: 160 }}
-                aria-label='Search files'
-              />
-            </>
+            <Input
+              placeholder="Filter files…"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              size="sm"
+              className="flex-1"
+            />
           )}
+          <Button
+            variant="secondary"
+            size="icon"
+            onClick={() => setPaneCollapsed((v) => !v)}
+            aria-label={paneCollapsed ? 'Expand files pane' : 'Collapse files pane'}
+            title={paneCollapsed ? 'Expand files pane' : 'Collapse files pane'}
+          >
+            <IconChevron
+              className="w-4 h-4"
+              style={{ transform: paneCollapsed ? undefined : 'rotate(180deg)' }}
+            />
+          </Button>
         </div>
-        {/* Scrollable file tree — hidden when collapsed */}
         {!paneCollapsed && (
-          <div className='flex-1 min-h-0 overflow-y-auto'>
-            {!directoryTree ? (
-              <div className='p-3'>Loading index...</div>
-            ) : files.length === 0 ? (
-              <div className='p-3' style={{ color: 'var(--text-muted)' }}>
-                No files found.
-              </div>
-            ) : (
-              <div className='px-2 py-2'>
-                <DirTree
-                  node={
-                    query.trim()
-                      ? filterDir(directoryTree, filterMatch) || {
-                          ...directoryTree,
-                          dirs: [],
-                          files: [],
-                        }
-                      : directoryTree
-                  }
-                  level={0}
-                />
+          <>
+            <div
+              className="flex items-center justify-between gap-2 px-3 py-2 border-b shrink-0"
+              style={{ borderColor: 'var(--border-subtle)' }}
+            >
+              <span className="text-xs text-(--text-muted)">
+                {files.length} file{files.length === 1 ? '' : 's'}
+              </span>
+              <Tooltip content="Upload file">
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  onClick={onUploadClick}
+                  disabled={uploading}
+                  aria-label="Upload file"
+                >
+                  <IconUpload className="w-4 h-4" />
+                </Button>
+              </Tooltip>
+              <input ref={fileInputRef} type="file" hidden onChange={onFilePicked} />
+            </div>
+            {uploadError && (
+              <div className="px-3 py-2 shrink-0">
+                <Alert>{uploadError}</Alert>
               </div>
             )}
-          </div>
+            <div className="flex-1 overflow-auto px-1 py-1">
+              <FileTree
+                files={treeEntries}
+                selectedPath={selectedPath}
+                query={query}
+                onSelectFile={(p) => goToFile(p)}
+              />
+            </div>
+          </>
         )}
       </aside>
-      {/* Right panel: file content — scrolls independently */}
-      <main className='h-full min-h-0 min-w-0 overflow-auto'>
-        {!selectedFile ? (
-          <div style={{ padding: 16, color: 'var(--text-muted)' }}>Select a file to view.</div>
-        ) : isMarkdown(selectedFile) ? (
-          <MarkdownEditor file={selectedFile} />
-        ) : (
-          <BasicFileViewer file={selectedFile} />
-        )}
+
+      <main className="flex-1 min-w-0 min-h-0 overflow-hidden">
+        <FilePane
+          filePath={selectedPath}
+          fileName={selectedMeta?.name}
+          fileSize={selectedMeta?.size ?? null}
+          content={content}
+          isContentLoading={isContentLoading}
+          contentError={contentError}
+          onWrite={onWrite}
+          onRename={onRename}
+          onDelete={onDelete}
+          getBinaryUrl={getBinaryUrl}
+          fileInfo={
+            selectedMeta
+              ? {
+                  path: selectedMeta.relativePath ?? undefined,
+                  absolutePath: selectedMeta.absolutePath ?? undefined,
+                  size: selectedMeta.size ?? null,
+                  type: selectedMeta.type ?? null,
+                  ext: selectedMeta.ext ?? null,
+                  mtime: selectedMeta.mtime ?? null,
+                  ctime: selectedMeta.ctime ?? null,
+                }
+              : undefined
+          }
+        />
       </main>
     </div>
   )
