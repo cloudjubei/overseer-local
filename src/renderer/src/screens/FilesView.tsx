@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   Alert,
   Button,
+  classifyFileByExtension,
   FilePane,
   FileTree,
   Input,
@@ -72,15 +73,17 @@ export const FilesView: React.FC = () => {
   )
 
   useEffect(() => {
-    if (!selectedPath) {
-      setContent(null)
-      setContentError(null)
-      return
-    }
-    let cancelled = false
-    setIsContentLoading(true)
     setContent(null)
     setContentError(null)
+    if (!selectedPath) return
+    // Images / PDFs / unknown binaries go through `getBinaryUrl` instead of
+    // the text read; skip the utf-8 fetch (and the bogus error it would
+    // surface for binary content).
+    const kind = classifyFileByExtension(selectedPath)
+    if (kind !== 'markdown' && kind !== 'html' && kind !== 'text') return
+
+    let cancelled = false
+    setIsContentLoading(true)
     readFile(selectedPath, 'utf8')
       .then((txt) => {
         if (cancelled) return
