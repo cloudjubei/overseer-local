@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import type { Status, Story } from 'thefactory-tools'
 import { useActiveProject, useProjectContext } from '@renderer/contexts/ProjectContext'
-import StatusControl, { STATUS_LABELS } from '@renderer/components/stories/StatusControl'
+import { StatusControl, STATUS_LABELS } from 'thefactory-ui/web'
 import { useNavigator } from '@renderer/navigation/Navigator'
 import { StoryCard, StoryCardRaw } from '@renderer/components/stories/StoryCard'
 import { useStories } from '@renderer/contexts/StoriesContext'

@@ -1,335 +1,16 @@
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { createPortal } from 'react-dom'
+import { useCallback, useMemo } from 'react'
+
+import { ModelChip as ModelChipBase, type ModelChipMode } from 'thefactory-ui/web'
 import { useLLMConfig } from '../../contexts/LLMConfigContext'
 import { useNavigator } from '../../navigation/Navigator'
 import { getPrice } from '../../services/pricingService'
-import type { LLMConfig } from 'thefactory-tools'
-
-function providerLabel(p?: string) {
-  if (!p) return ''
-  const key = String(p).toLowerCase()
-  const map: Record<string, string> = {
-    openai: 'OpenAI',
-    anthropic: 'Anthropic',
-    gemini: 'Gemini',
-    google: 'Google',
-    xai: 'xAI',
-    groq: 'Groq',
-    together: 'Together',
-    azure: 'Azure',
-    ollama: 'Ollama',
-    local: 'Local',
-    custom: 'Custom',
-  }
-  return map[key] || p
-}
-
-function providerDotClasses(p?: string) {
-  const key = String(p || '').toLowerCase()
-  switch (key) {
-    case 'openai':
-      return 'bg-blue-500'
-    case 'anthropic':
-      return 'bg-orange-500'
-    case 'gemini':
-    case 'google':
-      return 'bg-green-500'
-    case 'xai':
-      return 'bg-black'
-    case 'groq':
-      return 'bg-pink-500'
-    case 'together':
-      return 'bg-emerald-500'
-    case 'azure':
-      return 'bg-sky-600'
-    case 'ollama':
-    case 'local':
-      return 'bg-neutral-500'
-    case 'custom':
-      return 'bg-purple-500'
-    default:
-      return 'bg-pink-500'
-  }
-}
-
-function clamp(n: number, min: number, max: number) {
-  return Math.max(min, Math.min(max, n))
-}
-
-function formatUSD(n?: number) {
-  if (n == null || Number.isNaN(n)) return '?'
-  const fixed = n.toFixed(4)
-  const trimmed = fixed.replace(/\.0+$/, '').replace(/(\.\d*?)0+$/, '$1')
-  return `$${trimmed}`
-}
-
-function computePosition(
-  anchor: HTMLElement,
-  panel: HTMLElement | null,
-  gap = 8,
-): { top: number; left: number; minWidth: number; side: 'top' | 'bottom' } {
-  const ar = anchor.getBoundingClientRect()
-  const scrollX = window.scrollX || window.pageXOffset
-  const scrollY = window.scrollY || window.pageYOffset
-  const viewportW = window.innerWidth
-  const viewportH = window.innerHeight
-
-  const panelW = panel ? panel.offsetWidth : Math.max(180, ar.width)
-  const panelH = panel ? panel.offsetHeight : 180
-
-  const spaceBelow = viewportH - ar.bottom
-  const side: 'top' | 'bottom' = spaceBelow < panelH + gap ? 'top' : 'bottom'
-
-  let top: number
-  if (side === 'bottom') {
-    top = ar.bottom + scrollY + gap
-  } else {
-    top = ar.top + scrollY - panelH - gap
-  }
-
-  const padding = 12
-
-  let left: number
-  if (ar.left + panelW > viewportW - padding) {
-    left = ar.right - panelW + scrollX
-  } else {
-    left = ar.left + scrollX
-  }
-
-  const maxLeft = scrollX + viewportW - panelW - padding
-  const minLeft = scrollX + padding
-  left = clamp(left, minLeft, maxLeft)
-
-  const minTop = scrollY + padding
-  const maxTop = scrollY + viewportH - panelH - padding
-  top = clamp(top, minTop, maxTop)
-
-  return { top, left, minWidth: ar.width, side }
-}
-
-function useOutsideClick(refs: React.RefObject<HTMLElement | null>[], onOutside: () => void) {
-  useEffect(() => {
-    function onDoc(e: MouseEvent) {
-      const t = e.target as Node
-      const inside = refs.some((r) => r.current && r.current.contains(t))
-      if (!inside) onOutside()
-    }
-    document.addEventListener('mousedown', onDoc)
-    return () => document.removeEventListener('mousedown', onDoc)
-  }, [refs, onOutside])
-}
-
-type PriceRecord = {
-  inputPerMTokensUSD: number
-  outputPerMTokensUSD: number
-  cacheReadInputPerMTokensUSD?: number
-}
-
-function Picker({
-  anchorEl,
-  onClose,
-  selectedConfigId,
-  onPickConfigId,
-  recentConfigIds,
-}: {
-  anchorEl: HTMLElement
-  onClose: () => void
-  selectedConfigId?: string
-  onPickConfigId: (configId: string) => void
-  recentConfigIds: string[]
-}) {
-  const panelRef = useRef<HTMLDivElement | null>(null)
-  const [coords, setCoords] = useState<{
-    top: number
-    left: number
-    minWidth: number
-    side: 'top' | 'bottom'
-  } | null>(null)
-  const { configs } = useLLMConfig()
-  const { navigateView } = useNavigator()
-  const [activeIndex, setActiveIndex] = useState(0)
-  const [pricesByKey, setPricesByKey] = useState<Record<string, PriceRecord | null | undefined>>({})
-
-  useLayoutEffect(() => {
-    const update = () => setCoords(computePosition(anchorEl, panelRef.current))
-    update()
-    window.addEventListener('resize', update)
-    window.addEventListener('scroll', update, true)
-    return () => {
-      window.removeEventListener('resize', update)
-      window.removeEventListener('scroll', update, true)
-    }
-  }, [anchorEl])
-
-  useOutsideClick([panelRef], onClose)
-
-  const recents: LLMConfig[] = React.useMemo(() => {
-    if (recentConfigIds && recentConfigIds.length) {
-      const map = new Map(configs.map((c) => [c.id, c] as const))
-      return recentConfigIds.map((id) => map.get(id)).filter(Boolean) as LLMConfig[]
-    }
-    return []
-  }, [recentConfigIds, configs])
-
-  useEffect(() => {
-    let cancelled = false
-
-    const run = async () => {
-      const next: Record<string, PriceRecord | null> = {}
-      const items = recents
-        .map((cfg) => ({ provider: cfg.provider, model: cfg.model }))
-        .filter((x) => x.provider && x.model) as { provider: string; model: string }[]
-
-      const uniqKeys = Array.from(new Set(items.map((x) => `${x.provider}::${x.model}`)))
-
-      await Promise.all(
-        uniqKeys.map(async (key) => {
-          const [provider, model] = key.split('::')
-          try {
-            const rec = await getPrice(provider, model)
-            next[key] = rec
-              ? {
-                  inputPerMTokensUSD: rec.inputPerMTokensUSD,
-                  outputPerMTokensUSD: rec.outputPerMTokensUSD,
-                  cacheReadInputPerMTokensUSD: rec.cacheReadInputPerMTokensUSD,
-                }
-              : null
-          } catch {
-            next[key] = null
-          }
-        }),
-      )
-
-      if (cancelled) return
-      setPricesByKey(next)
-    }
-
-    void run()
-    return () => {
-      cancelled = true
-    }
-  }, [recents])
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (!panelRef.current) return
-      if (e.key === 'Escape') {
-        e.preventDefault()
-        onClose()
-        return
-      }
-      if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
-        e.preventDefault()
-        setActiveIndex((i) => (i + 1) % Math.max(1, recents.length + 1))
-      } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
-        e.preventDefault()
-        setActiveIndex(
-          (i) => (i - 1 + Math.max(1, recents.length + 1)) % Math.max(1, recents.length + 1),
-        )
-      } else if (e.key === 'Enter') {
-        e.preventDefault()
-        if (activeIndex < recents.length) {
-          const cfg = recents[activeIndex]
-          if (cfg) {
-            onPickConfigId(cfg.id!)
-          }
-          onClose()
-        } else {
-          navigateView('Settings')
-          onClose()
-        }
-      }
-    }
-    document.addEventListener('keydown', onKey)
-    return () => document.removeEventListener('keydown', onKey)
-  }, [activeIndex, onClose, recents, onPickConfigId, navigateView])
-
-  if (!coords) return null
-
-  return createPortal(
-    <div
-      ref={panelRef}
-      className={`standard-picker standard-picker--${coords.side}`}
-      role="menu"
-      aria-label="Select LLM Configuration"
-      style={{
-        top: coords.top,
-        left: coords.left,
-        minWidth: Math.max(180, coords.minWidth + 8),
-        position: 'absolute',
-      }}
-      onClick={(e) => {
-        e.stopPropagation()
-      }}
-      onMouseDown={(e) => {
-        e.stopPropagation()
-        e.preventDefault()
-      }}
-    >
-      {recents.map((cfg, i) => {
-        const isActive = cfg.id === selectedConfigId
-        const dot = providerDotClasses(cfg.provider)
-        const priceKey = cfg.provider && cfg.model ? `${cfg.provider}::${cfg.model}` : undefined
-        const p = priceKey ? pricesByKey[priceKey] : undefined
-        const inStr = p ? formatUSD(p.inputPerMTokensUSD) : '?'
-        const outStr = p ? formatUSD(p.outputPerMTokensUSD) : '?'
-        const cacheStr =
-          p && p.cacheReadInputPerMTokensUSD != null
-            ? formatUSD(p.cacheReadInputPerMTokensUSD)
-            : '?'
-
-        return (
-          <button
-            key={cfg.id}
-            role="menuitemradio"
-            aria-checked={isActive}
-            className="standard-picker__item"
-            onClick={(e) => {
-              e.stopPropagation()
-              onPickConfigId(cfg.id!)
-              onClose()
-            }}
-            onMouseEnter={() => setActiveIndex(i)}
-          >
-            <span
-              className={['inline-block w-1.5 h-1.5 rounded-full mr-2', dot].join(' ')}
-              aria-hidden
-            />
-            <span className="standard-picker__label flex min-w-0 flex-col leading-tight">
-              <span className="truncate text-[12px] font-medium">{cfg.name || 'Untitled'}</span>
-              <span className="truncate text-[11px] text-[var(--text-secondary)]">
-                {cfg.model || '—'}
-              </span>
-              <span className="truncate text-[10px] text-[var(--text-secondary)]">
-                In {inStr} · Out {outStr} · Cache {cacheStr}
-              </span>
-            </span>
-          </button>
-        )
-      })}
-      <button
-        role="menuitem"
-        className="standard-picker__item"
-        onClick={(e) => {
-          e.stopPropagation()
-          navigateView('Settings')
-          onClose()
-        }}
-        onMouseEnter={() => setActiveIndex(recents.length)}
-      >
-        <span className="standard-picker__label">Manage LLM Configurations…</span>
-      </button>
-    </div>,
-    document.body,
-  )
-}
 
 export type ModelChipProps = {
   provider?: string
   model?: string
   className?: string
   editable?: boolean
-  mode?: 'agentRun' | 'chat'
+  mode?: ModelChipMode
 }
 
 export default function ModelChip({
@@ -339,8 +20,6 @@ export default function ModelChip({
   editable = false,
   mode = 'agentRun',
 }: ModelChipProps) {
-  const containerRef = useRef<HTMLSpanElement>(null)
-  const [open, setOpen] = useState(false)
   const {
     configs,
     activeAgentRunConfig,
@@ -352,96 +31,71 @@ export default function ModelChip({
   } = useLLMConfig()
   const { navigateView } = useNavigator()
 
-  const setActiveId = useCallback(
+  const activeConfig = mode === 'chat' ? activeChatConfig : activeAgentRunConfig
+  const recents = mode === 'chat' ? recentChatConfigs : recentAgentRunConfigs
+
+  const onPick = useCallback(
     (id: string) => (mode === 'chat' ? setActiveChat(id) : setActiveAgentRun(id)),
     [mode, setActiveChat, setActiveAgentRun],
   )
-  const activeConfig = useMemo(
-    () => (mode === 'chat' ? activeChatConfig : activeAgentRunConfig),
-    [mode, activeChatConfig, activeAgentRunConfig],
-  )
-  const recentConfigs = useMemo(
-    () => (mode === 'chat' ? recentChatConfigs : recentAgentRunConfigs),
-    [mode, recentAgentRunConfigs, recentChatConfigs],
+
+  const onOpenSettings = useCallback(
+    () => navigateView('Settings', { settingsTab: 'llms' }),
+    [navigateView],
   )
 
-  let prov = providerLabel(provider)
-  let displayModel = model
+  const baseActive = useMemo(
+    () =>
+      activeConfig
+        ? {
+            id: activeConfig.id!,
+            name: activeConfig.name,
+            provider: activeConfig.provider,
+            model: activeConfig.model,
+          }
+        : null,
+    [activeConfig],
+  )
 
-  if ((!prov || !displayModel) && activeConfig) {
-    prov = providerLabel(activeConfig.provider)
-    displayModel = activeConfig.model
-  }
+  const baseRecents = useMemo(
+    () =>
+      recents
+        .filter((c) => c.id)
+        .map((c) => ({
+          id: c.id!,
+          name: c.name,
+          provider: c.provider,
+          model: c.model,
+        })),
+    [recents],
+  )
 
-  const parts = [prov || undefined, displayModel || undefined].filter(Boolean)
-  const label = parts.join(' · ')
-  const title = label || (editable ? 'Select model' : 'Unknown model')
-
-  if (editable && (!configs || configs.length === 0)) {
-    return (
-      <button
-        type="button"
-        className={`btn-secondary no-drag ${className || ''}`}
-        onClick={() => navigateView('Settings')}
-        title="No LLMs configured. Open Settings to add one."
-        aria-label="Configure LLMs"
-      >
-        Configure LLM…
-      </button>
-    )
-  }
-
-  const chipEl = (
-    <span
-      ref={containerRef}
-      className={[
-        'inline-flex items-center gap-1 rounded-full border px-2 py-1 text-xs',
-        ' text-neutral-800  dark:text-neutral-200',
-        mode === 'chat'
-          ? 'bg-teal-500/20 border-teal-600 dark:border-teal-700  dark:bg-teal-800/60 '
-          : 'bg-neutral-100 border-neutral-200 dark:border-neutral-700  dark:bg-neutral-800/60 ',
-        editable ? 'cursor-pointer hover:bg-neutral-100/80 dark:hover:bg-neutral-800' : '',
-        'no-drag',
-        className || '',
-      ].join(' ')}
-      title={title}
-      aria-label={title}
-      role={editable ? 'button' : 'note'}
-      onClick={(e) => {
-        if (!editable) return
-        e.stopPropagation()
-        setOpen((o) => !o)
-      }}
-      onMouseDown={(e) => {
-        if (!editable) return
-        e.stopPropagation()
-      }}
-    >
-      <span className="flex flex-col leading-tight max-w-[60px] items-center pr-1 pl-1 overflow-hidden text-ellipsis">
-        <span className="truncate text-[10px] uppercase tracking-wide text-neutral-700 dark:text-neutral-300">
-          {prov || (editable ? 'Select' : '—')}
-        </span>
-        {(displayModel || editable) && (
-          <span className="truncate text-xs font-medium">
-            {displayModel || (editable ? 'model…' : '')}
-          </span>
-        )}
-      </span>
-    </span>
+  const baseConfigs = useMemo(
+    () =>
+      configs
+        .filter((c) => c.id)
+        .map((c) => ({
+          id: c.id!,
+          name: c.name,
+          provider: c.provider,
+          model: c.model,
+        })),
+    [configs],
   )
 
   return (
-    <>
-      {chipEl}
-      {editable && open && containerRef.current && (
-        <Picker
-          anchorEl={containerRef.current}
-          onClose={() => setOpen(false)}
-          selectedConfigId={activeConfig?.id}
-          onPickConfigId={setActiveId}
-          recentConfigIds={recentConfigs.map((c) => c.id).filter((c) => c !== undefined)}
-        />
-      )}
-    </>
+    <ModelChipBase
+      provider={provider}
+      model={model}
+      className={className}
+      editable={editable}
+      mode={mode}
+      activeConfig={baseActive}
+      recents={baseRecents}
+      configs={baseConfigs}
+      onPick={onPick}
+      onOpenSettings={onOpenSettings}
+      getPrice={getPrice}
+    />
   )
 }

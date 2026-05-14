@@ -1,20 +1,24 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigator } from '@renderer/navigation/Navigator'
 import DependencyBullet from '@renderer/components/stories/DependencyBullet'
-import StatusControl from '@renderer/components/stories/StatusControl'
 import { useActiveProject, useProjectContext } from '@renderer/contexts/ProjectContext'
 import { useAgents } from '@renderer/contexts/AgentsContext'
 import AgentRunBullet from '@renderer/components/agents/AgentRunBullet'
 import { ChatContext, Feature, Status, Story } from 'thefactory-tools'
 import { IconBack, IconCalculator, IconChevron, IconEdit, IconPlus } from 'thefactory-ui/web/icons'
 import ExclamationChip from '@renderer/components/stories/ExclamationChip'
-import RunAgentButton from '@renderer/components/stories/RunAgentButton'
 import { RichText } from '@renderer/components/ui/RichText'
 import ModelChip from '@renderer/components/agents/ModelChip'
 import { getChatContextKey } from 'thefactory-tools/utils'
 import UsageModal from '@renderer/components/chat/UsageModal'
-import { StatusPicker, statusKey, STATUS_LABELS } from '@renderer/components/stories/StatusControl'
-import { Button } from 'thefactory-ui/web'
+import {
+  Button,
+  RunAgentButton,
+  StatusControl,
+  StatusPicker,
+  STATUS_LABELS,
+  statusKey,
+} from 'thefactory-ui/web'
 import { useStories } from '@renderer/contexts/StoriesContext'
 import { ChatSidebarPanel } from '@renderer/components/chat'
 import { useAppSettings } from '@renderer/contexts/AppSettingsContext'
@@ -23,13 +27,15 @@ const STATUS_ORDER: Status[] = ['-', '~', '+', '=', '?']
 
 type FeatureSort = 'index_asc' | 'index_desc' | 'status_asc' | 'status_desc'
 
-function featureMatchesQuery(f: Feature, q: string) {
+/** Match a feature against the search box. Searches by display index
+ *  (e.g. `2`, the user-visible position; the uuid is never shown), title
+ *  and description. */
+function featureMatchesQuery(f: Feature, displayIndex: number, q: string) {
   if (!q) return true
   const s = q.trim().toLowerCase()
   if (!s) return true
-  const idStr = String(f.id || '')
   return (
-    idStr.includes(s) ||
+    String(displayIndex).includes(s) ||
     (f.title || '').toLowerCase().includes(s) ||
     (f.description || '').toLowerCase().includes(s)
   )
@@ -141,7 +147,7 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
           : statusFilter === 'not-done'
             ? f.status !== '+' || f.rejection
             : f.status === statusFilter
-      return byStatus && featureMatchesQuery(f, query)
+      return byStatus && featureMatchesQuery(f, getFeatureIndex(story, f.id), query)
     })
   }, [featuresSorted, statusFilter, query])
 

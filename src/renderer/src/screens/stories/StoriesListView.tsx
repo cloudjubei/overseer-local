@@ -1,14 +1,18 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigator } from '@renderer/navigation/Navigator'
 import BoardView from './BoardView'
-import { SegmentedControl } from 'thefactory-ui/web'
 import { useActiveProject, useProjectContext } from '@renderer/contexts/ProjectContext'
 import DependencyBullet from '@renderer/components/stories/DependencyBullet'
-import StatusControl, {
-  STATUS_LABELS,
+import {
+  RunAgentButton,
+  SegmentedControl,
+  Skeleton,
+  SkeletonText,
+  StatusControl,
   StatusPicker,
+  STATUS_LABELS,
   statusKey,
-} from '@renderer/components/stories/StatusControl'
+} from 'thefactory-ui/web'
 import { useAgents } from '@renderer/contexts/AgentsContext'
 import { Status, Story } from 'thefactory-tools'
 import ExclamationChip from '@renderer/components/stories/ExclamationChip'
@@ -22,10 +26,8 @@ import {
 import { getChatContextKey } from 'thefactory-tools/utils'
 import UsageModal from '@renderer/components/chat/UsageModal'
 import AgentRunBullet from '@renderer/components/agents/AgentRunBullet'
-import RunAgentButton from '@renderer/components/stories/RunAgentButton'
 import { RichText } from '@renderer/components/ui/RichText'
 import ModelChip from '@renderer/components/agents/ModelChip'
-import { Skeleton, SkeletonText } from 'thefactory-ui/web'
 import { useAppSettings } from '@renderer/contexts/AppSettingsContext'
 import { useStories } from '@renderer/contexts/StoriesContext'
 import { ChatSidebarPanel } from '@renderer/components/chat'
@@ -38,19 +40,25 @@ function countFeatures(story: Story) {
   return { done, total }
 }
 
-function matchesQuery(story: Story, q: string) {
+/** Match a story against the search box. Searches by display index (e.g.
+ *  `5`, since the uuid is never user-visible), title and description. */
+function matchesQuery(story: Story, displayIndex: number | undefined, q: string) {
   if (!q) return true
   const s = q.trim().toLowerCase()
   if (!s) return true
-  const idStr = String(story.id || '')
+  const idxStr = displayIndex != null ? String(displayIndex) : ''
   return (
-    idStr.includes(s) ||
-    story.title?.toLowerCase().includes(s) ||
-    story.description?.toLowerCase().includes(s)
+    idxStr.includes(s) ||
+    !!story.title?.toLowerCase().includes(s) ||
+    !!story.description?.toLowerCase().includes(s)
   )
 }
 
-function filterStories(stories: Story[], { query, status }: { query: string; status: string }) {
+function filterStories(
+  stories: Story[],
+  indexOf: (id: string) => number | undefined,
+  { query, status }: { query: string; status: string },
+) {
   return stories.filter((t) => {
     const hasRejectedFeatures = Array.isArray(t.features) && t.features.some((f) => !!f.rejection)
     const byStatus =
@@ -59,7 +67,7 @@ function filterStories(stories: Story[], { query, status }: { query: string; sta
         : status === 'not-done'
           ? t.status !== '+' || hasRejectedFeatures
           : t.status === (status as Status)
-    return byStatus && matchesQuery(t, query)
+    return byStatus && matchesQuery(t, indexOf(t.id), query)
   })
 }
 
@@ -166,8 +174,8 @@ export default function StoriesListView() {
   }, [allStories, sortBy, project, projectId, getStoryDisplayIndex])
 
   const filtered = useMemo(
-    () => filterStories(sorted, { query, status: statusFilter }),
-    [sorted, query, statusFilter],
+    () => filterStories(sorted, getStoryDisplayIndex, { query, status: statusFilter }),
+    [sorted, getStoryDisplayIndex, query, statusFilter],
   )
 
   const isSearchFiltered = query !== ''

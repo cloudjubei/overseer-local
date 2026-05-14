@@ -1,15 +1,15 @@
 import React from 'react'
 import { useNavigator } from '../../navigation/Navigator'
-import { Tooltip } from 'thefactory-ui/web'
-import { IconXCircle } from 'thefactory-ui/web/icons'
+import { DependencyChip, StatusControl } from 'thefactory-ui/web'
 import { StoryCard } from './StoryCard'
 import { FeatureCard } from './FeatureCard'
-import StatusControl from './StatusControl'
 import { useStories } from '../../contexts/StoriesContext'
 
 export interface DependencyBulletProps {
   className?: string
-  dependency: string // format: "storyId" or "featureId" (it's of the format {storyId}.{featureIndex})
+  /** `"storyUuid"` or `"storyUuid.featureUuid"` (or the display-index form
+   *  `"3"` / `"3.2"`, which the resolver normalises). */
+  dependency: string
   isOutbound?: boolean
   notFoundDependencyDisplay?: string
   onRemove?: () => void
@@ -31,12 +31,11 @@ const DependencyBullet: React.FC<DependencyBulletProps> = ({
 
   const resolved = resolveDependency(dependency)
   const isError = 'code' in resolved
-  const isFeatureDependency = !isError && resolved.kind === 'feature'
   const display = isError ? (notFoundDependencyDisplay ?? dependency) : resolved.display
 
-  let content: React.ReactNode
+  let tooltipContent: React.ReactNode
   if (isError) {
-    content = (
+    tooltipContent = (
       <div className="summary-card p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-md max-w-xs">
         <div className="text-xs text-gray-500 mb-1">Not found</div>
         <h3 className="text-lg font-semibold mb-2">Not found</h3>
@@ -47,32 +46,19 @@ const DependencyBullet: React.FC<DependencyBulletProps> = ({
       </div>
     )
   } else if (resolved.kind === 'story') {
-    const { storyId } = resolved
-    content = (
-      <StoryCard
-        storyId={storyId}
-        className="max-w-xs !border-0 shadow-none !bg-transparent dark:!bg-transparent"
-      />
-    )
+    tooltipContent = <StoryCard storyId={resolved.storyId} className="max-w-xs" />
   } else {
-    const { storyId, featureId } = resolved
-    content = (
+    tooltipContent = (
       <FeatureCard
-        storyId={storyId}
-        featureId={featureId}
-        className="max-w-xs !border-0 shadow-none !bg-transparent dark:!bg-transparent"
+        storyId={resolved.storyId}
+        featureId={resolved.featureId}
+        className="max-w-xs"
       />
     )
   }
 
   const handleClick = () => {
-    if (!interactive) return
-    if (onRemove) {
-      onRemove()
-      return
-    }
     if (isError) return
-
     const targetStoryId = resolved.kind === 'story' ? resolved.id : resolved.storyId
     const featureId = resolved.kind === 'feature' ? resolved.featureId : undefined
 
@@ -98,39 +84,19 @@ const DependencyBullet: React.FC<DependencyBulletProps> = ({
     }
   }
 
-  const spanProps: React.HTMLAttributes<HTMLSpanElement> = {}
-  if (interactive) {
-    spanProps.onClick = (e) => {
-      e.preventDefault()
-      handleClick()
-    }
-    spanProps.role = 'button'
-    spanProps.tabIndex = 0
-    spanProps.onKeyDown = (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault()
-        handleClick()
-      }
-    }
-  }
-
   return (
-    <Tooltip
-      placement="bottom"
-      allowedPlacements={['bottom', 'top', 'right', 'left']}
-      content={content}
-      zIndex={2000}
-      disabled={disableHoverInfo}
-    >
-      <span
-        className={`${className} chip  ${isError ? '' : isFeatureDependency ? 'feature' : 'story'} ${isError ? 'chip--missing' : isOutbound ? 'chip--blocks' : 'chip--ok'}`}
-        title={`${display}${isOutbound ? ' (requires this)' : ''}`}
-        {...spanProps}
-      >
-        #{display}
-        {onRemove && <IconXCircle className="w-3.5 h-3" />}
-      </span>
-    </Tooltip>
+    <DependencyChip
+      className={className}
+      display={display}
+      kind={isError ? 'missing' : resolved.kind}
+      variant={isError ? 'missing' : isOutbound ? 'blocks' : 'ok'}
+      tooltip={tooltipContent}
+      disableHoverInfo={disableHoverInfo}
+      interactive={interactive}
+      onClick={handleClick}
+      onRemove={onRemove}
+      title={`${display}${isOutbound ? ' (requires this)' : ''}`}
+    />
   )
 }
 

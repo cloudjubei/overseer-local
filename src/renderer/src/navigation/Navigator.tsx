@@ -42,6 +42,7 @@ export type ModalRoute =
 export type NavigatorState = {
   currentView: NavigationView
   storiesRoute: StoriesRoute
+  settingsTab?: string
 }
 export type ModalState = {
   modal: ModalRoute | null
@@ -51,7 +52,7 @@ export type NavigatorApi = NavigatorState &
   ModalState & {
     openModal: (m: ModalRoute) => void
     closeModal: () => void
-    navigateView: (v: NavigationView) => void
+    navigateView: (v: NavigationView, opts?: { settingsTab?: string }) => void
     navigateStoryDetails: (
       storyId: string,
       highlightFeatureId?: string,
@@ -89,7 +90,8 @@ function viewPrefixToView(prefix: string): NavigationView {
 function parseHash(hashRaw: string): NavigatorState {
   const raw = (hashRaw || '').replace(/^#/, '')
 
-  const [prefixRaw] = raw.split('/')
+  const [pathPart, queryPart] = raw.split('?')
+  const [prefixRaw] = pathPart.split('/')
   const prefix = prefixRaw || 'home'
 
   const currentView: NavigationView = viewPrefixToView(prefix)
@@ -99,16 +101,27 @@ function parseHash(hashRaw: string): NavigatorState {
   if (
     (m =
       /^story\/([0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12})(?:\/highlight-story)?(?:\/highlight-feature\/([0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}))?/.exec(
-        raw,
+        pathPart,
       ))
   ) {
     const storyId = m[1]
     const highlightFeatureId = m[2] || undefined
-    const highlightStory = raw.includes('/highlight-story') ? true : undefined
+    const highlightStory = pathPart.includes('/highlight-story') ? true : undefined
     storiesRoute = { name: 'details', storyId, highlightFeatureId, highlightStory }
   }
 
-  return { currentView, storiesRoute }
+  let settingsTab: string | undefined
+  if (currentView === 'Settings' && queryPart) {
+    try {
+      const params = new URLSearchParams(queryPart)
+      const t = params.get('tab')
+      if (t) settingsTab = t
+    } catch {
+      // ignore malformed query
+    }
+  }
+
+  return { currentView, storiesRoute, settingsTab }
 }
 
 const NavigatorContext = createContext<NavigatorApi | null>(null)
@@ -135,40 +148,45 @@ export function NavigatorProvider({ children }: { children: React.ReactNode }) {
     setModal({ modal: null })
   }, [])
 
-  const navigateView = useCallback((v: NavigationView) => {
-    switch (v) {
-      case 'Home':
-        window.location.hash = '#home'
-        break
-      case 'Files':
-        window.location.hash = '#files'
-        break
-      case 'Chat':
-        window.location.hash = '#chats'
-        break
-      case 'Settings':
-        window.location.hash = '#settings'
-        break
-      case 'Agents':
-        window.location.hash = '#agents'
-        break
-      case 'LiveData':
-        window.location.hash = '#live-data'
-        break
-      case 'ProjectTimeline':
-        window.location.hash = '#project-timeline'
-        break
-      case 'Tests':
-        window.location.hash = '#tests'
-        break
-      case 'Tools':
-        window.location.hash = '#tools'
-        break
-      case 'Git':
-        window.location.hash = '#git'
-        break
-    }
-  }, [])
+  const navigateView = useCallback(
+    (v: NavigationView, opts?: { settingsTab?: string }) => {
+      switch (v) {
+        case 'Home':
+          window.location.hash = '#home'
+          break
+        case 'Files':
+          window.location.hash = '#files'
+          break
+        case 'Chat':
+          window.location.hash = '#chats'
+          break
+        case 'Settings':
+          window.location.hash = opts?.settingsTab
+            ? `#settings?tab=${encodeURIComponent(opts.settingsTab)}`
+            : '#settings'
+          break
+        case 'Agents':
+          window.location.hash = '#agents'
+          break
+        case 'LiveData':
+          window.location.hash = '#live-data'
+          break
+        case 'ProjectTimeline':
+          window.location.hash = '#project-timeline'
+          break
+        case 'Tests':
+          window.location.hash = '#tests'
+          break
+        case 'Tools':
+          window.location.hash = '#tools'
+          break
+        case 'Git':
+          window.location.hash = '#git'
+          break
+      }
+    },
+    [],
+  )
 
   const navigateStoryDetails = useCallback(
     (storyId: string, highlightFeatureId?: string, highlightStory: boolean = false) => {

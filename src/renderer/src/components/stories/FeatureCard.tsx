@@ -1,14 +1,12 @@
 import { useMemo } from 'react'
 import type { Feature, ProjectSpec, Status, Story } from 'thefactory-tools'
-import { Markdown } from 'thefactory-ui/web'
-import StatusControl from './StatusControl'
+import { Markdown, RunAgentButton, StatusControl } from 'thefactory-ui/web'
 import DependencyBullet from './DependencyBullet'
 import { useAgents } from '@renderer/contexts/AgentsContext'
 import { useNavigator } from '@renderer/navigation/Navigator'
 import { useActiveProject } from '@renderer/contexts/ProjectContext'
 import { useStories } from '@renderer/contexts/StoriesContext'
 import AgentRunBullet from '../agents/AgentRunBullet'
-import RunAgentButton from './RunAgentButton'
 
 export function FeatureCard({
   storyId,

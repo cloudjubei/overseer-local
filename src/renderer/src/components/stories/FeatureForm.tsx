@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import type { Status } from 'thefactory-tools'
-import StatusControl from './StatusControl'
+import { StatusControl } from 'thefactory-ui/web'
 import { DependencySelector } from './DependencySelector'
 import DependencyBullet from './DependencyBullet'
 import { FileSelector } from '@renderer/components/ui/FileSelector'
@@ -147,7 +147,10 @@ export default function FeatureForm({
     const payload: FeatureFormValues = {
       title: title.trim(),
       description: description?.trim() || '',
-      rejection: rejection?.trim() || undefined,
+      // Send the empty string when the field is cleared (not `undefined`);
+      // otherwise the JSON wire body drops the key and the backend reads it
+      // as "leave unchanged" — rejection would never be removable.
+      rejection: rejection?.trim() ?? '',
       status,
       blockers,
       context,

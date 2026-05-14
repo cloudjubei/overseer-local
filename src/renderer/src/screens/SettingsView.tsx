@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { CollapsibleSidebar } from 'thefactory-ui/web'
+import { useNavigator } from '../navigation/Navigator'
 
 // Subviews
 import VisualSettings from './settings/visual/VisualSettings'
@@ -53,8 +54,23 @@ const CATEGORIES = [
 
 type CategoryId = (typeof CATEGORIES)[number]['id']
 
+function isCategory(value: string | undefined): value is CategoryId {
+  return (
+    !!value && (CATEGORIES as ReadonlyArray<{ id: string }>).some((c) => c.id === value)
+  )
+}
+
 export default function SettingsView() {
-  const [activeCategory, setActiveCategory] = useState<CategoryId>('visual')
+  const { settingsTab } = useNavigator()
+  const [activeCategory, setActiveCategory] = useState<CategoryId>(() =>
+    isCategory(settingsTab) ? settingsTab : 'visual',
+  )
+
+  useEffect(() => {
+    if (isCategory(settingsTab) && settingsTab !== activeCategory) {
+      setActiveCategory(settingsTab)
+    }
+  }, [settingsTab, activeCategory])
 
   return (
     <CollapsibleSidebar
