@@ -1,8 +1,15 @@
 import React, { forwardRef, useImperativeHandle } from 'react'
 import { gitService } from '@renderer/services/gitService'
 import { filesService } from '@renderer/services/filesService'
-import { DiffViewer, ResizeHandle, Spinner, Tooltip, type IntraMode } from 'thefactory-ui/web'
-import GitFileRow, { LocalFileEntry } from './common/GitFileRow'
+import {
+  DiffViewer,
+  GitFileRow,
+  ResizeHandle,
+  Spinner,
+  Tooltip,
+  type GitLocalFileEntry as LocalFileEntry,
+  type IntraMode,
+} from 'thefactory-ui/web'
 import { useLocalStorage } from '@renderer/hooks/useLocalStorage'
 
 export type LocalStatus = {

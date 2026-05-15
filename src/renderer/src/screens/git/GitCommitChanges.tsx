@@ -1,10 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { gitService } from '@renderer/services/gitService'
 import { GitDiffSummary } from 'thefactory-tools'
-import { DiffViewer, PathDisplay, ResizeHandle, Spinner } from 'thefactory-ui/web'
+import {
+  DiffViewer,
+  GitFileStatusIcon,
+  PathDisplay,
+  ResizeHandle,
+  Spinner,
+  getFilePatch,
+} from 'thefactory-ui/web'
 import { useLocalStorage } from '../../hooks/useLocalStorage'
-import GitFileStatusIcon from './common/GitFileStatusIcon'
-import { getFilePatch } from './common/gitUtils'
 
 export function GitCommitChanges({
   projectId,

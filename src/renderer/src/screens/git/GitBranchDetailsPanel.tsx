@@ -1,10 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react'
-import { GitUnifiedBranch } from 'thefactory-tools'
-import { ResizeHandle, Spinner } from 'thefactory-ui/web'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { GitLogCommit, GitUnifiedBranch } from 'thefactory-tools'
+import { GitCommitGraph, ResizeHandle, Spinner } from 'thefactory-ui/web'
 import { GitLocalChanges } from './GitLocalChanges'
-import { GitCommitGraph } from './commitGraph/GitCommitGraph'
 import { GitCommitChanges } from './GitCommitChanges'
 import { useLocalStorage } from '../../hooks/useLocalStorage'
+import { gitService } from '../../services/gitService'
 
 export function GitBranchDetailsPanel({
   projectId,
@@ -35,6 +35,42 @@ export function GitBranchDetailsPanel({
   onLocalStatusChange?: (count: number) => void
 }) {
   const [selectedCommitSha, setSelectedCommitSha] = useState<string | undefined>(undefined)
+
+  // Commit log fetch (moved out of the lifted GitCommitGraph so it stays
+  // stateless and shareable with web).
+  const [commits, setCommits] = useState<GitLogCommit[]>([])
+  const [graphLoading, setGraphLoading] = useState(false)
+  const [graphError, setGraphError] = useState<string | undefined>(undefined)
+  useEffect(() => {
+    if (!projectId) {
+      setCommits([])
+      return
+    }
+    let mounted = true
+    setGraphLoading(true)
+    setGraphError(undefined)
+    gitService
+      .getGitLog(projectId, { all: true, maxCount: 300 })
+      .then((res) => {
+        if (!mounted) return
+        const isStash = (c: GitLogCommit) =>
+          c.refs.some((r) => r.name.includes('stash')) ||
+          c.subject.startsWith('WIP on ') ||
+          c.subject.startsWith('On ') ||
+          c.subject.startsWith('index on ')
+        setCommits(res.commits.filter((c) => !isStash(c)))
+      })
+      .catch((e) => {
+        if (mounted) setGraphError(e?.message || 'Failed to load graph')
+      })
+      .finally(() => {
+        if (mounted) setGraphLoading(false)
+      })
+    return () => {
+      mounted = false
+    }
+  }, [projectId])
+  const graphCommits = useMemo(() => commits, [commits])
 
   const isDirty = changedCount > 0
 
@@ -114,18 +150,16 @@ export function GitBranchDetailsPanel({
           </div>
         ) : selectedBranch ? (
           <div className="flex flex-col min-h-0 h-full w-full">
-            {/* Top: commit graph */}
+            {/* Top: commit graph (no chrome header — the graph's column row
+                already labels each column) */}
             <div
               className="bg-neutral-50 dark:bg-neutral-900/40 overflow-hidden flex flex-col"
               style={{ height: topHeightPx }}
             >
-              <div className="px-3 py-2 border-b border-neutral-200 dark:border-neutral-800 flex items-center bg-white dark:bg-neutral-900 flex-shrink-0">
-                <span className="text-xs font-semibold text-neutral-700 dark:text-neutral-200 uppercase tracking-wide">
-                  Commit graph
-                </span>
-              </div>
               <GitCommitGraph
-                projectId={projectId}
+                commits={graphCommits}
+                loading={graphLoading}
+                error={graphError}
                 uncommittedChanges={isDirty}
                 selectedCommitSha={selectedCommitSha}
                 scrollToSha={scrollToSha}

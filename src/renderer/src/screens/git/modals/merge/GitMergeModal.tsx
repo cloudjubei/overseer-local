@@ -20,7 +20,7 @@ import { factoryTestsService } from '@renderer/services/factoryTestsService'
 import { gitService } from '@renderer/services/gitService'
 import { useGit } from '@renderer/contexts/GitContext'
 import MergeConflictResolver from '@renderer/screens/git/mergeConflict/MergeConflictResolver'
-import GitFileDiffItem from '../../common/GitFileDiffItem'
+import { GitFileDiffItem } from 'thefactory-ui/web'
 
 export type GitMergeModalProps = {
   projectId: string

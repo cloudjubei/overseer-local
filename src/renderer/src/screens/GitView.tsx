@@ -4,13 +4,34 @@ import { GitConflictEntry, GitUnifiedBranch } from 'thefactory-tools'
 import { useProjectContext } from '../contexts/ProjectContext'
 import { useGit } from '../contexts/GitContext'
 import { useNavigator } from '../navigation/Navigator'
+import { Button, GitSidebar } from 'thefactory-ui/web'
+import { IconChevron } from 'thefactory-ui/web/icons'
 import GitCommitModal from './git/modals/GitCommitModal'
 import GitMergeModal from './git/modals/merge/GitMergeModal'
 import MergeConflictResolver from './git/mergeConflict/MergeConflictResolver'
-import { GitSidebar } from './git/sidebar/GitSidebar'
 import { GitBranchDetailsPanel } from './git/GitBranchDetailsPanel'
 import { GitActionsPanel } from './git/actions/GitActionsPanel'
 import { GitCheckoutRemoteModal } from './git/modals/GitCheckoutRemoteModal'
+
+const SIDEBAR_COLLAPSED_KEY = 'GitView.sidebarCollapsed'
+
+function readSidebarCollapsed(): boolean {
+  if (typeof window === 'undefined') return false
+  try {
+    return window.localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+
+function persistSidebarCollapsed(v: boolean) {
+  if (typeof window === 'undefined') return
+  try {
+    window.localStorage.setItem(SIDEBAR_COLLAPSED_KEY, v ? '1' : '0')
+  } catch {
+    // best-effort
+  }
+}
 
 function dedupeByName(list: GitUnifiedBranch[]): GitUnifiedBranch[] {
   const m = new Map<string, GitUnifiedBranch>()
@@ -281,24 +302,57 @@ export default function GitView() {
 
   void nav // suppress unused-var lint
 
+  const [sidebarCollapsed, setSidebarCollapsed] = React.useState<boolean>(() =>
+    readSidebarCollapsed(),
+  )
+  React.useEffect(() => {
+    persistSidebarCollapsed(sidebarCollapsed)
+  }, [sidebarCollapsed])
+
   return (
     <div className="flex h-full min-h-0">
-      <GitSidebar
-        title={title}
-        projectId={projectId}
-        loading={loading}
-        error={error}
-        localBranches={localBranches}
-        remoteBranches={remoteBranches}
-        stashes={stashes}
-        current={current}
-        selectedBranchName={selectedBranchName}
-        selectedStashRef={selectedStashRef}
-        isEqualToCurrent={isEqualToCurrent}
-        onSelectBranch={onSelectBranch}
-        onDoubleClickBranch={switchToBranch}
-        onSelectStash={onSelectStash}
-      />
+      {/* Collapsible left aside — matches the Files/Tools pattern (web + desktop) */}
+      <aside
+        className="shrink-0 flex flex-col border-r border-neutral-200 dark:border-neutral-800 overflow-hidden transition-[width]"
+        style={{
+          width: sidebarCollapsed ? 48 : undefined,
+          minWidth: sidebarCollapsed ? 48 : 200,
+        }}
+      >
+        <div
+          className={`flex items-center gap-2 px-2 py-2 shrink-0 ${
+            sidebarCollapsed ? 'justify-center' : 'justify-end'
+          }`}
+        >
+          <Button
+            variant="secondary"
+            size="icon"
+            onClick={() => setSidebarCollapsed((v) => !v)}
+            aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            <IconChevron
+              className="w-4 h-4"
+              style={{ transform: sidebarCollapsed ? undefined : 'rotate(180deg)' }}
+            />
+          </Button>
+        </div>
+        {!sidebarCollapsed && (
+          <GitSidebar
+            projectId={projectId}
+            loading={loading}
+            error={error}
+            localBranches={localBranches}
+            remoteBranches={remoteBranches}
+            stashes={stashes}
+            current={current}
+            selectedBranchName={selectedBranchName}
+            selectedStashRef={selectedStashRef}
+            onSelectBranch={onSelectBranch}
+            onDoubleClickBranch={switchToBranch}
+            onSelectStash={onSelectStash}
+          />
+        )}
+      </aside>
 
       <GitBranchDetailsPanel
         projectId={projectId}
