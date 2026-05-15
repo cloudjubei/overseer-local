@@ -8,14 +8,14 @@ export type TestsCatalogItem = { value: string; label: string }
 export type TestsContextValue = {
   isRunningTests: boolean
   isRunningCoverage: boolean
-  isRunningE2ETests: boolean
+  isRunningCustomTests: boolean
 
   results?: TestsResult
-  resultsE2E?: TestsResult
+  resultsCustom?: TestsResult
   coverage?: CoverageResult
 
   testsError: string | null
-  testsErrorE2E: string | null
+  testsErrorCustom: string | null
   coverageError: string | null
 
   isLoadingCatalog: boolean
@@ -23,10 +23,10 @@ export type TestsContextValue = {
   refreshTestsCatalog: () => Promise<void>
 
   runAllTests: () => Promise<void>
-  runTestsE2E: (configPath?: string) => Promise<void>
+  runTestsCustom: (configPath?: string, env?: Record<string, string>) => Promise<void>
   runAllCoverages: () => Promise<void>
   resetTests: () => void
-  resetTestsE2E: () => void
+  resetTestsCustom: () => void
   resetCoverage: () => void
 }
 
@@ -36,16 +36,16 @@ export function TestsProvider({ children }: { children: React.ReactNode }) {
   const { projectId } = useActiveProject()
 
   const [isRunningTests, setIsRunningTests] = useState(false)
-  const [isRunningE2ETests, setIsRunningE2ETests] = useState(false)
+  const [isRunningCustomTests, setIsRunningCustomTests] = useState(false)
   const [isRunningCoverage, setIsRunningCoverage] = useState(false)
   const [isLoadingCatalog, setIsLoadingCatalog] = useState(false)
 
   const [results, setResults] = useState<TestsResult | undefined>(undefined)
-  const [resultsE2E, setResultsE2E] = useState<TestsResult | undefined>(undefined)
+  const [resultsCustom, setResultsCustom] = useState<TestsResult | undefined>(undefined)
   const [coverage, setCoverage] = useState<CoverageResult | undefined>(undefined)
 
   const [testsError, setTestsError] = useState<string | null>(null)
-  const [testsErrorE2E, setTestsErrorE2E] = useState<string | null>(null)
+  const [testsErrorCustom, setTestsErrorCustom] = useState<string | null>(null)
   const [coverageError, setCoverageError] = useState<string | null>(null)
 
   const [testsCatalog, setTestsCatalog] = useState<TestsCatalogItem[]>([])
@@ -54,19 +54,17 @@ export function TestsProvider({ children }: { children: React.ReactNode }) {
     let cancelled = false
     async function load() {
       if (!projectId) return
-      try {
-        const [lastRes, lastCov, lastE2ERes] = await Promise.all([
-          factoryTestsService.getLastResult(projectId),
-          factoryTestsService.getLastCoverage(projectId),
-          factoryTestsService.getLastResultE2E(projectId),
-        ])
-        if (cancelled) return
-        setResults(lastRes)
-        setCoverage(lastCov)
-        setResultsE2E(lastE2ERes)
-      } catch (_) {
-        // ignore preload errors on initial load
-      }
+      // Each cached endpoint is independent — a single failure shouldn't
+      // wipe out the others (matches the web parity).
+      const [lastRes, lastCov, lastCustomRes] = await Promise.allSettled([
+        factoryTestsService.getLastResult(projectId),
+        factoryTestsService.getLastCoverage(projectId),
+        factoryTestsService.getLastResultCustom(projectId),
+      ])
+      if (cancelled) return
+      if (lastRes.status === 'fulfilled') setResults(lastRes.value)
+      if (lastCov.status === 'fulfilled') setCoverage(lastCov.value)
+      if (lastCustomRes.status === 'fulfilled') setResultsCustom(lastCustomRes.value)
     }
     load()
     return () => {
@@ -115,9 +113,9 @@ export function TestsProvider({ children }: { children: React.ReactNode }) {
     setTestsError(null)
   }, [])
 
-  const resetTestsE2E = useCallback(() => {
-    setResultsE2E(undefined)
-    setTestsErrorE2E(null)
+  const resetTestsCustom = useCallback(() => {
+    setResultsCustom(undefined)
+    setTestsErrorCustom(null)
   }, [])
 
   const resetCoverage = useCallback(() => {
@@ -140,19 +138,19 @@ export function TestsProvider({ children }: { children: React.ReactNode }) {
     }
   }, [projectId])
 
-  const runTestsE2E = useCallback(
-    async (configPath?: string) => {
+  const runTestsCustom = useCallback(
+    async (configPath?: string, env?: Record<string, string>) => {
       if (!projectId) return
-      setIsRunningE2ETests(true)
-      setTestsErrorE2E(null)
-      setResultsE2E(undefined)
+      setIsRunningCustomTests(true)
+      setTestsErrorCustom(null)
+      setResultsCustom(undefined)
       try {
-        const res = await factoryTestsService.runTestsE2E(projectId, configPath)
-        setResultsE2E(res)
+        const res = await factoryTestsService.runTestsCustom(projectId, configPath, env)
+        setResultsCustom(res)
       } catch (e: any) {
-        setTestsErrorE2E(e?.message || String(e))
+        setTestsErrorCustom(e?.message || String(e))
       } finally {
-        setIsRunningE2ETests(false)
+        setIsRunningCustomTests(false)
       }
     },
     [projectId],
@@ -177,41 +175,41 @@ export function TestsProvider({ children }: { children: React.ReactNode }) {
     () => ({
       isRunningTests,
       isRunningCoverage,
-      isRunningE2ETests,
+      isRunningCustomTests,
       isLoadingCatalog,
       results,
-      resultsE2E,
+      resultsCustom,
       coverage,
       testsError,
-      testsErrorE2E,
+      testsErrorCustom,
       coverageError,
       testsCatalog,
       refreshTestsCatalog,
       runAllTests,
-      runTestsE2E,
+      runTestsCustom,
       runAllCoverages,
       resetTests,
-      resetTestsE2E,
+      resetTestsCustom,
       resetCoverage,
     }),
     [
       isRunningTests,
       isRunningCoverage,
-      isRunningE2ETests,
+      isRunningCustomTests,
       isLoadingCatalog,
       results,
-      resultsE2E,
+      resultsCustom,
       coverage,
       testsError,
-      testsErrorE2E,
+      testsErrorCustom,
       coverageError,
       testsCatalog,
       refreshTestsCatalog,
       runAllTests,
-      runTestsE2E,
+      runTestsCustom,
       runAllCoverages,
       resetTests,
-      resetTestsE2E,
+      resetTestsCustom,
       resetCoverage,
     ],
   )

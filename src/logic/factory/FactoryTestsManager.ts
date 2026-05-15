@@ -34,16 +34,19 @@ export default class FactoryTestsManager extends BaseManager {
       this.runTests(projectId, paths)
     handlers[IPC_HANDLER_KEYS.FACTORY_TESTS_RUN_ALL_TESTS] = async ({ projectId }) =>
       this.runAllTests(projectId)
-    handlers[IPC_HANDLER_KEYS.FACTORY_TESTS_RUN_TESTS_E2E] = async ({ projectId, configPath }) =>
-      this.runTestsE2E(projectId, configPath)
+    handlers[IPC_HANDLER_KEYS.FACTORY_TESTS_RUN_TESTS_CUSTOM] = async ({
+      projectId,
+      configPath,
+      env,
+    }) => this.runTestsCustom(projectId, configPath, env)
     handlers[IPC_HANDLER_KEYS.FACTORY_TESTS_RUN_COVERAGES] = async ({ projectId, paths }) =>
       this.runTestsCoverage(projectId, paths)
     handlers[IPC_HANDLER_KEYS.FACTORY_TESTS_RUN_ALL_COVERAGES] = async ({ projectId }) =>
       this.runAllTestsCoverage(projectId)
     handlers[IPC_HANDLER_KEYS.FACTORY_TESTS_GET_LAST_RESULT] = async ({ projectId }) =>
       this.getLastResult(projectId)
-    handlers[IPC_HANDLER_KEYS.FACTORY_TESTS_GET_LAST_RESULT_E2E] = async ({ projectId }) =>
-      this.getLastResultE2E(projectId)
+    handlers[IPC_HANDLER_KEYS.FACTORY_TESTS_GET_LAST_RESULT_CUSTOM] = async ({ projectId }) =>
+      this.getLastResultCustom(projectId)
     handlers[IPC_HANDLER_KEYS.FACTORY_TESTS_GET_LAST_COVERAGE] = async ({ projectId }) =>
       this.getLastCoverage(projectId)
 
@@ -63,9 +66,13 @@ export default class FactoryTestsManager extends BaseManager {
     const tools = await this.__getTools(projectId)
     return await tools?.runAllTests()
   }
-  async runTestsE2E(projectId: string, configPath?: string): Promise<TestsResult | undefined> {
+  async runTestsCustom(
+    projectId: string,
+    configPath?: string,
+    env?: Record<string, string>,
+  ): Promise<TestsResult | undefined> {
     const tools = await this.__getTools(projectId)
-    return await tools?.runAllTests({ configPath })
+    return await tools?.runAllTests({ configPath, env })
   }
 
   async runTestsCoverage(projectId: string, paths: string[]): Promise<CoverageResult | undefined> {
@@ -82,9 +89,13 @@ export default class FactoryTestsManager extends BaseManager {
     return await tools?.getLastTestsRun()
   }
 
-  async getLastResultE2E(projectId: string) {
+  async getLastResultCustom(projectId: string) {
+    // Custom runs are persisted in a separate cache by thefactory-tools
+    // (whenever `runAllTests` is invoked with a `configPath`). Reading from
+    // the regular cache here would return the latest *standard* run instead
+    // of the latest custom one.
     const tools = await this.__getTools(projectId)
-    return await tools?.getLastTestsRun()
+    return await tools?.getLastTestsCustom()
   }
 
   async getLastCoverage(projectId: string) {

@@ -299,16 +299,20 @@ const FACTORY_TESTS_API = {
     ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TESTS_RUN_TESTS, { projectId, paths }),
   runAllTests: (projectId) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TESTS_RUN_ALL_TESTS, { projectId }),
-  runTestsE2E: (projectId, configPath) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TESTS_RUN_TESTS_E2E, { projectId, configPath }),
+  runTestsCustom: (projectId, configPath, env) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TESTS_RUN_TESTS_CUSTOM, {
+      projectId,
+      configPath,
+      env,
+    }),
   runCoverages: (projectId, paths) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TESTS_RUN_COVERAGES, { projectId, paths }),
   runAllCoverages: (projectId) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TESTS_RUN_ALL_COVERAGES, { projectId }),
   getLastResult: (projectId) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TESTS_GET_LAST_RESULT, { projectId }),
-  getLastResultE2E: (projectId) =>
-    ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TESTS_GET_LAST_RESULT_E2E, { projectId }),
+  getLastResultCustom: (projectId) =>
+    ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TESTS_GET_LAST_RESULT_CUSTOM, { projectId }),
   getLastCoverage: (projectId) =>
     ipcRenderer.invoke(IPC_HANDLER_KEYS.FACTORY_TESTS_GET_LAST_COVERAGE, { projectId }),
 }

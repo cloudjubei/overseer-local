@@ -5,11 +5,15 @@ export type FactoryTestsService = {
   listTests: (projectId: string) => Promise<FileMeta[]>
   runTests: (projectId: string, paths: string[]) => Promise<TestsResult | undefined>
   runAllTests: (projectId: string) => Promise<TestsResult | undefined>
-  runTestsE2E: (projectId: string, configPath?: string) => Promise<TestsResult | undefined>
+  runTestsCustom: (
+    projectId: string,
+    configPath?: string,
+    env?: Record<string, string>,
+  ) => Promise<TestsResult | undefined>
   runCoverages: (projectId: string, paths: string[]) => Promise<CoverageResult | undefined>
   runAllCoverages: (projectId: string) => Promise<CoverageResult | undefined>
   getLastResult: (projectId: string) => Promise<TestsResult | undefined>
-  getLastResultE2E: (projectId: string) => Promise<TestsResult | undefined>
+  getLastResultCustom: (projectId: string) => Promise<TestsResult | undefined>
   getLastCoverage: (projectId: string) => Promise<CoverageResult | undefined>
 }
 
