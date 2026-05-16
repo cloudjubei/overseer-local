@@ -1,16 +1,8 @@
 import React, { Dispatch, SetStateAction } from 'react'
 import type { ChatContext, CompletionSettings } from 'thefactory-tools'
-import { Button } from 'thefactory-ui/web'
+import { ChatHeader } from 'thefactory-ui/web'
 import ContextInfoButton from '../../ui/ContextInfoButton'
 import ModelChip from '../../agents/ModelChip'
-import {
-  IconCalculator,
-  IconChevron,
-  IconCode,
-  IconRefreshChat,
-  IconScroll,
-  IconSettings,
-} from 'thefactory-ui/web/icons'
 import ChatSettingsDropdown, { type ToolToggle } from '../ChatSettingsDropdown'
 
 export type ChatSidebarHeaderProps = {
@@ -40,13 +32,18 @@ export type ChatSidebarHeaderProps = {
   isRunningAgent: boolean
 }
 
+/**
+ * Desktop-side wrapper around the shared `ChatHeader` in `thefactory-ui`.
+ * Renders the same compact icon row as web, with desktop's ContextInfoButton
+ * + ModelChip + the local `ChatSettingsDropdown` (which still owns the
+ * deeper history-summarization / message-sanitization sub-controls).
+ */
 export function ChatSidebarHeader({
   context,
   chatContextTitle,
   isCollapsible,
   onCollapse,
   totalCostUSD,
-  formatUSD,
   setIsPromptModalOpen,
   setIsCostsModalOpen,
   setIsDynamicContextOpen,
@@ -67,76 +64,21 @@ export function ChatSidebarHeader({
   isRunningAgent,
 }: ChatSidebarHeaderProps) {
   return (
-    <header className="relative flex-shrink-0 px-3 py-2 border-b border-[var(--border-subtle)] bg-[var(--surface-raised)] flex items-center justify-between gap-2">
-      <div className="flex items-center gap-2 min-w-0">
-        {isCollapsible ? (
-          <button
-            type="button"
-            onClick={onCollapse}
-            className="btn-secondary btn-icon"
-            aria-label="Collapse chat sidebar"
-            title="Collapse chat sidebar"
-          >
-            <IconChevron className="w-4 h-4" style={{ transform: 'rotate(90deg)' }} />
-          </button>
-        ) : null}
-        <ContextInfoButton context={context} label={chatContextTitle} />
-
-        <button
-          onClick={() => setIsPromptModalOpen(true)}
-          className="btn-secondary btn-icon"
-          aria-label="View System Prompt"
-          title="View System Prompt"
-        >
-          <IconScroll className="w-4 h-4" />
-        </button>
-
-        <button
-          onClick={() => setIsCostsModalOpen(true)}
-          className="btn-secondary btn-icon"
-          aria-label="View usage costs"
-          title={totalCostUSD > 0 ? `Total cost: ${formatUSD(totalCostUSD)}` : 'Usage costs'}
-        >
-          <IconCalculator className="w-4 h-4" />
-        </button>
-
-        <button
-          onClick={() => setIsDynamicContextOpen(true)}
-          className="btn-secondary btn-icon"
-          aria-label="View dynamic context"
-          title="Dynamic context"
-        >
-          <IconCode className="w-4 h-4" />
-        </button>
-      </div>
-      <div className="flex items-center gap-2">
-        {!isRunningAgent && (
-          <>
-            <Button
-              className="btn-secondary w-[34px]"
-              variant="danger"
-              aria-label="Refresh chat"
-              title="Refresh chat"
-              onClick={() => restartChat(context)}
-            >
-              <IconRefreshChat className="w-4 h-4" />
-            </Button>
-            <ModelChip editable className="border-blue-500" mode="chat" />
-
-            <button
-              ref={settingsBtnRef}
-              onClick={() => setIsSettingsOpen((v) => !v)}
-              className="btn-secondary btn-icon"
-              aria-haspopup="menu"
-              aria-expanded={isSettingsOpen}
-              aria-label="Open Chat Settings"
-              title="Chat settings"
-            >
-              <IconSettings className="w-4 h-4" />
-            </button>
-          </>
-        )}
-
+    <ChatHeader
+      isCollapsible={isCollapsible}
+      onCollapse={onCollapse}
+      totalCostUSD={totalCostUSD}
+      contextInfoSlot={<ContextInfoButton context={context} label={chatContextTitle} />}
+      onOpenPrompt={() => setIsPromptModalOpen(true)}
+      onOpenCosts={() => setIsCostsModalOpen(true)}
+      onOpenDynamicContext={() => setIsDynamicContextOpen(true)}
+      onRefresh={() => restartChat(context)}
+      onOpenSettings={() => setIsSettingsOpen((v) => !v)}
+      settingsBtnRef={settingsBtnRef}
+      isSettingsOpen={isSettingsOpen}
+      isRunningAgent={isRunningAgent}
+      modelChip={<ModelChip editable className="border-blue-500" mode="chat" />}
+      settingsDropdown={
         <ChatSettingsDropdown
           isOpen={isSettingsOpen}
           onClose={() => setIsSettingsOpen(false)}
@@ -157,7 +99,7 @@ export function ChatSidebarHeader({
           onDeleteChat={handleDeleteChat}
           settingsBtnRef={settingsBtnRef}
         />
-      </div>
-    </header>
+      }
+    />
   )
 }

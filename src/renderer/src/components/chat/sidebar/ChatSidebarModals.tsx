@@ -1,5 +1,5 @@
-import React, { Dispatch, SetStateAction } from 'react'
-import { Modal } from 'thefactory-ui/web'
+import { Dispatch, SetStateAction } from 'react'
+import { SystemPromptViewerModal } from 'thefactory-ui/web'
 import UsageModal from '../UsageModal'
 import ChatDynamicContextModal from '../ChatDynamicContextModal'
 import type { ChatState } from '../../../contexts/chats/ChatsTypes'
@@ -29,16 +29,12 @@ export function ChatSidebarModals({
 }: ChatSidebarModalsProps) {
   return (
     <>
-      <Modal
+      <SystemPromptViewerModal
         isOpen={isPromptModalOpen}
         onClose={() => setIsPromptModalOpen(false)}
+        prompt={effectivePrompt}
         title="System Prompt"
-        contentClassName="!p-0"
-      >
-        <div className="p-4 bg-[var(--surface-base)] text-sm text-[var(--text-secondary)] max-h-[70vh] overflow-auto">
-          <pre className="whitespace-pre-wrap font-sans">{effectivePrompt}</pre>
-        </div>
-      </Modal>
+      />
 
       <UsageModal
         isOpen={isCostsModalOpen}
