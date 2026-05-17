@@ -1,4 +1,9 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
+import {
+  aggregateGroupBadgeState,
+  EMPTY_BADGE_STATE,
+  type BadgeState,
+} from 'thefactory-ui/headless'
 import { notificationsService } from '@renderer/services/notificationsService'
 import type {
   Notification,
@@ -18,22 +23,9 @@ import { useAgents } from '@renderer/contexts/AgentsContext'
 import { useGit } from '@renderer/contexts/GitContext'
 import { DEFAULT_PROJECT_SETTINGS } from './useProjectSettings'
 
-export type ProjectBadgeState = {
-  agent_runs: { running: number; unread: number }
-  chat_messages: { unread: number; thinking: boolean }
-  git_changes: {
-    /** Commits available to pull on the current branch (behind remote) */
-    incoming: number
-    /** Whether the working tree has uncommitted changes */
-    uncommitted: boolean
-  }
-}
+export type ProjectBadgeState = BadgeState
 
-const DEFAULT_PROJECT_BADGE_STATE: ProjectBadgeState = {
-  agent_runs: { running: 0, unread: 0 },
-  chat_messages: { unread: 0, thinking: false },
-  git_changes: { incoming: 0, uncommitted: false },
-}
+const DEFAULT_PROJECT_BADGE_STATE: ProjectBadgeState = EMPTY_BADGE_STATE
 
 export function useNotifications() {
   const { activeProject, projects } = useProjectContext()
@@ -185,25 +177,7 @@ export function useNotifications() {
       // SCOPE groups never aggregate from member projects — they only have their own
       // group-level chat badges which are not tracked here, so return empty state.
       if (g.type === 'SCOPE') return DEFAULT_PROJECT_BADGE_STATE
-
-      // MAIN groups aggregate badges from all member projects
-      const agg: ProjectBadgeState = {
-        agent_runs: { running: 0, unread: 0 },
-        chat_messages: { unread: 0, thinking: false },
-        git_changes: { incoming: 0, uncommitted: false },
-      }
-
-      for (const pid of g.projects || []) {
-        const st = badgeStateByProject[pid]
-        if (!st) continue
-        agg.agent_runs.running += st.agent_runs.running
-        agg.agent_runs.unread += st.agent_runs.unread
-        agg.chat_messages.unread += st.chat_messages.unread
-        agg.chat_messages.thinking = agg.chat_messages.thinking || st.chat_messages.thinking
-        agg.git_changes.incoming += st.git_changes.incoming
-        agg.git_changes.uncommitted = agg.git_changes.uncommitted || st.git_changes.uncommitted
-      }
-      return agg
+      return aggregateGroupBadgeState(g.projects ?? [], badgeStateByProject)
     },
     [groups, badgeStateByProject],
   )

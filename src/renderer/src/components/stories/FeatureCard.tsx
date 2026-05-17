@@ -1,6 +1,10 @@
 import { useMemo } from 'react'
 import type { Feature, ProjectSpec, Status, Story } from 'thefactory-tools'
-import { Markdown, RunAgentButton, StatusControl } from 'thefactory-ui/web'
+import {
+  FeatureCard as FeatureCardBase,
+  RunAgentButton,
+  type StoryStatus as UikitStatus,
+} from 'thefactory-ui/web'
 import DependencyBullet from './DependencyBullet'
 import { useAgents } from '@renderer/contexts/AgentsContext'
 import { useNavigator } from '@renderer/navigation/Navigator'
@@ -28,14 +32,9 @@ export function FeatureCard({
   const { project } = useActiveProject()
   const { storiesById, featuresById } = useStories()
 
-  const story = useMemo(() => {
-    return storiesById[storyId]
-  }, [storiesById, storyId])
-  const feature = useMemo(() => {
-    return featuresById[featureId]
-  }, [featuresById, featureId])
+  const story = useMemo(() => storiesById[storyId], [storiesById, storyId])
+  const feature = useMemo(() => featuresById[featureId], [featuresById, featureId])
 
-  //TODO: show nice uknown view
   if (!feature || !story || !project) return <span>UNKNOWN FEATURE</span>
 
   return (
@@ -51,6 +50,7 @@ export function FeatureCard({
     />
   )
 }
+
 export function FeatureCardRaw({
   project,
   story,
@@ -71,10 +71,7 @@ export function FeatureCardRaw({
   showActions?: boolean
   isNew?: boolean
   onPillClick?: () => void
-
-  // onClick?: () => void
 }) {
-  //TODO: make a function `getAgentRun` that accepts a context - later we can construct that from
   const { runsHistory, startAgent } = useAgents()
   const { navigateAgentRun } = useNavigator()
 
@@ -91,159 +88,51 @@ export function FeatureCardRaw({
       r.context.featureId === featureId,
   )
 
-  return (
-    <div
-      className={`story-card p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-md group ${className}`}
-      // role={onClick ? 'button' : 'region'}
-      // tabIndex={onClick ? 0 : undefined}
-      // onClick={onClick}
-      // onKeyDown={(e) => {
-      //   if (!onClick && !onStatusChange) return
-      //   if (onClick && (e.key === 'Enter' || e.key === ' ')) {
-      //     e.preventDefault()
-      //     onClick()
-      //   }
-      //   if (onStatusChange && e.key.toLowerCase() === 's') {
-      //     e.preventDefault()
-      //     const order: Status[] = ['-', '~', '+', '=', '?']
-      //     const current = story.status
-      //     const idx = order.indexOf(current)
-      //     const next = order[(idx + 1) % order.length]
-      //     onStatusChange(next)
-      //   }
-      // }}
-      aria-label={`Feature ${feature.id} ${feature.title}`}
+  const headerLeft = isNew ? (
+    <span
+      className={`id-chip bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800 font-bold ${onPillClick ? 'cursor-pointer hover:bg-blue-200 dark:hover:bg-blue-800/50' : ''}`}
+      onClick={(e) => {
+        if (onPillClick) {
+          e.stopPropagation()
+          onPillClick()
+        }
+      }}
     >
-      <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
-        {isNew ? (
-          <span
-            className={`id-chip bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800 font-bold ${onPillClick ? 'cursor-pointer hover:bg-blue-200 dark:hover:bg-blue-800/50' : ''}`}
-            onClick={(e) => {
-              if (onPillClick) {
-                e.stopPropagation()
-                onPillClick()
-              }
-            }}
-          >
-            NEW
-          </span>
-        ) : (
-          <DependencyBullet
-            key={dependency}
-            dependency={dependency}
-            interactive={false}
-            disableHoverInfo={true}
-          />
-        )}
-        <div className="story-card__actions opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-150 ease-out flex items-center gap-2">
-          {showActions && (
-            <>
-              {featureRun ? (
-                <AgentRunBullet
-                  key={featureRun.context.agentRunId}
-                  run={featureRun}
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    navigateAgentRun(featureRun.context)
-                  }}
-                />
-              ) : (
-                <RunAgentButton
-                  onClick={(agentType) => {
-                    startAgent(agentType, projectId, storyId, featureId)
-                  }}
-                />
-              )}
-            </>
-          )}
-          {/* {onClick && showStatus && (
-            <Tooltip content="Open details (Enter)" placement="top">
-              <button
-                className="btn-secondary !px-2 !py-1 text-sm"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  onClick()
-                }}
-                aria-label="Open details"
-              >
-                ↗
-              </button>
-            </Tooltip>
-          )} */}
-        </div>
-      </div>
+      NEW
+    </span>
+  ) : (
+    <DependencyBullet dependency={dependency} interactive={false} disableHoverInfo />
+  )
 
-      <h3 className="text-lg font-semibold mb-2" title={feature.title}>
-        {feature.title}
-      </h3>
+  const actions = showActions ? (
+    featureRun ? (
+      <AgentRunBullet
+        key={featureRun.context.agentRunId}
+        run={featureRun}
+        onClick={(e) => {
+          e.stopPropagation()
+          navigateAgentRun(featureRun.context)
+        }}
+      />
+    ) : (
+      <RunAgentButton
+        onClick={(agentType) => {
+          startAgent(agentType, projectId, storyId, featureId)
+        }}
+      />
+    )
+  ) : undefined
 
-      {feature.description && (
-        <div className="text-sm text-gray-600 dark:text-gray-300 mb-2 markdown-container text-ellipsis overflow-hidden">
-          <Markdown text={feature.description} />
-        </div>
-      )}
-
-      {feature.blockers && feature.blockers.length > 0 && (
-        <div className="flex flex-wrap items-start gap-1 mb-2">
-          {feature.blockers.map((dep) => (
-            <DependencyBullet key={dep} dependency={dep} interactive={false} />
-          ))}
-        </div>
-      )}
-
-      {!isNew && showStatus && <StatusControl status={feature.status} onChange={onStatusChange} />}
-    </div>
+  return (
+    <FeatureCardBase
+      feature={feature as { id: string; title: string; description?: string; status: UikitStatus; blockers?: string[] }}
+      headerLeft={headerLeft}
+      actions={actions}
+      renderBlocker={(dep) => <DependencyBullet dependency={dep} interactive={false} />}
+      showStatus={!isNew && showStatus}
+      onStatusChange={onStatusChange as ((s: UikitStatus) => void) | undefined}
+      className={className}
+      ariaLabel={`Feature ${feature.id} ${feature.title}`}
+    />
   )
 }
-//   return (
-//     <div
-//       className={`feature-card p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-md ${className}`}
-//     >
-//         {isNew ? (
-//           <span
-//             className={`id-chip bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800 font-bold ${onPillClick ? 'cursor-pointer hover:bg-blue-200 dark:hover:bg-blue-800/50' : ''}`}
-//             onClick={(e) => {
-//               if (onPillClick) {
-//                 e.stopPropagation()
-//                 onPillClick()
-//               }
-//             }}
-//           >
-//             NEW
-//           </span>
-//         ) : (
-//           <DependencyBullet
-//             key={displayId}
-//             dependency={displayId}
-//             interactive={false}
-//             disableHoverInfo={true}
-//           />
-//         )}
-
-//       <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
-
-//       {feature.description && (
-//         <div className="text-sm text-gray-600 dark:text-gray-300 mb-2 markdown-container text-ellipsis overflow-hidden">
-//           <Markdown text={feature.description} />
-//         </div>
-//       )}
-
-//       {feature.context && feature.context.length > 0 && (
-//         <div className="flex flex-wrap items-start gap-1 mb-2">
-//           {feature.context.map((p) => (
-//             <ContextFileChip key={p} path={p} />
-//           ))}
-//         </div>
-//       )}
-//       {feature.blockers && feature.blockers.length > 0 && (
-//         <div className="flex flex-wrap items-start gap-1 mb-2">
-//           {feature.blockers.map((dep) => (
-//             <DependencyBullet key={dep} dependency={dep} interactive={false} />
-//           ))}
-//         </div>
-//       )}
-
-//       {!isNew && <StatusControl status={feature.status} />}
-//     </div>
-//   )
-// }

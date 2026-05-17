@@ -1,10 +1,15 @@
-import React from 'react'
-import { FileDisplay } from 'thefactory-ui/web'
-import WarningChip from './WarningChip'
-import { FileMeta } from 'thefactory-tools'
-import { inferFileType } from 'thefactory-tools/utils'
+import { useMemo } from 'react'
+import { ContextFileChip as ContextFileChipBase } from 'thefactory-ui/web'
 import { useFiles } from '../../contexts/FilesContext'
+import { inferFileType } from 'thefactory-tools/utils'
 
+/**
+ * Desktop wrapper around the shared `ContextFileChip`. Resolves the bare
+ * `path` against `useFiles().filesByPath` so the preview tooltip reflects
+ * the actual file metadata; falls back to a synthetic shape (using
+ * `inferFileType` for the mime hint) when the file isn't in the project
+ * snapshot (e.g. deleted between turns).
+ */
 export default function ContextFileChip({
   path,
   onRemove,
@@ -16,13 +21,9 @@ export default function ContextFileChip({
 }) {
   const { filesByPath } = useFiles()
 
-  const file: FileMeta = React.useMemo(() => {
-    const foundFile = filesByPath[path]
-    if (foundFile) {
-      return foundFile
-    }
-
-    // Fallback for when file is not found in the project's file list
+  const file = useMemo(() => {
+    const found = filesByPath[path]
+    if (found) return found
     const parts = path.split('/')
     const name = parts[parts.length - 1] || path
     return {
@@ -36,38 +37,5 @@ export default function ContextFileChip({
     }
   }, [path, filesByPath])
 
-  return (
-    <div className="inline-file-chip relative">
-      {warn ? (
-        <div className="absolute -top-1 -left-1">
-          <WarningChip
-            title="File not referenced in text"
-            tooltip="File not referenced in title/description/rejection"
-          />
-        </div>
-      ) : null}
-      <FileDisplay
-        file={file}
-        density="normal"
-        showPreviewOnHover
-        interactive={false}
-        trailing={
-          onRemove ? (
-            <button
-              type="button"
-              className="btn-ghost text-xs"
-              onClick={(e) => {
-                e.stopPropagation()
-                onRemove?.()
-              }}
-              title="Remove file"
-              aria-label="Remove file"
-            >
-              ✕
-            </button>
-          ) : undefined
-        }
-      />
-    </div>
-  )
+  return <ContextFileChipBase file={file} onRemove={onRemove} warn={warn} />
 }

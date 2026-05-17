@@ -1,7 +1,7 @@
-import React from 'react'
+import { StoryAndFeatureCallout as StoryAndFeatureCalloutBase } from 'thefactory-ui/web'
 import DependencyBullet from './DependencyBullet'
 
-interface StoryAndFeatureCalloutProps {
+export type StoryAndFeatureCalloutProps = {
   storyId?: string
   featureId?: string
 }
@@ -10,26 +10,17 @@ export default function StoryAndFeatureCallout({
   storyId,
   featureId,
 }: StoryAndFeatureCalloutProps) {
-  const deps: string[] = []
-  if (storyId) {
-    deps.push(storyId)
-  }
-  if (storyId && featureId) {
-    deps.push(`${storyId}.${featureId}`)
-  }
-
-  if (deps.length === 0) return null
-
   return (
-    <div className="flex flex-wrap justify-center gap-1 min-w-[60px] min-h-[30px]">
-      {deps.map((d) => (
+    <StoryAndFeatureCalloutBase
+      storyId={storyId}
+      featureId={featureId}
+      renderBullet={(dep) => (
         <DependencyBullet
-          key={d}
-          dependency={d}
+          dependency={dep}
           interactive
-          notFoundDependencyDisplay={'*DELETED*'}
+          notFoundDependencyDisplay="*DELETED*"
         />
-      ))}
-    </div>
+      )}
+    />
   )
 }
