@@ -1,8 +1,10 @@
-import React from 'react'
+import { useMemo } from 'react'
+import {
+  DependencyBullet as DependencyBulletBase,
+  type ResolvedDependency,
+  type StoryStatus,
+} from 'thefactory-ui/web'
 import { useNavigator } from '../../navigation/Navigator'
-import { DependencyChip, StatusControl } from 'thefactory-ui/web'
-import { StoryCard } from './StoryCard'
-import { FeatureCard } from './FeatureCard'
 import { useStories } from '../../contexts/StoriesContext'
 
 export interface DependencyBulletProps {
@@ -17,7 +19,13 @@ export interface DependencyBulletProps {
   disableHoverInfo?: boolean
 }
 
-const DependencyBullet: React.FC<DependencyBulletProps> = ({
+/**
+ * Desktop wrapper around the shared `DependencyBullet`. Resolves the dep
+ * string through `StoriesContext` into the structural shape the shared
+ * component expects, and wires `onClick` to the Navigator (with the
+ * same-page scroll-to-feature behaviour preserved).
+ */
+export default function DependencyBullet({
   className,
   dependency,
   isOutbound = false,
@@ -25,79 +33,79 @@ const DependencyBullet: React.FC<DependencyBulletProps> = ({
   onRemove,
   interactive = true,
   disableHoverInfo = false,
-}) => {
+}: DependencyBulletProps) {
   const { navigateStoryDetails, storiesRoute } = useNavigator()
   const { resolveDependency } = useStories()
 
-  const resolved = resolveDependency(dependency)
-  const isError = 'code' in resolved
-  const display = isError ? (notFoundDependencyDisplay ?? dependency) : resolved.display
-
-  let tooltipContent: React.ReactNode
-  if (isError) {
-    tooltipContent = (
-      <div className="summary-card p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-md max-w-xs">
-        <div className="text-xs text-gray-500 mb-1">Not found</div>
-        <h3 className="text-lg font-semibold mb-2">Not found</h3>
-        <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
-          The requested dependency could not be resolved.
-        </p>
-        <StatusControl status="-" />
-      </div>
-    )
-  } else if (resolved.kind === 'story') {
-    tooltipContent = <StoryCard storyId={resolved.storyId} className="max-w-xs" />
-  } else {
-    tooltipContent = (
-      <FeatureCard
-        storyId={resolved.storyId}
-        featureId={resolved.featureId}
-        className="max-w-xs"
-      />
-    )
-  }
-
-  const handleClick = () => {
-    if (isError) return
-    const targetStoryId = resolved.kind === 'story' ? resolved.id : resolved.storyId
-    const featureId = resolved.kind === 'feature' ? resolved.featureId : undefined
-
-    const isSameStory = storiesRoute.name === 'details' && storiesRoute.storyId === targetStoryId
-    if (isSameStory) {
-      if (featureId) {
-        const row = document.querySelector(`.feature-row[data-feature-id="${featureId}"]`)
-        if (row) {
-          row.scrollIntoView({ block: 'center', behavior: 'smooth' })
-          row.classList.add('highlighted')
-          setTimeout(() => row.classList.remove('highlighted'), 2000)
-        }
-      } else {
-        const element = document.querySelector('.details-header')
-        if (element) {
-          element.scrollIntoView({ block: 'start', behavior: 'smooth' })
-          element.classList.add('highlighted')
-          setTimeout(() => element.classList.remove('highlighted'), 2000)
-        }
+  const resolved: ResolvedDependency | null = useMemo(() => {
+    const ref = resolveDependency(dependency)
+    if ('code' in ref) return null
+    if (ref.kind === 'feature') {
+      return {
+        kind: 'feature',
+        display: ref.display,
+        storyId: ref.storyId,
+        featureId: ref.featureId,
+        feature: {
+          id: ref.feature.id,
+          title: ref.feature.title,
+          description: ref.feature.description,
+          status: ref.feature.status as StoryStatus,
+          blockers: ref.feature.blockers,
+        },
       }
-    } else {
-      navigateStoryDetails(targetStoryId, featureId, !featureId)
     }
-  }
+    return {
+      kind: 'story',
+      display: ref.display,
+      storyId: ref.storyId,
+      story: {
+        id: ref.story.id,
+        title: ref.story.title,
+        description: ref.story.description,
+        status: ref.story.status as StoryStatus,
+        blockers: ref.story.blockers,
+      },
+    }
+  }, [resolveDependency, dependency])
 
   return (
-    <DependencyChip
+    <DependencyBulletBase
+      resolved={resolved}
       className={className}
-      display={display}
-      kind={isError ? 'missing' : resolved.kind}
-      variant={isError ? 'missing' : isOutbound ? 'blocks' : 'ok'}
-      tooltip={tooltipContent}
-      disableHoverInfo={disableHoverInfo}
-      interactive={interactive}
-      onClick={handleClick}
+      dependency={dependency}
+      notFoundDisplay={notFoundDependencyDisplay}
+      isOutbound={isOutbound}
       onRemove={onRemove}
-      title={`${display}${isOutbound ? ' (requires this)' : ''}`}
+      interactive={interactive}
+      disableHoverInfo={disableHoverInfo}
+      onClick={(r) => {
+        if (r.kind === 'missing') return
+        const targetStoryId = r.storyId
+        const featureId = r.kind === 'feature' ? r.featureId : undefined
+
+        const isSameStory =
+          storiesRoute.name === 'details' && storiesRoute.storyId === targetStoryId
+        if (isSameStory) {
+          if (featureId) {
+            const row = document.querySelector(`.feature-row[data-feature-id="${featureId}"]`)
+            if (row) {
+              row.scrollIntoView({ block: 'center', behavior: 'smooth' })
+              row.classList.add('highlighted')
+              setTimeout(() => row.classList.remove('highlighted'), 2000)
+            }
+          } else {
+            const element = document.querySelector('.details-header')
+            if (element) {
+              element.scrollIntoView({ block: 'start', behavior: 'smooth' })
+              element.classList.add('highlighted')
+              setTimeout(() => element.classList.remove('highlighted'), 2000)
+            }
+          }
+        } else {
+          navigateStoryDetails(targetStoryId, featureId, !featureId)
+        }
+      }}
     />
   )
 }
-
-export default DependencyBullet

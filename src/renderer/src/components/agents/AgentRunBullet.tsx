@@ -1,29 +1,23 @@
-import type { Chat } from 'thefactory-tools'
-import StatusChip from './StatusChip'
+import type { Chat, LLMConfig } from 'thefactory-tools'
+import { AgentRunBullet as AgentRunBulletBase, type AgentRunBulletProps } from 'thefactory-ui/web'
 
 export default function AgentRunBullet({
   run,
   onClick,
 }: {
   run: Chat
-  onClick?: (e: any) => void
+  onClick?: AgentRunBulletProps['onClick']
 }) {
-  const provider = (run.metadata?.llmConfig as any)?.provider || 'unknown'
-  const model = (run.metadata?.llmConfig as any)?.model || 'unknown'
-  const state = run.state || 'created'
-  
-  const label = `Agent Run ${run.context.agentRunId?.slice(0, 8)} · ${state} · ${provider} · ${model}`
-
+  const llm = run.metadata?.llmConfig as LLMConfig | undefined
   return (
-    <button
-      type="button"
+    <AgentRunBulletBase
+      run={{
+        agentRunId: run.context.agentRunId,
+        state: run.state ?? 'created',
+        provider: llm?.provider,
+        model: llm?.model,
+      }}
       onClick={onClick}
-      title={label}
-      aria-label={label}
-      className="inline-flex items-center p-0 m-0 bg-transparent border-0"
-      style={{ lineHeight: 1 }}
-    >
-      <StatusChip state={state} />
-    </button>
+    />
   )
 }

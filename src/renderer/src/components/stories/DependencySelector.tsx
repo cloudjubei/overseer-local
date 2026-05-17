@@ -1,7 +1,7 @@
-import React, { useState } from 'react'
-import { useActiveProject, useProjectContext } from '../../contexts/ProjectContext'
-import type { Feature, Story } from 'thefactory-tools'
+import React from 'react'
+import { useActiveProject } from '../../contexts/ProjectContext'
 import { useStories } from '../../contexts/StoriesContext'
+import { useDependencySelector } from 'thefactory-ui/headless'
 
 type DependencySelectorProps = {
   onConfirm?: (deps: string[]) => void
@@ -17,104 +17,27 @@ export const DependencySelector: React.FC<DependencySelectorProps> = ({
   existingDeps = [],
 }) => {
   const { project } = useActiveProject()
-  const [search, setSearch] = useState('')
-  const [selected, setSelected] = useState<Set<string>>(new Set(existingDeps))
   const { storiesById, getStoryDisplayIndex, getFeatureDisplayIndex } = useStories()
 
-  const q = search.trim().toLowerCase()
+  const stories = React.useMemo(() => Object.values(storiesById), [storiesById])
 
-  const toggle = (dep: string) => {
-    const newSelected = new Set(selected)
-    if (newSelected.has(dep)) {
-      newSelected.delete(dep)
-    } else {
-      newSelected.add(dep)
-    }
-    setSelected(newSelected)
-  }
+  const sel = useDependencySelector({
+    stories,
+    currentStoryId,
+    currentFeatureId,
+    existingDeps,
+    getStoryDisplayIndex,
+    getFeatureDisplayIndex,
+  })
 
-  if (!project) {
-    return <div>Loading blockers...</div>
-  }
-
-  function doesStoryMatch(story: Story, q: string): boolean {
-    const display = `${getStoryDisplayIndex(story.id)}`
-    return (
-      display.toLowerCase().includes(q) ||
-      story.title.toLowerCase().includes(q) ||
-      (story.description || '').toLowerCase().includes(q)
-    )
-  }
-
-  function doesFeatureMatch(story: Story, f: Feature, q: string): boolean {
-    const display = `${getStoryDisplayIndex(story.id)}.${getFeatureDisplayIndex(story.id, f.id)}`
-    return (
-      display.toLowerCase().includes(q) ||
-      f.title.toLowerCase().includes(q) ||
-      (f.description || '').toLowerCase().includes(q)
-    )
-  }
-
-  const renderStoryItem = (storyId: string) => {
-    const story = storiesById[storyId]
-    if (!story) return null
-    const storyDep = `${storyId}`
-    const isDisabled = existingDeps.includes(storyDep)
-    const storyMatches = !q || doesStoryMatch(story, q)
-    const matchingFeatures = story.features.filter((f) => !q || doesFeatureMatch(story, f, q))
-    if (!storyMatches && matchingFeatures.length === 0) return null
-
-    const display = `${getStoryDisplayIndex(storyId)}`
-
-    return (
-      <li key={storyId}>
-        <div
-          className={`selector-item flex gap-2 ${isDisabled ? 'disabled text-neutral-400 cursor-not-allowed' : 'cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-700'}`}
-        >
-          <input
-            type="checkbox"
-            checked={selected.has(storyDep)}
-            onChange={() => toggle(storyDep)}
-            disabled={isDisabled}
-          />
-          #{display} {story.title}
-        </div>
-        <ul className="ml-4 space-y-1">
-          {matchingFeatures.map((f: Feature) => {
-            const featureDep = `${storyId}.${f.id}`
-            const isSelf = currentStoryId === storyId && currentFeatureId === f.id
-            const isFDisabled = isSelf || existingDeps.includes(featureDep)
-            const featureDisplay = `${display}.${getFeatureDisplayIndex(storyId, f.id)}`
-            return (
-              <li
-                key={`${featureDep}`}
-                className={`selector-item flex gap-2 ${isFDisabled ? 'disabled text-neutral-400 cursor-not-allowed' : 'cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-700'}`}
-              >
-                <input
-                  type="checkbox"
-                  checked={selected.has(featureDep)}
-                  onChange={() => toggle(featureDep)}
-                  disabled={isFDisabled}
-                />
-                #{featureDisplay} {f.title}
-              </li>
-            )
-          })}
-        </ul>
-      </li>
-    )
-  }
-
-  const storyIds = Object.keys(storiesById).sort(
-    (a, b) => (getStoryDisplayIndex(a) || 0) - (getStoryDisplayIndex(b) || 0),
-  )
+  if (!project) return <div>Loading blockers...</div>
 
   return (
     <div className="dependency-selector">
       <input
         type="search"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
+        value={sel.search}
+        onChange={(e) => sel.setSearch(e.target.value)}
         placeholder="Search stories or features"
         className="w-full rounded-md border px-3 py-2 text-sm"
       />
@@ -122,19 +45,51 @@ export const DependencySelector: React.FC<DependencySelectorProps> = ({
         <div>
           <h3 className="text-lg font-semibold">{project.title}</h3>
         </div>
-        {storyIds.length > 0 && (
-          <ul className="space-y-2">{storyIds.map((storyId) => renderStoryItem(storyId))}</ul>
+        {sel.items.length > 0 && (
+          <ul className="space-y-2">
+            {sel.items.map((item) => (
+              <li key={item.story.id}>
+                <div
+                  className={`selector-item flex gap-2 ${item.storyDisabled ? 'disabled text-neutral-400 cursor-not-allowed' : 'cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-700'}`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={sel.selected.has(item.storyDep)}
+                    onChange={() => sel.toggle(item.storyDep)}
+                    disabled={item.storyDisabled}
+                  />
+                  #{item.storyDisplay} {item.story.title}
+                </div>
+                <ul className="ml-4 space-y-1">
+                  {item.features.map((f) => (
+                    <li
+                      key={f.featureDep}
+                      className={`selector-item flex gap-2 ${f.disabled ? 'disabled text-neutral-400 cursor-not-allowed' : 'cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-700'}`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={sel.selected.has(f.featureDep)}
+                        onChange={() => sel.toggle(f.featureDep)}
+                        disabled={f.disabled}
+                      />
+                      #{f.featureDisplay} {f.feature.title}
+                    </li>
+                  ))}
+                </ul>
+              </li>
+            ))}
+          </ul>
         )}
       </div>
       <button
         className="btn mt-4"
-        disabled={selected.size === 0}
+        disabled={!sel.canConfirm}
         onClick={() => {
-          onConfirm?.(Array.from(selected))
-          setSelected(new Set())
+          onConfirm?.(sel.collect())
+          sel.clear()
         }}
       >
-        Add {selected.size} Selected
+        Add {sel.selected.size} Selected
       </button>
     </div>
   )

@@ -1,60 +1,30 @@
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from 'thefactory-ui/web'
+import { useMemo } from 'react'
+import { AgentModelQuickSelect as AgentModelQuickSelectBase } from 'thefactory-ui/web'
 import { useNavigator } from '../../navigation/Navigator'
 import { useLLMConfig } from '../../contexts/LLMConfigContext'
 
 export default function AgentModelQuickSelect({ className = '' }: { className?: string }) {
-  const {
-    setActiveAgentRun,
-    recentAgentRunConfigs,
-    activeAgentRunConfigId: activeConfigId,
-    configs,
-  } = useLLMConfig()
+  const { setActiveAgentRun, recentAgentRunConfigs, activeAgentRunConfigId, configs } =
+    useLLMConfig()
   const { navigateView } = useNavigator()
 
-  if (!configs || configs.length === 0) {
-    return (
-      <button
-        type="button"
-        className={`btn-secondary no-drag ${className}`}
-        onClick={() => navigateView('Settings')}
-        title="No LLMs configured. Open Settings to add one."
-        aria-label="Configure LLMs"
-      >
-        Configure LLM…
-      </button>
-    )
-  }
+  const options = useMemo(
+    () =>
+      recentAgentRunConfigs
+        .filter((c) => c.id)
+        .map((c) => ({ id: c.id!, name: c.name ?? c.id!, model: c.model })),
+    [recentAgentRunConfigs],
+  )
 
   return (
-    <div className={`no-drag ${className}`}>
-      <Select
-        value={activeConfigId || ''}
-        onValueChange={(v) => {
-          if (v === '__open_settings') {
-            navigateView('Settings')
-            return
-          }
-          setActiveAgentRun(v)
-        }}
-      >
-        <SelectTrigger className="ui-select w-[220px]" aria-label="Agent Model">
-          <SelectValue placeholder="Select Model" />
-        </SelectTrigger>
-        <SelectContent>
-          {recentAgentRunConfigs.map((cfg) => (
-            <SelectItem key={cfg.id} value={cfg.id!}>
-              {cfg.name} {cfg.model ? `(${cfg.model})` : ''}
-            </SelectItem>
-          ))}
-          <SelectItem value="__open_settings">Manage LLM Configurations…</SelectItem>
-        </SelectContent>
-      </Select>
-    </div>
+    <AgentModelQuickSelectBase
+      value={activeAgentRunConfigId || ''}
+      options={options}
+      onPick={setActiveAgentRun}
+      onOpenSettings={() => navigateView('Settings')}
+      className={className}
+      ariaLabel="Agent Model"
+      placeholder={configs && configs.length > 0 ? 'Select Model' : undefined}
+    />
   )
 }

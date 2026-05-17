@@ -1,6 +1,7 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import type { Status } from 'thefactory-tools'
 import { StatusControl } from 'thefactory-ui/web'
+import { useFeatureForm, type FeatureFormValues as PackageFeatureFormValues } from 'thefactory-ui/headless'
 import { DependencySelector } from './DependencySelector'
 import DependencyBullet from './DependencyBullet'
 import { FileSelector } from '@renderer/components/ui/FileSelector'
@@ -29,13 +30,9 @@ type Props = {
   titleRef?: React.RefObject<HTMLInputElement | null>
   storyId: string
   featureId?: string
-  // When true, the form will not render inline action buttons at the bottom.
-  // Use this when placing actions in a parent Modal footer to keep them sticky.
   hideActions?: boolean
-  // Optional id to bind external submit buttons using the `form` attribute
   formId?: string
   onDirtyChange?: (dirty: boolean) => void
-  // If true, focus the Description textarea and place caret at the end on mount
   focusDescription?: boolean
   projectId?: string
 }
@@ -48,170 +45,75 @@ export default function FeatureForm({
   submitting = false,
   titleRef,
   storyId,
-  featureId = undefined,
+  featureId,
   hideActions = false,
   formId,
   onDirtyChange,
   focusDescription = false,
   projectId,
 }: Props) {
-  const [title, setTitle] = useState<string>(initialValues?.title ?? '')
-  const [description, setDescription] = useState<string>(initialValues?.description ?? '')
-  const [rejection, setRejection] = useState<string>(initialValues?.rejection ?? '')
-  const [status, setStatus] = useState<Status>(initialValues?.status ?? '-')
-  const [blockers, setBlockers] = useState<string[]>(initialValues?.blockers ?? [])
-  const [context, setContext] = useState<string[]>(initialValues?.context ?? [])
-  const [error, setError] = useState<string | null>(null)
-  const [showSelector, setShowSelector] = useState(false)
-  const [showFileSelector, setShowFileSelector] = useState(false)
-
   const { normalizeDependency } = useStories()
 
+  const form = useFeatureForm({
+    initialValues: {
+      title: initialValues?.title,
+      description: initialValues?.description,
+      rejection: initialValues?.rejection,
+      status: initialValues?.status,
+      blockers: initialValues?.blockers,
+      context: initialValues?.context,
+    },
+    onSubmit: async (v: PackageFeatureFormValues) => {
+      await onSubmit({
+        title: v.title,
+        description: v.description,
+        rejection: v.rejection,
+        status: v.status as Status,
+        blockers: v.blockers,
+        context: v.context,
+      })
+    },
+    onDirty: onDirtyChange,
+    normalizeDependency,
+  })
+
+  const [showSelector, setShowSelector] = useState(false)
+  const [showFileSelector, setShowFileSelector] = useState(false)
   const localTitleRef = useRef<HTMLInputElement | null>(null)
   const combinedTitleRef = titleRef ?? localTitleRef
   const descriptionRef = useRef<HTMLTextAreaElement | null>(null)
-  const isCreate = !(featureId !== null && featureId !== undefined)
-
-  // Baseline snapshot for dirty tracking
-  const initialSnapshotRef = useRef<{
-    title: string
-    description: string
-    rejection: string
-    status: Status
-    blockers: string[]
-    context: string[]
-  } | null>(null)
-  if (initialSnapshotRef.current === null) {
-    initialSnapshotRef.current = {
-      title: initialValues?.title ?? '',
-      description: initialValues?.description ?? '',
-      rejection: initialValues?.rejection ?? '',
-      status: initialValues?.status ?? '-',
-      blockers: initialValues?.blockers ?? [],
-      context: initialValues?.context ?? [],
-    }
-  }
+  const isCreate = featureId == null
 
   useEffect(() => {
-    // Focus logic: If requested, focus description and place caret at end; otherwise focus title
     if (focusDescription && descriptionRef.current) {
       const el = descriptionRef.current
       el.focus()
-      // Move caret to end
       const len = el.value?.length ?? 0
       try {
         el.setSelectionRange(len, len)
-      } catch (_) {
+      } catch {
         // ignore selection errors on some browsers
       }
       return
     }
-    if (combinedTitleRef?.current) {
-      combinedTitleRef.current.focus()
-      combinedTitleRef.current.select?.()
-    }
+    combinedTitleRef.current?.focus()
+    combinedTitleRef.current?.select?.()
   }, [combinedTitleRef, focusDescription])
-
-  // Dirty tracking
-  useEffect(() => {
-    const baseline = initialSnapshotRef.current!
-    const dirty =
-      title !== baseline.title ||
-      description !== baseline.description ||
-      rejection !== baseline.rejection ||
-      status !== baseline.status ||
-      blockers.length !== baseline.blockers.length ||
-      context.length !== baseline.context.length ||
-      blockers.some((b, i) => b !== baseline.blockers[i]) ||
-      context.some((c, i) => c !== baseline.context[i])
-    onDirtyChange?.(dirty)
-  }, [title, description, rejection, status, blockers, context, onDirtyChange])
-
-  const canSubmit = useMemo(() => title.trim().length > 0 && !submitting, [title, submitting])
-
-  function validate(): boolean {
-    let valid = true
-    if (!title.trim()) {
-      setError('Title is required')
-      valid = false
-    } else {
-      setError(null)
-    }
-
-    return valid
-  }
-
-  async function handleSubmit(e?: React.FormEvent) {
-    e?.preventDefault()
-    if (!validate()) return
-    const payload: FeatureFormValues = {
-      title: title.trim(),
-      description: description?.trim() || '',
-      // Send the empty string when the field is cleared (not `undefined`);
-      // otherwise the JSON wire body drops the key and the backend reads it
-      // as "leave unchanged" — rejection would never be removable.
-      rejection: rejection?.trim() ?? '',
-      status,
-      blockers,
-      context,
-    }
-    await onSubmit(payload)
-  }
-
-  function onKeyDown(e: React.KeyboardEvent) {
-    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'enter') {
-      e.preventDefault()
-      if (canSubmit) handleSubmit()
-    }
-  }
-
-  function removeBlockerAt(idx: number) {
-    setBlockers((deps) => deps.filter((_, i) => i !== idx))
-  }
-
-  function removeContextAt(idx: number) {
-    setContext((ctx) => ctx.filter((_, i) => i !== idx))
-  }
-
-  // Compute mentioned items in current text; we treat a reference as any #word pattern (ids like 1 or 1.2)
-  const combinedTextForMentions = `${title}\n${description}\n${rejection}`
-
-  const mentionedPaths = useMemo(() => {
-    const res = new Set<string>()
-    for (const p of context) {
-      if (combinedTextForMentions.includes(`@${p}`)) res.add(p)
-    }
-    return res
-  }, [combinedTextForMentions, context])
-
-  // Keep context in sync with @ mentions: add on select via callback; also remove if no longer mentioned anywhere
-  useEffect(() => {
-    setContext((prev) => prev.filter((p) => combinedTextForMentions.includes(`@${p}`)))
-  }, [combinedTextForMentions])
-
-  const handleFileMentionSelected = (path: string) => {
-    setContext((prev) => (prev.includes(path) ? prev : [...prev, path]))
-  }
-
-  const handleReferenceSelected = (ref: string) => {
-    console.log('handleReferenceSelected ref: ', ref)
-    const canonical = normalizeDependency(ref)
-    console.log('handleReferenceSelected canonical: ', canonical)
-    setBlockers((prev) => (prev.includes(canonical) ? prev : [...prev, canonical]))
-  }
 
   return (
     <form
       id={formId}
-      onSubmit={handleSubmit}
-      onKeyDown={onKeyDown}
+      onSubmit={(e) => {
+        e.preventDefault()
+        void form.handleSubmit()
+      }}
+      onKeyDown={form.onKeyDown}
       className="flex flex-col min-h-0"
       aria-label={isCreate ? 'Create Feature' : 'Edit Feature'}
     >
-      {/* Content area */}
       <div className="grid grid-cols-1 gap-3">
         <div className="flex justify-between items-center">
-          <StatusControl status={status} onChange={setStatus} />
+          <StatusControl status={form.values.status} onChange={form.setStatus} />
           <div>{projectId && <ProjectChip projectId={projectId} nonActionable />}</div>
           <DependencyBullet dependency={storyId} interactive={false} />
         </div>
@@ -229,25 +131,27 @@ export default function FeatureForm({
           ref={combinedTitleRef}
           type="text"
           placeholder="What is this feature?"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          value={form.values.title}
+          onChange={(e) => form.setTitle(e.target.value)}
           disabled={submitting}
           className="w-full rounded-md border px-3 py-2 text-sm disabled:opacity-60"
           style={{
             background: 'var(--surface-raised)',
-            borderColor: error ? 'var(--status-stuck-soft-border)' : 'var(--border-default)',
+            borderColor: form.error
+              ? 'var(--status-stuck-soft-border)'
+              : 'var(--border-default)',
             color: 'var(--text-primary)',
           }}
-          aria-invalid={!!error}
-          aria-describedby={error ? 'feature-title-error' : undefined}
+          aria-invalid={!!form.error}
+          aria-describedby={form.error ? 'feature-title-error' : undefined}
         />
-        {error ? (
+        {form.error ? (
           <div
             id="feature-title-error"
             className="text-xs"
             style={{ color: 'var(--status-stuck-fg)' }}
           >
-            {error}
+            {form.error}
           </div>
         ) : null}
 
@@ -263,8 +167,8 @@ export default function FeatureForm({
             id="feature-description"
             rows={4}
             placeholder="Optional details or acceptance criteria. Tip: @ to reference files, # to reference stories/features"
-            value={description}
-            onChange={setDescription}
+            value={form.values.description}
+            onChange={form.setDescription}
             disabled={submitting}
             className="w-full rounded-md border px-3 py-2 text-sm disabled:opacity-60 resize-y max-h-64"
             style={{
@@ -273,8 +177,8 @@ export default function FeatureForm({
               color: 'var(--text-primary)',
             }}
             ariaLabel="Feature description"
-            onFileMentionSelected={handleFileMentionSelected}
-            onReferenceSelected={handleReferenceSelected}
+            onFileMentionSelected={form.addContextFile}
+            onReferenceSelected={form.addBlocker}
             inputRef={descriptionRef}
           />
         </div>
@@ -291,8 +195,8 @@ export default function FeatureForm({
             id="feature-rejection"
             rows={3}
             placeholder="Optional reason for rejection (leave blank to remove). Tip: @ files, # stories/features"
-            value={rejection}
-            onChange={setRejection}
+            value={form.values.rejection}
+            onChange={form.setRejection}
             disabled={submitting}
             className="w-full rounded-md border px-3 py-2 text-sm disabled:opacity-60 resize-y max-h-64"
             style={{
@@ -301,8 +205,8 @@ export default function FeatureForm({
               color: 'var(--text-primary)',
             }}
             ariaLabel="Feature rejection reason"
-            onFileMentionSelected={handleFileMentionSelected}
-            onReferenceSelected={handleReferenceSelected}
+            onFileMentionSelected={form.addContextFile}
+            onReferenceSelected={form.addBlocker}
           />
         </div>
 
@@ -314,12 +218,12 @@ export default function FeatureForm({
             className="flex flex-wrap items-start gap-2 border rounded-md min-h-[3rem] p-2"
             style={{ borderColor: 'var(--border-default)', background: 'var(--surface-raised)' }}
           >
-            {context.map((p, idx) => (
+            {form.values.context.map((p, idx) => (
               <ContextFileChip
                 key={p}
                 path={p}
-                onRemove={() => removeContextAt(idx)}
-                warn={!mentionedPaths.has(p)}
+                onRemove={() => form.removeContextAt(idx)}
+                warn={!form.mentionedPaths.has(p)}
               />
             ))}
             <button
@@ -354,16 +258,14 @@ export default function FeatureForm({
               background: 'var(--surface-raised)',
             }}
           >
-            {blockers.map((dep, idx) => {
-              return (
-                <DependencyBullet
-                  key={dep}
-                  dependency={dep}
-                  onRemove={() => removeBlockerAt(idx)}
-                  interactive={false}
-                />
-              )
-            })}
+            {form.values.blockers.map((dep, idx) => (
+              <DependencyBullet
+                key={dep}
+                dependency={dep}
+                onRemove={() => form.removeBlockerAt(idx)}
+                interactive={false}
+              />
+            ))}
             <button
               type="button"
               onClick={() => setShowSelector(true)}
@@ -381,7 +283,6 @@ export default function FeatureForm({
         </div>
       </div>
 
-      {/* Inline actions (non-modal footer). Kept outside scroll area so they remain visible */}
       {!hideActions && (
         <div className="flex-shrink-0 flex justify-between gap-2 p-4 border-t border-border">
           {onDelete && !isCreate ? (
@@ -409,7 +310,7 @@ export default function FeatureForm({
             {isCreate ? (
               <Button
                 type="submit"
-                disabled={!canSubmit}
+                disabled={!form.canSubmit}
                 aria-keyshortcuts="Control+Enter Meta+Enter"
                 title="Cmd/Ctrl+Enter to submit"
               >
@@ -420,7 +321,7 @@ export default function FeatureForm({
                 type="submit"
                 variant="secondary"
                 size="icon"
-                disabled={!canSubmit}
+                disabled={!form.canSubmit}
                 aria-keyshortcuts="Control+Enter Meta+Enter"
                 title="Save (Cmd/Ctrl+Enter)"
                 aria-label="Save"
@@ -433,25 +334,15 @@ export default function FeatureForm({
       )}
 
       {showSelector && (
-        <Modal
-          title="Select Blocker"
-          onClose={() => setShowSelector(false)}
-          isOpen={true}
-          size="md"
-        >
+        <Modal title="Select Blocker" onClose={() => setShowSelector(false)} isOpen size="md">
           <DependencySelector
             onConfirm={(deps) => {
-              const newDeps = deps
-                .map((d) => normalizeDependency(d))
-                .filter((d) => !blockers.includes(d))
-
-              console.log('DependencySelector newDeps: ', newDeps)
-              setBlockers([...blockers, ...newDeps])
+              for (const d of deps) form.addBlocker(d)
               setShowSelector(false)
             }}
             currentStoryId={storyId}
             currentFeatureId={featureId}
-            existingDeps={blockers}
+            existingDeps={form.values.blockers}
           />
         </Modal>
       )}
@@ -460,15 +351,14 @@ export default function FeatureForm({
         <Modal
           title="Select Context Files"
           onClose={() => setShowFileSelector(false)}
-          isOpen={true}
+          isOpen
           size="lg"
         >
           <FileSelector
-            selected={context}
+            selected={form.values.context}
             onCancel={() => setShowFileSelector(false)}
             onConfirm={(paths) => {
-              const unique = Array.from(new Set([...(context || []), ...paths]))
-              setContext(unique)
+              for (const p of paths) form.addContextFile(p)
               setShowFileSelector(false)
             }}
             allowMultiple

@@ -14,29 +14,19 @@ import CostChip from './CostChip'
 import TokensChip from './TokensChip'
 import type { Chat, LLMConfig } from 'thefactory-tools'
 import { Button, DotBadge } from 'thefactory-ui/web'
-import { formatDate, formatHmsCompact, formatTime } from '../../utils/time'
+import {
+  computeAgentRunUsage,
+  computeCostUSD,
+  computeRunDurations,
+  formatDate,
+  formatHmsCompact,
+  formatTime,
+  useDurationTimer,
+} from 'thefactory-ui/headless'
 import { useAgents } from '../../contexts/AgentsContext'
 import { useNotifications } from '@renderer/hooks/useNotifications'
 import { useCosts } from '@renderer/contexts/CostsContext'
 import { getChatContextKey } from 'thefactory-tools/utils'
-
-function useDurationTimers(run: Chat) {
-  const [now, setNow] = useState<number>(Date.now())
-  useEffect(() => {
-    if (run.state !== 'running') return
-    const id = setInterval(() => setNow(Date.now()), 1000)
-    return () => clearInterval(id)
-  }, [run.state])
-
-  const create = new Date(run.createdAt).getTime()
-  // Try to find the last message to estimate 'finishedAt' if it's completed
-  const lastUpdate = new Date(run.updatedAt).getTime()
-  const end = run.state === 'running' || run.state === 'created' ? now : lastUpdate
-
-  const startMs = Math.max(0, end - create)
-  const thinkingMs = Math.max(0, now - lastUpdate)
-  return { duration: formatHmsCompact(startMs), thinking: formatHmsCompact(thinkingMs) }
-}
 
 export interface AgentRunRowProps {
   run: Chat
@@ -47,10 +37,10 @@ export interface AgentRunRowProps {
   showActions?: boolean
   showProject?: boolean
   showModel?: boolean
-  showStatus?: boolean // default true
-  showFeaturesInsteadOfTurn?: boolean // default true
-  showThinking?: boolean // default false
-  showRating?: boolean // default false
+  showStatus?: boolean
+  showFeaturesInsteadOfTurn?: boolean
+  showThinking?: boolean
+  showRating?: boolean
 }
 
 export default function AgentRunRow({
@@ -67,7 +57,11 @@ export default function AgentRunRow({
   showThinking = false,
   showRating = false,
 }: AgentRunRowProps) {
-  const { duration, thinking } = useDurationTimers(run)
+  const now = useDurationTimer(run.state === 'running')
+  const { startMs, thinkingMs } = useMemo(() => computeRunDurations(run, now), [run, now])
+  const duration = formatHmsCompact(startMs)
+  const thinking = formatHmsCompact(thinkingMs)
+
   const { isRunUnread, markRunSeen } = useAgents()
   const { markNotificationsByMetadata } = useNotifications()
   const { getCost } = useCosts()
@@ -75,13 +69,12 @@ export default function AgentRunRow({
 
   const [isAnimating, setIsAnimating] = useState(false)
   const [animKind, setAnimKind] = useState<'up' | 'down' | null>(null)
-
   const [durableCostUSD, setDurableCostUSD] = useState<number | undefined>(undefined)
 
-  const chatKey = useMemo(() => {
-    if (!run?.context.agentRunId) return undefined
-    return getChatContextKey(run.context)
-  }, [run?.context])
+  const chatKey = useMemo(
+    () => (run.context.agentRunId ? getChatContextKey(run.context) : undefined),
+    [run.context],
+  )
 
   useEffect(() => {
     let cancelled = false
@@ -91,12 +84,10 @@ export default function AgentRunRow({
     }
     getCost(chatKey)
       .then((res) => {
-        if (cancelled) return
-        setDurableCostUSD(res?.totalCostUSD)
+        if (!cancelled) setDurableCostUSD(res?.totalCostUSD)
       })
       .catch(() => {
-        if (cancelled) return
-        setDurableCostUSD(undefined)
+        if (!cancelled) setDurableCostUSD(undefined)
       })
     return () => {
       cancelled = true
@@ -104,42 +95,22 @@ export default function AgentRunRow({
   }, [chatKey, getCost])
 
   const handleRate = (rating: { score: number; comment?: string } | undefined) => {
-    if (onRate) {
-      setIsAnimating(true)
-      setAnimKind((rating ?? run.rating)?.score === 1 ? 'up' : 'down')
-
-      window.setTimeout(() => {
-        setIsAnimating(false)
-        setAnimKind(null)
-      }, 700)
-      onRate?.(run.context.agentRunId!, rating)
-    }
+    if (!onRate) return
+    setIsAnimating(true)
+    setAnimKind((rating ?? run.rating)?.score === 1 ? 'up' : 'down')
+    window.setTimeout(() => {
+      setIsAnimating(false)
+      setAnimKind(null)
+    }, 700)
+    onRate(run.context.agentRunId!, rating)
   }
 
-  const prompt = useMemo(
-    () =>
-      run.messages
-        .map((m: any) => (m?.role === 'assistant' ? (m?.usage?.promptTokens ?? 0) : 0))
-        .reduce((acc, c) => acc + c, 0),
-    [run.messages],
-  )
-  const completion = useMemo(
-    () =>
-      run.messages
-        .map((m: any) => (m?.role === 'assistant' ? (m?.usage?.completionTokens ?? 0) : 0))
-        .reduce((acc, c) => acc + c, 0),
-    [run.messages],
-  )
-
+  const { prompt, completion } = useMemo(() => computeAgentRunUsage(run), [run])
   const llmConfig = run.metadata?.llmConfig as LLMConfig | undefined
-
-  const costUSD = useMemo(() => {
-    if (durableCostUSD != null) return durableCostUSD
-    if (!llmConfig) return 0
-    const inputPrice = llmConfig.costInputPerMTokensUSD || 0
-    const outputPrice = llmConfig.costOutputPerMTokensUSD || 0
-    return (inputPrice * prompt) / 1_000_000 + (outputPrice * completion) / 1_000_000
-  }, [durableCostUSD, llmConfig, prompt, completion])
+  const costUSD = useMemo(
+    () => (durableCostUSD != null ? durableCostUSD : computeCostUSD(prompt, completion, llmConfig)),
+    [durableCostUSD, prompt, completion, llmConfig],
+  )
 
   const acknowledgeRun = () => {
     if (unread && run.context.agentRunId) {
@@ -161,7 +132,6 @@ export default function AgentRunRow({
       onMouseEnter={acknowledgeRun}
       onFocus={acknowledgeRun}
     >
-      {/* Unseen-completed red dot indicator to the left of the first column */}
       <td className="px-3 py-2 leading-tight w-4">
         {unread ? (
           <DotBadge title={'Run completed (unseen)'} />
@@ -181,7 +151,11 @@ export default function AgentRunRow({
       <td className="px-3 py-2">
         <DependencyBullet
           className={'max-w-[100px] overflow-clip'}
-          dependency={run.context.featureId ? `${run.context.storyId}.${run.context.featureId}` : run.context.storyId || ''}
+          dependency={
+            run.context.featureId
+              ? `${run.context.storyId}.${run.context.featureId}`
+              : run.context.storyId || ''
+          }
           notFoundDependencyDisplay={'?'}
         />
       </td>
@@ -201,16 +175,21 @@ export default function AgentRunRow({
       ) : null}
       {showFeaturesInsteadOfTurn ? (
         <td className="px-3 py-2">
-          <span className="text-xs">
-            {run.context.featureId ? '1/1' : '—'}
-          </span>
+          <span className="text-xs">{run.context.featureId ? '1/1' : '—'}</span>
         </td>
       ) : null}
       <td className="px-3 py-2">
         <CostChip
           provider={llmConfig?.provider || ''}
           model={llmConfig?.model || ''}
-          price={llmConfig ? { inputPerMTokensUSD: llmConfig.costInputPerMTokensUSD || 0, outputPerMTokensUSD: llmConfig.costOutputPerMTokensUSD || 0 } : undefined}
+          price={
+            llmConfig
+              ? {
+                  inputPerMTokensUSD: llmConfig.costInputPerMTokensUSD || 0,
+                  outputPerMTokensUSD: llmConfig.costOutputPerMTokensUSD || 0,
+                }
+              : undefined
+          }
           costUSD={costUSD}
         />
       </td>
@@ -299,13 +278,13 @@ export default function AgentRunRow({
         <td className="px-3 py-2 text-right">
           <div className="flex gap-2 justify-end opacity-0 group-hover:opacity-100 transition-opacity">
             {onView ? (
-               <Button
-                 className="btn-secondary w-[34px]"
-                 aria-label="View"
-                 onClick={() => run.context.agentRunId && onView(run.context.agentRunId)}
-               >
-                 <IconChevron className="w-4 h-4" />
-               </Button>
+              <Button
+                className="btn-secondary w-[34px]"
+                aria-label="View"
+                onClick={() => run.context.agentRunId && onView(run.context.agentRunId)}
+              >
+                <IconChevron className="w-4 h-4" />
+              </Button>
             ) : null}
             {run.state === 'running' && onCancel && run.context.agentRunId ? (
               <Button
