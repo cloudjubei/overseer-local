@@ -6,7 +6,7 @@
 
 ## `src/legacy/`
 
-The current in-process LOCAL implementation (everything under `src/logic/` and the data-bearing parts of `src/main/`) is being moved verbatim into `src/legacy/` as part of the backend-only cutover (see [docs/implementation-plan.md § B.1](./implementation-plan.md)). Folder structure is preserved so a reader can navigate it like the old tree.
+The in-process LOCAL implementation (everything that was under `src/logic/` and the data-bearing parts of `src/main/`) has been moved verbatim into `src/legacy/` as part of the backend-only cutover (2026-05; see [docs/implementation-plan.md § B.1](./implementation-plan.md)). Folder structure is preserved so a reader can navigate it like the old tree; imports inside the legacy tree are likely dangling and that's intentional — the tree is excluded from build / typecheck / lint / tests.
 
 Rules:
 

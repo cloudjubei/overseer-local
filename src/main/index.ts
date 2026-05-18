@@ -1,7 +1,6 @@
 import { app, shell, BrowserWindow, nativeImage, dialog } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
-import { initManagers } from './managers'
 
 const getAppIcon = () => {
   // In dev (electron-forge start + vite), __dirname points to .vite/build, so use process.cwd()
@@ -47,9 +46,6 @@ async function createWindow(): Promise<void> {
     shell.openExternal(details.url)
     return { action: 'deny' }
   })
-
-  const projectRoot = app.getAppPath()
-  await initManagers(projectRoot, mainWindow)
 
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     await mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
