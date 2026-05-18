@@ -1,52 +1,10 @@
 import { ElectronAPI } from '@electron-toolkit/preload'
-import type { ProjectsGroupsService } from '@renderer/services/projectsGroupsService'
-import type { ProjectsService } from '@renderer/services/projectsService'
-import type { ChatsService } from '@renderer/services/chatsService'
-import type { PricingService } from '@renderer/services/pricingService'
-import type { CostsService } from '@renderer/services/costsService'
-import type { FilesService } from '@renderer/services/filesService'
-import type { NotificationsService } from '@renderer/services/notificationsService'
-import type { SettingsService } from '@renderer/services/settingsService'
-import type { LiveDataService } from '@renderer/services/liveDataService'
-import type { FactoryAgentRunService } from '@renderer/services/factoryAgentRunService'
-import type { FactoryToolsService } from '@renderer/services/factoryToolsService'
-import type { DBService } from '@renderer/services/dbService'
-import type { DocumentIngestionService } from '@renderer/services/documentIngestionService'
-import type { StoriesService } from '@renderer/services/storiesService'
-import type { FactoryTestsService } from '@renderer/services/factoryTestsService'
-import type { CompletionService } from '@renderer/services/completionService'
-import type { GitService } from '@renderer/services/gitService'
-import type { GitCredentialsService } from '@renderer/services/gitCredentialsService'
-import type { LLMConfigsService } from '@renderer/services/llmConfigsService'
-import type { CodeIntelService } from '@renderer/services/codeIntelService'
-import type { DiagnosticsService } from '@renderer/services/diagnosticsService'
 import type { AuthService } from '@renderer/services/authService'
 
 declare global {
   interface Window {
     electron: ElectronAPI
     authService: AuthService
-    dbService: DBService
-    factoryAgentRunService: FactoryAgentRunService
-    factoryToolsService: FactoryToolsService
-    codeIntelService: CodeIntelService
-    storiesService: StoriesService
-    projectsService: ProjectsService
-    projectsGroupsService: ProjectsGroupsService
-    filesService: FilesService
-    chatsService: ChatsService
-    completionService: CompletionService
-    pricingService: PricingService
-    costsService: CostsService
-    notificationsService: NotificationsService
-    settingsService: SettingsService
-    liveDataService: LiveDataService
-    documentIngestionService: DocumentIngestionService
-    factoryTestsService: FactoryTestsService
-    gitService: GitService
-    gitCredentialsService: GitCredentialsService
-    llmConfigsService: LLMConfigsService
-    diagnosticsService: DiagnosticsService
   }
 }
 export {}
