@@ -1,8 +1,6 @@
 # Implementation plan
 
-For the architectural ground rules every change must follow, see [ARCHITECTURE.md](./ARCHITECTURE.md). For the platform-adaptation rules see [PLATFORM_ADAPTATIONS.md](./PLATFORM_ADAPTATIONS.md) and [MULTI_PLATFORM_ARCHITECTURE.md](./MULTI_PLATFORM_ARCHITECTURE.md). For the UI conventions, see the canonical home at [thefactory-ui/docs/ARCHITECTURE.md § Consumer-facing UI conventions](../../thefactory-ui/docs/ARCHITECTURE.md#consumer-facing-ui-conventions). The reference implementation for the new direction is [thefactory-overseer-web](../../thefactory-overseer-web)'s renderer.
-
-The earlier hybrid / dual-mode analysis is preserved verbatim at [docs/expansion/03-overseer-local-hybrid.md](./expansion/03-overseer-local-hybrid.md) — that document is **superseded**. The decision is below.
+For the architectural ground rules every change must follow, see [ARCHITECTURE.md](./ARCHITECTURE.md). For the platform-adaptation rules see [PLATFORM_ADAPTATIONS.md](./PLATFORM_ADAPTATIONS.md) and [MULTI_PLATFORM_ARCHITECTURE.md](./MULTI_PLATFORM_ARCHITECTURE.md). For the UI conventions, see the canonical home at [thefactory-ui/docs/ARCHITECTURE.md § Consumer-facing UI conventions](../../thefactory-ui/docs/ARCHITECTURE.md#consumer-facing-ui-conventions). The reference implementation to mirror is [thefactory-overseer-web](../../thefactory-overseer-web)'s renderer.
 
 ---
 
@@ -23,9 +21,9 @@ A new contributor opening web, desktop, and mobile side by side should be able t
 
 ## A. Open questions / blocked tasks
 
-Things genuinely blocked on a third-party decision or external trigger, not on engineering work. All four cross-cutting questions that were here in the previous draft (sidecar vs external backend, Postgres bundling, data migration, offline scope) have been resolved — see §C for the decisions and §B for the work.
+Things genuinely blocked on a third-party decision or external trigger, not on engineering work. Re-populate only when a real external blocker appears.
 
-*(Currently empty — keep this section short and re-populate only when a real external blocker appears.)*
+*(Currently empty.)*
 
 ---
 
@@ -42,9 +40,9 @@ Concretely:
 - Create `src/legacy/` and move the current contents of `src/logic/` and `src/main/` (everything that's not pure Electron-window-chrome) under it. Preserve the original folder structure so a reader can navigate it like the old tree.
 - Wire `src/legacy/` out of the build — no compilation, no imports from live code, no tests against it. A `src/legacy/README.md` explains what's there, when it was deprecated (2026-05), and why (backend-only cutover). Link to this plan.
 - Delete the old IPC routes that pointed at the legacy managers. Renderer screens stay in place for now and will be re-pointed at the backend client in §B.3 — they'll be visibly broken in between, which is fine for an internal cutover branch.
-- Add a note to [ARCHITECTURE.md](./ARCHITECTURE.md) explaining that `src/legacy/` exists, why it's there, and that **nothing in live code may import from it**. (Tracked separately in the parity-mandate todo list.)
+- Confirm [ARCHITECTURE.md § `src/legacy/`](./ARCHITECTURE.md#srclegacy) still accurately describes the move once the files land.
 
-Why first: every later step needs the slate clean. We don't want to refactor live code in two places (current LOCAL + new backend-client) while transitioning.
+Goal: every later step starts from a clean slate, with no live code importing from the old managers.
 
 ### 2. Backend client — HTTP + WS, lifted from web
 
@@ -57,7 +55,7 @@ Desktop talks to `thefactory-backend` over the same HTTP + WS surface the web ap
 
 ### 3. Re-point the renderer at the backend client
 
-The renderer's contexts under `src/renderer/core/contexts/` are already structurally identical to web's `src/core/contexts/` — that was the work of the BE-refactor branch. Now they swap their data source from "Electron IPC → legacy managers" to "backend HTTP + WS."
+The renderer's contexts under `src/renderer/core/contexts/` are structurally identical to web's `src/core/contexts/`. Swap their data source from "Electron IPC → legacy managers" to "backend HTTP + WS."
 
 - For every context (`Projects`, `ProjectsGroups`, `Stories`, `Chats`, `Files`, `Git`, `Agents`, `Tests`, `Tools`, `LiveData`, `Costs`, `AppSettings`, …): replace its IPC calls with the generated SDK + `WsClient`.
 - Where web has already lifted a context into `thefactory-ui/headless` (e.g. badge math, `chatsSeen` store, form state hooks), desktop imports from there directly instead of maintaining its own copy. Any context still duplicated between web and desktop is a parity bug — file a follow-up to promote it to `thefactory-ui/headless`.
@@ -84,7 +82,7 @@ This screen is also where the "you're disconnected" banner is configured (see §
 
 ### 6. Disconnected-state UX
 
-Desktop is always-online by design (see §C). When the network drops, behaviour mirrors mobile:
+When the network drops, behaviour mirrors mobile:
 
 - Persistent banner at the top of the window when the WS is disconnected.
 - Disable actions that need the WS (sending chat messages, creating stories) — show a tooltip on hover explaining why.
@@ -101,30 +99,14 @@ Desktop is always-online by design (see §C). When the network drops, behaviour 
 
 ---
 
-## C. Direction: backend-only, always online, fresh start
+## C. Runtime model
 
-The hybrid analysis ([expansion/03-overseer-local-hybrid.md](./expansion/03-overseer-local-hybrid.md)) explored dual-mode LOCAL + CONNECTED with mode switching, sidecar backends, Postgres bundling, and `~/.factory` migration. **All of that is dropped.** Desktop becomes a pure backend client, equivalent to web at the runtime level and to mobile at the deployment-target level.
-
-Rationale:
-
-- Maintaining two implementations of every manager forever doubles every bug surface, every test, every WS contract change. The cost is permanent.
-- The CONNECTED path already exists in production for web. Reusing it for desktop catches API drift early and shrinks the desktop codebase substantially.
-- Mobile is also backend-only (see [thefactory-overseer-mobile/docs/implementation-plan.md](../../thefactory-overseer-mobile/docs/implementation-plan.md)). Three clients sharing one transport contract is the parity story the [thefactory-ui](../../thefactory-ui) split is built around.
-- Bundled-backend (sidecar), Postgres-in-the-app, data migration from existing `~/.factory/` trees — all turned out to be solving problems that **don't actually exist** under a fresh-start, always-online assumption. We're not carrying that complexity.
-
-What that means concretely:
-
-- The renderer talks to `thefactory-backend` over HTTP + WS, exactly like web.
-- The main process is window chrome + native bridges only — no data services, no file watchers, no embedded Node runtime, no Postgres.
-- No sidecar. No bundled backend. The user runs (or connects to) a `thefactory-backend` instance separately.
-- No backward compatibility with the old LOCAL data layout. Existing `~/.factory/` trees are not migrated; users are expected to be on a fresh install or use one of the existing tools to push their data into the backend out-of-band.
-- No offline mode, no local cache, no sync layer. Network drops show a disconnected banner; data screens stay on their last-known render. See §B.6.
-
-What we keep:
-
-- Electron-specific chrome: window controls, native menus, system tray, OS notifications, native file pickers, app-protocol handlers.
-- Settings + theme state (UI-level, not data) — same `AppSettings` / `chatsSeen` localStorage model the web uses.
-- Renderer-side IPC for the Electron-only surfaces above. Everything else is direct HTTP + WS.
+- **Backend-only, always online, fresh start.** Desktop is a pure backend client — equivalent to web at the runtime level and to mobile at the deployment-target level.
+- **Renderer talks to `thefactory-backend` over HTTP + WS**, exactly like web. Same generated SDK, same WS event stream.
+- **Main process is window chrome + native bridges only** — no data services, no file watchers, no embedded Node runtime, no Postgres, no sidecar, no bundled backend. The user runs (or connects to) a `thefactory-backend` instance separately.
+- **No backward compatibility, no data migration.** Existing `~/.factory/` trees are not auto-imported; this is treated as a fresh install.
+- **No offline mode, no local cache, no sync layer.** Network drops show a disconnected banner; data screens stay on their last-known render. See §B.6.
+- **What stays Electron-side:** window controls, native menus, system tray, OS notifications, native file pickers, app-protocol handlers, settings + theme state (UI-level only — same `AppSettings` / `chatsSeen` localStorage model the web uses). IPC stays for these surfaces; everything else is direct HTTP + WS.
 
 ---
 
