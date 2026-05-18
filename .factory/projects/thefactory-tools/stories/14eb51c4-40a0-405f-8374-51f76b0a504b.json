@@ -1,0 +1,73 @@
+{
+  "id": "14eb51c4-40a0-405f-8374-51f76b0a504b",
+  "status": "-",
+  "title": "different type of LLM output - strategies",
+  "description": "Support multiple configurable LLM output strategies in the completion pipeline instead of hard-coding the current 3-phase flow.\n\nThe supported strategies should be:\n- `unstructured`: plain assistant output with no structured schema enforcement and no 3-phase orchestration.\n- `native_structured`: provider-native structured output for the assistant response, without the full tool-orchestration wrapper.\n- `three_phase_structured_native_tools_structured`: the current behaviour in `src/completion/CompletionTools.ts` — structured starter response -> native tool-calling loop -> structured finalizer response.\n- `native_tools_only`: pure native tool-calling flow with no structured starter/finalizer phases.\n\nKey requirements:\n- The strategy must be easy to configure through completion settings, with optional per-request override support.\n- Only `three_phase_structured_native_tools_structured` should use the full 3-phase orchestration.\n- The other strategies must avoid unnecessary extra LLM calls.\n- Usage/cost tracking must record which strategy produced each LLM call so the strategies can be compared by tokens and cost.\n- For the 3-phase strategy, tracking should also distinguish the phase of the call (for example starter vs tool-loop vs finalizer) so comparisons are meaningful.\n- Tests must cover every strategy, configuration selection, and strategy-aware usage/cost attribution.\n\nImplementation note from current code:\n`sendCompletionWithTools()` in `src/completion/CompletionTools.ts` currently implements the 3-phase strategy implicitly, while `sendCompletion()` currently toggles structured output based on whether tools are available. This story should make the strategy explicit in types/configuration and route execution through strategy-specific orchestration paths instead of growing the current hard-coded branching.",
+  "features": [
+    {
+      "id": "8bc9dd3a-a33e-4ef9-8c8d-c1328cc94e5b",
+      "status": "-",
+      "title": "Add configurable completion output strategy selection",
+      "description": "Introduce a first-class completion output strategy type and make it configurable through completion settings with optional per-request override support. Keep backward compatibility by defaulting to the current 3-phase behavior unless explicitly changed. Make strategy selection explicit in completion types and orchestration entrypoints rather than inferred indirectly from tool availability.",
+      "context": [],
+      "createdAt": "2026-03-25T01:33:37.213Z",
+      "updatedAt": "2026-03-25T01:33:37.213Z"
+    },
+    {
+      "id": "0fa73e4f-783a-49a6-b258-f2cf8c88fd4c",
+      "status": "-",
+      "title": "Implement unstructured output strategy",
+      "description": "Add an `unstructured` completion strategy that performs a direct assistant completion without structured schema enforcement and without the 3-phase orchestration wrapper. This path should avoid unnecessary extra model calls and return plain assistant output as-is.",
+      "context": [],
+      "createdAt": "2026-03-25T01:33:37.237Z",
+      "updatedAt": "2026-03-25T01:33:37.237Z"
+    },
+    {
+      "id": "9e7adc7e-3fdc-4826-b707-27f42d8c14c1",
+      "status": "-",
+      "title": "Implement native structured output strategy",
+      "description": "Add a `native_structured` completion strategy that uses provider-native structured output for the assistant response in a single completion path, without invoking the full starter -> tool-loop -> finalizer process. Ensure the returned structured response can still be parsed into the expected assistant response shape.",
+      "context": [],
+      "createdAt": "2026-03-25T01:33:37.257Z",
+      "updatedAt": "2026-03-25T01:33:37.257Z"
+    },
+    {
+      "id": "5ec3d332-ac8a-4139-ab94-a341fb392ae2",
+      "status": "-",
+      "title": "Make the current 3-phase flow an explicit strategy",
+      "description": "Refactor the current behavior in `src/completion/CompletionTools.ts` into an explicit `three_phase_structured_native_tools_structured` strategy. Preserve existing behavior: structured starter response, native tool-calling loop gated by `requiresTools`, and structured finalizer response after tool execution.",
+      "context": [],
+      "createdAt": "2026-03-25T01:33:37.277Z",
+      "updatedAt": "2026-03-25T01:33:37.277Z"
+    },
+    {
+      "id": "1e67131f-cf1c-4163-910e-12b58e08b110",
+      "status": "-",
+      "title": "Implement native-tools-only strategy",
+      "description": "Add a `native_tools_only` completion strategy that uses pure provider-native tool calling without structured starter or finalizer phases. This path should run the tool loop directly and let the final assistant response, if any, come from the native provider flow rather than a structured wrapper call.",
+      "context": [],
+      "createdAt": "2026-03-25T01:33:37.297Z",
+      "updatedAt": "2026-03-25T01:33:37.297Z"
+    },
+    {
+      "id": "0de2240a-bcb3-4280-aa26-0b3c852d55c7",
+      "status": "-",
+      "title": "Track usage and costs by strategy and phase",
+      "description": "Extend LLM usage/cost tracking so every recorded completion call includes the selected completion strategy. Also add a phase field for multi-call strategies, especially the current 3-phase flow, so calls can be distinguished as starter, tool-loop, finalizer, or single-call equivalents. This should make it possible to compare token and cost usage across strategies meaningfully.",
+      "context": [],
+      "createdAt": "2026-03-25T01:33:37.316Z",
+      "updatedAt": "2026-03-25T01:33:37.316Z"
+    },
+    {
+      "id": "7ffe59e8-fd97-4f63-884d-8c57cbcea681",
+      "status": "-",
+      "title": "Add tests for each strategy, configuration, and attribution",
+      "description": "Add automated tests for every supported completion output strategy: `unstructured`, `native_structured`, `three_phase_structured_native_tools_structured`, and `native_tools_only`. Also test configuration defaults and per-request overrides, verify that non-3-phase strategies avoid unnecessary extra model calls, and verify that usage/cost entries include the strategy field and correct phase attribution where applicable.",
+      "context": [],
+      "createdAt": "2026-03-25T01:33:37.338Z",
+      "updatedAt": "2026-03-25T01:33:37.338Z"
+    }
+  ],
+  "createdAt": "2026-03-25T01:19:34.867Z",
+  "updatedAt": "2026-03-25T01:33:03.392Z"
+}

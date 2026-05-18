@@ -1,0 +1,80 @@
+{
+  "id": "9e288da0-bd1f-4055-bfaa-f3921243ad0a",
+  "status": "+",
+  "title": "ChatsTools improvements",
+  "description": "Various improvements for ChatsTools",
+  "features": [
+    {
+      "id": "17f976da-24e7-47ef-af77-9de5041a84e2",
+      "status": "+",
+      "title": "Chats need settings storage",
+      "description": "Each chat type - as defined by the ChatContextType - and subtype (as defined by ChatContextProjectTopicType or ChatContextStoryTopicType if it exists for the given type), needs to be able to store settings for that particular chat type. These settings should exist in a single file under `.factory/settings/chats.json` .\nThe settings to store are:\n- systemPrompt (what is the prompt to send at the beginning of the chat)\n- availableTools (which tools the given chat agent has access to)\n- autoCallTools (which tools the agent can call without asking for confirmation from the user)\nThe defaults for these should be exposed via constants in @src/chats/utils.ts so that any client can easily use them.\nWhen starting @src/chats/ChatsTools.ts it should make sure that the settings file gets created.\nFor the prompts there are a few included in @src/chats/utils.ts already - they are done so that it's easy to replace the `{{item}}` with contextual info. The prompts for all types should be done - especially `createStory` and `createFeature` is important as these agents need to guide the users in creating a good story/feature so that it contains all the spec needed for the job to be done (so that all the questions needed for an agent to perform their job are answered).",
+      "context": [
+        "src/chats/utils.ts",
+        "src/chats/ChatsTools.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-29T19:20:17.045Z",
+      "updatedAt": "2025-09-29T20:39:32.506Z",
+      "completedAt": "2025-09-29T20:39:32.506Z"
+    },
+    {
+      "id": "4b51972e-76fc-46e8-a11c-e62803ec43fc",
+      "status": "+",
+      "title": "Add the missing functions to ChatsTools",
+      "description": "In @src/chats/ChatsTools.ts there are missing functions needed for manipulating the chat settings:\n- given a ContextType a chats settings must be able to be updated \n- also given ContextType - we need a resetToDefaults\n- given a ContextType and matching objects (so for 'PROJECT' that would be a ProjectSpec) it will return the system prompt with the values taken from the objects appropriately replacing the systemPrompt placeholders.\nAll the required types should be in @src/chats/types.ts .",
+      "context": [
+        "src/chats/ChatsTools.ts",
+        "src/chats/types.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-29T21:45:41.790Z",
+      "updatedAt": "2025-09-29T21:58:03.102Z",
+      "completedAt": "2025-09-29T21:58:03.102Z"
+    },
+    {
+      "id": "bed2d4d7-bb35-40ff-bb40-b9d0aa0df72f",
+      "status": "+",
+      "title": "The prompt for the tests chat should include information about the outputs",
+      "description": "When running tests they are currently stored under `.factory/tests-run.json` and the coverage under `.factory/tests-coverage.json` - the system prompt should include information about this and what types the agent should expect to see there, as well as the fact that running the tests means that they are expected to be under the folder `tests` of the project.",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-09-29T21:59:52.357Z",
+      "updatedAt": "2025-09-29T22:50:42.565Z",
+      "completedAt": "2025-09-29T22:50:42.565Z"
+    },
+    {
+      "id": "7d5cb25c-cccb-42da-8ac5-e772227a8920",
+      "status": "+",
+      "title": "In ChatsTools  the function `getDefaultChatSettings` needs to be implemented",
+      "description": "@src/chats/ChatsTools.ts has it missing. It would be cleaner to implement if `ChatSettingsSelector` in @src/chats/types.ts follows the same structure as `ChatContextArguments`.",
+      "context": [
+        "src/chats/ChatsTools.ts",
+        "src/chats/types.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-29T22:47:32.897Z",
+      "updatedAt": "2025-09-29T22:52:14.895Z",
+      "completedAt": "2025-09-29T22:52:14.895Z"
+    },
+    {
+      "id": "70cff04d-f061-4faa-a688-b46c49484ca2",
+      "status": "+",
+      "title": "Completion needs to accept ChatSettings and generate the spec from it",
+      "description": "The @src/orchestrator.ts is using @src/agentTools/AgentTools.ts to generate the signatures for the tools that each agent has available.\nWhen using @src/chats/completion.ts via @src/chats/ChatsTools.ts we want similar signatures to be generated and appended to the first system prompt sent to the LLM. In Chats these signatures need to be generated base off the allowed tools that will be a part of provided `ChatSettings` .\nCompletion should have this interface unified, so that it will inject the tool signatures into the system prompt if there's a specific template like `{{TOOLS}}` . This way it can be reused for the needs of the @src/orchestrator.ts and via @src/chats/ChatsTools.ts . What's more, this way the whole logic inside of the orchestrator for performing a single LLM turn - so sending a single message, the LLM responding, and then running all the tool calls needed - this could be also a part of completion, which could then accept the needed agent tooling.",
+      "context": [
+        "src/orchestrator.ts",
+        "src/agentTools/AgentTools.ts",
+        "src/chats/completion.ts",
+        "src/chats/ChatsTools.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-30T12:19:15.670Z",
+      "updatedAt": "2025-09-30T22:18:56.706Z",
+      "completedAt": "2025-09-30T22:18:56.706Z"
+    }
+  ],
+  "createdAt": "2025-09-29T19:15:14.383Z",
+  "updatedAt": "2025-09-29T19:15:20.071Z",
+  "completedAt": "2025-09-30T22:18:56.706Z"
+}

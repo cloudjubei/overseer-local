@@ -1,0 +1,223 @@
+{
+  "id": "67749a79-fda3-4c2b-9c35-b644c761b895",
+  "status": "=",
+  "title": "Ongoing Improvements",
+  "description": "Various ongoing improvements to the project",
+  "features": [
+    {
+      "id": "8a94bd10-9838-4e6f-9b6c-1b2060d6de40",
+      "status": "=",
+      "title": "Aim for close to 100% test coverage",
+      "description": "We need to make sure that the tests cover as close as 100% of the codebase.\nObviously, things like the ai service with getting results from the AI cannot be fully tested - but we can test for many ranges of responses by mocking the LLM responses appropriately. The same idea should be taken everywhere to try to achieve 100% coverage.\n\nOne important thing is to make sure that data that is entering and leaving endpoints is validated thoroughly to make sure that it matches the expected schema. This should be part of the code and the tests should validate it too (i.e. malformed objects being rejected).\n\nThere needs to be a relevant section in @README.md  explaining how vital testing is and to refer to @docs/TESTING.md for all guidance related to writing tests and the standard for them. For reference there is also the @docs/CODE_STANDARD.md  document that highlights the coding standard within the project.\n\nNEVER FIX CODE JUST SO TESTS PASS - THE PROJECT CODE NEEDS TO MAKE SENSE AND WORK SO THE FEATURES ARE SATISFIED. TESTS ALWAYS NEED TO POKE AT HOLES AND EDGES OF THE CODE.",
+      "context": [],
+      "createdAt": "2025-09-19T10:36:00.358Z",
+      "updatedAt": "2025-09-30T01:11:39.782Z",
+      "blockers": []
+    },
+    {
+      "id": "656fa3b5-b86a-41f3-8312-3aa1ed774c6d",
+      "status": "=",
+      "title": "Code standard",
+      "description": "The document @docs/CODE_STANDARD.md  highlights the overall architecture and coding standards maintained in this project.\nThere is a clear reference to it inside @README.md and @docs/FILE_ORGANISATION.md so that anyone creating new features or updating existing ones will go to it.\nIt should be as succinct as possible, but explaining the idea as well as possible.\n\nGo over all the code and make sure that it satisfies the standards.",
+      "context": [],
+      "createdAt": "2025-09-19T10:36:08.586Z",
+      "updatedAt": "2025-09-22T22:55:15.264Z",
+      "blockers": []
+    },
+    {
+      "id": "03858e2a-b346-4a6c-b711-427a85401e8e",
+      "status": "+",
+      "title": "Hybrid Search needs improvements",
+      "description": "Right now the search doesn't seem to be pick up file names for keyword search.\nWhen the query is passed in - for embedding/semantic search - it should process the whole query and let the embeddings score like they do now. But for keyword search, the query should be space separated - and each such keyword should be tested against the file contents and the file name. File name should score separately from contents - it should be weighed 50/50 (file name vs contents) for the final score for the overall keyword score.",
+      "context": [],
+      "createdAt": "2025-09-23T12:18:10.277Z",
+      "updatedAt": "2025-09-23T12:32:09.157Z",
+      "completedAt": "2025-09-23T12:32:09.157Z"
+    },
+    {
+      "id": "a83e8f50-66a3-44f7-a01f-057de5bb0a00",
+      "status": "+",
+      "title": "The current tests are too basic",
+      "description": "We need to have more advanced tests to really see that the search functionality is working appropriately.\nWe need two sets of files - 1 made up non-code documents and 2 this project's files (all of them).\n\nWe need to have the tests cover all sorts of cases for using the hybrid search - when the weight is 0, 0.2, 0.5, 0.8, 1.0 . When there is information just in the title of the file, just in the contents or just in the embeddings (semantically it's there).",
+      "context": [],
+      "createdAt": "2025-09-23T12:45:38.880Z",
+      "updatedAt": "2025-09-23T12:51:52.069Z",
+      "completedAt": "2025-09-23T12:51:52.069Z"
+    },
+    {
+      "id": "f018a399-a2fb-47f5-9990-b89fc7381097",
+      "status": "+",
+      "title": "Need to create an e2e tests using a real db under `tests/e2e`",
+      "description": "First we need to explain to the user how to easily spin up a test database with docker compose that will be used for e2e tests.\nThen assuming the database is running, there need to be e2e tests for indexing and most importantly for hybrid-search - mirroring all the tests inside `tests` that would require to call `openDatabase`",
+      "context": [],
+      "createdAt": "2025-09-23T13:02:45.316Z",
+      "updatedAt": "2025-09-23T16:59:28.369Z",
+      "blockers": [],
+      "completedAt": "2025-09-23T16:17:21.497Z"
+    },
+    {
+      "id": "bd58e850-de61-4e54-adba-9a7b49e76f29",
+      "status": "+",
+      "title": "Make more complex e2e tests",
+      "description": "THere should be an equivalent e2e test version of @tests/hybrid-search-advanced.test.ts .\nWe should have one version for entities and one for documents.\nThe goal is to stress test different weights to the scores [0,0.2,0.5,0.8,1] of the keywords vs embedding weights.\nWe also make sure that files are picked up based on their file names - so there need to be appropriate tests for that.\nFollow @docs/TESTING.md for standards. \nMake sure the tests are as atomic and self-contained as possible.\nPrefer more easily failable tests rather than a huge battery of tests that could fail at the beginning.",
+      "context": [
+        "tests/hybrid-search-advanced.test.ts",
+        "docs/TESTING.md"
+      ],
+      "createdAt": "2025-09-23T15:07:16.099Z",
+      "updatedAt": "2025-09-23T17:00:30.567Z",
+      "blockers": [],
+      "completedAt": "2025-09-23T16:20:36.753Z"
+    },
+    {
+      "id": "94a33d4a-7698-4962-86cd-cb3a19d7f664",
+      "status": "+",
+      "title": "Tests fail",
+      "description": "",
+      "context": [],
+      "createdAt": "2025-09-23T17:00:26.541Z",
+      "updatedAt": "2025-09-23T18:08:26.001Z",
+      "blockers": [],
+      "completedAt": "2025-09-23T17:11:58.623Z"
+    },
+    {
+      "id": "734c141d-83b8-4a4c-8ed5-75ef2d5ea874",
+      "status": "+",
+      "title": "Title doesn't get taken into account when hybrid searching",
+      "description": "Inside the definition of hybrid search in @src/utils.ts - for documents, `src` isn't taken into account - the name portion of it should be. But even better, we should enforce accepting a name, inside DocumentInput, and store it in the database and then keyword search (inside hybrid search) should also test itself against this value.",
+      "context": [
+        "src/utils.ts"
+      ],
+      "createdAt": "2025-09-23T17:01:25.209Z",
+      "updatedAt": "2025-09-24T03:00:18.323Z",
+      "blockers": [],
+      "completedAt": "2025-09-24T03:00:18.323Z"
+    },
+    {
+      "id": "4016b214-feaf-41a0-b56c-f61932f3250c",
+      "status": "+",
+      "title": "Complex e2e from this project's codebase",
+      "description": "Following @tests/e2e/documents-hybrid-advanced.e2e.test.ts and @tests/hybrid-search-advanced.test.ts - there need to be advanced e2e tests using this project's code files as documents to search against, checking various weight settings.\nThese tests need to be exact - i.e. they should always return the same expected files in the correct order for the given weight.",
+      "context": [
+        "tests/e2e/documents-hybrid-advanced.e2e.test.ts",
+        "tests/hybrid-search-advanced.test.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-23T18:11:34.201Z",
+      "updatedAt": "2025-09-23T22:03:29.894Z",
+      "completedAt": "2025-09-23T22:03:29.894Z"
+    },
+    {
+      "id": "39e9a493-5433-405b-8fc0-89f4ec5d3e18",
+      "status": "+",
+      "title": "Augment the existing hybrid search tests",
+      "description": "All the tests that use hybrid search (both e2e and normal) need to be updated to include cases where a list of keywords is presented.\\nA test case needs to show having matches at the start of the list, another in the middle, another at the end, another no matches, and yet another having a sentence that doesn't match in terms of keywords but semantically does.",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-09-23T22:08:33.087Z",
+      "updatedAt": "2025-09-23T22:12:35.953Z",
+      "completedAt": "2025-09-23T22:12:35.953Z"
+    },
+    {
+      "id": "ad2a782a-d8f1-4560-83f5-2e972c9ed02f",
+      "status": "+",
+      "title": "Entities tests need to show that metadata isn't taken into account",
+      "description": "The entities hybrid search tests - @tests/e2e/entities-hybrid-advanced.e2e.test.ts and @tests/e2e/entities-hybrid.e2e.test.ts need to be updated with tests that show that even if metadata holds relevant data - then it won't change a hybrid search result.",
+      "context": [
+        "tests/e2e/entities-hybrid-advanced.e2e.test.ts",
+        "tests/e2e/entities-hybrid.e2e.test.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-23T22:23:59.756Z",
+      "updatedAt": "2025-09-23T22:57:32.181Z",
+      "completedAt": "2025-09-23T22:57:32.181Z"
+    },
+    {
+      "id": "057eb355-399f-443b-b98d-6c2f46a953da",
+      "status": "+",
+      "title": "e2e tests suffer from randomness",
+      "description": "It seems that a few of the e2e tests give different results on different runs. This seems to be caused by some randomness being involved at tokenization or even more probably at the embedding stage.\nWe should make sure that two items that are exactly the same - should get the same exact fts tokens and embeddings.\nThere shouldn't be randomisation at play.",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-09-23T22:57:35.778Z",
+      "updatedAt": "2025-09-24T00:25:29.131Z",
+      "completedAt": "2025-09-24T00:25:29.131Z"
+    },
+    {
+      "id": "4c2bf377-ffe0-4ad3-8b2d-f3cc9ba32592",
+      "status": "+",
+      "title": "when multiple keywords are input they are not treated separately",
+      "description": "I keep observing a textScore of 0 when calling `searchDocuments` in @src/index.ts . When only one keyword is input, the textScore is correct, but with multiple keywords that are space separated - the result is pretty much always 0.\nWhat should happen is that the input should be space separated, and for each such keyword the textScore should be computed and then the maximum of all these keywords should be taken - that should be the final score for a set of keywords. This should be directly inside the SQL `hybrid_search_entities` and `hybrid_search_documents` functions.",
+      "context": [
+        "src/index.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-24T02:37:08.544Z",
+      "updatedAt": "2025-09-24T02:42:00.191Z",
+      "completedAt": "2025-09-24T02:42:00.191Z"
+    },
+    {
+      "id": "04391c02-652b-4dad-b59a-2eda2bccf1d3",
+      "status": "+",
+      "title": "Batching of embeddings",
+      "description": "In @src/index.ts in the function `upsertDocuments` we are embedding the content of many documents at once and this takes a long time. So we require this improvement - the @src/utils/embeddings.ts needs to allow batched embeddings, so that it can quicker do the whole batch in one go. Sample code for the usage of this is commented out in `upsertDocuments` .",
+      "context": [
+        "src/index.ts",
+        "src/utils/embeddings.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-29T20:28:01.709Z",
+      "updatedAt": "2025-09-30T01:11:34.522Z",
+      "completedAt": "2025-09-30T01:11:34.522Z"
+    },
+    {
+      "id": "77101a35-86dd-42f7-b42b-5c30fedc7713",
+      "status": "+",
+      "title": "Check hashes before embeddings",
+      "description": "In `upsertDocuments` in @src/index.ts before proceeding into the embeddings, there should be a function that would accept the src/ids of the documents and their contents and would return all the documents that would be updated (thus requiring embeddings) and then only these documents would be passed onto the embeddings and the actual upsert. The embeddings are the bottleneck, so we need to make sure that as few documents as possible get re-embedded - thus we need a pre-emptive hash check.",
+      "context": [
+        "src/index.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-29T22:45:51.048Z",
+      "updatedAt": "2025-09-30T00:59:38.344Z",
+      "completedAt": "2025-09-30T00:59:38.344Z"
+    },
+    {
+      "id": "492873cd-c561-440c-abd5-319affebb017",
+      "status": "+",
+      "title": "OR query splitting for search",
+      "description": "Support 'OR' and '|' operators in queries to act as separators for alternative tokens.\n\nScope:\n- Full-text tsquery builders (documents/entities): exclude the 'or' lexeme so it is not treated as a keyword; treat separated tokens as OR alternatives within the tsquery.\n- Name/src direct search logic (see Feature: Document name/src direct search and interleaving): split queries on ' OR ' and '|' (case-insensitive), trim and dedupe tokens; avoid splitting inside quotes.\n\nAcceptance criteria:\n- Given 'codeIntel OR code-intel OR code_intel', treat these as three alternative tokens. The term 'OR' is not searched.\n- Existing search tests pass; no functional regressions.\n\nTesting:\n- Unit/integration tests verifying that queries with 'OR' and '|' are treated as alternative tokens for entities and documents. Example inputs: 'codeIntel OR code-intel OR code_intel', 'alpha|beta', 'ALPHA or beta'.\n- Edge cases: multiple adjacent separators ('alpha||beta'), leading/trailing separators ('|alpha', 'beta|'), mixed-case 'or'/'OR', redundant whitespace, and quoted phrases preserved (e.g., '\"foo OR bar\"' must not be split).\n- Regression tests ensuring that removing 'or' as a lexeme does not prevent finding documents that contain the literal word 'or' when intended (e.g., by using quotes or when no delimiter pattern is present).\n- E2E tests (real DB) for documents and entities confirming that at least one alternative match returns results and that ranking remains stable otherwise.",
+      "context": [],
+      "createdAt": "2025-11-05T16:29:52.888Z",
+      "updatedAt": "2025-11-05T22:51:21.105Z",
+      "blockers": [],
+      "completedAt": "2025-11-05T22:51:21.105Z"
+    },
+    {
+      "id": "03e7618d-5ac3-4ff8-9dff-c9d64076128a",
+      "status": "+",
+      "title": "Document name/src direct search and interleaving with hybrid results",
+      "description": "Add a direct name/src search for documents and interleave top results with hybrid search output.\n\nScope:\n- New SQL: searchDocumentsByName that honors filters (ids, types, projectIds) and ranks by match strength: exact equality on name/src, then prefix, then contains. Limit to top 10.\n- Query parsing follows 'OR' splitting rules (see Feature: OR query splitting for search). For multiple tokens, match if any token hits, rank by strongest match per document.\n- Update src/index.ts searchDocuments to run both hybrid and name searches, interleave results alternating while de-duplicating by id, and cap at the requested limit.\n\nAcceptance criteria:\n- Up to 10 direct name/src matches appear interleaved with hybrid results; duplicates are removed; ordering is deterministic.\n- Filename queries surface expected documents even when content lacks keyword matches.\n\nTesting:\n- Unit tests for the interleaving logic: alternating merge of two lists, de-duplication by id, deterministic ordering, and capping at the requested limit; verify behavior when one list exhausts early and when both contain overlaps.\n- Name/src search unit/integration tests: verify ranking tiers (exact equality > prefix > contains), enforcement of top-10 cap, and honoring of filters (ids, types, projectIds). Include OR splitting inputs per Feature 1.\n- E2E (real DB): scenarios where filename-only matches surface near the top and are interleaved among hybrid results; confirm duplicates are removed when the same id appears in both lists.\n- Regression tests: ensure the final result count equals the API limit and that when no name matches exist, hybrid-only ordering remains unchanged.",
+      "context": [],
+      "createdAt": "2025-11-05T16:29:52.890Z",
+      "updatedAt": "2025-11-05T20:24:07.372Z",
+      "completedAt": "2025-11-05T20:24:07.372Z"
+    },
+    {
+      "id": "7f3ef437-3fe9-48ef-be8e-59316248e5cb",
+      "status": "+",
+      "title": "Improving search",
+      "description": "Implement improved DB-backed document search APIs per '@docs/SEARCH_IMPROVED.md', with project naming conventions.\n\nMVP (paths-only results):\n- Add three explicit document search methods (keep existing 'searchDocuments' as the unified/hybrid search):\n  1) 'searchDocumentsForPaths(args: { projectIds: string[]; query: string; limit?: number; pathPrefix?: string }): Promise<string[]>'\n     - Case-insensitive substring match on stored document 'src' and/or 'name'.\n     - No content scanning.\n  2) 'searchDocumentsForKeywords(args: { projectIds: string[]; keywords: string | string[]; matchMode?: 'any' | 'all'; limit?: number; pathPrefix?: string }): Promise<string[]>'\n     - Tokenization when input is string: split on /[,;]+/, trim, drop empties.\n     - Substring matching in document content (and optionally name/src as implementation choice).\n     - Default matching case-insensitive.\n     - 'matchMode' default: 'any'.\n  3) 'searchDocumentsForExact(args: { projectIds: string[]; needles: string | string[]; matchMode?: 'any' | 'all'; caseSensitive?: boolean; limit?: number; pathPrefix?: string }): Promise<string[]>'\n     - Tokenization when input is string: split on /[,;]+/, trim, drop empties.\n     - Literal substring matching (not regex).\n     - Default 'caseSensitive: true'.\n     - 'matchMode' default: 'any'.\n\nCommon rules:\n- Returned paths are project-relative; normalize to unix separators where needed.\n- Support optional scoping via 'pathPrefix' (project-relative directory prefix).\n\nStep 2 (follow-up enhancement):\n- Add match-detail variants/flags for keyword + exact searches that return per-document hit locations similar to 'grep': line + column (1-based), matched token/needle, and short preview/snippet. Include guardrails such as maxMatchesPerFile and scan byte limits.\n\nOut of scope (for now): regex search, AST-aware search, replace/refactor.",
+      "context": [
+        "docs/SEARCH_IMPROVED.md"
+      ],
+      "blockers": [],
+      "createdAt": "2026-02-26T11:34:48.921Z",
+      "updatedAt": "2026-03-02T19:34:55.154Z",
+      "completedAt": "2026-03-02T19:34:55.154Z"
+    }
+  ],
+  "createdAt": "2025-09-19T01:04:36.087Z",
+  "updatedAt": "2025-11-05T21:59:35.088Z"
+}

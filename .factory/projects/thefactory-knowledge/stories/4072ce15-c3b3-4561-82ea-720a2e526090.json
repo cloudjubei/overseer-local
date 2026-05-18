@@ -1,0 +1,333 @@
+{
+  "id": "4072ce15-c3b3-4561-82ea-720a2e526090",
+  "status": "+",
+  "title": "Main area of knowledge - code projects",
+  "description": "The biggest usage for this project is to be able to provide agents (LLMs) with concise information about code in a given project for which a knowledge graph would be created. An interface must be created so that a whole repository could be ingested and the following functions would be provided:\n1) List all the files in the project\n2) List all the external dependencies (libraries) used in the project\n3) List all the classes in the project\n4) For each class to see which classes are its dependencies (internal and external - libraries)\n5) List all the types/interfaces used in the project\n6) For each class to see what interface it exposes.\n7) List all references using a given class\n8) List all references using a given class's function\n9) List all references using a given class's variable\n\nOr any other queries/methods that make sense for an agent to ask about a code project.\n\nAs a final test for this, a test suite for THIS code project needs to be created that will show all of the above answered/solved.",
+  "features": [
+    {
+      "id": "3883d1a7-93e7-410a-9984-3daeb4226487",
+      "status": "+",
+      "title": "Define Pydantic Models for Code Artifacts",
+      "description": "Create a new module `src/models/code_artifact.py` to define Pydantic models for representing code structures like `CodeFile`, `ClassDefinition`, `FunctionDefinition`, and `ImportStatement`. These models will serve as the data transfer objects between the parser and the graph ingestion service.",
+      "context": [],
+      "createdAt": "2025-09-16T13:01:31.412Z",
+      "updatedAt": "2025-09-16T15:24:10.909Z",
+      "completedAt": "2025-09-16T11:39:40.387Z"
+    },
+    {
+      "id": "eb428a6a-6807-4975-ada6-ab53f1df8a55",
+      "status": "+",
+      "title": "Implement an AST-based Python Code Parser",
+      "description": "Create a new module `src/code_parser.py`. This module will contain a `CodeParser` class that uses Python's `ast` module to parse a given Python source file. It will extract files, classes, functions, and import statements, populating the Pydantic models defined in the previous feature. This feature focuses only on parsing, not on graph interaction.",
+      "context": [],
+      "createdAt": "2025-09-16T13:01:31.412Z",
+      "updatedAt": "2025-09-16T16:20:59.479Z",
+      "blockers": [],
+      "completedAt": "2025-09-16T14:50:18.674Z"
+    },
+    {
+      "id": "8f0a5256-d41a-41ac-843f-0702d9982a94",
+      "status": "+",
+      "title": "Create a Code Ingestion Service",
+      "description": "Create a new module `src/code_ingestion_service.py`. This service will be responsible for orchestrating the analysis of a code repository. It will recursively scan a given directory for `.py` files, use the `CodeParser` to analyze each file, and then use the `GraphService` to create nodes and relationships in the knowledge graph representing the code structure (e.g., `File`, `Class` nodes and `IMPORTS`, `DEFINES` relationships) within a specified 'Area of Knowledge'.",
+      "context": [],
+      "createdAt": "2025-09-16T13:01:31.412Z",
+      "updatedAt": "2025-09-16T15:26:57.901Z",
+      "completedAt": "2025-09-16T12:41:43.668Z"
+    },
+    {
+      "id": "3759aebb-bea3-4f28-a7bd-a1bf3e12a013",
+      "status": "+",
+      "title": "Develop Agent Tools for Code Project Queries",
+      "description": "Extend `src/agent_tools.py` with a new set of functions for querying the code project knowledge graph. Implement the functions listed in the story description, such as `list_files_in_project(area_name)`, `list_classes_in_project(area_name)`, `get_class_dependencies(area_name, class_name)`, etc. These functions will translate the user's question into a Cypher query and execute it against the graph via the `GraphService`.",
+      "context": [],
+      "createdAt": "2025-09-16T13:01:31.412Z",
+      "updatedAt": "2025-09-16T15:31:40.269Z",
+      "completedAt": "2025-09-16T13:06:04.495Z"
+    },
+    {
+      "id": "ea57faab-48f7-4b30-8025-34b376b2e4b1",
+      "status": "+",
+      "title": "Add API Endpoint to Trigger Code Ingestion",
+      "description": "Create a new router in `src/routers/code_projects.py` with a POST endpoint, e.g., `/code-projects/{area_name}/ingest`. This endpoint will accept a local directory path and use the `CodeIngestionService` to start the process of analyzing the repository and populating the graph. This provides a clear entry point for the new functionality.",
+      "context": [],
+      "createdAt": "2025-09-16T13:01:31.412Z",
+      "updatedAt": "2025-09-16T15:32:50.265Z",
+      "completedAt": "2025-09-16T13:28:27.501Z"
+    },
+    {
+      "id": "6f5d3bce-75f1-4264-93bf-98317df37472",
+      "status": "+",
+      "title": "Create Test Suite for Self-Code-Analysis",
+      "description": "Create a new test file @tests/scenarios/test_self_code_analysis.py . This test will perform an end-to-end validation of the new feature set by: 1. Calling the new API endpoint to ingest the project's own `src` directory. 2. Using the new functions in @src/agent_tools.py  to query the resulting graph. 3. Asserting that the queries return expected and accurate results about the project's own codebase. 4. Ensuring the test area is cleaned up afterward.",
+      "context": [
+        "tests/scenarios/test_self_code_analysis.py",
+        "src/agent_tools.py"
+      ],
+      "createdAt": "2025-09-16T13:01:31.412Z",
+      "updatedAt": "2025-09-16T20:07:25.987Z",
+      "blockers": [],
+      "completedAt": "2025-09-16T18:58:12.342Z"
+    },
+    {
+      "id": "968b682f-e0c9-4fee-b87f-6010b2a71ab6",
+      "status": "+",
+      "title": "Create a javascript and typescript parser",
+      "description": "Following on from the Python parser in @src/code_parser.py  - do the same for javascript and typescript",
+      "context": [
+        "src/code_parser.py"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-16T16:03:11.807Z",
+      "updatedAt": "2025-09-16T16:34:53.635Z",
+      "completedAt": "2025-09-16T16:34:53.635Z"
+    },
+    {
+      "id": "a5c6b5ff-8dd4-4bd7-ad77-e4d1a868e44c",
+      "status": "+",
+      "title": "Check the code repository to see if there's anything missing from the description",
+      "description": "If there are features missing from the codebase - create a document @docs/IMPROVEMENTS.md that will list all the still to do code stories.",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T16:22:04.319Z",
+      "updatedAt": "2025-09-16T20:20:37.397Z",
+      "completedAt": "2025-09-16T20:20:37.397Z"
+    },
+    {
+      "id": "a02fd18c-1b54-4c43-a0f9-454bfaa40156",
+      "status": "+",
+      "title": "JS/TS ingestion integration",
+      "description": "We have a heuristic JS/TS parser @src/js_ts_parser.py  but it is not integrated into the ingestion flow or API.\nAdd repository ingestion options to also scan .js/.jsx/.ts/.tsx, parse via CodeParserJSTS, and ingest comparable nodes and relationships (Files/Classes/Methods/Types, IMPORTS, CONTAINS, EXPOSES, USES_TYPE).",
+      "context": [
+        "src/js_ts_parser.py"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-16T17:41:33.701Z",
+      "updatedAt": "2025-09-16T18:58:38.336Z",
+      "completedAt": "2025-09-16T18:58:38.336Z"
+    },
+    {
+      "id": "c53c57a2-9212-40d4-ab5e-697aa5afd074",
+      "status": "+",
+      "title": "Richer Python ingestion (unify ingestion paths)",
+      "description": "There are two approaches present: @src/code_ingestion_service.py  (used by router) and @src/code_project_indexer.py  (richer ingestion producing Library/Type/Method nodes and dependencies). Consolidate into a single ingestion path with feature flags:\n    - Create Library nodes for external libs from pyproject and file imports.\n    - Create Type nodes and USES_TYPE relationships based on collected annotations.\n    - Create Method nodes per class and EXPOSES relationships.\n    - Create DEPENDS_ON_CLASS edges for class inheritance/usage where possible.",
+      "context": [
+        "src/code_project_indexer.py",
+        "src/code_ingestion_service.py"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-16T17:44:50.153Z",
+      "updatedAt": "2025-09-16T18:26:02.133Z",
+      "completedAt": "2025-09-16T18:26:02.133Z"
+    },
+    {
+      "id": "86de51eb-cd04-421a-9745-0346c4ba464b",
+      "status": "+",
+      "title": "Module vs Library distinction",
+      "description": "Current API’s list_external_dependencies returns Modules and optional Libraries, but the standard ingestion path only creates Module nodes. Ensure the ingestion pipeline can optionally create Library nodes (from pyproject or package.json) and link classes/files accordingly (DEPENDS_ON_LIB).",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T17:45:33.294Z",
+      "updatedAt": "2025-09-16T18:35:56.037Z",
+      "completedAt": "2025-09-16T18:35:56.037Z"
+    },
+    {
+      "id": "74135e24-6eae-4fe9-90ef-14e68a9c87db",
+      "status": "+",
+      "title": "Method call graph and variable usage",
+      "description": "Current references to method/variable are best-effort (definition/exposed files). Implement call graph extraction for Python and JS/TS to support:\n    - list_references_to_method: return callers (class methods/functions) and files with invocations.\n    - list_references_to_class_variable: model separate Variable/Field nodes and USES/READS/WRITES edges to capture usage sites.\n\nInternal class dependencies beyond inheritance\n  - Add detection of composition/aggregation (attributes typed to other project classes) and method parameter/return types referencing other project classes to build DEPENDS_ON_CLASS edges accordingly.",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T17:46:25.666Z",
+      "updatedAt": "2025-09-16T19:10:48.835Z",
+      "completedAt": "2025-09-16T19:10:48.835Z"
+    },
+    {
+      "id": "2bc698b1-419b-4562-829a-f3fbbf35880e",
+      "status": "+",
+      "title": "API surface for code project queries",
+      "description": "Expose agent_tools code project functions as REST endpoints for remote use:\n  - GET /code-projects/{area}/files\n  - GET /code-projects/{area}/dependencies\n  - GET /code-projects/{area}/classes\n  - GET /code-projects/{area}/classes/{class}/dependencies\n  - GET /code-projects/{area}/types\n  - GET /code-projects/{area}/classes/{class}/interface\n  - GET /code-projects/{area}/refs/class/{class}\n  - GET /code-projects/{area}/refs/method/{class}/{method}\n  - GET /code-projects/{area}/refs/variable/{class}/{variable}\nDocument these endpoints and wire to agent_tools or GraphService queries.",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T17:46:55.420Z",
+      "updatedAt": "2025-09-16T19:13:41.250Z",
+      "completedAt": "2025-09-16T19:13:41.250Z"
+    },
+    {
+      "id": "35f1a0c0-f211-4ded-b901-00fdba010976",
+      "status": "+",
+      "title": "Multi-language dependency extraction",
+      "description": "For JS/TS, extract dependencies from import specs and optionally package.json to create Library nodes; for Python, continue to intersect imports with pyproject.toml to identify top-level libraries.\nNormalize dependency names (scoped packages like @scope/name, dash/underscore normalization for Python).",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T17:47:11.751Z",
+      "updatedAt": "2025-09-16T19:23:15.631Z",
+      "completedAt": "2025-09-16T19:23:15.631Z"
+    },
+    {
+      "id": "87c76a96-64cb-43e9-bfe9-a16d64ac5923",
+      "status": "+",
+      "title": "Project scoping and metadata",
+      "description": "The ingestion endpoint accepts project_id; ensure all created nodes consistently set projectId at the top level (File, Class, Module, Library, Type, Method). @src/code_ingestion_service.py  does this; verify parity when consolidating with @src/code_project_indexer.py .",
+      "context": [
+        "src/code_ingestion_service.py",
+        "src/code_project_indexer.py"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-16T17:48:06.466Z",
+      "updatedAt": "2025-09-16T18:12:02.060Z",
+      "completedAt": "2025-09-16T18:12:02.060Z"
+    },
+    {
+      "id": "1dee0ed5-9ee4-401f-8f27-6b2fb0cd486b",
+      "status": "+",
+      "title": "Robustness, performance, and scale",
+      "description": "Batch Cypher operations: move repeated MERGE statements into UNWIND batches for better throughput on large codebases.\n\nError handling and partial retries during ingestion, with a summary report of skipped files/errors.",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T17:48:54.654Z",
+      "updatedAt": "2025-09-16T19:25:45.038Z",
+      "completedAt": "2025-09-16T19:25:45.038Z"
+    },
+    {
+      "id": "1f27a419-262e-4d6d-b0ce-8c255b333c96",
+      "status": "+",
+      "title": "Tests and coverage improvements",
+      "description": "Add unit tests for parsers (Python and JS/TS) with edge cases (decorators, async, type annotations, generics, private members, relative imports, scoped packages, class fields syntax variations).\nAdd tests covering the new REST endpoints for code project queries if implemented.\nAdd an E2E test that ingests a mixed-language sample (Python + JS/TS) and validates cross-language dependency extraction and queries.",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T17:49:16.472Z",
+      "updatedAt": "2025-09-16T19:30:39.621Z",
+      "completedAt": "2025-09-16T19:30:39.621Z"
+    },
+    {
+      "id": "76e72321-50ed-4f56-b3c1-3356b23bbc15",
+      "status": "+",
+      "title": "Documentation",
+      "description": "Extend README.md with a “Code Project Knowledge Graph” section covering:\n  - How to run a local Neo4j test instance and seed (link to tests/neo4j docs).\n  - How to ingest a repository (Python and JS/TS only today; future: multi-language) and run agent queries.\n  - Data model conventions: labels (Area, File, Class, Method, Module, Library, Type), relationship types (BELONGS_TO, DEFINES, CONTAINS, IMPORTS, EXPOSES, USES_TYPE, DEPENDS_ON_CLASS, DEPENDS_ON_LIB).",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T17:50:37.203Z",
+      "updatedAt": "2025-09-16T19:39:30.379Z",
+      "completedAt": "2025-09-16T19:39:30.379Z"
+    },
+    {
+      "id": "3cc543dd-04a3-44df-a78b-fecde68edbb3",
+      "status": "+",
+      "title": "Operational concerns",
+      "description": "Provide containerized Neo4j for local dev via docker-compose with default creds matching tests (already present under tests/neo4j).Add make targets to start API + DB.\nAdd observability: structured logging around ingestion phases and counts, optional metrics.",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T17:51:18.945Z",
+      "updatedAt": "2025-09-16T19:36:26.037Z",
+      "completedAt": "2025-09-16T19:36:26.037Z"
+    },
+    {
+      "id": "95b5f4d3-52ac-4651-bede-4d007bf1c1b3",
+      "status": "+",
+      "title": "Error - no results from get_class_dependencies",
+      "description": "When running @tests/scenarios/test_self_code_analysis.py , it calls 'get_class_dependencies' inside @src/agent_tools.py . The query inside returns no results.\nA simple query has been added first (which was also tested) to see if it works, and even this one yields no results.\nThis suggests that when the whole code graph is being made, it doesn't produce the correct dependencies/relationships.\nThe code for ingesting is in @src/code_ingestion_service.py \n\nRemember - all code in `graphiti/` is just for reference - changing it does nothing.",
+      "context": [
+        "tests/scenarios/test_self_code_analysis.py",
+        "src/agent_tools.py",
+        "src/code_ingestion_service.py"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-16T20:05:45.737Z",
+      "updatedAt": "2025-09-17T08:56:39.676Z",
+      "completedAt": "2025-09-17T08:56:39.676Z"
+    },
+    {
+      "id": "aa133c3a-3a6d-43df-9d12-ac63c379b329",
+      "status": "+",
+      "title": "Error",
+      "description": "When running @tests/e2e/test_mixed_language_ingest.py",
+      "context": [
+        "tests/e2e/test_mixed_language_ingest.py"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-16T20:06:40.079Z",
+      "updatedAt": "2025-09-17T09:49:14.792Z",
+      "completedAt": "2025-09-17T08:58:53.939Z"
+    },
+    {
+      "id": "dbb6532f-b8eb-4979-b18e-45011589ce2e",
+      "status": "+",
+      "title": "Prepare a showcase as to how to use this project",
+      "description": "The use case is the following:\nThere's the package 'graphiti-core' (this project uses it so it can be used as reference) - an external project wants to learn about it and use it appropriately. A guide in @docs/FIRST_STEPS.md  should be written - detailing the process of an external process supplying all the code for 'graphiti-core' and getting all the relevant information. So it should be very easy to setup a graph for such a package and as a result retrieve some sort of root node that will serve as a summary. From then on anyone can query about this package and retrieve appropriate information.",
+      "context": [
+        "docs/FIRST_STEPS.md"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-16T20:12:52.485Z",
+      "updatedAt": "2025-09-17T09:14:44.800Z",
+      "completedAt": "2025-09-17T09:14:44.800Z"
+    },
+    {
+      "id": "2a7efb39-de58-41bd-aab8-387f9ccccd9c",
+      "status": "+",
+      "title": "Look at the project and cleanup any dead or duplicate code",
+      "description": "Make the whole repository cleaner and work well together.\nIt should be easily extensible for future language parsers or domain specific areas/blueprints etc.",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T21:35:09.934Z",
+      "updatedAt": "2025-09-16T21:58:43.820Z",
+      "completedAt": "2025-09-16T21:58:43.820Z"
+    },
+    {
+      "id": "a2fc4774-0e7d-4067-ac53-d4b820feadd5",
+      "status": "+",
+      "title": "Follow the official graphiti guide",
+      "description": "Looking here:\nhttps://help.getzep.com/graphiti/core-concepts/custom-entity-and-edge-types\n\nIt follows that all EntityNodes must be flat - i.e. shouldn't have any dictionaries as fields. The `create_node` in @src/graph_service.py must be updated to flatten the attributes directly onto the node so only primitives and arrays are stored as fields.",
+      "context": [
+        "src/graph_service.py"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-17T00:06:44.837Z",
+      "updatedAt": "2025-09-17T00:38:00.315Z",
+      "completedAt": "2025-09-17T00:38:00.315Z"
+    },
+    {
+      "id": "f9e8a2a5-b490-46c2-8717-7adfc7eed17d",
+      "status": "+",
+      "title": "Use the official guides to make this project better",
+      "description": "Looking at here:\nhttps://help.getzep.com/graphiti/core-concepts/graph-namespacing\nand\nhttps://help.getzep.com/graphiti/core-concepts/communities\nand especially:\nhttps://help.getzep.com/graphiti/working-with-data/searching\n\nWe are missing some core functionality that is exposed by graphiti.\nGo over these resources and create a document @docs/IMPROVEMENTS.md that will highlight step by step features that we should add to make this project better.",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-09-17T00:09:40.797Z",
+      "updatedAt": "2025-09-17T00:44:23.487Z",
+      "completedAt": "2025-09-17T00:44:23.487Z"
+    },
+    {
+      "id": "d8afecc3-8836-47f9-940b-87c43223f3e9",
+      "status": "+",
+      "title": "Follow the official guide to strongly type",
+      "description": "Looking here:\nhttps://help.getzep.com/graphiti/core-concepts/custom-entity-and-edge-types\n\nIt follows that all EntityNodes must be strongly type by extending BaseModel just like it's shown in the guide and just like we do already in @src/models/blueprint.py  . This means that all code related EntityNodes that are used in @src/agent_tools.py  for instance, would have to have their model (which would be great anyway to have them strongly typed).\nAll queries must be updated to match the new models.\nThis is also one of the reasons why @tests/scenarios/test_self_code_analysis.py  doesn't work, because we cannot have queries such as `c.attributes.class_name = $cls` .",
+      "context": [
+        "tests/scenarios/test_self_code_analysis.py",
+        "src/agent_tools.py",
+        "src/models/blueprint.py"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-17T00:27:35.801Z",
+      "updatedAt": "2025-09-17T00:41:55.426Z",
+      "completedAt": "2025-09-17T00:41:55.426Z"
+    },
+    {
+      "id": "e6130a18-d1f5-4a8b-8aa1-fadeb27a909c",
+      "status": "+",
+      "title": "pytest test fail but individually they all pass",
+      "description": "When running `pytest` some of the tests fail.\nBut when running them individually one by one like:\n`pytest -q tests/scenarios/test_thefactory_db.py` then all the tests pass.\n\nNow only @tests/scenarios/test_self_code_analysis.py fails when running pytest (individually it works) - error given in rejection.",
+      "context": [
+        "tests/scenarios/test_self_code_analysis.py"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-17T09:49:59.864Z",
+      "updatedAt": "2025-09-17T10:47:46.975Z",
+      "completedAt": "2025-09-17T10:32:24.627Z"
+    }
+  ],
+  "createdAt": "2025-09-16T13:01:31.412Z",
+  "updatedAt": "2025-09-17T00:07:02.599Z",
+  "completedAt": "2025-09-17T10:32:24.627Z"
+}

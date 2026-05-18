@@ -1,0 +1,51 @@
+{
+  "id": "a3638d6f-f522-4fcc-9428-6802648919c5",
+  "status": "+",
+  "title": "Handling new LLMs",
+  "description": "We want to be able to handle in @src/completion/CompletionTools.ts :\n- deepseek and its latest models (v3.2, deepseek-reasoner, deepseek-chat and the older R1)\n- qwen and its latest models (qwen3-coder-next, qwen3.5-35b-a3b, qwen3.5)\n- llama and its latest models (llama-4-maverick, llama-4-scout)\n- xai and its latest grok models (grok-4)\ncheck the web for the latest APIs of these and see how they are in terms of tool usage. A lot of their APIs were based off openai's chatgpt models - maybe we can us that to base some of these directly off of that and use @src/completion/providers/completionProviderOpenAI.ts .\n\nWe also want to be able to launch custom models locally (currently qwen, deepseek, llama) and have them use the native tools if possible. Come up with a plan on how to do this, because if it's not possible and we must resort to the old text based way and enforcing json output etc that's no problem, but we must have a clean path for this.",
+  "features": [
+    {
+      "id": "39d2b8a0-21b5-478a-aea0-2df796062308",
+      "status": "+",
+      "title": "DeepSeek Provider Integration",
+      "description": "Add DeepSeek as a supported provider, utilizing the OpenAI-compatible logic since their API matches. Create `completionProviderDeepSeek.ts` if needed, or simply map it in `buildProviderRequest`. Ensure we correctly handle `deepseek-chat` with native tools and implement specific handling for `deepseek-reasoner` (R1) models, which might have different behaviors regarding tool usage or extra reasoning tokens.",
+      "context": [],
+      "createdAt": "2026-03-19T19:03:43.661Z",
+      "updatedAt": "2026-03-23T21:41:08.912Z",
+      "completedAt": "2026-03-23T21:41:08.912Z"
+    },
+    {
+      "id": "6f28b30c-c547-4d3f-a29e-82be6aea688b",
+      "status": "+",
+      "title": "xAI (Grok) Provider Integration",
+      "description": "Add xAI as a provider, creating `completionProviderXAI.ts` if needed, mapping to the `https://api.x.ai/v1` base URL. Utilize the OpenAI-compatible logic for `grok-4` handling native tools directly.",
+      "context": [],
+      "createdAt": "2026-03-19T19:03:50.690Z",
+      "updatedAt": "2026-03-23T21:45:28.622Z",
+      "completedAt": "2026-03-23T21:45:28.622Z"
+    },
+    {
+      "id": "4f8d75e1-d619-4dd9-bc9a-c40e7e6cd661",
+      "status": "+",
+      "title": "Qwen & LLaMA Provider Integration",
+      "description": "Add Qwen (via DashScope) and LLaMA (via Together/Groq or AWS) as supported model providers. Ensure we map their base endpoints correctly and pass them through the OpenAI-compatible wrapper. This allows newer models like qwen3-coder-next and llama-4-maverick to natively use tools.",
+      "context": [],
+      "createdAt": "2026-03-19T19:03:58.225Z",
+      "updatedAt": "2026-03-23T23:04:20.885Z",
+      "completedAt": "2026-03-23T23:04:20.885Z"
+    },
+    {
+      "id": "7040bbd0-531d-49f8-9e0b-35248af509e1",
+      "status": "+",
+      "title": "Local Models Engine & Tooling Fallback",
+      "description": "Create `completionProviderLocal.ts` pointing to localhost environments like LM Studio (`http://localhost:1234/v1`), Ollama or vLLM, dynamically allowing the API endpoint via the `apiUrlOverride` in `LLMConfig`. Crucially, implement a textual fallback logic that enforces JSON output if the native tool array isn't supported by the chosen local model, ensuring a clean path regardless of model capability.",
+      "context": [],
+      "createdAt": "2026-03-19T19:04:26.649Z",
+      "updatedAt": "2026-03-24T00:19:47.045Z",
+      "completedAt": "2026-03-24T00:19:47.045Z"
+    }
+  ],
+  "createdAt": "2026-03-19T18:53:22.283Z",
+  "updatedAt": "2026-03-19T18:53:22.283Z",
+  "completedAt": "2026-03-24T00:19:47.045Z"
+}

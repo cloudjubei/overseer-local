@@ -1,0 +1,2150 @@
+{
+  "id": "19aed5c3-99d0-4ba5-bfa0-4ee13c3d8849",
+  "status": "=",
+  "title": "TESTING",
+  "description": "Ongoing Testing improvements",
+  "features": [
+    {
+      "id": "c13d7a95-b887-49a3-8cd4-c229c206a5dc",
+      "status": "+",
+      "title": "Add tests for src/check-ins/check-ins.controller.ts",
+      "description": "Improve test coverage for @src/check-ins/check-ins.controller.ts .\nTarget uncovered lines: 1-27.",
+      "context": [
+        "src/check-ins/check-ins.controller.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-07T10:41:47.117Z",
+      "updatedAt": "2025-10-07T10:59:35.782Z",
+      "completedAt": "2025-10-07T10:59:35.782Z"
+    },
+    {
+      "id": "984f414e-ab0d-4972-8d8b-7c283a604b1c",
+      "status": "+",
+      "title": "Add tests for src/check-ins/check-ins.service.ts",
+      "description": "Improve test coverage for @src/check-ins/check-ins.service.ts .\nTarget uncovered lines: 1-30.",
+      "context": [
+        "src/check-ins/check-ins.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-07T10:41:48.916Z",
+      "updatedAt": "2025-10-07T11:01:45.447Z",
+      "completedAt": "2025-10-07T11:01:45.447Z"
+    },
+    {
+      "id": "1c87b347-fda3-4b87-b0d8-16d19ca7605e",
+      "status": "+",
+      "title": "Add tests for src/common/decorators/filebody.decorator.ts",
+      "description": "Improve test coverage for @src/common/decorators/filebody.decorator.ts .\nTarget uncovered lines: 1-6.",
+      "context": [
+        "src/common/decorators/filebody.decorator.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-07T10:41:50.656Z",
+      "updatedAt": "2025-10-07T11:02:27.237Z",
+      "completedAt": "2025-10-07T11:02:27.237Z"
+    },
+    {
+      "id": "8f8b83e2-b986-4e16-a52e-73e01aacd5a3",
+      "status": "+",
+      "title": "Add tests for src/common/utils/uuid.ts",
+      "description": "Improve test coverage for @src/common/utils/uuid.ts .\nTarget uncovered lines: 1-11.",
+      "context": [
+        "src/common/utils/uuid.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-07T10:41:59.076Z",
+      "updatedAt": "2025-10-07T11:04:12.396Z",
+      "completedAt": "2025-10-07T11:04:12.396Z"
+    },
+    {
+      "id": "34a25f0b-fece-4242-980a-25dec253e697",
+      "status": "+",
+      "title": "Add tests for src/conversations/conversations.service.ts",
+      "description": "Improve test coverage for @src/conversations/conversations.service.ts .\nTarget uncovered lines: 1-76.",
+      "context": [
+        "src/conversations/conversations.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-07T10:42:03.594Z",
+      "updatedAt": "2025-10-07T11:05:23.661Z",
+      "completedAt": "2025-10-07T11:05:23.661Z"
+    },
+    {
+      "id": "d98fded6-f45d-43c9-b5ce-ea7fa7fc9bf8",
+      "status": "+",
+      "title": "Add tests for src/goal-steps/goal-steps.controller.ts",
+      "description": "Improve test coverage for @src/goal-steps/goal-steps.controller.ts .\nTarget uncovered lines: 1-17.",
+      "context": [
+        "src/goal-steps/goal-steps.controller.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-07T10:42:08.036Z",
+      "updatedAt": "2025-10-07T11:06:54.290Z",
+      "completedAt": "2025-10-07T11:06:54.290Z"
+    },
+    {
+      "id": "fc8d9926-628d-492d-9b4b-bffc2d9d21d5",
+      "status": "+",
+      "title": "Add tests for src/goal-steps/goal-steps.service.ts",
+      "description": "Improve test coverage for @src/goal-steps/goal-steps.service.ts .\nTarget uncovered lines: 1-51.",
+      "context": [
+        "src/goal-steps/goal-steps.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-07T10:42:09.947Z",
+      "updatedAt": "2025-10-07T11:09:20.607Z",
+      "completedAt": "2025-10-07T11:09:20.607Z"
+    },
+    {
+      "id": "f84235d3-80f9-4f88-9197-80bfb3c5f7a5",
+      "status": "+",
+      "title": "Add tests for src/goals/goals.controller.ts",
+      "description": "Improve test coverage for @src/goals/goals.controller.ts .\nTarget uncovered lines: 1-48.",
+      "context": [
+        "src/goals/goals.controller.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-07T10:42:15.032Z",
+      "updatedAt": "2025-10-07T11:10:43.032Z",
+      "completedAt": "2025-10-07T11:10:43.032Z"
+    },
+    {
+      "id": "0054a96b-5906-4602-9cc4-e8bf0339731c",
+      "status": "+",
+      "title": "Add tests for src/goals/static-goals.ts",
+      "description": "Improve test coverage for @src/goals/static-goals.ts .\nTarget uncovered lines: 1-5.",
+      "context": [
+        "src/goals/static-goals.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-07T10:42:16.561Z",
+      "updatedAt": "2025-10-07T11:11:53.806Z",
+      "completedAt": "2025-10-07T11:11:53.806Z"
+    },
+    {
+      "id": "af93fb31-c1a3-4b3d-9986-eea6958d1196",
+      "status": "+",
+      "title": "Add tests for src/journals/journals.controller.ts",
+      "description": "Improve test coverage for @src/journals/journals.controller.ts.\nTarget uncovered lines: 1-16.",
+      "context": [
+        "src/journals/journals.controller.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-07T10:42:21.815Z",
+      "updatedAt": "2025-10-07T11:12:59.383Z",
+      "completedAt": "2025-10-07T11:12:59.383Z"
+    },
+    {
+      "id": "8489bf4b-4c3e-43a7-a47a-b4ec0d2569ac",
+      "status": "+",
+      "title": "Add tests for src/journals/journals.service.ts",
+      "description": "Improve test coverage for @src/journals/journals.service.ts.\nTarget uncovered lines: 1-37.",
+      "context": [
+        "src/journals/journals.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-07T10:42:23.391Z",
+      "updatedAt": "2025-10-07T11:15:01.590Z",
+      "completedAt": "2025-10-07T11:15:01.590Z"
+    },
+    {
+      "id": "31281e3f-e5d5-4fec-aa6b-b483915985ad",
+      "status": "+",
+      "title": "Add tests for src/profiles/profiles.controller.ts",
+      "description": "Improve test coverage for @src/profiles/profiles.controller.ts .\nTarget uncovered lines: 1-19.",
+      "context": [
+        "src/profiles/profiles.controller.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-07T10:42:45.221Z",
+      "updatedAt": "2025-10-07T11:16:51.299Z",
+      "completedAt": "2025-10-07T11:16:51.299Z"
+    },
+    {
+      "id": "e261b34f-c67d-4844-90b8-31546360eb70",
+      "status": "+",
+      "title": "Add tests for src/moods/repositories/dynamodb-moods.repository.ts",
+      "description": "Improve test coverage for @src/moods/repositories/dynamodb-moods.repository.ts .\nTarget uncovered lines: 1-22.",
+      "context": [
+        "src/moods/repositories/dynamodb-moods.repository.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-07T10:43:05.119Z",
+      "updatedAt": "2025-10-07T11:20:08.927Z",
+      "completedAt": "2025-10-07T11:20:08.927Z"
+    },
+    {
+      "id": "6784c134-9eef-42a0-8182-1deafdf5cb21",
+      "status": "+",
+      "title": "Add tests for src/ai/ai-prompts.service.ts",
+      "description": "Improve test coverage for @src/ai/ai-prompts.service.ts .\nTarget uncovered lines: 1-12.",
+      "context": [
+        "src/ai/ai-prompts.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-07T10:43:47.104Z",
+      "updatedAt": "2025-10-07T11:21:33.258Z",
+      "completedAt": "2025-10-07T11:21:33.258Z"
+    },
+    {
+      "id": "41ba5013-032f-4dcb-a0fb-5d56aecfabf7",
+      "status": "+",
+      "title": "Add tests for src/ai/ai.controller.ts",
+      "description": "Improve test coverage for @src/ai/ai.controller.ts .\nTarget uncovered lines: 1-18.",
+      "context": [
+        "src/ai/ai.controller.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-07T10:43:50.360Z",
+      "updatedAt": "2025-10-07T11:23:44.409Z",
+      "completedAt": "2025-10-07T11:23:44.409Z"
+    },
+    {
+      "id": "cd6e83da-350d-4190-a715-82a745182a92",
+      "status": "+",
+      "title": "Add tests for src/ai/ai.service.ts",
+      "description": "Improve test coverage for @src/ai/ai.service.ts .\nTarget uncovered lines: 1-145.",
+      "context": [
+        "src/ai/ai.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-07T10:43:53.523Z",
+      "updatedAt": "2025-10-07T11:28:11.668Z",
+      "completedAt": "2025-10-07T11:28:11.668Z"
+    },
+    {
+      "id": "ac01c6df-6098-43ad-b093-026d2b8f412f",
+      "status": "+",
+      "title": "Add tests for src/ai/transcription.service.ts",
+      "description": "Improve test coverage for @src/ai/transcription.service.ts .\nTarget uncovered lines: 1-68.",
+      "context": [
+        "src/ai/transcription.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-07T10:43:54.975Z",
+      "updatedAt": "2025-10-07T10:53:08.461Z",
+      "completedAt": "2025-10-07T11:28:31.668Z"
+    },
+    {
+      "id": "413f8893-f07c-4b1e-a15a-027fa534520b",
+      "status": "+",
+      "title": "Create an e2e test to test against the running database - ai service",
+      "description": "There exists a special fake user for testing:\nemail: `cloudjubei+tester@gmail.com`\npassword: `Password1!`\n\nUse these credentials to run some rudimentary tests against the ai service - testing every endpoint with multiple different types of inputs",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-10-07T10:56:47.212Z",
+      "updatedAt": "2025-10-07T12:57:20.170Z",
+      "completedAt": "2025-10-07T12:57:20.170Z"
+    },
+    {
+      "id": "afee036a-2808-4c4b-9a67-15d7cd241889",
+      "status": "=",
+      "title": "Failing tests",
+      "description": "Here failing tests will be reported that need fixing.\nAlways scrutinize the test first and try to adapt it - due to code changing, the test might need to change drastically.\n\nDO NOT ADAPT THE CODE SO THE TESTS PASS - ALWAYS FIND A WAY TO MAKE THE TESTS WORK IF THE CODE MAKES SENSE.",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-10-07T12:50:13.300Z",
+      "updatedAt": "2025-12-10T01:14:59.877Z"
+    },
+    {
+      "id": "ccc9c3cf-dab5-49a7-9550-c2f25074fd5e",
+      "status": "+",
+      "title": "Improve coverage",
+      "description": "You can inspect `.factory/tests-coverage.json` and see a lot of uncovered code. Fix that.\n\nYou can inspect `.factory/tests-run.json` and see a lot of failing tests and test suites. Fix them.",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-10-07T13:51:20.252Z",
+      "updatedAt": "2025-11-10T19:35:12.304Z",
+      "completedAt": "2025-11-10T19:35:12.304Z"
+    },
+    {
+      "id": "978ea17d-3dd4-4962-9b49-8d03526124d6",
+      "status": "+",
+      "title": "Add tests for src/admin/admin.controller.ts",
+      "description": "Improve test coverage for @src/admin/admin.controller.ts .\nTarget uncovered lines: 1-31.",
+      "context": [
+        "src/admin/admin.controller.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-07T15:42:11.704Z",
+      "updatedAt": "2025-10-07T15:54:28.875Z",
+      "completedAt": "2025-10-07T15:54:28.875Z"
+    },
+    {
+      "id": "6833e054-5f57-408c-9c59-44407104436f",
+      "status": "+",
+      "title": "Add tests for src/ai/ai.service.ts",
+      "description": "Improve test coverage for @src/ai/ai.service.ts .\nTarget uncovered lines: 34-35, 50, 77, 80-83, 107-109, 111-113, 125-126, 132-143.",
+      "context": [
+        "src/ai/ai.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-07T15:42:24.943Z",
+      "updatedAt": "2025-10-07T16:26:55.847Z",
+      "completedAt": "2025-10-07T16:26:55.847Z"
+    },
+    {
+      "id": "d5de9df6-455e-4d6a-ad45-50aa5b6c250a",
+      "status": "+",
+      "title": "Add tests for src/check-ins/check-ins.controller.ts",
+      "description": "Improve test coverage for @src/check-ins/check-ins.controller.ts .\nTarget uncovered lines: 12-23.",
+      "context": [
+        "src/check-ins/check-ins.controller.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-07T15:42:30.109Z",
+      "updatedAt": "2025-10-07T16:04:15.348Z",
+      "completedAt": "2025-10-07T16:04:15.348Z"
+    },
+    {
+      "id": "df96cad4-8ce2-41b2-97a2-494665c753b8",
+      "status": "+",
+      "title": "Add tests for src/check-ins/repositories/dynamodb-check-ins.repository.ts",
+      "description": "Improve test coverage for @src/check-ins/repositories/dynamodb-check-ins.repository.ts .\nTarget uncovered lines: 16-19, 40-53.",
+      "context": [
+        "src/check-ins/repositories/dynamodb-check-ins.repository.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-07T15:42:33.829Z",
+      "updatedAt": "2025-10-07T16:06:17.435Z",
+      "completedAt": "2025-10-07T16:06:17.435Z"
+    },
+    {
+      "id": "9238e3ab-928d-4f14-ab5e-56d7a35e37b5",
+      "status": "+",
+      "title": "Add tests for src/conversations/repositories/dynamodb-conversation-logs.repository.ts",
+      "description": "Improve test coverage for @src/conversations/repositories/dynamodb-conversation-logs.repository.ts .\nTarget uncovered lines: 12-15.",
+      "context": [
+        "src/conversations/repositories/dynamodb-conversation-logs.repository.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-07T15:43:58.129Z",
+      "updatedAt": "2025-10-07T16:07:27.914Z",
+      "completedAt": "2025-10-07T16:07:27.914Z"
+    },
+    {
+      "id": "dc119cb4-136a-49f5-b236-b70aaf617350",
+      "status": "+",
+      "title": "Add tests for src/database/repositories/base.repository.ts",
+      "description": "Improve test coverage for @src/database/repositories/base.repository.ts .\nTarget uncovered lines: 7-10, 15.",
+      "context": [
+        "src/database/repositories/base.repository.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-07T15:44:02.763Z",
+      "updatedAt": "2025-10-07T16:07:54.691Z",
+      "completedAt": "2025-10-07T16:07:54.691Z"
+    },
+    {
+      "id": "2870fb6f-8e23-4132-b959-2dc4632c4f2a",
+      "status": "+",
+      "title": "Add tests for src/goal-steps/repositories/dynamodb-goal-steps.repository.ts",
+      "description": "Improve test coverage for @src/goal-steps/repositories/dynamodb-goal-steps.repository.ts .\nTarget uncovered lines: 1-15.",
+      "context": [
+        "src/goal-steps/repositories/dynamodb-goal-steps.repository.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-07T15:44:07.716Z",
+      "updatedAt": "2025-10-07T16:08:40.444Z",
+      "completedAt": "2025-10-07T16:08:40.444Z"
+    },
+    {
+      "id": "33460cea-abeb-4a9f-902d-8f3f721ebc47",
+      "status": "+",
+      "title": "Add tests for src/journals/journals.controller.ts",
+      "description": "Improve test coverage for @src/journals/journals.controller.ts .\nTarget uncovered lines: 9-12.",
+      "context": [
+        "src/journals/journals.controller.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-07T15:44:13.329Z",
+      "updatedAt": "2025-10-07T16:10:29.388Z",
+      "completedAt": "2025-10-07T16:10:29.388Z"
+    },
+    {
+      "id": "e3e7e456-b808-4902-8ae8-92c4c7c210f6",
+      "status": "+",
+      "title": "Add tests for src/journals/journals.service.ts",
+      "description": "Improve test coverage for @src/journals/journals.service.ts .\nTarget uncovered lines: 8-35.",
+      "context": [
+        "src/journals/journals.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-07T15:44:15.169Z",
+      "updatedAt": "2025-10-07T16:24:48.540Z",
+      "completedAt": "2025-10-07T16:24:48.540Z"
+    },
+    {
+      "id": "c589f3b3-2461-4560-b370-39aaa9257bb0",
+      "status": "+",
+      "title": "Add tests for src/journals/repositories/dynamodb-journals.repository.ts",
+      "description": "Improve test coverage for @src/journals/repositories/dynamodb-journals.repository.ts .\nTarget uncovered lines: 1-16.",
+      "context": [
+        "src/journals/repositories/dynamodb-journals.repository.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-07T15:44:16.836Z",
+      "updatedAt": "2025-10-07T16:11:20.060Z",
+      "completedAt": "2025-10-07T16:11:20.060Z"
+    },
+    {
+      "id": "78943ca9-3c9a-485c-a685-5ca0d2e5b0ab",
+      "status": "+",
+      "title": "Add tests for src/profiles/repositories/dynamodb-user-profiles.repository.ts",
+      "description": "Improve test coverage for @src/profiles/repositories/dynamodb-user-profiles.repository.ts .\nTarget uncovered lines: 8-11, 14-17, 29-35.",
+      "context": [
+        "src/profiles/repositories/dynamodb-user-profiles.repository.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-07T15:44:21.312Z",
+      "updatedAt": "2025-10-07T16:13:39.262Z",
+      "completedAt": "2025-10-07T16:13:39.262Z"
+    },
+    {
+      "id": "33c2364b-2fde-49c8-a735-64a8136066ca",
+      "status": "+",
+      "title": "Add tests for src/goals/repositories/dynamodb-goals.repository.ts",
+      "description": "Improve test coverage for @src/goals/repositories/dynamodb-goals.repository.ts .\nTarget uncovered lines: 8-9, 16-19, 39 .",
+      "context": [
+        "src/goals/repositories/dynamodb-goals.repository.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-08T00:09:22.179Z",
+      "updatedAt": "2025-10-08T00:17:09.320Z",
+      "completedAt": "2025-10-08T00:17:09.320Z"
+    },
+    {
+      "id": "e2e85455-6f9a-4f4f-bc99-6c92b65f3518",
+      "status": "+",
+      "title": "Add tests for src/goals/goals.service.ts",
+      "description": "Improve test coverage for @src/goals/goals.service.ts .\nTarget uncovered lines: 31, 37, 40, 42, 48-50, 54, 56, 59, 61-67, 71, 76, 85 .",
+      "context": [
+        "src/goals/goals.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-08T00:09:25.937Z",
+      "updatedAt": "2025-10-08T00:22:25.970Z",
+      "completedAt": "2025-10-08T00:22:25.970Z"
+    },
+    {
+      "id": "a4497ec9-09a9-4d52-9191-2f805cd8780f",
+      "status": "+",
+      "title": "Add tests for src/common/interceptors/logging.interceptor.ts",
+      "description": "Improve test coverage for @src/common/interceptors/logging.interceptor.ts .\nTarget uncovered lines: 5, 16, 18, 20, 24 .",
+      "context": [
+        "src/common/interceptors/logging.interceptor.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-08T00:09:42.157Z",
+      "updatedAt": "2025-10-08T00:28:03.486Z",
+      "completedAt": "2025-10-08T00:28:03.486Z"
+    },
+    {
+      "id": "0e6184fc-f9e3-4ab4-965a-1caf50d1716d",
+      "status": "+",
+      "title": "Add tests for src/check-ins/check-ins.service.ts",
+      "description": "Improve test coverage for @src/check-ins/check-ins.service.ts .\nTarget uncovered lines: 29 .",
+      "context": [
+        "src/check-ins/check-ins.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-08T00:09:46.053Z",
+      "updatedAt": "2025-10-08T00:29:33.412Z",
+      "completedAt": "2025-10-08T00:29:33.412Z"
+    },
+    {
+      "id": "5e666fb8-5d1a-4cb2-b8b9-c2d2de380e51",
+      "status": "+",
+      "title": "Add tests for src/app.controller.ts",
+      "description": "Improve test coverage for @src/app.controller.ts .\nTarget uncovered lines: 8 .",
+      "context": [
+        "src/app.controller.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-08T00:09:55.086Z",
+      "updatedAt": "2025-10-08T00:30:44.786Z",
+      "completedAt": "2025-10-08T00:30:44.786Z"
+    },
+    {
+      "id": "db8a6cbd-d635-4bd7-aaec-623f51f92231",
+      "status": "+",
+      "title": "Add tests for src/ai/transcription.service.ts",
+      "description": "Improve test coverage for @src/ai/transcription.service.ts .\nTarget uncovered lines: 44, 63-66 .",
+      "context": [
+        "src/ai/transcription.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-08T00:10:02.850Z",
+      "updatedAt": "2025-10-08T00:38:48.422Z",
+      "completedAt": "2025-10-08T00:38:48.422Z"
+    },
+    {
+      "id": "9c0fe4f4-9343-4cc5-8e5f-d574f71822ba",
+      "status": "+",
+      "title": "Add tests for src/analytics/mixpanel.service.ts",
+      "description": "Improve test coverage for @src/analytics/mixpanel.service.ts .\nTarget uncovered lines: 16, 18, 65, 68 .",
+      "context": [
+        "src/analytics/mixpanel.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-08T00:10:07.164Z",
+      "updatedAt": "2025-10-08T00:42:50.436Z",
+      "completedAt": "2025-10-08T00:42:50.436Z"
+    },
+    {
+      "id": "9424a5e1-28bd-4f73-980e-acea4368afa2",
+      "status": "+",
+      "title": "Add tests for src/auth/auth.controller.ts",
+      "description": "Improve test coverage for @src/auth/auth.controller.ts .\nTarget uncovered lines: 29, 37, 41, 45 .",
+      "context": [
+        "src/auth/auth.controller.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-08T00:10:08.880Z",
+      "updatedAt": "2025-10-08T00:46:03.613Z",
+      "completedAt": "2025-10-08T00:46:03.613Z"
+    },
+    {
+      "id": "606ee45f-f7b8-4053-b6e0-23c772133984",
+      "status": "+",
+      "title": "Add tests for src/admin/auth/admin-auth.controller.ts",
+      "description": "Improve test coverage for @src/admin/auth/admin-auth.controller.ts .\nTarget uncovered lines: 1-30 .",
+      "context": [
+        "src/admin/auth/admin-auth.controller.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-08T23:26:26.151Z",
+      "updatedAt": "2025-11-10T19:52:26.305Z",
+      "completedAt": "2025-11-10T19:52:26.305Z"
+    },
+    {
+      "id": "18b633d4-5034-4dfe-93a8-b92d4f3da426",
+      "status": "+",
+      "title": "Add tests for src/admin/auth/admin-auth.service.ts",
+      "description": "Improve test coverage for @src/admin/auth/admin-auth.service.ts .\nTarget uncovered lines: 1-34 .",
+      "context": [
+        "src/admin/auth/admin-auth.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-08T23:26:27.732Z",
+      "updatedAt": "2025-11-10T19:52:30.638Z",
+      "completedAt": "2025-11-10T19:52:30.638Z"
+    },
+    {
+      "id": "740942ed-9b55-4d2e-84ee-362131ef47ef",
+      "status": "+",
+      "title": "Add tests for src/profiles/utils/unit-parser.ts",
+      "description": "Improve test coverage for @src/profiles/utils/unit-parser.ts .\nTarget uncovered lines: 18, 30, 42 .",
+      "context": [
+        "src/profiles/utils/unit-parser.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-08T23:26:40.465Z",
+      "updatedAt": "2025-11-10T19:40:46.109Z",
+      "completedAt": "2025-11-10T19:40:46.109Z"
+    },
+    {
+      "id": "21066fbb-0aa9-49ca-baff-fe4ec75be668",
+      "status": "+",
+      "title": "Add tests for src/admin/admin.service.ts",
+      "description": "Improve test coverage for @src/admin/admin.service.ts .\nTarget uncovered lines: 1-98 .",
+      "context": [
+        "src/admin/admin.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-11-10T19:33:17.762Z",
+      "updatedAt": "2025-11-10T19:52:35.837Z",
+      "completedAt": "2025-11-10T19:52:35.837Z"
+    },
+    {
+      "id": "de589e69-6f1c-451c-bf04-4f05ee98dddd",
+      "status": "+",
+      "title": "Add tests for src/admin/auth/admin-auth.service.ts",
+      "description": "Improve test coverage for @src/admin/auth/admin-auth.service.ts .\nTarget uncovered lines: 1-34 .",
+      "context": [
+        "src/admin/auth/admin-auth.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-11-10T19:33:22.495Z",
+      "updatedAt": "2025-11-10T19:55:29.830Z",
+      "completedAt": "2025-11-10T19:55:29.830Z"
+    },
+    {
+      "id": "581fca4e-a48d-4a61-bf17-9ad5e1596e13",
+      "status": "+",
+      "title": "Add tests for src/ai/ai.service.ts",
+      "description": "Improve test coverage for @src/ai/ai.service.ts .\nTarget uncovered lines: 7-87 .",
+      "context": [
+        "src/ai/ai.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-11-10T19:33:26.592Z",
+      "updatedAt": "2025-11-10T19:57:06.907Z",
+      "completedAt": "2025-11-10T19:57:06.907Z"
+    },
+    {
+      "id": "4f0db11f-34e7-49d1-bae0-fd3bdc3820ca",
+      "status": "+",
+      "title": "Add tests for src/ai/core/ai-core.service.ts",
+      "description": "Improve test coverage for @src/ai/core/ai-core.service.ts .\nTarget uncovered lines: 11-66 .",
+      "context": [
+        "src/ai/core/ai-core.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-11-10T19:33:30.606Z",
+      "updatedAt": "2025-11-10T19:58:23.626Z",
+      "completedAt": "2025-11-10T19:58:23.626Z"
+    },
+    {
+      "id": "b3fc4ff7-9c9d-48fe-8b14-d5e7e426de1d",
+      "status": "+",
+      "title": "Add tests for src/ai/prompts/ai-prompts.service.ts",
+      "description": "Improve test coverage for @src/ai/prompts/ai-prompts.service.ts .\nTarget uncovered lines: 3-38 .",
+      "context": [
+        "src/ai/prompts/ai-prompts.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-11-10T19:33:34.836Z",
+      "updatedAt": "2025-11-10T21:47:02.135Z",
+      "completedAt": "2025-11-10T21:47:02.135Z"
+    },
+    {
+      "id": "12cbfa74-bb41-49e2-a1af-4afbf4cedf94",
+      "status": "+",
+      "title": "Add tests for src/ai/transcription/ai-transcription.service.ts",
+      "description": "Improve test coverage for @src/ai/transcription/ai-transcription.service.ts .\nTarget uncovered lines: 5-29 .",
+      "context": [
+        "src/ai/transcription/ai-transcription.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-11-10T19:33:39.185Z",
+      "updatedAt": "2025-11-11T11:34:51.956Z",
+      "completedAt": "2025-11-11T11:34:51.956Z"
+    },
+    {
+      "id": "172f29ab-18dd-498b-aa93-221a96c6a0b9",
+      "status": "+",
+      "title": "Add tests for src/auth/auth.service.ts",
+      "description": "Improve test coverage for @src/auth/auth.service.ts .\nTarget uncovered lines: 1-100 .",
+      "context": [
+        "src/auth/auth.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-11-10T19:33:43.869Z",
+      "updatedAt": "2025-11-11T11:37:53.602Z",
+      "completedAt": "2025-11-11T11:37:53.602Z"
+    },
+    {
+      "id": "0a8b3511-0c13-4e32-9638-61a3fa4d60b0",
+      "status": "+",
+      "title": "Add tests for src/auth/strategies/strategy-factory.ts",
+      "description": "Improve test coverage for @src/auth/strategies/strategy-factory.ts .\nTarget uncovered lines: 1-10 .",
+      "context": [
+        "src/auth/strategies/strategy-factory.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-11-10T19:33:54.992Z",
+      "updatedAt": "2025-11-11T11:38:12.402Z",
+      "completedAt": "2025-11-11T11:38:12.402Z"
+    },
+    {
+      "id": "4ebad203-146c-4344-8e5b-ab84139b6537",
+      "status": "+",
+      "title": "Add tests for src/check-ins/check-ins.service.ts",
+      "description": "Improve test coverage for @src/check-ins/check-ins.service.ts .\nTarget uncovered lines: 3-29 .",
+      "context": [
+        "src/check-ins/check-ins.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-11-10T19:33:56.732Z",
+      "updatedAt": "2025-11-11T11:39:28.914Z",
+      "completedAt": "2025-11-11T11:39:28.914Z"
+    },
+    {
+      "id": "1458fc4e-27d0-484b-8b01-31ddd5f30313",
+      "status": "+",
+      "title": "Add tests for src/cognito/cognito.service.ts",
+      "description": "Improve test coverage for @src/cognito/cognito.service.ts .\nTarget uncovered lines: 1-123 .",
+      "context": [
+        "src/cognito/cognito.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-11-10T19:33:59.460Z",
+      "updatedAt": "2025-11-11T12:15:09.573Z",
+      "completedAt": "2025-11-11T12:15:09.573Z"
+    },
+    {
+      "id": "1f0c1875-0cbd-401f-881f-91adc214f087",
+      "status": "+",
+      "title": "Add tests for src/common/utils/metrics.ts",
+      "description": "Improve test coverage for @src/common/utils/metrics.ts .\nTarget uncovered lines: 3, 10-49, 55 .",
+      "context": [
+        "src/common/utils/metrics.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-11-10T19:34:05.166Z",
+      "updatedAt": "2025-11-11T12:57:41.408Z",
+      "completedAt": "2025-11-11T12:57:41.408Z"
+    },
+    {
+      "id": "40ad4af2-dfd1-4b94-89b7-7a130659a29b",
+      "status": "+",
+      "title": "Add tests for src/common/utils/time.ts",
+      "description": "Improve test coverage for @src/common/utils/time.ts .\nTarget uncovered lines: 1-16 .",
+      "context": [
+        "src/common/utils/time.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-11-10T19:34:08.658Z",
+      "updatedAt": "2025-11-11T13:00:15.589Z",
+      "completedAt": "2025-11-11T13:00:15.589Z"
+    },
+    {
+      "id": "06f51032-03ae-436d-b675-fed2ef023bdb",
+      "status": "+",
+      "title": "Add tests for src/journals/journals.service.ts",
+      "description": "Improve test coverage for @src/journals/journals.service.ts .\nTarget uncovered lines: 9-64 .",
+      "context": [
+        "src/journals/journals.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-11-10T19:34:32.499Z",
+      "updatedAt": "2025-12-09T17:08:37.005Z",
+      "completedAt": "2025-12-09T17:08:37.005Z"
+    },
+    {
+      "id": "5e8ccfa4-3b9e-4a49-baf3-679f42e03d21",
+      "status": "+",
+      "title": "Add tests for src/momentum/momentum.service.ts",
+      "description": "Improve test coverage for @src/momentum/momentum.service.ts .\nTarget uncovered lines: 4-29 .",
+      "context": [
+        "src/momentum/momentum.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-11-10T19:34:38.046Z",
+      "updatedAt": "2025-12-09T17:09:51.177Z",
+      "completedAt": "2025-12-09T17:09:51.177Z"
+    },
+    {
+      "id": "ac8be545-ba52-4ec7-a89c-1e8ed3064434",
+      "status": "+",
+      "title": "Add tests for src/momentum/motivational-texts.ts",
+      "description": "Improve test coverage for @src/momentum/motivational-texts.ts .\nTarget uncovered lines: 2-9 .",
+      "context": [
+        "src/momentum/motivational-texts.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-11-10T19:34:39.903Z",
+      "updatedAt": "2025-12-09T17:10:46.085Z",
+      "completedAt": "2025-12-09T17:10:46.085Z"
+    },
+    {
+      "id": "32136fc5-7feb-4cbf-9082-603d603324f0",
+      "status": "+",
+      "title": "Add tests for src/moods/moods.service.ts",
+      "description": "Improve test coverage for @src/moods/moods.service.ts .\nTarget uncovered lines: 5-13 .",
+      "context": [
+        "src/moods/moods.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-11-10T19:34:45.408Z",
+      "updatedAt": "2025-12-09T17:14:24.073Z",
+      "completedAt": "2025-12-09T17:14:24.073Z"
+    },
+    {
+      "id": "ee9bd6ad-c7d3-4afd-93b6-b1f07f34ff21",
+      "status": "+",
+      "title": "Add tests for src/profiles/profiles.service.ts",
+      "description": "Improve test coverage for @src/profiles/profiles.service.ts .\nTarget uncovered lines: 5-49 .",
+      "context": [
+        "src/profiles/profiles.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-11-10T19:34:47.236Z",
+      "updatedAt": "2025-12-09T17:18:02.791Z",
+      "completedAt": "2025-12-09T17:18:02.791Z"
+    },
+    {
+      "id": "77fe8808-f865-491d-b831-43b00f336180",
+      "status": "+",
+      "title": "Add tests for src/profiles/utils/motivation-texts.ts",
+      "description": "Improve test coverage for @src/profiles/utils/motivation-texts.ts .\nTarget uncovered lines: 2-6, 9-18 .",
+      "context": [
+        "src/profiles/utils/motivation-texts.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-11-10T19:34:55.635Z",
+      "updatedAt": "2025-12-09T17:20:19.171Z",
+      "completedAt": "2025-12-09T17:20:19.171Z"
+    },
+    {
+      "id": "3da25827-fb57-455f-969c-8feaf009e01f",
+      "status": "+",
+      "title": "Add tests for src/profiles/utils/unit-parser.ts",
+      "description": "Improve test coverage for @src/profiles/utils/unit-parser.ts .\nTarget uncovered lines: 18, 30, 42 .",
+      "context": [
+        "src/profiles/utils/unit-parser.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-11-10T19:34:57.164Z",
+      "updatedAt": "2025-12-09T17:21:20.568Z",
+      "completedAt": "2025-12-09T17:21:20.568Z"
+    },
+    {
+      "id": "1433cf6f-c0f4-4cdb-8ab5-09803b232277",
+      "status": "+",
+      "title": "Add tests for src/storage/s3.service.ts",
+      "description": "Improve test coverage for @src/storage/s3.service.ts .\nTarget uncovered lines: 13-26, 32 .",
+      "context": [
+        "src/storage/s3.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-11-10T19:35:00.782Z",
+      "updatedAt": "2025-12-09T17:23:02.449Z",
+      "completedAt": "2025-12-09T17:23:02.449Z"
+    },
+    {
+      "id": "6e6dc11f-4640-4374-bbf8-ff1c6918bad4",
+      "status": "+",
+      "title": "Add tests for src/whatsapp/whatsapp.webhook.service.ts",
+      "description": "Improve test coverage for @src/whatsapp/whatsapp.webhook.service.ts .\nTarget uncovered lines: 10-230 .",
+      "context": [
+        "src/whatsapp/whatsapp.webhook.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-09T17:04:16.055Z",
+      "updatedAt": "2025-12-09T17:25:22.361Z",
+      "completedAt": "2025-12-09T17:25:22.361Z"
+    },
+    {
+      "id": "69c17054-2045-4555-a9b2-c5c1806e6013",
+      "status": "+",
+      "title": "Add tests for src/whatsapp/whatsapp.webhook.controller.ts",
+      "description": "Improve test coverage for @src/whatsapp/whatsapp.webhook.controller.ts .\nTarget uncovered lines: 6-25 .",
+      "context": [
+        "src/whatsapp/whatsapp.webhook.controller.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-09T17:04:17.638Z",
+      "updatedAt": "2025-12-09T17:27:13.451Z",
+      "completedAt": "2025-12-09T17:27:13.451Z"
+    },
+    {
+      "id": "04bd1787-7239-4af9-a6b4-43f6a574dd5e",
+      "status": "+",
+      "title": "Add tests for src/whatsapp/whatsapp.user-resolver.service.ts",
+      "description": "Improve test coverage for @src/whatsapp/whatsapp.user-resolver.service.ts .\nTarget uncovered lines: 3-8 .",
+      "context": [
+        "src/whatsapp/whatsapp.user-resolver.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-09T17:04:19.310Z",
+      "updatedAt": "2025-12-09T17:29:34.284Z",
+      "completedAt": "2025-12-09T17:29:34.284Z"
+    },
+    {
+      "id": "84c87a75-06e0-4956-8472-beda9a76a6b5",
+      "status": "+",
+      "title": "Add tests for src/whatsapp/whatsapp.outbox.worker.ts",
+      "description": "Improve test coverage for @src/whatsapp/whatsapp.outbox.worker.ts .\nTarget uncovered lines: 23, 29, 35, 39-40, 44, 51, 53, 58, 63, 75-76, 80, 84, 87 .",
+      "context": [
+        "src/whatsapp/whatsapp.outbox.worker.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-09T17:04:20.966Z",
+      "updatedAt": "2025-12-09T17:34:51.415Z",
+      "completedAt": "2025-12-09T17:34:51.415Z"
+    },
+    {
+      "id": "33dbe2cd-0df4-40e1-bcea-e0976be506df",
+      "status": "+",
+      "title": "Add tests for src/whatsapp/whatsapp.outbound.service.ts",
+      "description": "Improve test coverage for @src/whatsapp/whatsapp.outbound.service.ts .\nTarget uncovered lines: 5-34 .",
+      "context": [
+        "src/whatsapp/whatsapp.outbound.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-09T17:04:22.549Z",
+      "updatedAt": "2025-12-09T17:36:32.484Z",
+      "completedAt": "2025-12-09T17:36:32.484Z"
+    },
+    {
+      "id": "6b5fb4b9-a7ca-402d-9b11-9b8f9f7766f5",
+      "status": "+",
+      "title": "Add tests for src/whatsapp/whatsapp.formatter.ts",
+      "description": "Improve test coverage for @src/whatsapp/whatsapp.formatter.ts .\nTarget uncovered lines: 19, 27, 29, 46, 57, 73, 78, 88 .",
+      "context": [
+        "src/whatsapp/whatsapp.formatter.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-09T17:04:25.027Z",
+      "updatedAt": "2025-12-09T17:38:58.490Z",
+      "completedAt": "2025-12-09T17:38:58.490Z"
+    },
+    {
+      "id": "80e48ec7-add2-47ec-a7a2-13026b81294c",
+      "status": "+",
+      "title": "Add tests for src/whatsapp/whatsapp.api.service.ts",
+      "description": "Improve test coverage for @src/whatsapp/whatsapp.api.service.ts .\nTarget uncovered lines: 4-58 .",
+      "context": [
+        "src/whatsapp/whatsapp.api.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-09T17:04:29.418Z",
+      "updatedAt": "2025-12-09T17:40:51.403Z",
+      "completedAt": "2025-12-09T17:40:51.403Z"
+    },
+    {
+      "id": "6fc4a8d8-e8ee-4c14-aede-cc585660fad7",
+      "status": "+",
+      "title": "Add tests for src/whatsapp/whatsapp-sessions.repository.ts",
+      "description": "Improve test coverage for @src/whatsapp/whatsapp-sessions.repository.ts .\nTarget uncovered lines: 1-18 .",
+      "context": [
+        "src/whatsapp/whatsapp-sessions.repository.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-09T17:04:31.209Z",
+      "updatedAt": "2025-12-10T00:25:35.809Z",
+      "completedAt": "2025-12-10T00:25:35.809Z"
+    },
+    {
+      "id": "eaf718ea-26ef-4315-8775-88b2a8bc0e12",
+      "status": "+",
+      "title": "Add tests for src/whatsapp/whatsapp-outbox.repository.ts",
+      "description": "Improve test coverage for @src/whatsapp/whatsapp-outbox.repository.ts .\nTarget uncovered lines: 1-38 .",
+      "context": [
+        "src/whatsapp/whatsapp-outbox.repository.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-09T17:04:35.139Z",
+      "updatedAt": "2025-12-10T00:27:33.928Z",
+      "completedAt": "2025-12-10T00:27:33.928Z"
+    },
+    {
+      "id": "e6bea8d1-89ba-47a5-93ce-618460286f32",
+      "status": "+",
+      "title": "WhatsApp formatter failing tests",
+      "description": "Look at @src/whatsapp/whatsapp.formatter.ts and its failing tests:\n@src/whatsapp/whatsapp.formatter.spec.ts",
+      "context": [
+        "src/whatsapp/whatsapp.formatter.ts",
+        "src/whatsapp/whatsapp.formatter.spec.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-10T00:12:51.851Z",
+      "updatedAt": "2025-12-10T01:15:13.719Z",
+      "completedAt": "2025-12-10T00:22:24.245Z"
+    },
+    {
+      "id": "c569a249-14e9-4292-bdbb-481021289d07",
+      "status": "+",
+      "title": "Metrics failing tests",
+      "description": "Look at @src/common/utils/metrics.ts and its failing tests @src/common/utils/metrics.spec.ts",
+      "context": [
+        "src/common/utils/metrics.ts",
+        "src/common/utils/metrics.spec.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-10T00:13:38.457Z",
+      "updatedAt": "2025-12-10T01:15:16.134Z",
+      "completedAt": "2025-12-10T00:24:04.160Z"
+    },
+    {
+      "id": "5e1beb41-7110-4ec4-8a27-2dfaca687624",
+      "status": "+",
+      "title": "Add tests for src/whatsapp/whatsapp.api.service.ts",
+      "description": "Improve test coverage for @src/whatsapp/whatsapp.api.service.ts .\nTarget uncovered lines: 27-58 .",
+      "context": [
+        "src/whatsapp/whatsapp.api.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-10T00:15:12.724Z",
+      "updatedAt": "2025-12-10T00:29:32.890Z",
+      "completedAt": "2025-12-10T00:29:32.890Z"
+    },
+    {
+      "id": "41d43b40-f586-4191-bb6d-d783e98ff0dd",
+      "status": "+",
+      "title": "Add tests for src/whatsapp/whatsapp-sessions.repository.ts",
+      "description": "Improve test coverage for @src/whatsapp/whatsapp-sessions.repository.ts .\nTarget uncovered lines: 1-18 .",
+      "context": [
+        "src/whatsapp/whatsapp-sessions.repository.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-10T00:15:16.840Z",
+      "updatedAt": "2025-12-10T00:31:58.312Z",
+      "completedAt": "2025-12-10T00:31:58.312Z"
+    },
+    {
+      "id": "626611d8-eed9-40bb-9a60-74fb30e8cd96",
+      "status": "+",
+      "title": "Add tests for src/user/profile/repositories/dynamodb-user-profiles.repository.ts",
+      "description": "Improve test coverage for @src/user/profile/repositories/dynamodb-user-profiles.repository.ts .\nTarget uncovered lines: 1-43 .",
+      "context": [
+        "src/user/profile/repositories/dynamodb-user-profiles.repository.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-10T00:15:22.031Z",
+      "updatedAt": "2025-12-10T00:36:08.739Z",
+      "completedAt": "2025-12-10T00:36:08.739Z"
+    },
+    {
+      "id": "1599b4b3-f7de-4fab-ae91-284605edc878",
+      "status": "+",
+      "title": "Add tests for src/user/users.service.ts",
+      "description": "Improve test coverage for @src/user/users.service.ts .\nTarget uncovered lines: 4-22 .",
+      "context": [
+        "src/user/users.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-10T00:15:23.919Z",
+      "updatedAt": "2025-12-10T00:37:17.393Z",
+      "completedAt": "2025-12-10T00:37:17.393Z"
+    },
+    {
+      "id": "5dcf68b9-1541-482d-9835-6f83d484c693",
+      "status": "+",
+      "title": "Add tests for src/user/users.controller.ts",
+      "description": "Improve test coverage for @src/user/users.controller.ts .\nTarget uncovered lines: 1-20 .",
+      "context": [
+        "src/user/users.controller.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-10T00:15:25.588Z",
+      "updatedAt": "2025-12-10T00:40:47.563Z",
+      "completedAt": "2025-12-10T00:40:47.563Z"
+    },
+    {
+      "id": "239e3e54-cedd-4721-b518-5e557a27d87c",
+      "status": "+",
+      "title": "Add tests for src/moods/repositories/dynamodb-moods.repository.ts",
+      "description": "Improve test coverage for @src/moods/repositories/dynamodb-moods.repository.ts .\nTarget uncovered lines: 1-11 .",
+      "context": [
+        "src/moods/repositories/dynamodb-moods.repository.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-10T00:15:30.562Z",
+      "updatedAt": "2025-12-10T00:43:12.297Z",
+      "completedAt": "2025-12-10T00:43:12.297Z"
+    },
+    {
+      "id": "b6f7e2e7-87d0-4592-94a5-002d78b4dcde",
+      "status": "+",
+      "title": "Add tests for src/moods/moods.controller.ts",
+      "description": "Improve test coverage for @src/moods/moods.controller.ts .\nTarget uncovered lines: 1-13 .",
+      "context": [
+        "src/moods/moods.controller.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-10T00:15:36.349Z",
+      "updatedAt": "2025-12-10T00:49:28.162Z",
+      "completedAt": "2025-12-10T00:49:28.162Z"
+    },
+    {
+      "id": "54430e4b-0659-4912-b125-609ed66b3ae3",
+      "status": "+",
+      "title": "Add tests for src/user/profile/user-profiles.service.ts",
+      "description": "Improve test coverage for @src/user/profile/user-profiles.service.ts .\nTarget uncovered lines: 19-48 .",
+      "context": [
+        "src/user/profile/user-profiles.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-10T01:05:54.687Z",
+      "updatedAt": "2025-12-10T01:18:09.861Z",
+      "completedAt": "2025-12-10T01:18:09.861Z"
+    },
+    {
+      "id": "b44899c4-ea75-4b64-9f6e-c02c17ae41a7",
+      "status": "+",
+      "title": "Add tests for src/user/users.service.ts",
+      "description": "Improve test coverage for @src/user/users.service.ts .\nTarget uncovered lines: 4-22 .",
+      "context": [
+        "src/user/users.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-10T01:05:56.843Z",
+      "updatedAt": "2025-12-10T01:20:12.427Z",
+      "completedAt": "2025-12-10T01:20:12.427Z"
+    },
+    {
+      "id": "2d4dbce6-b56a-4343-b830-95724d7dd7fb",
+      "status": "+",
+      "title": "Add tests for src/moods/moods.controller.ts",
+      "description": "Improve test coverage for @src/moods/moods.controller.ts .\nTarget uncovered lines: 8-10 .",
+      "context": [
+        "src/moods/moods.controller.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-10T01:06:05.911Z",
+      "updatedAt": "2025-12-10T01:21:02.319Z",
+      "completedAt": "2025-12-10T01:21:02.319Z"
+    },
+    {
+      "id": "64cf3276-74fe-4b8b-92a1-d90ae693e6f1",
+      "status": "+",
+      "title": "Add tests for src/momentum/repositories/dynamodb-momentum.repository.ts",
+      "description": "Improve test coverage for @src/momentum/repositories/dynamodb-momentum.repository.ts .\nTarget uncovered lines: 1-15 .",
+      "context": [
+        "src/momentum/repositories/dynamodb-momentum.repository.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-10T01:06:09.683Z",
+      "updatedAt": "2025-12-10T01:23:55.947Z",
+      "completedAt": "2025-12-10T01:23:55.947Z"
+    },
+    {
+      "id": "9e6c6d32-665e-459f-a1d8-64fa7dde0ec3",
+      "status": "+",
+      "title": "Add tests for src/storage/s3.service.ts",
+      "description": "Improve test coverage for @src/storage/s3.service.ts .\nTarget uncovered lines: 14-70 .",
+      "context": [
+        "src/storage/s3.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-10T01:06:14.282Z",
+      "updatedAt": "2025-12-10T01:26:11.655Z",
+      "completedAt": "2025-12-10T01:26:11.655Z"
+    },
+    {
+      "id": "4ebc7478-c2f3-4aa9-b50a-36d8720dea72",
+      "status": "+",
+      "title": "Add tests for src/momentum/motivational-texts.ts",
+      "description": "Improve test coverage for @src/momentum/motivational-texts.ts .\nTarget uncovered lines: 6-9 .",
+      "context": [
+        "src/momentum/motivational-texts.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-10T01:06:20.605Z",
+      "updatedAt": "2025-12-10T01:28:25.396Z",
+      "completedAt": "2025-12-10T01:28:25.396Z"
+    },
+    {
+      "id": "1501fa97-8189-41d7-baca-63e889438f9a",
+      "status": "+",
+      "title": "Add tests for src/momentum/momentum.service.ts",
+      "description": "Improve test coverage for @src/momentum/momentum.service.ts .\nTarget uncovered lines: 10-28 .",
+      "context": [
+        "src/momentum/momentum.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-10T01:06:22.299Z",
+      "updatedAt": "2025-12-10T01:32:35.053Z",
+      "completedAt": "2025-12-10T01:32:35.053Z"
+    },
+    {
+      "id": "f520605f-43ff-4fc9-9c8f-9afecdc10c44",
+      "status": "+",
+      "title": "Add tests for src/models/missingModels.controller.ts",
+      "description": "Improve test coverage for @src/models/missingModels.controller.ts .\nTarget uncovered lines: 1-5 .",
+      "context": [
+        "src/models/missingModels.controller.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-10T01:06:28.486Z",
+      "updatedAt": "2025-12-10T01:34:37.830Z",
+      "completedAt": "2025-12-10T01:34:37.830Z"
+    },
+    {
+      "id": "fa3f166d-4d4b-4ba4-84e4-3ce4946bf3fc",
+      "status": "+",
+      "title": "Add tests for src/journals/repositories/dynamodb-journals.repository.ts",
+      "description": "Improve test coverage for @src/journals/repositories/dynamodb-journals.repository.ts .\nTarget uncovered lines: 1-10 .",
+      "context": [
+        "src/journals/repositories/dynamodb-journals.repository.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-10T01:06:30.154Z",
+      "updatedAt": "2025-12-10T01:36:14.337Z",
+      "completedAt": "2025-12-10T01:36:14.337Z"
+    },
+    {
+      "id": "07ef0ea4-c549-49b5-8890-cd53710e3d14",
+      "status": "+",
+      "title": "Add tests for src/journals/journals.service.ts",
+      "description": "Improve test coverage for @src/journals/journals.service.ts .\nTarget uncovered lines: 27-53 .",
+      "context": [
+        "src/journals/journals.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-10T01:06:31.682Z",
+      "updatedAt": "2025-12-10T01:38:16.149Z",
+      "completedAt": "2025-12-10T01:38:16.149Z"
+    },
+    {
+      "id": "77aa8c20-08e6-45ea-aa69-09cad8def297",
+      "status": "+",
+      "title": "Add tests for src/journals/journals.controller.ts",
+      "description": "Improve test coverage for @src/journals/journals.controller.ts .\nTarget uncovered lines: 1-25 .",
+      "context": [
+        "src/journals/journals.controller.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-10T01:06:33.633Z",
+      "updatedAt": "2025-12-10T01:40:30.170Z",
+      "completedAt": "2025-12-10T01:40:30.170Z"
+    },
+    {
+      "id": "772aa0c8-73b4-410b-8a55-3d7b3a128150",
+      "status": "+",
+      "title": "Add tests for src/goals/repositories/dynamodb-goals.repository.ts",
+      "description": "Improve test coverage for @src/goals/repositories/dynamodb-goals.repository.ts .\nTarget uncovered lines: 1-20 .",
+      "context": [
+        "src/goals/repositories/dynamodb-goals.repository.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-10T01:06:35.155Z",
+      "updatedAt": "2025-12-10T01:42:39.881Z",
+      "completedAt": "2025-12-10T01:42:39.881Z"
+    },
+    {
+      "id": "31c861a4-c96c-4bbd-b4c2-56e94d49393a",
+      "status": "+",
+      "title": "Add tests for src/ai/ai.controller.ts",
+      "description": "Improve test coverage for @src/ai/ai.controller.ts .\nTarget uncovered lines: 1-11 .",
+      "context": [
+        "src/ai/ai.controller.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T11:26:50.942Z",
+      "updatedAt": "2025-12-11T11:30:21.469Z",
+      "completedAt": "2025-12-11T11:30:21.469Z"
+    },
+    {
+      "id": "9f9a9f4b-c6d4-49a5-bfa4-8996953aa255",
+      "status": "+",
+      "title": "Add tests for src/ai/ai.service.ts",
+      "description": "Improve test coverage for @src/ai/ai.service.ts .\nTarget uncovered lines: 31, 67 .",
+      "context": [
+        "src/ai/ai.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T11:26:53.318Z",
+      "updatedAt": "2025-12-11T11:32:23.752Z",
+      "completedAt": "2025-12-11T11:32:23.752Z"
+    },
+    {
+      "id": "ef67635c-bf7c-49ba-aae2-601b9e2d9401",
+      "status": "+",
+      "title": "Add tests for src/ai/core/ai-core.service.ts",
+      "description": "Improve test coverage for @src/ai/core/ai-core.service.ts .\nTarget uncovered lines: 30-31, 34-51 .",
+      "context": [
+        "src/ai/core/ai-core.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T11:26:55.663Z",
+      "updatedAt": "2025-12-11T11:35:44.681Z",
+      "completedAt": "2025-12-11T11:35:44.681Z"
+    },
+    {
+      "id": "9e0d9a68-0179-4d70-a642-7a5dc1be36b1",
+      "status": "+",
+      "title": "Add tests for src/ai/prompts/ai-prompts.service.ts",
+      "description": "Improve test coverage for @src/ai/prompts/ai-prompts.service.ts .\nTarget uncovered lines: 17-19, 46-48 .",
+      "context": [
+        "src/ai/prompts/ai-prompts.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T11:26:57.370Z",
+      "updatedAt": "2025-12-11T11:37:10.474Z",
+      "completedAt": "2025-12-11T11:37:10.474Z"
+    },
+    {
+      "id": "38017f61-429b-4669-a556-b40409a9bf86",
+      "status": "+",
+      "title": "Add tests for src/ai/transcription/ai-transcription.controller.ts",
+      "description": "Improve test coverage for @src/ai/transcription/ai-transcription.controller.ts .\nTarget uncovered lines: 1-10 .",
+      "context": [
+        "src/ai/transcription/ai-transcription.controller.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T11:26:59.040Z",
+      "updatedAt": "2025-12-11T11:38:02.568Z",
+      "completedAt": "2025-12-11T11:38:02.568Z"
+    },
+    {
+      "id": "1472c34f-5550-460a-87c9-0f617c1a46b6",
+      "status": "+",
+      "title": "Add tests for src/ai/transcription/ai-transcription.service.ts",
+      "description": "Improve test coverage for @src/ai/transcription/ai-transcription.service.ts .\nTarget uncovered lines: 11-30 .",
+      "context": [
+        "src/ai/transcription/ai-transcription.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T11:27:01.914Z",
+      "updatedAt": "2025-12-11T11:38:57.873Z",
+      "completedAt": "2025-12-11T11:38:57.873Z"
+    },
+    {
+      "id": "8294c51d-038e-4f37-bd90-90b327750418",
+      "status": "+",
+      "title": "Add tests for src/analytics/mixpanel.service.ts",
+      "description": "Improve test coverage for @src/analytics/mixpanel.service.ts .\nTarget uncovered lines: 31, 34, 37-44, 46, 68, 70 .",
+      "context": [
+        "src/analytics/mixpanel.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T11:27:05.985Z",
+      "updatedAt": "2025-12-11T11:41:55.850Z",
+      "completedAt": "2025-12-11T11:41:55.850Z"
+    },
+    {
+      "id": "afa5d929-6991-47b6-9095-b35e112be86d",
+      "status": "+",
+      "title": "Add tests for src/auth/auth.controller.ts",
+      "description": "Improve test coverage for @src/auth/auth.controller.ts .\nTarget uncovered lines: 19-61, 67-73 .",
+      "context": [
+        "src/auth/auth.controller.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T11:27:09.765Z",
+      "updatedAt": "2025-12-11T11:44:29.789Z",
+      "completedAt": "2025-12-11T11:44:29.789Z"
+    },
+    {
+      "id": "aee51255-2152-46bd-a97e-52f76837d1fc",
+      "status": "+",
+      "title": "Add tests for src/auth/auth.service.ts",
+      "description": "Improve test coverage for @src/auth/auth.service.ts .\nTarget uncovered lines: 9-78 .",
+      "context": [
+        "src/auth/auth.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T11:27:11.499Z",
+      "updatedAt": "2025-12-11T11:47:12.825Z",
+      "completedAt": "2025-12-11T11:47:12.825Z"
+    },
+    {
+      "id": "5ccd8409-a388-4744-8785-f9551305ac98",
+      "status": "+",
+      "title": "Add tests for src/auth/phone-link/auth-phone-link.service.ts",
+      "description": "Improve test coverage for @src/auth/phone-link/auth-phone-link.service.ts .\nTarget uncovered lines: 7-62 .",
+      "context": [
+        "src/auth/phone-link/auth-phone-link.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T11:27:17.928Z",
+      "updatedAt": "2025-12-11T11:49:20.831Z",
+      "completedAt": "2025-12-11T11:49:20.831Z"
+    },
+    {
+      "id": "9eeae5c9-d466-4f9c-b65f-dff0355edc5e",
+      "status": "+",
+      "title": "Add tests for src/auth/phone-link/repositories/dynamodb-phone-link-codes.repository.ts",
+      "description": "Improve test coverage for @src/auth/phone-link/repositories/dynamodb-phone-link-codes.repository.ts .\nTarget uncovered lines: 5-14 .",
+      "context": [
+        "src/auth/phone-link/repositories/dynamodb-phone-link-codes.repository.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T11:27:19.919Z",
+      "updatedAt": "2025-12-11T11:50:27.449Z",
+      "completedAt": "2025-12-11T11:50:27.449Z"
+    },
+    {
+      "id": "4819a983-a99b-42f6-86e4-3ddd0fe3261f",
+      "status": "+",
+      "title": "Add tests for src/auth/providers/admin-cognito-auth.provider.ts",
+      "description": "Improve test coverage for @src/auth/providers/admin-cognito-auth.provider.ts .\nTarget uncovered lines: 1-20 .",
+      "context": [
+        "src/auth/providers/admin-cognito-auth.provider.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T11:27:24.281Z",
+      "updatedAt": "2025-12-11T11:52:18.813Z",
+      "completedAt": "2025-12-11T11:52:18.813Z"
+    },
+    {
+      "id": "e07a5468-4f53-4f6d-832a-be3199ba901c",
+      "status": "+",
+      "title": "Add tests for src/auth/providers/user-cognito-auth.provider.ts",
+      "description": "Improve test coverage for @src/auth/providers/user-cognito-auth.provider.ts .\nTarget uncovered lines: 1-20 .",
+      "context": [
+        "src/auth/providers/user-cognito-auth.provider.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T11:27:26.622Z",
+      "updatedAt": "2025-12-11T11:54:08.516Z",
+      "completedAt": "2025-12-11T11:54:08.516Z"
+    },
+    {
+      "id": "4269b5d5-22b6-4877-9422-59703739f992",
+      "status": "+",
+      "title": "Add tests for src/auth/strategies/strategy-factory.ts",
+      "description": "Improve test coverage for @src/auth/strategies/strategy-factory.ts .\nTarget uncovered lines: 2-8 .",
+      "context": [
+        "src/auth/strategies/strategy-factory.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T11:27:29.111Z",
+      "updatedAt": "2025-12-11T11:55:18.520Z",
+      "completedAt": "2025-12-11T11:55:18.520Z"
+    },
+    {
+      "id": "98ddf140-a297-4a9a-a6fa-f04b7c725aa7",
+      "status": "+",
+      "title": "Add tests for src/cognito/acognito.service.ts",
+      "description": "Improve test coverage for @src/cognito/acognito.service.ts .\nTarget uncovered lines: 5-154 .",
+      "context": [
+        "src/cognito/acognito.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T11:27:39.300Z",
+      "updatedAt": "2025-12-11T11:58:37.170Z",
+      "completedAt": "2025-12-11T11:58:37.170Z"
+    },
+    {
+      "id": "e920a67d-53cc-458b-82ba-e738db02584c",
+      "status": "+",
+      "title": "Add tests for src/cognito/acognito.service.ts",
+      "description": "Improve test coverage for @src/cognito/acognito.service.ts .\nTarget uncovered lines: 5-154 .",
+      "context": [
+        "src/cognito/acognito.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T11:27:40.981Z",
+      "updatedAt": "2025-12-11T12:00:19.740Z",
+      "completedAt": "2025-12-11T12:00:19.740Z"
+    },
+    {
+      "id": "cf2cb354-e805-48c6-b62b-2eed58deb199",
+      "status": "+",
+      "title": "Add tests for src/cognito/admin-cognito.service.ts",
+      "description": "Improve test coverage for @src/cognito/admin-cognito.service.ts .\nTarget uncovered lines: 1-6 .",
+      "context": [
+        "src/cognito/admin-cognito.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T11:27:42.508Z",
+      "updatedAt": "2025-12-11T12:01:36.599Z",
+      "completedAt": "2025-12-11T12:01:36.599Z"
+    },
+    {
+      "id": "7006a834-f5c9-4857-b47d-b9cb7a882d81",
+      "status": "+",
+      "title": "Add tests for src/cognito/user-cognito.service.ts",
+      "description": "Improve test coverage for @src/cognito/user-cognito.service.ts .\nTarget uncovered lines: 4 .",
+      "context": [
+        "src/cognito/user-cognito.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T11:27:47.018Z",
+      "updatedAt": "2025-12-11T12:02:30.247Z",
+      "completedAt": "2025-12-11T12:02:30.247Z"
+    },
+    {
+      "id": "b15e2e19-4bf8-4044-9e2d-40b778c6871c",
+      "status": "+",
+      "title": "Add tests for src/admin/admin.controller.ts",
+      "description": "Improve test coverage for @src/admin/admin.controller.ts .\nTarget uncovered lines: 1-41 .",
+      "context": [
+        "src/admin/admin.controller.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T13:17:36.547Z",
+      "updatedAt": "2025-12-11T18:09:22.960Z",
+      "completedAt": "2025-12-11T18:09:22.960Z"
+    },
+    {
+      "id": "5de6ce62-bf6f-4436-93bb-8a683004d69b",
+      "status": "+",
+      "title": "Add tests for src/admin/admin.service.ts",
+      "description": "Improve test coverage for @src/admin/admin.service.ts .\nTarget uncovered lines: 1-58 .",
+      "context": [
+        "src/admin/admin.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T13:17:38.685Z",
+      "updatedAt": "2025-12-11T18:10:51.530Z",
+      "completedAt": "2025-12-11T18:10:51.530Z"
+    },
+    {
+      "id": "27b74db9-c7ba-44d1-87ea-a7702e976243",
+      "status": "+",
+      "title": "Add tests for src/admin/auth/admin-auth.service.ts",
+      "description": "Improve test coverage for @src/admin/auth/admin-auth.service.ts .\nTarget uncovered lines: 1-37 .",
+      "context": [
+        "src/admin/auth/admin-auth.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T13:17:43.936Z",
+      "updatedAt": "2025-12-11T18:14:37.054Z",
+      "completedAt": "2025-12-11T18:14:37.054Z"
+    },
+    {
+      "id": "28408aa4-9449-4c9b-814d-8a304787c196",
+      "status": "+",
+      "title": "Add tests for src/ai/ai.service.ts",
+      "description": "Improve test coverage for @src/ai/ai.service.ts .\nTarget uncovered lines: 31, 67 .",
+      "context": [
+        "src/ai/ai.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T13:17:50.580Z",
+      "updatedAt": "2025-12-11T18:15:59.069Z",
+      "completedAt": "2025-12-11T18:15:59.069Z"
+    },
+    {
+      "id": "a4ac794c-27ec-49ab-a4ea-464a1fdb81a8",
+      "status": "+",
+      "title": "Add tests for src/ai/core/ai-core.service.ts",
+      "description": "Improve test coverage for @src/ai/core/ai-core.service.ts .\nTarget uncovered lines: 34-51 .",
+      "context": [
+        "src/ai/core/ai-core.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T13:17:52.642Z",
+      "updatedAt": "2025-12-11T18:19:22.946Z",
+      "completedAt": "2025-12-11T18:19:22.946Z"
+    },
+    {
+      "id": "5932da5b-7a89-4364-913a-3cb769964249",
+      "status": "+",
+      "title": "Add tests for src/ai/prompts/ai-prompts.service.ts",
+      "description": "Improve test coverage for @src/ai/prompts/ai-prompts.service.ts .\nTarget uncovered lines: 6-9, 12-38, 46-48 .",
+      "context": [
+        "src/ai/prompts/ai-prompts.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T13:17:54.360Z",
+      "updatedAt": "2025-12-11T18:22:14.866Z",
+      "completedAt": "2025-12-11T18:22:14.866Z"
+    },
+    {
+      "id": "c94f42df-56c9-46c1-b5c7-4633cf1178c5",
+      "status": "+",
+      "title": "Add tests for src/ai/transcription/ai-transcription.service.ts",
+      "description": "Improve test coverage for @src/ai/transcription/ai-transcription.service.ts .\nTarget uncovered lines: 11-30 .",
+      "context": [
+        "src/ai/transcription/ai-transcription.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T13:18:00.706Z",
+      "updatedAt": "2025-12-11T18:23:45.200Z",
+      "completedAt": "2025-12-11T18:23:45.200Z"
+    },
+    {
+      "id": "3a7b2073-984c-440f-864f-130ffd960023",
+      "status": "+",
+      "title": "Add tests for src/analytics/mixpanel.service.ts",
+      "description": "Improve test coverage for @src/analytics/mixpanel.service.ts .\nTarget uncovered lines: 31, 34, 38, 41, 44, 46, 68, 70 .",
+      "context": [
+        "src/analytics/mixpanel.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T13:18:02.280Z",
+      "updatedAt": "2025-12-11T18:29:02.040Z",
+      "completedAt": "2025-12-11T18:29:02.040Z"
+    },
+    {
+      "id": "ce364b60-e516-4a75-9aec-c75754c28b3b",
+      "status": "+",
+      "title": "Add tests for src/auth/auth.controller.ts",
+      "description": "Improve test coverage for @src/auth/auth.controller.ts .\nTarget uncovered lines: 27, 30, 33, 37, 42-49, 53-63 .",
+      "context": [
+        "src/auth/auth.controller.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T13:18:03.812Z",
+      "updatedAt": "2025-12-11T18:41:02.956Z",
+      "completedAt": "2025-12-11T18:41:02.956Z"
+    },
+    {
+      "id": "10667239-2047-4685-83cb-863e5989dc54",
+      "status": "+",
+      "title": "Add tests for src/auth/auth.service.ts",
+      "description": "Improve test coverage for @src/auth/auth.service.ts .\nTarget uncovered lines: 9-78 .",
+      "context": [
+        "src/auth/auth.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T13:18:05.628Z",
+      "updatedAt": "2025-12-11T18:44:48.757Z",
+      "completedAt": "2025-12-11T18:44:48.757Z"
+    },
+    {
+      "id": "565f8735-ae17-4467-a9b7-b564e773b562",
+      "status": "+",
+      "title": "Add tests for src/auth/phone-link/auth-phone-link.service.ts",
+      "description": "Improve test coverage for @src/auth/phone-link/auth-phone-link.service.ts .\nTarget uncovered lines: 23-54, 60 .",
+      "context": [
+        "src/auth/phone-link/auth-phone-link.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T13:18:07.012Z",
+      "updatedAt": "2025-12-11T18:50:12.253Z",
+      "completedAt": "2025-12-11T18:50:12.253Z"
+    },
+    {
+      "id": "3670e467-573f-4a7b-b83f-ad5d7994293d",
+      "status": "+",
+      "title": "Add tests for src/auth/providers/admin-cognito-auth.provider.ts",
+      "description": "Improve test coverage for @src/auth/providers/admin-cognito-auth.provider.ts .\nTarget uncovered lines: 6-18 .",
+      "context": [
+        "src/auth/providers/admin-cognito-auth.provider.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T13:18:08.653Z",
+      "updatedAt": "2025-12-11T18:53:10.201Z",
+      "completedAt": "2025-12-11T18:53:10.201Z"
+    },
+    {
+      "id": "a0b0345a-4fe1-420c-97a5-22242e844d6d",
+      "status": "+",
+      "title": "Add tests for src/auth/providers/user-cognito-auth.provider.ts",
+      "description": "Improve test coverage for @src/auth/providers/user-cognito-auth.provider.ts .\nTarget uncovered lines: 8-18 .",
+      "context": [
+        "src/auth/providers/user-cognito-auth.provider.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T13:18:10.545Z",
+      "updatedAt": "2025-12-11T18:55:12.755Z",
+      "completedAt": "2025-12-11T18:55:12.755Z"
+    },
+    {
+      "id": "2e35bd90-236a-48b6-b9ae-b7ae661f81a8",
+      "status": "+",
+      "title": "Add tests for src/auth/providers/admin-cognito-auth.provider.ts",
+      "description": "Improve test coverage for @src/auth/providers/admin-cognito-auth.provider.ts .\nTarget uncovered lines: 6-18 .",
+      "context": [
+        "src/auth/providers/admin-cognito-auth.provider.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T13:18:21.414Z",
+      "updatedAt": "2025-12-11T18:58:03.975Z",
+      "completedAt": "2025-12-11T18:58:03.975Z"
+    },
+    {
+      "id": "21776295-8896-4f03-90ab-1c9b67972fff",
+      "status": "+",
+      "title": "Add tests for src/auth/providers/user-cognito-auth.provider.ts",
+      "description": "Improve test coverage for @src/auth/providers/user-cognito-auth.provider.ts .\nTarget uncovered lines: 8-18 .",
+      "context": [
+        "src/auth/providers/user-cognito-auth.provider.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T13:18:23.297Z",
+      "updatedAt": "2025-12-11T19:01:16.934Z",
+      "completedAt": "2025-12-11T19:01:16.934Z"
+    },
+    {
+      "id": "7ab78a24-ec35-4bba-a9a6-68f68ed59932",
+      "status": "+",
+      "title": "Add tests for src/check-ins/check-ins.scheduler.ts",
+      "description": "Improve test coverage for @src/check-ins/check-ins.scheduler.ts .\nTarget uncovered lines: 19, 23-24, 34, 39 .",
+      "context": [
+        "src/check-ins/check-ins.scheduler.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T13:18:29.504Z",
+      "updatedAt": "2025-12-11T19:03:15.777Z",
+      "completedAt": "2025-12-11T19:03:15.777Z"
+    },
+    {
+      "id": "85c1648e-59c7-4855-b787-fb1630f2662a",
+      "status": "+",
+      "title": "Add tests for src/check-ins/check-ins.service.ts",
+      "description": "Improve test coverage for @src/check-ins/check-ins.service.ts .\nTarget uncovered lines: 49-52 .",
+      "context": [
+        "src/check-ins/check-ins.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T13:18:31.161Z",
+      "updatedAt": "2025-12-11T19:07:22.481Z",
+      "completedAt": "2025-12-11T19:07:22.481Z"
+    },
+    {
+      "id": "ae7f2319-e5bc-4135-ad67-20ce893aea17",
+      "status": "+",
+      "title": "Add tests for src/check-ins/repositories/dynamodb-check-ins.repository.ts",
+      "description": "Improve test coverage for @src/check-ins/repositories/dynamodb-check-ins.repository.ts .\nTarget uncovered lines: 7-9 .",
+      "context": [
+        "src/check-ins/repositories/dynamodb-check-ins.repository.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T13:18:36.705Z",
+      "updatedAt": "2025-12-11T19:11:26.451Z",
+      "completedAt": "2025-12-11T19:11:26.451Z"
+    },
+    {
+      "id": "a60fe62b-e909-4ed6-b190-c4b39363d175",
+      "status": "+",
+      "title": "Add tests for src/cognito/acognito.service.ts",
+      "description": "Improve test coverage for @src/cognito/acognito.service.ts .\nTarget uncovered lines: 51-149 .",
+      "context": [
+        "src/cognito/acognito.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T13:18:38.486Z",
+      "updatedAt": "2025-12-11T19:12:58.952Z",
+      "completedAt": "2025-12-11T19:12:58.952Z"
+    },
+    {
+      "id": "fac8714f-c942-4102-8daa-53f4fbb57b24",
+      "status": "+",
+      "title": "Add tests for src/common/utils/metrics.ts",
+      "description": "Improve test coverage for @src/common/utils/metrics.ts .\nTarget uncovered lines: 41, 43, 47-49 .",
+      "context": [
+        "src/common/utils/metrics.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T13:18:47.710Z",
+      "updatedAt": "2025-12-11T19:17:55.913Z",
+      "completedAt": "2025-12-11T19:17:55.913Z"
+    },
+    {
+      "id": "1910e873-c56e-473e-9562-bd8a9c96c9d8",
+      "status": "+",
+      "title": "Add tests for src/common/utils/time.ts",
+      "description": "Improve test coverage for @src/common/utils/time.ts .\nTarget uncovered lines: 5-6 .",
+      "context": [
+        "src/common/utils/time.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T13:18:49.336Z",
+      "updatedAt": "2025-12-11T19:22:57.804Z",
+      "completedAt": "2025-12-11T19:22:57.804Z"
+    },
+    {
+      "id": "9e5125e5-41cf-4dca-9f32-2bf3b9872f7a",
+      "status": "+",
+      "title": "Add tests for src/conversations/conversations.service.ts",
+      "description": "Improve test coverage for @src/conversations/conversations.service.ts .\nTarget uncovered lines: 42, 50, 53-70, 78, 92, 99-234, 244-247, 249-252, 254-259, 261-264, 266-269, 271-274, 276-277, 279-280, 282-289, 291-294, 319, 322-323, 326-331, 341, 350, 361, 378-379, 385, 401-402, 405-425 .",
+      "context": [
+        "src/conversations/conversations.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T13:18:54.990Z",
+      "updatedAt": "2025-12-11T19:26:41.460Z",
+      "completedAt": "2025-12-11T19:26:41.460Z"
+    },
+    {
+      "id": "e97fc63b-81c0-41d8-9f15-b8cab1033932",
+      "status": "+",
+      "title": "Add tests for src/database/repositories/base.repository.ts",
+      "description": "Improve test coverage for @src/database/repositories/base.repository.ts .\nTarget uncovered lines: 3-8, 26-54 .",
+      "context": [
+        "src/database/repositories/base.repository.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T13:19:01.430Z",
+      "updatedAt": "2025-12-11T19:28:37.416Z",
+      "completedAt": "2025-12-11T19:28:37.416Z"
+    },
+    {
+      "id": "2e8b4927-ed87-4ebb-ad40-463e78ab51bf",
+      "status": "+",
+      "title": "Add tests for src/database/repositories/baseId.repository.ts",
+      "description": "Improve test coverage for @src/database/repositories/baseId.repository.ts .\nTarget uncovered lines: 9-11, 13-31, 34-37, 46-48, 65 .",
+      "context": [
+        "src/database/repositories/baseId.repository.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T13:19:03.120Z",
+      "updatedAt": "2025-12-11T19:32:50.127Z",
+      "completedAt": "2025-12-11T19:32:50.127Z"
+    },
+    {
+      "id": "8b95eca0-1712-4706-bedf-05290a082f58",
+      "status": "+",
+      "title": "Add tests for src/journals/journals.controller.ts",
+      "description": "Improve test coverage for @src/journals/journals.controller.ts .\nTarget uncovered lines: 1-25 .",
+      "context": [
+        "src/journals/journals.controller.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T13:19:09.196Z",
+      "updatedAt": "2025-12-11T19:35:04.935Z",
+      "completedAt": "2025-12-11T19:35:04.935Z"
+    },
+    {
+      "id": "c9bea42d-e535-4915-9493-f83005aea475",
+      "status": "+",
+      "title": "Add tests for src/journals/journals.service.ts",
+      "description": "Improve test coverage for @src/journals/journals.service.ts .\nTarget uncovered lines: 27-53 .",
+      "context": [
+        "src/journals/journals.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T13:19:10.711Z",
+      "updatedAt": "2025-12-11T19:37:18.580Z",
+      "completedAt": "2025-12-11T19:37:18.580Z"
+    },
+    {
+      "id": "5808bb8f-450b-443b-b072-eb7b6a902ea1",
+      "status": "+",
+      "title": "Add tests for src/momentum/momentum.controller.ts",
+      "description": "Improve test coverage for @src/momentum/momentum.controller.ts .\nTarget uncovered lines: 1-11 .",
+      "context": [
+        "src/momentum/momentum.controller.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T13:19:16.749Z",
+      "updatedAt": "2025-12-11T19:39:51.493Z",
+      "completedAt": "2025-12-11T19:39:51.493Z"
+    },
+    {
+      "id": "548c079e-2f02-42cd-8de4-8a4e62255cc8",
+      "status": "+",
+      "title": "Add tests for src/momentum/motivational-texts.ts",
+      "description": "Improve test coverage for @src/momentum/motivational-texts.ts .\nTarget uncovered lines: 6-9 .",
+      "context": [
+        "src/momentum/motivational-texts.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T13:19:19.667Z",
+      "updatedAt": "2025-12-11T19:42:06.834Z",
+      "completedAt": "2025-12-11T19:42:06.834Z"
+    },
+    {
+      "id": "78809428-9a4b-466c-8aa8-4b60fe9d1810",
+      "status": "+",
+      "title": "Add tests for src/moods/moods.controller.ts",
+      "description": "Improve test coverage for @src/moods/moods.controller.ts .\nTarget uncovered lines: 8-10 .",
+      "context": [
+        "src/moods/moods.controller.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T13:19:21.299Z",
+      "updatedAt": "2025-12-11T19:43:26.096Z",
+      "completedAt": "2025-12-11T19:43:26.096Z"
+    },
+    {
+      "id": "720bfc01-a27f-4519-9d76-61a8537dc207",
+      "status": "+",
+      "title": "Add tests for src/notifications/notifications.service.ts",
+      "description": "Improve test coverage for @src/notifications/notifications.service.ts .\nTarget uncovered lines: 14-20, 22-26 .",
+      "context": [
+        "src/notifications/notifications.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T13:19:26.041Z",
+      "updatedAt": "2025-12-11T19:46:17.779Z",
+      "completedAt": "2025-12-11T19:46:17.779Z"
+    },
+    {
+      "id": "25bb5639-e945-4749-bfff-1981ddd005c2",
+      "status": "+",
+      "title": "Add tests for src/storage/s3.service.ts",
+      "description": "Improve test coverage for @src/storage/s3.service.ts .\nTarget uncovered lines: 28-70 .",
+      "context": [
+        "src/storage/s3.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T13:19:27.589Z",
+      "updatedAt": "2025-12-11T19:48:19.436Z",
+      "completedAt": "2025-12-11T19:48:19.436Z"
+    },
+    {
+      "id": "4aadb224-ae85-4494-bb61-bee09e1ace66",
+      "status": "+",
+      "title": "Add tests for src/user/users.service.ts",
+      "description": "Improve test coverage for @src/user/users.service.ts .\nTarget uncovered lines: 20-22 .",
+      "context": [
+        "src/user/users.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T13:19:29.447Z",
+      "updatedAt": "2025-12-11T19:50:45.380Z",
+      "completedAt": "2025-12-11T19:50:45.380Z"
+    },
+    {
+      "id": "88fc8c76-cc83-4dab-99a3-e915a66f79ea",
+      "status": "+",
+      "title": "Add tests for src/user/profile/user-profiles.service.ts",
+      "description": "Improve test coverage for @src/user/profile/user-profiles.service.ts .\nTarget uncovered lines: 19-48 .",
+      "context": [
+        "src/user/profile/user-profiles.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T13:19:30.990Z",
+      "updatedAt": "2025-12-11T19:51:48.254Z",
+      "completedAt": "2025-12-11T19:51:48.254Z"
+    },
+    {
+      "id": "41771e83-0223-4c21-9402-ab07676406f6",
+      "status": "+",
+      "title": "Add tests for src/user/profile/repositories/dynamodb-user-profiles.repository.ts",
+      "description": "Improve test coverage for @src/user/profile/repositories/dynamodb-user-profiles.repository.ts .\nTarget uncovered lines: 22-41 .",
+      "context": [
+        "src/user/profile/repositories/dynamodb-user-profiles.repository.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T13:19:32.508Z",
+      "updatedAt": "2025-12-11T19:52:56.907Z",
+      "completedAt": "2025-12-11T19:52:56.907Z"
+    },
+    {
+      "id": "a25ecdd2-0615-4493-8a68-cd4ec1a20387",
+      "status": "+",
+      "title": "Add tests for src/user/profile/utils/unit-parser.ts",
+      "description": "Improve test coverage for @src/user/profile/utils/unit-parser.ts .\nTarget uncovered lines: 18, 25, 42, 51 .",
+      "context": [
+        "src/user/profile/utils/unit-parser.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T13:19:35.077Z",
+      "updatedAt": "2025-12-11T19:55:09.362Z",
+      "completedAt": "2025-12-11T19:55:09.362Z"
+    },
+    {
+      "id": "7c8d7cb7-b205-47a7-8514-3885a0ba01bb",
+      "status": "+",
+      "title": "Add tests for src/utils/TokenUtils.ts",
+      "description": "Improve test coverage for @src/utils/TokenUtils.ts .\nTarget uncovered lines: 7 .",
+      "context": [
+        "src/utils/TokenUtils.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T13:19:37.917Z",
+      "updatedAt": "2025-12-11T19:56:09.835Z",
+      "completedAt": "2025-12-11T19:56:09.835Z"
+    },
+    {
+      "id": "e0f694bf-dfba-4555-a5f0-28f5cc3a5d31",
+      "status": "+",
+      "title": "Add tests for src/whatsapp/whatsapp-outbox.repository.ts",
+      "description": "Improve test coverage for @src/whatsapp/whatsapp-outbox.repository.ts .\nTarget uncovered lines: 17-49 .",
+      "context": [
+        "src/whatsapp/whatsapp-outbox.repository.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T13:19:39.835Z",
+      "updatedAt": "2025-12-11T19:59:41.346Z",
+      "completedAt": "2025-12-11T19:59:41.346Z"
+    },
+    {
+      "id": "75631600-4743-4f96-af49-3e4c2eee754d",
+      "status": "+",
+      "title": "Add tests for src/whatsapp/whatsapp.api.service.ts",
+      "description": "Improve test coverage for @src/whatsapp/whatsapp.api.service.ts .\nTarget uncovered lines: 19-58 .",
+      "context": [
+        "src/whatsapp/whatsapp.api.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T13:19:41.838Z",
+      "updatedAt": "2025-12-11T20:01:01.420Z",
+      "completedAt": "2025-12-11T20:01:01.420Z"
+    },
+    {
+      "id": "fe437202-2379-4973-b26a-bfccf8b3c450",
+      "status": "+",
+      "title": "Add tests for src/whatsapp/whatsapp.formatter.ts",
+      "description": "Improve test coverage for @src/whatsapp/whatsapp.formatter.ts .\nTarget uncovered lines: 47, 58, 74, 79, 89 .",
+      "context": [
+        "src/whatsapp/whatsapp.formatter.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T13:19:43.950Z",
+      "updatedAt": "2025-12-11T20:04:18.873Z",
+      "completedAt": "2025-12-11T20:04:18.873Z"
+    },
+    {
+      "id": "964b1014-9b20-4a83-a98e-c760d1107116",
+      "status": "+",
+      "title": "Add tests for src/whatsapp/whatsapp.outbound.service.ts",
+      "description": "Improve test coverage for @src/whatsapp/whatsapp.outbound.service.ts .\nTarget uncovered lines: 17-24 .",
+      "context": [
+        "src/whatsapp/whatsapp.outbound.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T13:19:45.437Z",
+      "updatedAt": "2025-12-11T20:07:00.536Z",
+      "completedAt": "2025-12-11T20:07:00.536Z"
+    },
+    {
+      "id": "b45384d4-ea91-4d87-acd3-2096906a822f",
+      "status": "+",
+      "title": "Add tests for src/whatsapp/whatsapp.outbox.worker.ts",
+      "description": "Improve test coverage for @src/whatsapp/whatsapp.outbox.worker.ts .\nTarget uncovered lines: 39, 51, 53, 74-75, 79, 83, 86 .",
+      "context": [
+        "src/whatsapp/whatsapp.outbox.worker.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T13:19:50.905Z",
+      "updatedAt": "2025-12-11T20:17:45.361Z",
+      "completedAt": "2025-12-11T20:17:45.361Z"
+    },
+    {
+      "id": "b78fb45b-0d42-4378-8ca8-48edfeb5dd9a",
+      "status": "+",
+      "title": "Add tests for src/whatsapp/whatsapp.webhook.controller.ts",
+      "description": "Improve test coverage for @src/whatsapp/whatsapp.webhook.controller.ts .\nTarget uncovered lines: 23-25 .",
+      "context": [
+        "src/whatsapp/whatsapp.webhook.controller.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T13:19:52.464Z",
+      "updatedAt": "2025-12-11T20:18:43.149Z",
+      "completedAt": "2025-12-11T20:18:43.149Z"
+    },
+    {
+      "id": "201f579b-1108-4f44-8759-e7fad331a3a0",
+      "status": "+",
+      "title": "Add tests for src/whatsapp/whatsapp.webhook.service.ts",
+      "description": "Improve test coverage for @src/whatsapp/whatsapp.webhook.service.ts .\nTarget uncovered lines: 29, 31, 33, 40-41, 55, 59, 65, 69, 81, 88, 91, 106, 118, 126, 143, 160, 176, 193, 211, 216, 224 .",
+      "context": [
+        "src/whatsapp/whatsapp.webhook.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-11T13:19:54.120Z",
+      "updatedAt": "2025-12-11T20:27:30.789Z",
+      "completedAt": "2025-12-11T20:27:30.789Z"
+    },
+    {
+      "id": "eeeea3be-689e-4f27-8272-19ffbebb2310",
+      "status": "+",
+      "title": "Add tests for src/admin/admin.controller.ts",
+      "description": "Improve test coverage for @src/admin/admin.controller.ts .\nTarget uncovered lines: 23-29 .",
+      "context": [
+        "src/admin/admin.controller.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-12T19:06:10.324Z",
+      "updatedAt": "2025-12-12T19:14:45.604Z",
+      "completedAt": "2025-12-12T19:14:45.604Z"
+    },
+    {
+      "id": "b623fd1b-72ce-42f0-9856-b5f4b9c1a9dd",
+      "status": "+",
+      "title": "Add tests for src/admin/admin.service.ts",
+      "description": "Improve test coverage for @src/admin/admin.service.ts .\nTarget uncovered lines: 40-56 .",
+      "context": [
+        "src/admin/admin.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-12T19:06:13.836Z",
+      "updatedAt": "2025-12-12T19:17:01.625Z",
+      "completedAt": "2025-12-12T19:17:01.625Z"
+    },
+    {
+      "id": "b3c76267-c1d0-4a47-aa75-b414b6ff7f6c",
+      "status": "+",
+      "title": "Add tests for src/admin/auth/admin-auth.controller.ts",
+      "description": "Improve test coverage for @src/admin/auth/admin-auth.controller.ts .\nTarget uncovered lines: 1-36 .",
+      "context": [
+        "src/admin/auth/admin-auth.controller.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-12T19:06:15.742Z",
+      "updatedAt": "2025-12-12T19:18:59.540Z",
+      "completedAt": "2025-12-12T19:18:59.540Z"
+    },
+    {
+      "id": "9d7ded5f-b6e1-4ea4-8610-5b406809d9dc",
+      "status": "+",
+      "title": "Add tests for src/admin/auth/admin-auth.service.ts",
+      "description": "Improve test coverage for @src/admin/auth/admin-auth.service.ts .\nTarget uncovered lines: 15-32 .",
+      "context": [
+        "src/admin/auth/admin-auth.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-12T19:06:18.070Z",
+      "updatedAt": "2025-12-12T19:20:47.898Z",
+      "completedAt": "2025-12-12T19:20:47.898Z"
+    },
+    {
+      "id": "d3536e79-89f7-4b45-80bd-aa99ce1975de",
+      "status": "+",
+      "title": "Add tests for src/ai/ai.service.ts",
+      "description": "Improve test coverage for @src/ai/ai.service.ts .\nTarget uncovered lines: 17, 24-69 .",
+      "context": [
+        "src/ai/ai.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-12T19:06:20.514Z",
+      "updatedAt": "2025-12-12T19:22:15.485Z",
+      "completedAt": "2025-12-12T19:22:15.485Z"
+    },
+    {
+      "id": "ae7f03c9-1407-4a89-ac7b-4f855b416c70",
+      "status": "+",
+      "title": "Add tests for src/ai/core/ai-core.service.ts",
+      "description": "Improve test coverage for @src/ai/core/ai-core.service.ts .\nTarget uncovered lines: 30-51, 62-69 .",
+      "context": [
+        "src/ai/core/ai-core.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-12T19:06:22.067Z",
+      "updatedAt": "2025-12-12T19:24:11.392Z",
+      "completedAt": "2025-12-12T19:24:11.392Z"
+    },
+    {
+      "id": "fd946bdc-425a-4124-a685-0dc1b1d516ea",
+      "status": "+",
+      "title": "Add tests for src/ai/prompts/ai-prompts.service.ts",
+      "description": "Improve test coverage for @src/ai/prompts/ai-prompts.service.ts .\nTarget uncovered lines: 32 .",
+      "context": [
+        "src/ai/prompts/ai-prompts.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-12T19:06:30.508Z",
+      "updatedAt": "2025-12-12T19:26:19.743Z",
+      "completedAt": "2025-12-12T19:26:19.743Z"
+    },
+    {
+      "id": "60d6246e-80ad-4929-bb08-6d17473ce402",
+      "status": "+",
+      "title": "Add tests for src/ai/transcription/ai-transcription.service.ts",
+      "description": "Improve test coverage for @src/ai/transcription/ai-transcription.service.ts .\nTarget uncovered lines: 11-30 .",
+      "context": [
+        "src/ai/transcription/ai-transcription.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-12T19:06:33.892Z",
+      "updatedAt": "2025-12-12T19:27:40.635Z",
+      "completedAt": "2025-12-12T19:27:40.635Z"
+    },
+    {
+      "id": "bb2ae834-88eb-492e-8fa0-fd32570cc96b",
+      "status": "+",
+      "title": "Add tests for src/analytics/mixpanel.service.ts",
+      "description": "Improve test coverage for @src/analytics/mixpanel.service.ts .\nTarget uncovered lines: 31, 34, 37-44, 46, 68, 70 .",
+      "context": [
+        "src/analytics/mixpanel.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-12T19:06:41.802Z",
+      "updatedAt": "2025-12-12T19:30:09.519Z",
+      "completedAt": "2025-12-12T19:30:09.519Z"
+    },
+    {
+      "id": "c8258a0d-7731-4e30-9660-39506656557d",
+      "status": "+",
+      "title": "Add tests for src/auth/auth.controller.ts",
+      "description": "Improve test coverage for @src/auth/auth.controller.ts .\nTarget uncovered lines: 37, 41-48, 52-62 .",
+      "context": [
+        "src/auth/auth.controller.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-12T19:06:45.338Z",
+      "updatedAt": "2025-12-12T19:36:24.010Z",
+      "completedAt": "2025-12-12T19:36:24.010Z"
+    },
+    {
+      "id": "c5e38cfe-f5b6-401e-ba96-457509fb0727",
+      "status": "+",
+      "title": "Add tests for src/auth/auth.service.ts",
+      "description": "Improve test coverage for @src/auth/auth.service.ts .\nTarget uncovered lines: 36-77 .",
+      "context": [
+        "src/auth/auth.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-12T19:06:47.239Z",
+      "updatedAt": "2025-12-12T19:37:26.656Z",
+      "completedAt": "2025-12-12T19:37:26.656Z"
+    },
+    {
+      "id": "33f979b3-e262-4130-b909-ade130572a4f",
+      "status": "+",
+      "title": "Add tests for src/auth/providers/user-cognito-auth.provider.ts",
+      "description": "Improve test coverage for @src/auth/providers/user-cognito-auth.provider.ts .\nTarget uncovered lines: 8-18 .",
+      "context": [
+        "src/auth/providers/user-cognito-auth.provider.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-12-12T19:06:53.024Z",
+      "updatedAt": "2025-12-12T19:39:01.391Z",
+      "completedAt": "2025-12-12T19:39:01.391Z"
+    }
+  ],
+  "createdAt": "2025-09-26T13:36:34.959Z",
+  "updatedAt": "2025-10-07T00:09:46.485Z"
+}

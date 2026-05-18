@@ -111,29 +111,27 @@ export default function GroupNavItem({
   return (
     <li className="nav-li">
       <div
-        className={classNames(
-          'nav-item',
-          'pl-0 gap-0',
-          accentClass,
-          isActiveGroup && 'nav-item--active',
-        )}
+        className={classNames('nav-item', accentClass, isActiveGroup && 'nav-item--active')}
       >
         {isScope ? (
-          /* SCOPE: static collection icon, same width as the MAIN folder button so labels align */
-          <span
-            className="flex items-center justify-center h-full w-[42px] shrink-0"
-            aria-hidden
-          >
+          /* SCOPE: static collection icon — same `.nav-item__icon` size as
+           * a ProjectNavItem so the row aligns visually under it. */
+          <span className="nav-item__icon" aria-hidden>
             <IconCollection className="w-4 h-4" />
           </span>
         ) : (
-          /* MAIN: clickable folder icon that toggles expand/collapse */
+          /* MAIN: clickable folder icon that toggles expand/collapse.
+           * Same `.nav-item__icon` size as ProjectNavItem (22px) so a
+           * group header sits perfectly under an ungrouped project row.
+           * The hover surface is just the icon — keeping the click
+           * target tight here matches web's layout. */
           <button
             type="button"
             onClick={onToggleOpen}
-            className="flex items-center justify-center hover:bg-black/5 dark:hover:bg-white/10 h-full w-[42px] rounded-l shrink-0"
+            className="nav-item__icon outline-none rounded hover:bg-black/5 dark:hover:bg-white/10"
             aria-expanded={isOpen}
             aria-controls={`group-${g.id}`}
+            aria-label={isOpen ? 'Collapse group' : 'Expand group'}
           >
             {isOpen ? (
               <IconFolderOpen className="w-4 h-4" />
@@ -145,7 +143,7 @@ export default function GroupNavItem({
 
         <button
           type="button"
-          className="nav-item__label flex-1 text-left font-medium outline-none truncate h-full flex items-center"
+          className="nav-item__label flex-1 text-left font-medium outline-none truncate"
           onClick={() => onGroupSelect(g.id)}
         >
           {g.title}
@@ -205,9 +203,13 @@ export default function GroupNavItem({
         )}
       </div>
 
-      {/* Expandable project list — MAIN groups only */}
+      {/* Expandable project list — MAIN groups only. No left padding on
+       *  the wrapper (web doesn't have it either); the visual indent for
+       *  group children comes from each `ProjectNavItem`'s own internal
+       *  layout, so the project rows align under the group header
+       *  without a visible vertical "cut" running down the left edge. */}
       {!isScope && isOpen && (
-        <div className="pl-3 mt-1 flex flex-col gap-1">
+        <div className="mt-1 flex flex-col gap-1">
           <ul id={`group-${g.id}`} className="nav-list" aria-label={`${g.title} projects`}>
             {groupProjects.map((p) => (
               <ProjectNavItem

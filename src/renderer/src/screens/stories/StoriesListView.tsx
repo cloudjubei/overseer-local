@@ -8,6 +8,7 @@ import {
   SegmentedControl,
   Skeleton,
   SkeletonText,
+  Spinner,
   StatusControl,
   StatusPicker,
   STATUS_LABELS,
@@ -108,12 +109,14 @@ export default function StoriesListView() {
   const {
     storyIdsByProject,
     storiesById,
+    isProjectLoaded,
     updateStory,
     getStoryDisplayIndex,
     reorderStory,
     getBlockers,
     getBlockersOutbound,
   } = useStories()
+  const isLoaded = isProjectLoaded(projectId)
   const { runsActive, startAgent } = useAgents()
 
   useEffect(() => {
@@ -486,12 +489,14 @@ export default function StoriesListView() {
             className="flex-1 min-h-0 overflow-y-auto stories-results"
             tabIndex={-1}
           >
-            {!isAppSettingsLoaded ? (
-              <ul className="stories-list" role="list" aria-label="Loading stories">
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <SkeletonRow key={i} />
-                ))}
-              </ul>
+            {!isAppSettingsLoaded || !isLoaded ? (
+              <div
+                className="flex flex-col items-center justify-center h-full gap-3 opacity-70"
+                aria-busy="true"
+              >
+                <Spinner size={28} />
+                <span className="text-sm">Loading stories…</span>
+              </div>
             ) : filtered.length === 0 ? (
               <div className="empty">No stories found.</div>
             ) : (

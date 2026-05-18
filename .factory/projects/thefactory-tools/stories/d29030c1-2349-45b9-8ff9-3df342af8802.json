@@ -1,0 +1,65 @@
+{
+  "id": "d29030c1-2349-45b9-8ff9-3df342af8802",
+  "status": "+",
+  "title": "Testing and Project improvements",
+  "description": "To make the Testing tools better we don't want to be guessing the user's testing setup or how the tests run, but want to record it inside the ProjectSpec . For a project that is a coding project, we want to be able to record what language it is, what testing framework is used for it (so we can easily run tests via TestTools) and what general framework is used (so we could run code in isolation etc via a new set of tools called ProgrammingTools. Not every project is meant to be a coding project, so this information needs to be optional.\nProjectTools need to be extended by appropriate methods to accommodate for the above.\n\nFor the time being we want to support python and javascript/typescript projects in terms of testing and running code, but we want to have the user have the option to select any well-known language, and any well-known framework + testing framework for that language.",
+  "features": [
+    {
+      "id": "9f80b110-c947-43ba-b16d-4ab1d8586258",
+      "status": "+",
+      "title": "Update `ProjectSpec` type with language and framework details",
+      "description": "Modify the `ProjectSpec` interface in @src/types.ts  to include an optional field `codeInfo` (signalling a coding project) - with fields for `language`, `testFramework`, and `framework`. Define new string literal types for these fields to ensure type safety.\nMake sure that `framework` and `testFramework` is stored in a dictionary that is accessible via a key that is a `language` - this way it's easy to see which frameworks belong to which language. \nAll options should include an `other` option. \nThese values need to be exported so package importers can use them.",
+      "context": [
+        "src/types.ts"
+      ],
+      "createdAt": "2025-09-24T16:54:44.937Z",
+      "updatedAt": "2025-09-24T19:00:17.985Z",
+      "blockers": [],
+      "completedAt": "2025-09-24T19:00:17.985Z"
+    },
+    {
+      "id": "46d426ae-deb5-4933-bb25-0a72073e9d39",
+      "status": "+",
+      "title": "Extend `ProjectTools` to manage project's codeInfo",
+      "description": "In @src/tools/ProjectTools.ts , add a new method to update the `codeInfo` property of a `ProjectSpec` which will also verify its correctness. This method will call the existing `updateProject` function internally.",
+      "context": [
+        "src/tools/ProjectTools.ts"
+      ],
+      "createdAt": "2025-09-24T16:54:55.770Z",
+      "updatedAt": "2025-09-24T19:03:53.907Z",
+      "blockers": [],
+      "completedAt": "2025-09-24T19:03:53.907Z"
+    },
+    {
+      "id": "9af7e4e9-7f4e-4a7d-ba14-965c38e47796",
+      "status": "+",
+      "title": "Refactor `TestTools` to use a testFramework for test execution",
+      "description": "Modify `TestTools` in @src/tests/TestTools.ts  to use new parameters `language` and `testFramework` to determine how to run tests. If a language or testFramework isn't implemented/available throw an appropriate error.\nThe @src/orchestrator.ts should pass in these values directly just like it does with `projectId`, `storyId` and `featureId` .",
+      "context": [
+        "src/tests/TestTools.ts",
+        "src/orchestrator.ts"
+      ],
+      "createdAt": "2025-09-24T16:55:10.822Z",
+      "updatedAt": "2025-09-24T21:22:28.496Z",
+      "blockers": [],
+      "completedAt": "2025-09-24T21:22:28.496Z"
+    },
+    {
+      "id": "b946a691-81ae-486b-bc07-606e6384b787",
+      "status": "+",
+      "title": "Create a function guessCodeProjectInfo",
+      "description": "Inside @src/tools/ProjectTools.ts we need this function, so that any client can provide a root path and based on some common files to the languages we support the appropriate language, framework and test framework info can be guessed and returned back - in the same format as stored in ProjectSpec's codeInfo in @src/types.ts",
+      "context": [
+        "src/tools/ProjectTools.ts",
+        "src/types.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-24T18:00:25.433Z",
+      "updatedAt": "2025-09-24T19:15:49.321Z",
+      "completedAt": "2025-09-24T19:15:49.321Z"
+    }
+  ],
+  "createdAt": "2025-09-24T16:53:48.145Z",
+  "updatedAt": "2025-09-24T16:53:48.145Z",
+  "completedAt": "2025-09-24T21:22:28.496Z"
+}

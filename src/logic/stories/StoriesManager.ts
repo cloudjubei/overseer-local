@@ -68,11 +68,26 @@ export default class StoriesManager extends BaseManager {
 
   async getTools(projectId: string): Promise<StoryTools | undefined> {
     await this.toolsLock.lock()
-    if (!this.tools[projectId]) {
-      await this.updateTool(projectId)
+    try {
+      if (!this.tools[projectId]) {
+        // Catch per-project failures (missing dir, watcher init error, …)
+        // so the lock is still released. Without this, a single bad
+        // project freezes every subsequent getTools call across the app
+        // — including the ones for healthy projects — and stories
+        // silently fail to load for everyone after the first.
+        try {
+          await this.updateTool(projectId)
+        } catch (e) {
+          console.error(
+            `StoriesManager.updateTool failed for project ${projectId}`,
+            (e as Error)?.message ?? e,
+          )
+        }
+      }
+      return this.tools[projectId]
+    } finally {
+      this.toolsLock.unlock()
     }
-    this.toolsLock.unlock()
-    return this.tools[projectId]
   }
 
   async listStories(projectId: string): Promise<Story[]> {
@@ -170,10 +185,18 @@ export default class StoriesManager extends BaseManager {
   }
 
   private async updateTool(projectId: string): Promise<StoryTools | undefined> {
-    const projectRoot = await this.projectsManager.getProjectDir(projectId)
-    if (!projectRoot) return
+    // `getProjectStoriesRoot` resolves `dataLocation` correctly: for
+    // `'central'` projects it returns the overseer's central root (where
+    // stories actually live), not the project's source-code path. Using
+    // `getProjectDir` here was the bug — `central` projects had their
+    // StoryTools watcher pointing at `<sourceRepo>/projects/<id>/stories`
+    // (which doesn't exist), so `listStories` returned `[]` for every
+    // non-active project, and the renderer's All-Projects views were
+    // missing all but the first project's stories.
+    const storiesRoot = await this.projectsManager.getProjectStoriesRoot(projectId)
+    if (!storiesRoot) return
 
-    const tools = createStoryTools(projectId, projectRoot)
+    const tools = createStoryTools(projectId, storiesRoot)
     await tools.init()
 
     this.tools[projectId] = tools

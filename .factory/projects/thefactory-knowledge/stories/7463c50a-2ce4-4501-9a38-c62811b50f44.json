@@ -1,0 +1,100 @@
+{
+  "id": "7463c50a-2ce4-4501-9a38-c62811b50f44",
+  "status": "=",
+  "title": "Improvements",
+  "description": "Various ongoing improvements to be added to the project",
+  "features": [
+    {
+      "id": "0934208a-82c2-4a9a-a0e5-e7daa3a0b8c2",
+      "status": "+",
+      "title": "Community-aware code insights (value-add)",
+      "description": "Provide higher-level analytics using communities:\n  - “Top entrypoint classes” per community (in-degree on CALLS or centrality).\n  - “Instability” metrics per community (ratio of outgoing to incoming DEPENDS_ON_CLASS edges).\n  - “Hotspots” by combining change history (later) or fan-in/out metrics.\nExpose as:\n  - GET /code-projects/{area}/analytics/communities/top-entrypoints\n  - GET /code-projects/{area}/analytics/communities/hotspots",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-09-17T09:36:16.049Z",
+      "updatedAt": "2025-09-19T21:22:21.280Z",
+      "completedAt": "2025-09-19T21:22:21.280Z"
+    },
+    {
+      "id": "c24e44b1-5a5e-4037-8ed3-8199ad88a92e",
+      "status": "=",
+      "title": "Code standard",
+      "description": "The document @docs/CODE_STANDARD.md  highlights the overall architecture and coding standards maintained in this project.\nThere is a clear reference to it inside @README.md and @docs/FILE_ORGANISATION.md so that anyone creating new features or updating existing ones will go to it.\nIt should be as succinct as possible, but explaining the idea as well as possible.\n\nGo over all the code and make sure that it satisfies the standards.",
+      "context": [],
+      "createdAt": "2025-09-19T10:32:57.759Z",
+      "updatedAt": "2025-09-19T21:16:03.561Z"
+    },
+    {
+      "id": "dedb18d4-c951-4e32-be68-15ac4f2ce765",
+      "status": "=",
+      "title": "Aim for close to 100% test coverage",
+      "description": "We need to make sure that the tests cover as close as 100% of the codebase.\nObviously, things like the ai service with getting results from the AI cannot be fully tested - but we can test for many ranges of responses by mocking the LLM responses appropriately. The same idea should be taken everywhere to try to achieve 100% coverage.\n\nOne important thing is to make sure that data that is entering and leaving endpoints is validated thoroughly to make sure that it matches the expected schema. This should be part of the code and the tests should validate it too (i.e. malformed objects being rejected).\n\nThere needs to be a relevant section in @README.md  explaining how vital testing is and to refer to @docs/TESTING.md for all guidance related to writing tests and the standard for them. For reference there is also the @docs/CODE_STANDARD.md  document that highlights the coding standard within the project.\n\nNEVER FIX CODE JUST SO TESTS PASS - THE PROJECT CODE NEEDS TO MAKE SENSE AND WORK SO THE FEATURES ARE SATISFIED. TESTS ALWAYS NEED TO POKE AT HOLES AND EDGES OF THE CODE.",
+      "context": [],
+      "createdAt": "2025-09-19T10:33:24.683Z",
+      "updatedAt": "2025-09-19T21:16:06.064Z"
+    },
+    {
+      "id": "25b1538c-358c-430b-adca-d6250f0d6cb9",
+      "status": "+",
+      "title": "Documentation needs to be easier to read",
+      "description": "We have a @README.md but it's very convoluted.\nIt needs to be a very quick guide to launching the project:\n- 1st, install dependencies with poetry \n- 2nd, install neo4j (or any further setup)\n- 3rd, copy a prepared `.env.copy` file and fill in the keys missing\n- 4th, install docker and run docker compose (prepared file) which should have EVERYTHING it needs to do its job\n- 5th, explain how to run tests\n- 6th, brief explanation of APIs\n\nIf any of the steps above require additional changes so that they make sense - carry it all out.",
+      "context": [
+        "README.md"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-01T00:28:16.733Z",
+      "updatedAt": "2025-10-01T00:33:02.514Z",
+      "completedAt": "2025-10-01T00:33:02.514Z"
+    },
+    {
+      "id": "216de839-03da-4782-9e97-da3c6edb028e",
+      "status": "+",
+      "title": "2 simple commands to running tests and 1 for coverage",
+      "description": "There should be 1 command - like `pytest` to run just the unit tests and then another one like `pytest e2e` that will run the tests from `tests\\e2e`. We also need something similar to be able to run coverage.\nThis needs to be explained in the @README.md in the appropriate section.",
+      "context": [
+        "README.md"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-01T00:30:11.163Z",
+      "updatedAt": "2025-10-01T00:32:09.171Z",
+      "completedAt": "2025-10-01T00:32:09.171Z"
+    },
+    {
+      "id": "ac2c2448-c79b-4072-ac1c-97296ec57d6b",
+      "status": "+",
+      "title": "Error building docker",
+      "description": "Running `docker compose up --build` causes an error:\n\n => ERROR [6/7] RUN poetry install --no-root --only main                                                                                                                                        0.6s\n------                                                                                                                                                                                               \n > [6/7] RUN poetry install --no-root --only main:\n0.554 \n0.554 Expected '=' after a key in a key/value pair (at line 16, column 7)\n------\nDockerfile:27\n\n--------------------\n\n  25 |     \n\n  26 |     # Install dependencies\n\n  27 | >>> RUN poetry install --no-root --only main\n\n  28 |     \n\n  29 |     # Copy application source\n\n--------------------\n\nfailed to solve: process \"/bin/sh -c poetry install --no-root --only main\" did not complete successfully: exit code: 1",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-10-01T00:51:29.682Z",
+      "updatedAt": "2025-10-01T00:57:00.019Z",
+      "completedAt": "2025-10-01T00:57:00.019Z"
+    },
+    {
+      "id": "f1ac359b-e66c-4489-a22d-2694184d7d47",
+      "status": "+",
+      "title": "All the dependencies need an update",
+      "description": "We should use the latest versions of all the dependencies wherever possible.\nEspecially python and numpy.\nIf any of the code, especially all the library code in the local `graphiti/graphiti_core` needs updating then do so.",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-10-01T00:53:06.060Z",
+      "updatedAt": "2025-10-01T00:58:56.275Z",
+      "completedAt": "2025-10-01T00:58:56.275Z"
+    },
+    {
+      "id": "e3796050-b4ad-4a33-a024-ef9ff263e3fd",
+      "status": "+",
+      "title": "Docker build fails",
+      "description": "When running `docker compose up --build` the now local graphiti package is not included in the @Dockerfile , cos this error appears:\n\n                                                                                                                                    \n > [6/7] RUN poetry install --no-root --only main:                                                                                                                                                   \n0.628 Path /app/graphiti for graphiti-core does not exist",
+      "context": [
+        "Dockerfile"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-01T09:14:05.146Z",
+      "updatedAt": "2025-10-01T09:15:40.298Z",
+      "completedAt": "2025-10-01T09:15:40.298Z"
+    }
+  ],
+  "createdAt": "2025-09-17T09:36:02.281Z",
+  "updatedAt": "2025-10-01T00:43:04.266Z"
+}

@@ -1,0 +1,122 @@
+{
+  "id": "7771c325-eff3-481f-859e-1673eb028f2f",
+  "status": "+",
+  "title": "GitMergeTools",
+  "description": "Objective: Provide GitMergeTools under src/git to preview and apply external branches/commits into the current working tree. It must compute a clear plan of what will change, highlight conflicts (including impact on pending local changes), and then perform the merge safely when confirmed.\n\nScope:\n- A new module: src/git/GitMergeTools.ts (and related helpers/types) that can:\n  - getMergePlan({ repoPath, sources, baseRef=HEAD, includePatch?, planMode? }): Promise<MergePlan>.\n    • sources: one or more external refs (e.g., origin/feature/*) or commit SHAs.\n    • planMode: 'worktree' (simulate in a temporary worktree for accuracy) or 'merge-tree' (fast approximation without touching the working tree).\n    • Output includes: commits to be merged, per-file change stats, predicted conflicts, and an 'impactOnLocal' section showing which locally modified files would be touched.\n  - applyMerge({ repoPath, sources, baseRef=HEAD, strategy?, allowFastForward?, noCommit?, createMergeCommit?, signoff?, autoStash?, confirmWhenDirty?, dryRun? }): Promise<MergeResult>.\n    • Executes the merge(s) into the current working tree with safety checks.\n    • Supports auto-stash of pending changes and restoration on success/failure.\n    • Returns final status: success with new commit/merge state or conflicts with details.\n  - getLocalStatus({ repoPath }): Promise<LocalStatus> to summarize index/working tree state (porcelain-style for UI display).\n  - buildMergeReport(plan[, metrics? ]): JSON-serializable report suitable for client display with schemaVersion; patches are opt-in.\n  - Optional cherry-pick selection helpers: selectCommits/planCherryPick/applyCherryPick for fine-grained control over which commits to apply.\n\nNon-goals:\n- No monitoring loop or orchestrator hooks in this story; that may be addressed separately if needed.\n- No network services; operations are in-process. Fetch is opt-in when clients need to update remote refs.\n- Submodules and binary file patch bodies are out-of-scope (binaries listed without patches; submodules ignored).\n\nKey Requirements:\n- Safety first: never destroy uncommitted work by default; destructive operations require confirm flags.\n- Dry-run support that does not modify the current working tree when planMode='worktree' (uses a temporary git worktree) or 'merge-tree' approximation.\n- Clear conflict and impact reporting, including overlaps with locally modified files.\n- Patches are opt-in with size limits (maxPatchedFiles/maxPatchBytes) to keep payloads small.\n- Typed, versioned, serializable report shapes (schemaVersion) for remote-friendly usage.\n\nDeliverables:\n- src/git/GitMergeTools.ts exporting:\n  - getMergePlan, applyMerge, getLocalStatus, buildMergeReport, and optional cherry-pick helpers.\n- src/git/types.ts defining: MergePlan, MergeResult, LocalStatus, FileChange, ConflictEntry, ImpactOnLocal, and related enums.\n- Tests using temporary repos to validate planning with dirty working trees, conflict detection, auto-stash behavior, and successful apply.\n- Documentation with examples: planning, applying with autoStash, and interpreting impact/conflicts.\n\nSuccess Criteria:\n- For given external branches/commits, getMergePlan returns per-file changes and conflicts versus HEAD and highlights local edits that would be affected.\n- applyMerge with autoStash handles dirty working trees safely and restores stash on failure; returns a clear result (commit SHA or conflict list).\n- Reports are JSON-serializable and keep patches disabled by default; enabling patches respects size limits.",
+  "features": [
+    {
+      "id": "da089164-247a-4690-820b-f05567e4d16a",
+      "status": "+",
+      "title": "Merge planning core (getMergePlan)",
+      "description": "Implement getMergePlan to preview applying one or more external sources (remote refs or commit SHAs) onto a baseRef (default HEAD).\n- Options: { repoPath, sources: string[], baseRef=HEAD, includePatch?, planMode? ('merge-tree' | 'worktree') }\n- Plan output: commits to be merged, per-file change stats (A/M/D/R), predicted conflicts, and impactOnLocal (overlap with staged/unstaged and untracked clobber risks).\n- planMode='merge-tree' for fast approximation; 'worktree' simulates in a temporary git worktree for high-fidelity prediction without touching the current working tree.\n- Patches are opt-in and size-limited.\nAcceptance criteria:\n- Given an external branch that conflicts with HEAD and local edits overlapping the same files, the plan lists predicted conflicts and flags impacted local files.\n- 'merge-tree' produces a reasonable prediction; 'worktree' mode matches the actual merge result when performed in a temp worktree.\n- Plan is JSON-serializable and includes schemaVersion via the report builder.",
+      "context": [],
+      "createdAt": "2025-10-05T16:42:59.405Z",
+      "updatedAt": "2025-10-07T18:32:44.139Z",
+      "completedAt": "2025-10-06T13:17:15.600Z"
+    },
+    {
+      "id": "d0b2994d-1dfa-428a-a270-583c6bb9133b",
+      "status": "+",
+      "title": "Per-file change stats and optional patches",
+      "description": "Provide per-file change breakdown for the merge plan.\n- For each affected file: path, status (A/M/D/R), insertions, deletions, renameFrom/renameScore when applicable.\n- includePatch adds unified diffs for text files only; binary patch bodies are out-of-scope (binaries may be listed without patches).\n- Respect limits: maxPatchedFiles and maxPatchBytes; set truncated flags when limits are exceeded.\nAcceptance criteria:\n- For a merge introducing additions/modifications/deletions/renames, the plan lists accurate statuses and line stats.\n- When includePatch=false, no patch bodies are present; when true, text files include unified diffs subject to limits with truncation indicated.\n- Submodules are ignored for patch bodies; binaries are never patched.",
+      "context": [],
+      "createdAt": "2025-10-05T16:42:59.408Z",
+      "updatedAt": "2025-10-06T13:25:24.742Z",
+      "completedAt": "2025-10-06T13:25:24.742Z"
+    },
+    {
+      "id": "630d291c-26c0-4533-8681-ac0768d6b80f",
+      "status": "+",
+      "title": "Local status and impact analysis (getLocalStatus)",
+      "description": "Implement getLocalStatus and integrate impact analysis into planning.\n- getLocalStatus({ repoPath }) -> porcelain-like summary of staged, unstaged, untracked (optionally ignored) files.\n- impactOnLocal in MergePlan: overlaps where the merge will modify files that have local changes; identify untracked files that would be overwritten (clobber risk) and staged changes that may conflict.\nAcceptance criteria:\n- On a repo with dirty working tree, getLocalStatus reports staged/unstaged/untracked accurately.\n- MergePlan.impactOnLocal lists files that will be touched by the merge and flags untracked overwrite risks clearly.\n- JSON-serializable, compact enough for UI consumption.",
+      "context": [],
+      "createdAt": "2025-10-05T16:42:59.409Z",
+      "updatedAt": "2025-10-06T13:29:26.564Z",
+      "completedAt": "2025-10-06T13:29:26.564Z"
+    },
+    {
+      "id": "6840372d-d304-4b50-ad90-211924f70cc3",
+      "status": "+",
+      "title": "Apply merge safely (applyMerge) with auto-stash",
+      "description": "Implement applyMerge to execute the planned merge(s) into the current working tree with safety options.\n- Options: { repoPath, sources, baseRef=HEAD, strategy?, allowFastForward?, noCommit?, createMergeCommit?, signoff?, autoStash?, includeUntrackedInStash?, confirmWhenDirty?, dryRun? }.\n- Behavior: optionally auto-stash staged/unstaged (and untracked if enabled), perform merge(s), restore stash on success; on failure/conflicts, restore stash if safe and return Conflict details.\n- Never destroy uncommitted work by default; require confirmWhenDirty for risky operations when autoStash is disabled.\nAcceptance criteria:\n- With pending changes, applyMerge(autoStash=true) succeeds for a non-conflicting merge and restores local changes; returns new commit SHA (unless noCommit=true).\n- On conflicts, returns a clear MergeResult with per-file conflict entries and next steps; stash is restored if merge is aborted.\n- Fast-forward merges are supported when allowFastForward=true; noCommit/createMergeCommit flags behave as expected.",
+      "context": [],
+      "createdAt": "2025-10-05T16:42:59.410Z",
+      "updatedAt": "2025-10-06T13:36:52.672Z",
+      "completedAt": "2025-10-06T13:36:52.672Z"
+    },
+    {
+      "id": "c6d8252d-3ded-40e9-97d1-4d1822eb7a61",
+      "status": "+",
+      "title": "Merge report builder (buildMergeReport)",
+      "description": "Produce a JSON-serializable merge report from a MergePlan for client display.\n- buildMergeReport(plan, { includePatch?, maxPatchedFiles?, maxPatchBytes? }): returns schemaVersioned report with plan summary, per-file changes, conflicts, and impactOnLocal; optional patches included within limits and marked truncated when needed.\nAcceptance criteria:\n- Report contains schemaVersion, plan metadata, per-file stats, conflicts, and impact sections.\n- JSON.stringify/parse round-trips without loss; default excludes patches unless includePatch=true.\n- Size limits are enforced; truncation is indicated via flags.",
+      "context": [],
+      "createdAt": "2025-10-05T16:42:59.411Z",
+      "updatedAt": "2025-10-06T13:44:02.742Z",
+      "completedAt": "2025-10-06T13:44:02.742Z"
+    },
+    {
+      "id": "34bbcegf3-c04b-4141-a99d-dd30f32e9612",
+      "status": "+",
+      "title": "Cherry-pick helpers (optional)",
+      "description": "Provide optional helpers for fine-grained commit application.\n- selectCommits: utility to list and filter commits from sources.\n- planCherryPick({ repoPath, commits[], baseRef=HEAD, includePatch?, planMode? }) -> MergePlan-like prediction for cherry-picking.\n- applyCherryPick({ repoPath, commits[], autoStash?, signoff?, noCommit?, dryRun? }) -> MergeResult with conflict details when applicable.\nAcceptance criteria:\n- Can select a subset of commits from a source branch and preview/apply them with conflict reporting.\n- Auto-stash and dry-run semantics mirror applyMerge behavior.\n- JSON-serializable plan/result shapes consistent with merge operations.",
+      "context": [],
+      "createdAt": "2025-10-05T16:42:59.412Z",
+      "updatedAt": "2025-10-06T14:02:01.962Z",
+      "completedAt": "2025-10-06T14:02:01.962Z"
+    },
+    {
+      "id": "5c456bb7-0f72-49c8-8ee4-8ec380c29588",
+      "status": "+",
+      "title": "Fetch helpers (opt-in)",
+      "description": "Introduce a small, opt-in helper to update remote refs before planning/applying.\n- fetchRefs({ repoPath, remote='origin', refs?, prune?=true, tags?=false }): performs a safe 'git fetch' without altering the current working tree.\n- No implicit network calls anywhere else; callers choose when to fetch.\nAcceptance criteria:\n- fetchRefs updates refs/remotes/<remote> safely and returns summary info (fetched refs, pruned count).\n- No working tree/index changes; respects provided options.\n- Errors are surfaced with clear messages/codes.",
+      "context": [],
+      "createdAt": "2025-10-05T16:42:59.413Z",
+      "updatedAt": "2025-10-07T18:41:34.196Z",
+      "blockers": [],
+      "completedAt": "2025-10-07T18:41:34.196Z"
+    },
+    {
+      "id": "2bb35a25-a786-4352-a2a6-5eb138cf2b6f",
+      "status": "+",
+      "title": "Types and serialization (schema v1)",
+      "description": "Define stable TypeScript types and schema constants for plans, results, and reports.\n- src/git/types.ts: MergePlan, MergeResult, LocalStatus, FileChange, ConflictEntry, ImpactOnLocal, PatchHunk, enums, and SCHEMA_VERSION constant.\n- Ensure shapes are toJSON-safe, with no cyclic references, and future-proof via schemaVersion.\nAcceptance criteria:\n- Types compile and are exported for client usage.\n- JSON round-trip works for plan/result/report payloads.\n- Changes to shapes require bumping SCHEMA_VERSION and documenting migration notes.",
+      "context": [],
+      "createdAt": "2025-10-05T16:42:59.414Z",
+      "updatedAt": "2025-10-07T18:52:57.091Z",
+      "completedAt": "2025-10-07T18:52:57.091Z"
+    },
+    {
+      "id": "1bc440b1-2446-4e9a-ac64-0bb9d9c30551",
+      "status": "+",
+      "title": "Performance and limits",
+      "description": "Keep planning/apply operations efficient and bounded.\n- Prefer 'merge-tree' planning fast path; auto-fallback to 'worktree' when conflicts/renames or low confidence are detected.\n- Enforce limits: maxPatchedFiles, maxPatchBytes; avoid unbounded in-memory state.\n- Always clean up temporary worktrees; robust cleanup even on errors.\nAcceptance criteria:\n- For simple fast-forward or non-conflicting merges, planning completes quickly using 'merge-tree'.\n- When limits are exceeded, output is truncated with flags and execution remains stable.\n- No orphaned temporary worktrees remain after errors (verified in tests).",
+      "context": [],
+      "createdAt": "2025-10-05T16:42:59.415Z",
+      "updatedAt": "2025-10-07T19:00:37.992Z",
+      "completedAt": "2025-10-07T19:00:37.992Z"
+    },
+    {
+      "id": "5d0dd8f0-e1a0-4c90-8675-3e79139beabf",
+      "status": "+",
+      "title": "Documentation and examples for GitMergeTools",
+      "description": "Provide concise documentation and examples for GitMergeTools.\n- JSDoc for public APIs and types.\n- README snippet with examples: getMergePlan (merge-tree vs worktree), applyMerge with autoStash and includeUntrackedInStash, interpreting impactOnLocal, and enabling patches with limits.\nAcceptance criteria:\n- Examples run against temporary repos in docs/tests.\n- Clear guidance on safety flags (confirmWhenDirty, autoStash) and network isolation (fetchRefs is opt-in).",
+      "context": [],
+      "createdAt": "2025-10-05T16:42:59.416Z",
+      "updatedAt": "2025-10-07T19:12:34.378Z",
+      "completedAt": "2025-10-07T19:12:34.378Z"
+    },
+    {
+      "id": "cc2ac901-3ec4-4737-ac9e-12d3b1c19ae4",
+      "status": "+",
+      "title": "Test suite for GitMergeTools",
+      "description": "Add automated tests using temporary git repositories for GitMergeTools.\n- Cover: dirty working trees (staged/unstaged/untracked), untracked clobber detection, auto-stash behavior, fast-forward merges, conflicts with detailed reporting, merge-tree vs worktree parity, patch size limits, and cherry-pick helpers.\n- Ensure no network dependency unless fetchRefs is explicitly invoked.\nAcceptance criteria:\n- Tests pass reliably in CI; no flakiness from timing or network.\n- Edge cases like interrupted merges (conflicts) and cleanup of temp worktrees are validated.\n- Coverage demonstrates key paths: planning, apply, impact analysis, and reporting.",
+      "context": [],
+      "createdAt": "2025-10-05T16:42:59.417Z",
+      "updatedAt": "2025-10-07T19:15:49.368Z",
+      "completedAt": "2025-10-07T19:15:49.368Z"
+    }
+  ],
+  "createdAt": "2025-10-05T16:10:11.372Z",
+  "updatedAt": "2025-10-05T23:28:04.905Z",
+  "completedAt": "2025-10-07T19:15:49.368Z"
+}

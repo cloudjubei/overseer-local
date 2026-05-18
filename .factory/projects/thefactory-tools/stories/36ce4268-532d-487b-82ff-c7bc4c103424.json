@@ -1,0 +1,61 @@
+{
+  "id": "36ce4268-532d-487b-82ff-c7bc4c103424",
+  "status": "+",
+  "title": "Two-phase completions: tool-calling loop then structured final output (incl. dynamic context patch)",
+  "description": "## Goal\nFix the current reliability issues around `updateDynamicContext` and structured responses by moving the responsibility from the LLM (tool invocation timing) into the system.\n\nToday, `updateDynamicContext` is exposed as a tool and the LLM must decide when to call it. In practice it sometimes doesn't call it frequently enough, leaving the dynamic context block stale/large. Also, during a multi-tool run we are often still in the tool-call phase and do not get a structured final message (`{ message, suggested_actions, thinking }`) because the model hasn't produced a terminal assistant response.\n\n## Proposed approach\nImplement a **2-phase** completion flow in `sendCompletionWithTools`:\n\n### Phase 1: Tool-calling loop (internal)\n- Use a dedicated prompt for tool execution.\n- Allow the model to call tools repeatedly until it indicates completion.\n- Do **not** require structured output in this phase.\n\n### Phase 2: Finalization (structured)\n- Make a second completion call with a dedicated finalization prompt.\n- Enforce **structured output** for the final assistant response: `{ message, suggested_actions, thinking, dynamicContextPatch }`.\n- `dynamicContextPatch` is the data that previously would have been sent via the `updateDynamicContext` tool.\n- The system applies `dynamicContextPatch` itself by calling `ChatsTools.updateDynamicContext(context, patch)` after the model returns.\n\n## Notes / constraints\n- Continue using `Chat.dynamicContext?: ChatDynamicContext` as the single source of truth.\n- This story focuses on making dynamic context updates and structured user-facing output reliable at a systems level.\n\n## Acceptance criteria\n- The tool loop always terminates with a deterministic structured output (Phase 2).\n- The system persists `dynamicContextPatch` to `chat.dynamicContext` every turn (when present), without relying on a tool call from the model.\n- The existing `updateDynamicContext` tool can be removed from the agent toolset or deprecated (decision in features).\n- Tests cover both phases and persistence behavior.",
+  "features": [
+    {
+      "id": "9923e662-f789-462a-807c-c8f9d2e33bc3",
+      "status": "+",
+      "title": "Implement two-phase `sendCompletionWithTools` with structured finalization + dynamicContextPatch persistence",
+      "description": "## Summary\nRefactor the completion pipeline to run in two phases:\n\n1) **Tool execution phase**: model can call tools until done.\n2) **Finalization phase**: a second completion call returns a strict structured payload that includes user-facing output plus a `dynamicContextPatch`.\n\n## Requirements\n- Add a new structured response schema for finalization:\n  - `message: string`\n  - `suggested_actions: string[]`\n  - `thinking: string`\n  - `dynamicContextPatch?: Partial<ChatDynamicContext>`\n- Phase 1 prompt should be optimized for tool calling and should not require structured output.\n- Phase 2 prompt should include:\n  - A summary of what happened in Phase 1 (tool calls/results), plus the current chat dynamic context.\n  - Instructions to produce the structured object.\n  - Instructions to produce `dynamicContextPatch` that is minimal and avoids repeating unchanged fields.\n- After Phase 2 completes, the system must apply `dynamicContextPatch` by calling `ChatsTools.updateDynamicContext(context, patch)`.\n- Decide and implement whether `updateDynamicContext` remains exposed as a tool:\n  - Prefer: remove it from the agent toolset to prevent inconsistent dual-update patterns.\n  - Alternate: keep it, but the system still applies the Phase 2 patch and reconciles conflicts deterministically.\n\n## Acceptance criteria\n- A run that performs multiple tool calls always ends with the structured final response.\n- `chat.dynamicContext` is persisted each turn via the Phase 2 patch.\n- The Phase 2 response is enforced at the completion/tooling level (not dependent on LLM voluntarily calling tools).\n- Existing call sites of `sendCompletionWithTools` are updated accordingly.",
+      "context": [],
+      "createdAt": "2026-03-09T11:04:50.571Z",
+      "updatedAt": "2026-03-10T12:31:45.328Z",
+      "completedAt": "2026-03-10T12:31:45.328Z"
+    },
+    {
+      "id": "ef068121-be14-4c2d-a136-f9cf118af692",
+      "status": "+",
+      "title": "Add tests for two-phase tool loop + structured finalization + dynamic context persistence",
+      "description": "## Scope\nAdd automated coverage for the new two-phase completion path.\n\n## Tests to include\n- **Tool-loop continues until done**: ensure Phase 1 can execute multiple tool calls and does not require a terminal structured message.\n- **Finalization always structured**: ensure Phase 2 returns a parsed object with `{ message, suggested_actions, thinking, dynamicContextPatch }`.\n- **Dynamic context persisted**: verify `dynamicContextPatch` is merged and stored via `ChatsTools.updateDynamicContext`.\n- **No reliance on `updateDynamicContext` tool** (if removed): ensure dynamic context is still updated even if the LLM never calls that tool.\n- **Regression tests** for existing `sendCompletionWithTools` call sites to ensure they still get user-facing output.\n\n## Acceptance criteria\n- Tests fail on the old single-phase implementation and pass with the two-phase approach.\n- Tests cover at least one multi-tool sequence and one no-tool sequence.",
+      "context": [],
+      "createdAt": "2026-03-09T11:04:58.317Z",
+      "updatedAt": "2026-03-10T12:31:46.890Z",
+      "completedAt": "2026-03-10T12:31:46.890Z"
+    },
+    {
+      "id": "b05f1e61-0aea-4ae9-afeb-fdc15ccd5d41",
+      "status": "+",
+      "title": "Add resumeCompletionTools to resume tool-calling loop after confirmation/results are provided",
+      "description": "Implement a `resumeCompletionTools` capability so a client can resume a completion tool-loop after one or more tool calls were awaiting confirmation (e.g. `require_confirmation`/`pending`) and later have tool results updated.\n\nAcceptance criteria:\n- Public API exists (location TBD under `src/completion/`) that takes enough inputs to resume: original `CompletionRequest`, `CompletionSettings`, current persisted chat messages (or `chatContext` + loaders), available toolset/callTool, and optional `llmCostsTools`.\n- Resume logic does **not** re-run already-completed tool calls; it only continues from the latest unresolved tool calls / latest assistant turn.\n- Works when the last persisted state includes tool messages with updated `toolResult.type` and `toolResult.result`.\n- Produces the same terminal `CompletionResponseTurns` shapes as `sendCompletionWithTools`.\n- Includes handling for edge cases: no pending tools, missing tool results, inconsistent toolCallId mapping.\n\nImplementation notes:\n- Likely builds on `sendCompletionWithTools` internal loop: detect tool messages with `pending/require_confirmation/running` and decide whether to call tools or continue.\n- Integrate with `createCompletionWithToolsParams` where possible.",
+      "context": [],
+      "createdAt": "2026-03-10T20:04:19.680Z",
+      "updatedAt": "2026-03-11T02:03:36.821Z",
+      "completedAt": "2026-03-11T02:03:36.821Z"
+    },
+    {
+      "id": "a7793f53-7141-43ec-80f5-e8601eabd0a1",
+      "status": "+",
+      "title": "Completion cohesion/cleanup: make completion helpers + orchestration easier to read and reuse",
+      "description": "Refactor/clean up completion-related code to be more cohesive and readable, using the new helper patterns as a baseline.\n\nScope:\n- Clean up `src/completion/completionHelpers.ts` (and adjacent completion files) to reduce duplication and clarify responsibilities.\n- Standardize naming and shapes for completion params/callbacks.\n- Ensure `createCompletionWithToolsParams` is a clear, reusable \"base builder\" for completion clients.\n- Reduce ad-hoc orchestration glue in call sites (e.g. orchestrator) by encouraging composition: base params + optional extra callbacks.\n\nAcceptance criteria:\n- `createCompletionWithToolsParams` is well-factored and documented: minimal hidden side effects, clear invariants.\n- Completion settings/options types are consistent across codebase (no stale/duplicate fields).\n- No placeholder outputs like '(omitted; N chars)' anywhere in completion sanitization path.\n- `compileCheck` passes and existing completion-related tests remain green (or are updated appropriately).\n\nNon-goals:\n- Full removal of AgentRun legacy paths (tracked in story #18).",
+      "context": [],
+      "createdAt": "2026-03-10T20:04:37.794Z",
+      "updatedAt": "2026-03-12T00:45:29.337Z",
+      "completedAt": "2026-03-12T00:45:29.337Z"
+    },
+    {
+      "id": "739a8661-e1af-4782-817a-ff1a031ed54d",
+      "status": "+",
+      "title": "Unit tests: resumeCompletionTools + completion helper wiring/persistence behavior",
+      "description": "Add targeted unit tests for the new `resumeCompletionTools` and for completion helper wiring to prevent regressions.\n\nScope:\n- Tests for `resumeCompletionTools`:\n  - resumes from chat history containing tool calls that were previously `require_confirmation` and now have results.\n  - does not re-run tools that already have success/error results.\n  - handles mixed states (some completed, some still require confirmation).\n  - returns expected `CompletionResponseTurns` and terminates deterministically.\n- Tests for `createCompletionWithToolsParams` (or successor helper) wiring:\n  - `toolsReceivedCallback` writes assistant + tool placeholders correctly.\n  - `toolCalledCallback` updates the correct tool message by toolCallId.\n  - `responseReceivedCallback` persists assistant message and applies `dynamicContextPatch` when present.\n\nAcceptance criteria:\n- New tests pass and cover at least one multi-turn resume scenario.\n- Existing completion tests remain green.\n- Tests are stable (no timing flakiness; use fake timers/mocks where appropriate).",
+      "context": [],
+      "createdAt": "2026-03-10T20:04:50.967Z",
+      "updatedAt": "2026-03-12T01:07:07.912Z",
+      "completedAt": "2026-03-12T01:07:07.912Z"
+    }
+  ],
+  "createdAt": "2026-03-09T11:04:39.721Z",
+  "updatedAt": "2026-03-09T11:04:39.721Z",
+  "completedAt": "2026-03-12T01:07:07.912Z"
+}

@@ -1,0 +1,87 @@
+{
+  "id": "b34c0e11-0ce9-400a-8fb5-a04b013f29a5",
+  "status": "-",
+  "title": "Decision augmentation — per-level decisions, never losing context",
+  "description": "## The goal\n\nNot all project knowledge lives in code files. Architectural choices, trade-offs, rejected alternatives, performance constraints, product requirements, team conventions — all of this context informed how the project got to its current state. Without an explicit, structured decision store attached to the knowledge map, that context is permanently lost the moment a person leaves a team or a codebase evolves.\n\nThis story covers **Part 3 of the project's core mission**: augmenting every level item — from a single file (L1) up to the whole system (L4) — with the decisions that shaped it, so that for any node in the knowledge map a user can ask \"why does this exist the way it does?\" and get a structured, traceable answer.\n\n## What already exists\n\n- `Decision` type, `DecisionImpact`, `DecisionManager` class in `src/decisions/` — decisions can be created, linked to level items, and stored.\n- `KnowledgeTools.enrichItemsWithDecisions()` adds decision stubs to item metadata.\n- Decisions acknowledge improvements (mark them as addressed).\n- Decisions supersede one another and carry impact data.\n- The viewer has a basic Decisions tab showing a flat list.\n\n## What is missing\n\n1. **Per-level-item decision exploration** — there is no UI or API that, given a level item ID, returns all decisions that affected it (including decisions on its parent L2/L3/L4, since those decisions shaped the item too).\n2. **Decision timeline per item** — decisions should be traversable chronologically per item, showing what changed and when.\n3. **Viewer: decisions panel on every item** — when you click any item in the tree/graph/search, the Detail panel should show its decisions inline.\n4. **Storing non-code context** — no mechanism exists to attach external-to-code information (product requirements, benchmarks, conventions) that is not derivable from the codebase itself.\n5. **Decision inheritance through the level hierarchy** — a decision on L4 (the whole project) implicitly shapes every L1 file under it; this transitivity is not modelled.\n6. **Golden standard decisions** — the golden fixture has no hand-authored decisions, so the integration tests cannot verify the decision retrieval path.\n7. **Decision search** — decisions are not semantically indexed in a way that allows \"find all decisions related to performance\" across a project.\n8. **Decision drafts from optimisation suggestions** — the framework exists but the full round-trip (suggestion → draft decision → stored decision → acknowledged improvement) is not verified end-to-end.",
+  "features": [
+    {
+      "id": "7fe288fe-a4c0-4353-a88d-b58583c14f4c",
+      "status": "-",
+      "title": "Per-level-item decision API — retrieve all decisions that shaped a given item (including inherited from ancestors)",
+      "description": "Currently there is no API endpoint or `KnowledgeTools` method that, given a level item ID, returns the complete set of decisions that affected it — including decisions attached to its parent L2, L3, or L4 ancestors, since those decisions transitively shaped it.\n\n**What is needed:**\n\n1. `DecisionManager.getDecisionsForItem(itemId: string, ancestorIds?: string[]): Decision[]` — returns decisions where `affectedItems` contains `itemId` OR any item in `ancestorIds`. Sort by `createdAt` descending so most recent appears first.\n\n2. Level hierarchy awareness in `DecisionManager`: given an L1 item ID, the manager must be able to resolve its L2/L3/L4 ancestor IDs. This requires access to the level map (passed in, or injected from storage).\n\n3. A new API endpoint in `viewer/serve.ts`: `GET /api/project/:id/item/:itemId/decisions` that returns the ordered decision list annotated with `inheritedFrom` (the ancestor level item ID this decision was originally attached to, or `null` if direct).\n\n4. A supersession chain: if a decision has been superseded, include the chain (superseded → superseding) in the response so a viewer can show the full history.\n\n**Decision inheritance model:**\nA decision on L4 (whole project) implicitly shapes every L1/L2/L3 item under it. A decision on L2 shapes all L1 items within that feature group. This hierarchy traversal must be explicit and unit-tested.",
+      "context": [
+        "src/decisions/decisionManager.ts",
+        "src/types.ts",
+        "viewer/serve.ts"
+      ],
+      "plan": "1. Read `DecisionManager` fully — understand current `getDecisionsForItem` and storage model.\n2. Extend to accept and traverse ancestor IDs.\n3. Add the API endpoint with `inheritedFrom` annotations.\n4. Write unit tests for: direct decision, L2-inherited, L4-inherited, superseded decision excluded from active list.\n5. Write an integration test using the golden fixture augmented with hand-authored decisions.",
+      "acceptance": "- `getDecisionsForItem('l1_src_entry', ['l2_orders', 'l3_order_workflow', 'l4_golden_hand_authored'])` returns direct + all inherited decisions.\n- The API endpoint returns a JSON list with `inheritedFrom` annotations.\n- Unit tests cover all inheritance scenarios.\n- Superseded decisions are excluded from the active list but optionally includable.",
+      "createdAt": "2026-04-20T23:40:47.766Z",
+      "updatedAt": "2026-04-20T23:44:19.536Z"
+    },
+    {
+      "id": "5067b14f-3245-401c-b8e9-ba82af1c2091",
+      "status": "-",
+      "title": "Viewer: inline decisions panel on every level item",
+      "description": "The viewer currently shows a flat global Decisions tab. There is no way to see, when clicking an item in the tree, graph, or search results, which decisions shaped that specific item.\n\n**What is needed:**\n\n1. In `viewer/index.html`, the `showDetail(itemId)` function must call `GET /api/project/:id/item/:itemId/decisions` and render the result inline in the Detail panel, below the existing what/why/how/signal/flow sections.\n\n2. The decisions section in the detail panel should show:\n   - Each decision's `title`, `rationale`, `createdAt`.\n   - Whether it is `inheritedFrom` an ancestor (shown as a subtle badge like \"via L3: order_workflow\").\n   - Whether it supersedes or is superseded by another decision (linked by ID).\n   - Its `impact` data if present (quality delta, execution delta, etc.).\n\n3. If a decision acknowledges an improvement, show the improvement ID as a reference.\n\n4. If there are no decisions for the item, show a subtle \"No decisions recorded for this item\" placeholder — not an error.\n\n5. A 'Record decision' quick-action button (can be stubbed for now) should be visible to encourage capture of new context.",
+      "context": [
+        "viewer/index.html",
+        "viewer/serve.ts",
+        "src/decisions/decisionManager.ts"
+      ],
+      "plan": "1. Implement the API endpoint (from feature 1) as a prerequisite.\n2. Add a `renderDecisions(itemId)` function in `viewer/index.html` that fetches and renders the panel section.\n3. Call `renderDecisions` at the end of `showDetail`.\n4. Style consistently with the existing panel (use `--surface`, `--accent`, `--muted` CSS variables).\n5. Write viewer test asserting that a mock decision response renders its title in the panel.",
+      "acceptance": "- Clicking any item shows its decisions (direct + inherited) in the Detail panel.\n- Inherited decisions clearly show which ancestor level they came from.\n- Superseded decisions are visually distinguished.\n- The panel gracefully handles zero decisions.",
+      "createdAt": "2026-04-20T23:40:06.548Z",
+      "updatedAt": "2026-04-20T23:44:20.736Z"
+    },
+    {
+      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "status": "-",
+      "title": "Non-code context attachment — store decisions for information that lives outside the codebase",
+      "description": "A significant class of project knowledge is not derivable from the code itself: product requirements, performance SLAs, team conventions, rejected architectural directions, external constraints (security, compliance, cost). This information must be storable as decisions attached to level items so it is never lost.\n\n**What is needed:**\n\n1. The `Decision` type must support a `externalContext` field — a free-text or structured block that can carry information not traceable to any specific file (e.g. \"This module was kept synchronous due to a legal constraint that all financial writes must be auditable in a single thread\").\n\n2. A `source` enum field on `Decision` distinguishing: `code-derived` (derived from analysis), `human-authored` (manually entered), `imported` (from an external ticket system). Currently the type conflates these.\n\n3. The viewer's 'Record decision' action (from the inline panel feature) must pre-fill `source: 'human-authored'` and present a form that allows entering:\n   - `title`\n   - `rationale`\n   - `externalContext` (free text)\n   - `affectedItems` (multi-select from current level item + ancestors)\n   - `impact` (optional quality/execution delta)\n\n4. The decision store (`DecisionManager`) must persist these records in `.factory/knowledge/decisions.json` (already done for the base type) and ensure they survive project re-analysis (i.e. re-generating levels must NOT wipe decisions).",
+      "context": [
+        "src/decisions/decisionManager.ts",
+        "src/types.ts",
+        "viewer/index.html",
+        "viewer/serve.ts"
+      ],
+      "plan": "1. Extend `Decision` type with `externalContext?: string` and `source: 'code-derived' | 'human-authored' | 'imported'`.\n2. Update `DecisionManager` persistence to handle the new fields.\n3. Add a `POST /api/project/:id/decisions` endpoint.\n4. Build the form in the viewer (modal or inline).\n5. Unit test: persisted human-authored decision survives a `generateLevels` re-run.",
+      "acceptance": "- A human-authored decision with `externalContext` can be created from the viewer and persisted.\n- Re-running analysis does not delete existing decisions.\n- The `source` field is visible in the Detail panel decisions section.",
+      "createdAt": "2026-04-21T00:00:00.000Z",
+      "updatedAt": "2026-04-20T23:44:21.905Z"
+    },
+    {
+      "id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+      "status": "-",
+      "title": "Hand-author golden standard decisions and integration-test the full decision round-trip",
+      "description": "The golden fixture (`tests/fixtures/golden-hand-authored/`) currently contains no decisions. This means the integration tests cannot verify the decision retrieval, inheritance, or display paths.\n\n**What is needed:**\n\n1. Add a `golden-decisions.json` file to the golden fixture containing:\n   - At least one decision directly on `l1_src_entry` (e.g. \"submitOrder chosen as entry point to isolate HTTP concerns from domain logic\").\n   - At least one decision on `l2_orders` (an L2 ancestor) that should be inherited by all three L1 files.\n   - At least one decision on `l4_golden_hand_authored` (the root L4) that should be inherited by everything.\n   - At least one superseded decision (with a `supersededBy` pointing to a newer decision).\n   - At least one decision with `externalContext` describing a constraint not visible in the code.\n\n2. Extend `goldenPackIntegration.test.ts` with:\n   - A test that calls `getDecisionsForItem('l1_src_entry', ancestors)` and asserts the correct set of decisions is returned (direct + inherited from L2 + inherited from L4).\n   - A test that the superseded decision is excluded from the active list but present in the full chain.\n   - A test that the API endpoint `/api/project/:id/item/l1_src_entry/decisions` returns the correct JSON shape.\n\n3. Wire `golden-decisions.json` into the fixture loader so `DecisionManager` reads it during test setup.",
+      "context": [
+        "tests/fixtures/golden-hand-authored",
+        "tests/integration/goldenPackIntegration.test.ts",
+        "src/decisions/decisionManager.ts"
+      ],
+      "plan": "1. Author `golden-decisions.json` by hand following the `Decision` type schema.\n2. Update fixture loader to seed `DecisionManager` from this file.\n3. Write integration tests as described.\n4. Run all tests to confirm green.",
+      "acceptance": "- `golden-decisions.json` exists and contains all required decision types.\n- Integration tests for decision retrieval, inheritance, and supersession pass.\n- No existing tests regress.",
+      "createdAt": "2026-04-21T00:00:00.000Z",
+      "updatedAt": "2026-04-20T23:44:23.778Z"
+    },
+    {
+      "id": "c3d4e5f6-a7b8-9012-cdef-123456789012",
+      "status": "-",
+      "title": "Optimisation suggestion → decision draft round-trip",
+      "description": "The optimisation framework can generate improvement suggestions (e.g. \"merging `submitOrder` and `validateOrder` would reduce dependency edges by 1\"). The `DecisionManager` has a `createDecisionFromSuggestion` path. However, the full round-trip — from seeing a suggestion in the viewer, accepting or rejecting it, creating a decision, and having that decision acknowledge the improvement — is not verified end-to-end.\n\n**What is needed:**\n\n1. In the viewer's Optimisation panel, each suggestion must have:\n   - An 'Accept' button that creates a decision draft (pre-filled with the suggestion's `id`, `objective`, `expectedDelta`, `affectedNodeIds`) and opens the decision form.\n   - A 'Reject' button that creates a decision with `status: 'rejected'` and a required `rationale` field.\n\n2. On acceptance, the created decision must call `acknowledgeImprovement(suggestionId)` on the server, marking the improvement as `acknowledged`.\n\n3. On rejection, the decision must record *why* the suggestion was rejected so future analyses understand the decision context.\n\n4. Write an integration test that:\n   - Starts with the golden fixture + a known optimisation suggestion.\n   - Simulates clicking 'Accept' (calls the API).\n   - Asserts the improvement is now acknowledged in `KnowledgeTools.getImprovements()`.\n   - Asserts the decision is stored and retrievable via the decision API.\n\n5. Write a second integration test for the 'Reject' path.",
+      "context": [
+        "viewer/index.html",
+        "viewer/serve.ts",
+        "src/decisions/decisionManager.ts",
+        "src/improvements"
+      ],
+      "plan": "1. Audit existing `createDecisionFromSuggestion` in `DecisionManager`.\n2. Wire viewer Accept/Reject buttons to the API.\n3. Implement acknowledge endpoint if not present.\n4. Write integration tests.\n5. Run all tests.",
+      "acceptance": "- Clicking Accept on an optimisation suggestion creates a decision and acknowledges the improvement.\n- Clicking Reject creates a decision with rationale and marks the improvement as `rejected`.\n- Both paths are covered by integration tests that pass.",
+      "createdAt": "2026-04-21T00:00:00.000Z",
+      "updatedAt": "2026-04-20T23:44:25.444Z"
+    }
+  ],
+  "createdAt": "2026-04-20T23:38:53.536Z",
+  "updatedAt": "2026-04-21T00:00:00.000Z"
+}

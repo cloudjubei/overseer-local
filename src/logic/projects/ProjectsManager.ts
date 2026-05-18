@@ -85,6 +85,16 @@ export default class ProjectsManager extends BaseManager {
   async getProjectDir(projectId: string): Promise<string | undefined> {
     return await this.tools.getProjectDir(projectId)
   }
+  /**
+   * Where this project's data files (stories, runs, …) actually live.
+   * Honours `dataLocation`: `'inProject'` → the project's own repo path,
+   * `'central'` → the overseer's central root. Always use this — not
+   * `getProjectDir` — when wiring storage tools (StoryTools, RunsTools,
+   * …) so central-located projects don't read from the wrong directory.
+   */
+  async getProjectStoriesRoot(projectId: string): Promise<string | undefined> {
+    return await this.tools.getProjectStoriesRoot(projectId)
+  }
   async listProjects(): Promise<ProjectSpec[]> {
     return await this.tools.listProjects()
   }

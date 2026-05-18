@@ -1,0 +1,520 @@
+{
+  "id": "7d89a33c-fc59-4c54-a1e8-2cca8f032281",
+  "status": "=",
+  "title": "Ongoing improvements",
+  "description": "Various ongoing improvements",
+  "features": [
+    {
+      "id": "4b27bf28-4e73-4762-9c34-d765a152195b",
+      "status": "+",
+      "title": "Running the backend fails",
+      "description": "Right now there's an error message when trying to run `npm run start:dev` - the error:\n\nnode:internal/modules/cjs/loader:657\n      throw e;\n      ^\n\nError [ERR_PACKAGE_PATH_NOT_EXPORTED]: Package subpath './lib/index.cjs.js' is not defined by \"exports\" in /Users/cloud/Documents/Work/compass-be/node_modules/langfuse-vercel/package.json\n    at exportsNotFound (node:internal/modules/esm/resolve:313:10)\n    at packageExportsResolve (node:internal/modules/esm/resolve:660:9)\n    at resolveExports (node:internal/modules/cjs/loader:650:36)\n    at Module._findPath (node:internal/modules/cjs/loader:717:31)\n    at Module._resolveFilename (node:internal/modules/cjs/loader:1355:27)\n    at defaultResolveImpl (node:internal/modules/cjs/loader:1025:19)\n    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1030:22)\n    at Module._load (node:internal/modules/cjs/loader:1179:37)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24) {\n  code: 'ERR_PACKAGE_PATH_NOT_EXPORTED'\n}",
+      "context": [],
+      "createdAt": "2025-09-18T00:21:37.127Z",
+      "updatedAt": "2025-09-18T00:23:02.987Z",
+      "completedAt": "2025-09-18T00:23:02.987Z"
+    },
+    {
+      "id": "e7cf8e6d-1f0f-4896-8a4b-5b3fcf8a5568",
+      "status": "=",
+      "title": "Aim for close to 100% test coverage",
+      "description": "We need to make sure that the tests cover as close as 100% of the codebase.\nObviously, things like the ai service with getting results from the AI cannot be fully tested - but we can test for many ranges of responses by mocking the LLM responses appropriately. The same idea should be taken everywhere to try to achieve 100% coverage.\n\nOne important thing is to make sure that data that is entering and leaving endpoints is validated thoroughly to make sure that it matches the expected schema. This should be part of the code and the tests should validate it too (i.e. malformed objects being rejected).\n\nThere needs to be a relevant section in @README.md explaining how vital testing is and to refer to @docs/TESTING.md for all guidance related to writing tests and the standard for them. For reference there is also the @docs/CODE_STANDARD.md document that highlights the coding standard within the project.",
+      "context": [
+        "README.md",
+        "docs/TESTING.md",
+        "docs/CODE_STANDARD.md"
+      ],
+      "createdAt": "2025-09-18T10:25:22.533Z",
+      "updatedAt": "2025-09-19T10:39:35.706Z",
+      "blockers": []
+    },
+    {
+      "id": "ae82a776-c5b8-4601-bb9e-d0cf859c1fa9",
+      "status": "=",
+      "title": "Code standard",
+      "description": "The document @docs/CODE_STANDARD.md  highlights the overall architecture and coding standards maintained in this project.\nThere is a clear reference to it inside @README.md and @docs/FILE_ORGANISATION.md so that anyone creating new features or updating existing ones will go to it.\nIt should be as succinct as possible, but explaining the idea as well as possible.\n\nGo over all the code and make sure that it satisfies the standards.",
+      "context": [
+        "README.md",
+        "docs/FILE_ORGANISATION.md",
+        "docs/CODE_STANDARD.md"
+      ],
+      "createdAt": "2025-09-18T10:28:12.858Z",
+      "updatedAt": "2025-09-18T10:58:55.550Z",
+      "completedAt": "2025-09-18T10:58:55.550Z",
+      "blockers": []
+    },
+    {
+      "id": "f24feb5b-ed8d-4a40-8911-56242750731a",
+      "status": "+",
+      "title": "The environment DYNAMODB_TABLE_* names are not needed",
+      "description": "We don't want to make the dynamodb table names configurable - they can always be completely static defined clearly somewhere within the project. The only thing the user should provide is the endpoint.",
+      "context": [],
+      "createdAt": "2025-09-18T10:39:54.742Z",
+      "updatedAt": "2025-09-18T10:44:21.196Z",
+      "completedAt": "2025-09-18T10:44:21.196Z"
+    },
+    {
+      "id": "0b57777f-7988-4729-a6bc-438ad184ed34",
+      "status": "+",
+      "title": "Cognito requires a secret",
+      "description": "@src/config/configuration.ts has the 'clientSecret' added from the env. Make sure it is used for Cognito auth.",
+      "context": [
+        "src/config/configuration.ts"
+      ],
+      "createdAt": "2025-09-19T14:04:33.200Z",
+      "updatedAt": "2025-09-19T14:16:11.060Z",
+      "completedAt": "2025-09-19T14:16:11.060Z"
+    },
+    {
+      "id": "996a37ec-ca66-434f-ae61-aab164530b70",
+      "status": "+",
+      "title": "Fix the seed_database script",
+      "description": "Currently the @scripts/seed_database doesn't work.\nThe error is:\n\n\nscripts/seed_database: line 60: local: `attribute-definitions=AttributeName=id,AttributeType=S': not a valid identifier",
+      "context": [
+        "scripts/seed_database"
+      ],
+      "createdAt": "2025-09-19T14:05:06.719Z",
+      "updatedAt": "2025-09-19T14:17:47.719Z",
+      "completedAt": "2025-09-19T14:17:47.719Z"
+    },
+    {
+      "id": "1db68cb3-e53d-4d02-b94a-c7bf4fc94f2d",
+      "status": "+",
+      "title": "make dev/prod work via copying envs",
+      "description": "the run command in @package.json needs to first take the appropriate env file from `/envs` and copy it to the root of the project directory. Right now there will be `/envs/.env.dev` and `/envs/.env.prod` .\nwhen the user calls `npm run start:dev` it needs to first copy `/envs/.env.dev` and replace the contents of it into `.env` .\nwhen the user calls `npm run start:prod` it needs to copy `/envs/.env.prod` and replace the content of it into `.env` .\nIn the future we will also have a staging.\n\ncalling `npm run start` does the same as `npm run start:dev`",
+      "context": [
+        "package.json"
+      ],
+      "createdAt": "2025-09-19T14:08:19.145Z",
+      "updatedAt": "2025-09-19T14:19:43.261Z",
+      "blockers": [],
+      "completedAt": "2025-09-19T14:19:43.261Z"
+    },
+    {
+      "id": "8bfc7833-9e76-45a6-bbd7-08e51c524fe1",
+      "status": "+",
+      "title": "Create a public LLM test endpoint",
+      "description": "It must accept any text and feed it directly to the llm and respond in raw text back whatever it returns.\nIf there are any errors - throw them appropriately.\nIt should accept one parameter - the model type - if the correct API key is available then use the LLM - otherwise throw a meaningful error.",
+      "context": [],
+      "createdAt": "2025-09-19T14:30:55.137Z",
+      "updatedAt": "2025-09-19T14:37:57.768Z",
+      "completedAt": "2025-09-19T14:37:57.768Z"
+    },
+    {
+      "id": "26e2b8ed-21d3-4160-9951-27004f1b5862",
+      "status": "+",
+      "title": "Generate goals",
+      "description": "In @src/goals/static-goals.ts there's `COMMON_GOALS` that are used throughout the app as static goals to be used whenever the service needs to provide readily available ones.\nThe 1st text can be made longer (up to a 100 characters) whereas the one next to it (currently blank - '') should be a summary that should be a max of 20 characters.",
+      "context": [
+        "src/goals/static-goals.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-25T18:10:05.942Z",
+      "updatedAt": "2025-09-25T20:19:58.685Z",
+      "completedAt": "2025-09-25T20:19:58.685Z"
+    },
+    {
+      "id": "c78f25d6-1747-4e8b-a5fe-913e8371581c",
+      "status": "+",
+      "title": "AI prompt needs to be improved",
+      "description": "Currently the `PROMPT_GOAL_SUGGESTIONS` in @src/ai/ai.service.ts doesn't specify if it's meant to be a Micro goal or Macro goal.\nA Micro goal is a 'today' goal - a single shot one.\nA Macro goal is a long term goal - for at least a week and usually for a month.\nWe need 2 prompts so that `suggestGoals` can use them accordingly (it defaults to Micro goals when type not provided).",
+      "context": [
+        "src/ai/ai.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-25T18:14:00.699Z",
+      "updatedAt": "2025-09-25T18:17:14.169Z",
+      "completedAt": "2025-09-25T18:17:14.169Z"
+    },
+    {
+      "id": "4e302d72-1550-4178-b32b-6ea47251f3e6",
+      "status": "+",
+      "title": "Goals service should record the audio",
+      "description": "In @src/goals/goals.service.ts inside the function `suggestFromAudio` we need to record the file by uploading it to S3 and associating it with the user, so that we can analyse it later if need be.\nThe uploaded file in @src/goals/goals.controller.ts needs to have a size limit of 5MB.",
+      "context": [
+        "src/goals/goals.service.ts",
+        "src/goals/goals.controller.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-06T15:35:54.449Z",
+      "updatedAt": "2025-10-06T23:08:52.159Z",
+      "completedAt": "2025-10-06T22:54:16.371Z"
+    },
+    {
+      "id": "5a9edaa6-8e4f-449f-a4b6-80c87e2d5b73",
+      "status": "+",
+      "title": "For now, users can only set 1 macro goal at a time - no other goals are allowed",
+      "description": "In @src/goals/goals.controller.ts and @src/goals/goals.service.ts - we need to update these so that a user can only ever have 1 MACRO goal associated with their account. In the future we might allow multiple goals of multiple types, but for now we need to make the `create` endpoint only create a goal if it's a Macro one, if it's MICRO it should throw an error. And if a user creates a new goal, it should mark the previous goal as `cancelled` (setting `completedAt` + introducing a goal state to mark when a goal is `active`, `cancelled` or `done` ). We also need an endpoint to mark the current goal as `done`.",
+      "context": [
+        "src/goals/goals.controller.ts",
+        "src/goals/goals.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-06T15:42:03.561Z",
+      "updatedAt": "2025-10-06T21:46:44.894Z",
+      "completedAt": "2025-10-06T21:46:44.894Z"
+    },
+    {
+      "id": "8d380ce5-b365-4644-b403-cead40aaa547",
+      "status": "+",
+      "title": "Users can do a text or audio journal",
+      "description": "We need an endpoint for a user to do an audio journal and a text journal (the audio journal simply first gets transcribed) and then follows the route of the text journal.\nThis means that for each user there needs to be a table storing all such journals.",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-10-06T21:30:43.940Z",
+      "updatedAt": "2025-10-06T23:08:57.786Z",
+      "completedAt": "2025-10-06T22:55:19.949Z"
+    },
+    {
+      "id": "77fdca0b-1c9c-484c-a0f3-135b2527a47a",
+      "status": "+",
+      "title": "For each goal - we need to record the user's goal steps",
+      "description": "A client will be able to call an endpoint on the behalf of the user, to record a UserGoalStep - a new dto to be created - that will have an id that is a reference to a user's current goal, a standard createdAt timestamp, and also a completedAt - which when created if not provided by the user gets set to the same value as createdAt. This dto also holds a reference to a @src/journals/dto/journal.dto.ts , because the user can create these goal steps in two ways - either by providing the goalId and the journalText (+ optional completedAt) or by providing an audio file, which needs to be first transcribed (similar to goals in @src/goals/goals.controller.ts ) and then follow the same path as the journalText, but also need to be recorded here.",
+      "context": [
+        "src/goals/goals.controller.ts",
+        "src/journals/dto/journal.dto.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-06T21:41:36.556Z",
+      "updatedAt": "2025-10-07T08:46:55.307Z",
+      "completedAt": "2025-10-07T07:29:50.436Z"
+    },
+    {
+      "id": "bf47730d-84ce-43e7-9440-ed8fb247fb01",
+      "status": "+",
+      "title": "Whenever the user submits a journal a UserMood must be recorded",
+      "description": "We need an appropriate prompt for an LLM to be able to try to gather the mood from a person's journal - @src/models/journal/JournalModel.dto.ts  . We first need this only text based, but we also need to prepare for the case when a user will have a more complex user profile so that can be fed into the prompt and a better mood can be decided.\nIf the current LLMs can do it - then when the user has provided a sound recording in the journal data then that should also be analysed for the tone of voice or any emotional load associated with the voice recording. That needs to be stored and added to the prompt with the text.  @src/models/profile/UserMoodModel.dto.ts must be used by  its own service and controller and hook in to ALL places where journals are made.",
+      "context": [
+        "src/models/journal/JournalModel.dto.ts",
+        "src/models/profile/UserMoodModel.dto.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-06T21:48:12.143Z",
+      "updatedAt": "2025-10-07T09:08:30.017Z",
+      "completedAt": "2025-10-07T09:08:30.017Z"
+    },
+    {
+      "id": "7f760715-b843-4b82-b442-bc8778e5e806",
+      "status": "+",
+      "title": "The database should auto create UUIDs and timestamps",
+      "description": "we should rely on standard database mechanisms for creating ids as UUIDs and timestamps (create + on any update).\nThis goes for any dto created by controllers - such as `Goal` via @src/goals/goals.controller.ts - that has an id, createdAt and updatedAt . Find them all and update accordingly.",
+      "context": [
+        "src/goals/goals.controller.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-06T22:06:52.290Z",
+      "updatedAt": "2025-10-06T22:06:52.290Z",
+      "completedAt": "2025-10-06T23:01:58.293Z"
+    },
+    {
+      "id": "12fa9bc6-20ea-4bf9-b5ab-c2fcd6a59519",
+      "status": "+",
+      "title": "All `something.interface.ts` should be removed and only `something.dto.ts` used",
+      "description": "In many places, such as @src/goals/goals.service.ts we use a @src/goals/interfaces/goal.interface.ts and a dto @src/goals/dto/goal.dto.ts . This creates confusion and unnecessary boilerplate as all the DTOs are identical to their interfaces.\nWe should remove all these `interface.ts` files and only use the `dto.ts` files which should hold all typing information needed.\nAdditionally, all these dto files should be placed under `src/models` as many logical places use the same file types so it doesn't make sense to bind it to a single feature.\n\nInformation about only having the DTOs should be in @docs/FILE_ORGANISATION.md and @docs/CODE_STANDARD.md",
+      "context": [
+        "src/goals/goals.service.ts",
+        "src/goals/interfaces/goal.interface.ts",
+        "src/goals/dto/goal.dto.ts",
+        "docs/FILE_ORGANISATION.md",
+        "docs/CODE_STANDARD.md"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-06T23:01:04.975Z",
+      "updatedAt": "2025-10-07T00:05:33.355Z",
+      "completedAt": "2025-10-07T00:05:33.355Z"
+    },
+    {
+      "id": "b68d91d0-1863-4fcf-b59a-d1622939ac5b",
+      "status": "+",
+      "title": "Every single endpoint should be tracked via Mixpanel",
+      "description": "We already have @src/activity-log/activity-log.module.ts which makes @src/activity-log/activity-log.service.ts log all endpoint activities - we want to use Mixpanel to also track all events.\nWe also want it to track user sessions.",
+      "context": [
+        "src/activity-log/activity-log.module.ts",
+        "src/activity-log/activity-log.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-06T23:14:57.650Z",
+      "updatedAt": "2025-10-07T00:38:11.267Z",
+      "completedAt": "2025-10-07T00:38:11.267Z"
+    },
+    {
+      "id": "373b416d-1ffc-42b3-b5fb-19531d127656",
+      "status": "+",
+      "title": "When transcribing audio from text - automatically get the mood/tone as well",
+      "description": "In @src/ai/ai.service.ts when getting text out of audio by using @src/ai/transcription.service.ts  - we should also try to get the tone/mood information and it should be added into `TranscriptionResult` . The models should be moved to `src/models/ai` .",
+      "context": [
+        "src/ai/ai.service.ts",
+        "src/ai/transcription.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-07T08:55:32.865Z",
+      "updatedAt": "2025-10-07T09:32:24.967Z",
+      "completedAt": "2025-10-07T09:32:24.967Z"
+    },
+    {
+      "id": "058214be-f288-4ed2-97bc-465589ed588a",
+      "status": "+",
+      "title": "when getting free form text to process via AI - always include mood information",
+      "description": "When using `suggestGoals` in @src/ai/ai.service.ts , the data should also include the mood/tone information from the text input.\nWhenever calling any text generation from user input - the output should include a standard mood/tone/sentiment information.\n\nThe prompts at the bottom of @src/ai/ai.service.ts should also move to @src/ai/ai-prompts.service.ts so it's easier to manage them in the future.",
+      "context": [
+        "src/ai/ai.service.ts",
+        "src/ai/ai-prompts.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-07T08:58:03.026Z",
+      "updatedAt": "2025-10-07T11:20:44.367Z",
+      "completedAt": "2025-10-07T10:19:37.360Z"
+    },
+    {
+      "id": "f4d0d8c4-92d0-47f0-b5c3-377293feb34a",
+      "status": "+",
+      "title": "Lint ignore",
+      "description": "The `lint` script inside @package.json should ignore all `*.test.ts` and `*.spec.ts` files.",
+      "context": [
+        "package.json"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-07T09:16:10.385Z",
+      "updatedAt": "2025-10-07T09:18:22.536Z",
+      "completedAt": "2025-10-07T09:18:22.536Z"
+    },
+    {
+      "id": "61727d65-2aee-4267-9dfe-e4883c39fd05",
+      "status": "+",
+      "title": "Refactor all the repositories",
+      "description": "All `*.repository.ts` have a common base as they all interact with dynamodb - especially when returning lists of things - there's this common `ListResult` repeated everywhere. All these repositories should extend a base class that has a common interface for all of them to reuse common functionalities.",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-10-07T11:22:01.459Z",
+      "updatedAt": "2025-10-07T11:37:50.213Z",
+      "completedAt": "2025-10-07T11:37:50.213Z"
+    },
+    {
+      "id": "f241bf62-21ad-4d94-823c-a71fd4c37d6c",
+      "status": "+",
+      "title": "Current build/compilation error",
+      "description": "There's an error when trying to start the project using `npm run start` :\n\n[Nest] 50184  - 10/07/2025, 1:30:36 PM   ERROR [ExceptionHandler] Nest can't resolve dependencies of the AdminService (Symbol(USER_PROFILES_REPOSITORY), Symbol(CONVERSATION_LOGS_REPOSITORY), Symbol(ACTIVITY_LOGS_REPOSITORY), MoodsService, ?, S3StorageService). Please make sure that the argument Symbol(JOURNALS_REPOSITORY) at index [4] is available in the AdminModule context.\n\nPotential solutions:\n- Is AdminModule a valid NestJS module?\n- If Symbol(JOURNALS_REPOSITORY) is a provider, is it part of the current AdminModule?\n- If Symbol(JOURNALS_REPOSITORY) is exported from a separate @Module, is that module imported within AdminModule?\n  @Module({\n    imports: [ /* the Module containing Symbol(JOURNALS_REPOSITORY) */ ]\n  })",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-10-07T11:31:27.517Z",
+      "updatedAt": "2025-10-07T11:32:33.683Z",
+      "completedAt": "2025-10-07T11:32:33.683Z"
+    },
+    {
+      "id": "dc441abd-c33c-4d28-83e4-8c56b3f58daf",
+      "status": "+",
+      "title": "Jest config needs to ignore `*.e2e.test.ts` and `*.e2e.spec.ts` files",
+      "description": "The files in `tests` are right now the e2e tests, and all such tests should be ignored from the unit test runner using @jest.config.js and @jest.setup.ts . The e2e have their own @tests/jest.e2e.json and @tests/jest.e2e.setup.ts",
+      "context": [
+        "jest.config.js",
+        "jest.setup.ts",
+        "tests/jest.e2e.json",
+        "tests/jest.e2e.setup.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-07T12:06:14.702Z",
+      "updatedAt": "2025-10-07T12:38:38.242Z",
+      "completedAt": "2025-10-07T12:38:38.242Z"
+    },
+    {
+      "id": "1f698eec-c66e-4585-bb0f-c17dffec6f4f",
+      "status": "+",
+      "title": "clearing check ins",
+      "description": "In @src/check-ins/check-ins.service.ts we need a clear function (stubbed at the bottom) that will clear all of a user's check ins.",
+      "context": [
+        "src/check-ins/check-ins.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-07T14:58:19.996Z",
+      "updatedAt": "2025-10-07T15:00:28.948Z",
+      "completedAt": "2025-10-07T15:00:28.948Z"
+    },
+    {
+      "id": "7def1d45-4849-4a41-a2d3-ae91a2c0a2be",
+      "status": "+",
+      "title": "In goals.controller - add a getMicroGoalsForMacroGoal endpoint",
+      "description": "@src/goals/goals.controller.ts requires a new endpoint to retrieve all micro goals for a specific macro goal.\nMicro goals user `referenceId` to hold a reference to a macro goal.",
+      "context": [
+        "src/goals/goals.controller.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-11T00:26:05.101Z",
+      "updatedAt": "2025-10-11T00:28:21.660Z",
+      "completedAt": "2025-10-11T00:28:21.660Z"
+    },
+    {
+      "id": "9fe44744-9446-46de-aa18-a55e145278d4",
+      "status": "+",
+      "title": "When the user sends an audio journal entry - we need a confirmation response",
+      "description": "We want to confirm to the user that the input was understood and send back a message like:\n\"You mentioned getting back into the gym and balancing that with time with your kids. Shall I record this, or do you want to re-record?\"\n\nFor this to work, when the user says something about:\n\"I need to get back into the gym and balance that with time with my kids\", we need to record that verbatim in the data but also need it summarised as:\n\"getting back into the gym and balancing that with time with your kids.\"\n\n@src/models/ai/TranscriptionResultModel.dto.ts has a `  confirmationText` added that should be used for this purpose.\n@src/ai/transcription.service.ts needs to be updated to accommodate this accordingly.",
+      "context": [
+        "src/models/ai/TranscriptionResultModel.dto.ts",
+        "src/ai/transcription.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-14T09:22:18.097Z",
+      "updatedAt": "2025-10-14T09:29:57.753Z",
+      "completedAt": "2025-10-14T09:29:57.753Z"
+    },
+    {
+      "id": "fa53734b-9e77-452b-af31-0680457d13dc",
+      "status": "+",
+      "title": "The user has a history of lifestyle and micro goals these should be taken into account when generating new micro goals",
+      "description": "in @src/goals/goals.service.ts the prompt for generating a new set of micro goals needs to take into account the user's lifestyle responses (the @src/models/profile/UserProfileLifestyleModel.dto.ts in @src/models/profile/UserProfileModel.dto.ts ) - especially the latest one as its the most recent (this should be explained in the prompt). As well as the user's last completed AND not-completed micro goals, so that the new micro goals are COMPLETELY different from the last ones. The last week (so 21 micro goals) should be included in the prompt.",
+      "context": [
+        "src/goals/goals.service.ts",
+        "src/models/profile/UserProfileLifestyleModel.dto.ts",
+        "src/models/profile/UserProfileModel.dto.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-14T09:45:00.332Z",
+      "updatedAt": "2025-10-14T09:51:53.728Z",
+      "completedAt": "2025-10-14T09:51:53.728Z"
+    },
+    {
+      "id": "cc7438ae-c725-4d3b-9317-ab46ad80bede",
+      "status": "+",
+      "title": "`microGoalsForActiveMacro` needs to be updated",
+      "description": "In @src/ai/ai-prompts.service.ts `microGoalsForActiveMacro` has been updated, and functions calling it need to be updated to - so especially @src/ai/ai.service.ts .\nIt expects the user's most recent macro goals and micro goals.\n\nThe AGE field is not correct - the `dob` from profile that is passed in is actually the date the user recorded their age - their age in years. So if today is 14/10/2025, and the user would say that today they are 20, then the `dob` field would be 14/10/2005.\nThis calculation needs to be present on @src/models/profile/UserProfileModel.dto.ts so it's easy to get the age from this date and use it here.",
+      "context": [
+        "src/ai/ai-prompts.service.ts",
+        "src/ai/ai.service.ts",
+        "src/models/profile/UserProfileModel.dto.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-14T10:34:57.369Z",
+      "updatedAt": "2025-10-14T10:43:58.527Z",
+      "completedAt": "2025-10-14T10:43:58.527Z"
+    },
+    {
+      "id": "1342407f-ed02-4d7a-abc8-fe28f29dba46",
+      "status": "+",
+      "title": "`computeAge` needs to be updated",
+      "description": "In @src/models/profile/UserProfileModel.dto.ts the `computeAge` function needs to be fixed - the dob stored is an iso timestamp - and the age needs to be computed from it properly.",
+      "context": [
+        "src/models/profile/UserProfileModel.dto.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-14T11:11:42.261Z",
+      "updatedAt": "2025-10-14T11:13:14.391Z",
+      "completedAt": "2025-10-14T11:13:14.391Z"
+    },
+    {
+      "id": "d12d71c0-8b7b-4a55-b681-0ac1adb689a6",
+      "status": "+",
+      "title": "New data - Momentum",
+      "description": "For each user we want to store some ongoing data when they keep on doing goals.\nFor now we need a new table that will store a new piece of data `UserMomentumModel` . Make sure this is stored and used like other pieces of data (look at @src/models/goal/GoalModel.dto.ts ).\nEvery user should have a momentum, we need a new controller that will be able to serve it - if a user doesn't yet have it created, then it should get created with default values.\nApart from standard id, createdAt, updatedAt, we need it to have:\n- microGoalsConsecutive: number (defaults to 0), will store the number of consecutive days the user has been completing micro goals\n- motivationText?: string (defaults to undefined ), this will store a motivational text that will be shown to the user.\n\nWhenever the user records a micro goal as completed via @src/goals/goals.controller.ts - their momentum needs to be updated so that:\n- the microGoalsConsecutive needs to increment if there's a day difference (date days not 24h) between the last `updatedAt` and `now`\n- the motivationText needs to update depending on the number of days. For 2 or more days we need something like these texts to be set:\n“You’re 2 days into your new rhythm — great start.”\n    “3 days of consistency — that’s where habits start to stick.”\n    “You’ve shown up 4 days in a row — real momentum now.”\n    “5 days running — your consistency is building a foundation.”\n\nCome up with a similar sounding in tone texts that we can use for up to 14 days, and then switch to showing weeks, rather than days. Have a bank of these texts for up to 4 weeks.",
+      "context": [
+        "src/models/goal/GoalModel.dto.ts",
+        "src/goals/goals.controller.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-17T10:22:40.770Z",
+      "updatedAt": "2025-10-17T13:46:32.882Z",
+      "completedAt": "2025-10-17T13:12:12.994Z"
+    },
+    {
+      "id": "e34a2fc7-fe51-4acb-a99e-8ea8cea962cc",
+      "status": "+",
+      "title": "Add an encouragement text",
+      "description": "In @src/profiles/profiles.controller.ts in the `addLifestyle` endpoint, we need to introduce a new `UserProfileLifestyleCreateModel` that will be exactly the same as the current and update `UserProfileLifestyleModel` to include a `motivationText:string` that will always include a string depending on the user's energy. We also need a second one that works almost the same `motivationTextEvening:string` - it will simply use a different text bank.\nWe need to create a bank of these texts that are consts and which will be rotated for the user. So when a new lifestyle is added - the last 5 entries should be checked, and the new motivationText needs to be different than all of them.\nHere is a list to start with - but make sure to add 5 more texts to each energy level (separate them from the ones here by a comment so it's easy to review):\n\n- Low Energy:\n    “Thanks for sharing — sounds like energy’s a little low today. Let’s focus on small wins and rebuild step by step.”\n    “Not every day needs to be full throttle. Let’s just get one thing done that makes you feel good.”\n    “Let’s take it easy and steady today — small progress still counts.”\n    “Let’s keep today simple — light movement, hydration, and something that makes you feel good.”\n    “No pressure. Just tick one small goal off your list and that’s a win.”\n    “Gentle pace today — you’re still moving forward.”\n\n- Medium Energy:\n    “Nice — balanced energy today. Let’s keep that steady rhythm going.”\n    “Good to hear. Let’s make today about consistency, not perfection.”\n    “You sound centred. Let’s keep building quietly and stay focused.”\n    “Here are a few focused actions to keep your momentum.”\n    “You’re in a solid place — let’s build on it.”\n    “Steady progress always beats all-or-nothing thinking.”\n\n- High Energy:\n    “You’re sounding fired up — let’s channel that into something great today.”\n    “Love that energy — perfect day to push forward and get things done.”\n    “That’s the spirit! Let’s make today count and keep the streak alive.”\n    “You’re in the zone — perfect day to stretch a little further.”\n    “Let’s use that energy and make a real dent in your goals.”\n    “Momentum’s high — let’s ride that wave and finish strong.”\n\n\nAnd here is the bank to get started for the evening texts - make sure to also add 5 more each:\n\nLow Energy\n\n    “Even showing up to reflect counts as progress — proud of you for doing it.”\n\n    “It’s okay to slow down. You’ve still kept your streak alive.”\n\n    “Tomorrow’s another opportunity — rest and reset.”\n\n\nMedium Energy\n\n    “Solid day — small consistent steps are adding up.”\n\n    “Good rhythm today. Keep showing up and it’ll compound.”\n\n    “Balance looks good — you’re finding your stride.”\n\n\nHigh Energy\n\n    “Great energy today — that kind of consistency builds real change.”\n\n    “Strong finish. You’re clearly building momentum.”\n\n    “Loved your effort today — keep that drive flowing.”",
+      "context": [
+        "src/profiles/profiles.controller.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-17T10:30:23.360Z",
+      "updatedAt": "2025-10-17T11:41:08.947Z",
+      "completedAt": "2025-10-17T11:41:08.947Z"
+    },
+    {
+      "id": "8b1d8ec3-d83e-4ce5-965c-502a9fc376b3",
+      "status": "+",
+      "title": "Creating a macro goal needs to involve a confirmation text",
+      "description": "When a macro goal is created, we need to store a confirmationText: string in @src/models/goal/GoalModel.dto.ts .\nIf the user had a goal of \"I need to get back into a steady gym rhythm\" then the confirmation text should say something like:\n\"your focus for the week is to get back into a steady gym rhythm\". So we need an appropriate prompt for this. This should happen right before the mood is established.",
+      "context": [
+        "src/models/goal/GoalModel.dto.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-17T11:17:01.183Z",
+      "updatedAt": "2025-10-17T11:46:10.552Z",
+      "completedAt": "2025-10-17T11:46:10.552Z"
+    },
+    {
+      "id": "f743f2b4-d491-4624-a3ca-b9179686b3d0",
+      "status": "+",
+      "title": "Use journal entries for micro goals",
+      "description": "Currently when generating micro goals in @src/goals/goals.service.ts and then later via `generateMicroGoalsForActiveMacro` in @src/ai/ai.service.ts we are taking into account the user's lifestyle entries, but not the journal entries. The last 5 days of journal entries (if they exist) should be also taken into account. The dates need to be checked to make sure that they are valid for the above requirement.",
+      "context": [
+        "src/goals/goals.service.ts",
+        "src/ai/ai.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-17T11:28:24.384Z",
+      "updatedAt": "2025-10-17T11:54:03.633Z",
+      "completedAt": "2025-10-17T11:54:03.633Z"
+    },
+    {
+      "id": "7386bfd1-77c2-4904-a299-0df0bb735bc2",
+      "status": "+",
+      "title": "After the user submits a journal entry we need an acknowledgement text",
+      "description": "To make the user feel acknowledged we need to generate a line that will be shown to the user to make them feel heard.\n\nThe purpose of this line is light human acknowledgment, not problem-solving. It should always feel supportive but calm.\n\nIf the journal is positive: reinforce it.\n    “Love that energy - you sound focused.”\n\nIf neutral: reflect consistency.\n    “Sounds like a balanced day - steady progress.”\n\nIf negative: acknowledge gently without trying to fix.\n    “Thanks for sharing that — small steps forward are still progress.”\nor\n        “That sounds like it’s been a tough stretch — great you’re ready to get back into rhythm 👊”\n\nThe goal is simply to make the user feel seen and comfortable expressing themselves.\n\nCreate an appropriate prompt for this and add a step to add this new text in @src/journals/journals.service.ts  - this text should be added to @src/models/journal/JournalModel.dto.ts when creating it. The field should be called 'acknowledgmentText'.\n\nCreate a bank of 10 supportive texts that could be used no matter what the user says in case the generation fails so that a JournalModel always contains this.",
+      "context": [
+        "src/models/journal/JournalModel.dto.ts",
+        "src/journals/journals.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-17T14:28:01.056Z",
+      "updatedAt": "2025-10-17T14:41:41.941Z",
+      "completedAt": "2025-10-17T14:41:41.941Z"
+    },
+    {
+      "id": "b7235f0c-f6d6-4995-b357-28a8a40b4421",
+      "status": "+",
+      "title": "New summaryBulletpoints",
+      "description": "In @src/ai/ai-prompts.service.ts inside the function `confirmationFromTranscription` a new requirement for 'summaryBulletpoints' has been added.\nThese are trying to capture the essence of the user's text as a list of concise bullet points.\nThere's some TODOs left to fill in, in the prompt. Do them.\nMake sure that all places that use @src/models/ai/TranscriptionResultModel.dto.ts have it all done correctly with the new bullet points.",
+      "context": [
+        "src/ai/ai-prompts.service.ts",
+        "src/models/ai/TranscriptionResultModel.dto.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-17T15:38:42.677Z",
+      "updatedAt": "2025-10-17T15:41:26.103Z",
+      "completedAt": "2025-10-17T15:41:26.103Z"
+    },
+    {
+      "id": "820e64ce-d0bb-47c9-8ac9-8902cf606745",
+      "status": "+",
+      "title": "transcribe audio telemetry",
+      "description": "When using whisper to transcribe audio - we are not recording any telemetry like for all the object/text generations.\nIn @src/ai/transcription.service.ts in `transcribeWithOpenAI` - the telemetry setup is missing.",
+      "context": [
+        "src/ai/transcription.service.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-18T00:06:20.460Z",
+      "updatedAt": "2025-11-07T12:51:17.158Z",
+      "completedAt": "2025-11-07T12:51:17.158Z"
+    },
+    {
+      "id": "681f13d1-4b2c-44bb-bf58-874970da3c78",
+      "status": "+",
+      "title": "Account recovery via email/phone with Cognito ForgotPassword flow",
+      "description": "Goal\nEnable account recovery (login) by email or phone only, with 4 endpoints that drive Cognito through AdminSetUserPassword → ForgotPassword → ConfirmForgotPassword, then authenticate and return standard tokens.\n\nEndpoints\n- POST /auth/recovery/email/initiate { email }\n- POST /auth/recovery/email/confirm { email, code }\n- POST /auth/recovery/phone/initiate { phoneE164 }\n- POST /auth/recovery/phone/confirm { phoneE164, code }\n\nFlow (Cognito aligned)\n1) Lookup user via Cognito only (no profilesRepo):\n   - email: CognitoService.findUserByEmail(email)\n   - phone: CognitoService.findUserByPhoneNumber(phoneE164)\n   Return username (and sub if available).\n2) AdminSetUserPassword to a fixed password (e.g. 'recovery') to invalidate old creds:\n   - Add helper: CognitoService.adminSetUserPassword(username, password='recovery', permanent=true)\n3) ForgotPassword(username) to trigger a code via Cognito over the channel Cognito prioritises.\n4) ConfirmForgotPassword(username, confirmationCode, newPassword=random-strong-password)\n   - We generate a strong temporary password server-side to avoid the user picking one.\n5) Authenticate with adminInitiateAuth(username, newPassword) and return LoginResultModel.\n\nDTOs (new)\n- EmailRecoveryInitiateModel { email: string }\n- EmailRecoveryConfirmModel { email: string, code: string }\n- PhoneRecoveryInitiateModel { phoneE164: string }\n- PhoneRecoveryConfirmModel { phoneE164: string, code: string }\n\nService additions (AuthService)\n- initiateRecoveryByEmail(email): find via Cognito, adminSetUserPassword('recovery'), forgotPassword\n- confirmRecoveryByEmail(email, code): find via Cognito, confirmForgotPassword with generated strong password, adminInitiateAuth → return tokens (userId=sub)\n- initiateRecoveryByPhone(phoneE164): same as email but phone lookup\n- confirmRecoveryByPhone(phoneE164, code): same as email but phone lookup\n\nController\n- Add 4 endpoints under /auth/recovery/... mapping to the service methods; keep existing error mapping (UserNotFoundException, CodeMismatchException, ExpiredCodeException, etc.).\n\nCognitoService additions\n- adminSetUserPassword(username: string, password: string, permanent=true)\n  (We already use AdminSetUserPassword in ensureUser; expose a dedicated helper.)\n\nSecurity & rate limiting\n- These endpoints are unauthenticated; add basic rate limits and ActivityLog entries.\n\nAcceptance criteria\n- Submitting a valid email/phone to initiate sends a code via Cognito (CODE_SENT response).\n- Confirming with the correct code returns standard LoginResultModel (idToken, accessToken, refreshToken, expiresIn, tokenType, userId=sub).\n- Errors map to existing controller error mapping.\n- If user has both email and phone, Cognito may choose the delivery channel; both endpoint types operate correctly.\n\nTests\n- Unit tests for service and controller using a mocked CognitoService: happy paths and common errors (user not found, code mismatch, expired).",
+      "context": [],
+      "createdAt": "2025-11-17T15:33:56.083Z",
+      "updatedAt": "2025-11-17T16:10:11.919Z",
+      "completedAt": "2025-11-17T16:10:11.919Z"
+    },
+    {
+      "id": "25f0d254-4486-4cd9-8d22-d55685838754",
+      "status": "+",
+      "title": "Delete account: anonymise PII and detach email/phone",
+      "description": "Goal\nProvide an authenticated endpoint to anonymise a user account: remove personal attributes (email/phone) from Cognito to free aliases and redact corresponding fields in our profile store.\n\nEndpoint\n- DELETE /auth/account (JWT protected via Cognito access token)\n  - Returns StatusModel { status: 'DELETED' } (or 'ANONYMISED').\n\nFlow\n1) Resolve current user: sub from JWT. Find Cognito username via CognitoService.findUserBySub(sub).\n2) In Cognito, delete attributes so aliases can be reused:\n   - AdminDeleteUserAttributes(['email','email_verified','phone_number','phone_number_verified'])\n   - Add helper: CognitoService.adminDeleteUserAttributes(username: string, names: string[])\n3) In profilesRepo (DynamoDB), redact PII and unlink soft references:\n   - profilesRepo.updatePartial(userId=sub, { email: undefined, phoneNumber: undefined, whatsappVerified: false })\n   - Optionally set a neutral display name (e.g., 'Deleted User') or other fields if present.\n4) Return { status: 'DELETED' }.\n\nNotes\n- We do NOT delete the Cognito user to allow future reactivation paths if needed; we only clear aliases. If full deletion is desired later, we can add AdminDeleteUser.\n- Ensure ActivityLog captures the action (but do not log PII).\n\nCognitoService additions\n- adminDeleteUserAttributes(username: string, names: string[])\n\nAcceptance criteria\n- After deletion, the same email/phone can be used to sign up/link to a different/new account.\n- Profile no longer returns email/phone (and whatsappVerified=false).\n- Endpoint requires a valid Cognito access token.\n\nTests\n- Unit tests for service and controller with mocked CognitoService and profilesRepo: happy path; user not found; partial failures (rollback or best-effort logging).",
+      "context": [],
+      "createdAt": "2025-11-17T15:33:56.088Z",
+      "updatedAt": "2025-11-17T16:18:31.580Z",
+      "completedAt": "2025-11-17T16:18:31.580Z"
+    }
+  ],
+  "createdAt": "2025-09-18T00:21:01.905Z",
+  "updatedAt": "2025-10-17T15:14:29.597Z"
+}

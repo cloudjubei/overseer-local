@@ -1,0 +1,14 @@
+{
+  "title": "Overseer Local",
+  "description": "the overseer local project",
+  "repo_url": "https://github.com/cloudjubei/overseer-local",
+  "codeInfo": {
+    "language": "typescript",
+    "framework": "electron"
+  },
+  "scopeGroupIds": [
+    "9d03b28b-4491-4868-9bf8-1d66ed32679c"
+  ],
+  "createdAt": "2025-09-14T19:03:30.461Z",
+  "updatedAt": "2026-05-17T12:53:29.833Z"
+}

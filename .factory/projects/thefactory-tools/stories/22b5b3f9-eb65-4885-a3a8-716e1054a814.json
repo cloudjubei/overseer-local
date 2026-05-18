@@ -1,0 +1,187 @@
+{
+  "id": "22b5b3f9-eb65-4885-a3a8-716e1054a814",
+  "status": "+",
+  "title": "Agentic Tools API spec",
+  "description": "To enable AI agents to reliably use the project's tools, we need a robust system for defining and exposing tool schemas. This story implements an automated tool schema generator (`src/tools/schema/generator/ToolSchemaGenerator.ts`).\n\nThis generator scans all `*Tools.ts` files in the `src` directory at build time, reflects on the exported functions, and generates a `src/tools/generated/ToolSchemas.ts` file. This file contains detailed schemas for each tool, including parameters, return types, descriptions, and examples, all extracted from the source code and its JSDoc comments.\n\nKey tasks include:\n1.  Developing the schema generator to parse TypeScript source files.\n2.  Fixing any compilation issues within the generator script.\n3.  Integrating the generator into the build process by adding a `prebuild` script to `package.json`.\n4.  Ensuring the generated schemas are available for the generic tool-calling API, allowing agents to dynamically and correctly invoke tools.",
+  "features": [
+    {
+      "id": "95186c0e-90b0-4680-9de9-4cbc1af73979",
+      "status": "+",
+      "title": "Create ToolManager for Generic Tool Calling",
+      "description": "Create a new file `src/tools/toolManager.ts` that will be responsible for managing and executing tools. It will export a `createToolManager` function that takes the composed tools from `createTools` as input. The manager will expose two methods: one to get the tool schemas/signatures for the LLM prompt, and a `callTool(toolName, args)` method to execute a tool by name.",
+      "context": [],
+      "createdAt": "2025-09-23T09:47:00.547Z",
+      "updatedAt": "2025-09-23T10:33:38.097Z",
+      "completedAt": "2025-09-23T10:33:38.097Z"
+    },
+    {
+      "id": "ef5e7b1a-367c-4285-812c-b7dba9f8229b",
+      "status": "+",
+      "title": "Refactor `Tools.ts` to Integrate with ToolManager",
+      "description": "Refactor `src/tools/Tools.ts` to offload the responsibility of generating tool signatures and agent-specific tool mappings to the new `ToolManager`. The `toolSigsForAgent` function will be moved into the `ToolManager` and simplified. The main `createTools` function will remain, as it is responsible for composing the raw tool functions.",
+      "context": [],
+      "createdAt": "2025-09-23T09:47:00.548Z",
+      "updatedAt": "2025-09-23T10:42:49.026Z",
+      "completedAt": "2025-09-23T10:42:49.026Z"
+    },
+    {
+      "id": "66762159-8ccb-46c5-a1f5-ff18ecb3e30f",
+      "status": "+",
+      "title": "Refactor Orchestrator to Use ToolManager",
+      "description": "Update `src/orchestrator.ts` to use the new `ToolManager`. In the `runConversation` function, instead of creating a map of available tools via `toolSigsForAgent`, it will instantiate the `ToolManager` and use its `callTool` method to execute tool calls from the agent. It will also use the `ToolManager` to get the tool signatures for constructing the system prompt.",
+      "context": [],
+      "createdAt": "2025-09-23T09:47:00.549Z",
+      "updatedAt": "2025-09-23T10:55:20.232Z",
+      "completedAt": "2025-09-23T10:55:20.232Z"
+    },
+    {
+      "id": "30263cbc-0c80-4a08-8648-59e6add8ddd7",
+      "status": "+",
+      "title": "Implement the Automated Tool Schema Generator",
+      "description": "Develop the @src/tools/schema/generator/ToolSchemaGenerator.ts  script to automatically parse `*Tools.ts` files and generate @src/tools/generated/ToolSchemas.ts . This includes reflecting on exported functions, extracting JSDoc comments for descriptions and examples, and deriving parameter/return types.",
+      "context": [
+        "src/tools/schema/generator/ToolSchemaGenerator.ts",
+        "src/tools/generated/ToolSchemas.ts"
+      ],
+      "createdAt": "2025-10-22T10:04:47.716Z",
+      "updatedAt": "2025-10-22T12:13:56.077Z",
+      "blockers": [],
+      "completedAt": "2025-10-22T12:13:56.077Z"
+    },
+    {
+      "id": "0eeefed7-a3f7-4747-9c7f-e40dccf08a54",
+      "status": "+",
+      "title": "Refine Tool Schema Naming and Filtering",
+      "description": "Update the ToolSchemaGenerator to refine the generated schemas. This includes: 1. Filtering out lifecycle methods like 'init', 'cleanup', and 'subscribe'. 2. Renaming the 'id' field to 'name'. 3. Using the plain function name as the unique identifier and storing the original namespace in a new 'category' field. 4. Converting all tool names to snake_case.",
+      "context": [],
+      "createdAt": "2025-10-22T12:26:32.442Z",
+      "updatedAt": "2025-10-22T12:32:43.215Z",
+      "completedAt": "2025-10-22T12:32:43.215Z"
+    },
+    {
+      "id": "0710b95c-8f3c-4cf8-b98e-9c450357797a",
+      "status": "+",
+      "title": "Align Parameter Schema with OpenAPI Standard",
+      "description": "Modify the ToolSchemaGenerator to produce a 'parameters' object that follows the OpenAPI/JSON Schema standard, as seen in the legacy 'agentToolsConstants.ts' file. This involves changing from an array of parameter definitions to a single object with properties and a 'required' array. This standard should also be documented in 'docs/FILE_ORGANISATION.md'.",
+      "context": [],
+      "createdAt": "2025-10-22T12:26:32.445Z",
+      "updatedAt": "2025-10-22T12:37:21.433Z",
+      "completedAt": "2025-10-22T12:37:21.433Z"
+    },
+    {
+      "id": "dc7b8627-3e49-4706-93c8-ada3034b73e8",
+      "status": "+",
+      "title": "Add JSDoc Descriptions to Tool Functions",
+      "description": "Update the source tool files (e.g., FileTools.ts, StoryTools.ts) to include JSDoc comments for all exported tool functions. These comments must provide a clear 'description' that the ToolSchemaGenerator can extract, ensuring the generated schemas are properly documented, similar to the legacy 'agentToolsConstants.ts' file.",
+      "context": [],
+      "createdAt": "2025-10-22T12:26:32.446Z",
+      "updatedAt": "2025-10-22T12:54:21.462Z",
+      "completedAt": "2025-10-22T12:54:21.462Z"
+    },
+    {
+      "id": "3f68c1b7-9e77-415a-ac11-1b89e70f59b3",
+      "status": "+",
+      "title": "the returns object is incorrect when returning a Promise",
+      "description": "In @src/tools/schema/ToolSchemaGenerator.ts  whenever one of the functions returns a Promise it produces bad typing information. It should be assumed that the return type when in a Promise should be the type inside.",
+      "context": [
+        "src/tools/schema/ToolSchemaGenerator.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-23T19:14:36.513Z",
+      "updatedAt": "2025-10-23T19:50:38.993Z",
+      "completedAt": "2025-10-23T19:50:38.993Z"
+    },
+    {
+      "id": "c663d98e-b86a-4319-b003-59b9be727f11",
+      "status": "+",
+      "title": "parameters are missing description",
+      "description": "In @src/tools/schema/ToolSchemaGenerator.ts when a function is generated, it will have the parameters object and within the properties (or directly the object) - the objects need to have a description. For instance in \"listContents\" there's the parameter \"path\" - it should have a description of \"Project-relative path.\".\nAll such parameters need descriptions.\nThis means that all interface files should have the appropriate JDoc-style comments - as these are the outside facing ones. All comments or any other descriptions should be on the interface files themselves - not the functions (as these are never public facing).\nThe parser should parse all relevant info from the interface files.\n\n\nThe information to add this should be included in @docs/FILE_ORGANISATION.md",
+      "context": [
+        "src/tools/schema/ToolSchemaGenerator.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-23T19:17:14.920Z",
+      "updatedAt": "2025-10-27T09:19:31.362Z",
+      "completedAt": "2025-10-24T15:53:06.543Z"
+    },
+    {
+      "id": "999d8f8b-6ac5-41e1-8693-32bb9795cb1d",
+      "status": "+",
+      "title": "some functions are missing their description",
+      "description": "So @src/test/TestTools.ts, @src/projectsgroups/ProjectsGroupsTools.ts , @src/project/ProjectTools.ts , @src/git/GitTools.ts , @src/file/FileTools.ts , @src/chats/ChatsTools.ts , @src/agentRun/AgentRunTools.ts , and  @src/webSearch/WebSearchTools.ts are missing the descriptions in the resulting function schemas.\nThe information to add this should be included in @docs/FILE_ORGANISATION.md",
+      "context": [
+        "src/test/TestTools.ts",
+        "src/webSearch/WebSearchTools.ts",
+        "src/projectsgroups/ProjectsGroupsTools.ts",
+        "src/project/ProjectTools.ts",
+        "src/git/GitTools.ts",
+        "src/file/FileTools.ts",
+        "src/chats/ChatsTools.ts",
+        "src/agentRun/AgentRunTools.ts",
+        "docs/FILE_ORGANISATION.md"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-23T19:20:12.012Z",
+      "updatedAt": "2025-10-23T19:48:21.612Z",
+      "completedAt": "2025-10-23T19:48:21.612Z"
+    },
+    {
+      "id": "e4a4cf63-ae6b-4faf-9a0d-ae85bb98a4f8",
+      "status": "+",
+      "title": "All objects in parameters or returns need to be self-contained",
+      "description": "The @src/tools/schema/ToolSchemaGenerator.ts when creating 'parameters' or 'returns' uses a lot of '$ref' - but we cannot have these as each function definition should be self contained. So all objects need to be deep. If there would be a cycle (i.e. a self reference) just resolve it as a generic object type.",
+      "context": [
+        "src/tools/schema/ToolSchemaGenerator.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-24T14:25:47.886Z",
+      "updatedAt": "2025-10-24T15:13:29.294Z",
+      "completedAt": "2025-10-24T15:13:29.294Z"
+    },
+    {
+      "id": "0d2103fc-bf84-4d5d-8fb9-4088c3c8038d",
+      "status": "+",
+      "title": "Most functions have an incorrect description",
+      "description": "A lot of the functions got this description:\n'Construct a type with the properties of T except for those in'\nwhile others got:\n'Make all properties in T optional'\nnether of these make any sense as a description.\nYou can inspect @src/tools/generated/ToolSchemas.ts to see the current generated ones.",
+      "context": [
+        "src/tools/generated/ToolSchemas.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-27T10:36:17.416Z",
+      "updatedAt": "2025-10-28T01:51:33.277Z",
+      "completedAt": "2025-10-28T01:51:33.277Z"
+    },
+    {
+      "id": "456e8a6a-1719-453a-a98d-4c1655d5be99",
+      "status": "+",
+      "title": "Wrong return types",
+      "description": "When inspecting the output of @src/tools/generated/ToolSchemas.ts and comparing to @src/agentTools/agentToolsConstants.ts (which is the legacy working version that we are comparing against) - the function `readPaths` ends up producing:\n\"returns: {\"type\":\"object\",\"description\":\"unmodeled: FilesResult\"}\" - which isn't at all useful.\n`FilesResult` is a very basic type that can easily be described. A strategy for doing so should be implemented in @src/tools/schema/ToolSchemaGenerator.ts .",
+      "context": [
+        "src/tools/generated/ToolSchemas.ts",
+        "src/agentTools/agentToolsConstants.ts",
+        "src/tools/schema/ToolSchemaGenerator.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-27T10:53:17.094Z",
+      "updatedAt": "2025-10-28T09:08:06.602Z",
+      "completedAt": "2025-10-28T09:08:06.602Z"
+    },
+    {
+      "id": "60e67f8f-9226-4c1c-81a3-f249c69c991e",
+      "status": "+",
+      "title": "If a parameter is \"?\" it means it's optional.",
+      "description": "For instance in @src/webSearch/webSearchTypes.ts there's `webSearch` which has an optional `limit` parameter, but in @src/tools/generated/ToolSchemas.ts it gets generated as required - which isn't correct.",
+      "context": [
+        "src/webSearch/webSearchTypes.ts",
+        "src/tools/generated/ToolSchemas.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-27T10:56:23.427Z",
+      "updatedAt": "2025-10-27T11:17:10.615Z",
+      "completedAt": "2025-10-27T11:17:10.615Z"
+    }
+  ],
+  "createdAt": "2025-09-23T09:44:47.556Z",
+  "updatedAt": "2025-10-28T10:27:01.583Z",
+  "completedAt": "2025-10-28T10:27:01.583Z"
+}

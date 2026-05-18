@@ -1,0 +1,51 @@
+{
+  "id": "0f49d8be-d912-48da-a210-617117d06bf2",
+  "status": "+",
+  "title": "Integrate `thefactory-db` Search into Main Project Tools",
+  "description": "Refactor the existing `searchFiles` tool in the main project's @src/tools/fileTools.ts . The updated tool should act as a facade that first attempts to perform a hybrid search using the `thefactory-db` package. If the database is not available or the search fails, it must fall back to the original file-based search logic to ensure system resilience and backward compatibility.\nMake sure @src/tools/fileTools.ts uses the new package in the appropriate manner - a correct db connection string should be passed to it and if it is passed, then the search should use it. The places where it needs to be passed through is in @src/index.ts  (the function 'startRun') and @src/tools/chatTools.ts (the function 'buildChatTools' ).\n\nif there's an error in the db search - we should also fall back to the standard file search that is already there.",
+  "features": [
+    {
+      "id": "831108c1-3775-4539-b1e8-266884ad9cca",
+      "status": "+",
+      "title": "Update `fileTools` to accept and utilize a database connctionString",
+      "description": "Modify the `createFileTools` function in `@src/tools/fileTools.ts` to accept an optional `dbConnectionString` string parameter. This path should be passed to the internal `searchFiles` function, which will then use it to initialize the database instance via `getDbInstance`. This will allow the search to be configured dynamically instead of relying solely on an environment variable.",
+      "context": [],
+      "createdAt": "2025-09-16T12:59:58.902Z",
+      "completedAt": "2025-09-16T12:26:32.262Z",
+      "updatedAt": "2025-09-16T12:59:58.902Z"
+    },
+    {
+      "id": "76f556ae-5e2b-4b3f-850c-6484147c02f4",
+      "status": "+",
+      "title": "Propagate `dbConnectionString` from `chatTools` to `fileTools`",
+      "description": "Update the `buildChatTools` function in `@src/tools/chatTools.ts` to accept a `dbConnectionString` in its options. This `dbConnectionString` must be passed down to the `createTools` function call, so it can be subsequently forwarded to `createFileTools`.",
+      "context": [],
+      "createdAt": "2025-09-16T12:59:58.902Z",
+      "completedAt": "2025-09-16T13:10:26.585Z",
+      "updatedAt": "2025-09-16T12:59:58.902Z"
+    },
+    {
+      "id": "84c5cc8c-6126-46d3-b69c-31b97bf01c6f",
+      "status": "+",
+      "title": "Propagate `dbConnectionString` from `startRun` to `buildChatTools`",
+      "description": "Modify the `startRun` function in `@src/index.ts` to accept the `dbConnectionString` as part of its arguments. This will involve updating the `AgentRun` type to include an optional `dbConnectionString` property. The `dbConnectionString` should then be passed down through the call chain, specifically to `runIsolatedOrchestrator`, which will make it available to the tool creation process.",
+      "context": [],
+      "createdAt": "2025-09-16T12:59:58.902Z",
+      "completedAt": "2025-09-16T11:29:37.982Z",
+      "updatedAt": "2025-09-16T12:59:58.902Z"
+    },
+    {
+      "id": "ae4b3c24-ba53-49b0-9221-e6c401fdf623",
+      "status": "+",
+      "title": "Ensure `thefactory-db` is a dependency",
+      "description": "Add `thefactory-db` as a dependency to the `package.json` file to ensure it can be imported and used by the `fileTools` module. This step is crucial for the database-backed search functionality to work.",
+      "context": [],
+      "createdAt": "2025-09-16T12:59:58.902Z",
+      "completedAt": "2025-09-16T10:43:24.450Z",
+      "updatedAt": "2025-09-16T12:59:58.902Z"
+    }
+  ],
+  "createdAt": "2025-09-16T12:59:58.902Z",
+  "completedAt": "2025-09-16T13:10:26.585Z",
+  "updatedAt": "2025-09-16T12:59:58.902Z"
+}

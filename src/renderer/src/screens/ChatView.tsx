@@ -297,9 +297,13 @@ export default function ChatView() {
     } catch (_) {}
   }, [selectedContext, activeProjectId, markNotificationsByMetadata, markRunSeen])
 
-  // Header action: Categories | History switch with unread dot hint, plus the 'create topic' button
+  // Header action: Categories | History switch with unread dot hint, plus the 'create topic' button.
+  // The toggle is hidden in group mode — group chats are always shown as a
+  // flat history-style list (groups have no stories so the categories
+  // grouping doesn't apply). Matches web's GroupChatView.
+  const isGroupScope = activeSelectionType === 'group' && !!activeGroupId
   const headerAction = useMemo(() => {
-    const seg = (
+    const seg = isGroupScope ? null : (
       <SegmentedControl
         ariaLabel={'Toggle chat list mode'}
         options={[
@@ -363,6 +367,7 @@ export default function ChatView() {
       </div>
     )
   }, [
+    isGroupScope,
     mode,
     activeProjectId,
     activeGroupId,

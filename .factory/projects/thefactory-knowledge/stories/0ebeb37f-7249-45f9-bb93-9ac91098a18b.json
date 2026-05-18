@@ -1,0 +1,113 @@
+{
+  "id": "0ebeb37f-7249-45f9-bb93-9ac91098a18b",
+  "status": "+",
+  "title": "Viewing the graphiti knowledge graph",
+  "description": "Always consult the included 'graphiti/' folder for references to the graphiti project that is the basis of the knowledge graph.\n\nThe story is to view the knowledge graph for the running service. First, it must be possible to view all relevant nodes, edges and any graphiti related information. Second, it must also be possible to edit/add/remove nodes and edges according to the graphiti spec.\n\nA document 'docs/VIEWING_THE_GRAPH.md' should be created, that will explain how any client can obtain the full graph, and what is the data structure to expect and how nodes/edges or any other quirks of graphiti should be handled to allow viewing/editing.",
+  "features": [
+    {
+      "id": "b6cbaf68-04eb-4c97-9688-f3d5eb5cd6b3",
+      "status": "+",
+      "title": "Extend GraphService to Retrieve All Nodes and Edges",
+      "description": "Add a method `get_full_graph` to `src/graph_service.py`. This method will execute a Cypher query to fetch all nodes and all relationships from the Neo4j database. The result should be structured as a dictionary containing two lists: 's' and 'edges'. Each element in these lists should be a dictionary representing the properties of the node or edge.",
+      "context": [],
+      "createdAt": "2025-09-16T13:03:49.840Z",
+      "completedAt": "2025-09-16T06:57:04.453Z",
+      "updatedAt": "2025-09-16T13:03:49.840Z"
+    },
+    {
+      "id": "6239d35c-2382-42bb-a0bd-7e3cece43691",
+      "status": "+",
+      "title": "Add Generic Node CRUD Methods to GraphService",
+      "description": "Implement `create_node`, `get_node`, `update_node`, and `delete_node` methods in `src/graph_service.py`. These methods will allow for the creation and management of generic nodes in the graph, not tied to a specific type like 'Area' or 'Blueprint'. They should handle arbitrary labels and properties.",
+      "context": [],
+      "createdAt": "2025-09-16T13:03:49.840Z",
+      "completedAt": "2025-09-16T10:07:18.019Z",
+      "updatedAt": "2025-09-16T13:03:49.840Z"
+    },
+    {
+      "id": "a6d47681-3672-4151-a910-e2293f021344",
+      "status": "+",
+      "title": "Add Generic Edge CRUD Methods to GraphService",
+      "description": "Implement `create_edge`, `get_edge`, `update_edge`, and `delete_edge` methods in `src/graph_service.py`. These methods will manage relationships between nodes. `create_edge` will require source and target node identifiers, a relationship type, and optional properties.",
+      "context": [],
+      "createdAt": "2025-09-16T13:03:49.840Z",
+      "completedAt": "2025-09-16T08:34:21.168Z",
+      "updatedAt": "2025-09-16T13:03:49.840Z"
+    },
+    {
+      "id": "408f950b-eff3-42b9-bd52-c01e00a15cd5",
+      "status": "+",
+      "title": "Create Pydantic Models for Generic Graph Nodes and Edges",
+      "description": "Create a new file `src/models/graph.py` and define Pydantic models for `GraphNode` and `GraphEdge`. These models will be used for request and response validation in the new graph API endpoints. The `GraphNode` should include fields like `id`, `labels`, and `properties`. The `GraphEdge` should include `id`, `type`, `source`, `target`, and `properties`.",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:03:49.840Z",
+      "completedAt": "2025-09-16T11:29:22.910Z",
+      "updatedAt": "2025-09-16T13:03:49.840Z"
+    },
+    {
+      "id": "48086c73-723e-4e32-a23d-59ebb01eb4f2",
+      "status": "+",
+      "title": "Create API Endpoint to View the Full Knowledge Graph",
+      "description": "Create a new router file `src/routers/graph.py`. Add a `GET /graph` endpoint that uses the `get_full_graph` method from `GraphService` to return the entire graph. Include this new router in `src/main.py`.",
+      "context": [],
+      "createdAt": "2025-09-16T13:03:49.840Z",
+      "completedAt": "2025-09-16T10:28:11.224Z",
+      "updatedAt": "2025-09-16T13:03:49.840Z"
+    },
+    {
+      "id": "bebbb3c9-608f-4363-b0dc-2bf81e4b10da",
+      "status": "+",
+      "title": "Create API Endpoints for Generic Node CRUD",
+      "description": "In @src/routers/graph.py , add endpoints for `POST /graph/nodes`, `GET /graph/nodes/{node_id}`, `PUT /graph/nodes/{node_id}`, and `DELETE /graph/nodes/{node_id}`. These endpoints will use the corresponding methods from @src/graph_service.py  and the Pydantic models for validation.",
+      "context": [
+        "src/routers/graph.py",
+        "src/graph_service.py"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-16T12:53:54.768Z",
+      "updatedAt": "2025-09-16T12:56:17.219Z",
+      "completedAt": "2025-09-16T02:36:11.224Z"
+    },
+    {
+      "id": "f2e76391-9ebc-4951-a6ee-c20d78684fe8",
+      "status": "+",
+      "title": "Create API Endpoints for Generic Edge CRUD",
+      "description": "In `src/routers/graph.py`, add endpoints for `POST /graph/edges`, `GET /graph/edges/{edge_id}`, `PUT /graph/edges/{edge_id}`, and `DELETE /graph/edges/{edge_id}`. These will use the edge CRUD methods from `GraphService`.",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:03:49.840Z",
+      "completedAt": "2025-09-16T04:18:29.879Z",
+      "updatedAt": "2025-09-16T13:03:49.840Z"
+    },
+    {
+      "id": "c4bef3ee-9483-41c0-b33b-facd7628b5e3",
+      "status": "+",
+      "title": "Create Documentation for Viewing and Editing the Graph",
+      "description": "Create the file `docs/VIEWING_THE_GRAPH.md`. This document will provide a comprehensive guide for developers on how to interact with the new graph API. It should cover how to fetch the graph, the data structures for nodes and edges, and provide examples for creating, updating, and deleting both nodes and edges.",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:03:49.840Z",
+      "completedAt": "2025-09-16T06:10:21.475Z",
+      "updatedAt": "2025-09-16T13:03:49.840Z"
+    },
+    {
+      "id": "a25ae4f8-6a37-45b3-9abd-f6888ec8e150",
+      "status": "+",
+      "title": "Create a test so that it's easy to see the result of the graph viewing",
+      "description": "Just like we have @tests/scenarios/test_coding_project.py - we need to have a similar test for a viewing test for a few different cases.\nIt must be possible to view visually in the console the result of this.",
+      "plan": "",
+      "context": [
+        "tests/scenarios/test_coding_project.py"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T12:56:18.340Z",
+      "updatedAt": "2025-09-16T12:59:45.761Z",
+      "completedAt": "2025-09-16T03:34:32.889Z"
+    }
+  ],
+  "createdAt": "2025-09-16T12:53:54.768Z",
+  "updatedAt": "2025-09-16T13:03:49.840Z",
+  "completedAt": "2025-09-16T11:29:22.910Z"
+}

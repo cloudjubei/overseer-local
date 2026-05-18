@@ -1,0 +1,31 @@
+{
+  "id": "8e472e0e-6906-48d1-8cda-97eacea3e74e",
+  "status": "+",
+  "title": "Refactor ProjectTools for Distributed Configuration",
+  "description": "Refactor Project and Story tools to support a split configuration model where project specifics reside within the project directory, while the main registry holds location and overrides. This establishes a clear separation of concerns and enables project portability.\n\n### Goals\n1.  **Split ProjectSpec**:\n    *   **Registry Entry** (`.factory/projects/<id>.json`): Stores `id`, `path`, `overrides` (title, description), and registry metadata.\n    *   **Project Config** (`<project_path>/.factory/project.json`): Stores the source of truth: `title`, `description`, `repo_url`, `codeInfo`, `storyIdToDisplayIndex`.\n2.  **Update ProjectTools**:\n    *   `createProject`: Creates both the registry entry and the local project config file.\n    *   `getProject`: Merges Registry Entry + Project Config (applying overrides).\n    *   `updateProject`: Updates the correct file based on which fields are changed (e.g., `title` update goes to Config unless it's an override).\n3.  **Update StoryTools**:\n    *   Ensure stories are read from/written to `<project_path>/.factory/stories/`.\n    *   `createStory`, `listStories`, etc., must verify the project path via `ProjectTools`.\n4.  **Migration/Compatibility**:\n    *   Ideally, provide a way to migrate existing projects to this structure.\n\n### Technical Details\n*   **Scopes**: Introduce the concept of 'Global Scope' (Registry) vs 'Project Scope' (Config & Stories).\n*   **Interfaces**:\n    *   `ProjectRegistryEntry`: `{ id, path, overrides?: Partial<ProjectConfig>, metadata, createdAt, updatedAt }`\n    *   `ProjectConfig`: `{ title, description, repo_url, storyIdToDisplayIndex, codeInfo, ... }`\n",
+  "features": [
+    {
+      "id": "450f6938-0ad4-4768-b7cc-50b35a967e18",
+      "status": "+",
+      "title": "Define ProjectRegistryEntry and ProjectConfig Interfaces",
+      "description": "- **Goal**: Split the current `ProjectSpec` into `ProjectRegistryEntry` and `ProjectConfig`.\n- **Files**: `src/project/projectTypes.ts`.\n- **Details**:\n    - `ProjectConfig` will contain: `title`, `description`, `repo_url`, `codeInfo`, `storyIdToDisplayIndex`, `createdAt`, `updatedAt`.\n    - `ProjectRegistryEntry` will contain: `id`, `path`, `overrides` (optional `title`, `description`), `metadata`, `createdAt`, `updatedAt` (registry-specific).\n    - Update dependent types to reflect this split (e.g. `ProjectSpec` = `ProjectRegistryEntry` & `ProjectConfig` combined).",
+      "context": [],
+      "createdAt": "2026-03-03T08:58:56.780Z",
+      "updatedAt": "2026-03-03T18:29:41.313Z",
+      "completedAt": "2026-03-03T18:29:41.313Z"
+    },
+    {
+      "id": "a3adebde-6985-40cb-88b8-2dfe15150cab",
+      "status": "+",
+      "title": "Refactor ProjectTools Implementation",
+      "description": "- **Goal**: Update `ProjectTools.ts` to manage the lifecycle of both `RegistryEntry` and `ProjectConfig`.\n- **Files**: `src/project/ProjectTools.ts`.\n- **Details**:\n    - `createProject`:\n        - Write `ProjectRegistryEntry` to `.factory/projects/`.\n        - Write `ProjectConfig` to `<project_path>/.factory/project.json`.\n    - `getProject`:\n        - Read registry entry.\n        - Read project config from file path.\n        - Merge: `Registry.overrides` takes precedence over `Config`.\n    - `updateProject`:\n        - Determine if the update targets the registry (overrides, path) or the config (title, description, codeInfo).\n        - Write to the appropriate file.",
+      "context": [],
+      "createdAt": "2026-03-03T08:59:32.862Z",
+      "updatedAt": "2026-03-03T18:29:47.740Z",
+      "completedAt": "2026-03-03T18:29:47.740Z"
+    }
+  ],
+  "createdAt": "2026-03-03T08:58:39.971Z",
+  "updatedAt": "2026-03-03T08:58:39.971Z",
+  "completedAt": "2026-03-03T18:29:47.740Z"
+}

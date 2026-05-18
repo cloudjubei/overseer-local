@@ -1,0 +1,41 @@
+{
+  "id": "b945b369-8823-4839-a203-393e20a4bd9b",
+  "status": "+",
+  "title": "Consolidate AgentRunTools into ChatsTools",
+  "description": "`src/agentRun/AgentRunTools.ts` and `src/agentRun/agentRunTypes.ts` are obsolete. The functionality for isolated agent runs should be handled by `ChatsTools` using the `AGENT_RUN` chat context.\n\nRefactor `src/orchestrator.ts` to use `ChatsTools` (and `AGENT_RUN` / `AGENT_RUN_FEATURE` contexts) instead of `AgentRunTools`, then remove the obsolete `src/agentRun/` module.\n\n## New relevant context (from story: Two-phase completions / completion helpers)\n### Completion orchestration should be ChatsTools-first\nWe now have a strong base helper in `src/completion/completionHelpers.ts`:\n- `createCompletionWithToolsParams({ chatsTools, request, settings, callTool, llmCostsTools? })`\n  - wires `toolsReceivedCallback` to persist assistant + placeholder tool messages via `chatsTools.addChatMessages`\n  - wires `toolCalledCallback` to update the correct tool message by `toolCallId`\n  - wires `responseReceivedCallback` to persist the assistant message and apply `dynamicContextPatch` via `chatsTools.updateDynamicContext`\n  - wires `getDynamicContext` to load `chat.dynamicContext` via `chatsTools.getChat`\n  - wires `onFinishCallback` to record system error/max-turns messages\n\n**Orchestrator refactor direction**: instantiate `ChatsTools` (e.g. via `createChatsTools(projectRoot)`) and build `sendCompletionWithTools(...)` params using `createCompletionWithToolsParams` rather than ad-hoc callback plumbing.\n\n### Removal of AgentRun logging as part of migration\nCurrent orchestrator still logs messages to `AgentRunTools` conversations and currently may stub `getDynamicContext` instead of loading from chat.\nDuring migration, prefer using chat persistence as the canonical log:\n- assistant messages\n- tool call placeholders + results\n- dynamic context updates\n\n### Resumability requirement (tool confirmation flow)\nCompletion is gaining a `resumeCompletionTools` capability (see story 36ce4268... Feature 3) so clients can resume tool loops after confirmation-required tools have been resolved.\nThis is directly relevant to orchestrator migration: orchestration should be able to restart/resume a run purely from persisted chat history (no AgentRun conversation state required).\n\n### Testing considerations\nOrchestrator tests (`src/orchestrator.test.ts`) currently depend on `AgentRunTools` mocks. Migrating to ChatsTools will require new tests to assert:\n- chat messages persisted correctly (assistant + tool messages)\n- tool message state transitions (`require_confirmation` -> running -> success/errored)\n- dynamicContextPatch is persisted via `ChatsTools.updateDynamicContext`\n\n## Key requirements for `ChatsTools` to fully replace the remaining `AgentRunTools` needs\n- Efficient listing of chats by type and scope (avoid scanning all chats): `listChatsByType(type, projectId, storyId?, featureId?)`.\n- Generic metadata updates with merge semantics: `updateChatMetadata(context, patch)`.\n- Rating support: `rateChat(context, { score, comment? })` setting `createdAt` automatically.\n- Basic in-process concurrency safety within a single `ChatsTools` instance (per-chat lock) to avoid lost updates during concurrent read/modify/write operations.\n\nNon-requirements (explicitly out of scope):\n- `getRun` / `deleteRun` wrappers\n- run-specific file watchers (we already watch chats)\n- `statusMessage`, `startedAt`, `finishedAt` (derive from `createdAt` / `updatedAt`)\n- persisting LLM config / secrets (model/provider details are stored on messages)",
+  "features": [
+    {
+      "id": "fec97e01-3518-4b1d-83e1-f89d48c41246",
+      "status": "+",
+      "title": "Migrate AgentRun Types and Logic to ChatsTools",
+      "description": "Implement the remaining functionality needed to retire `AgentRunTools` by extending `src/chats/ChatsTools.ts` and `src/chats/chatsTypes.ts`.\n\n### Scope\nAdd the following APIs to `ChatsTools`:\n1) `listChatsByType(type, projectId, storyId?, featureId?)`\n   - Must narrow filesystem traversal to the smallest subtree based on the provided scope (project/story/feature) and then filter by `context.type`.\n   - Purpose: support listing agent runs without scanning all chats.\n\n2) `updateChatMetadata(context, patch)`\n   - Generic metadata updater; `metadata` is treated as an untyped object.\n   - Must merge into `chat.metadata` (do not overwrite by default).\n\n3) `rateChat(context, { score, comment? })`\n   - Persists `chat.rating` with `rating.createdAt` set automatically.\n\n4) Basic concurrency safety (single instance)\n   - Add a simple in-process per-chat lock (keyed by chat path/context key) so that concurrent writes from the same `ChatsTools` instance do not lose updates.\n   - Cross-process / multi-instance locking is out of scope.\n\n### Notes\n- No need for run wrappers (`getRun`, `deleteRun`) or run watchers.\n- No need for `statusMessage`, `startedAt`, `finishedAt`.\n- No need to persist LLM config/secrets; message-level provider/model info is sufficient.\n\n### (Optional) small fix in same area\n- Fix the incorrect error message in `updateChatSettings` / `updateCompletionSettings` where it references `selector.type` (selector is undefined).",
+      "context": [],
+      "createdAt": "2026-03-03T01:51:59.902Z",
+      "updatedAt": "2026-03-12T00:44:12.149Z",
+      "completedAt": "2026-03-12T00:44:12.149Z"
+    },
+    {
+      "id": "0ca9757b-c16c-4086-b7be-f965ea9f9bcf",
+      "status": "+",
+      "title": "Refactor Orchestrator to use ChatsTools",
+      "description": "Update `src/orchestrator.ts` to replace usage of `AgentRunTools` with `ChatsTools`. The orchestrator currently uses `agentRunTools.createRun`, `startConversation`, `addMessagesToConversation`, etc. These calls should be replaced with `chatsTools.createChat` (or `getChat`), `addChatMessages`, and updating the chat state. The `runId` concept maps to `agentRunId` in `ChatContextAgentRun`.",
+      "context": [],
+      "createdAt": "2026-03-03T01:51:59.908Z",
+      "updatedAt": "2026-03-12T00:44:10.949Z",
+      "completedAt": "2026-03-12T00:44:10.949Z"
+    },
+    {
+      "id": "e01b80f0-7c1f-4c26-902c-0bf8cdb30f63",
+      "status": "+",
+      "title": "Remove Obsolete AgentRun Module",
+      "description": "Once the orchestrator is refactored and tests pass, delete the `src/agentRun/` directory and remove references to `AgentRunTools` from `src/index.ts` and other files. Update `docs/FILE_ORGANISATION.md` to reflect the removal.",
+      "context": [],
+      "createdAt": "2026-03-03T01:51:59.912Z",
+      "updatedAt": "2026-03-12T00:42:02.131Z",
+      "completedAt": "2026-03-12T00:42:02.131Z"
+    }
+  ],
+  "createdAt": "2026-03-03T01:49:42.309Z",
+  "updatedAt": "2026-03-10T20:07:29.948Z",
+  "completedAt": "2026-03-12T00:44:12.149Z"
+}

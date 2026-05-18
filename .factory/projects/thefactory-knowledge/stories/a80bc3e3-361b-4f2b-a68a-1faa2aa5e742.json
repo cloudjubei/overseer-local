@@ -1,0 +1,101 @@
+{
+  "id": "a80bc3e3-361b-4f2b-a68a-1faa2aa5e742",
+  "status": "-",
+  "title": "LLM-enriched pipeline — Approach A",
+  "description": "Implement the Approach A pipeline: heuristic structural skeleton first, then LLM enrichment passes per level. The heuristic pipeline (genericStrategy → logicalPieces → levelGenerator) already produces a structurally correct L1→L4 skeleton. This story adds the LLM enrichment passes that upgrade each level from mechanically correct to semantically meaningful, using the hand-authored golden-standard.json (tests/fixtures/small-clean/golden-standard.json) as the convergence oracle.\n\n## The pipeline shape\n\n```\nsource files\n     ↓\n[1] genericStrategy.generateL1()           ← DONE (structural skeleton)\n     ↓\n[2] extractL1LogicalGraph()                ← DONE (heuristic regex pieces + edges)\n     ↓\n[2b] LlmLogicalPieceExtractor             ← TO DO: wire as config.logicalPieceExtractor\n     upgrades piece.what per function      (LlmLogicalPieceExtractor already written)\n     ↓\n[3] buildProjectGraphSnapshot()            ← DONE (graph edges, signals, flows)\n     ↓\n[4] genericStrategy.generateL2()           ← DONE (dir grouping + test co-location)\n[4b] LlmGroupingPass at L2               ← TO DO: post-heuristic rename buckets\n     'src' → 'slug creation' etc.\n     ↓\n[5] genericStrategy.generateL3()           ← DONE (two-pole semantic split)\n[5b] LlmGroupingPass at L3               ← TO DO: when pole confidence is low\n     ↓\n[6] generateL4()                           ← DONE (reads package.json name+desc)\n     ↓\n[7] HeuristicSummarizer / LLM Summarizer  ← PARTIAL (L4 prose needs LLM)\n     ↓\nenriched knowledge  ←→  golden-standard.json (oracle)\n```\n\n## Why Approach A over Approach B\n\nApproach B (LLM derives structure from raw files) requires building everything from scratch — new prompts, structured output contract, partial failure recovery, expensive per-run cost, no graceful fallback. Approach A extends a working heuristic skeleton that already passes 49/50 convergence tests. Each LLM enrichment pass is independently testable, composable, and optional — the pipeline degrades gracefully to heuristic quality when LLM is unavailable.\n\n## Golden standard reference\n\nThe oracle for all convergence measurement is `tests/fixtures/small-clean/golden-standard.json`. It defines:\n- L4: `slug-ify` — the project/system node with a meaningful prose description\n- L3: `public surface` (package.json + index.js) and `transformation engine` (the real logic)\n- L2: `slug creation`, `slug restoration`, `text helpers`, `public API` — each co-located with its test\n- L1: individual files with implementation-agnostic descriptions\n- L0: individual exported functions with semantic what-field descriptions\n\nThe golden file is NOT fed into the pipeline — it is the measurement target. The pipeline must independently produce something structurally and semantically equivalent.\n\n## LLM calls that are mandatory (not optional polish)\n\n| Decision | Why heuristics cannot do it | LLM call type |\n|---|---|---|\n| L2 group naming | 'slug creation' cannot be inferred from 'src' — requires reading what the functions DO | summarizeGroup(files + piece.whats) → name + description |\n| L0 function descriptions | what: 'function slugify in slugify.js' is useless. Golden wants 'Converts a string to a URL-safe slug by…' | extractFile(content) → piece.what per function |\n| L3 semantic grouping | When directories are not named src/tests, heuristic pole split fails | groupL2Features(features) → cluster labels |\n| L4 project description | Concatenating name+package.json desc ≠ 'Public transform library providing two inverse operations…' | summarizeProject(all_l3) → project prose |\n| Noise detection (small-dirty) | 13 no-op infrastructure classes cannot be distinguished from real code by regex | assessFile(content) → is_noise + reason |\n\n## Approach B note\n\nApproach B (LLM-first structure derivation from raw files) is tracked in a separate story. Features for Approach B are deliberately left unwritten until Approach A is complete and its metrics are established — the Approach A implementation will inform which parts of Approach B are worth investing in and which are already solved.",
+  "features": [
+    {
+      "id": "80ae47bd-18c2-46c3-9b4a-0456f86e8248",
+      "status": "+",
+      "title": "Fix the 1 remaining failing convergence test (utils.js symbol names in summary)",
+      "description": "The convergence test suite has 49/50 tests passing. The one failing test checks that the utils.js L1 summary surfaces the exported function names stripDiacritics and normalizeWhitespace in either its summary.summary or summary.keyResponsibilities fields.\n\nRoot cause to confirm: the heuristic summarizer's summarizeL1() method reads ctx.logicalPieces to build a 'Defines: stripDiacritics, normalizeWhitespace' responsibility line. The logicalPieces context is populated from item.metadata['logicalPieces'] which is set by extractL1LogicalGraph() before summarizeLevel() is called. The bug is likely one of: (a) ctx.logicalPieces is empty for utils.js because the item metadata is not being read correctly, (b) the pieceWhat guard at line 74 of heuristicSummarizer fires and short-circuits before the Defines: line is appended, or (c) the module-level what field for utils.js matches the mechanical pattern guard exactly and the test expectation needs to also check item.description.\n\nThe fix must not require changes to the test assertion — the pipeline must surface the symbol names from the extracted logical pieces.",
+      "plan": "1. Add a targeted debug trace or unit test that runs extractLogicalPiecesFromFile on utils.js directly and logs the pieces. Confirm stripDiacritics and normalizeWhitespace are extracted as function kind pieces.\n2. Add a second trace that calls buildContext(utils_l1_item) inside a summarizeLevel call and logs ctx.logicalPieces.\n3. Identify the exact code path break.\n4. Fix the summarizer or the context build path so the Defines: line is always appended when logicalPieces contains non-module pieces.\n5. Re-run the convergence test suite and confirm 50/50.",
+      "context": [],
+      "acceptance": "- tests/integration/pipelineConvergence.test.ts passes all 50 tests with no changes to the test assertions.\n- The utils.js L1 summary.keyResponsibilities contains a 'Defines: stripDiacritics, normalizeWhitespace' line OR the summary.summary contains those function names.\n- No existing tests regress.",
+      "createdAt": "2026-04-23T14:25:58.858Z",
+      "updatedAt": "2026-04-24T01:20:30.680Z",
+      "blockers": [],
+      "completedAt": "2026-04-24T01:20:30.680Z"
+    },
+    {
+      "id": "95ddb5a5-4d5f-4316-8d30-44f9f9b1d672",
+      "status": "+",
+      "title": "Wire LlmLogicalPieceExtractor as config.logicalPieceExtractor (Iteration 2)",
+      "description": "The LlmLogicalPieceExtractor class already exists and is complete (src/graph/llmLogicalPieceExtractor.ts). It accepts a sendPrompt lambda, runs the heuristic extractor as baseline, then calls the LLM to upgrade each piece's 'what' field with a semantically meaningful description. This feature wires it into the pipeline via config.logicalPieceExtractor and validates the upgrade against the golden-standard.json L0 targets.\n\nThis is Iteration 2 of the convergence loop. The key delta it closes: L0 function descriptions go from 'function \"slugify\" in slugify.js.' (heuristic) to something like 'Converts a string to a URL-safe slug by stripping diacritics, normalising whitespace, lowercasing, and replacing spaces/special chars with a separator.' (LLM). This is a mandatory gap that heuristics cannot close.\n\nThe sendPrompt interface is already defined as (systemPrompt: string, userPrompt: string) => Promise<string>. Any LLM provider can be plugged in by implementing this function. The feature should also add a test variant in pipelineConvergence.test.ts that runs with a mock sendPrompt (returning canned semantic descriptions) to verify the wiring without requiring a live LLM key.",
+      "plan": "1. Create a helper factory function createLlmLogicalPieceExtractor(sendPrompt, provider, model) in a new file src/graph/createLlmExtractor.ts that assembles the extractor from a sendPrompt lambda.\n2. Add a test variant in tests/integration/pipelineConvergence.test.ts (or a new test file) that passes a mock sendPrompt returning canned piece data for utils.js, slugify.js, and deslugify.js.\n3. Assert that with the mock LLM: piece.what for 'slugify' contains 'slug', piece.what for 'stripDiacritics' contains 'diacritic', and the L1 summary for slugify.js is richer than the heuristic fallback.\n4. Document the sendPrompt interface contract in src/graph/llmLogicalPieceExtractor.ts.\n5. Record the convergence score improvement vs. Iteration 1 baseline in docs/convergence-log.md.",
+      "context": [
+        "src/graph/llmLogicalPieceExtractor.ts",
+        "src/levels/levelGenerator.ts",
+        "tests/integration/pipelineConvergence.test.ts",
+        "tests/fixtures/small-clean/golden-standard.json"
+      ],
+      "acceptance": "- config.logicalPieceExtractor is correctly threaded through levelGenerator and exercises the LlmLogicalPieceExtractor when provided.\n- A test with a mock sendPrompt passes and shows that piece.what fields are upgraded from heuristic to LLM-provided values.\n- The convergence score for L0 descriptions improves measurably vs. the heuristic-only baseline.\n- docs/convergence-log.md records the Iteration 2 score.",
+      "createdAt": "2026-04-23T14:44:01.768Z",
+      "updatedAt": "2026-04-24T01:23:38.198Z",
+      "completedAt": "2026-04-24T01:23:38.198Z"
+    },
+    {
+      "id": "bdbbe036-e9f1-429e-8718-677986a8e086",
+      "status": "+",
+      "title": "Wire LlmGroupingPass for L2 feature naming and summarization",
+      "description": "The heuristic pipeline groups L1 files into L2 feature groups based on directory structure or basic import clustering, often leaving them with mechanical names like 'l2_src' or 'Feature group from directory: src'.\n\nAs Iteration 3/4 of the convergence loop, we need to wire in an `LlmGroupingPass` at the L2 level. This pass will take the heuristic grouping, along with the 'what' descriptions of the logical pieces within that group, and use the LLM to:\n1. Propose a semantic, human-readable name for the group (e.g., 'slug creation' instead of 'src').\n2. Write a concise description of what the feature group does and why it exists.\n\nThe golden-standard.json requires these L2 names to be implementation-agnostic lowercase phrases.\n\n**Plan:**\n1. Implement or wire an `LlmGroupingPass` class/function that takes a set of L1 items and their logical pieces.\n2. Define a prompt that asks the LLM to synthesize a feature name and description from the collected pieces.\n3. Hook this pass into `genericStrategy.generateL2()` or as a post-processor before `generateL3()`.\n4. Update convergence tests to verify that L2 names in the `slug-ify` fixture move from 'src' to semantic labels matching the golden standard.",
+      "context": [],
+      "createdAt": "2026-04-24T00:35:17.163Z",
+      "updatedAt": "2026-04-24T01:26:43.754Z",
+      "blockers": [],
+      "completedAt": "2026-04-24T01:26:43.754Z"
+    },
+    {
+      "id": "4d4c9d17-6991-4107-afd4-443571ebd160",
+      "status": "+",
+      "title": "Wire LlmGroupingPass for L3 semantic clustering",
+      "description": "When the heuristic two-pole split (code vs. scaffolding) isn't enough, we need the LLM to cluster the L2 features into meaningful L3 subsystems based on themes.\n\nThe pipeline's heuristic L3 grouping primarily splits code vs tests or scaffolding. However, in larger projects (or as dictated by `golden-standard.json`'s 'public surface' vs 'transformation engine' split), L2 features need to be semantically clustered.\n\nThis feature implements an `LlmGroupingPass` at the L3 level that:\n1. Takes the named and summarized L2 features.\n2. Uses an LLM to identify themes and group them into L3 subsystems.\n3. Provides a semantic name and description for each L3 subsystem.\n\n**Plan:**\n1. Create/extend the `LlmGroupingPass` logic to handle L2->L3 clustering.\n2. Design a prompt that inputs L2 features and outputs L3 clusters.\n3. Integrate this pass into `genericStrategy.generateL3()` as a fallback when pole confidence is low, or as a post-heuristic enhancement.\n4. Test against the small-clean fixture to ensure it produces 'public surface' and 'transformation engine' equivalents.",
+      "context": [],
+      "createdAt": "2026-04-24T00:57:05.766Z",
+      "updatedAt": "2026-04-24T01:29:14.883Z",
+      "completedAt": "2026-04-24T01:29:14.883Z"
+    },
+    {
+      "id": "d268edd8-dc45-4493-bdf4-94f95e4238b3",
+      "status": "+",
+      "title": "Wire LLM Project Summarizer for L4 project description",
+      "description": "The current pipeline uses heuristics to generate L4 descriptions by concatenating `package.json` names and descriptions, resulting in a mechanical string like 'System: small-clean'.\n\nThe `golden-standard.json` target requires a meaningful, system-level project description, such as 'Public transform library providing two inverse operations...'. This requires synthesizing information across the entire project (all L3s).\n\nThis feature wires an LLM Summarizer at the L4 level:\n1. It takes the summarized L3 subsystems.\n2. It uses an LLM to synthesize a cohesive L4 project description.\n3. This step replaces or augments the heuristic L4 description.\n\n**Plan:**\n1. Create an `LlmProjectSummarizer` or extend the existing LLM summarization framework.\n2. Design a prompt that inputs L3 summaries and outputs a high-level project description.\n3. Integrate this into `generateL4()`.\n4. Add convergence tests verifying that the L4 description for `slug-ify` becomes semantically meaningful, matching the golden standard's intent.",
+      "context": [],
+      "createdAt": "2026-04-24T01:14:12.395Z",
+      "updatedAt": "2026-04-24T01:30:42.893Z",
+      "completedAt": "2026-04-24T01:30:42.893Z"
+    },
+    {
+      "id": "c16bd94e-ebb1-4861-a3bb-6669e8cc4f1d",
+      "status": "+",
+      "title": "Wire LLM Noise Detection pass for small-dirty fixture",
+      "description": "The heuristic pipeline processes all files without distinguishing core logic from boilerplate, leading to bloated extractions (e.g., 13 no-op infrastructure classes in the `small-dirty` fixture being promoted to L2 features).\n\nThe `golden-standard.json` uses a `Noise classification` strategy where boilerplate and empty files are identified and excluded or de-prioritized.\n\nThis feature introduces an `LlmNoiseDetectionPass`:\n1. It analyzes file content early in the pipeline (or as part of `logicalPieceExtractor`).\n2. It uses an LLM to assess if a file is purely boilerplate, empty, or 'noise' relative to the core business logic.\n3. It flags these files so the pipeline can optionally exclude them from higher-level aggregation or mark them as partial-file noise.\n\n**Plan:**\n1. Create an `LlmNoiseDetector` that takes file content and outputs a noise assessment (is_noise + reason).\n2. Wire this into the early stages of extraction or as a filter before L2 generation.\n3. Test against the `small-dirty` fixture to verify the 13 infrastructure classes are successfully flagged and omitted from the final L2/L3 groupings, aligning the output structurally with `small-clean`.",
+      "context": [],
+      "createdAt": "2026-04-24T01:14:21.003Z",
+      "updatedAt": "2026-04-24T01:33:30.537Z",
+      "completedAt": "2026-04-24T01:33:30.537Z"
+    },
+    {
+      "id": "d5be6988-bd74-4b36-a51d-48a78be8f4b1",
+      "status": "-",
+      "title": "Live E2E integration tests for LLM prompts (OpenAI & Anthropic)",
+      "description": "Implement a live E2E integration test suite that hits real LLM APIs (OpenAI and Anthropic) to verify prompt efficacy. It should only run when the appropriate API keys are provided (via environment or a local config file). The tests will run the extraction and grouping passes against the `small-clean` fixture and assert that the semantic structure matches the golden standard.",
+      "context": [],
+      "createdAt": "2026-04-25T09:50:26.778Z",
+      "updatedAt": "2026-04-25T09:51:31.995Z",
+      "blockers": []
+    },
+    {
+      "id": "400f0ab5-8931-4547-84e6-ad909e92c8c4",
+      "status": "-",
+      "title": "CLI tool to execute and inspect LLM pipeline locally",
+      "description": "Implement a CLI script (e.g. `npm run analyze <path>`) that runs the full Approach A pipeline with LLM enrichment enabled over a target directory. It should dump the resulting KnowledgeSnapshot as JSON so we can quickly verify the real-world output. It should accept `--provider openai|anthropic` and read the corresponding API keys from `.env`.",
+      "context": [],
+      "createdAt": "2026-04-25T09:50:35.482Z",
+      "updatedAt": "2026-04-25T09:51:34.744Z",
+      "blockers": []
+    }
+  ],
+  "createdAt": "2026-04-23T14:25:19.094Z",
+  "updatedAt": "2026-04-25T09:50:35.492Z"
+}

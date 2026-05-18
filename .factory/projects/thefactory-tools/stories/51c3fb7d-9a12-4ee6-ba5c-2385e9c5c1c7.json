@@ -1,0 +1,62 @@
+{
+  "id": "51c3fb7d-9a12-4ee6-ba5c-2385e9c5c1c7",
+  "status": "+",
+  "title": "Group-scoped chats + cross-project tool access within groups",
+  "description": "Enable a single chat to operate over a set of projects (a group scope) and safely call tools against any project in that group.\n\nKey capabilities:\n- New chat contexts for group scope stored under `/.factory/chats/groups/<groupId>/...`.\n- ChatsTools prompt/settings plumbing for group contexts, including listing member projects in the system prompt.\n- Tool-call routing that can target a chosen project via `projectId` argument.\n- Central enforcement in `factoryToolsManager.executeTool` so tool calls can only target projects within the chat’s allowed group scope.\n\nDomain clarification:\n- Use a single `ProjectsGroup` entity for all groupings.\n- Add `ProjectsGroup.type: 'MAIN' | 'SCOPE'` to distinguish cohesive/main vs loose/scope groupings.\n- Group membership is derived from `Project.scopeGroupIds` (a project is in a group iff `scopeGroupIds` includes `groupId`).",
+  "features": [
+    {
+      "id": "56ecfcbd-f571-4dba-bd80-127469da9914",
+      "status": "+",
+      "title": "Add group chat contexts and persistence under /.factory/chats/groups/<groupId>/",
+      "description": "## Goal\nIntroduce group-scoped chat contexts and store/load them from a dedicated folder.\n\n## Scope\n- Add new `ChatContextType` values for group chats (name TBD but likely `GROUP` / `GROUP_TOPIC`).\n- Extend `ChatContext` to carry `groupId`.\n- Persist group chats under `/.factory/chats/groups/<groupId>/...`.\n- Update context <-> path mapping so:\n  - `getChatContextPath(...)` produces the group path\n  - `getChatContextFromFilename(...)` parses group paths correctly\n- Ensure `ChatsTools.subscribe()` emits add/change/delete updates for group chat files.\n\n## Acceptance criteria\n- Can create and load a chat whose context includes `{ type: GROUP, groupId }`.\n- Group chat files are written under `/.factory/chats/groups/<groupId>/`.\n- Parsing round-trip holds:\n  - `context -> path -> context` yields the same `type/groupId`.\n- Existing project/general chat paths continue to work unchanged.\n\n## Implementation notes\nLikely changes:\n- `src/chats/chatsTypes.ts`\n- `src/chats/chatsUtils.ts`\n- `src/chats/chatsConstants.ts` (constants for folder name)\n- `src/constants.ts` (if shared constants are used for chats roots)",
+      "context": [],
+      "createdAt": "2026-03-10T20:40:30.540Z",
+      "updatedAt": "2026-03-12T16:36:54.724Z",
+      "completedAt": "2026-03-12T16:36:54.724Z"
+    },
+    {
+      "id": "a19e7358-cebd-43a9-8790-287af1ed96e1",
+      "status": "+",
+      "title": "Group prompt plumbing in ChatsTools (member projects list + projectId tool-call guidance)",
+      "description": "## Goal\nWhen a chat is group-scoped, ChatsTools must generate the correct system prompt and settings for that scope, including:\n- what the group is\n- which projects are in scope\n- how the assistant should target a specific project when calling tools\n\n## Scope\n- Add default settings + default system prompt for group contexts in `chatsConstants`.\n- Extend `getDefaultChatPrompt` / `getDefaultChatSettings` handling for group contexts.\n- Extend `ChatsTools.getSettingsPrompt`, `updateChatSettings`, `updateCompletionSettings` switches to support group context.\n- Add a group context renderer that resolves:\n  - group metadata (including `ProjectsGroup.type`)\n  - list of member projects (id + title + description if available)\n- Membership resolution must be derived from Project specs:\n  - a project is in group iff `Project.scopeGroupIds` contains `groupId`\n- Prompt must explicitly instruct:\n  - For project-dependent tools, include `projectId` in tool arguments.\n  - Valid `projectId`s are limited to those in the group.\n\n## Acceptance criteria\n- For `{ type: GROUP, groupId }` contexts, `ChatsTools.getSettingsPrompt` includes group.type + member project list.\n- For non-group contexts, existing prompts are unchanged.\n- The group prompt explicitly teaches the model to add `projectId` for project-dependent tool calls.\n\n## Implementation notes\n- ChatsTools is instantiated once for a multi-project organiser, so it should not be hard-bound to a single project.\n- Prefer injecting resolvers/providers into ChatsTools creation (e.g. `resolveGroup(groupId)` and `resolveGroupProjectIds(groupId)` and `resolveProject(projectId)` callbacks) rather than importing concrete tools directly.\n- Likely changes:\n  - `src/chats/chatsConstants.ts`\n  - `src/chats/chatsUtils.ts`\n  - `src/chats/ChatsTools.ts`\n  - `src/project/*` and `src/projectsgroups/*` if a new resolver surface is needed.",
+      "context": [],
+      "createdAt": "2026-03-10T20:41:08.844Z",
+      "updatedAt": "2026-03-16T15:37:35.464Z",
+      "completedAt": "2026-03-16T15:37:35.464Z"
+    },
+    {
+      "id": "a9194e6c-9a4a-45a0-8001-1aba80462918",
+      "status": "+",
+      "title": "Tool-call projectId injection + missing-projectId retry behavior",
+      "description": "## Goal\nMake it easy and reliable for the LLM to target the correct project when calling tools.\n\n## Scope\n- Extend the tool-call wrapper (client-side `callTool`) to inject `projectId` similarly to existing `storyId`/`featureId` injection.\n- Rules:\n  - If chat context is project-descendant (has `chatContext.projectId`) and args do not include `projectId`, inject it.\n  - If chat context is group-scoped (has `groupId` but no single `projectId`), then for project-dependent tool calls:\n    - require `projectId` in args, OR\n    - return a structured error that instructs the model to retry with `projectId`.\n- Define ‘project-dependent tool’ classification:\n  - Prefer tool schema metadata (e.g. tool declares it requires a project scope), otherwise maintain a conservative allowlist.\n\n## Acceptance criteria\n- In project-scoped chats, tool calls succeed without explicitly providing `projectId`.\n- In group-scoped chats, tool calls either:\n  - include `projectId` and execute against that project, or\n  - fail with a clear retry message instructing to include `projectId`.\n- Tests cover injection and missing-projectId behavior.\n\n## Implementation notes\n- Client wrapper currently calls `factoryToolsManager.executeTool(projectId, name, args)`; update to route using `args.projectId ?? chatContext.projectId`.\n- Ensure enforcement is still centralized (Feature: executeTool enforcement).",
+      "context": [],
+      "createdAt": "2026-03-10T20:41:58.215Z",
+      "updatedAt": "2026-03-17T01:46:11.128Z",
+      "blockers": [],
+      "completedAt": "2026-03-17T01:46:11.128Z"
+    },
+    {
+      "id": "57ba99ce-e2e3-475f-8131-530a5ba118d8",
+      "status": "+",
+      "title": "Central scope enforcement in factoryToolsManager.executeTool (allow only group-member projects)",
+      "description": "## Goal\nEnforce group scope at the single source of truth: `factoryToolsManager.executeTool`.\n\n## Scope\n- Extend `executeTool` to accept an optional execution scope (preferred: pass `chatContext` or `{ scopeType, groupId }`).\n- When scope is group-scoped:\n  - determine allowed projectIds for the group by reading project specs\n  - a project is allowed iff `Project.scopeGroupIds` contains `groupId`\n  - reject calls where the routed `projectId` is not in the allowed set\n- Ensure rejection error is deterministic and model-actionable (so the agent can retry with a correct `projectId`).\n\n## Acceptance criteria\n- Tool execution succeeds for a projectId that is a member of the group (by `scopeGroupIds` membership).\n- Tool execution fails (with clear error) for a projectId outside the group.\n- Tool execution behavior for non-group chats is unchanged.\n- Tests cover allow/deny scenarios and ensure no bypass through missing/incorrect scope.\n\n## Implementation notes\n- Prefer passing scope into `executeTool` rather than re-resolving it indirectly.\n- The enforcement should run before dispatching to the underlying per-project toolset.\n- Likely changes:\n  - `factoryToolsManager` implementation (not yet in context files)\n  - membership resolver helper (Feature 5)\n  - client wrapper / orchestrator call sites to pass scope\n  - tests for the manager",
+      "context": [],
+      "createdAt": "2026-03-10T20:42:20.038Z",
+      "updatedAt": "2026-03-17T02:19:44.954Z",
+      "completedAt": "2026-03-17T02:19:44.954Z"
+    },
+    {
+      "id": "a2bfb1bc-9231-421d-be58-05c83de7177a",
+      "status": "+",
+      "title": "Group typing + project membership: ProjectsGroup.type enum + Project.scopeGroupIds (+ membership helpers)",
+      "description": "## Goal\nMake group semantics explicit while keeping a single group entity:\n- all groupings are `ProjectsGroup`\n- `ProjectsGroup.type` distinguishes cohesive/main vs loose/scope\n- membership is derived solely from `Project.scopeGroupIds`\n\n## Scope\n- Extend `ProjectsGroup` to include a `type` enum (exact values TBD; e.g. `MAIN | SCOPE`).\n- Extend Project spec/types to include:\n  - `scopeGroupIds?: string[]`\n- Define membership rule used across the system:\n  - a project is in group iff `Project.scopeGroupIds` contains `groupId`\n- Provide helper APIs to resolve membership used by:\n  - ChatsTools prompt rendering (group -> member projects)\n  - `factoryToolsManager.executeTool` enforcement (is target project allowed for group?)\n\n## Acceptance criteria\n- A group has a `type` field that clients can use to distinguish ‘main’ vs ‘scope’ intent.\n- A project can belong to many groups via `scopeGroupIds`.\n- Membership resolution function can return all projectIds for a groupId by scanning project specs.\n- Tests cover:\n  - group type parsing/validation\n  - membership resolution correctness\n\n## Implementation notes\n- Likely changes:\n  - `src/projectsgroups/projectsGroupsTypes.ts` (add `type`)\n  - `src/projectsgroups/ProjectsGroupsTools.ts` (create/edit validation for `type`)\n  - `src/project/projectTypes.ts` (ProjectSpec: add `scopeGroupIds`)\n  - `src/project/ProjectTools.ts` (create/update project spec validation)\n  - Add a helper module for membership resolution (e.g. `src/projectsgroups/groupsMembership.ts`).\n- Avoid duplicating membership in `projects_groups.json` to prevent drift; membership should come from Project specs.",
+      "context": [],
+      "createdAt": "2026-03-10T20:42:42.269Z",
+      "updatedAt": "2026-03-17T11:38:53.000Z",
+      "completedAt": "2026-03-17T11:38:53.000Z"
+    }
+  ],
+  "createdAt": "2026-03-10T20:40:03.473Z",
+  "updatedAt": "2026-03-11T00:37:57.563Z",
+  "completedAt": "2026-03-17T11:38:53.000Z"
+}

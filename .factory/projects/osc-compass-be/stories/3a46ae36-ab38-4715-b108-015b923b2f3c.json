@@ -1,0 +1,139 @@
+{
+  "id": "3a46ae36-ab38-4715-b108-015b923b2f3c",
+  "status": "+",
+  "title": "Admin tools",
+  "description": "We require various admin tools so that certain things can be configured/viewed or modified.\n\nWe will require a second login way where an admin user (authenticated solely via a different Cognito table than the users) can access certain endpoints.\nThe first few endpoints that we require:\n- get user profiles, listing all the users in the system and their profiles\n- get user conversations, listing a given users conversations log\n- get user activity log, listing a given users endpoint interactions",
+  "features": [
+    {
+      "id": "567b460f-df43-48d8-b6d5-c9443b8faea7",
+      "status": "+",
+      "title": "Setup Admin Module and Admin Cognito Authentication",
+      "description": "Create a new @src/admin/admin.module.ts . Add configuration for a new Admin Cognito user pool. Implement an `AdminCognitoStrategy` and an `AdminAuthGuard` to secure admin-only endpoints.\n\nBoth the admin module and @src/auth/auth.module.ts should use NestJS's PasssportModule and essentially follow the same exact patterns.\nThis should be documented and enforced in @docs/FILE_ORGANISATION.md and @docs/CODE_STANDARD.md",
+      "context": [
+        "src/admin/admin.module.ts",
+        "src/auth/auth.module.ts",
+        "docs/FILE_ORGANISATION.md",
+        "docs/CODE_STANDARD.md"
+      ],
+      "createdAt": "2025-09-19T10:45:06.270Z",
+      "updatedAt": "2025-10-07T09:21:01.332Z",
+      "blockers": [],
+      "completedAt": "2025-10-07T09:21:01.332Z"
+    },
+    {
+      "id": "1b52c3ed-2e04-4a04-9d64-3908542ede18",
+      "status": "+",
+      "title": "Implement Admin Endpoint to List All User Profiles",
+      "description": "Create an endpoint `GET /admin/users` within the `admin` module, protected by the `AdminAuthGuard`. This endpoint will use the `UserProfilesRepository` to fetch and return a paginated list of all user profiles.",
+      "context": [],
+      "createdAt": "2025-09-19T10:45:06.271Z",
+      "updatedAt": "2025-10-07T09:24:11.865Z",
+      "completedAt": "2025-10-07T09:24:11.865Z"
+    },
+    {
+      "id": "6ec8e31b-7dba-40e6-a51a-b28fac1cb9d0",
+      "status": "+",
+      "title": "Implement Admin Endpoint to List User Conversation Logs",
+      "description": "Create an endpoint `GET /admin/users/:userId/conversations` in the `admin` module. Secured by the `AdminAuthGuard`, it will retrieve a paginated list of conversation logs for the specified user using the `ConversationLogsRepository`.",
+      "context": [],
+      "createdAt": "2025-09-19T10:45:06.271Z",
+      "updatedAt": "2025-10-07T09:27:34.854Z",
+      "completedAt": "2025-10-07T09:27:34.854Z"
+    },
+    {
+      "id": "861a968d-0bee-48e8-ab74-e3fcff6bc684",
+      "status": "+",
+      "title": "Implement Admin Endpoint to List User Activity Logs",
+      "description": "Create an endpoint `GET /admin/users/:userId/activity` in the `admin` module. Protected by the `AdminAuthGuard`, this endpoint will fetch a paginated list of activity logs for the specified user from the `ActivityLogsRepository`.",
+      "context": [],
+      "createdAt": "2025-09-19T10:45:06.271Z",
+      "updatedAt": "2025-10-07T09:30:19.413Z",
+      "completedAt": "2025-10-07T09:30:19.413Z"
+    },
+    {
+      "id": "cc72b861-c894-427f-8fe4-00acea175c8d",
+      "status": "+",
+      "title": "Implement Admin Endpoint to List User audio recordings",
+      "description": "Create an endpoint `GET /admin/users/:userId/files/audio` in the `admin` module. Protected by the `AdminAuthGuard`, this endpoint will fetch a paginated list of audio file urls for the specified user.",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-10-06T15:37:17.106Z",
+      "updatedAt": "2025-10-07T09:37:16.143Z",
+      "completedAt": "2025-10-07T09:37:16.143Z"
+    },
+    {
+      "id": "e210f108-cfa6-47d5-a941-d15422e9b3ab",
+      "status": "+",
+      "title": "Implement Admin Endpoint to List User Moods",
+      "description": "Create an endpoint `GET /admin/users/:userId/moods` in the `admin` module. Protected by the `AdminAuthGuard`, this endpoint will fetch a paginated list of moods for the specified user.",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-10-06T23:28:27.716Z",
+      "updatedAt": "2025-10-07T09:31:22.542Z",
+      "completedAt": "2025-10-07T09:31:22.542Z"
+    },
+    {
+      "id": "14f618cb-dc79-4bfb-a89a-580101fe558f",
+      "status": "+",
+      "title": "Implement Admin Endpoint to List User journals",
+      "description": "Create an endpoint `GET /admin/users/:userId/journals` in the `admin` module. Protected by the `AdminAuthGuard`, this endpoint will fetch a paginated list of journals for the specified user.",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-10-06T23:29:41.345Z",
+      "updatedAt": "2025-10-07T09:34:32.639Z",
+      "completedAt": "2025-10-07T09:34:32.639Z"
+    },
+    {
+      "id": "376c9903-d7c4-472a-8796-6c7c7a14d95b",
+      "status": "+",
+      "title": "Admin auth endpoints and access-token validation",
+      "description": "Introduce admin authentication endpoints and update JWT validation so clients can log in and use access tokens for subsequent admin calls.\n\nScope:\n- Add unauthenticated admin auth endpoints under `/admin/auth`:\n  - POST `/admin/auth/login` — authenticate against the Admin Cognito User Pool using USER_PASSWORD_AUTH and return tokens `{ accessToken, idToken, refreshToken, expiresIn, tokenType }`. Compute and pass SECRET_HASH if a client secret is configured.\n  - POST `/admin/auth/forgot-password` — trigger Cognito ForgotPassword for the username.\n  - POST `/admin/auth/reset-password` — confirm password reset with `{ username, confirmationCode, newPassword }`.\n- Update Admin Cognito JWT strategy to accept and validate Cognito Access Tokens:\n  - Verify issuer and signature via JWKS (RS256), ignore audience claim, and validate `token_use === 'access'` and `client_id === configured clientId`.\n- Keep existing admin endpoints protected via the admin guard; do NOT guard the new auth endpoints.\n- Add DTOs, Swagger docs, validation, and unit tests for controller and strategy changes.\n\nOut of scope:\n- Registration (handled via Cognito UI) and token refresh endpoint (can be a separate feature).\n\nNotes:\n- Admin User Pool App Client has ALLOW_USER_PASSWORD_AUTH and ALLOW_REFRESH_TOKEN_AUTH enabled. Client secret is set, so the service will compute SECRET_HASH using HMAC-SHA256(username + clientId, clientSecret).",
+      "context": [],
+      "createdAt": "2025-10-08T15:32:31.371Z",
+      "updatedAt": "2025-10-08T23:27:30.048Z",
+      "blockers": [],
+      "completedAt": "2025-10-08T23:27:30.048Z"
+    },
+    {
+      "id": "099d1d70-7ccd-462c-8f87-188dc8f3405b",
+      "status": "+",
+      "title": "listUsers needs rework",
+      "description": "In @src/admin/admin.service.ts the `listUsers` function needs to be reworked so that it gets all the stored user profiles AND all their auth profiles (cognito email and telegram id).\n@src/models/admin/UserModel.dto.ts is updated to hold the values correctly.",
+      "context": [
+        "src/admin/admin.service.ts",
+        "src/models/admin/UserModel.dto.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-09T10:02:14.537Z",
+      "updatedAt": "2025-10-09T12:47:29.708Z",
+      "completedAt": "2025-10-09T12:47:29.708Z"
+    },
+    {
+      "id": "6260f416-631f-44d5-89b6-a76cf1e8d68e",
+      "status": "+",
+      "title": "UserProfileModel whenever returned needs to include dates",
+      "description": "@src/models/profile/UserProfileModel.dto.ts should include the createdAt and updatedAt dates that are stored in the database.",
+      "context": [
+        "src/models/profile/UserProfileModel.dto.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-09T12:48:05.218Z",
+      "updatedAt": "2025-10-09T12:49:17.889Z",
+      "completedAt": "2025-10-09T12:49:17.889Z"
+    },
+    {
+      "id": "b11eccfd-b1ca-4952-bbef-b11b73044187",
+      "status": "+",
+      "title": "I need a function that for a given user will wipe ALL their data",
+      "description": "it will clear their credentials and absolutely all data associated with the user",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-10-10T23:00:59.484Z",
+      "updatedAt": "2025-10-11T00:24:28.112Z",
+      "completedAt": "2025-10-11T00:24:28.112Z"
+    }
+  ],
+  "createdAt": "2025-09-18T12:57:49.187Z",
+  "updatedAt": "2025-09-18T12:59:48.879Z",
+  "completedAt": "2025-10-11T00:24:28.112Z"
+}

@@ -1,0 +1,46 @@
+{
+  "id": "eee69543-4940-4bb8-9db1-c7de264bf427",
+  "status": "-",
+  "title": "OAuth Accounts and Secure Credential Storage",
+  "description": "Goal Implement one-click OAuth login and secure credential storage for popular Git providers (GitHub, GitLab, Bitbucket). This replaces the manual entry of personal access tokens in Settings and automatically configures credentials for Git operations across the application. Scope: - Define secure credential storage API requests for `thefactory-tools`. - Implement OAuth login flow to securely acquire access and refresh tokens. - Store and retrieve these tokens securely using OS-level keychains (macOS Keychain, Windows Credential Vault, Linux Secret Service). - Update Git tools and managers to transparently use securely stored tokens for operations without exposing plaintext tokens to the renderer. - Update UI in Settings to show connected accounts and allow one-click login/logout instead of manual token entry.",
+  "features": [
+    {
+      "id": "c6c9c539-b7be-4bd6-abe8-58a9d966fe0f",
+      "status": "-",
+      "title": "Implement OAuthManager & Secure Storage API",
+      "description": "Define the API request and implement a Secure Storage integration in `thefactory-tools` (or securely wrap Electron's `safeStorage`). Create a specialized `OAuthManager` in `src/main/managers.ts` to coordinate secure storage, retrieval, and clearing of provider credentials (GitHub, GitLab, Bitbucket).",
+      "context": [],
+      "createdAt": "2026-03-17T20:05:24.030Z",
+      "updatedAt": "2026-03-17T20:05:24.030Z"
+    },
+    {
+      "id": "62f6566f-18b9-4f9a-bfef-49bf9ca79b20",
+      "status": "-",
+      "title": "OAuth Login Flow & Token Exchange",
+      "description": "Implement OAuth login flow handling browser redirect, custom protocol URI (deep linking), and token exchange for GitHub (and subsequently GitLab/Bitbucket). Retrieve access and refresh tokens after successful user authorization and persist them via `OAuthManager`.",
+      "context": [],
+      "createdAt": "2026-03-17T20:06:44.290Z",
+      "updatedAt": "2026-03-17T20:06:44.290Z"
+    },
+    {
+      "id": "57b96bd4-8c6c-4f36-8222-a7c6c0a15fcc",
+      "status": "-",
+      "title": "UI Refactor: Connected Accounts View",
+      "description": "Update the Settings UI to use simple 'Connect / Disconnect' buttons instead of text inputs for PATs. Poll or listen for connection state changes from `OAuthManager` to reactively update the UI when the user authenticates.",
+      "context": [],
+      "createdAt": "2026-03-17T20:06:53.720Z",
+      "updatedAt": "2026-03-17T20:06:53.720Z"
+    },
+    {
+      "id": "28f5e9b0-b018-4607-b7ae-6b263fd074a9",
+      "status": "-",
+      "title": "Git Auth Integration & Backend Wireup",
+      "description": "Modify Git tools and existing managers to automatically lookup and attach the OAuth tokens from `OAuthManager` instead of prompting the user or extracting tokens directly from the frontend interface. Update API endpoints (GitHub fetching, pushing, cloning) to support the OAuth flow natively.",
+      "context": [],
+      "createdAt": "2026-03-17T20:07:01.531Z",
+      "updatedAt": "2026-03-17T20:07:01.531Z"
+    }
+  ],
+  "createdAt": "2026-03-17T20:04:04.087Z",
+  "updatedAt": "2026-03-17T20:04:04.087Z"
+}

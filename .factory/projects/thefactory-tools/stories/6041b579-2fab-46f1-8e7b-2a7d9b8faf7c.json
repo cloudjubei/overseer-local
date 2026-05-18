@@ -1,0 +1,62 @@
+{
+  "id": "6041b579-2fab-46f1-8e7b-2a7d9b8faf7c",
+  "status": "+",
+  "title": "Allow the possibility of attaching photos and external files to features, as well as chat",
+  "description": "A user must be able to specify external file links in a Feature that will be sent to the LLM. This must be used inside the orchestrator and inside Chat.",
+  "features": [
+    {
+      "id": "4d7ea580-74c9-4a68-a19a-aeb919a1df8e",
+      "status": "+",
+      "title": "Update Feature and CompletionMessage types to support file attachments",
+      "description": "Modify the `Feature` and `CompletionMessage` types in `src/types.ts` to include an optional `files` field, which will be an array of strings representing file paths or URLs.",
+      "context": [],
+      "createdAt": "2025-09-17T22:34:24.182Z",
+      "updatedAt": "2025-09-17T23:25:08.577Z",
+      "completedAt": "2025-09-17T23:25:08.577Z"
+    },
+    {
+      "id": "884f9247-8621-429c-adf6-f87bfef462bc",
+      "status": "+",
+      "title": "Update completion to support file attachments in messages",
+      "description": "Modify the chat message functions in @src/completion.ts to handle an optional `files` array provided by the user. Follow the same idea as the @src/orchestrator.ts",
+      "context": [
+        "src/completion.ts",
+        "src/orchestrator.ts"
+      ],
+      "createdAt": "2025-09-17T22:34:32.826Z",
+      "updatedAt": "2025-09-18T00:17:02.729Z",
+      "blockers": [],
+      "completedAt": "2025-09-18T00:17:02.729Z"
+    },
+    {
+      "id": "52ceaa5d-5486-47fb-9656-a52e36a39faf",
+      "status": "+",
+      "title": "Update orchestrator to include file attachments",
+      "description": "Modify the @src/orchestrator.ts to process the `files` field from both features. The orchestrator must be updated to format and include the content from these files in the context provided to the LLM.",
+      "context": [
+        "src/orchestrator.ts"
+      ],
+      "createdAt": "2025-09-17T22:34:37.988Z",
+      "updatedAt": "2025-09-18T00:16:03.253Z",
+      "blockers": [],
+      "completedAt": "2025-09-18T00:16:03.253Z"
+    },
+    {
+      "id": "ce9db622-7401-4765-918f-96d554a72440",
+      "status": "+",
+      "title": "Unify the code for completion that is shared between chatTools and orchestrator",
+      "description": "There should be only one good access point to sending LLM completions and that should be via @src/completion.ts - make sure that any code that is shared between @src/tools/chatTools.ts and @src/orchestrator.ts is actually in @src/completion.ts and is shared appropriately.",
+      "context": [
+        "src/completion.ts",
+        "src/tools/chatTools.ts",
+        "src/orchestrator.ts"
+      ],
+      "createdAt": "2025-09-17T23:52:51.586Z",
+      "updatedAt": "2025-09-18T00:20:04.345Z",
+      "completedAt": "2025-09-18T00:20:04.345Z"
+    }
+  ],
+  "createdAt": "2025-09-17T15:40:12.069Z",
+  "updatedAt": "2025-09-17T15:40:12.069Z",
+  "completedAt": "2025-09-18T00:20:04.345Z"
+}

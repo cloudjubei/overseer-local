@@ -1,0 +1,273 @@
+{
+  "id": "8671c325-eff3-481f-859e-1673eb028f2f",
+  "status": "+",
+  "title": "GitTools",
+  "description": "Objective: Provide a comprehensive set of Git tools under the `src/git` module. This includes `GitMonitorTools` to monitor and report on agent-created feature branches and `GitMergeTools` for review and merge operations. The final public API will be exposed through a unified `GitTools` module.\n\nScope:\n- A new primary module: `src/git/GitTools.ts` that acts as the public-facing API, exporting curated functions from the other git modules.\n- A monitoring module: `src/git/GitMonitorTools.ts` that can:\n  - Monitor feature branches relative to a base branch (e.g., main).\n  - Summarize diffs per branch, ahead/behind status, and working tree status.\n  - Map changes to stories/features via pluggable resolvers.\n  - Produce structured, serializable reports for client-side consumption.\n- A review/merge module (`src/git/GitMergeTools.ts`) that offers review operations: accept files, reject files (restore from base), reset branch, and commit selection.\n- Centralized types and refactored helpers to improve code organization and maintainability.\n\nNon-goals:\n- No UI components in this story (client apps will render data).\n- No network/remote service; APIs are in-process, but event payloads and state must be serializable to support future remote usage.\n\nKey Requirements:\n- Safe git operations with support for dry-run and read-only modes.\n- Performant, with opt-in for expensive operations like patch generation.\n- Robust handling of git history changes, renames, and binary files.\n- Typed event payloads and stable, serializable report shapes.\n- Clean code structure with clear separation of concerns (public API, monitoring logic, types, pure utils, and impure helpers).\n\nDeliverables:\n- `src/git/GitTools.ts`: The primary client-facing module.\n- `src/git/GitMonitorTools.ts`: Contains monitoring and reporting APIs.\n- `src/git/GitMergeTools.ts`: Contains review, accept, reject, and merge operations.\n- `src/git/gitTypes.ts`: Centralized location for all shared, client-facing TypeScript interfaces.\n- `src/git/gitUtils.ts`: For pure, self-contained utility functions with no external dependencies.\n- `src/git/gitHelpers.ts`: For helper functions with dependencies (e.g., Node.js file system or child processes).\n- `src/index.ts`: Updated to export the public API from `@src/git/GitTools.ts`.\n- Documentation and examples.\n- Test coverage for all public-facing functionalities.\n\nSuccess Criteria:\n- A single, easy-to-use `GitTools` module is exposed to clients.\n- Clients can subscribe to branch updates and render per-branch change summaries.\n- Clients can map changes to stories/features.\n- Clients can accept/reject/reset selections safely and commit changes.\n- Codebase is well-structured, with types and helpers properly segregated.\n- APIs are serializable and safe for future remote usage.",
+  "features": [
+    {
+      "id": "ad089164-247a-4690-820b-f05567e4d16a",
+      "status": "+",
+      "title": "GitMonitorTools: branch monitoring core",
+      "description": "Implement startGitMonitor to observe feature branches relative to a base branch (e.g., main) using polling.\n- Options: repoPath, baseBranch, branchFilter, pollIntervalMs, includePatch? (defaults false), readOnly?, debounceMs.\n- Emits typed events on branch tip change, ahead/behind changes, or working tree status changes.\n- Provides monitor methods: stop(), subscribe(listener), getState() -> snapshot of known branches with minimal stats.\n- Handles rebases/force-push by comparing commit SHAs and detecting history rewrites.\nAcceptance criteria:\n- Given a repo with base 'main' and a feature branch with a new commit, the monitor emits an update event for that branch within the polling interval.\n- getState returns branch entries with: name, headSha, ahead, behind, lastUpdatedAt, and hasUncommittedChanges.\n- When no new commits occur, no new update events are emitted (debounced).",
+      "context": [],
+      "createdAt": "2025-10-05T16:42:59.405Z",
+      "updatedAt": "2025-10-05T16:55:54.082Z",
+      "completedAt": "2025-10-05T16:55:54.082Z"
+    },
+    {
+      "id": "c0f2994d-1dfa-428a-a270-583c6bb9133b",
+      "status": "+",
+      "title": "Diff summaries and optional patch generation",
+      "description": "Provide getBranchDiffSummary to compute diffs between baseRef and headRef.\n- Returns file-level stats: path, status (A/M/D/R/C), insertions, deletions, binary?, renameFrom?, renameScore.\n- Aggregate totals and ahead/behind counts for the branch.\n- includePatch flag adds unified diff patches (line numbers, hunks) for text files.\n- Correctly handles renames and binary files (no patch for binary).\nAcceptance criteria:\n- For a branch with additions/modifications/deletions, the summary lists each file with accurate status and line stats.\n- When includePatch=false, no patch data is present; when true, text files include unified diff; binary files are marked binary without patch.\n- Renames are detected with renameFrom and a non-null score.",
+      "context": [],
+      "createdAt": "2025-10-05T16:42:59.408Z",
+      "updatedAt": "2025-10-05T16:57:41.613Z",
+      "completedAt": "2025-10-05T16:57:41.613Z"
+    },
+    {
+      "id": "741d291c-26c0-4533-8681-ac0768d6b80f",
+      "status": "+",
+      "title": "Story/feature resolver API and default resolver",
+      "description": "Introduce a pluggable resolver system to map changes to storyId/featureId.\n- Define StoryFeatureResolver interface that receives file changes, commits, and repoPath, returns mappings to storyId/featureId.\n- Default resolver uses commit message tags like [story:ID] and [feature:ID], and file path heuristics (e.g., src/story/<ID>/..., tests mentioning story IDs) as fallback.\n- Expose resolveChangesToStories to apply one or more resolvers and merge results.\nAcceptance criteria:\n- Given commits containing [story:abc] [feature:123], grouping correctly associates changed files to story 'abc' and feature '123'.\n- When tags are absent, file path heuristics can group at least obvious cases; unmapped files are grouped under 'unassigned'.\n- API allows injecting a custom resolver overriding defaults.",
+      "context": [],
+      "createdAt": "2025-10-05T16:42:59.409Z",
+      "updatedAt": "2025-10-05T22:16:15.885Z",
+      "blockers": [],
+      "completedAt": "2025-10-05T22:16:15.885Z"
+    },
+    {
+      "id": "7950372d-d304-4b50-ad90-211924f70cc3",
+      "status": "+",
+      "title": "Review operations: accept, reject, reset, commit selection",
+      "description": "Implement review-friendly git operations for client workflows.\n- acceptFiles: stage selected files on the current feature branch.\n- rejectFiles: restore selected files from baseRef (discarding branch changes for those files).\n- resetBranch: support soft/mixed/hard resets with safety checks, optional dry-run.\n- commitSelection: commit staged changes with a provided message and trailers (e.g., story/feature tags).\n- Optional readOnly/confirm flags to prevent destructive operations.\nAcceptance criteria:\n- Accepting files stages only those files; rejecting files restores content from baseRef; committing creates a new commit with correct message.\n- Hard reset is blocked in readOnly mode and requires confirm=true to proceed.\n- Operations handle untracked and renamed files sensibly, with errors clearly reported.",
+      "context": [],
+      "createdAt": "2025-10-05T16:42:59.410Z",
+      "updatedAt": "2025-10-05T17:05:19.235Z",
+      "completedAt": "2025-10-05T17:05:19.235Z"
+    },
+    {
+      "id": "d6e8252d-3ded-40e9-97d1-4d1822eb7a61",
+      "status": "+",
+      "title": "Structured reporting API for client apps",
+      "description": "Produce JSON-serializable reports for branches and workspace suitable for UI.\n- buildBranchReport({ repoPath, baseRef, headRef, includePatch?, includeMetrics? }): returns summary, grouped changes (by story/feature), file list, and optional patches.\n- buildWorkspaceReport: composes reports for multiple branches returned by the monitor.\n- Stable, versioned schema to support remote transport.\nAcceptance criteria:\n- Report includes: branch metadata, ahead/behind, totals, changes grouped by story/feature, and per-file stats.\n- When includePatch=false, patches are omitted; schema remains valid.\n- Schema can be JSON.stringify/parsed without loss; includes a schemaVersion field.",
+      "context": [],
+      "createdAt": "2025-10-05T16:42:59.411Z",
+      "updatedAt": "2025-10-05T17:08:29.691Z",
+      "completedAt": "2025-10-05T17:08:29.691Z"
+    },
+    {
+      "id": "4aabdfe3-c04b-4141-a99d-dd30f32e9612",
+      "status": "+",
+      "title": "Orchestrator integration hooks",
+      "description": "Provide optional helpers to integrate monitoring with the orchestrator.\n- A small adapter that accepts hooks/events (e.g., onAgentBranchCreated(name), onAgentCompleted(name)) to start/stop monitoring for those branches.\n- No hard dependency on orchestrator internals; purely function-based to avoid tight coupling.\nAcceptance criteria:\n- Given branch names emitted via the adapter API, monitors are started and later stopped; updates flow through to provided listeners.\n- Adapter can be used in apps that do not use the orchestrator by passing explicit branch names (no-op for others).",
+      "context": [],
+      "createdAt": "2025-10-05T16:42:59.412Z",
+      "updatedAt": "2025-10-05T21:43:22.396Z",
+      "completedAt": "2025-10-05T21:43:22.396Z"
+    },
+    {
+      "id": "6d456bb7-0f72-49c8-8ee4-8ec380c29588",
+      "status": "+",
+      "title": "Metrics provider interface (tests and coverage hooks)",
+      "description": "Define a GitMetricsProvider interface to optionally attach test results and coverage stats to reports.\n- Default provider is a no-op; clients can supply an implementation that uses existing TestTools to run tests on the branch and parse coverage.\n- Reports can include a metrics block when includeMetrics=true.\nAcceptance criteria:\n- When a custom provider is supplied, buildBranchReport includes metrics: test pass/fail counts, coverage percentages, and summary text.\n- With no provider, metrics is omitted or null without affecting other fields.\n- Provider errors are caught and surfaced as a metricsError field without failing report generation.",
+      "context": [],
+      "createdAt": "2025-10-05T16:42:59.413Z",
+      "updatedAt": "2025-10-05T21:47:20.068Z",
+      "completedAt": "2025-10-05T21:47:20.068Z"
+    },
+    {
+      "id": "3cc45a25-a786-4352-a2a6-5eb138cf2b6f",
+      "status": "+",
+      "title": "Serialization and remote-friendly events",
+      "description": "Ensure monitor events and report payloads are stable, minimal, and serializable.\n- Define TypeScript types for event payloads and reports; avoid cyclic references.\n- Default events exclude patch bodies to keep payloads small; includePatch must be explicitly enabled.\n- Provide toJSON-safe state from monitor.getState().\nAcceptance criteria:\n- Event payloads and states can be JSON.stringify/parsed without errors.\n- Event payloads remain under a reasonable size threshold by default (e.g., <200KB without patches for 100 changed files), subject to repo contents.\n- A schemaVersion is included to allow future evolution.",
+      "context": [],
+      "createdAt": "2025-10-05T16:42:59.414Z",
+      "updatedAt": "2025-10-05T21:52:37.717Z",
+      "completedAt": "2025-10-05T21:52:37.717Z"
+    },
+    {
+      "id": "0ab350b1-2446-4e9a-ac64-0bb9d9c30551",
+      "status": "+",
+      "title": "Caching and performance optimizations",
+      "description": "Reduce redundant work and unnecessary events.\n- Cache last processed headSha per branch; skip diff computation when unchanged.\n- Debounce frequent updates within a short window; configurable debounceMs.\n- Optionally cache diff stats for headSha pairs in-memory to avoid recomputation in rapid polling cycles.\nAcceptance criteria:\n- When no new commits are added, the monitor does not recompute diffs or emit update events.\n- With rapid successive commits, updates are debounced according to debounceMs.\n- Memory usage remains stable under prolonged monitoring (no unbounded cache growth).",
+      "context": [],
+      "createdAt": "2025-10-05T16:42:59.415Z",
+      "updatedAt": "2025-10-05T22:20:53.945Z",
+      "completedAt": "2025-10-05T22:20:53.945Z"
+    },
+    {
+      "id": "6c0dd8f0-e1a0-4c90-8675-3e79139beabf",
+      "status": "+",
+      "title": "Documentation and examples",
+      "description": "Provide concise documentation and examples for GitMonitorTools.\n- JSDoc for all public APIs.\n- A short README section or docs comment with usage snippets for monitoring, diff summaries, review operations, and orchestrator adapter.\nAcceptance criteria:\n- Docs include at least: basic monitor setup, one-off diff usage, accept/reject/reset examples, and report building.\n- Types are discoverable via editor IntelliSense.\n- Examples avoid includePatch by default and explain when to enable it.",
+      "context": [],
+      "createdAt": "2025-10-05T16:42:59.416Z",
+      "updatedAt": "2025-10-05T22:27:03.999Z",
+      "completedAt": "2025-10-05T22:27:03.999Z"
+    },
+    {
+      "id": "bb3ac901-3ec4-4737-ac9e-12d3b1c19ae4",
+      "status": "+",
+      "title": "Test suite for GitMonitorTools",
+      "description": "Add automated tests using temporary git repositories.\n- Cover monitoring events, diff summary correctness (including renames and binary files), and review operations behavior.\n- Include edge cases: rebases/force-push simulation, untracked files, readOnly mode, and errors surfaced cleanly.\nAcceptance criteria:\n- Tests pass reliably on CI without network access.\n- Flakiness minimized via deterministic polling intervals and controlled clocks where possible.\n- Coverage demonstrates key paths (monitoring, diffs, operations) are exercised.",
+      "context": [],
+      "createdAt": "2025-10-05T16:42:59.417Z",
+      "updatedAt": "2025-10-05T22:29:38.598Z",
+      "completedAt": "2025-10-05T22:29:38.598Z"
+    },
+    {
+      "id": "4feef81c-0dad-47e6-8b15-07216f2b0e20",
+      "status": "+",
+      "title": "Finalize GitTools: API Unification and Code Refactoring",
+      "description": "Create a unified client-facing API endpoint at `src/git/GitTools.ts`, which exports a curated set of functions from `GitMonitorTools` and `GitMergeTools`. Centralize all shared and public-facing TypeScript types into `src/git/gitTypes.ts`. Refactor helper functions into `src/git/gitUtils.ts` (for pure, dependency-free functions) and `src/git/gitHelpers.ts` (for helpers with external dependencies like Node.js APIs). Finally, update `src/index.ts` to export the new consolidated `GitTools` module.",
+      "context": [],
+      "createdAt": "2025-10-23T18:39:42.071Z",
+      "updatedAt": "2025-10-23T22:37:24.138Z",
+      "blockers": [],
+      "completedAt": "2025-10-23T22:37:24.138Z"
+    },
+    {
+      "id": "d0812cd6-3540-4e21-b545-796312c4b099",
+      "status": "+",
+      "title": "Clean up gitHelpers",
+      "description": "In @src/git/gitHelpers.ts there are multiple functions for executing git - there should only be 1 (in the non-safe and safe variant) that should be used by @src/git/GitTools.ts , @src/git/monitor/GitMonitorTools.ts and @src/git/merge/GitMergeTools.ts .\nAll the types should be strictly defined in @src/git/gitTypes.ts .\n\nPay attention to the fact that @src/git/GitTools.ts has a timeout parameter so that we're able to control the running time of the execution.",
+      "context": [
+        "src/git/gitHelpers.ts",
+        "src/git/GitTools.ts",
+        "src/git/monitor/GitMonitorTools.ts",
+        "src/git/merge/GitMergeTools.ts",
+        "src/git/gitTypes.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-24T12:26:35.401Z",
+      "updatedAt": "2025-10-24T13:07:22.124Z",
+      "completedAt": "2025-10-24T13:07:22.124Z"
+    },
+    {
+      "id": "a9e5060f-4c2e-4a62-9876-3ee8833e1595",
+      "status": "+",
+      "title": "Enhance `MergeReportFile` with Optional Structured Diffs",
+      "description": "Update the `MergeReportFile` type in `src/git/gitTypes.ts` to include an optional `structuredDiff` field. This field will hold an array of `DiffHunk` objects, providing a parsed representation of the raw patch. This structured format will make it easier for client UIs to render diffs with clear distinctions between added, deleted, and context lines. The functions that generate `MergeReportFile` objects should be updated to optionally include this data. New tests should be added to verify the structured diff generation.",
+      "context": [],
+      "createdAt": "2025-10-27T16:14:32.535Z",
+      "updatedAt": "2025-10-27T16:29:25.335Z",
+      "completedAt": "2025-10-27T16:29:25.335Z"
+    },
+    {
+      "id": "c623bb41-742d-4d6c-bff5-166fc709d14f",
+      "status": "+",
+      "title": "Create `getFileContent` API in GitTools",
+      "description": "Implement and expose a new method, `getFileContent(repoPath: string, filePath: string, ref: string): Promise<string>`, in the `GitTools` module. This function will retrieve the full content of a specified file from a given git reference (branch, commit, etc.). The implementation will involve calling `git show <ref>:<filePath>` and should be added to `gitHelpers.ts` and exposed through the main `GitTools.ts` API. This new capability must be covered by tests.",
+      "context": [],
+      "createdAt": "2025-10-27T16:14:32.537Z",
+      "updatedAt": "2025-10-27T16:35:47.206Z",
+      "completedAt": "2025-10-27T16:35:47.206Z"
+    },
+    {
+      "id": "3fd4a9fc-f486-40bc-a8f8-af77cbd18c69",
+      "status": "+",
+      "title": "Augment `buildMergeReport` with Optional Analyses",
+      "description": "Enhance the `buildMergeReport` method to accept an `options` object that allows clients to request specific analyses. The `MergeReport` will be augmented with the results of these analyses.\n\n### New Types:\n\n**MergeReportOptions**\n```typescript\nexport interface MergeReportOptions {\n  includePatch?: boolean;\n  analyses?: Array<'compilation' | 'tests' | 'coverage'>;\n}\n```\n\n**Analysis Result Types**\n```typescript\nexport interface CompilationImpactAnalysis {\n  summary: string;\n  details: Array<{ path: string; risk: 'low' | 'medium' | 'high'; reason: string }>;\n}\n\nexport interface TestsImpactAnalysis {\n  impacted: string[];\n  totalCatalog: number;\n}\n\nexport interface DiffCoverageAnalysis {\n  totalAdded: number;\n  covered: number;\n  pct: number;\n  perFile: Array<{ path: string; added: number; covered: number; pct: number }>;\n}\n```\n\n**Updated MergeReport**\n```typescript\nexport interface MergeReport {\n  // ... existing fields\n  analysis?: {\n    compilation?: CompilationImpactAnalysis;\n    tests?: TestsImpactAnalysis;\n    coverage?: DiffCoverageAnalysis;\n  };\n}\n```\n\n### Acceptance Criteria:\n- The `buildMergeReport` function in `GitTools` is updated to accept the new `MergeReportOptions`.\n- The `MergeReport` and related types are updated in `gitTypes.ts` as specified.\n- When an analysis is requested via the options, the corresponding analysis data is included in the returned `MergeReport`.\n- If no analyses are requested, the `analysis` field should be omitted or empty.\n- The implementation should be designed to accommodate different analysis providers or strategies in the future.\n- New tests are added to verify the functionality with and without analysis options.",
+      "context": [],
+      "createdAt": "2025-10-27T16:14:59.619Z",
+      "updatedAt": "2025-10-27T16:45:24.612Z",
+      "completedAt": "2025-10-27T16:45:24.612Z"
+    },
+    {
+      "id": "59d06fdb-e355-4f8d-b62f-0eb4f9b99055",
+      "status": "+",
+      "title": "Fix `GitMonitorTools` Timeout on Invalid Base Branch",
+      "description": "The test 'surfaces errors via onError when base branch is invalid' in `src/git/monitor/GitMonitorEdgeCases.test.ts` is timing out. This indicates that when `startGitMonitor` is configured with an invalid base branch, it doesn't call the `onError` callback as expected, causing the test to hang. The implementation needs to be fixed to properly handle this error case and propagate it through the `onError` handler.",
+      "context": [],
+      "createdAt": "2025-10-27T22:09:30.176Z",
+      "updatedAt": "2025-10-27T22:12:08.922Z",
+      "completedAt": "2025-10-27T22:12:08.922Z"
+    },
+    {
+      "id": "a1e75932-acd0-45a7-a541-1954b5b36027",
+      "status": "+",
+      "title": "Fix `rejectFiles` to Correctly Handle New and Renamed Files",
+      "description": "The test 'rejectFiles restores from base or removes new files; handles renames' in `src/git/monitor/GitMonitorReviewOps.test.ts` is failing. The assertion `expect(addedExists).toBe(false)` fails, meaning a newly added file is not being removed upon rejection. The `rejectFiles` function in `GitMonitorTools` must be updated to correctly discard newly added files (which don't exist in the base branch) and properly handle renames.",
+      "context": [],
+      "createdAt": "2025-10-27T22:09:30.177Z",
+      "updatedAt": "2025-10-27T22:14:02.759Z",
+      "completedAt": "2025-10-27T22:14:02.759Z"
+    },
+    {
+      "id": "4fb07832-b40b-41d4-bfbd-cf081fe0a34b",
+      "status": "+",
+      "title": "Correct Debouncing Logic in `startGitMonitor`",
+      "description": "The test 'debounces rapid successive updates within debounceMs' in `src/git/monitor/GitMonitorTools.test.ts` fails because it receives two events instead of the expected one. This points to a flaw in the debouncing mechanism within `startGitMonitor`. The logic should be reviewed and fixed to ensure that rapid file system events are correctly coalesced into a single update event.",
+      "context": [],
+      "createdAt": "2025-10-27T22:09:30.178Z",
+      "updatedAt": "2025-10-27T22:19:10.389Z",
+      "completedAt": "2025-10-27T22:19:10.389Z"
+    },
+    {
+      "id": "7e502f63-ac6e-4e9b-a809-16bbebc375fd",
+      "status": "+",
+      "title": "Fix Untracked File Clobber Detection in `applyMerge`",
+      "description": "The test 'merge fails due to untracked clobber without includeUntrackedInStash, then succeeds with it' in `src/git/merge/GitMergeDryRunAndUntracked.test.ts` is failing. `applyMerge` should fail when a merge would overwrite a local untracked file, but it's incorrectly succeeding. The pre-merge checks need to be improved to reliably detect potential overwrites of untracked files and abort the operation as expected.",
+      "context": [],
+      "createdAt": "2025-10-27T22:09:30.179Z",
+      "updatedAt": "2025-10-27T22:26:54.057Z",
+      "completedAt": "2025-10-27T22:26:54.057Z"
+    },
+    {
+      "id": "602b75f7-0b29-4f72-9559-b678a60f023e",
+      "status": "+",
+      "title": "Fix Local Status Reporting and Merge Plan Impact Analysis",
+      "description": "Two tests are failing in `src/git/merge/GitMergeLocalStatus.test.ts`:\n1. `reports staged, unstaged, and untracked files accurately`: `getLocalStatus` fails to report an unstaged file. The git status parsing logic is likely incorrect.\n2. `identifies overlap with local changes and flags untracked overwrite risks`: `getMergePlan` does not correctly identify conflicts between incoming changes and local unstaged changes.\nBoth `getLocalStatus` and the impact analysis in `getMergePlan` need to be fixed to accurately reflect the local repository state.",
+      "context": [],
+      "createdAt": "2025-10-27T22:09:30.180Z",
+      "updatedAt": "2025-10-27T22:28:25.419Z",
+      "completedAt": "2025-10-27T22:28:25.419Z"
+    },
+    {
+      "id": "77677e96-9682-4836-9cbc-b9bcf5df6b1f",
+      "status": "+",
+      "title": "Ensure `buildMergeReport` Preserves `impactOnLocal` Data",
+      "description": "The test 'preserves impactOnLocal from plan' in `src/git/merge/GitMergeReport.test.ts` is failing. The `impactOnLocal` analysis, which is generated during the planning phase, is being lost or ignored when the final merge report is constructed by `buildMergeReport`. The function needs to be corrected to ensure this critical data is carried over from the plan to the report.",
+      "context": [],
+      "createdAt": "2025-10-27T22:09:30.180Z",
+      "updatedAt": "2025-10-27T22:31:27.397Z",
+      "completedAt": "2025-10-27T22:31:27.397Z"
+    },
+    {
+      "id": "955b4e54-2deb-4061-8380-d7e6a8406410",
+      "status": "+",
+      "title": "Unify Local and Remote Branch Representation",
+      "description": "The current gitTools API returns local and remote branches as distinct entities.\nThe API should be enhanced to provide a unified view of branches. A single branch entry should contain all relevant information, including its local presence, remote presence, tracking relationship, and any associated metadata.\n\n### Proposed API Enhancement\n\nInstead of separate lists for local and remote branches, the API could return a single, consolidated list. Each branch object could look something like this:\n\n```json\n{\n  \"name\": \"features/f67e8921-b197-40c9-9154-e95db8f27deb\",\n  \"fullName\": \"refs/heads/features/f67e8921-b197-40c9-9154-e95db8f27deb\",\n  \"isLocal\": true,\n  \"isRemote\": true,\n  \"remoteName\": \"origin/features/f67e8921-b197-40c9-9154-e95db8f27deb\",\n  \"storyId\": \"f67e8921-b197-40c9-9154-e95db8f27deb\",\n  \"ahead\": 2,\n  \"behind\": 0\n}\n```",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-10-28T10:23:19.618Z",
+      "updatedAt": "2025-10-28T10:31:42.040Z",
+      "completedAt": "2025-10-28T10:31:42.040Z"
+    },
+    {
+      "id": "235026c5-81df-4621-9da7-91a7c76adb55",
+      "status": "+",
+      "title": "Provide Diff Against Merge Base for Incoming Changes",
+      "description": "When viewing the diff for a feature branch from a different base branch (e.g., viewing changes on `features/A` while checked out on `main`), the current diff calculation seems to be a direct comparison between the two branch HEADs (`git diff main..features/A`).\n\nThis is problematic because it shows changes unique to `main` as \"deletions\" relative to `features/A`, which is confusing. The user's intent is to see only the *incoming changes* that would be applied if `features/A` were merged into `main`. This is the standard behavior for pull/merge request diffs.\n\n### Proposed API Enhancement\n\nThe `gitTools` API should provide a method to generate a diff against the common ancestor (merge base) of two branches. The correct command for this is typically:\n\n`git diff $(git merge-base <base_branch> <feature_branch>)..<feature_branch>`\n\nOr, using the three-dot notation which does the same thing for this use case:\n\n`git diff <base_branch>...<feature_branch>`\n\nThe API method should accept two branch references (the base/target branch and the feature/source branch) and return a diff that reflects only the changes introduced on the feature branch since it diverged from the base branch.",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-10-28T10:23:35.168Z",
+      "updatedAt": "2025-10-28T10:39:00.383Z",
+      "completedAt": "2025-10-28T10:39:00.383Z"
+    },
+    {
+      "id": "6b6c2b99-dd3f-4ce7-9367-6cd14fd62743",
+      "status": "+",
+      "title": "Git FeatureInfo Contract",
+      "description": "Purpose\n- Enable the UI to display story/feature chips for pending commits in Git views.\n- Provide a stable contract for 'thefactory-tools' to surface feature metadata from commits so the renderer does not parse commit messages heuristically.\n\nScope\n- Applies to operations that return commits or reports about commits relative to a base ref (e.g., selectCommits, branch/workspace reports, merge reports, monitors).\n- Backward compatible: tools MAY omit the new fields; the UI will fall back to commit message parsing.\n- Non-goal: No UI; no network calls; do not mutate commit messages.\n\nContract & Types (to be added in src/git/gitTypes.ts)\n- type FeatureRef = {\n    storyId: string            // canonical story id (UUID or similar)\n    featureId?: string         // canonical feature id if commit is tied to a specific feature\n  }\n- type FeatureInfo = FeatureRef & {\n    title?: string             // feature or story title for display (prefer feature when featureId is set)\n    description?: string       // short description\n  }\n- interface CommitInfo {\n    sha: string\n    parents: string[]\n    summary: string            // commit subject line\n    authorName?: string\n    authorEmail?: string\n    authorDate?: number        // unix epoch millis\n    featureInfo?: FeatureInfo  // NEW: optional enriched mapping to story/feature\n  }\n- interface FeatureInfoResolverContext {\n    message?: string           // raw commit message (subject + body if available)\n    branch?: string            // branch context where observed\n    repoRoot?: string          // repository root (read-only expectation)\n  }\n- type FeatureInfoResolver = (\n    commit: CommitInfo,\n    ctx: FeatureInfoResolverContext\n  ) => FeatureInfo | undefined | null | Promise<FeatureInfo | undefined | null>\n- interface FeatureInfoOptions {\n    enableHeuristics?: boolean // default: true; conservative fallback parsing\n    resolvers?: FeatureInfoResolver[] // custom resolvers; first non-null wins\n  }\n- Versioning: Additive and optional; consumers must feature-detect.\n\nExtraction Guidance\n- Prefer structured sources:\n  - Commit trailers: 'Story-Id: <storyId>', 'Feature-Id: <storyId>.<index>' or project-specific canonical feature id.\n  - Branch context: when authored on a feature branch that encodes the id clearly.\n  - Merge metadata recorded by tooling (if available).\n- Fallback heuristics (until projects adopt trailers):\n  - Accept bare ids inside subject/body matching:\n    - Feature: /\\b([0-9a-fA-F-]{8,})\\.(\\d+)\\b/\n    - Story: /\\b([0-9a-fA-F-]{8,})\\b/\n  - Prefer the most specific match (feature over story) and the first occurrence.\n- Only attach when confidently resolved; otherwise omit.\n\nWhere to Include FeatureInfo\n- selectCommits: return CommitInfo[] with featureInfo when resolvable and enabled via options.\n- buildBranchReport: include per-commit featureInfo and propagate a dominant mapping to groups when applicable.\n- Git monitor events: include per-change or per-commit mapping when feasible.\n\nIntegration Points (APIs accept FeatureInfoOptions)\n- GitMergeTools.selectCommits(opts: { baseRef, headRef, featureInfo?: FeatureInfoOptions }): CommitInfo[]\n- GitMonitorTools.buildBranchReport(opts: { baseRef, headRef, includePatches?, featureInfo?: FeatureInfoOptions }): BranchReport\n- Any monitor/review APIs that surface commits should thread through FeatureInfoOptions and attach featureInfo when enabled.\n\nRenderer Expectations\n- If featureInfo exists, the UI will render chips using featureId or storyId.\n- If only ids are provided, the app resolves titles/descriptions from its Stories DB.\n- If only titles are provided without ids, the UI cannot link and will ignore it.\n- Multiple commits may refer to the same feature; the UI de-duplicates chips per branch view.\n\nSecurity & Privacy\n- Do not infer or fabricate ids. Only attach featureInfo when confidently resolved.\n- Keep commit messages intact; do not strip or mutate.\n\nAcceptance Criteria\n- Types in gitTypes.ts include FeatureRef, FeatureInfo, optional CommitInfo.featureInfo, FeatureInfoResolver, FeatureInfoOptions, and FeatureInfoResolverContext.\n- Commit-returning APIs accept FeatureInfoOptions and can include featureInfo when enabled.\n- Structured extraction preferred; heuristics conservative and optional. Custom resolvers supported.\n- Reports/events thread featureInfo through to commits and groups.\n- Backward compatible: omitting options results in no featureInfo attached.\n\nExamples\n- Subject: 'feat(ui): add filter chips f67e8921-b197-40c9-9154-e95db8f27deb.0'\n  - featureInfo: { storyId: 'f67e8921-b197-40c9-9154-e95db8f27deb', featureId: 'f67e8921-b197-40c9-9154-e95db8f27deb.0' }\n- Subject: 'fix: address crash (story f67e8921-b197-40c9-9154-e95db8f27deb)'\n  - featureInfo: { storyId: 'f67e8921-b197-40c9-9154-e95db8f27deb' }",
+      "context": [],
+      "createdAt": "2025-10-29T09:59:26.880Z",
+      "updatedAt": "2025-11-05T16:49:55.379Z",
+      "blockers": [],
+      "completedAt": "2025-10-29T11:18:22.685Z"
+    }
+  ],
+  "createdAt": "2025-10-05T16:10:11.372Z",
+  "updatedAt": "2025-10-27T09:19:17.100Z",
+  "completedAt": "2025-10-29T11:18:22.685Z"
+}

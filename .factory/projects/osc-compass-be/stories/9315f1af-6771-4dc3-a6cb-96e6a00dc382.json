@@ -1,0 +1,94 @@
+{
+  "id": "9315f1af-6771-4dc3-a6cb-96e6a00dc382",
+  "status": "+",
+  "title": "New flow invalidating current endpoints",
+  "description": "The whole backend flow has been changed and a few endpoints need to be updated or changed to reflect these changes.\nThere's no need for serving old clients or backward-compatibility. This is a fresh project and everything can be assumed to work from a clean slate.",
+  "features": [
+    {
+      "id": "ab6429b2-fcc4-4b9b-b932-1f2a32b5ec52",
+      "status": "+",
+      "title": "Macro goal spec has changed",
+      "description": "Macro goals need to change in the way they are prompted and stored.\nA user will be able to send free form text or an audio file that will be transcribed to text and then saved as text - two separate endpoints follow `aiSuggestions` and `aiSuggestionsFromAudio` in @src/goals/goals.controller.ts . This text always should try to include mood information.\nYou can see how in @src/goals/goals.service.ts the function`suggestFromAudio` is used (and that it calls `suggestFromText`). Both of these suggest endpoints are no longer needed, but the flow is similar. You can see that there's @src/ai/transcription.service.ts that can analyse the mood - use the models returned from that and include them in the new macroGoal object.\nThese new endpoints need to return a new Macro goal object. This now needs to be separated from Micro goals as they are completely different and incompatible, which means Macro goals can be similar to the spec in @src/models/goal/GoalModel.dto.ts but don't need type, difficulty or category.\n\nWhen a user creates a Macro goal this completes any previous Macro goal AND cancels any live Micro goals for that user.\n\nRemove 'goals/aiSuggestions' + '/goals/aiSuggestionsFromAudio' endpoints.",
+      "context": [
+        "src/goals/goals.service.ts",
+        "src/ai/transcription.service.ts",
+        "src/goals/goals.controller.ts",
+        "src/models/goal/GoalModel.dto.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-10T13:03:03.353Z",
+      "updatedAt": "2025-10-10T13:46:48.058Z",
+      "completedAt": "2025-10-10T13:46:48.058Z"
+    },
+    {
+      "id": "e94a408f-ba24-4481-80c7-6fcafdf49a6b",
+      "status": "+",
+      "title": "Micro goals spec has changed",
+      "description": "Once a user has an active Macro goal - they can call a new endpoint `generateMicroGoals` in @src/goals/goals.controller.ts . This needs to take the user's profile information (whatever is available - i.e. gender, dob, weight, height + latest lifestyle value, so the last one in the array), as well as the past 10 macro goals with ALL of their micro goals (i.e. all micro goals referencing that macro goal).\nThis then will generate 3 new micro goals, that are directly relevant to the macro goal the user typed in. These micro goals are meant to be given to the user first thing in the morning and they should have a day to complete them all. This contextual information should be passed to the LLM that will generate them - each micro goal is an object of type @src/models/goal/GoalModel.dto.ts - but simply with a type: MICRO and a referenceId matching the Macro goal it was generated from.",
+      "context": [
+        "src/models/goal/GoalModel.dto.ts",
+        "src/goals/goals.controller.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-10T13:14:10.928Z",
+      "updatedAt": "2025-10-10T19:10:05.267Z",
+      "completedAt": "2025-10-10T19:06:21.371Z"
+    },
+    {
+      "id": "3932e013-b88c-46c4-8656-6dc772d1658b",
+      "status": "+",
+      "title": "Micro goals can be completed",
+      "description": "We need an endpoint in @src/goals/goals.controller.ts for updating a micro goal's state. If it updates to anything other than ACTIVE then completedAt needs to be set to the current data, if ACTIVE then it removes completedAt.",
+      "context": [
+        "src/goals/goals.controller.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-10T13:16:35.592Z",
+      "updatedAt": "2025-10-10T18:37:02.341Z",
+      "completedAt": "2025-10-10T18:37:02.341Z"
+    },
+    {
+      "id": "143f1d85-963d-4c5d-b971-2ed141abfcfc",
+      "status": "+",
+      "title": "generate Macro goal suggestion",
+      "description": "There needs to be an endpoint in @src/goals/goals.controller.ts  that for a given user will generate a list of up to 5 macro goal suggestions - `macro/suggestions`i.e. generateMacroGoalSuggestions.\nThe endpoint needs to work in a similar way to the `generateMicroGoals` in @src/goals/goals.service.ts  - it should take into account the full user profile.\nIf the AI service doesn't generate enough - there's always `COMMON_GOAL_SUGGESTIONS_MACRO` that can be used to fill up the missing ones.",
+      "context": [
+        "src/goals/goals.service.ts",
+        "src/goals/goals.controller.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-10T18:22:58.490Z",
+      "updatedAt": "2025-10-10T19:31:05.167Z",
+      "completedAt": "2025-10-10T19:31:05.167Z"
+    },
+    {
+      "id": "461d44d6-c2a2-4fbc-abb0-c48e8d646bf0",
+      "status": "+",
+      "title": "Recreate COMMON_GOALS for the new spec.",
+      "description": "Now macro goals are far more generic and don't include actionable text. They can be things like \"Get back into a workout routine\", \"Reduce stress and feel calmer\" or \"Improve sleep and energy\" . We need to have the `COMMON_GOALS` in @src/goals/static-goals.ts recreated to match this new spec. The first item in each array is the text and the 2nd is the summary.",
+      "context": [
+        "src/goals/static-goals.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-10T19:14:59.151Z",
+      "updatedAt": "2025-10-10T19:18:04.617Z",
+      "completedAt": "2025-10-10T19:18:04.617Z"
+    },
+    {
+      "id": "fcc8e6a0-33d7-4470-846f-0afe37c6eb15",
+      "status": "+",
+      "title": "listByReferenceId compilation error",
+      "description": "@src/goals/repositories/dynamodb-goals.repository.ts `listByReferenceId` doesn't compile\n\nProperty 'LastEvaluatedKey' does not exist on type 'ServiceOutputTypes'.\n  Property 'LastEvaluatedKey' does not exist on type 'BatchExecuteStatementCommandOutput'.",
+      "context": [
+        "src/goals/repositories/dynamodb-goals.repository.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-10T19:31:30.347Z",
+      "updatedAt": "2025-10-10T19:34:31.681Z",
+      "completedAt": "2025-10-10T19:34:31.681Z"
+    }
+  ],
+  "createdAt": "2025-10-10T12:56:17.416Z",
+  "updatedAt": "2025-10-10T12:56:17.416Z",
+  "completedAt": "2025-10-10T19:34:31.681Z"
+}

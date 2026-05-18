@@ -1,0 +1,81 @@
+{
+  "id": "5ddf2058-6e1c-4fdd-afb4-90fc72cfa33a",
+  "status": "+",
+  "title": "INTEGRATION (Lane A): Provider-simulator e2e reliability tests for health-data sync",
+  "description": "Source: `docs/IMPROVEMENTS_INTEGRATION.md`\n\nGoal: Add CI-safe e2e/integration tests for health-data sync reliability scenarios by introducing a provider simulator and wiring adapters to point at it in tests.\n\nOut of scope: live-provider browser OAuth flows / short-lived token automation (documented in the doc’s OUT OF SCOPE section).",
+  "features": [
+    {
+      "id": "3b641657-e4ac-4677-9ce6-77e0d3c7499f",
+      "status": "+",
+      "title": "Create provider simulator (HTTP server) for health-data adapters (Lane A)",
+      "description": "From `docs/IMPROVEMENTS_INTEGRATION.md`.\n\n- Implement a lightweight simulator serving deterministic responses for key provider endpoints.\n- Support scripting scenarios: success, partial data, pagination/cursor, transient errors.\n\nAcceptance:\n- Can be started/stopped from e2e tests.\n- Deterministic fixtures checked into repo.",
+      "context": [],
+      "createdAt": "2026-03-11T10:49:45.906Z",
+      "updatedAt": "2026-03-13T08:30:15.689Z",
+      "completedAt": "2026-03-13T08:30:15.689Z"
+    },
+    {
+      "id": "b202ce0e-2967-4a9f-9533-df02feeeba62",
+      "status": "+",
+      "title": "Wire adapters/config to point to simulator during e2e tests",
+      "description": "From `docs/IMPROVEMENTS_INTEGRATION.md`.\n\n- Add configuration to override base URLs for providers in test environment.\n- Ensure no real network calls in CI e2e suite.\n\nAcceptance:\n- Tests fail if real-provider domains are called.\n- CI-safe and repeatable.",
+      "context": [],
+      "createdAt": "2026-03-11T10:49:45.910Z",
+      "updatedAt": "2026-03-13T09:01:54.855Z",
+      "completedAt": "2026-03-13T09:01:54.855Z"
+    },
+    {
+      "id": "26dc4aa3-82d5-4673-865f-8d0b690599d4",
+      "status": "+",
+      "title": "E2E scenario: happy-path sync (single window) using simulator",
+      "description": "From `docs/IMPROVEMENTS_INTEGRATION.md`.\n\nAcceptance:\n- Sync endpoint/job completes successfully.\n- Persisted daily + raw + sync-state records match expected fixtures.",
+      "context": [],
+      "createdAt": "2026-03-11T10:49:45.914Z",
+      "updatedAt": "2026-03-13T16:51:50.104Z",
+      "completedAt": "2026-03-13T16:51:50.104Z"
+    },
+    {
+      "id": "acbfffa4-e05c-40a7-9f90-19e8c87b5e55",
+      "status": "+",
+      "title": "E2E scenario: pagination/cursor progression and resume",
+      "description": "From `docs/IMPROVEMENTS_INTEGRATION.md`.\n\nAcceptance:\n- Cursor is advanced correctly across pages.\n- Re-running sync resumes from correct point and is idempotent.",
+      "context": [],
+      "createdAt": "2026-03-11T10:49:45.918Z",
+      "updatedAt": "2026-03-13T17:02:06.066Z",
+      "completedAt": "2026-03-13T17:02:06.066Z"
+    },
+    {
+      "id": "9be4595c-ab3e-4bf6-9f41-6d120c3af266",
+      "status": "+",
+      "title": "E2E scenario: transient provider failure then success on re-sync",
+      "description": "Lane A reliability test.\n\nAcceptance:\n- First run records a retryable/transient error state.\n- Second run (same inputs) succeeds and clears/updates error state appropriately.",
+      "context": [],
+      "createdAt": "2026-03-11T10:49:45.922Z",
+      "updatedAt": "2026-03-13T17:03:12.789Z",
+      "completedAt": "2026-03-13T17:03:12.789Z"
+    },
+    {
+      "id": "8b8ddf23-f4f7-4a5f-a781-0d3fbb6fcfa4",
+      "status": "+",
+      "title": "E2E scenario: permanent auth failure classification",
+      "description": "Lane A reliability test.\n\nAcceptance:\n- Auth failure is classified as non-retryable.\n- Sync-state reflects correct error category and does not advance cursor.",
+      "context": [],
+      "createdAt": "2026-03-11T10:49:45.926Z",
+      "updatedAt": "2026-03-15T12:41:59.916Z",
+      "completedAt": "2026-03-15T12:41:59.916Z"
+    },
+    {
+      "id": "754a1310-ad5f-4f14-9ca7-32d41d6f4305",
+      "status": "+",
+      "title": "E2E scenario: partial data + merge behavior across multiple windows",
+      "description": "Lane A reliability test.\n\nAcceptance:\n- Daily aggregation merge rules are validated end-to-end.\n- Missing hours/days do not corrupt existing aggregates.",
+      "context": [],
+      "createdAt": "2026-03-11T10:49:45.930Z",
+      "updatedAt": "2026-03-15T12:57:37.026Z",
+      "completedAt": "2026-03-15T12:57:37.026Z"
+    }
+  ],
+  "createdAt": "2026-03-11T10:24:50.366Z",
+  "updatedAt": "2026-03-11T10:24:50.366Z",
+  "completedAt": "2026-03-20T15:40:52.669Z"
+}

@@ -1,0 +1,159 @@
+{
+  "id": "001f80e1-5a55-47ac-8b74-dee89ae3efed",
+  "status": "+",
+  "title": "Initial scaffold - TypeScript React frontend app",
+  "description": "We want to create an admin web app that will use a swagger file to generate all of its backend code.\nThe admin app allows a user to login and register (+ forgot password).\nIt will allow the user to view other users of a system, and do some operations on them - like viewing their profiles or the actions they have taken.\nThe users have take journals and store audio files - for each user we want to show these so the admin can access them.\nOver time there will be more functionality added.",
+  "features": [
+    {
+      "id": "7b638306-d23a-429a-a61a-8e6163e80036",
+      "status": "+",
+      "title": "Project Scaffold Generation",
+      "description": "Create the initial React TypeScript Vite project with Tailwind CSS and shadcn/ui setup using standard CLI tools. This feature provides the exact command-line steps to generate the complete project structure, install dependencies, and configure the build system. The scaffold will include: Vite React TypeScript template, Tailwind CSS configuration, shadcn/ui initialization, basic folder structure for admin dashboard, and initial configuration files. This will serve as the foundation for all subsequent development work.",
+      "context": [],
+      "createdAt": "2025-10-08T11:57:31.400Z",
+      "updatedAt": "2025-10-08T14:25:02.799Z",
+      "completedAt": "2025-10-08T14:25:02.799Z"
+    },
+    {
+      "id": "33d5f2bf-82d8-4311-9331-a12e87b57df1",
+      "status": "+",
+      "title": "Swagger API Client Generation",
+      "description": "Set up automated TypeScript API client generation from the existing backend Swagger specification. This feature will configure OpenAPI Generator to create type-safe API clients, interfaces, and models. Includes setting up npm scripts for code generation, configuring axios as the HTTP client, and establishing the project structure to separate generated code from custom code. The generated client will provide all necessary methods for user authentication, user management, journal access, and audio file operations as defined in the backend Swagger spec.",
+      "context": [],
+      "createdAt": "2025-10-08T11:57:46.567Z",
+      "updatedAt": "2025-10-08T14:25:04.605Z",
+      "blockers": [],
+      "completedAt": "2025-10-08T14:25:04.605Z"
+    },
+    {
+      "id": "a6e10301-109a-400a-aa89-a2110cba9c45",
+      "status": "+",
+      "title": "Authentication System Setup",
+      "description": "Implement the complete authentication system including login, register, and forgot password functionality using React Hook Form, Zod validation, and shadcn/ui components. This feature includes creating reusable form components, setting up JWT token management with localStorage/sessionStorage, implementing protected route guards with React Router, and creating auth context/state management. The system will integrate with the generated API client to handle authentication endpoints and provide a smooth user experience with proper error handling and form validation.",
+      "context": [],
+      "createdAt": "2025-10-08T11:58:03.374Z",
+      "updatedAt": "2025-10-08T23:42:13.576Z",
+      "completedAt": "2025-10-08T23:42:13.576Z"
+    },
+    {
+      "id": "8211326c-8379-463b-af6d-8f8e992e32c7",
+      "status": "+",
+      "title": "Admin Dashboard Layout & Routing",
+      "description": "Create the core admin dashboard layout with navigation, sidebar, and routing structure using React Router and shadcn/ui components. This feature includes setting up the main dashboard shell with responsive sidebar navigation, header with user menu, breadcrumb navigation, and protected route structure. The layout will include navigation items for Users, User Profiles, Journals, Audio Files, and Settings. Uses shadcn/ui components like Sheet, Navigation Menu, Avatar, and Dropdown Menu to create a professional admin interface. Establishes the foundation for all admin pages and ensures consistent UX across the application.",
+      "context": [],
+      "createdAt": "2025-10-08T11:58:15.317Z",
+      "updatedAt": "2025-10-08T23:45:30.810Z",
+      "completedAt": "2025-10-08T23:45:30.810Z"
+    },
+    {
+      "id": "53683c8a-3ccc-4152-9f70-40cc15d63ade",
+      "status": "+",
+      "title": "Nothing shows when app is launched",
+      "description": "when running the app with `npm run dev` nothing shows when navigating to the link in the browser.\nIt seems the app is running, but no UI is emitted.\n\nVITE_API_BASE is set in `.env`\n\nThere's also an error in @src/components/ui/form.tsx :\n'UseFormReturn' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.",
+      "context": [
+        "src/components/ui/form.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-08T23:55:52.421Z",
+      "updatedAt": "2025-10-08T23:59:18.682Z",
+      "completedAt": "2025-10-08T23:59:18.682Z"
+    },
+    {
+      "id": "2b55df69-0908-4830-9f57-c510ce5e70e2",
+      "status": "+",
+      "title": "Settings: Theme toggle (light/dark)",
+      "description": "Implement app-wide light/dark mode using Tailwind 'class' strategy and shadcn/ui theme provider. Add a toggle control in the header and on a '/settings' page. Persist preference in localStorage (key: 'theme') and respect system preference on first load. Prevent FOUC by initializing theme before React mounts. Acceptance: toggle updates UI instantly, persists across refresh, initial load matches stored or system preference.",
+      "context": [],
+      "createdAt": "2025-10-09T01:10:10.513Z",
+      "updatedAt": "2025-10-09T01:16:42.864Z",
+      "completedAt": "2025-10-09T01:16:42.864Z"
+    },
+    {
+      "id": "0d85e99f-36d5-4ecb-a9bc-5fc2d3822927",
+      "status": "+",
+      "title": "Audiofiles view",
+      "description": "Route: '/audiofiles'. Fetch audiofiles via generated backend SDK under 'src/generated' with pagination and filters (by userId/email, date range if supported). Display table columns: id, user (email or id), filename/title, duration, size, createdAt, actions (inline play, download, open user profile). Provide loading, error and empty states; column sorting (createdAt desc default). Preserve filters in URL query params. Acceptance: data loads from backend, pagination works, audio preview plays, links navigate correctly, states are handled.",
+      "context": [],
+      "createdAt": "2025-10-09T01:10:10.516Z",
+      "updatedAt": "2025-10-09T09:55:21.158Z",
+      "blockers": [],
+      "completedAt": "2025-10-09T09:55:21.158Z"
+    },
+    {
+      "id": "0fe58689-3ad9-405c-84d0-6b32860bc727",
+      "status": "+",
+      "title": "Journals view",
+      "description": "Route: '/journals'. Fetch journals via generated SDK with pagination and filters (userId, date range, text search by title/content excerpt if supported). Table: id, userId, title or first line excerpt, createdAt, actions (view details, open user profile). Provide detail view (drawer/modal or dedicated route) to show full journal entry metadata and content. Include loading, error and empty states; sorting (createdAt desc default). Acceptance: backend-powered list with pagination, filters function, detail view works, links to user profile work.",
+      "context": [],
+      "createdAt": "2025-10-09T01:10:10.517Z",
+      "updatedAt": "2025-10-09T10:03:26.754Z",
+      "blockers": [],
+      "completedAt": "2025-10-09T10:03:26.754Z"
+    },
+    {
+      "id": "642a06bf-3271-44b2-84c3-623d6e2b2621",
+      "status": "+",
+      "title": "UserProfiles view (list)",
+      "description": "Route: '/users'. Fetch paginated users list via generated SDK with search (by name) . Table: id, name, createdAt, actions (open profile detail, quick links to filtered journals/audiofiles). Include loading, error and empty states; basic sorting; URL query-driven search/pagination. Acceptance: users load from backend, search/sort/pagination work, actions navigate appropriately.",
+      "context": [],
+      "createdAt": "2025-10-09T01:10:10.518Z",
+      "updatedAt": "2025-10-09T09:59:33.912Z",
+      "blockers": [],
+      "completedAt": "2025-10-09T09:59:33.912Z"
+    },
+    {
+      "id": "0f64a1ba-12fd-4117-8ba5-8c6854f0e83e",
+      "status": "+",
+      "title": "Profiles view (user detail)",
+      "description": "Route: '/users/:id'. Tabs: Overview (basic profile info), Journals (user-scoped journals list), Audiofiles (user-scoped audiofiles list), Activity/Actions (if available). Each tab fetches data via generated SDK filtered by userId and supports pagination where applicable. Actions: open journal detail, play/download audio, copy user id. Loading/error/empty states on each tab; deep linkable via tab query/hash. Acceptance: navigating to a user shows their info and related resources from backend; tab content loads independently and behaves correctly.",
+      "context": [],
+      "createdAt": "2025-10-09T01:10:10.519Z",
+      "updatedAt": "2025-10-09T10:01:59.573Z",
+      "blockers": [],
+      "completedAt": "2025-10-09T10:01:59.573Z"
+    },
+    {
+      "id": "5a499247-a0db-46e0-9275-28aaac8802c0",
+      "status": "+",
+      "title": "UserDetail rework",
+      "description": "In @src/pages/admin/UserDetail.tsx - the email and telegram id should be in this separate Basic Info section, but to the right they should have a copy button just like the id does.\n\nAt the top should be info about when the user profile was created and when it was last updated.\n\nIn the \"Journals\" tab there should be no \"Open in Journals\".\nIn the \"Audiofiles\" tab - the audio playback control should be were the \"Download\" button is - and that button should be gone (the control already includes a download option).",
+      "context": [
+        "src/pages/admin/UserDetail.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-09T12:47:19.423Z",
+      "updatedAt": "2025-10-09T13:32:09.959Z",
+      "completedAt": "2025-10-09T13:32:09.959Z"
+    },
+    {
+      "id": "5e10a72d-b70a-4541-8fba-bcb36e99f371",
+      "status": "+",
+      "title": "Users rework",
+      "description": "In @src/pages/admin/Users.tsx the \"Journals\" and \"Audio\" buttons in actions should redirect to the tab inside @src/pages/admin/UserDetail.tsx .",
+      "context": [
+        "src/pages/admin/UserDetail.tsx",
+        "src/pages/admin/Users.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-09T12:50:05.385Z",
+      "updatedAt": "2025-10-09T13:33:43.103Z",
+      "completedAt": "2025-10-09T13:33:43.103Z"
+    },
+    {
+      "id": "e8d68406-2c5d-4b9d-be25-59564fb1a5be",
+      "status": "+",
+      "title": "in the users list allow the delete a user",
+      "description": "There needs to be a red delete button with a confirmation popup in the @src/pages/admin/Users.tsx page for each user.\nThis button should only show when hovering at the end of the actions list where the button is.\nThe button will call the backends DELETE `users/:userId` (i.e. wipeUserData) . The app needs to refresh after this so that this user is not longer displayed.",
+      "context": [
+        "src/pages/admin/Users.tsx"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-10T23:19:41.194Z",
+      "updatedAt": "2025-10-10T23:26:04.031Z",
+      "completedAt": "2025-10-10T23:26:04.031Z"
+    }
+  ],
+  "createdAt": "2025-10-08T11:51:29.107Z",
+  "updatedAt": "2025-10-08T11:54:05.930Z",
+  "completedAt": "2025-10-10T23:26:04.031Z"
+}

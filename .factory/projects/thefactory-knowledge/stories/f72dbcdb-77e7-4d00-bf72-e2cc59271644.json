@@ -1,0 +1,186 @@
+{
+  "id": "f72dbcdb-77e7-4d00-bf72-e2cc59271644",
+  "status": "+",
+  "title": "Main project structure based on the graphiti library",
+  "description": "There's a library `https://github.com/getzep/graphiti` that provides an upgraded RAG database - a knowledge graph. This project needs to be able to run locally and must expose an API that any client can interact with.\nFor reference, the whole library has been added under `graphiti/` .",
+  "features": [
+    {
+      "id": "803f5242-9319-4a54-b5ae-12f299e12901",
+      "status": "+",
+      "title": "Initialize Project with Poetry and Basic Files",
+      "description": "Set up the basic project structure by initializing a new Poetry project. This will create the `pyproject.toml` for dependency management. Also, add a standard Python `.gitignore` file and a placeholder `README.md`.",
+      "context": [],
+      "createdAt": "2025-09-16T13:01:31.413Z",
+      "completedAt": "2025-09-15T05:51:34.991Z",
+      "updatedAt": "2025-09-16T13:01:31.413Z"
+    },
+    {
+      "id": "1c300dbf-ca51-4d24-aba5-599a2b828c03",
+      "status": "+",
+      "title": "Add Core Dependencies (graphiti, fastapi, uvicorn)",
+      "description": "Use Poetry to add the core libraries required for the project. This includes `graphiti-python` for the knowledge graph, `fastapi` for building the API, and `uvicorn` for serving the application.",
+      "context": [],
+      "createdAt": "2025-09-16T13:01:31.413Z",
+      "completedAt": "2025-09-15T09:14:11.443Z",
+      "updatedAt": "2025-09-16T13:01:31.413Z"
+    },
+    {
+      "id": "4d009469-2946-4dc5-8d7f-e920a25adcab",
+      "status": "+",
+      "title": "Set Up Application Source Directory Structure",
+      "description": "Create a `src/` directory to contain the main application code.",
+      "context": [],
+      "createdAt": "2025-09-16T13:01:31.413Z",
+      "completedAt": "2025-09-15T08:13:34.727Z",
+      "updatedAt": "2025-09-16T13:01:31.413Z"
+    },
+    {
+      "id": "8461ff65-daf8-46c4-8553-57c3e9155bc6",
+      "status": "+",
+      "title": "Implement Basic FastAPI Application with Health Check",
+      "description": "Create a `main.py` inside `src/`. In this file, initialize a FastAPI application and implement a `/health` GET endpoint that returns a 200 OK status. This serves as the application's entry point and a basic way to verify it's running.",
+      "context": [],
+      "createdAt": "2025-09-16T13:01:31.413Z",
+      "completedAt": "2025-09-15T02:55:27.087Z",
+      "updatedAt": "2025-09-16T13:01:31.413Z"
+    },
+    {
+      "id": "809975e3-53e1-42ff-b3d5-7de0c3eab6b7",
+      "status": "+",
+      "title": "Create a Service for Graphiti Knowledge Graph",
+      "description": "Create a new module `src/graph_service.py` to handle all interactions with the `graphiti` library. Implement an initialization function or class to set up the knowledge graph instance. This will centralize graph-related logic.",
+      "context": [],
+      "createdAt": "2025-09-16T13:01:31.413Z",
+      "completedAt": "2025-09-15T04:41:42.634Z",
+      "updatedAt": "2025-09-16T13:01:31.413Z"
+    },
+    {
+      "id": "962549dd-a90d-4132-9822-cdf1e8a7202f",
+      "status": "+",
+      "title": "Create API Endpoint to Add Data to the Graph",
+      "description": "Implement a POST endpoint (e.g., `/documents`) in `main.py`. This endpoint will accept a payload containing text data, use the `GraphService` to process and add the data to the knowledge graph, and return a success response.",
+      "context": [],
+      "createdAt": "2025-09-16T13:01:31.413Z",
+      "completedAt": "2025-09-15T01:08:38.140Z",
+      "updatedAt": "2025-09-16T13:01:31.413Z"
+    },
+    {
+      "id": "593203e1-8117-4149-b0bb-8dc46d618a1a",
+      "status": "+",
+      "title": "Create API Endpoint to Query the Graph",
+      "description": "Implement a GET endpoint (e.g., `/query`) in `main.py`. This endpoint will accept a query string, use the `GraphService` to search the knowledge graph, and return the relevant results.",
+      "context": [],
+      "createdAt": "2025-09-16T13:01:31.413Z",
+      "completedAt": "2025-09-15T07:50:25.141Z",
+      "updatedAt": "2025-09-16T13:01:31.413Z"
+    },
+    {
+      "id": "91be4de2-b9cc-4c0a-bc0f-d0ff07ff0d55",
+      "status": "+",
+      "title": "Add Docker Support for Local Execution",
+      "description": "Create a `Dockerfile` to containerize the FastAPI application. Also, create a `docker-compose.yml` file to define the application service, making it easy to build and run the entire project locally with a single command.",
+      "context": [],
+      "createdAt": "2025-09-16T13:01:31.413Z",
+      "completedAt": "2025-09-15T02:04:38.162Z",
+      "updatedAt": "2025-09-16T13:01:31.413Z"
+    },
+    {
+      "id": "9fd9a0a9-3f9e-4699-a9eb-d8f86aa1d713",
+      "status": "+",
+      "title": "Implement Configuration Management",
+      "description": "Create a `config.py` module to manage application settings using environment variables (e.g., via Pydantic's BaseSettings). This will handle configurations like API port, logging levels, and any specific settings for the graphiti library.",
+      "context": [],
+      "createdAt": "2025-09-16T13:01:31.413Z",
+      "completedAt": "2025-09-14T22:10:55.477Z",
+      "updatedAt": "2025-09-16T13:01:31.413Z"
+    },
+    {
+      "id": "c50d1444-b482-443a-ae5c-ecabb54e9ae9",
+      "status": "+",
+      "title": "Update README with Setup and Usage Instructions",
+      "description": "Flesh out the `README.md` file with a project description, detailed instructions on how to set up the environment (both natively with Poetry and with Docker), how to run the application, and examples of how to use the API endpoints.",
+      "context": [],
+      "createdAt": "2025-09-16T13:01:31.413Z",
+      "completedAt": "2025-09-14T21:01:44.656Z",
+      "updatedAt": "2025-09-16T13:01:31.413Z"
+    },
+    {
+      "id": "a63aa3e0-790b-4833-8fb1-a7530555a462",
+      "status": "+",
+      "title": "The graphiti library isn't used correctly",
+      "description": "For this story, especially useful is the @graphiti/README.md . The imported package are actually all the files under `graphiti/graphiti-core`. These files are there just for reference - the package must be used properly like it is imported now in the @pyproject.toml .\nGo over the @src/graph_service.py and fix the usage so that it is correct and aligns with this story's requirements.",
+      "plan": "",
+      "context": [
+        "graphiti/README.md",
+        "src/graph_service.py",
+        "pyproject.toml"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:01:31.413Z",
+      "completedAt": "2025-09-14T21:49:26.535Z",
+      "updatedAt": "2025-09-16T13:01:31.413Z"
+    },
+    {
+      "id": "9b9695d3-6bb2-4864-8ba8-ee606ff48f55",
+      "status": "+",
+      "title": "The project depends on neo4j - explain how to create it and run locally",
+      "description": "Explain the exact steps the user must follow from scratch so that they can have this running and serving clients over the REST API - all in @README.md .",
+      "plan": "",
+      "context": [
+        "README.md"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:01:31.413Z",
+      "completedAt": "2025-09-15T00:01:41.048Z",
+      "updatedAt": "2025-09-16T13:01:31.413Z"
+    },
+    {
+      "id": "cab30040-606c-4a96-8f47-f3b05d4f115c",
+      "status": "+",
+      "title": "Cannot start the project",
+      "description": "When running:\n\"\"\nThe following error appears:\nFile \"thefactory-knowledge/src/main.py\", line 6, in <module>\n    from .graph_service import GraphService, GraphServiceError\nImportError: attempted relative import with no known parent package\n\nIt seems this is some issue with @pyproject.toml or just in @src/main.py . Make sure you always keep @README.md up to date.",
+      "plan": "",
+      "context": [
+        "pyproject.toml",
+        "src/main.py",
+        "README.md"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:01:31.413Z",
+      "completedAt": "2025-09-14T20:08:41.415Z",
+      "updatedAt": "2025-09-16T13:01:31.413Z"
+    },
+    {
+      "id": "d51459dc-1d67-43a6-9f73-95eb786cabc9",
+      "status": "+",
+      "title": "Cannot run - an error shows",
+      "description": "poetry run uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload\n\nINFO:     Will watch for changes in these directories: ['thefactory-knowledge']\nINFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)\nINFO:     Started reloader process [22130] using WatchFiles\nINFO:     Started server process [22135]\nINFO:     Waiting for application startup.\nERROR:    Traceback (most recent call last):\n  File \"thefactory-knowledge/.venv/lib/python3.13/site-packages/starlette/routing.py\", line 693, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n               ~~~~~~~~~~~~~~~~~~~~~^^^^^\n  File \"thefactory-knowledge/.venv/lib/python3.13/site-packages/starlette/routing.py\", line 569, in __aenter__\n    await self._router.startup()\n  File \"thefactory-knowledge/.venv/lib/python3.13/site-packages/starlette/routing.py\", line 670, in startup\n    await handler()\n  File \"thefactory-knowledge/src/main.py\", line 20, in on_startup\n    configure_logging()\n    ~~~~~~~~~~~~~~~~~^^\n  File \"thefactory-knowledge/src/config.py\", line 58, in configure_logging\n    settings = get_settings()\n  File \"thefactory-knowledge/src/config.py\", line 50, in get_settings\n    return Settings()  # type: ignore[call-arg]\n  File \"thefactory-knowledge/.venv/lib/python3.13/site-packages/pydantic_settings/main.py\", line 188, in __init__\n    super().__init__(\n    ~~~~~~~~~~~~~~~~^\n        **__pydantic_self__._settings_build_values(\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    ...<27 lines>...\n        )\n        ^\n    )\n    ^\n  File \"thefactory-knowledge/.venv/lib/python3.13/site-packages/pydantic/main.py\", line 253, in __init__\n    validated_self = self.__pydantic_validator__.validate_python(data, self_instance=self)\npydantic_core._pydantic_core.ValidationError: 3 validation errors for Settings\nneo4j_uri\n  Extra inputs are not permitted [type=extra_forbidden, input_value='bolt://localhost:7687', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.11/v/extra_forbidden\nneo4j_user\n  Extra inputs are not permitted [type=extra_forbidden, input_value='neo4j', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.11/v/extra_forbidden\nneo4j_password\n  Extra inputs are not permitted [type=extra_forbidden, input_value='your_secure_password', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.11/v/extra_forbidden\n\nERROR:    Application startup failed. Exiting.\n^CINFO:     Stopping reloader process [22130]",
+      "plan": "",
+      "context": [],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:01:31.413Z",
+      "completedAt": "2025-09-14T18:35:30.877Z",
+      "updatedAt": "2025-09-16T13:01:31.413Z"
+    },
+    {
+      "id": "6e697fe2-b9d8-41b6-b7ac-ffad70689109",
+      "status": "+",
+      "title": "When using the service - error",
+      "description": "After using the POST /documents API with the following data (as explained in the README.md):\n{\n  \"text\": \"Neo4j is a graph database that stores data as nodes and relationships.\",\n  \"metadata\": {\n    \"title\": \"Neo4j Intro\"\n  }\n}\n\nTHIS MASSIVE ERROR SHOWS:\n\nINFO:     127.0.0.1:59235 - \"POST /documents HTTP/1.1\" 500 Internal Server Error\nERROR:    Exception in ASGI application\nTraceback (most recent call last):\n  File \"/Users/cloud/Documents/Work/thefactory-knowledge/.venv/lib/python3.13/site-packages/uvicorn/protocols/http/httptools_impl.py\", line 401, in run_asgi\n    result = await app(  # type: ignore[func-returns-value]\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n        self.scope, self.receive, self.send\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/Users/cloud/Documents/Work/thefactory-knowledge/.venv/lib/python3.13/site-packages/uvicorn/middleware/proxy_headers.py\", line 70, in __call__\n    return await self.app(scope, receive, send)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/cloud/Documents/Work/thefactory-knowledge/.venv/lib/python3.13/site-packages/fastapi/applications.py\", line 1054, in __call__\n    await super().__call__(scope, receive, send)\n  File \"/Users/cloud/Documents/Work/thefactory-knowledge/.venv/lib/python3.13/site-packages/starlette/applications.py\", line 113, in __call__\n    await self.middleware_stack(scope, receive, send)\n  File \"/Users/cloud/Documents/Work/thefactory-knowledge/.venv/lib/python3.13/site-packages/starlette/middleware/errors.py\", line 187, in __call__\n    raise exc\n  File \"/Users/cloud/Documents/Work/thefactory-knowledge/.venv/lib/python3.13/site-packages/starlette/middleware/errors.py\", line 165, in __call__\n    await self.app(scope, receive, _send)\n  File \"/Users/cloud/Documents/Work/thefactory-knowledge/.venv/lib/python3.13/site-packages/starlette/middleware/exceptions.py\", line 62, in __call__\n    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)\n  File \"/Users/cloud/Documents/Work/thefactory-knowledge/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py\", line 62, in wrapped_app\n    raise exc\n  File \"/Users/cloud/Documents/Work/thefactory-knowledge/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py\", line 51, in wrapped_app\n    await app(scope, receive, sender)\n  File \"/Users/cloud/Documents/Work/thefactory-knowledge/.venv/lib/python3.13/site-packages/starlette/routing.py\", line 715, in __call__\n    await self.middleware_stack(scope, receive, send)\n  File \"/Users/cloud/Documents/Work/thefactory-knowledge/.venv/lib/python3.13/site-packages/starlette/routing.py\", line 735, in app\n    await route.handle(scope, receive, send)\n  File \"/Users/cloud/Documents/Work/thefactory-knowledge/.venv/lib/python3.13/site-packages/starlette/routing.py\", line 288, in handle\n    await self.app(scope, receive, send)\n  File \"/Users/cloud/Documents/Work/thefactory-knowledge/.venv/lib/python3.13/site-packages/starlette/routing.py\", line 76, in app\n    await wrap_app_handling_exceptions(app, request)(scope, receive, send)\n  File \"/Users/cloud/Documents/Work/thefactory-knowledge/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py\", line 62, in wrapped_app\n    raise exc\n  File \"/Users/cloud/Documents/Work/thefactory-knowledge/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py\", line 51, in wrapped_app\n    await app(scope, receive, sender)\n  File \"/Users/cloud/Documents/Work/thefactory-knowledge/.venv/lib/python3.13/site-packages/starlette/routing.py\", line 73, in app\n    response = await f(request)\n               ^^^^^^^^^^^^^^^^\n  File \"/Users/cloud/Documents/Work/thefactory-knowledge/.venv/lib/python3.13/site-packages/fastapi/routing.py\", line 301, in app\n    raw_response = await run_endpoint_function(\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    ...<3 lines>...\n    )\n    ^\n  File \"/Users/cloud/Documents/Work/thefactory-knowledge/.venv/lib/python3.13/site-packages/fastapi/routing.py\", line 212, in run_endpoint_function\n    return await dependant.call(**values)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/cloud/Documents/Work/thefactory-knowledge/src/main.py\", line 71, in add_document\n    return JSONResponse(status_code=201, content={\"success\": True, \"result\": result})\n  File \"/Users/cloud/Documents/Work/thefactory-knowledge/.venv/lib/python3.13/site-packages/starlette/responses.py\", line 178, in __init__\n    super().__init__(content, status_code, headers, media_type, background)\n    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/cloud/Documents/Work/thefactory-knowledge/.venv/lib/python3.13/site-packages/starlette/responses.py\", line 41, in __init__\n    self.body = self.render(content)\n                ~~~~~~~~~~~^^^^^^^^^\n  File \"/Users/cloud/Documents/Work/thefactory-knowledge/.venv/lib/python3.13/site-packages/starlette/responses.py\", line 181, in render\n    return json.dumps(\n           ~~~~~~~~~~^\n        content,\n        ^^^^^^^^\n    ...<3 lines>...\n        separators=(\",\", \":\"),\n        ^^^^^^^^^^^^^^^^^^^^^^\n    ).encode(\"utf-8\")\n    ^\n  File \"/opt/homebrew/Cellar/python@3.13/3.13.5/Frameworks/Python.framework/Versions/3.13/lib/python3.13/json/__init__.py\", line 238, in dumps\n    **kw).encode(obj)\n          ~~~~~~^^^^^\n  File \"/opt/homebrew/Cellar/python@3.13/3.13.5/Frameworks/Python.framework/Versions/3.13/lib/python3.13/json/encoder.py\", line 200, in encode\n    chunks = self.iterencode(o, _one_shot=True)\n  File \"/opt/homebrew/Cellar/python@3.13/3.13.5/Frameworks/Python.framework/Versions/3.13/lib/python3.13/json/encoder.py\", line 261, in iterencode\n    return _iterencode(o, 0)\n  File \"/opt/homebrew/Cellar/python@3.13/3.13.5/Frameworks/Python.framework/Versions/3.13/lib/python3.13/json/encoder.py\", line 180, in default\n    raise TypeError(f'Object of type {o.__class__.__name__} '\n                    f'is not JSON serializable')\nTypeError: Object of type datetime is not JSON serializable",
+      "plan": "",
+      "context": [],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:01:31.413Z",
+      "completedAt": "2025-09-15T06:22:22.610Z",
+      "updatedAt": "2025-09-16T13:01:31.413Z"
+    }
+  ],
+  "createdAt": "2025-09-16T13:01:31.413Z",
+  "completedAt": "2025-09-15T09:14:11.443Z",
+  "updatedAt": "2025-09-16T13:01:31.413Z"
+}

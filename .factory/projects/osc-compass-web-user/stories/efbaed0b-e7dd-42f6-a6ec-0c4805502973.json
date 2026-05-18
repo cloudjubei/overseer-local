@@ -1,0 +1,71 @@
+{
+  "id": "efbaed0b-e7dd-42f6-a6ec-0c4805502973",
+  "status": "+",
+  "title": "Initial launch and user bootstrap",
+  "description": "Goal\n- On first app load, ensure a backend user and session exist and persist identifiers in an app cookie for subsequent visits.\n\nFlow (finalized)\n- On app startup, BootstrapGate initializes the OpenAPI client and ensures a token exists in a non-blocking effect. It always renders children and never performs navigation.\n- Token resolution order: server-provided token (HttpOnly cookie via server), otherwise read client cookie safely; if missing, call backend bootstrap to create/init user + session; then set token on the generated OpenAPI client.\n- Errors do not block rendering. A small, dismissible banner with a Retry button is shown. Retry re-attempts bootstrap.\n- Routing to Chat is handled by the Root page ('/' -> '/chat') and not by BootstrapGate. This prevents double-navigate races.\n\nTech notes\n- Use the generated axios/OpenAPI client in src/generated/backend. Configure base URL and token in a small wrapper (src/lib/api/init-openapi.ts) via env vars, and set the token with setAccessToken(token) after bootstrap.\n- Cookie strategy: prefer HttpOnly cookie when feasible (server-side), with client cookie fallback only for minimal token propagation needed by the OpenAPI client. Client cookie parsing is hardened to never throw on malformed third‑party cookies.\n- Bootstrap is performed in a React effect to avoid render‑time side effects and hook order mismatches. BootstrapGate never calls router.replace.\n- UserProvider reads initial uid/token in a safe, try/catch wrapped initializer so render never throws.\n- An app-level ErrorBoundary wraps the entire client tree; chat surfaces inline banners/toasts for retryable errors.\n\nAcceptance criteria\n- First visit without cookie performs backend bootstrap, persists identifiers, sets token in the OpenAPI client, and app renders Chat (via Root page redirect) without blocking UI.\n- Subsequent visits reuse the cookie/token and do not recreate the user; no redundant bootstrap calls are made.\n- Errors surface a non-blocking banner with Retry and do not crash or prevent page reloads.\n- No in-render navigation is performed by bootstrap logic; navigation is handled only by pages/routes.\n",
+  "features": [
+    {
+      "id": "353943e0-4ea1-4a3d-b1b3-b144df10e76d",
+      "status": "+",
+      "title": "OpenAPI configuration bootstrap",
+      "description": "Create a small startup initializer that sets the OpenAPI client base URL and token. Implementation: in 'src/lib/api/init-openapi.ts', export 'initOpenAPI(baseUrl: string)' and 'setAccessToken(token: string | undefined)'. Usage: import { OpenAPI } from '@/generated/backend/core/OpenAPI'; within init, set 'OpenAPI.BASE = baseUrl' (from process.env.NEXT_PUBLIC_API_BASE_URL at app startup) and 'OpenAPI.TOKEN = token' when available after auth. All service calls will directly import from '@/generated/backend' without an extra wrapper.",
+      "context": [],
+      "createdAt": "2025-11-07T15:43:41.509Z",
+      "updatedAt": "2025-11-07T15:45:51.849Z",
+      "completedAt": "2025-11-07T15:45:51.849Z"
+    },
+    {
+      "id": "c934399a-38d9-4fb4-98c9-340d27ca5615",
+      "status": "+",
+      "title": "App cookie schema and storage",
+      "description": "Define cookie keys and shape for user identification (e.g., 'cw_uid', 'cw_session' or opaque token if backend supplies one). Prefer HttpOnly cookie set via backend or Next.js route handler; fallback to non-HttpOnly only if necessary. Document expiry (e.g., 180 days) and scope ('/'). Acceptance: cookie is written on first successful bootstrap and read on subsequent visits to hydrate user context.",
+      "context": [],
+      "createdAt": "2025-11-07T15:43:41.511Z",
+      "updatedAt": "2025-11-07T15:48:35.659Z",
+      "completedAt": "2025-11-07T15:48:35.659Z"
+    },
+    {
+      "id": "35d91fcf-b5a0-4eb0-bf2a-ea4ff784d913",
+      "status": "+",
+      "title": "Bootstrap endpoint integration",
+      "description": "On missing app cookie, call backend bootstrap/login endpoint using the generated client. Example: 'import { AuthService } from '@/generated/backend'' and 'await AuthService.authControllerLogin({ body })' (or the specific bootstrap endpoint). Persist returned identifiers (userId, access token) and set 'OpenAPI.TOKEN'. Acceptance: first-visit flow creates user/session, sets cookie, and prepares OpenAPI for subsequent calls.",
+      "context": [],
+      "createdAt": "2025-11-07T15:43:41.512Z",
+      "updatedAt": "2025-11-07T15:50:40.425Z",
+      "completedAt": "2025-11-07T15:50:40.425Z"
+    },
+    {
+      "id": "d6179f97-37a9-42c9-a3a7-df7d96914633",
+      "status": "+",
+      "title": "Startup bootstrap hook and guard",
+      "description": "Implement client-side bootstrap in a non-blocking effect within BootstrapGate:\n- Initialize OpenAPI base URL from NEXT_PUBLIC_API_BASE_URL.\n- Resolve token in this order: server-provided prop from HttpOnly cookie, else safe client cookie read (never throws), else call backend bootstrap to create/init user + session.\n- Set the token on the generated OpenAPI client via setAccessToken(token).\n- Never navigate or block rendering from BootstrapGate; always render children. Root page handles '/' -> '/chat'.\n- On error, show a small retryable banner/toast; allow reattempts without redirects.\n\nAcceptance:\n- First visit without cookie bootstraps and sets token while UI remains interactive; redirect to '/chat' is handled only by the Root page.\n- Subsequent visits reuse the existing token and avoid redundant bootstrap calls.\n- Errors are non-blocking, retryable, and do not crash reloads.",
+      "context": [],
+      "createdAt": "2025-11-07T15:43:41.513Z",
+      "updatedAt": "2025-11-10T20:04:53.901Z",
+      "completedAt": "2025-11-07T15:51:51.559Z"
+    },
+    {
+      "id": "550555a7-84fa-4832-86ce-f25ff4bdc2a6",
+      "status": "+",
+      "title": "Error handling and retry UX",
+      "description": "Provide a small banner/toast with retry for bootstrap failures. On error, keep the user on a safe route (e.g., '/'), allow retrying the bootstrap call, and log errors to console for MVP diagnostics. Acceptance: simulated 4xx/5xx shows retry; successful retry proceeds to Chat.",
+      "context": [],
+      "createdAt": "2025-11-07T15:43:41.514Z",
+      "updatedAt": "2025-11-07T15:53:27.755Z",
+      "completedAt": "2025-11-07T15:53:27.755Z"
+    },
+    {
+      "id": "54b8d3a4-7023-48be-8454-916132960235",
+      "status": "+",
+      "title": "Client-side user state provider and hydration",
+      "description": "Introduce a lightweight global user state for immediate client access.\n- Create a UserProvider (React Context) with state: { uid: string | null; tokenAvailable: boolean; profile?: Partial<UserProfileModel>; hydrated: boolean } and a 'useUser' hook.\n- Hydrate from bootstrap cookies on mount (uid, token presence); optionally support a later 'me' fetch to enrich profile.\n- Keep storage in-memory (no localStorage) for now; ensure safe SSR/CSR boundaries.\nAcceptance criteria:\n- After bootstrap, client components can synchronously read 'uid' and 'tokenAvailable' without re-fetching.\n- State is consistent across navigations; errors in optional profile fetch are non-blocking.",
+      "context": [],
+      "createdAt": "2025-11-10T10:26:20.346Z",
+      "updatedAt": "2025-11-10T10:45:56.582Z",
+      "completedAt": "2025-11-10T10:45:56.582Z"
+    }
+  ],
+  "createdAt": "2025-11-07T15:16:25.826Z",
+  "updatedAt": "2025-11-10T20:19:27.948Z",
+  "completedAt": "2025-11-10T10:45:56.582Z"
+}

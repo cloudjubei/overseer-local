@@ -1,8 +1,9 @@
 [
   {
-    "title": "TheFactory",
     "id": "1ab9a5d7-de6b-4503-ac17-892ae9ad3582",
+    "title": "TheFactory",
     "type": "MAIN",
+    "active": true,
     "projects": [
       "thefactory-tools",
       "thefactory-db",
@@ -11,22 +12,23 @@
       "thefactory-overseer-web"
     ],
     "createdAt": "2025-10-16T19:17:03.151Z",
-    "updatedAt": "2026-04-21T23:13:18.296Z"
+    "updatedAt": "2026-05-13T11:57:45.512Z"
   },
   {
-    "title": "OSC",
     "id": "49f65521-3929-4514-8751-532c6c318829",
+    "title": "OSC",
     "type": "MAIN",
+    "active": true,
     "projects": [
       "osc-compass-be",
       "osc-compass-web-user",
       "osc-compass-web-admin",
       "osc-compass-website",
       "osc-compass-telegram",
-      "compass-docs"
+      "osc-compass-docs"
     ],
-    "createdAt": "2025-10-16T19:16:52.656Z",
-    "updatedAt": "2026-04-20T21:26:59.600Z"
+    "createdAt": "2026-05-13T11:57:20.797Z",
+    "updatedAt": "2026-05-13T11:57:20.797Z"
   },
   {
     "id": "9d03b28b-4491-4868-9bf8-1d66ed32679c",
@@ -35,7 +37,7 @@
     "active": true,
     "projects": [
       "thefactory-tools",
-      "main"
+      "overseer-local"
     ],
     "createdAt": "2026-03-18T01:03:56.476Z",
     "updatedAt": "2026-03-18T20:46:20.266Z"

@@ -1,0 +1,51 @@
+{
+  "id": "e61c6e05-6017-4df1-bd91-ce0227824c21",
+  "status": "+",
+  "title": "Journal view",
+  "description": "Goal\n- Show a reverse-chronological list of journal entries (text and audio) using JournalsService and JournalModel.\n\nUI behavior\n- List displays newest first; each item shows date and text snippet or transcript.\n- Audio entries provide inline playback controls and display transcription when available.\n- Provide empty, loading, and error states; include retry actions on failures.\n\nTech notes\n- Use React Query for data loading and caching; support pagination or infinite scroll if available.\n- Use accessible audio players and ensure transcripts are readable on small screens.\n\nAcceptance criteria\n- Journals load and display newest-first ordering consistently.\n- Audio entries are playable; transcripts visible when provided.\n- Errors are handled gracefully with retries and friendly messaging.",
+  "features": [
+    {
+      "id": "6149990c-dc05-4e42-a13a-a560bfff35da",
+      "status": "+",
+      "title": "Journals query and list",
+      "description": "Fetch journal entries via JournalsService; display reverse-chronological list (newest first). Support pagination or infinite scroll if backend provides it. Use React Query for caching and background refetching.",
+      "context": [],
+      "createdAt": "2025-11-07T15:43:41.532Z",
+      "updatedAt": "2025-11-08T01:05:49.599Z",
+      "completedAt": "2025-11-08T01:05:49.599Z"
+    },
+    {
+      "id": "b400a912-3cd7-432d-8ce7-f52c382f0ee8",
+      "status": "+",
+      "title": "Journal list item components",
+      "description": "Create renderers for text and audio journal entries. Show date/time, text snippet or transcript, and any metadata. Clicking an item can expand or navigate to detail if needed (MVP may remain in-list).",
+      "context": [],
+      "createdAt": "2025-11-07T15:43:41.533Z",
+      "updatedAt": "2025-11-08T01:07:49.338Z",
+      "completedAt": "2025-11-08T01:07:49.338Z"
+    },
+    {
+      "id": "cb3d9c04-3a32-4607-8948-92e85a5f7492",
+      "status": "+",
+      "title": "Audio playback",
+      "description": "Provide inline audio playback for audio journals using the HTMLAudioElement. Ensure accessible labels, graceful handling of remote URLs, and visible loading/progress states.",
+      "context": [],
+      "createdAt": "2025-11-07T15:43:41.534Z",
+      "updatedAt": "2025-11-08T01:09:17.299Z",
+      "completedAt": "2025-11-08T01:09:17.299Z"
+    },
+    {
+      "id": "037abb7b-550d-4eb7-9a80-540bfc6b24de",
+      "status": "+",
+      "title": "Empty, loading, and error states",
+      "description": "Show skeletons while loading, an empty-state placeholder when there are no journals, and an inline error with retry for failures. Acceptance: states are clear and non-blocking.",
+      "context": [],
+      "createdAt": "2025-11-07T15:43:41.534Z",
+      "updatedAt": "2025-11-08T01:10:41.222Z",
+      "completedAt": "2025-11-08T01:10:41.222Z"
+    }
+  ],
+  "createdAt": "2025-11-07T15:16:25.829Z",
+  "updatedAt": "2025-11-07T15:16:25.829Z",
+  "completedAt": "2025-11-08T01:10:41.222Z"
+}

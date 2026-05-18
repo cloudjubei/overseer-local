@@ -1,0 +1,906 @@
+{
+  "id": "b796b48a-94d1-4c85-9484-96b497f61d5d",
+  "status": "=",
+  "title": "TESTING",
+  "description": "Ongoing Testing improvements.\n\nAlways adhere to @docs/TESTING.md before creating tests.\n\nOnly test public functions - all internal functions have to be tested through usage of public functions.\n\nDO NOT ADAPT THE CODE SO THE TESTS PASS - ALWAYS FIND A WAY TO MAKE THE TESTS WORK IF THE CODE MAKES SENSE.",
+  "features": [
+    {
+      "id": "fe8eabd1-0c2b-4864-b8bb-6db089abb33f",
+      "status": "+",
+      "title": "Add tests for src/tests/TestTools.ts",
+      "description": "Improve test coverage for @src/tests/TestTools.ts.\nTarget uncovered lines: 31-60, 62-72, 74-82, 84-89, 91-107, 109-273, 275-332, 334-379, 381-476, 479-534.",
+      "context": [
+        "src/tests/TestTools.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-29T19:13:31.283Z",
+      "updatedAt": "2025-09-30T00:03:35.874Z",
+      "completedAt": "2025-09-30T00:03:35.874Z"
+    },
+    {
+      "id": "ea672911-ee66-414a-ba79-3b7d32a44648",
+      "status": "+",
+      "title": "Add tests for src/project/utils.ts",
+      "description": "Improve test coverage for @src/project/utils.ts.\nTarget uncovered lines: 5-14, 16-24, 26-102, 104-188.",
+      "context": [
+        "src/project/utils.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-29T19:13:35.898Z",
+      "updatedAt": "2025-09-30T00:08:03.185Z",
+      "completedAt": "2025-09-30T00:08:03.185Z"
+    },
+    {
+      "id": "3a15ea34-ca38-4cba-8126-311ab5b16b2e",
+      "status": "+",
+      "title": "Add tests for src/story/StoryTools.ts",
+      "description": "Improve test coverage for @src/story/StoryTools.ts.\nTarget uncovered lines: 24-42, 71-74, 76-100, 113-129, 131-136, 148-169, 186-187, 218-219, 229-230, 253, 256, 281-282, 286-287, 294-295, 308-309, 325-326, 329-330, 342-365, 367-398, 416-418, 421-423, 449-450, 464-465, 472-483, 488-504, 517, 519, 521, 525, 529, 531, 544-549, 551.",
+      "context": [
+        "src/story/StoryTools.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-29T19:13:38.720Z",
+      "updatedAt": "2025-09-30T00:11:35.808Z",
+      "completedAt": "2025-09-30T00:11:35.808Z"
+    },
+    {
+      "id": "e04c196d-bace-45a4-bfca-cdd2296ec09e",
+      "status": "+",
+      "title": "Add tests for src/project/ProjectTools.ts",
+      "description": "Improve test coverage for @src/project/ProjectTools.ts.\nTarget uncovered lines: 27-28, 41-42, 90-91, 94-98, 105-106, 128-129, 133-134, 138-139, 146, 155-156, 172-173, 176-177, 194-200, 205-221, 234, 263-295.",
+      "context": [
+        "src/project/ProjectTools.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-29T19:13:41.937Z",
+      "updatedAt": "2025-09-30T00:17:49.837Z",
+      "completedAt": "2025-09-30T00:17:49.837Z"
+    },
+    {
+      "id": "c27e95df-fa1a-4a7d-b396-d79e68ca46db",
+      "status": "+",
+      "title": "Add tests for src/pricing/utils.ts",
+      "description": "Improve test coverage for @src/pricing/utils.ts.\nTarget uncovered lines: 4-5, 8-17, 20-21.",
+      "context": [
+        "src/pricing/utils.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-29T19:13:48.127Z",
+      "updatedAt": "2025-09-30T00:19:40.070Z",
+      "completedAt": "2025-09-30T00:19:40.070Z"
+    },
+    {
+      "id": "95d39495-4759-498e-a346-cc4ecb35502f",
+      "status": "+",
+      "title": "Add tests for src/files/FileUtils.ts",
+      "description": "Improve test coverage for @src/files/FileUtils.ts.\nTarget uncovered lines: 62-68, 71-72, 78-82, 91-97, 107-114, 122-153, 159-172, 174-177, 180-181, 183-208, 210-275.",
+      "context": [
+        "src/files/FileUtils.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-29T19:13:53.116Z",
+      "updatedAt": "2025-09-30T00:22:28.569Z",
+      "completedAt": "2025-09-30T00:22:28.569Z"
+    },
+    {
+      "id": "749a26cc-b0a2-4966-ac24-862399b1cd70",
+      "status": "+",
+      "title": "Add tests for src/files/FileTools.ts",
+      "description": "Improve test coverage for @src/files/FileTools.ts.\nTarget uncovered lines: 13-23, 31-34, 69-70, 72-73, 85-86, 112, 145-146, 152-153, 200-228, 230-232, 243.",
+      "context": [
+        "src/files/FileTools.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-29T19:13:55.402Z",
+      "updatedAt": "2025-09-30T00:28:33.675Z",
+      "completedAt": "2025-09-30T00:28:33.675Z"
+    },
+    {
+      "id": "a0d39482-0907-423b-be08-19fe41539b0f",
+      "status": "+",
+      "title": "Add tests for src/chats/utils.ts",
+      "description": "Improve test coverage for @src/chats/utils.ts.\nTarget uncovered lines: 13-14, 16-17, 21-80, 83-110.",
+      "context": [
+        "src/chats/utils.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-29T19:13:58.343Z",
+      "updatedAt": "2025-09-30T00:31:32.012Z",
+      "completedAt": "2025-09-30T00:31:32.012Z"
+    },
+    {
+      "id": "f620b536-e20e-421e-8c80-1a08be907dff",
+      "status": "+",
+      "title": "Add tests for src/chats/ChatsTools.ts",
+      "description": "Improve test coverage for @src/chats/ChatsTools.ts.\nTarget uncovered lines: 1-170.",
+      "context": [
+        "src/chats/ChatsTools.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-29T19:14:01.373Z",
+      "updatedAt": "2025-09-30T00:35:51.163Z",
+      "completedAt": "2025-09-30T00:35:51.163Z"
+    },
+    {
+      "id": "7e8ad7c7-ecea-4913-b8bd-99817928e285",
+      "status": "+",
+      "title": "Add tests for src/agentTools/utils.ts",
+      "description": "Improve test coverage for @src/agentTools/utils.ts.\nTarget uncovered lines: 13-37, 39-73, 75-90, 153-198, 201-204.",
+      "context": [
+        "src/agentTools/utils.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-29T19:14:04.081Z",
+      "updatedAt": "2025-09-30T00:43:00.776Z",
+      "completedAt": "2025-09-30T00:43:00.776Z"
+    },
+    {
+      "id": "df5ea455-a69c-4fbb-9a13-726a1617e007",
+      "status": "+",
+      "title": "Add tests for src/agentTools/AgentTools.ts",
+      "description": "Improve test coverage for @src/agentTools/AgentTools.ts.\nTarget uncovered lines: 8-318.",
+      "context": [
+        "src/agentTools/AgentTools.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-29T19:14:07.946Z",
+      "updatedAt": "2025-09-30T00:47:54.384Z",
+      "completedAt": "2025-09-30T00:47:54.384Z"
+    },
+    {
+      "id": "cf7c05c6-046a-44e4-a79e-b9d644c1a632",
+      "status": "+",
+      "title": "Add tests for src/agentRun/AgentRunTools.ts",
+      "description": "Improve test coverage for @src/agentRun/AgentRunTools.ts.\nTarget uncovered lines: 1-306.",
+      "context": [
+        "src/agentRun/AgentRunTools.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-29T19:14:09.766Z",
+      "updatedAt": "2025-09-30T00:49:18.365Z",
+      "completedAt": "2025-09-30T00:49:18.365Z"
+    },
+    {
+      "id": "e2781004-06e9-496b-9efc-c8e671b782bd",
+      "status": "+",
+      "title": "Add tests for src/chats/ChatsTools.ts",
+      "description": "Improve test coverage for @src/chats/ChatsTools.ts.\nTarget uncovered lines: 1-371.",
+      "context": [
+        "src/chats/ChatsTools.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-30T01:30:41.001Z",
+      "updatedAt": "2025-09-30T01:43:28.915Z",
+      "completedAt": "2025-09-30T01:43:28.915Z"
+    },
+    {
+      "id": "28c610fe-11d5-4259-9080-6ca96de7f38a",
+      "status": "+",
+      "title": "Add tests for src/chats/helpers.ts",
+      "description": "Improve test coverage for @src/chats/helpers.ts.\nTarget uncovered lines: 1-32.",
+      "context": [
+        "src/chats/helpers.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-30T01:30:43.967Z",
+      "updatedAt": "2025-09-30T01:48:21.871Z",
+      "completedAt": "2025-09-30T01:48:21.871Z"
+    },
+    {
+      "id": "8f404ba3-78e9-4cf8-b766-e2410d74eb28",
+      "status": "+",
+      "title": "Add tests for src/chats/constants.ts",
+      "description": "Improve test coverage for @src/chats/constants.ts.\nTarget uncovered lines: 16-17, 19-20, 23-24, 26-27, 31-90, 93-120.",
+      "context": [
+        "src/chats/constants.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-30T01:31:00.660Z",
+      "updatedAt": "2025-09-30T01:52:19.063Z",
+      "completedAt": "2025-09-30T01:52:19.063Z"
+    },
+    {
+      "id": "e81ced30-a05c-4d0a-afab-23d98386d24b",
+      "status": "+",
+      "title": "Add tests for src/files/utils.ts",
+      "description": "Improve test coverage for @src/files/utils.ts.\nTarget uncovered lines: 3-6, 9-17, 20-21, 24-32, 35-89.",
+      "context": [
+        "src/files/utils.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-30T01:31:08.792Z",
+      "updatedAt": "2025-09-30T01:56:59.934Z",
+      "completedAt": "2025-09-30T01:56:59.934Z"
+    },
+    {
+      "id": "83339647-c16c-4b1c-9948-b43abd713ac8",
+      "status": "+",
+      "title": "Add tests for src/files/FileTools.ts",
+      "description": "Improve test coverage for @src/files/FileTools.ts.\nTarget uncovered lines: 13-23, 31-34, 69-70, 72-73, 85-86, 112, 145-146, 152-153, 200-228, 230-232, 243.",
+      "context": [
+        "src/files/FileTools.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-30T01:31:18.051Z",
+      "updatedAt": "2025-09-30T02:05:46.181Z",
+      "completedAt": "2025-09-30T02:05:46.181Z"
+    },
+    {
+      "id": "9cd7ef6d-2bcd-42e6-a74f-9be758e2b340",
+      "status": "+",
+      "title": "Add tests for src/story/StoryTools.ts",
+      "description": "Improve test coverage for @src/story/StoryTools.ts.\nTarget uncovered lines: 25-43, 72-75, 77-101, 114-130, 132-137, 149-170, 187-188, 219-220, 230-231, 254, 257, 282-283, 287-288, 295-296, 309-310, 326-327, 330-331, 343-366, 368-399, 417-419, 422-424, 450-451, 465-466, 473-484, 489-505, 518, 520, 522, 526, 530, 532, 545-550, 552.",
+      "context": [
+        "src/story/StoryTools.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-30T01:31:29.085Z",
+      "updatedAt": "2025-09-30T02:16:15.491Z",
+      "completedAt": "2025-09-30T02:16:15.491Z"
+    },
+    {
+      "id": "c73e9fa6-c3f4-4dda-9a82-535d7b21f2f7",
+      "status": "+",
+      "title": "Add tests for src/webSearch/WebSearchTools.ts",
+      "description": "Improve test coverage for @src/webSearch/WebSearchTools.ts.\nTarget uncovered lines: 10-24, 26-58, 60-90, 92-118, 120-163, 166-169.",
+      "context": [
+        "src/webSearch/WebSearchTools.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-30T01:31:34.073Z",
+      "updatedAt": "2025-09-30T02:24:36.547Z",
+      "completedAt": "2025-09-30T02:24:36.547Z"
+    },
+    {
+      "id": "14c0a329-f665-4e4b-9e0f-04eda988da77",
+      "status": "+",
+      "title": "Add tests for src/utils.ts",
+      "description": "Improve test coverage for @src/utils.ts.\nTarget uncovered lines: 16-21, 24-27, 55-57, 60-62, 92-93.",
+      "context": [
+        "src/utils.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-30T11:07:03.903Z",
+      "updatedAt": "2025-09-30T11:25:30.476Z",
+      "completedAt": "2025-09-30T11:25:30.476Z"
+    },
+    {
+      "id": "f50281bc-f3ee-462d-8a21-460f9b293aac",
+      "status": "+",
+      "title": "Add tests for src/agentTools/helpers.ts",
+      "description": "Improve test coverage for @src/agentTools/helpers.ts.\nTarget uncovered lines: 5-11.",
+      "context": [
+        "src/agentTools/helpers.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-30T11:07:06.361Z",
+      "updatedAt": "2025-09-30T11:11:06.287Z",
+      "completedAt": "2025-09-30T11:11:06.287Z"
+    },
+    {
+      "id": "d6382f59-943f-4fb9-ba14-2cbf679bb658",
+      "status": "+",
+      "title": "Add tests for src/chats/ChatsTools.ts",
+      "description": "Improve test coverage for @src/chats/ChatsTools.ts.\nTarget uncovered lines: 1-343.",
+      "context": [
+        "src/chats/ChatsTools.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-30T11:07:11.201Z",
+      "updatedAt": "2025-09-30T11:20:53.059Z",
+      "completedAt": "2025-09-30T11:20:53.059Z"
+    },
+    {
+      "id": "290a9550-b0e0-4e95-b53f-4fa0c63b85f3",
+      "status": "+",
+      "title": "Add tests for src/files/FileTools.ts",
+      "description": "Improve test coverage for @src/files/FileTools.ts.\nTarget uncovered lines: 13-23, 69-70, 85-86, 145-146, 153, 200-228, 230-232.",
+      "context": [
+        "src/files/FileTools.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-30T11:07:16.952Z",
+      "updatedAt": "2025-09-30T11:13:57.129Z",
+      "completedAt": "2025-09-30T11:13:57.129Z"
+    },
+    {
+      "id": "2e27b5c2-d5bc-413d-8626-5652d820f589",
+      "status": "+",
+      "title": "Add tests for src/chats/utils.ts",
+      "description": "Improve test coverage for @src/chats/utils.ts.\nTarget uncovered lines: 127-147, 149-169.",
+      "context": [
+        "src/chats/utils.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-30T11:07:20.176Z",
+      "updatedAt": "2025-09-30T11:16:53.518Z",
+      "completedAt": "2025-09-30T11:16:53.518Z"
+    },
+    {
+      "id": "b73b73e7-d076-444b-aae9-9ed4fd7d2161",
+      "status": "+",
+      "title": "Add tests for src/files/helpers.ts",
+      "description": "Improve test coverage for @src/files/helpers.ts.\nTarget uncovered lines: 16-17, 23-27, 36-42, 73-74, 81-84, 87-88, 119-122, 128-153, 155-220.",
+      "context": [
+        "src/files/helpers.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-30T11:07:24.799Z",
+      "updatedAt": "2025-09-30T11:21:04.976Z",
+      "completedAt": "2025-09-30T11:21:04.976Z"
+    },
+    {
+      "id": "9e19e3c2-0b4f-48cb-8b9b-ac23ec372c3d",
+      "status": "=",
+      "title": "Failing tests",
+      "description": "@docs/TESTING.md is the guide.\n\nHere failing tests will be reported that need fixing.\nAlways scrutinize the test first - due to code changing, the test might need to change drastically too.",
+      "context": [
+        "docs/TESTING.md"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-04T09:49:24.191Z",
+      "updatedAt": "2025-10-29T16:02:53.722Z"
+    },
+    {
+      "id": "802d1c2f-9780-4acc-b4c2-e037a4d3babb",
+      "status": "+",
+      "title": "Add tests for src/agentTools/agentToolsHelpers.ts",
+      "description": "Improve test coverage for @src/agentTools/agentToolsHelpers.ts.\nTarget uncovered lines: 1-11.",
+      "context": [
+        "src/agentTools/agentToolsHelpers.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-05T21:33:29.246Z",
+      "updatedAt": "2025-10-05T21:49:33.111Z",
+      "completedAt": "2025-10-05T21:49:33.111Z"
+    },
+    {
+      "id": "396269ca-cbe5-4db6-addf-c4c603d49baa",
+      "status": "+",
+      "title": "Add tests for src/project/projectUtils.ts",
+      "description": "Improve test coverage for @src/project/projectUtils.ts.\nTarget uncovered lines: 92-94, 151-154, 163.",
+      "context": [
+        "src/project/projectUtils.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-05T23:18:42.437Z",
+      "updatedAt": "2025-10-05T23:31:49.076Z",
+      "completedAt": "2025-10-05T23:31:49.076Z"
+    },
+    {
+      "id": "93e0941c-cc8e-4b1d-bae9-12f59ca43aed",
+      "status": "+",
+      "title": "Add tests for src/file/fileHelpers.ts",
+      "description": "Improve test coverage for @src/file/fileHelpers.ts.\nTarget uncovered lines: 82-83, 87-88, 171-174, 195-196, 201-205, 210-216.",
+      "context": [
+        "src/file/fileHelpers.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-05T23:18:53.523Z",
+      "updatedAt": "2025-10-05T23:33:37.863Z",
+      "completedAt": "2025-10-05T23:33:37.863Z"
+    },
+    {
+      "id": "b6d12725-c1ec-432a-9235-68b32a741da7",
+      "status": "+",
+      "title": "Add tests for src/completion/completionUtils.ts",
+      "description": "Improve test coverage for @src/completion/completionUtils.ts.\nTarget uncovered lines: 71-80, 84-101.",
+      "context": [
+        "src/completion/completionUtils.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-05T23:19:00.333Z",
+      "updatedAt": "2025-10-05T23:35:29.304Z",
+      "completedAt": "2025-10-05T23:35:29.304Z"
+    },
+    {
+      "id": "69f7bcbc-c09e-45aa-bb1d-2b98314cb90a",
+      "status": "+",
+      "title": "Add tests for src/completion/completionHelpers.ts",
+      "description": "Improve test coverage for @src/completion/completionHelpers.ts.\nTarget uncovered lines: 12-13.",
+      "context": [
+        "src/completion/completionHelpers.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-05T23:19:02.171Z",
+      "updatedAt": "2025-10-05T23:36:39.290Z",
+      "completedAt": "2025-10-05T23:36:39.290Z"
+    },
+    {
+      "id": "38759226-6c3b-41ca-ad1d-d7203cb2575f",
+      "status": "+",
+      "title": "Add tests for src/logger.ts",
+      "description": "Improve test coverage for @src/logger.ts .\nTarget uncovered lines: 9-10, 16-17, 23-24, 42-43, 46-47, 49-54, 56-84, 86-98, 102-103 .",
+      "context": [
+        "src/logger.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-08T23:23:02.379Z",
+      "updatedAt": "2025-10-08T23:29:48.707Z",
+      "completedAt": "2025-10-08T23:29:48.707Z"
+    },
+    {
+      "id": "c63fa8f6-96ea-41f3-bcfe-0ce878514099",
+      "status": "+",
+      "title": "Add tests for src/orchestrator.ts",
+      "description": "Improve test coverage for @src/orchestrator.ts .\nTarget uncovered lines: 96-99, 206-349, 351-392, 394-443, 445-572, 612-668 .",
+      "context": [
+        "src/orchestrator.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-08T23:23:04.238Z",
+      "updatedAt": "2025-10-08T23:31:26.001Z",
+      "completedAt": "2025-10-08T23:31:26.001Z"
+    },
+    {
+      "id": "b47b6fdd-d054-4310-b588-307557b93eed",
+      "status": "+",
+      "title": "Add tests for src/utils.ts",
+      "description": "Improve test coverage for @src/utils.ts .\nTarget uncovered lines: 26-29 .",
+      "context": [
+        "src/utils.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-08T23:23:08.498Z",
+      "updatedAt": "2025-10-08T23:33:16.893Z",
+      "completedAt": "2025-10-08T23:33:16.893Z"
+    },
+    {
+      "id": "e99b8936-100f-44a7-b97b-9214ca5c9a49",
+      "status": "+",
+      "title": "Add tests for src/agentTools/AgentTools.ts",
+      "description": "Improve test coverage for @src/agentTools/AgentTools.ts .\nTarget uncovered lines: 56, 67, 122, 148, 175, 270-273, 275-282, 299-307, 309-312, 314-318, 320-328, 348-352, 365-367 .",
+      "context": [
+        "src/agentTools/AgentTools.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-08T23:23:12.702Z",
+      "updatedAt": "2025-10-08T23:43:40.567Z",
+      "completedAt": "2025-10-08T23:43:40.567Z"
+    },
+    {
+      "id": "2ab4efa5-52e7-4f00-b51d-48e80d9da48c",
+      "status": "+",
+      "title": "Add tests for src/chats/ChatsTools.ts",
+      "description": "Improve test coverage for @src/chats/ChatsTools.ts .\nTarget uncovered lines: 42-44, 101-102, 120-121, 141-143, 145-152, 154-205, 207-222, 224-290, 292-367, 369-375, 382-388, 401-402, 404-405, 407-408, 433-435, 438-441, 444-446, 448-451, 453-455 .",
+      "context": [
+        "src/chats/ChatsTools.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-08T23:23:17.229Z",
+      "updatedAt": "2025-10-08T23:51:57.700Z",
+      "completedAt": "2025-10-08T23:51:57.700Z"
+    },
+    {
+      "id": "15753fb7-424a-4f52-8ac7-81c0accb558f",
+      "status": "+",
+      "title": "Add tests for src/chats/chatsUtils.ts",
+      "description": "Improve test coverage for @src/chats/chatsUtils.ts .\nTarget uncovered lines: 85-93, 99-100, 133-135, 155, 179 .",
+      "context": [
+        "src/chats/chatsUtils.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-08T23:23:21.637Z",
+      "updatedAt": "2025-10-08T23:58:36.805Z",
+      "completedAt": "2025-10-08T23:58:36.805Z"
+    },
+    {
+      "id": "bf4c65b3-45f2-445f-bc07-d5c1efe91404",
+      "status": "+",
+      "title": "Add tests for src/completion/CompletionTools.ts",
+      "description": "Improve test coverage for @src/completion/CompletionTools.ts .\nTarget uncovered lines: 27-113, 115-139, 141-225, 227-269, 271-339, 348-349, 353-355, 361-363, 367-370, 377-399, 402-405 .",
+      "context": [
+        "src/completion/CompletionTools.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-08T23:23:26.092Z",
+      "updatedAt": "2025-10-09T00:11:44.186Z",
+      "completedAt": "2025-10-09T00:11:44.186Z"
+    },
+    {
+      "id": "aa8a3d2a-e656-4cb8-8ad5-1d6e422ca8cb",
+      "status": "+",
+      "title": "Add tests for src/file/fileHelpers.ts",
+      "description": "Improve test coverage for @src/file/fileHelpers.ts .\nTarget uncovered lines: 36-42, 84, 87-88, 119-122, 161-162, 210-216 .",
+      "context": [
+        "src/file/fileHelpers.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-08T23:23:33.163Z",
+      "updatedAt": "2025-10-09T00:17:56.098Z",
+      "completedAt": "2025-10-09T00:17:56.098Z"
+    },
+    {
+      "id": "9f21e6a8-b311-43b0-8deb-9ac627ed0770",
+      "status": "+",
+      "title": "Add tests for src/project/ProjectTools.ts",
+      "description": "Improve test coverage for @src/project/ProjectTools.ts .\nTarget uncovered lines: 28-29, 147, 267-268 .",
+      "context": [
+        "src/project/ProjectTools.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-08T23:23:42.165Z",
+      "updatedAt": "2025-10-09T00:24:21.517Z",
+      "completedAt": "2025-10-09T00:24:21.517Z"
+    },
+    {
+      "id": "e25278ae-2480-46c2-88bc-def7ef9f079f",
+      "status": "+",
+      "title": "Add tests for src/project/projectUtils.ts",
+      "description": "Improve test coverage for @src/project/projectUtils.ts .\nTarget uncovered lines: 163 .",
+      "context": [
+        "src/project/projectUtils.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-08T23:23:43.763Z",
+      "updatedAt": "2025-10-09T00:26:55.609Z",
+      "completedAt": "2025-10-09T00:26:55.609Z"
+    },
+    {
+      "id": "a8f64282-d9a8-4c29-8338-975d4d2e53ee",
+      "status": "+",
+      "title": "Add tests for src/story/StoryTools.ts",
+      "description": "Improve test coverage for @src/story/StoryTools.ts .\nTarget uncovered lines: 80-81, 114-123, 134-135, 198-199, 230-231, 258-273, 282-284, 329-344, 421-422, 494-495, 509-510, 565, 583, 585, 594 .",
+      "context": [
+        "src/story/StoryTools.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-08T23:23:47.304Z",
+      "updatedAt": "2025-10-09T00:30:20.992Z",
+      "completedAt": "2025-10-09T00:30:20.992Z"
+    },
+    {
+      "id": "8bf4b5df-6aa9-40a6-8c58-ace954d87fbb",
+      "status": "+",
+      "title": "Add tests for src/test/TestTools.ts",
+      "description": "Improve test coverage for @src/test/TestTools.ts .\nTarget uncovered lines: 52-56, 61-62, 93, 96-97, 104, 115-118, 349-354, 366-368, 379-380, 390-391, 415-417, 425-499, 521-522, 526-527, 538-547, 550-554, 559, 571-584, 589-591, 598-599, 620-626, 631-641, 656-658, 660-661, 663-665, 667-669 .",
+      "context": [
+        "src/test/TestTools.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-08T23:23:48.895Z",
+      "updatedAt": "2025-10-09T10:11:47.303Z",
+      "completedAt": "2025-10-09T10:11:47.303Z"
+    },
+    {
+      "id": "15f81a26-2ee9-433a-a364-12b3626fccb7",
+      "status": "+",
+      "title": "Add tests for src/test/testUtils.ts",
+      "description": "Improve test coverage for @src/test/testUtils.ts .\nTarget uncovered lines: 65-66, 87, 140-152, 159-163, 172-178, 215-216, 252, 277-284, 291-295, 314-316, 386-391, 425-432, 438-443, 462-467, 576, 638, 718-719, 773-774, 777-778, 806-808, 848-849, 853-854, 924-925, 934-935, 940-941, 1028-1031, 1042-1043, 1075, 1087, 1096-1098, 1109, 1112, 1129-1130 .",
+      "context": [
+        "src/test/testUtils.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-08T23:23:52.740Z",
+      "updatedAt": "2025-10-09T10:25:18.416Z",
+      "completedAt": "2025-10-09T10:25:18.416Z"
+    },
+    {
+      "id": "963f9ced-fb02-4a6b-8cd5-9dece3250209",
+      "status": "+",
+      "title": "Add tests for src/webSearch/WebSearchTools.ts",
+      "description": "Improve test coverage for @src/webSearch/WebSearchTools.ts .\nTarget uncovered lines: 132-136 .",
+      "context": [
+        "src/webSearch/WebSearchTools.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-27T22:51:01.282Z",
+      "updatedAt": "2025-10-28T01:41:50.899Z",
+      "completedAt": "2025-10-28T01:41:50.899Z"
+    },
+    {
+      "id": "3f0c84d0-23f3-4b7b-8acf-1414203d8939",
+      "status": "+",
+      "title": "Add tests for src/tools/schema/ToolSchemaGenerator.ts",
+      "description": "Improve test coverage for @src/tools/schema/ToolSchemaGenerator.ts .\nTarget uncovered lines: 1-565 .",
+      "context": [
+        "src/tools/schema/ToolSchemaGenerator.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-27T22:51:09.434Z",
+      "updatedAt": "2025-10-28T02:58:47.028Z",
+      "completedAt": "2025-10-28T02:58:47.028Z"
+    },
+    {
+      "id": "196acc05-7f20-44a0-92db-a74afbce8276",
+      "status": "+",
+      "title": "Add tests for src/projectsgroups/ProjectsGroupsTools.ts",
+      "description": "Improve test coverage for @src/projectsgroups/ProjectsGroupsTools.ts .\nTarget uncovered lines: 1-228 .",
+      "context": [
+        "src/projectsgroups/ProjectsGroupsTools.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-27T22:51:15.259Z",
+      "updatedAt": "2025-10-28T01:44:53.581Z",
+      "completedAt": "2025-10-28T01:44:53.581Z"
+    },
+    {
+      "id": "48fae80f-a690-4ab8-aac3-c23639b6b47b",
+      "status": "+",
+      "title": "Add tests for src/test/testUtils.ts",
+      "description": "Improve test coverage for @src/test/testUtils.ts .\nTarget uncovered lines: 61-80, 87, 92-93, 101-233, 235-341, 343-403, 405-455, 458-530, 576, 638, 705-706, 718-719, 735-745, 754-756, 758-761, 773-774, 777-778, 782-812, 820-825, 848-849, 853-854, 898-918, 924-925, 928-930, 934-935, 940-941, 976-977, 1028-1031, 1042-1043, 1075, 1087, 1096-1098, 1109, 1112, 1122-1123, 1129-1130 .",
+      "context": [
+        "src/test/testUtils.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-27T22:51:23.616Z",
+      "updatedAt": "2025-10-28T01:51:54.650Z",
+      "completedAt": "2025-10-28T01:51:54.650Z"
+    },
+    {
+      "id": "e762119f-635f-42b9-8416-fadafe765a90",
+      "status": "+",
+      "title": "Add tests for src/git/monitor/GitMonitorTools.ts",
+      "description": "Improve test coverage for @src/git/monitor/GitMonitorTools.ts .\nTarget uncovered lines: 39-41, 47-52, 54-56, 71-73, 93-94, 102-103, 127-130, 133-134, 136-137, 259, 374-381, 429-442, 496-501, 557-560, 568-572, 574-578, 580-581, 615-618, 620-621, 623-624, 628-629, 636-644, 694, 706-707, 713-727, 769-774, 800-803, 808-810, 814-815, 866-867, 879-882, 903-908, 911-913, 931-967 .",
+      "context": [
+        "src/git/monitor/GitMonitorTools.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-27T22:51:38.299Z",
+      "updatedAt": "2025-10-28T02:16:58.688Z",
+      "completedAt": "2025-10-28T02:16:58.688Z"
+    },
+    {
+      "id": "8c656d38-3b58-4688-8812-42a17b76805b",
+      "status": "+",
+      "title": "Add tests for src/git/merge/GitMergeTools.ts",
+      "description": "Improve test coverage for @src/git/merge/GitMergeTools.ts .\nTarget uncovered lines: 87-88, 103, 108-118, 157-160, 176-179, 193-194, 219-226, 269-276, 386-388, 391-392, 483-484, 607-608, 624-629, 652-654, 786-787, 846-852, 865-866, 923-927, 968-976, 1000-1020, 1036-1041, 1056-1057, 1072-1078, 1098-1100, 1102-1104, 1146-1147, 1171-1172 .",
+      "context": [
+        "src/git/merge/GitMergeTools.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-27T22:51:39.787Z",
+      "updatedAt": "2025-10-28T02:25:08.493Z",
+      "completedAt": "2025-10-28T02:25:08.493Z"
+    },
+    {
+      "id": "752a4b8d-2103-4595-97e2-0992822c7a55",
+      "status": "+",
+      "title": "Add tests for src/git/gitUtils.ts",
+      "description": "Improve test coverage for @src/git/gitUtils.ts .\nTarget uncovered lines: 3-11, 42-50, 78-80, 108-110, 117-124 .",
+      "context": [
+        "src/git/gitUtils.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-27T22:51:41.395Z",
+      "updatedAt": "2025-10-28T01:55:36.559Z",
+      "completedAt": "2025-10-28T01:55:36.559Z"
+    },
+    {
+      "id": "2b7dc2c1-53af-4f62-8f59-35a5fc917fa7",
+      "status": "+",
+      "title": "Add tests for src/git/gitHelpers.ts",
+      "description": "Improve test coverage for @src/git/gitHelpers.ts .\nTarget uncovered lines: 29-30 .",
+      "context": [
+        "src/git/gitHelpers.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-27T22:51:43.172Z",
+      "updatedAt": "2025-10-28T02:11:43.569Z",
+      "completedAt": "2025-10-28T02:11:43.569Z"
+    },
+    {
+      "id": "27abe680-fcec-4744-9907-1f7eda1fc108",
+      "status": "+",
+      "title": "Add tests for src/git/GitTools.ts",
+      "description": "Improve test coverage for @src/git/GitTools.ts .\nTarget uncovered lines: 29-32, 34-37, 39-44, 46-50, 52-60, 62-70, 72-74, 76-85, 87-96, 98-101, 103-105, 107-110, 112-115, 117-121, 123-128, 130-142, 144-154, 156-164, 166-184, 186-197, 199-213, 236, 238, 241, 243, 250, 252-255, 257, 262, 270, 272, 274, 276, 278, 280 .",
+      "context": [
+        "src/git/GitTools.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-27T22:51:47.640Z",
+      "updatedAt": "2025-10-28T02:33:19.169Z",
+      "completedAt": "2025-10-28T02:33:19.169Z"
+    },
+    {
+      "id": "79ed399a-0c2d-4fd3-a826-94b912cac1d9",
+      "status": "+",
+      "title": "Add tests for src/file/fileHelpers.ts",
+      "description": "Improve test coverage for @src/file/fileHelpers.ts .\nTarget uncovered lines: 88, 217-223 .",
+      "context": [
+        "src/file/fileHelpers.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-27T22:51:52.500Z",
+      "updatedAt": "2025-10-28T01:58:55.944Z",
+      "completedAt": "2025-10-28T01:58:55.944Z"
+    },
+    {
+      "id": "c0a9c893-9660-4c37-86c1-b45159e4d576",
+      "status": "+",
+      "title": "Add tests for src/file/FileTools.ts",
+      "description": "Improve test coverage for @src/file/FileTools.ts .\nTarget uncovered lines: 88-89, 134-158, 223-224, 231 .",
+      "context": [
+        "src/file/FileTools.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-27T22:51:57.353Z",
+      "updatedAt": "2025-10-28T02:40:22.700Z",
+      "completedAt": "2025-10-28T02:40:22.700Z"
+    },
+    {
+      "id": "9c987a12-3369-4d39-a0e6-fa57b2d42f4c",
+      "status": "+",
+      "title": "Add tests for src/completion/completionHelpers.ts",
+      "description": "Improve test coverage for @src/completion/completionHelpers.ts .\nTarget uncovered lines: 12-13 .",
+      "context": [
+        "src/completion/completionHelpers.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-27T22:52:02.168Z",
+      "updatedAt": "2025-10-28T02:02:07.994Z",
+      "completedAt": "2025-10-28T02:02:07.994Z"
+    },
+    {
+      "id": "3ac7b80b-293e-4d9f-b0b2-e54bf3112372",
+      "status": "+",
+      "title": "Add tests for src/completion/CompletionTools.ts",
+      "description": "Improve test coverage for @src/completion/CompletionTools.ts .\nTarget uncovered lines: 98, 124-148, 220-229 .",
+      "context": [
+        "src/completion/CompletionTools.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-27T22:52:08.416Z",
+      "updatedAt": "2025-10-28T02:46:59.123Z",
+      "completedAt": "2025-10-28T02:46:59.123Z"
+    },
+    {
+      "id": "bc2e8214-7e29-4195-bd80-41f18d6b5708",
+      "status": "+",
+      "title": "Add tests for src/chats/chatsUtils.ts",
+      "description": "Improve test coverage for @src/chats/chatsUtils.ts .\nTarget uncovered lines: 115-117 .",
+      "context": [
+        "src/chats/chatsUtils.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-27T22:52:10.666Z",
+      "updatedAt": "2025-10-28T02:08:14.702Z",
+      "completedAt": "2025-10-28T02:08:14.702Z"
+    },
+    {
+      "id": "f4fed896-713d-4247-b00b-a0ca8d3bdd37",
+      "status": "+",
+      "title": "Add tests for src/chats/ChatsTools.ts",
+      "description": "Improve test coverage for @src/chats/ChatsTools.ts .\nTarget uncovered lines: 68-70, 114-115, 136-137, 201-203, 205-207, 209-211, 213-219, 287-292, 294-299, 301-306, 308-314, 324-326, 371-373, 375-377, 397-400, 402-405 .",
+      "context": [
+        "src/chats/ChatsTools.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-27T22:52:14.894Z",
+      "updatedAt": "2025-10-28T02:49:18.899Z",
+      "completedAt": "2025-10-28T02:49:18.899Z"
+    },
+    {
+      "id": "dd46c57c-ef96-44a6-9f41-c3ee27390f62",
+      "status": "+",
+      "title": "Add tests for src/agentTools/AgentTools.ts",
+      "description": "Improve test coverage for @src/agentTools/AgentTools.ts .\nTarget uncovered lines: 113, 122, 128, 140-165, 175, 278-286, 288-293 .",
+      "context": [
+        "src/agentTools/AgentTools.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-27T22:52:19.063Z",
+      "updatedAt": "2025-10-28T02:52:37.865Z",
+      "completedAt": "2025-10-28T02:52:37.865Z"
+    },
+    {
+      "id": "dcfd67a1-8eaf-49bc-a8f7-6bad16f5f106",
+      "status": "+",
+      "title": "Add tests for src/helpers.ts",
+      "description": "Improve test coverage for @src/helpers.ts .\nTarget uncovered lines: 13-15, 27-28, 43-44, 46-47, 55-59, 121-122 .",
+      "context": [
+        "src/helpers.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-27T22:52:23.885Z",
+      "updatedAt": "2025-10-28T01:49:30.137Z",
+      "completedAt": "2025-10-28T01:49:30.137Z"
+    },
+    {
+      "id": "12eae9c0-de16-4106-953a-bf68e2c3aaf0",
+      "status": "+",
+      "title": "Add tests for src/agentRun/AgentRunTools.ts",
+      "description": "Improve test coverage for @src/agentRun/AgentRunTools.ts .\nTarget uncovered lines: 41-42, 112-113, 122-123, 166-167, 201-202, 206-207, 233-234, 238-239, 244-245, 272-279, 355 .",
+      "context": [
+        "src/agentRun/AgentRunTools.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-27T22:52:25.514Z",
+      "updatedAt": "2025-10-28T02:55:08.192Z",
+      "completedAt": "2025-10-28T02:55:08.192Z"
+    },
+    {
+      "id": "ec9028e9-6d75-4058-8da0-0ae150b5f549",
+      "status": "+",
+      "title": "Fix `GitMergeBinarySubmodule.test.ts` by Allowing 'file' Protocol",
+      "description": "The `GitMergeBinarySubmodule.test.ts` is failing with a `fatal: transport 'file' not allowed` error. This is due to a security feature in recent Git versions. The test setup must be updated to configure the temporary git repository to allow local file cloning by setting `protocol.file.allow` to `always`.",
+      "context": [],
+      "createdAt": "2025-10-28T11:41:38.097Z",
+      "updatedAt": "2025-10-28T11:58:43.096Z",
+      "completedAt": "2025-10-28T11:58:43.096Z"
+    },
+    {
+      "id": "322e216a-f8fa-49fe-9410-a38f09fe7c9c",
+      "status": "+",
+      "title": "Correct Merge Plan for Renamed and Modified Files",
+      "description": "The `GitMergeImpactRenameBoth.test.ts` fails an assertion (`expected undefined to be truthy`), because a file that was both renamed and modified is missing from the merge plan. The logic in `GitMergeTools.getMergePlan` needs to be corrected to handle this specific scenario and correctly include such files in the output.",
+      "context": [],
+      "createdAt": "2025-10-28T11:41:38.100Z",
+      "updatedAt": "2025-10-28T12:05:49.610Z",
+      "completedAt": "2025-10-28T12:05:49.610Z"
+    },
+    {
+      "id": "6ac66ba0-4f0f-4b2c-97d0-e8f0ed136935",
+      "status": "+",
+      "title": "Resolve `spawn EBADF` Error in Command Execution Helper",
+      "description": "Multiple tests (`GitMergeIncludeIgnored`, `GitMergePlanParity`, `GitMergeSchema`, `GitMergeSelectCommits`) are failing with a `spawn EBADF` error originating from the `runCommand` function in `src/process/processHelpers.ts`. This indicates a problem with how child processes are being spawned, likely related to file descriptor handling. The `spawn` call in `runCommand` must be fixed to ensure standard I/O streams are handled correctly across all test environments.",
+      "context": [],
+      "createdAt": "2025-10-28T11:41:38.101Z",
+      "updatedAt": "2025-10-28T12:09:21.377Z",
+      "completedAt": "2025-10-28T12:09:21.377Z"
+    },
+    {
+      "id": "f77a559e-4e6f-4481-a205-e7a0cf537545",
+      "status": "+",
+      "title": "Fix Python Coverage Command Arguments in `testUtils`",
+      "description": "The `TestUtils.runPythonCoverageDir` function incorrectly constructs the command for `pytest`, adding a duplicate `-m` argument. The argument generation logic in `src/test/testUtils.ts` must be corrected to ensure the command is valid, which will fix the 'uses pytest runner when configured' test.",
+      "context": [],
+      "createdAt": "2025-10-28T11:42:11.374Z",
+      "updatedAt": "2025-10-28T12:16:04.551Z",
+      "completedAt": "2025-10-28T12:16:04.551Z"
+    },
+    {
+      "id": "27a6d1b9-8c55-417c-ad47-3fdbe65bc1f1",
+      "status": "+",
+      "title": "Improve Error Reporting for Python Coverage Failure in `testUtils`",
+      "description": "When Python coverage JSON generation fails, `TestUtils.runPythonCoverageDir` reports a generic file-not-found error instead of the specific generation failure. The error handling logic in `src/test/testUtils.ts` must be updated to provide a more accurate message, fixing the 'returns error when coverage json generation fails' test.",
+      "context": [],
+      "createdAt": "2025-10-28T11:42:11.376Z",
+      "updatedAt": "2025-10-28T12:19:13.266Z",
+      "completedAt": "2025-10-28T12:19:13.266Z"
+    },
+    {
+      "id": "c62ea16d-e35d-419e-855c-75cb018a4917",
+      "status": "+",
+      "title": "Correct Jest Failure Location Parsing in `testUtils`",
+      "description": "The `buildTestResult` helper function in `src/test/testUtils.ts` is failing to parse the line and column numbers from Jest's JSON output for test failures. The parsing logic needs to be updated to correctly locate and extract this information, fixing the 'parses jest json output and extracts names and line/column' test.",
+      "context": [],
+      "createdAt": "2025-10-28T11:42:11.376Z",
+      "updatedAt": "2025-10-28T12:21:56.922Z",
+      "completedAt": "2025-10-28T12:21:56.922Z"
+    },
+    {
+      "id": "27af3d53-eed2-4a10-af5b-3323c6c1ad2d",
+      "status": "+",
+      "title": "Correct Branch Rename Validation Order in `GitTools`",
+      "description": "The `GitTools.test.ts` test for renaming branches is failing because the `renameBranch` function returns a `working_tree_dirty` error instead of the expected `branch_already_exists` error. This is because the function checks the working tree status before verifying if the target branch name is already in use. The validation logic in `src/git/GitTools.ts` must be reordered to check for the existing branch name first.",
+      "context": [],
+      "createdAt": "2025-10-28T11:42:46.278Z",
+      "updatedAt": "2025-10-28T12:22:50.757Z",
+      "completedAt": "2025-10-28T12:22:50.757Z"
+    },
+    {
+      "id": "ccf2e31c-c1ca-433e-b889-027738f65793",
+      "status": "+",
+      "title": "The codeIntel-meta tests fail due to the code not picking up the `CodeIntelMember` class properly",
+      "description": "The @src/codeIntel/codeIntel-meta.test.ts fails with the errors in the rejection.\nThe relevant files for this are:\n@src/codeIntel/CodeIntelTools.ts , @src/codeIntel/codeIntelHelpers.ts , @src/codeIntel/codeIntelTypes.ts , @src/codeIntel/languagePackLoader.ts , @src/codeIntel/internal/treeSitter.ts , @src/codeIntel/javascript/codeIntelLanguagePackJavascript.ts , @src/codeIntel/javascript/codeIntelStrategyJavascript.ts and @src/codeIntel/byteSlicer.ts .\nMake sure you run `runTest` on @src/codeIntel/codeIntel-meta.test.ts to verify that the work you've completed is done.",
+      "context": [
+        "src/codeIntel/codeIntel-meta.test.ts",
+        "src/codeIntel/CodeIntelTools.ts",
+        "src/codeIntel/codeIntelHelpers.ts",
+        "src/codeIntel/codeIntelTypes.ts",
+        "src/codeIntel/languagePackLoader.ts",
+        "src/codeIntel/internal/treeSitter.ts",
+        "src/codeIntel/javascript/codeIntelLanguagePackJavascript.ts",
+        "src/codeIntel/javascript/codeIntelStrategyJavascript.ts",
+        "src/codeIntel/byteSlicer.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-29T08:45:33.438Z",
+      "updatedAt": "2025-10-29T15:51:07.735Z",
+      "completedAt": "2025-10-29T15:51:07.735Z"
+    }
+  ],
+  "createdAt": "2025-09-29T19:13:22.378Z",
+  "updatedAt": "2025-10-27T22:43:52.472Z"
+}

@@ -1,0 +1,100 @@
+{
+  "id": "6d94d459-c0f3-4848-991d-4ee4ba3830ce",
+  "status": "-",
+  "title": "Introduce domain events with @nestjs/event-emitter to decouple modules and clean layering",
+  "description": "Goal\nAdopt in-process domain events using @nestjs/event-emitter to decouple business logic from persistence (repositories) and remove cross-module layering smells. Services emit events when business state changes; listeners in other modules react (e.g., update statistics, enqueue messages) without repositories invoking higher-level services.\n\nMotivation\n- Eliminate repository -> service dependencies (e.g., profiles repo -> statistics service)\n- Reduce circular DI and module coupling\n- Make side-effects explicit, testable, and extensible\n\nScope (Phase 1)\n- Add EventEmitterModule.forRoot() at app bootstrap\n- Define event name constants and payload types per domain\n- Update service layers to emit events (move side-effects out of repositories)\n- Implement listeners in consumer modules\n- Update/add tests (unit + integration where relevant)\n\nTarget modules and initial events/listeners\n- User Profiles (emit):\n  - user.profile.created { userId, createdAt, timezone }\n  - user.profile.onboarding.updated { userId, stage, updatedAt, completedAt? }\n  - user.profile.deleted { userId }\n  - user.profile.simulation.updated { userId, simulation: Partial<...>, updatedAt }\n  Consumers: Statistics (funnel steps)\n\n- Statistics (listen):\n  - On profile created/updated events, set funnel steps via StatisticsUserService\n  - On WhatsApp and Journals/Audio events (below), increment counters\n\n- WhatsApp (emit):\n  - whatsapp.outbox.enqueued { outboxId, userId, phoneE164, bodyText, template? }\n  - whatsapp.outbox.delivered { outboxId, deliveredAt, providerMessageId }\n  - whatsapp.outbox.failed { outboxId, error }\n  - whatsapp.inbox.received { id, fromWaid, type, text?, button?, userId?, contextMessageId? }\n  - whatsapp.session.inbound.touched { userId, phoneE164, atIso }\n  Consumers: Statistics (WhatsApp counters); Conversations (optional, to create messages from inbound)\n\n- Conversations (emit):\n  - conversations.message.created { messageId, userId, type, createdAt }\n  - conversations.message.assistant.duplicateFlagged { messageId, userId, duplicateOfId }\n  Consumers: Statistics (per-message metrics)\n\n- Journals (emit):\n  - journals.entry.created { userId, journalId, createdAt }\n  Consumers: Statistics (journal counts)\n\n- Audio Recordings (emit):\n  - audio.recording.started/completed/canceled { userId, id, createdAt, durationSeconds? }\n  Consumers: Statistics (voice metrics)\n\n- Check-Ins (emit):\n  - checkins.scheduled { userId, scheduleAt }\n  - checkins.sent.whatsapp { userId, outboxId }\n  Consumers: WhatsApp (enqueue), future analytics\n\n- Goals (emit):\n  - goals.macro.created/updated { userId, goalId }\n  - goals.micro.created/updated { userId, goalId }\n  Consumers: Agent/analytics (future)\n\n- Activity (optional refactor):\n  - Interceptor emits activity.api.logged; ActivityService listens and persists\n\nDesign constraints\n- No new DB tables/queues; in-memory emitter only\n- Repositories remain persistence-only; side-effects move to services/listeners\n- Backwards compatible behavior for stats updates\n\nAcceptance criteria\n- App uses EventEmitterModule globally\n- User profiles no longer call statistics from repository; stats updated via listener\n- WhatsApp delivered/failed and inbox received events are emitted; statistics listener updates counters\n- Tests cover emitters and listeners for Profiles, WhatsApp, and Statistics\n- No module/provider circular dependency remains due to repositories\n\nNon-goals (this story)\n- Replacing cron-based orchestrators\n- Introducing an external message bus\n\nFollow-ups (Phase 2)\n- Conversations granular stats processing via events\n- Optional Activity interceptor refactor\n- Broader adoption across Check-Ins, Goals if needed",
+  "features": [
+    {
+      "id": "ecd68d45-172e-4bba-b87d-084b9331348d",
+      "status": "-",
+      "title": "App/Core - enable EventEmitter globally and define shared event types",
+      "description": "Add @nestjs/event-emitter as a dependency and register EventEmitterModule.forRoot() in AppModule. Create src/events with:\n- events.constants.ts: string constants for event names (grouped by domain)\n- events.types.ts: TypeScript payload interfaces per event\nProvide a small helper for safe emit (guard undefined payload). Acceptance: App boots with emitter; basic smoke test emits and listens.",
+      "context": [],
+      "createdAt": "2026-01-30T07:13:45.363Z",
+      "updatedAt": "2026-01-30T07:13:45.363Z"
+    },
+    {
+      "id": "2c43a86d-8670-4bcd-aaa0-e18ce015fe8e",
+      "status": "-",
+      "title": "User Profiles - emit lifecycle events; remove repository side effects",
+      "description": "In UserProfilesService, emit:\n- 'user.profile.created' { userId, createdAt, timezone }\n- 'user.profile.onboarding.updated' { userId, stage, updatedAt, completedAt? }\n- 'user.profile.deleted' { userId }\n- 'user.profile.simulation.updated' { userId, simulation: Partial<...>, updatedAt }\nRemove StatisticsUserService usage from DynamoDbUserProfilesRepository (repositories remain persistence-only). Update tests to verify emits from service and no direct stats calls from repository.",
+      "context": [],
+      "createdAt": "2026-01-30T07:13:45.364Z",
+      "updatedAt": "2026-01-30T07:13:45.364Z"
+    },
+    {
+      "id": "62384e98-2246-4973-9797-9dd1c6a3e7ff",
+      "status": "-",
+      "title": "Statistics - add listeners for profile/WhatsApp/journals/audio events",
+      "description": "Create listeners in statistics module to update funnels and counters:\n- On 'user.profile.created' => setFunnelStep(OnboardingStart)\n- On 'user.profile.onboarding.updated' => derive steps and setFunnelStepsCompleted\n- On 'whatsapp.outbox.delivered' => incrementWhatsappDelivered\n- On 'whatsapp.outbox.failed' => incrementWhatsappFailed\n- On 'journals.entry.created' => incrementJournalsStarted/Completed\n- On 'audio.recording.started/completed/canceled' => increment voice metrics and duration\nAdd focused unit tests for listeners. Ensure module wiring does not introduce DI cycles.",
+      "context": [],
+      "createdAt": "2026-01-30T07:13:45.365Z",
+      "updatedAt": "2026-01-30T07:13:45.365Z"
+    },
+    {
+      "id": "6c3ddf7b-d098-4166-af8e-6578d4c5f7fa",
+      "status": "-",
+      "title": "WhatsApp - emit outbox/inbox/session events and integrate with worker",
+      "description": "Emit from WhatsAppCoreService/WhatsAppOutboundService:\n- 'whatsapp.outbox.enqueued' { outboxId, userId, phoneE164, bodyText, template? }\n- 'whatsapp.outbox.delivered' { outboxId, deliveredAt, providerMessageId }\n- 'whatsapp.outbox.failed' { outboxId, error }\n- 'whatsapp.inbox.received' { id, fromWaid, type, text?, button?, userId?, contextMessageId? }\n- 'whatsapp.session.inbound.touched' { userId, phoneE164, atIso }\nWorker integration: before/after send, emit delivery.requested (optional), delivered/failed outcomes. Add tests to assert emissions and preserve existing behavior.",
+      "context": [],
+      "createdAt": "2026-01-30T07:13:45.365Z",
+      "updatedAt": "2026-01-30T07:13:45.365Z"
+    },
+    {
+      "id": "e22d647a-faa8-4227-a971-ea20279238c9",
+      "status": "-",
+      "title": "Conversations - emit message lifecycle events; prepare stats hooks",
+      "description": "From ConversationsCoreService, emit:\n- 'conversations.message.created' { messageId, userId, type, createdAt }\n- 'conversations.message.assistant.duplicateFlagged' { messageId, userId, duplicateOfId }\nListeners (phase 2): statistics per-message metrics. Add unit tests for emissions. No behavior change beyond events in this phase.",
+      "context": [],
+      "createdAt": "2026-01-30T07:13:45.366Z",
+      "updatedAt": "2026-01-30T07:13:45.366Z"
+    },
+    {
+      "id": "387650c7-7b2d-47ad-849a-5b9c2df85653",
+      "status": "-",
+      "title": "Journals - emit entry created events",
+      "description": "From JournalsService after successful create, emit 'journals.entry.created' { userId, journalId, createdAt }. Add unit tests verifying emission and payload shape.",
+      "context": [],
+      "createdAt": "2026-01-30T07:13:45.366Z",
+      "updatedAt": "2026-01-30T07:13:45.366Z"
+    },
+    {
+      "id": "4686cc62-b6f2-4d12-9098-9d33c55b7d59",
+      "status": "-",
+      "title": "Audio Recordings - emit started/completed/canceled events",
+      "description": "From AudioRecordingsService, emit:\n- 'audio.recording.started' { userId, id, createdAt }\n- 'audio.recording.completed' { userId, id, durationSeconds }\n- 'audio.recording.canceled' { userId, id }\nAdd unit tests verifying emissions at appropriate state transitions.",
+      "context": [],
+      "createdAt": "2026-01-30T07:13:45.367Z",
+      "updatedAt": "2026-01-30T07:13:45.367Z"
+    },
+    {
+      "id": "72e47d3d-5358-4647-8044-93271ea8dd5a",
+      "status": "-",
+      "title": "Check-Ins - emit scheduler and send events",
+      "description": "From CheckIns scheduler/service, emit:\n- 'checkins.scheduled' { userId, scheduleAt }\n- 'checkins.sent.whatsapp' { userId, outboxId }\nAdd unit tests verifying emissions. Future listeners in WhatsApp/Analytics may use them.",
+      "context": [],
+      "createdAt": "2026-01-30T07:13:45.368Z",
+      "updatedAt": "2026-01-30T07:13:45.368Z"
+    },
+    {
+      "id": "90c438e7-f04a-4ff7-9caa-08051d8b5a0c",
+      "status": "-",
+      "title": "Goals - emit macro/micro goal lifecycle events",
+      "description": "From Goals services, emit:\n- 'goals.macro.created' and 'goals.macro.updated' { userId, goalId }\n- 'goals.micro.created' and 'goals.micro.updated' { userId, goalId }\nAdd unit tests verifying emissions. No listeners required in this phase.",
+      "context": [],
+      "createdAt": "2026-01-30T07:13:45.369Z",
+      "updatedAt": "2026-01-30T07:13:45.369Z"
+    },
+    {
+      "id": "c495ba8a-bb3d-4a8c-b2e4-a76c89f41c5e",
+      "status": "-",
+      "title": "Activity (optional) - interceptor emits; service listens to persist",
+      "description": "Refactor logging to events: LoggingInterceptor emits 'activity.api.logged' with request/response snapshot; ActivityService becomes a listener persisting via repositories. Maintain existing controller endpoints. Add tests verifying listener persistence and that interceptor never blocks responses.",
+      "context": [],
+      "createdAt": "2026-01-30T07:13:45.369Z",
+      "updatedAt": "2026-01-30T07:13:45.369Z"
+    }
+  ],
+  "createdAt": "2026-01-30T07:12:35.401Z",
+  "updatedAt": "2026-01-30T07:12:35.401Z"
+}

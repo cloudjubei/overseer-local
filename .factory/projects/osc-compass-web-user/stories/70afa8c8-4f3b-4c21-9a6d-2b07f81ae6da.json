@@ -1,0 +1,51 @@
+{
+  "id": "70afa8c8-4f3b-4c21-9a6d-2b07f81ae6da",
+  "status": "+",
+  "title": "Section gating and onboarding checks",
+  "description": "Goal\n- Restrict access to Journal and Goals until onboarding is complete.\n\nOnboarding completion rule\n- getCurrentMacroGoal returns a current macro goal AND listMicroGoalsForMacro for that macro includes at least one micro goal.\n\nUI behavior\n- Navigation shows Chat, Journal, Goals; Journal and Goals are disabled or hidden until onboarding completes.\n- Once onboarding completes, nav updates dynamically to enable Journal and Goals without a full reload.\n\nTech notes\n- Implement a lightweight onboardingStatus hook or server action that calls the two endpoints and caches with React Query.\n- Guard routes (middleware or client-side guards) and reflect state in the nav.\n- Consider a loading indicator while status is being determined.\n\nAcceptance criteria\n- Before completion: only Chat is accessible; Journal and Goals are disabled or guarded.\n- After completion: Journal and Goals become accessible and usable immediately.\n- Errors and loading states are handled and visible to the user.",
+  "features": [
+    {
+      "id": "d3a79df3-f244-4fdd-aac3-27329c23345d",
+      "status": "+",
+      "title": "Navigation shell",
+      "description": "Implement top or side navigation with items: Chat, Journal, Goals. Reflect gated state visually (disabled style or tooltip) when onboarding is incomplete. Use shadcn/ui components for consistent styling. Acceptance: only Chat is enabled before onboarding complete; others are visibly gated.",
+      "context": [],
+      "createdAt": "2025-11-07T15:43:41.515Z",
+      "updatedAt": "2025-11-08T00:16:49.287Z",
+      "completedAt": "2025-11-08T00:16:49.287Z"
+    },
+    {
+      "id": "6dbccc6d-187b-44bb-b3bb-c8d9aeaed6c7",
+      "status": "+",
+      "title": "Onboarding status hook",
+      "description": "Create a React Query hook that calls 'getCurrentMacroGoal' and, if present, 'listMicroGoalsForMacro' to compute onboarding status: 'complete' if macro goal exists and micro goals list has at least one item, else 'incomplete'. Cache result and refetch on window focus. Return loading/error state.",
+      "context": [],
+      "createdAt": "2025-11-07T15:43:41.516Z",
+      "updatedAt": "2025-11-08T00:17:59.848Z",
+      "completedAt": "2025-11-08T00:17:59.848Z"
+    },
+    {
+      "id": "57345728-e382-4ca2-b63a-8793ac5c7252",
+      "status": "+",
+      "title": "Route guards",
+      "description": "Guard '/journal' and '/goals' routes. If onboarding is incomplete, redirect to '/chat' (client-side for MVP; can move to middleware/server action later). Update nav interactivity based on the hook result. Acceptance: direct navigation to gated routes before completion redirects to '/chat'.",
+      "context": [],
+      "createdAt": "2025-11-07T15:43:41.516Z",
+      "updatedAt": "2025-11-08T00:19:52.073Z",
+      "completedAt": "2025-11-08T00:19:52.073Z"
+    },
+    {
+      "id": "ae85c951-02c8-4617-9682-a189951a6bc3",
+      "status": "+",
+      "title": "Loading and error states",
+      "description": "Show a lightweight skeleton/spinner while onboarding status is loading. If an error occurs, display an inline error with a retry button that refetches the status. Acceptance: states transition cleanly without layout shift.",
+      "context": [],
+      "createdAt": "2025-11-07T15:43:41.517Z",
+      "updatedAt": "2025-11-08T00:22:15.135Z",
+      "completedAt": "2025-11-08T00:22:15.135Z"
+    }
+  ],
+  "createdAt": "2025-11-07T15:16:25.827Z",
+  "updatedAt": "2025-11-07T15:16:25.827Z",
+  "completedAt": "2025-11-08T00:22:15.135Z"
+}

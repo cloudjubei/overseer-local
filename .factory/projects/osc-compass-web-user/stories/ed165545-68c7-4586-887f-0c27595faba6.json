@@ -1,0 +1,62 @@
+{
+  "id": "ed165545-68c7-4586-887f-0c27595faba6",
+  "status": "+",
+  "title": "Goals view - Current and History",
+  "description": "Goal\n- Present the current macro goal with its micro goals and historical goals via GoalsService.\n\nCurrent tab\n- Show the current macro goal at the top.\n- Show active micro goals with the ability to mark complete or incomplete; persist changes via API.\n- Below, show past (completed) micro goals for the current macro goal sorted by most recent.\n\nHistory tab\n- Display a date-sorted list of past macro goals; each can be expanded to reveal all micro goals for that macro.\n\nTech notes\n- Use optimistic updates for micro goal completion toggles and reconcile with server responses.\n- Ensure sorting matches backend expectations and handle pagination if present.\n\nAcceptance criteria\n- Current tab shows macro goal and active micro goals; toggles persist and reflect immediately.\n- Past micro goals are listed beneath active ones in correct order.\n- History tab expands macro goals to reveal micro goals; ordering is correct.\n- Errors and empty states are handled gracefully.",
+  "features": [
+    {
+      "id": "70da0feb-91e3-49bf-b2d1-0d22fa612797",
+      "status": "+",
+      "title": "Current macro and active micro goals",
+      "description": "Fetch the current macro goal and its micro goals via GoalsService. Partition into active vs past. Render a header card for the macro, and a list of active micro goals with key stats.",
+      "context": [],
+      "createdAt": "2025-11-07T15:43:41.535Z",
+      "updatedAt": "2025-11-08T01:05:49.019Z",
+      "completedAt": "2025-11-08T01:05:49.019Z"
+    },
+    {
+      "id": "4107d804-3870-4058-9abf-76dff12ca8d5",
+      "status": "+",
+      "title": "Toggle micro goal completion (optimistic)",
+      "description": "Allow toggling complete/incomplete for micro goals with optimistic UI updates. Persist via GoalsService; rollback on failure and show a toast. Acceptance: toggle feels instant and consistent after server reconciliation.",
+      "context": [],
+      "createdAt": "2025-11-07T15:43:41.536Z",
+      "updatedAt": "2025-11-08T01:09:44.745Z",
+      "completedAt": "2025-11-08T01:09:44.745Z"
+    },
+    {
+      "id": "beb7218d-84fb-46f5-abd0-424e8519a63c",
+      "status": "+",
+      "title": "Past micro goals list",
+      "description": "Display past (completed) micro goals beneath active ones, sorted by most recent. Support pagination if present. Acceptance: ordering correct and list is performant for larger histories.",
+      "context": [],
+      "createdAt": "2025-11-07T15:43:41.537Z",
+      "updatedAt": "2025-11-08T01:15:27.797Z",
+      "completedAt": "2025-11-08T01:15:27.797Z"
+    },
+    {
+      "id": "9f4bec9d-1b70-4c6b-8917-6896ef6ebc39",
+      "status": "+",
+      "title": "History tab - macro goals archive",
+      "description": "Show a date-sorted list of past macro goals. Each item expands to reveal its micro goals. Persist expand/collapse state per session for UX polish (optional).",
+      "context": [],
+      "createdAt": "2025-11-07T15:43:41.537Z",
+      "updatedAt": "2025-11-10T10:31:32.269Z",
+      "blockers": [],
+      "completedAt": "2025-11-10T10:31:32.269Z"
+    },
+    {
+      "id": "bd4445b1-c1cd-46c0-b597-e1f3f573e145",
+      "status": "+",
+      "title": "Empty, loading, and error states",
+      "description": "Provide skeletons and empty placeholders for both tabs, plus inline error with retry. Acceptance: clear, consistent UX for transient and failure states across goals views.",
+      "context": [],
+      "createdAt": "2025-11-07T15:43:41.538Z",
+      "updatedAt": "2025-11-10T10:35:00.296Z",
+      "completedAt": "2025-11-10T10:35:00.296Z"
+    }
+  ],
+  "createdAt": "2025-11-07T15:16:25.829Z",
+  "updatedAt": "2025-11-10T11:38:53.643Z",
+  "completedAt": "2025-11-10T11:38:53.643Z"
+}

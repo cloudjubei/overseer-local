@@ -1,0 +1,41 @@
+{
+  "id": "0e893d2e-dcad-452f-b9a0-508d34c29a17",
+  "status": "+",
+  "title": "Implement Cost Tracking & Ledger",
+  "description": "Implement a cost tracking system using `thefactory-db` Entities within a consolidated `llmCosts` module.\n\nWe will use a dual-entity approach:\n1. **Ledger Entries**: Atomic, immutable records of every LLM call (`cost-ledger-entry`). We will use `shouldEmbed: false` to avoid unnecessary tokenization costs.\n2. **Aggregates**: Mutable entities (`cost-aggregate`) that store running totals for various scopes (Chat, Story, Feature, Project, Group) to allow O(1) cost retrieval.\n\nThis system requires implementing:\n- `LLMCostsTools` interface and implementation.\n- `PricingManager` logic consolidated into the module.\n- Logic to append ledger entries and recursively update aggregate entities.\n- Integration with the completion pipeline to automatically track costs.\n- Read-methods to fetch costs for specific scopes.\n- Standardized file structure (`types`, `constants`, `helpers`, `utils`, `Tools`).",
+  "features": [
+    {
+      "id": "617bd2de-b152-4b8f-97c7-1b73989ee94b",
+      "status": "+",
+      "title": "Implement LLMCostsTools and Module Structure",
+      "description": "Create a consolidated `src/llmCosts` module following the project's tool conventions (like `src/file/*`):\n\n- `llmCostsTypes.ts`: types for scopes, ledger entry content/entity, aggregate content/entity, tool interface.\n- `llmCostsConstants.ts`: entity type strings (`cost-ledger-entry`, `cost-aggregate`) and any key formats.\n- `llmCostsUtils.ts`: pure helpers (e.g., model key formatting, zero aggregate factory).\n- `llmCostsHelpers.ts`: reusable functions with dependencies (e.g., db match/update logic).\n- `LLMCostsTools.ts`: `LLMCostsTools` interface + implementation.\n\nImplement `LLMCostsTools` methods:\n- `appendCost`: calculate cost using consolidated pricing logic, create a `cost-ledger-entry` entity (`shouldEmbed: false`), and update `cost-aggregate` entities for all relevant scopes (agentRun/chat/feature/story/project; group to be supported when groupId is available).\n- `getCost`: retrieve the `cost-aggregate` for a specific scope.\n- `getCostTotals`: return totals for a scope (initially alias of `getCost` or returns the content only).\n\nEnsure `shouldEmbed: false` is used for all cost-related entities.",
+      "context": [],
+      "createdAt": "2026-03-03T01:40:34.144Z",
+      "updatedAt": "2026-03-03T18:28:34.132Z",
+      "completedAt": "2026-03-03T18:28:34.132Z"
+    },
+    {
+      "id": "99212ee1-5098-4219-af06-98440faad8e8",
+      "status": "+",
+      "title": "Integrate Cost Tracking into Completions",
+      "description": "Integrate `CostTools` into `Tools` and `CompletionTools`. Ensure that every `sendCompletion` call (or relevant wrapper) automatically calls `appendCost`.\n\n- Add `CostTools` to the `Tools` interface and `createTools`.\n- In `CompletionTools` (or `sendCompletion` logic), automatically track usage after a successful LLM call.\n- Pass the necessary context (Chat/Story/Project IDs) down to the completion layer so it can properly attribute the cost.",
+      "context": [],
+      "createdAt": "2026-03-03T01:41:00.063Z",
+      "updatedAt": "2026-03-03T18:28:43.556Z",
+      "completedAt": "2026-03-03T18:28:43.556Z"
+    },
+    {
+      "id": "5ea931ea-3bbf-429e-9715-95eb186e7561",
+      "status": "+",
+      "title": "Add Tests for Cost Tracking",
+      "description": "Expose a way for tests to reset costs or spy on them. Add tests verifying that `appendCost` correctly updates the `cost-ledger-entry` and all parent `cost-aggregate` entities. Verify correctness of calculations and handling of different pricing models (input, output, cached).",
+      "context": [],
+      "createdAt": "2026-03-03T01:41:11.398Z",
+      "updatedAt": "2026-03-03T20:57:43.175Z",
+      "completedAt": "2026-03-03T20:57:43.175Z"
+    }
+  ],
+  "createdAt": "2026-03-03T01:39:39.561Z",
+  "updatedAt": "2026-03-03T09:08:46.935Z",
+  "completedAt": "2026-03-03T20:57:43.175Z"
+}

@@ -1,0 +1,41 @@
+{
+  "id": "8b923a8b-2e41-482e-a21a-72f9b6cd7265",
+  "status": "+",
+  "title": "Additional roadmap improvements",
+  "description": "Address the remaining pending tasks from the graph-first summarization roadmap: KG external marker modeling, Prompt parity, and Optimization impact fidelity.",
+  "features": [
+    {
+      "id": "26601d0f-93c8-487a-8411-21b3ed532146",
+      "status": "+",
+      "title": "KG external marker modeling",
+      "description": "Improve external marker modeling in mempalace KG ingestion path.",
+      "context": [],
+      "createdAt": "2026-04-20T21:55:06.141Z",
+      "updatedAt": "2026-04-20T22:02:48.718Z",
+      "completedAt": "2026-04-20T22:02:48.718Z"
+    },
+    {
+      "id": "3f5e0e55-e721-4004-b434-0aaf566e633d",
+      "status": "+",
+      "title": "Prompt parity",
+      "description": "Bring L1/L4 prompt templates to the same graph-aware depth as L2/L3.",
+      "context": [],
+      "createdAt": "2026-04-20T21:55:11.637Z",
+      "updatedAt": "2026-04-20T22:05:14.013Z",
+      "completedAt": "2026-04-20T22:05:14.013Z"
+    },
+    {
+      "id": "ed7c2399-3b7d-4e48-b593-525fc2dad3a5",
+      "status": "+",
+      "title": "Optimization impact fidelity",
+      "description": "Replace heuristic optimization deltas with stronger estimation/modeling.",
+      "context": [],
+      "createdAt": "2026-04-20T21:55:18.031Z",
+      "updatedAt": "2026-04-20T22:14:54.631Z",
+      "completedAt": "2026-04-20T22:14:54.631Z"
+    }
+  ],
+  "createdAt": "2026-04-20T21:53:34.464Z",
+  "updatedAt": "2026-04-20T21:55:18.031Z",
+  "completedAt": "2026-04-20T22:14:54.631Z"
+}

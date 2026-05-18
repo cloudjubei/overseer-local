@@ -1,0 +1,260 @@
+{
+  "id": "b3e624bb-2396-4bf2-b964-66b14fe31dc6",
+  "status": "+",
+  "title": "Test Tools need to be better specced",
+  "description": "We want agents from the outside to use TestTools, therefore the schemas and APIs need to be made better so that there's a consistent model to use when interacting with them (input and output).\nThis also means that all internal usages need to be adapted to this.",
+  "features": [
+    {
+      "id": "6754dfef-b03e-4b7b-84df-177db2999806",
+      "status": "+",
+      "title": "Define Standardized Test Result Types",
+      "description": "Create a new `src/types/TestResult.ts` file and define the `TestResult` and `CoverageResult` interfaces. `TestResult` should contain `status ('pass' | 'fail')`, `stdout`, `stderr`, and `exitCode`. `CoverageResult` should formalize the existing success structure and define a consistent error shape, including fields like `status ('ok' | 'error')`, `message`, and `test` execution details.",
+      "context": [],
+      "createdAt": "2025-09-23T09:47:07.388Z",
+      "updatedAt": "2025-09-23T10:05:36.383Z",
+      "completedAt": "2025-09-23T10:05:36.383Z"
+    },
+    {
+      "id": "9d2f3579-8071-46cc-9b07-afc1a34f9638",
+      "status": "+",
+      "title": "Refactor `runTest` to Return a Standardized JSON Object",
+      "description": "Modify the `runTest` function in `src/tools/TestTools.ts` to return a `Promise<TestResult>`. Update all code paths, including success and error handling, to return a JSON object conforming to the new `TestResult` interface instead of the current formatted string (`PASS`/`FAIL`).",
+      "context": [],
+      "createdAt": "2025-09-23T09:47:07.391Z",
+      "updatedAt": "2025-09-23T10:14:34.442Z",
+      "completedAt": "2025-09-23T10:14:34.442Z"
+    },
+    {
+      "id": "87cd5a16-8499-4596-8e76-20f670cbcd6f",
+      "status": "+",
+      "title": "Refactor `runTestCoverage` for Consistent JSON Output",
+      "description": "Modify the `runTestCoverage` function in `src/tools/TestTools.ts` to return a `Promise<CoverageResult>`. Ensure that all execution paths, especially error conditions, return a JSON object that conforms to the `CoverageResult` interface, eliminating any string-based `FAIL` returns.",
+      "context": [],
+      "createdAt": "2025-09-23T09:47:07.392Z",
+      "updatedAt": "2025-09-23T10:15:25.494Z",
+      "completedAt": "2025-09-23T10:15:25.494Z"
+    },
+    {
+      "id": "0cf0e854-9610-461b-adf5-62a549c79e66",
+      "status": "+",
+      "title": "Update Tool Signatures and Descriptions",
+      "description": "In `src/tools/Tools.ts`, update the `toolSigsForAgent` function to change the return type signature for `runTest` from `-> str` to `-> json`. Also, update the `TOOL_DESCRIPTIONS` for `runTest` and `runTestCoverage` to accurately describe their new standardized JSON output.",
+      "context": [],
+      "createdAt": "2025-09-23T09:47:07.392Z",
+      "updatedAt": "2025-09-23T10:18:34.850Z",
+      "completedAt": "2025-09-23T10:18:34.850Z"
+    },
+    {
+      "id": "92647452-f759-4cc9-8b64-c56cbe717290",
+      "status": "+",
+      "title": "Update Project Documentation for TestTools API",
+      "description": "Update the `TestTools` section in `docs/FILE_ORGANISATION.md` to document the new, standardized JSON response schemas for `runTest` and `runTestCoverage`. Provide examples of the success and error JSON objects for clarity.",
+      "context": [],
+      "createdAt": "2025-09-23T09:47:07.393Z",
+      "updatedAt": "2025-09-23T10:21:07.326Z",
+      "completedAt": "2025-09-23T10:21:07.326Z"
+    },
+    {
+      "id": "54a95523-64dc-455c-adb4-4cb470471b28",
+      "status": "+",
+      "title": "There needs to be a function to list all current tests and a subscribe for test file changes",
+      "description": "The api should follow @src/tools/StoryTools.ts or @src/tools/ProjectTools.ts - they behave very similarly in terms of subscribing and listing the available stories / projects. The same needs to be done here.",
+      "context": [
+        "src/tools/StoryTools.ts",
+        "src/tools/ProjectTools.ts"
+      ],
+      "createdAt": "2025-09-23T11:58:56.958Z",
+      "updatedAt": "2025-09-23T12:11:24.819Z",
+      "completedAt": "2025-09-23T12:11:24.819Z"
+    },
+    {
+      "id": "db6dc161-b019-43a0-8b6d-bb343fc55b89",
+      "status": "+",
+      "title": "TestTools cleanup",
+      "description": "We can assume that all tests for all projects live in './tests' directory and that only tests will be there - so no need to match/check for file patterns.\\nInstead of using 2 file watchers we can use just 1 - the indexed version simply does more.",
+      "context": [],
+      "createdAt": "2025-09-23T12:22:58.808Z",
+      "updatedAt": "2025-09-23T12:26:04.877Z",
+      "completedAt": "2025-09-23T12:26:04.877Z"
+    },
+    {
+      "id": "c22ac25c-f8f6-42aa-94f9-f7790b0c8711",
+      "status": "+",
+      "title": "Follow the patterns other tools used in using utils.ts and FileUtils.ts",
+      "description": "Look at how @src/tools/StoryTools.ts uses @src/files/FileUtils.ts and @src/utils.ts for getting the path and ensuring the directory exists - do the same.",
+      "context": [
+        "src/tools/StoryTools.ts",
+        "src/files/FileUtils.ts",
+        "src/utils.ts"
+      ],
+      "createdAt": "2025-09-23T12:28:14.397Z",
+      "updatedAt": "2025-09-23T12:35:11.211Z",
+      "completedAt": "2025-09-23T12:35:11.211Z"
+    },
+    {
+      "id": "796e98b4-2ad4-40c3-8421-6c5d5896a6a9",
+      "status": "+",
+      "title": "There needs to be a runTests api",
+      "description": "In @src/tools/TestTools.ts we need a `runTests` that will run all the tests inside the provided `path` .\nWe also need an equivalent coverage function (if the one already existing doesn't do that already).",
+      "context": [
+        "src/tools/TestTools.ts"
+      ],
+      "createdAt": "2025-09-23T14:28:58.696Z",
+      "updatedAt": "2025-09-23T15:19:54.774Z",
+      "completedAt": "2025-09-23T15:19:54.774Z"
+    },
+    {
+      "id": "ee077ad7-e304-43b7-8a36-cecef31fd88c",
+      "status": "+",
+      "title": "Update the result of coverage to the new type",
+      "description": "There's a new type in @src/types.ts - \"NewCoverageOkResult\" .\nThis needs to replace the current \"CoverageResult\".\nEssentially the Ok and Error results need to be joined into one and when the result is ok, it should also contain a summary (i.e. an average of all the CoverageFileStats). This needs to be returned now in @src/tools/TestTools.ts .",
+      "context": [
+        "src/types.ts",
+        "src/tools/TestTools.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-23T20:05:52.867Z",
+      "updatedAt": "2025-09-23T20:08:57.798Z",
+      "completedAt": "2025-09-23T20:08:57.798Z"
+    },
+    {
+      "id": "efaf5c1c-ece0-49f6-9496-0c86482c673e",
+      "status": "+",
+      "title": "There's a new type NewTestResult and TestsResult",
+      "description": "These types are defined in @src/types.ts use them in @src/tools/TestTools.ts to return correct stats per test in NewTestResult and a run down of all tests to return TestsResult from `runTests`",
+      "context": [
+        "src/types.ts",
+        "src/tools/TestTools.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-23T20:27:35.470Z",
+      "updatedAt": "2025-09-23T20:35:22.416Z",
+      "completedAt": "2025-09-23T20:35:22.416Z"
+    },
+    {
+      "id": "abfe9105-2854-4990-bc74-bdc24791224a",
+      "status": "+",
+      "title": "Test run results need to be augmented with invalidation and stored",
+      "description": "The `testsRun` and `testsCoverage` results from @src/tools/TestTools.ts  need to be stored under `.factory` in their separate files - only for those two functions and only when running directly in the `tests` folder. \nThere needs to be an extra API to be able to retrieve the last results for the tests and coverages (no input is necessary as there should be 1 file each).",
+      "context": [
+        "src/tools/TestTools.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-23T21:06:49.946Z",
+      "updatedAt": "2025-09-23T23:20:25.418Z",
+      "completedAt": "2025-09-23T23:20:25.418Z"
+    },
+    {
+      "id": "e8e71104-3764-4258-959b-7eb6670d5d23",
+      "status": "+",
+      "title": "`parseVitestOutput` needs to be improved",
+      "description": "The function is in @src/tests/TestUtils.ts and it incorrectly parses the output for failed and skipped items. Here is an example of a test that has an item failing and skipped (this is what would be passed into text into the function):\n\n RUN  v1.6.1 /Users/cloud/Documents/Work/thefactory-tools\n\nstdout | Object.info (/Users/cloud/Documents/Work/thefactory-tools/src/logger.ts:128:15)\n[thefactory-tools] 2025-09-23T21:59:35.849Z createAgentRunTools created at: /Users/cloud/Documents/Work/thefactory-tools\n\nstdout | tests/AgentRunTools.test.ts > AgentRunTools > create/list/get/update/rate/delete run\n[thefactory-tools] 2025-09-23T21:59:35.875Z createAgentRunTools created at: /Users/cloud/Documents/Work/thefactory-tools/test-temp-agent-run-tools\n\nstdout | tests/AgentRunTools.test.ts > AgentRunTools > conversation lifecycle: start/add/finish/error\n[thefactory-tools] 2025-09-23T21:59:35.883Z createAgentRunTools created at: /Users/cloud/Documents/Work/thefactory-tools/test-temp-agent-run-tools\n\nstdout | tests/AgentRunTools.test.ts > AgentRunTools > conversation lifecycle: start/add/finish/error\n[thefactory-tools] 2025-09-23T21:59:35.884Z startConversation runId:  50062ee7-24a2-4f83-a195-74a58c6fae4f\n\nstdout | tests/AgentRunTools.test.ts > AgentRunTools > conversation lifecycle: start/add/finish/error\n[thefactory-tools] 2025-09-23T21:59:35.888Z errorConversation runId:  50062ee7-24a2-4f83-a195-74a58c6fae4f  statusMessage:  oops\n\nstdout | tests/AgentRunTools.test.ts > AgentRunTools > subscribe via FilesWatcher emits add/change/delete updates\n[thefactory-tools] 2025-09-23T21:59:35.890Z createAgentRunTools created at: /Users/cloud/Documents/Work/thefactory-tools/test-temp-agent-run-tools\n\n ✓ tests/AgentRunTools.test.ts > AgentRunTools > create/list/get/update/rate/delete run\n ✓ tests/AgentRunTools.test.ts > AgentRunTools > conversation lifecycle: start/add/finish/error\n × tests/AgentRunTools.test.ts > AgentRunTools > subscribe via FilesWatcher emits add/change/delete updates\n   → expected false to be true // Object.is equality\n\n Test Files  1 failed (1)\n      Tests  1 failed | 2 passed | 1 skipped (4)\n   Start at  23:59:35\n   Duration  486ms (transform 80ms, setup 0ms, collect 103ms, tests 75ms, environment 0ms, prepare 89ms)\n\n\n⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯\n\n FAIL  tests/AgentRunTools.test.ts > AgentRunTools > subscribe via FilesWatcher emits add/change/delete updates\nAssertionError: expected false to be true // Object.is equality\n\n- Expected\n+ Received\n\n- true\n+ false\n\n ❯ tests/AgentRunTools.test.ts:157:73\n    155| \n    156|     await delay(50)\n    157|     expect(updates.some((u) => u.type === 'add' && u.runId === run.id)…\n       |                                                                         ^\n    158| \n    159|     await tools.updateRun(run.id, { state: 'running' })\n\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯",
+      "context": [
+        "src/tests/TestUtils.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-23T21:58:45.763Z",
+      "updatedAt": "2025-09-23T22:05:26.183Z",
+      "completedAt": "2025-09-23T22:05:26.183Z"
+    },
+    {
+      "id": "b33c19a7-c838-4118-accb-24bc499c01fa",
+      "status": "+",
+      "title": "Parsing test results from `vitest` can be better",
+      "description": "When parsing passing tests only lines of the form:\n\" ✓ tests/AgentRunTools.test.ts > AgentRunTools > create/list/get/update/rate/delete run \"\nshould be looked at. The \"✓\" indicates a passing test. Do not parse passing tests from elsewhere.",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-09-23T23:56:54.409Z",
+      "updatedAt": "2025-09-24T01:13:29.269Z",
+      "completedAt": "2025-09-24T01:13:29.269Z"
+    },
+    {
+      "id": "eb4e9a68-276d-4f9c-b23b-339b945edd90",
+      "status": "+",
+      "title": "TestResult was updated to include passes",
+      "description": "`TestResult` is in @src/types.ts and the file that needs to be updated is @src/tests/TestUtils.ts to build up the results using `buildTestResult` .",
+      "context": [
+        "src/types.ts",
+        "src/tests/TestUtils.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-23T23:58:27.625Z",
+      "updatedAt": "2025-09-24T00:02:30.194Z",
+      "completedAt": "2025-09-24T00:02:30.194Z"
+    },
+    {
+      "id": "261f933b-6ce4-41d0-aa19-0b7323e11bf3",
+      "status": "+",
+      "title": "need to identify a project where tests are written with jest",
+      "description": "for a js/ts project, identify jest tests and run it appropriately",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-09-24T02:08:40.322Z",
+      "updatedAt": "2025-09-24T02:50:06.763Z",
+      "completedAt": "2025-09-24T02:50:06.763Z"
+    },
+    {
+      "id": "ddb3abc5-2779-43cd-bc8a-b50a01999d70",
+      "status": "+",
+      "title": "Running against a python project - errors",
+      "description": "The errors are like this:\nFile \"./tests/api/test_code_projects_endpoints.py\", line 6, in <module>\n    from src.main import app\nModuleNotFoundError: No module named 'src'",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-09-24T02:09:52.649Z",
+      "updatedAt": "2025-09-24T02:53:14.611Z",
+      "completedAt": "2025-09-24T02:53:14.611Z"
+    },
+    {
+      "id": "c4cc0f7a-9995-46fc-912f-8bcc488dc343",
+      "status": "+",
+      "title": "Running python tests with `pytest` still doesn't work",
+      "description": "It seems there might be some extra work the developer of a given project might need to do to enable running these tests externally (i.e. via this package). Create a document `docs/PYTHON_TEST.md` explaining what should be done.",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-09-24T22:53:00.975Z",
+      "updatedAt": "2026-03-19T18:42:47.055Z",
+      "completedAt": "2026-03-19T18:42:47.055Z"
+    },
+    {
+      "id": "0d2640d7-a6a7-40b7-b0b8-deb856fcc0ee",
+      "status": "+",
+      "title": "Running coverage with jest works but not tests",
+      "description": "There's a `jest.config.js` in the project against which we are testing this (the path to that project is outside of this project or outside of the project that imports this as a package). It should be possible to run the tests like it is via the command line.\nSomehow running coverage works.",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-09-24T22:54:57.138Z",
+      "updatedAt": "2025-09-24T23:43:53.406Z",
+      "completedAt": "2025-09-24T23:43:53.406Z"
+    },
+    {
+      "id": "cdfa246a-f5d2-4f72-8132-5ab13a15bb7a",
+      "status": "+",
+      "title": "When collecting coverage, filter out files that don't contribute to testing",
+      "description": "There's some files that seem to have no real code in them - like the @src/index.ts file in this project. They should never be considered for coverage as they end up showing as 100% covered and thus contribute to the overall statistics. @src/tests/TestUtils.ts needs to be improved to do this.\nCoverage result should be augmented to include the list of these files that end up getting ignored.",
+      "context": [
+        "src/index.ts",
+        "src/tests/TestUtils.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-24T22:57:24.365Z",
+      "updatedAt": "2025-09-26T01:09:42.912Z",
+      "completedAt": "2025-09-26T01:09:42.912Z"
+    },
+    {
+      "id": "f5165811-ff39-46ac-ba23-b765173e63ac",
+      "status": "+",
+      "title": "Allow running other tests",
+      "description": "A different project using this package has vitests that can be run normally via `vitest run` but they also have a more complex e2e setup that runs this:\n`cross-env RUN_E2E=1 DATABASE_URL=postgresql://user:password@localhost:65432/thefactory-db vitest run tests/e2e --no-file-parallelism`\n.\nFor this feature we want the following to be done:\n- if there's a `e2e` folder inside `tests` then it should be ignored from running tests (those tests normally get skipped)\n- if there's a `e2e` folder this allows the more complex setup. The code should scan (for js/ts) package.json and see if there's something pointing to e2e tests (for now can just be a key in scripts `test:e2e` ) and if so then it will take that value and use it so that these tests can be ran. The result of these tests should be stored similarly to the others but under `tests-e2e-run.json` .\n- the interface in @src/tests/TestTools.ts needs to update to allow all of the above. This means that the user should be able to modify the command to be run for the e2e tests .",
+      "context": [
+        "src/tests/TestTools.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-30T12:28:45.581Z",
+      "updatedAt": "2025-09-30T20:56:10.196Z",
+      "completedAt": "2025-09-30T13:44:24.764Z"
+    }
+  ],
+  "createdAt": "2025-09-23T09:42:23.522Z",
+  "updatedAt": "2025-09-23T09:42:23.522Z",
+  "completedAt": "2026-03-19T18:42:47.055Z"
+}

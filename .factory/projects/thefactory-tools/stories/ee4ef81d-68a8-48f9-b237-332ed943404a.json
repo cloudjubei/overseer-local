@@ -1,0 +1,50 @@
+{
+  "id": "ee4ef81d-68a8-48f9-b237-332ed943404a",
+  "status": "+",
+  "title": "orchestrator + agentRunStore needs to be improved",
+  "description": "`orchestrator` and `agentRunStore` needs to work similarly to how ProjectTools or StoryTools work in terms of the API, subscribing and propagating changes - there's a FilesWatcher observing changes to the files that are involved and whenever there's a change there - then the subscribers get notified.\nThere's no need to have the emitter (i.e. emit inside runAgentOnStory or runAgentOnFeature) - the client should just initiate a run, this library stores all the necessary data, and then the client listens to updates via agentRunStore's subscribe api. It should be possible to cancel a running agent via a single API. Thus, agentRunStore should be merged with the orchestrator - creating a single AgentTools.",
+  "features": [
+    {
+      "id": "3ee5a7df-5c37-4b40-8bc8-783c88b3c61e",
+      "status": "+",
+      "title": "Refactor the orchestrator to use AgentRunTools better",
+      "description": "@src/orchestrator.ts needs to be refactored as it's extremely hard to read. It needs to push updates to the @src/agents/AgentRunTools.ts  via an interface - there shouldn't be any of the 'emit' functionality as it makes the code bulky and hard to read.",
+      "context": [
+        "src/orchestrator.ts",
+        "src/agents/AgentRunTools.ts"
+      ],
+      "createdAt": "2025-09-22T13:53:18.053Z",
+      "updatedAt": "2025-09-22T15:43:29.912Z",
+      "blockers": [],
+      "completedAt": "2025-09-22T15:43:29.912Z"
+    },
+    {
+      "id": "76907a14-7aa0-47e5-8fa9-3857b71456be",
+      "status": "+",
+      "title": "Documentation update: FILE_ORGANISATION.md + API overview",
+      "description": "Update @docs/FILE_ORGANISATION.md  to document the new @src/agents/AgentRunTools.ts",
+      "context": [
+        "docs/FILE_ORGANISATION.md",
+        "src/agents/AgentRunTools.ts"
+      ],
+      "createdAt": "2025-09-22T13:53:18.055Z",
+      "updatedAt": "2025-09-22T20:46:24.603Z",
+      "blockers": [],
+      "completedAt": "2025-09-22T20:46:24.603Z"
+    },
+    {
+      "id": "5d7c257a-5a9d-4983-b4c3-905b9dc0d208",
+      "status": "+",
+      "title": "Tests for AgentRunTools",
+      "description": "Create appropriate unit tests for these tools",
+      "context": [],
+      "createdAt": "2025-09-22T13:53:18.056Z",
+      "updatedAt": "2025-09-22T21:09:50.858Z",
+      "blockers": [],
+      "completedAt": "2025-09-22T21:09:50.858Z"
+    }
+  ],
+  "createdAt": "2025-09-22T13:15:06.859Z",
+  "updatedAt": "2025-09-22T21:06:48.810Z",
+  "completedAt": "2025-09-22T21:09:50.858Z"
+}

@@ -1,0 +1,31 @@
+{
+  "id": "f7b9f525-a4ca-4296-ba46-6c3a3e7b5d03",
+  "status": "+",
+  "title": "It must be possible to rate an Agent's run",
+  "description": "The rating can be a number - and we also want to allow comments for this. The rating information should also contain the date when it was given.\n\nThis is a rating that will be added to an Agent's run that already happened - so it is tied to the HistoryService.\nThis has no implication on projects, stories or features.",
+  "features": [
+    {
+      "id": "e4f3ce87-8d68-4bb9-843d-44a2007dac3e",
+      "status": "+",
+      "title": "Update agent run data model with rating information",
+      "description": "In `src/agentRunStore.ts`, define a new type `AgentRunRating` which includes `score` (number), `comment` (string, optional), and `createdAt` (Date). Then, add an optional `rating` property of type `AgentRunRating` to the `AgentRunHistory` interface.",
+      "context": [],
+      "createdAt": "2025-09-16T12:59:58.903Z",
+      "completedAt": "2025-09-16T10:32:58.741Z",
+      "updatedAt": "2025-09-16T12:59:58.903Z"
+    },
+    {
+      "id": "e9ae1f44-75f3-4c5a-a595-ce16f7449875",
+      "status": "+",
+      "title": "Implement `rateRun` method in AgentRunStore",
+      "description": "In `src/agentRunStore.ts`, add a new method `rateRun` to the `AgentRunStore` implementation. This method should accept a `runId` and a rating object. It will read the corresponding run history file, add the rating information (including the current date for `createdAt`), and write the updated history back to the file. Ensure the method is added to the `AgentRunStore` interface as well.",
+      "context": [],
+      "createdAt": "2025-09-16T12:59:58.903Z",
+      "completedAt": "2025-09-16T09:20:49.241Z",
+      "updatedAt": "2025-09-16T12:59:58.903Z"
+    }
+  ],
+  "createdAt": "2025-09-16T12:59:58.903Z",
+  "completedAt": "2025-09-16T10:32:58.741Z",
+  "updatedAt": "2025-09-16T12:59:58.903Z"
+}

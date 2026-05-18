@@ -33,6 +33,24 @@ export interface GitLocalChangesRef {
   load: () => Promise<void>
 }
 
+/**
+ * Deduplicate file entries by path, keeping the first occurrence. Git can
+ * report the same path in both `unstaged` AND `untracked` for certain
+ * edge cases (e.g. partially-staged files that also have new content),
+ * which produces duplicate React keys when the two lists are concatenated
+ * for rendering.
+ */
+function dedupeByPath<T extends { path: string }>(files: T[]): T[] {
+  const seen = new Set<string>()
+  const out: T[] = []
+  for (const f of files) {
+    if (seen.has(f.path)) continue
+    seen.add(f.path)
+    out.push(f)
+  }
+  return out
+}
+
 export const GitLocalChanges = forwardRef<GitLocalChangesRef, GitLocalChangesProps>(
   ({ projectId, className = '', onStatusChange, onBusyChange, onErrorChange, onResolveConflict }, ref) => {
     const [loading, setLoading] = React.useState(true)
@@ -585,7 +603,7 @@ export const GitLocalChanges = forwardRef<GitLocalChangesRef, GitLocalChangesPro
               </div>
             ) : !error ? (
               <div>
-                {[...status.unstaged, ...status.untracked].map((f) => (
+                {dedupeByPath([...status.unstaged, ...status.untracked]).map((f) => (
                   <GitFileRow
                     key={`unstaged:${f.path}`}
                     file={f}

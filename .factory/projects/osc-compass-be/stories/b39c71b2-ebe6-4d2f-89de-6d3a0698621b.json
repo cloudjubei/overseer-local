@@ -1,0 +1,83 @@
+{
+  "id": "b39c71b2-ebe6-4d2f-89de-6d3a0698621b",
+  "status": "+",
+  "title": "Create the AI Service",
+  "description": "The backend needs to take the freeform text the user provides via `createGoal` and transform it into a `GoalSuggestion` array , by running the text via an LLM and adapting the LLMs responses (if need be) to match our model. \nThus, we need to implement the missing functionality in `AIService` by using a common library such as Vercel's \"ai\" package to talk to LLMs. We need to update the README.md to explain where keys for at OPENAI, GEMINI and ANTHROPIC should go, and they should be then used (configured which one to use via a static app-wide config file) by the `AIService`. \nWe also need to use 'langfuse-vercel' to monitor all AI usage. Explain that correctly too.\n\nThe `AIService` only needs to do this now, but in the future we will require it to take other text input and provide us with strongly typed models as responses.",
+  "features": [
+    {
+      "id": "a1aded82-8724-40f6-8d0c-fdf95503db7f",
+      "status": "+",
+      "title": "Configure AI Service and Langfuse Environment Variables",
+      "description": "Update the application's configuration to support the new AI service. Modify `src/config/configuration.ts` to add a new 'ai' namespace with fields for `provider`, `openaiApiKey`, `geminiApiKey`, `anthropicApiKey`, `langfuseApiKey`, and `langfuseTracingV2`. Update `src/config/validation.ts` to add Joi validation rules for the corresponding environment variables: `AI_PROVIDER`, `OPENAI_API_KEY`, `GEMINI_API_KEY`, `ANTHROPIC_API_KEY`, `LANGFUSE_SECRET_KEY`, `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_BASE_URL`. The provider should be one of 'openai', 'gemini', or 'anthropic'.",
+      "context": [],
+      "createdAt": "2025-09-17T15:29:43.771Z",
+      "updatedAt": "2025-09-17T15:36:04.266Z",
+      "completedAt": "2025-09-17T15:36:04.266Z"
+    },
+    {
+      "id": "9127c06d-de59-4b9d-a2dc-8340954276e6",
+      "status": "+",
+      "title": "Install AI and Monitoring SDKs",
+      "description": "Add the necessary NPM packages to support AI model interaction and monitoring. Install Vercel's AI SDK (`ai`), Langfuse (`langfuse-vercel`), and the specific provider libraries (`@anthropic-ai/sdk`, `openai`, `@google/generative-ai`). These libraries will be used in the new AI service.",
+      "context": [],
+      "createdAt": "2025-09-17T15:29:48.889Z",
+      "updatedAt": "2025-09-17T15:36:45.779Z",
+      "completedAt": "2025-09-17T15:36:45.779Z"
+    },
+    {
+      "id": "461f3384-c636-48b1-a30e-b9f6cf04efdb",
+      "status": "+",
+      "title": "Implement AI Service for Goal Suggestions",
+      "description": "Create a new NestJS module in `src/ai`. Inside this module, create an `AIService` that implements the `IGoalAiProvider` interface from `src/goals/interfaces/ai-suggestions.interface.ts`. The service will use the application configuration to dynamically select and initialize a client for the configured provider (OpenAI, Gemini, or Anthropic). Use the Vercel AI SDK's `generateObject` function to call the LLM and parse its response into a `SuggestedGoal[]` array. Create a Zod schema that mirrors the `SuggestedGoal` interface, including the enums from `goal.interface.ts`, to ensure type-safe output from the LLM. The prompt should instruct the LLM to generate 3-5 relevant goals based on the user's free-text input. Also, integrate Langfuse tracing for monitoring all LLM calls.",
+      "context": [],
+      "createdAt": "2025-09-17T15:30:22.507Z",
+      "updatedAt": "2025-09-17T15:44:10.682Z",
+      "completedAt": "2025-09-17T15:44:10.682Z"
+    },
+    {
+      "id": "8250a13c-0327-4e4e-9445-0831d0a10f34",
+      "status": "+",
+      "title": "Integrate AI Service into Goals Module",
+      "description": "Update `src/goals/goals.module.ts` to replace the mock AI provider with the new `AIService`. Import the newly created `AiModule`. Then, modify the provider configuration for the `GOAL_AI_PROVIDER` token to use the `AIService` instead of the `MockGoalAiProvider`.",
+      "context": [],
+      "createdAt": "2025-09-17T15:30:29.390Z",
+      "updatedAt": "2025-09-17T15:45:18.258Z",
+      "completedAt": "2025-09-17T15:45:18.258Z"
+    },
+    {
+      "id": "9b398e40-206c-4fdb-8436-83b2ba57748f",
+      "status": "+",
+      "title": "Document AI Service Configuration in README",
+      "description": "Update the root `README.md` file to include a new section for 'AI Service Configuration'. This section should document the new environment variables: `AI_PROVIDER` (explaining the valid options: 'openai', 'gemini', 'anthropic'), `OPENAI_API_KEY`, `GEMINI_API_KEY`, `ANTHROPIC_API_KEY`. Also, document the variables for Langfuse monitoring: `LANGFUSE_SECRET_KEY`, `LANGFUSE_PUBLIC_KEY` and `LANGFUSE_BASE_URL`. Explain how to obtain these keys and how they are used by the application.",
+      "context": [],
+      "createdAt": "2025-09-17T15:30:37.864Z",
+      "updatedAt": "2025-09-17T15:46:27.418Z",
+      "completedAt": "2025-09-17T15:46:27.418Z"
+    },
+    {
+      "id": "1be4c286-8de0-420f-91d6-ba606f3a2415",
+      "status": "+",
+      "title": "Langfuse needs to be implemented for tracing",
+      "description": "As was explained - we need to implement Langfuse (`langfuse-vercel` ) for LLM tracing.",
+      "context": [],
+      "createdAt": "2025-09-17T23:09:46.272Z",
+      "updatedAt": "2025-09-17T23:16:41.984Z",
+      "completedAt": "2025-09-17T23:16:41.984Z"
+    },
+    {
+      "id": "bdd0d7e7-d0a8-4a1a-8d30-12e1c7f212c1",
+      "status": "+",
+      "title": "Error when compiling",
+      "description": "Inside the @src/ai/ai.service.ts there's an error:\n\nsrc/ai/ai.service.ts:99:32 - error TS2589: Type instantiation is excessively deep and possibly infinite.\n\n 99       const { object } = await generateObject({\n                                   ~~~~~~~~~~~~~~~~\n100         model,\n    ~~~~~~~~~~~~~~\n... \n104         experimental_telemetry: telemetry,\n    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n105       });",
+      "context": [
+        "src/ai/ai.service.ts"
+      ],
+      "createdAt": "2025-09-18T00:04:16.820Z",
+      "updatedAt": "2025-09-18T00:09:33.453Z",
+      "completedAt": "2025-09-18T00:09:33.453Z"
+    }
+  ],
+  "createdAt": "2025-09-17T14:32:13.085Z",
+  "updatedAt": "2025-09-17T14:32:13.085Z",
+  "completedAt": "2025-09-18T00:09:33.453Z"
+}

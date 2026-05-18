@@ -1,0 +1,144 @@
+{
+  "id": "d9eef420-85b7-4269-832e-daa010df4bb1",
+  "status": "+",
+  "title": "Chat view and ConversationService integration",
+  "description": "Goal\n- Implement the primary chat interface powered by ConversationService flows and history.\n\nStartup\n- Call latestConversation. If present, call startFlow with the last flow.id; otherwise call startFlow with 'start' to initialize a new flow.\n\nRendering logic\n- Render each ConversationFlowModel.message (HTML) in order, respecting nextDelay between items for a paced display.\n- When reaching the end of the current batch:\n  - If last item.type is 'Input': render inputs per inputsData; on submit call handleInput or handleFileInput; then continue rendering returned flow items with delays.\n  - If last item.type is 'Process': show a processing indicator message, call handleProcess, then continue rendering returned flow items with delays.\n  - Else: no more items; mark conversation finished and disable user input.\n\nInput UI rules\n- TEXT, NUMERIC, DATE, WEIGHT_HEIGHT: single bottom input box (only one of these at a time). If AUDIO is also present, show a record button next to the text input.\n- BUTTONS: render button groups below the message using the provided 2D layout.\n- MULTI_SELECTION: render checkboxes below the message with a submit action to send selected values.\n- AUDIO: if no text input present, render a centered record button; if combined with text, place the record button inline with the text input.\n\nHistory\n- Use getHistory to fetch and display older messages above the current flow.\n\nTech notes\n- Sanitize or trust server-provided HTML per backend contract; consider a safe HTML renderer.\n- Manage timers for nextDelay via a scheduler to avoid unmounted updates.\n- Integrate with React Query for data fetching and mutations.\n\nAcceptance criteria\n- Correctly resumes or starts a conversation via latestConversation and startFlow.\n- Sequential message display respects nextDelay and renders message HTML.\n- Proper handling for Input and Process steps; input disabled when conversation is finished.\n- History loads and displays above current messages; errors show toasts or inline messages.",
+  "features": [
+    {
+      "id": "36a0e019-e04a-4234-82e8-0dc7fb2d7598",
+      "status": "+",
+      "title": "Conversation service module",
+      "description": "Create a thin module that re-exports and centralizes calls to ConversationService endpoints (latestConversation, startFlow, handleInput, handleFileInput, handleProcess, getHistory) for clarity. Do not wrap OpenAPI client; import services directly from '@/generated/backend'. Ensure functions are typed and align with generated models.",
+      "context": [],
+      "createdAt": "2025-11-07T15:43:41.519Z",
+      "updatedAt": "2025-11-08T00:28:49.408Z",
+      "completedAt": "2025-11-08T00:28:49.408Z"
+    },
+    {
+      "id": "8331568c-b5fa-4698-9cb3-2199dbef5516",
+      "status": "+",
+      "title": "Flow sequencer and scheduler",
+      "description": "Implement a state machine and scheduler to render ConversationFlowModel items in order, respecting 'nextDelay'. Support cancelation on unmount and recovery when new batches arrive after inputs/process steps. Acceptance: messages appear with correct pacing; timers are cleaned up.",
+      "context": [],
+      "createdAt": "2025-11-07T15:43:41.520Z",
+      "updatedAt": "2025-11-08T00:32:17.096Z",
+      "completedAt": "2025-11-08T00:32:17.096Z"
+    },
+    {
+      "id": "b58eed1c-7f8e-4898-ac66-271dff4ec2fa",
+      "status": "+",
+      "title": "Message renderer (HTML-safe)",
+      "description": "Render 'ConversationFlowModel.message' HTML safely. For MVP, use 'dangerouslySetInnerHTML' with strict constraints (container styles, no inline scripts) and document trust boundary. Optionally add a sanitizer if required. Acceptance: messages render without breaking layout.",
+      "context": [],
+      "createdAt": "2025-11-07T15:43:41.522Z",
+      "updatedAt": "2025-11-08T00:36:13.492Z",
+      "completedAt": "2025-11-08T00:36:13.492Z"
+    },
+    {
+      "id": "b9aeb35c-861f-4b07-8e9d-0cd1f668641c",
+      "status": "+",
+      "title": "Input widgets - single value types",
+      "description": "Provide a bottom input for TEXT, NUMERIC, DATE, WEIGHT_HEIGHT types. Validate and submit via 'handleInput'; on success, append returned flow items and continue sequencing. If AUDIO is also present, render a record button inline next to the text input.",
+      "context": [],
+      "createdAt": "2025-11-07T15:43:41.523Z",
+      "updatedAt": "2025-11-08T00:40:58.069Z",
+      "completedAt": "2025-11-08T00:40:58.069Z"
+    },
+    {
+      "id": "5c04c8e7-0c7b-4ed7-bcce-0470cdbb938e",
+      "status": "+",
+      "title": "Buttons grid renderer",
+      "description": "Render BUTTONS input as a 2D matrix of button groups under the corresponding message. Click submits selected value via 'handleInput' and triggers the next flow batch with delays.",
+      "context": [],
+      "createdAt": "2025-11-07T15:43:41.524Z",
+      "updatedAt": "2025-11-08T01:08:21.153Z",
+      "blockers": [],
+      "completedAt": "2025-11-08T01:08:21.153Z"
+    },
+    {
+      "id": "8a86c4c8-86ec-4cb3-b5f4-5e401835eb88",
+      "status": "+",
+      "title": "Multi-selection input",
+      "description": "Render MULTI_SELECTION as a checkbox group with a submit action to send selected values via 'handleInput'. Preserve selections until submitted; allow clearing. Acceptance: multiple selections send correctly and advance flow.",
+      "context": [],
+      "createdAt": "2025-11-07T15:43:41.525Z",
+      "updatedAt": "2025-11-08T00:44:51.031Z",
+      "completedAt": "2025-11-08T00:44:51.031Z"
+    },
+    {
+      "id": "c11bd082-059a-4db0-b94c-9d60a2858694",
+      "status": "+",
+      "title": "Audio input and upload",
+      "description": "Provide recording UX. If combined with text input, show record button inline; if alone, center it. On stop, upload blob via 'handleFileInput' and continue the flow. Show upload progress and basic error handling.",
+      "context": [],
+      "createdAt": "2025-11-07T15:43:41.526Z",
+      "updatedAt": "2025-11-08T01:15:01.382Z",
+      "blockers": [],
+      "completedAt": "2025-11-08T01:15:01.382Z"
+    },
+    {
+      "id": "945f0678-fdcc-4947-9e74-0c845306ab4f",
+      "status": "+",
+      "title": "Process step handler",
+      "description": "When last flow item is of type 'Process', show a processing indicator/message and call 'handleProcess'. After completion, render returned flow items with delays. Acceptance: processing state visible; next items appear correctly.",
+      "context": [],
+      "createdAt": "2025-11-07T15:43:41.527Z",
+      "updatedAt": "2025-11-08T00:46:25.840Z",
+      "completedAt": "2025-11-08T00:46:25.840Z"
+    },
+    {
+      "id": "4bcbc6bf-5fde-4692-b375-42935603e873",
+      "status": "+",
+      "title": "History loader",
+      "description": "Use 'getHistory' to load and prepend earlier messages. Provide a 'Load previous' control at the top of the chat area, merging without duplicates and keeping scroll position reasonable.",
+      "context": [],
+      "createdAt": "2025-11-07T15:43:41.528Z",
+      "updatedAt": "2025-11-08T00:49:49.936Z",
+      "completedAt": "2025-11-08T00:49:49.936Z"
+    },
+    {
+      "id": "dfa779eb-af46-47b2-bfe7-e3789521de18",
+      "status": "+",
+      "title": "Conversation completion state",
+      "description": "Detect when the conversation ends (no Input or Process at end) and disable input controls. Show a final state message or CTA to start a new conversation if applicable.",
+      "context": [],
+      "createdAt": "2025-11-07T15:43:41.530Z",
+      "updatedAt": "2025-11-08T01:18:33.621Z",
+      "blockers": [],
+      "completedAt": "2025-11-08T01:18:33.621Z"
+    },
+    {
+      "id": "2df05019-f1cd-4800-8d58-dc13ca761596",
+      "status": "+",
+      "title": "Error and retry for chat actions",
+      "description": "For each API action (startFlow, handleInput, handleFileInput, handleProcess, getHistory), display inline error and offer retry. Ensure the flow state remains consistent and idempotent where possible.",
+      "context": [],
+      "createdAt": "2025-11-07T15:43:41.531Z",
+      "updatedAt": "2025-11-08T00:58:16.316Z",
+      "completedAt": "2025-11-08T00:58:16.316Z"
+    },
+    {
+      "id": "a8d3374a-9d6b-4d95-b1e0-19bd75f73a0d",
+      "status": "+",
+      "title": "Render only non-empty messages and remove completion banner",
+      "description": "Fix chat rendering and unintended finish UI.\n- Filter out sequencer items with empty or whitespace-only 'message' so blank cards are never shown.\n- Remove the 'Conversation finished' banner and 'Start new' CTA entirely (not part of spec).\n- Treat 'messageRequiresProcessing' as a processing state to auto-continue via 'handleProcess' when needed.\nAcceptance criteria:\n- No blank messages render in the chat.\n- The finish banner/CTA is never displayed.\n- Process-type or messageRequiresProcessing items auto-advance and display returned messages.",
+      "context": [],
+      "createdAt": "2025-11-10T10:26:20.344Z",
+      "updatedAt": "2025-11-10T10:31:17.511Z",
+      "completedAt": "2025-11-10T10:31:17.511Z"
+    },
+    {
+      "id": "b41daaab-80f6-4a9d-8882-ac52db12b183",
+      "status": "+",
+      "title": "Modularize ChatView presentation components",
+      "description": "Refactor ChatView into smaller, maintainable components without changing behavior.\n- Extract to 'src/app/chat/components': ChatItem (or MessageList), HistoryHeader (load previous / retry), Error banners (start/process/input), SingleInputBar, AudioInputBar, ButtonsGrid.\n- Wire props to keep state in ChatView; ensure type-safety and reuse.\nAcceptance criteria:\n- ChatView imports these components; no behavior or UX changes.\n- Code is easier to inspect/modify; components are self-contained and documented with props.",
+      "context": [],
+      "createdAt": "2025-11-10T10:26:20.348Z",
+      "updatedAt": "2025-11-10T10:35:33.480Z",
+      "completedAt": "2025-11-10T10:35:33.480Z"
+    }
+  ],
+  "createdAt": "2025-11-07T15:16:25.828Z",
+  "updatedAt": "2025-11-07T15:16:25.828Z",
+  "completedAt": "2025-11-10T10:35:33.480Z"
+}

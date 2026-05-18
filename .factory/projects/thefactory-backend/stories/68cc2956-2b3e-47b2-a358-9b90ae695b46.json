@@ -1,0 +1,60 @@
+{
+  "id": "68cc2956-2b3e-47b2-a358-9b90ae695b46",
+  "status": "+",
+  "title": "Phase 1 follow-ups",
+  "description": "Complete the remaining tasks from Phase 1, fixing API route paths, implementing WebSocket domain events, wiring up projectCheckoutService, and threading DATABASE_URL.",
+  "features": [
+    {
+      "id": "e40a38b9-79a0-4d95-8e24-6cce8223ebfc",
+      "status": "+",
+      "title": "Fix API Route Paths and Add Missing Routes",
+      "description": "Fix API Route Summary paths: stories/features/reorder must stay under `/api/v1/projects/:projectId/stories/...`. Add missing routes such as `GET .../stories/order`, `GET .../stories/:storyId`, and `PATCH /api/v1/projects/:id/active`.",
+      "context": [
+        "docs/01-backend-implementation-plan.md"
+      ],
+      "createdAt": "2026-04-21T23:13:38.291Z",
+      "updatedAt": "2026-04-21T23:24:06.135Z",
+      "completedAt": "2026-04-21T23:24:06.135Z"
+    },
+    {
+      "id": "6b675b50-a119-4716-a0e4-08e6fe54adb5",
+      "status": "+",
+      "title": "Implement WebSocket Domain Events and Tests",
+      "description": "Call `wsBroadcast` from the appropriate route/service paths for intended events (`projects:updated`, `stories:updated`, `chats:updated`, `completion:progress`, `files:changed`, `git:status-changed`, `tests:result`). Add tests to prove at least one client receives payloads after a mutation. Clarify WebSocket Events by distinguishing transport + wsBroadcast helper from emitting the named domain events.",
+      "context": [
+        "docs/01-backend-implementation-plan.md"
+      ],
+      "createdAt": "2026-04-21T23:17:16.622Z",
+      "updatedAt": "2026-04-21T23:31:36.564Z",
+      "completedAt": "2026-04-21T23:31:36.564Z"
+    },
+    {
+      "id": "c25764bd-9fc8-4202-93b3-c4c489a0745a",
+      "status": "+",
+      "title": "Wire up projectCheckoutService in Server and Routes",
+      "description": "Register `projectCheckoutService` on Fastify (or inject via a thin facade) and use from project lifecycle / file-git routes where clone or pull should occur. Currently it is tested in isolation but not wired in `server.ts`.",
+      "context": [],
+      "createdAt": "2026-04-21T23:18:16.809Z",
+      "updatedAt": "2026-04-22T09:07:48.614Z",
+      "plan": "1. Added reposBaseDir to AppConfig and makeTestConfig.\n2. Restored createToolsService to clean single-import from thefactory-tools with databaseUrl threaded to createFileTools.\n3. Fixed createGitTools call with valid zero-value GithubCredentials.\n4. Declared projectCheckoutService on FastifyInstance and decorated it in buildServer.\n5. POST /projects fires ensureCheckout fire-and-forget after creation.\n6. getGitTools, getCodeIntelTools, getTestRunnerTools all try projectCheckoutService.getCheckoutPath first, falling back to projectTools.getProjectDir.\n7. Added 500 ErrorResponse to route schemas in codeIntel and testRunner to fix strict typing.\n8. All 93 tests passing.",
+      "completedAt": "2026-04-22T09:07:36.246Z",
+      "blockers": []
+    },
+    {
+      "id": "6b4f2ad2-4861-43cd-aece-e083f95b9a64",
+      "status": "+",
+      "title": "Thread DATABASE_URL in Configuration and Tests",
+      "description": "Ensure `env.DATABASE_URL` is safely threaded through tests avoiding reliance on hardcoded defaults. The `DATABASE_URL` fix ensures DB calls during tests and development don't override each other unnecessarily or fail when `process.env` changes.",
+      "context": [
+        "docs/01-backend-implementation-plan.md"
+      ],
+      "createdAt": "2026-04-21T23:18:24.410Z",
+      "updatedAt": "2026-04-22T12:51:39.462Z",
+      "plan": "1. `makeTestConfig` in `testHelpers.ts` now reads `process.env.DATABASE_URL ?? ''` so the real env var flows in when present and falls back to empty string when absent — no hardcoded default.\\n2. `toolsService.test.ts` captures `process.env.DATABASE_URL ?? ''` once into `TEST_DB_URL` at module scope and passes it to every `createToolsService(…, TEST_DB_URL)` call, eliminating the bare `''` literals that had been left as stubs.\\n3. `config.test.ts` already explicitly deletes `process.env.DATABASE_URL` in `beforeEach` and restores the original env in `afterEach`, so config-level isolation is correct and untouched.\\n4. `config.ts` already reads `process.env.DATABASE_URL ?? ''` and exposes it as `AppConfig.databaseUrl`; `server.ts` passes `config.databaseUrl` into `createToolsService` — the entire production path was already correct.\\n5. No magic constant or hardcoded connection string appears anywhere in the test or config layer.",
+      "completedAt": "2026-04-22T12:51:39.462Z"
+    }
+  ],
+  "createdAt": "2026-04-21T23:10:16.309Z",
+  "updatedAt": "2026-04-21T23:18:24.411Z",
+  "completedAt": "2026-04-22T12:51:39.462Z"
+}

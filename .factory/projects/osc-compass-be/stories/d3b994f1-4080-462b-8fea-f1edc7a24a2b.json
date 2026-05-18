@@ -1,0 +1,71 @@
+{
+  "id": "d3b994f1-4080-462b-8fea-f1edc7a24a2b",
+  "status": "+",
+  "title": "Extend the `AIService` to accept sound recordings",
+  "description": "The user wants to record a voice memo or sound recording of them talking and send that to the backend to be used for various endpoints. For now, we are only going to allow it for the `createGoal` endpoint but in the future, other endpoints might also need to accept voice recordings. \nThe thing to be done, is that when such a recording is received - it first needs to be translated into text (speech-to-text) preferrably via a library like `whisper` . \nOnce we have the text, we should follow the same path as the corresponding text endpoint.\nWe need to extend our response model to include a confidence score from both the 'speech-to-text' and the LLM to indicate how the processing feels about understanding the voice and textual inputs. We want to make it configurable so that above a certain threshold - certain sound recordings will be rejected early on and a standardized response will be returned (asking the user to confirm whether this is what was understood). And the same for the text processing via LLMs - also if a threshold isn't passed - we will return a suggestion asking the user whether their query was understood.",
+  "features": [
+    {
+      "id": "398cc9b1-cf34-497b-b68d-f936969300c1",
+      "status": "+",
+      "title": "Integrate Speech-to-Text Service",
+      "description": "Create a new service, likely within the `ai` module, responsible for transcribing audio files to text. This service will use an external transcription provider like OpenAI's Whisper API. It should take an audio file buffer as input and return the transcribed text along with a confidence score if the provider supports it.",
+      "context": [],
+      "createdAt": "2025-09-17T23:26:18.177Z",
+      "updatedAt": "2025-09-17T23:44:26.419Z",
+      "completedAt": "2025-09-17T23:44:26.419Z"
+    },
+    {
+      "id": "8a926f08-5455-43eb-80f0-8f1abf3b479a",
+      "status": "+",
+      "title": "Configure Transcription and Confidence Thresholds",
+      "description": "Update the `config` module to include configuration for the speech-to-text service (e.g., API keys, model names) and define the confidence score thresholds for both transcription and LLM processing. This will involve modifying `src/config/configuration.ts` and `src/config/validation.ts`.",
+      "context": [],
+      "createdAt": "2025-09-17T23:26:22.968Z",
+      "updatedAt": "2025-09-17T23:45:42.412Z",
+      "completedAt": "2025-09-17T23:45:42.412Z"
+    },
+    {
+      "id": "0a675957-e6ee-4ffa-a6c6-b4a9ebc1fdb0",
+      "status": "+",
+      "title": "Enhance AIService for Audio Input",
+      "description": "Modify the `AIService` in `src/ai/ai.service.ts` to accept transcribed text and its confidence score. The service should incorporate this score into its logic, potentially passing it along or using it to influence the final response. It will need to return not just the goal suggestions but also a combined confidence score and a flag indicating if user confirmation is needed.",
+      "context": [],
+      "createdAt": "2025-09-17T23:26:27.166Z",
+      "updatedAt": "2025-09-17T23:50:26.611Z",
+      "completedAt": "2025-09-17T23:50:26.611Z"
+    },
+    {
+      "id": "97ebf309-55ac-4480-9fcd-96f7f1b83ab1",
+      "status": "+",
+      "title": "Create Audio Upload Endpoint in `GoalsController`",
+      "description": "Add a new endpoint to `src/goals/goals.controller.ts` that accepts `multipart/form-data`. This endpoint will handle the audio file upload, extract the file, and pass it to the `GoalsService` for processing. It will use NestJS's `FileInterceptor`.",
+      "context": [],
+      "createdAt": "2025-09-17T23:26:30.327Z",
+      "updatedAt": "2025-09-17T23:52:45.968Z",
+      "completedAt": "2025-09-17T23:52:45.968Z"
+    },
+    {
+      "id": "9ed61bbe-a923-41e6-97ec-1ff270fd3e5b",
+      "status": "+",
+      "title": "Implement Audio-to-Goal Logic in `GoalsService`",
+      "description": "Create a new method in `src/goals/goals.service.ts` that takes an audio file. This method will orchestrate the entire process: send the audio to the new transcription service, receive the text and confidence score, pass this information to the `AIService`, and then, based on the returned confidence levels and the configured thresholds, either create a goal directly or return a response asking for user confirmation.",
+      "context": [],
+      "createdAt": "2025-09-17T23:26:34.225Z",
+      "updatedAt": "2025-09-17T23:54:39.501Z",
+      "completedAt": "2025-09-17T23:54:39.501Z"
+    },
+    {
+      "id": "30db1595-c7e7-4593-915c-81e0a5c6ec31",
+      "status": "+",
+      "title": "Define DTOs and Response Models for Audio-based Goal Creation",
+      "description": "Create or update DTOs in `src/goals/dto` and interfaces in `src/goals/interfaces` to support the audio upload feature. This includes a new response model that can conditionally include either the created goal or a confirmation prompt with the transcribed text, along with the confidence scores from both transcription and the LLM.",
+      "context": [],
+      "createdAt": "2025-09-17T23:26:38.415Z",
+      "updatedAt": "2025-09-17T23:57:22.834Z",
+      "completedAt": "2025-09-17T23:57:22.834Z"
+    }
+  ],
+  "createdAt": "2025-09-17T14:38:20.950Z",
+  "updatedAt": "2025-09-17T14:38:20.950Z",
+  "completedAt": "2025-09-17T23:57:22.834Z"
+}

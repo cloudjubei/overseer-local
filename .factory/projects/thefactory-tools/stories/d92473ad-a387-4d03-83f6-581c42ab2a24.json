@@ -1,0 +1,66 @@
+{
+  "id": "d92473ad-a387-4d03-83f6-581c42ab2a24",
+  "status": "+",
+  "title": "getCode+getInterface improvements",
+  "description": "Improvements to `getCode` and `getInterface` in `src/codeIntel/CodeIntelTools.ts` (and the `CodeIntelTools` interface in `src/codeIntel/codeIntelTypes.ts`):\n\n1. **Merge `getInterface` into `getCode`** — The two functions differ only in whether they return raw source code (via `getCodeInternal`) vs. a projected interface/type shape (via `getInterfaceInternal`). They should be unified into a single `getCode` call that accepts an optional `mode` parameter: `'interface'` (default, current `getInterface` behaviour — returns projected type/interface + optional deep transitive deps) or `'code'` (current `getCode` behaviour — returns raw extracted source). `getInterface` should be removed from `CodeIntelTools`.\n\n2. **Accept multiple names in one call** — `getCode` should accept a `name` that can be either a single string or an array of strings, so agents can resolve several members in one round-trip instead of calling the tool repeatedly. The return type becomes an array of `CodeIntelMember[]` (one entry per requested name). Duplicate names (same name + package combination) must be deduplicated so each member appears only once in the result, even if requested multiple times.\n\n3. **Automatic cross-package fallback** — When a requested member is not found in the specified package (or when no package is specified and `'local'` is tried first), automatically search all immediate dependency packages in the catalogue. For each package where the member is found, return a result entry. This removes the need for agents to know which package owns a symbol.\n",
+  "features": [
+    {
+      "id": "8cd3203a-e086-49e6-ba43-4b8371e7d985",
+      "status": "+",
+      "title": "Merge getInterface into getCode via a mode parameter",
+      "description": "Currently `CodeIntelTools` exposes two separate methods:\n- `getCode(name, packageName?)` → calls `getCodeInternal` — returns raw extracted source.\n- `getInterface(name, packageName?, deep?)` → calls `getInterfaceInternal` — returns a projected type/interface shape, with optional transitive dependency resolution.\n\nThe difference is purely behavioural (source code vs. projected interface). They should be collapsed into a single `getCode` method with an optional `mode` parameter:\n- `mode: 'interface'` (default) — current `getInterface` behaviour: project class → interface if needed, support `deep` flag for transitive deps.\n- `mode: 'code'` — current `getCode` behaviour: return raw extracted source.\n\nThe `deep` parameter remains relevant only for `interface` mode.\n\n**Changes required:**\n- `CodeIntelTools` interface in `codeIntelTypes.ts`: remove `getInterface`, update `getCode` signature to `getCode(name: string | string[], packageName?: string, opts?: { mode?: 'interface' | 'code', deep?: boolean }): Promise<CodeIntelMember[]>`.\n- `createCodeIntelTools` in `CodeIntelTools.ts`: wire the new unified signature.\n- `getInterfaceInternal` and `getCodeInternal` remain as internal helpers but are no longer separately exposed.\n- Update JSDoc and any tool schema definitions accordingly.",
+      "context": [],
+      "createdAt": "2026-03-23T12:34:55.248Z",
+      "updatedAt": "2026-03-23T21:51:27.308Z",
+      "completedAt": "2026-03-23T21:51:27.308Z"
+    },
+    {
+      "id": "c825106d-09bb-40f5-974f-db429376227c",
+      "status": "+",
+      "title": "Accept multiple names in a single getCode call with deduplication",
+      "description": "Agents frequently need to resolve several symbols at once (e.g. a class and all its direct dependencies). Today they must issue one `getCode` call per name. This is wasteful.\n\n**Change:** The `name` argument of `getCode` should accept `string | string[]`. When an array is provided, results for all names are collected and returned together as a flat `CodeIntelMember[]`.\n\n**Deduplication:** If the same `(packageName, name)` pair appears more than once in the input (e.g. the same symbol requested twice, or the same symbol surfaced by multiple lookups), it must appear only once in the output. Use a `Set` keyed on `\"${packageName}/${name}\"` to track seen members.\n\n**Return type:** The return type changes from `Promise<CodeIntelMember>` (single) to `Promise<CodeIntelMember[]>` (always an array). This is consistent with the `getInterface` merge described in the companion feature.\n\n**Changes required:**\n- Update signature in `codeIntelTypes.ts`.\n- In `CodeIntelTools.ts`, wrap the single-name path in a loop/Promise.all over the names array before deduplicating and returning.\n- Update tests in `CodeIntelTools.test.ts` and `codeIntel-meta.test.ts` to use the new array return type.",
+      "context": [],
+      "createdAt": "2026-03-23T12:34:55.252Z",
+      "updatedAt": "2026-03-23T21:55:55.255Z",
+      "completedAt": "2026-03-23T21:55:55.255Z"
+    },
+    {
+      "id": "280368b5-4604-4296-815b-89c12565a8ec",
+      "status": "+",
+      "title": "Automatic cross-package fallback when member is not found in requested package",
+      "description": "Currently, if the requested `packageName` does not contain the member (or defaults to `'local'` and the member lives elsewhere), `getCode`/`getInterface` throw or return an empty array. Agents must already know which package owns a symbol, which is impractical.\n\n**Change:** When a member is not found in the explicitly requested package (or in `'local'` when no package is given), automatically fan out to all other packages present in the catalogue (i.e. all immediate dependencies that have already been scanned). For each package where the member exists, include a result entry.\n\n**Behaviour details:**\n- Resolution order: requested package first, then all other catalogue packages (excluding the one already tried) in iteration order.\n- If the requested package is explicit (not defaulted) and the member is found there, no fallback is needed.\n- If no package is specified (`packageName` is undefined/empty), try `'local'` first; if not found there, search all other packages.\n- The final result set is still subject to the deduplication rule from the multi-name feature (keyed on `\"${packageName}/${name}\"`).\n- Errors (e.g. language strategy not available) for a specific package during fallback should be swallowed and that package skipped rather than aborting the whole call.\n\n**Changes required:**\n- Extract a helper (e.g. `findMemberAcrossPackages`) in `CodeIntelTools.ts` that iterates `state.catalogue` and collects all packages containing a given member name.\n- Call this helper from the main resolution path when the primary lookup yields nothing.\n- Update JSDoc on `getCode` to document the fallback behaviour.\n- Add tests covering: member found only in a dependency package, member found in both local and a dependency, member not found anywhere (should return empty array rather than throwing).",
+      "context": [],
+      "createdAt": "2026-03-23T12:34:55.257Z",
+      "updatedAt": "2026-03-23T22:04:05.006Z",
+      "completedAt": "2026-03-23T22:04:05.006Z"
+    },
+    {
+      "id": "1c9b35a4-4dec-4bf0-a6a3-4291c770e4f5",
+      "status": "+",
+      "title": "Make sure this tool doesn't throw when nothing is found",
+      "description": "Simply return an empty result",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2026-03-23T20:28:21.434Z",
+      "updatedAt": "2026-03-23T22:10:18.336Z",
+      "completedAt": "2026-03-23T22:10:18.336Z"
+    },
+    {
+      "id": "477f12b5-0542-4a81-b91f-bac0f5f420a7",
+      "status": "+",
+      "title": "Failing test",
+      "description": "@src/codeIntel/CodeIntelTools.test.ts is failing.\nRun it and diagnose what's going wrong as it should be retrieving just the dependency in @src/codeIntel/CodeIntelTools.ts",
+      "context": [
+        "src/codeIntel/CodeIntelTools.test.ts",
+        "src/codeIntel/CodeIntelTools.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2026-03-24T00:11:32.609Z",
+      "updatedAt": "2026-03-24T00:51:03.389Z",
+      "completedAt": "2026-03-24T00:51:03.389Z"
+    }
+  ],
+  "createdAt": "2026-03-23T11:52:32.619Z",
+  "updatedAt": "2026-03-23T12:34:13.977Z",
+  "completedAt": "2026-03-24T00:51:03.389Z"
+}

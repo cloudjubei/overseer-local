@@ -1,0 +1,46 @@
+{
+  "id": "9aec9d1c-9bcf-4678-b7f1-160cde330836",
+  "status": "-",
+  "title": "improved tracking metrics",
+  "description": "Improve LLM cost tracking beyond per-request totals by adding derived metrics that are actionable at the tool and daily-summary level.\n\nScope:\n1. Extend the current LLM cost ledger so a completion can be attributed to the tool calls produced by that assistant response.\n   - Support responses with zero, one, or multiple tool calls.\n   - When a response contains multiple tool calls, evenly split request cost and token usage across those tool calls because the provider does not expose exact per-tool attribution.\n   - Mark any such derived attribution with `usageFromAverageCost = true` so downstream reporting can distinguish exact totals from totals that include averaged allocations.\n\n2. Introduce daily persisted summary data derived from raw ledger entries.\n   - Store per-day totals for request cost, input tokens, output tokens, cached-read tokens, and per-tool usage.\n   - For per-tool reporting, keep separate totals for:\n     a) entries with direct attribution only, and\n     b) entries including averaged multi-tool allocations.\n   - Daily summaries must be recomputable from ledger data, with recomputation able to restart from the latest summarized day and continue forward.\n\n3. Detect notable spikes and drops in cached-read token usage during summary generation.\n   - Run this analysis as part of daily summary recomputation.\n   - Use a deterministic, testable rule based on prior daily data and protect against noise on low-volume days.\n\nImplementation notes from current code context:\n- Current cost persistence is centered around `src/llmCosts/LLMCostsTools.ts` and is invoked from the completion flow in `src/completion/CompletionTools.ts`.\n- The implementation must propagate normalized tool-call context from the completion response into cost tracking before summaries can be derived.\n- The resulting design should preserve existing request-level totals while adding enough raw metadata to support future recomputation and reporting.\n\nAcceptance Criteria:\n1. Raw ledger entries preserve existing request-level totals and continue to support responses with no tool calls.\n2. Cost tracking captures sufficient tool-call metadata from each assistant response to attribute usage to zero, one, or many tool calls during later recomputation.\n3. For a response with exactly one tool call, the attributed per-tool cost and token totals match the original request totals for that response and `usageFromAverageCost` is false.\n4. For a response with multiple tool calls, request cost, input tokens, output tokens, and cached-read tokens are evenly divided per tool call, and each derived per-tool attribution is marked with `usageFromAverageCost = true`.\n5. Averaging is applied per tool call, not per unique tool name. If the same tool appears multiple times in one response, each call receives an equal share and contributes separately to that tool's aggregated totals.\n6. The sum of all derived per-tool allocations for a response equals that response's original request-level totals, subject only to a documented and deterministic rounding strategy if fractional values must be stored.\n7. Daily summary data is persisted by day and can be fully recomputed from raw ledger entries without requiring external state.\n8. Daily summaries include, at minimum, per-day totals for request cost, input tokens, output tokens, cached-read tokens, and per-tool usage totals.\n9. Per-tool daily summaries expose separate totals for direct-only attribution and totals that include averaged multi-tool allocations.\n10. Recompute logic can resume from the latest summarized day and continue forward without duplicating or skipping ledger data.\n11. Re-running summary recomputation over the same ledger data produces the same persisted daily summary results.\n12. Cache-read spike/drop detection runs as part of summary recomputation and uses a deterministic rule based only on persisted daily data from prior days.\n13. Cache-read anomaly detection ignores or suppresses low-volume noise using an explicit threshold or equivalent deterministic safeguard.\n14. Cache-read anomaly detection behaves safely when there is insufficient prior daily history, producing no false spike/drop events.\n15. Automated tests cover zero-tool, single-tool, and multi-tool responses; repeated tool names within one response; daily summary recomputation; restart-from-latest-summary behavior; and cache-read spike/drop detection edge cases.",
+  "features": [
+    {
+      "id": "15b7f1ff-91fe-447c-87ef-0715ab227f54",
+      "status": "-",
+      "title": "Extend LLM cost ledger schema for per-tool attribution",
+      "description": "Augment LLM cost ledger tracking so each completion cost entry can carry tool-attribution metadata needed for downstream summaries. Capture the tool names involved in the assistant response, the number of tool calls in that response, and a boolean `usageFromAverageCost` flag for any per-tool attribution derived by evenly splitting a single completion cost across multiple tool calls. Preserve current aggregate behaviour for chat-level totals while ensuring raw ledger data remains sufficient to recompute summaries later.",
+      "context": [],
+      "createdAt": "2026-03-25T01:26:35.025Z",
+      "updatedAt": "2026-03-25T01:26:35.025Z"
+    },
+    {
+      "id": "97062404-b4a5-4217-831e-c76e33daa1a7",
+      "status": "-",
+      "title": "Propagate tool-call context into LLMCostsTools append flow",
+      "description": "Update the completion pipeline so LLMCostsTools receives the actual tool-call context for each assistant response. The current cost append happens inside `sendCompletion` before callers consume tool calls, so this feature should adjust the API and call sites to pass the normalized tool calls from the same response into cost tracking. Ensure no-tool responses remain supported, and multi-tool responses can be represented without inventing exact per-tool costs beyond the defined even split.",
+      "context": [],
+      "createdAt": "2026-03-25T01:28:27.490Z",
+      "updatedAt": "2026-03-25T01:28:27.490Z"
+    },
+    {
+      "id": "2e2ce705-8980-4ec7-ab11-8ce180fb2069",
+      "status": "-",
+      "title": "Add daily LLM usage summary entity and incremental recomputation",
+      "description": "Introduce a dedicated persisted summary entity keyed by day for derived LLM usage analytics. The summary should be recomputable from ledger entries, support restarting from the last summarized day forward, and store daily totals needed for reporting: overall request cost, per-tool totals, tokens read, tokens written, cache read volume, and split totals for exact attributions vs attributions that include averaged multi-tool responses.",
+      "context": [],
+      "createdAt": "2026-03-25T01:28:35.137Z",
+      "updatedAt": "2026-03-25T01:28:35.137Z"
+    },
+    {
+      "id": "e5fc86a0-620d-4179-a549-8f5599889b37",
+      "status": "-",
+      "title": "Detect cache-read spikes and drops during summary generation",
+      "description": "Define and implement cache-read anomaly detection as part of daily summary recomputation. Compare each day’s cached-read token volume against recent baseline data and record significant spikes/drops in the summary output using a deterministic rule that can be recomputed. The rule should tolerate low-volume noise, handle missing prior days safely, and be testable without external services.",
+      "context": [],
+      "createdAt": "2026-03-25T01:28:44.866Z",
+      "updatedAt": "2026-03-25T01:28:44.866Z"
+    }
+  ],
+  "createdAt": "2026-03-25T01:17:06.915Z",
+  "updatedAt": "2026-03-25T01:34:47.104Z"
+}

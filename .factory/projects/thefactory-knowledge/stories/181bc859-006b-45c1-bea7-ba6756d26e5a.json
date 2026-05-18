@@ -1,0 +1,62 @@
+{
+  "id": "181bc859-006b-45c1-bea7-ba6756d26e5a",
+  "status": "+",
+  "title": "One neo4j instance serving multiple projects",
+  "description": "To not have to run multiple neo4j instances, it must be possible to always query/create/delete etc all nodes by \"projectId\" . Its akin to having a database with 1 table with the same types, where there's a foreign key \"projectId\" that indexes all values in that table - and it would be possible to split that table into multiple ones where each would be a reference to that \"projectId\", but to make infrastructure better we stick to the 1 table approach. The same idea should be used here.\nWhenever querying, it should be possible to query multiple projects at once (so providing a list of \"projecIds\" - if empty -> query all) and return results from all.",
+  "features": [
+    {
+      "id": "4e09a669-a158-41ec-9790-c779c54e8163",
+      "status": "+",
+      "title": "Core: Add projectId to GraphService for multi-tenancy",
+      "description": "Update `graph_service.py` to support multi-tenancy. All node creation, update, deletion, and query methods must be modified to operate within the scope of one or more `projectIds`. When creating nodes, a `projectId` property must be added. When querying, a list of `projectIds` should be used for filtering. An empty list of `projectIds` should mean querying across all projects.",
+      "context": [],
+      "createdAt": "2025-09-16T13:01:31.411Z",
+      "completedAt": "2025-09-16T00:14:42.990Z",
+      "updatedAt": "2025-09-16T13:01:31.411Z"
+    },
+    {
+      "id": "3206a15b-7fdf-4691-9dea-0534b0e0eeb5",
+      "status": "+",
+      "title": "API: Add projectId filtering to Area and Entity endpoints",
+      "description": "Update the `routers/areas.py` to support multi-tenancy. The endpoints for listing, creating, and querying Areas and Entities must accept a `projectIds` query parameter. This parameter will be passed down to the `GraphService` to ensure that operations are scoped to the correct project(s).",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:01:31.411Z",
+      "completedAt": "2025-09-16T01:22:50.382Z",
+      "updatedAt": "2025-09-16T13:01:31.411Z"
+    },
+    {
+      "id": "5c200fb4-a29b-4f31-892f-e3570d3ad0e7",
+      "status": "+",
+      "title": "API: Add projectId filtering to Blueprint endpoints",
+      "description": "Update the `routers/blueprints.py` to support multi-tenancy. The CRUD endpoints for Blueprints must accept a `projectIds` query parameter. This will be passed to the `GraphService` to ensure project-scoped operations.",
+      "context": [],
+      "createdAt": "2025-09-16T13:01:31.411Z",
+      "completedAt": "2025-09-15T23:58:53.950Z",
+      "updatedAt": "2025-09-16T13:01:31.411Z"
+    },
+    {
+      "id": "ce16cd72-fc24-48f5-9cc8-26f2d2ed32e5",
+      "status": "+",
+      "title": "Refactor: Update Agent Tools for multi-tenancy",
+      "description": "Update `agent_tools.py` to support multi-tenancy. All functions that interact with the `GraphService` must be updated to accept `projectIds` and pass them down to the service layer. This ensures that the high-level agent-facing tools are project-aware.",
+      "context": [],
+      "createdAt": "2025-09-16T13:01:31.411Z",
+      "completedAt": "2025-09-15T22:49:18.406Z",
+      "updatedAt": "2025-09-16T13:01:31.411Z"
+    },
+    {
+      "id": "5dd15267-3495-4bd9-ade5-f611cfda33f5",
+      "status": "+",
+      "title": "Tests: Update tests for multi-tenancy",
+      "description": "Update all existing tests in `tests/scenarios/` to be compatible with the new multi-tenancy feature. This involves providing a `projectId` when creating test data and using `projectIds` when querying. Add assertions to verify that data from one project is not visible when querying another.",
+      "context": [],
+      "createdAt": "2025-09-16T13:01:31.411Z",
+      "completedAt": "2025-09-15T23:06:23.396Z",
+      "updatedAt": "2025-09-16T13:01:31.411Z"
+    }
+  ],
+  "createdAt": "2025-09-16T13:01:31.411Z",
+  "completedAt": "2025-09-16T01:22:50.382Z",
+  "updatedAt": "2025-09-16T13:01:31.411Z"
+}

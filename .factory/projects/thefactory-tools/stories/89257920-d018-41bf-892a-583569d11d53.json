@@ -1,0 +1,497 @@
+{
+  "id": "89257920-d018-41bf-892a-583569d11d53",
+  "status": "-",
+  "title": "Ongoing improvements",
+  "description": "",
+  "features": [
+    {
+      "id": "1ec79a8a-a70b-4fa0-810f-3decc4178b9b",
+      "status": "+",
+      "title": "Project documentation: FILE_ORGANISATION.md",
+      "description": "Create or update top-level FILE_ORGANISATION.md to describe the overall project file/directory organisation. Describe all the main interfaces and explain each toolset: fileTools, storyTools, projectTools, testTools, chatTools. Add a brief section on how to extend tools. Include examples of typical usage snippets. Keep content precise and aligned with current code.",
+      "plan": "",
+      "context": [],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T12:59:58.902Z",
+      "completedAt": "2025-09-15T22:08:38.969Z",
+      "updatedAt": "2025-09-16T12:59:58.902Z"
+    },
+    {
+      "id": "24bebc0c-daa6-4a44-a156-42645449f1d5",
+      "status": "+",
+      "title": "Make agent function calling more error-safe",
+      "description": "Often times, when agents pass the arguments of a tool call - they get them slightly wrong. For instance, they confuse 'arguments' with 'args' or 'parameters' or 'params' - this is why we have MatchToolCall in @src/types.ts . We need to employ a similar strategy for all other functions where it's possible to mistake one word for another and an agent can make a bad mistake and mess up a whole run.\nFor instance, whenever paths to files are involved - that argument should be interchangeable with \"in\".\nLook at all the tools and come up with a function that for certain function calls will resolve this naming mistakes inside @src/orchestrator.ts and @src/tools/chatTools.ts (as those are 2 places where tools can be called).",
+      "plan": "",
+      "context": [
+        "src/types.ts",
+        "src/orchestrator.ts",
+        "src/tools/chatTools.ts"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T12:59:58.902Z",
+      "completedAt": "2025-09-15T21:34:42.442Z",
+      "updatedAt": "2025-09-16T12:59:58.902Z"
+    },
+    {
+      "id": "753f6df3-59a8-4fe0-972b-1dae53c20a15",
+      "status": "+",
+      "title": "Just like webSearchApiKeys are passed in - so should be githubCredentials",
+      "description": "Inside @src/orchestrator.ts for the 'startRun' function we are accepting webSearchApiKeys - we must also accept githubCredentials that will be used for all git operations (we cannot rely on any env variables).",
+      "plan": "",
+      "context": [
+        "src/orchestrator.ts"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T12:59:58.902Z",
+      "completedAt": "2025-09-15T18:04:38.189Z",
+      "updatedAt": "2025-09-16T12:59:58.902Z"
+    },
+    {
+      "id": "50e251a7-597f-4f58-a834-ceb0a20fc522",
+      "status": "+",
+      "title": "cleanup everything to do with History and history storing",
+      "description": "Currently @src/index.ts has HistoryStore and createHistoryStore defined. This should live in a separate file. It should also be documented well inside @docs/FILE_ORGANISATION.md .",
+      "plan": "",
+      "context": [
+        "src/index.ts",
+        "docs/FILE_ORGANISATION.md"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T12:59:58.902Z",
+      "completedAt": "2025-09-15T20:29:14.514Z",
+      "updatedAt": "2025-09-16T12:59:58.902Z"
+    },
+    {
+      "id": "5b1d6607-e448-4470-9df9-763f0c0e2ad5",
+      "status": "+",
+      "title": "Storing runs is delegated outside - it should be directly calling HistoryStore",
+      "description": "The intention of 'HistoryStore' defined in @src/history.ts  was that whenever any operation that requires storing would happen during an agent run, it would directly be stored by invoking the appropriate method using that interface.\nSo any external project using this project, could use the built-in one or provide their own with the correctly interfaced operations.\nMake sure that the provided 'HistoryStore' is used correctly during the whole run of an agent as started in @src/index.ts  via 'startRun' and then into the @src/orchestrator.ts via 'runIsolatedOrchestrator' and finally ending up in 'runConversation' .\nEssentially, an external project shouldn't have to do anything other than providing the 'HistoryStore' to be able to access the current and historical runs. This actually means we should change the name from 'HistoryStore' to 'AgentRunStore' - given that it also has information about the current runs. Adapt the interface if need be to expose/require the needed functionality.",
+      "plan": "",
+      "context": [
+        "src/index.ts",
+        "src/orchestrator.ts",
+        "src/history.ts"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T12:59:58.902Z",
+      "completedAt": "2025-09-15T19:40:27.402Z",
+      "updatedAt": "2025-09-16T12:59:58.902Z"
+    },
+    {
+      "id": "9ffc17e0-3eb2-4c0f-af23-88d4770ca4be",
+      "status": "+",
+      "title": "Integrate current pricing for an agentRun",
+      "description": "When calling 'setupAgentRunStoreForRun' inside @src/index.ts the latest pricing information should be included from the supplied 'PricingManager' - defined in @src/pricing.ts . 'AgentRunHistory' from @src/agentRunStore.ts must be updated to have the pricing information per prompt and completion token, so that a cost can be calculated later.",
+      "plan": "",
+      "context": [
+        "src/index.ts",
+        "src/pricing.ts",
+        "src/agentRunStore.ts"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T12:59:58.902Z",
+      "completedAt": "2025-09-15T17:42:08.193Z",
+      "updatedAt": "2025-09-16T12:59:58.902Z"
+    },
+    {
+      "id": "e7300947-204b-4a9a-a957-fda2d6aae03e",
+      "status": "+",
+      "title": "Enhance Story and Feature Data Model with Completion Timestamp",
+      "description": "Modify or extend the `Story` and `Feature` data models to include a `completedAt: Date | undefined` field. This field should be automatically populated with the current timestamp when the `status` of a Story or Feature changes to '+' (Done). If the status changes from '+' to anything else, `completedAt` should be unset (set to `undefined`). There also needs to be a `createdAt` field - this gets set only once on creation. There also needs to be an `updatedAt` field that gets updated whenever a Story/Feature gets updated in any way.\nThe types are in @src/types.ts and they are all used in @src/tools/storyTools.ts",
+      "plan": "",
+      "context": [
+        "src/types.ts",
+        "src/tools/storyTools.ts"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T12:59:58.902Z",
+      "completedAt": "2025-09-15T16:42:51.407Z",
+      "updatedAt": "2025-09-16T12:59:58.902Z"
+    },
+    {
+      "id": "2dc4520d-50ce-4639-b84c-b42826d51879",
+      "status": "+",
+      "title": "'createdAt' is required for Stories and Features",
+      "description": "The interfaces/types in @src/types.ts need to reflect that it's not an optional field.\nAlso all functions that touch it in @src/tools/storyTools.ts should assume so - this field MUST always be created when a Story or Feature is created.\nCleanup the @src/tools/storyTools.ts .",
+      "plan": "",
+      "context": [
+        "src/types.ts",
+        "src/tools/storyTools.ts"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:08:59.539Z",
+      "updatedAt": "2025-09-16T13:10:26.585Z",
+      "completedAt": "2025-09-16T00:07:48.144Z"
+    },
+    {
+      "id": "09b35d22-d6a0-474c-97d5-ab9ef39b6e5a",
+      "status": "+",
+      "title": "When a run is cancelled - cancel also the agent conversation",
+      "description": "Right now, when a run is cancelled - the LLM conversation still keeps on going and uses up tokens. Make sure that it's correctly aborted but the workspace shouldn't be deleted, to allow for further inspection.\nPrint a warning log that points to the workspace.",
+      "context": [],
+      "createdAt": "2025-09-18T13:49:25.281Z",
+      "updatedAt": "2025-09-19T10:49:11.903Z",
+      "completedAt": "2025-09-19T10:49:11.903Z"
+    },
+    {
+      "id": "c9a68ab1-b575-423f-80c4-25177623a6d1",
+      "status": "=",
+      "title": "Code standard",
+      "description": "The document @docs/CODE_STANDARD.md  highlights the overall architecture and coding standards maintained in this project.\nThere is a clear reference to it inside @README.md and @docs/FILE_ORGANISATION.md so that anyone creating new features or updating existing ones will go to it.\nIt should be as succinct as possible, but explaining the idea as well as possible.\n\nGo over all the code and make sure that it satisfies the standards.\nMake sure @docs/FILE_ORGANISATION.md is up to date.",
+      "context": [
+        "docs/FILE_ORGANISATION.md"
+      ],
+      "createdAt": "2025-09-19T10:34:20.107Z",
+      "updatedAt": "2025-09-29T21:54:52.159Z",
+      "blockers": []
+    },
+    {
+      "id": "917382fd-1c9a-4ab9-b6d3-e0410569ff8d",
+      "status": "=",
+      "title": "Aim for close to 100% test coverage",
+      "description": "We need to make sure that the tests cover as close as 100% of the codebase.\nObviously, things like the ai service with getting results from the AI cannot be fully tested - but we can test for many ranges of responses by mocking the LLM responses appropriately. The same idea should be taken everywhere to try to achieve 100% coverage.\n\nOne important thing is to make sure that data that is entering and leaving endpoints is validated thoroughly to make sure that it matches the expected schema. This should be part of the code and the tests should validate it too (i.e. malformed objects being rejected).\n\nThere needs to be a relevant section in @README.md  explaining how vital testing is and to refer to @docs/TESTING.md for all guidance related to writing tests and the standard for them. For reference there is also the @docs/CODE_STANDARD.md  document that highlights the coding standard within the project.\n\nNEVER FIX CODE JUST SO TESTS PASS - THE PROJECT CODE NEEDS TO MAKE SENSE AND WORK SO THE FEATURES ARE SATISFIED. TESTS ALWAYS NEED TO POKE AT HOLES AND EDGES OF THE CODE.",
+      "context": [],
+      "createdAt": "2025-09-19T10:34:37.842Z",
+      "updatedAt": "2025-09-22T21:53:45.446Z",
+      "blockers": []
+    },
+    {
+      "id": "060e174a-0e54-436d-8add-f6783f4146df",
+      "status": "+",
+      "title": "ProjectTools with subscribers",
+      "description": "In @src/tools/ProjectTools.ts the project tools get created via 'createProjectTools' so that they have ROOT + subscribers.\nWe need to trigger all of the subscribers whenever there's a change to projects i.e. createProject, updateProject, deleteProject, reorderStory .\nMake this clean.",
+      "context": [
+        "src/tools/ProjectTools.ts"
+      ],
+      "createdAt": "2025-09-21T22:45:51.951Z",
+      "updatedAt": "2025-09-21T22:54:20.708Z",
+      "completedAt": "2025-09-21T22:54:20.708Z"
+    },
+    {
+      "id": "b2723aa3-648f-4d2b-8761-9725f4ff7616",
+      "status": "+",
+      "title": "StoryTools with subscribers",
+      "description": "Following @src/tools/ProjectTools.ts, we want @src/tools/StoryTools.ts to trigger all of the subscribers whenever there's a change to stories i.e. saveStory, deleteStory .\nMake this clean.",
+      "context": [
+        "src/tools/StoryTools.ts"
+      ],
+      "createdAt": "2025-09-21T23:44:41.116Z",
+      "updatedAt": "2025-09-21T23:49:57.469Z",
+      "completedAt": "2025-09-21T23:49:57.469Z"
+    },
+    {
+      "id": "d04eff70-c5e9-4906-8b8e-387ab39676db",
+      "status": "+",
+      "title": "Unit tests failing",
+      "description": "two tests fail:\n@tests/webSearchTools.test.ts and @tests/completion.test.ts",
+      "context": [
+        "tests/webSearchTools.test.ts",
+        "tests/completion.test.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-23T18:32:27.738Z",
+      "updatedAt": "2025-09-23T21:00:53.178Z",
+      "completedAt": "2025-09-23T20:51:17.772Z"
+    },
+    {
+      "id": "5694475f-8e97-42f1-bc8f-4f10b8d6a7dd",
+      "status": "+",
+      "title": "Finish spec",
+      "description": "Inside @src/agentTools/constants.ts there are schemas that are not finished (they are commented out). Do them.",
+      "context": [
+        "src/agentTools/constants.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-28T01:39:27.705Z",
+      "updatedAt": "2025-09-28T01:41:55.944Z",
+      "completedAt": "2025-09-28T01:41:55.944Z"
+    },
+    {
+      "id": "be21c518-da60-45aa-a8b8-20fb2bb7865d",
+      "status": "+",
+      "title": "In utils - getChatContextFromFilename needs to be implemented",
+      "description": "In the file @src/chats/utils.ts there's a function `getChatContextFromFilename` that's the reverse of the function `getChatContextPath`, it needs to be implemented.",
+      "context": [
+        "src/chats/utils.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-28T01:41:01.952Z",
+      "updatedAt": "2025-09-28T01:42:46.583Z",
+      "completedAt": "2025-09-28T01:42:46.583Z"
+    },
+    {
+      "id": "2ca6e0ca-8573-4335-a788-509edcfe35c3",
+      "status": "+",
+      "title": "Go over all the tools and write a standalone interface description for each",
+      "description": "In tools such as @src/chats/ChatsTools.ts we are doing things like :\n`let _chatsToolsForType = createChatsTools('')\nexport type ChatsTools = typeof _chatsToolsForType` \nThis cannot happen as it leads to code being invoked when it shouldn't.\nGo over all the tools that have a similar type/interface definition and do it how @src/agentTools/AgentTools.ts has it - i.e. a separate interface definition.",
+      "context": [
+        "src/agentTools/AgentTools.ts",
+        "src/chats/ChatsTools.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-29T09:18:45.307Z",
+      "updatedAt": "2025-09-29T15:46:54.217Z",
+      "completedAt": "2025-09-29T15:37:35.561Z"
+    },
+    {
+      "id": "b94403c0-1a14-411f-b9f3-ed4c242897ea",
+      "status": "+",
+      "title": "Merging produces unwanted files that get picked up",
+      "description": "When using external merge or source-control conflict resolution tools, they produce files such as:\n`.stories/b796b48a-94d1-4c85-9484-96b497f61d5d_BACKUP_16128.json`, ``.stories/b796b48a-94d1-4c85-9484-96b497f61d5d_LOCAL_16128.json` or ``.stories/b796b48a-94d1-4c85-9484-96b497f61d5d.json.orig`  when merging a story json .\nThere should be a regex for such file artifacts inside @src/files/constants.ts that should be used by default by @src/files/FilesWatcher.ts .\nMake the regex good so that no other such files get picked up - that means find out what merge tools produce so that these are not picked up here.",
+      "context": [
+        "src/files/constants.ts",
+        "src/files/FilesWatcher.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-30T13:06:36.967Z",
+      "updatedAt": "2025-09-30T13:08:15.638Z",
+      "completedAt": "2025-09-30T13:08:15.638Z"
+    },
+    {
+      "id": "6b6aa078-ae4a-4cdc-a852-b27ea2d01ee6",
+      "status": "+",
+      "title": "Git Manager becomes GitTools",
+      "description": "We want to expose all the git related tools outside so we need to transform the current @src/git/gitManager.ts to follow the same structure as all the other tools in the project, for instance @src/completion/CompletionTools.ts or @src/tests/TestTools.ts . \nAll utils, constants and helpers should be correctly placed in the `src/git` folder - remembering that `utils` cannot have any external dependencies i.e. could be directly imported by outside projects.\n\nThe new GitTools needs to have the following functionality (if not already there in GitManager):\n- status porcelain with staged/unstaged changes, list remotes, fetch, pull, push, add (stage by path), reset (unstage by path), discard changes (checkout -- <path>), create branch, checkout branch, delete branch (safe only), rename branch, set upstream.\n- Ensure all commands use timeouts and return structured { ok, ... } responses; errors are captured without throwing.\n- Maintain safe checks: refuse destructive ops when working tree dirty where appropriate; confirm branch existence.\n\nThese need to be exposed exactly in the same manner as the other tools do - i.e. local non-exported functions and the Tools wrapper exposing them with needed dependencies (root etc).",
+      "context": [
+        "src/git/gitManager.ts",
+        "src/completion/CompletionTools.ts",
+        "src/tests/TestTools.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-03T11:20:05.515Z",
+      "updatedAt": "2025-10-04T22:38:42.317Z",
+      "completedAt": "2025-10-04T22:38:42.317Z"
+    },
+    {
+      "id": "2f7ad1c1-7f46-45f1-8ff0-6a1ef85a862c",
+      "status": "+",
+      "title": "FilesWatcherWithIndex needs to be reworked",
+      "description": "@src/file/FilesWatcherWithIndex.ts requires to return the list of files that are in the `filesDir` but also are not ignored by the `ignoredFiles`.\n@src/test/TestTools.ts need to use it, so that they can observe the whole provided root directory, but only observe files that are test files.\nThe current version doesn't work cos it depended on chokidar providing the list of filtered files but that doesn't happen - maybe it can still be fixed to do so.",
+      "context": [
+        "src/file/FilesWatcherWithIndex.ts",
+        "src/test/TestTools.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-05T16:54:12.051Z",
+      "updatedAt": "2025-10-05T17:01:18.692Z",
+      "completedAt": "2025-10-05T17:01:18.692Z"
+    },
+    {
+      "id": "906f60ad-dad5-40e8-87a3-e5586d3f4374",
+      "status": "+",
+      "title": "File write tool needs a better return result",
+      "description": "So that an LLM like you can understand that file writes (i.e. the `writeFile` tool) does its job - we should make the file return a diff of the changes.\nThere should also be a new tool called `writeDiffToFile` that will accept a filename and a standardised diff format - that will allow anyone to apply that to the file.",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-10-08T22:52:56.874Z",
+      "updatedAt": "2025-10-08T22:55:08.987Z",
+      "completedAt": "2025-10-08T22:55:08.987Z"
+    },
+    {
+      "id": "e47e8000-491a-49b9-8245-8acafccdbdc4",
+      "status": "+",
+      "title": "Add existing tools to chat tools",
+      "description": "There's `reorderFeature` but we also need a `reorderStory` - which is defined in @src/project/ProjectTools.ts  as `reorderStory`.\nAnd just as w have `createFeature` we need a `createStory` - both of these are in @src/story/StoryTools.ts .\n\nBoth of these new chat tools must be enabled as defaults in @src/chats/chatsConstants.ts .\n\nThey also need to be added in @src/agentTools/agentToolsConstants.ts , @src/agentTools/agentToolUtils.ts and  .",
+      "context": [
+        "src/agentTools/agentToolsConstants.ts",
+        "src/agentTools/agentToolUtils.ts",
+        "src/project/ProjectTools.ts",
+        "src/story/StoryTools.ts",
+        "src/chats/chatsConstants.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2025-10-16T23:11:52.527Z",
+      "updatedAt": "2025-10-16T23:52:43.362Z",
+      "completedAt": "2025-10-16T23:52:43.362Z"
+    },
+    {
+      "id": "4d808073-e37d-43e4-924a-6119d5d3d0c5",
+      "status": "+",
+      "title": "Update chat prompt",
+      "description": "When using the prompts for chats, sometimes the LLM goes off and starts implementing things on their own. The prompt needs to include directives telling the agent to always confirm whether they should carry out a course of action. They should never go off and start doing things on their own.",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-10-16T23:13:02.194Z",
+      "updatedAt": "2025-10-17T00:11:11.626Z",
+      "completedAt": "2025-10-16T23:41:38.381Z"
+    },
+    {
+      "id": "3336000a-43f2-4bc2-85c9-2b2ab386e6c9",
+      "status": "+",
+      "title": "FuzzyPatch module: add writeFuzzyPatch and migrate/expand diff tests",
+      "description": "Add a new module 'src/file/FuzzyPatch.ts' implementing 'writeFuzzyPatch(path, diff)' with robust, tolerant patch application:\n- tolerant normalization: accept LLM/SVN/headerless patches and bare '@@' by injecting missing headers/ranges\n- whitespace/tabs-insensitive anchor matching; LF EOL normalization for processing\n- rebuild hunks into valid unified diffs with ranged '@@ -l,s +l,s @@' headers, preserving correct context/deletions\n- retry flow: try direct apply; then fuzzy-rebuilt diff; finally synthesize from '+' lines as last resort\n- normalize final content to LF; never weaken or modify 'writeDiffToFile' validation\n\nWire it into the tools without altering 'writeDiffToFile':\n- expose 'writeFuzzyPatch' from the file tools factory\n- update file tools interface/types to include 'writeFuzzyPatch'\n\nTests:\n- move existing fuzzy-related failing tests from '@src/file/FileTools.diff.test.ts' to '@src/file/FuzzyPatch.test.ts' targeting 'writeFuzzyPatch'\n- add tests for: bare '@@' only, headerless hunks, SVN/LLM wrappers, CRLF vs LF, tabs vs spaces alignment, and synthesis fallback\n- keep strict 'writeDiffToFile' tests unchanged and passing\n\nAcceptance criteria:\n- 'writeDiffToFile' remains strict (rejects bare '@@'); its tests pass unchanged\n- 'writeFuzzyPatch' applies malformed/loose patches listed above successfully\n- migrated and new tests pass; demonstrates CRLF/tabs tolerance and last-resort synthesis\n- types updated and 'writeFuzzyPatch' is available via the tools API",
+      "context": [],
+      "createdAt": "2025-11-05T16:49:01.645Z",
+      "updatedAt": "2025-11-05T16:56:56.822Z",
+      "completedAt": "2025-11-05T16:56:56.822Z"
+    },
+    {
+      "id": "58fdefae-4e53-46e3-a793-a1dbb4c1d589",
+      "status": "+",
+      "title": "Project model: add active flag and persistence API",
+      "description": "- Add 'active: boolean' to the Project model with a backward-compatible default (true) when absent in existing project files.\n- Persist 'active' in serialization; on load, if missing, default to true.\n- Implement 'setActive(active: boolean): Promise<void>' that updates in-memory state and saves the project file atomically using the existing persistence mechanism.\n- Ensure serializers/deserializers include 'active', and validation/schema reflect the new field.\n- Add unit tests: defaulting on load when missing, persistence to disk, idempotent save when unchanged, and error handling.",
+      "context": [],
+      "createdAt": "2025-11-12T23:28:12.574Z",
+      "updatedAt": "2025-11-12T23:34:40.845Z",
+      "completedAt": "2025-11-12T23:34:40.845Z"
+    },
+    {
+      "id": "390f9823-a09a-43b9-ae98-b6bd998a4e74",
+      "status": "+",
+      "title": "Unified IFactoryTools interface with init/cleanup and resource disposal",
+      "description": "- Define a common 'IFactoryTools' interface with 'init(): Promise<void>' and 'cleanup(): Promise<void>'.\n- Update all tools to implement this interface; tools that allocate resources (e.g., FilesWatcher, timers, sockets, temp dirs) must dispose/close them in 'cleanup'.\n- Update any factories and exported types so creators return objects implementing 'IFactoryTools'.\n- Ensure 'cleanup' is safe to call multiple times (idempotent) and does not leak resources.\n- Add tests verifying 'cleanup' closes watchers/resources and no further events/actions are emitted after cleanup.",
+      "context": [],
+      "createdAt": "2025-11-12T23:28:12.575Z",
+      "updatedAt": "2026-03-19T18:43:00.842Z",
+      "blockers": [],
+      "completedAt": "2026-03-19T18:43:00.842Z"
+    },
+    {
+      "id": "f802cefa-ace8-4928-8b0c-146afc652de9",
+      "status": "+",
+      "title": "GitTools monitor lifecycle: get/stop/cleanup integration",
+      "description": "- In 'createGitTools', update 'startMonitor' to store a reference to the running monitor instance.\n- Add 'getMonitor(): Monitor | undefined' to inspect if a monitor is running.\n- Add 'stopMonitor(): Promise<void>' that stops/shuts down the monitor and clears the stored reference; ensure idempotency.\n- Implement 'cleanup(): Promise<void>' for GitTools that calls 'stopMonitor()' when a monitor is running.\n- Add tests for start/stop/idempotency, multiple 'startMonitor' calls not spawning multiple monitors, and that 'cleanup()' stops the monitor.",
+      "context": [],
+      "createdAt": "2025-11-12T23:28:12.576Z",
+      "updatedAt": "2026-03-17T21:07:15.585Z",
+      "completedAt": "2026-03-17T21:07:15.585Z"
+    },
+    {
+      "id": "56d35677-c233-4c67-a16a-17e719710213",
+      "status": "+",
+      "title": "Enforcing structured output",
+      "description": "### Goal\nFrom now on, 'thefactory-tools' enforces structured output **at the provider API level** for all supported providers.\n\n- We do **not** rely on prompt-only instructions for correctness.\n- We do **not** include additional prompt text warning about validation/parsing.\n- We assume all future providers integrated into this project will support provider-native structured outputs / JSON schema enforcement.\n\n### Legacy context (important)\n- Previously, `COMPLETION_PROTOCOL_INSTRUCTIONS` (and its companion `AGENT_RESPONSE_EXAMPLE`) in `@src/completion/completionConstants.ts` was the **sole** mechanism used to enforce structured output. The entire enforcement was prompt-based: the system prompt described the expected JSON shape, gave an example, and hoped the LLM would comply. There was **no** provider-level schema enforcement whatsoever.\n- Those prompt instructions are still useful as *developer guidance* (helping the LLM understand intent, field semantics, and example shapes), but they are **not** a correctness mechanism anymore. **Correctness must come exclusively from provider-native structured output enforcement.**\n- Do **not** add new prompt text that attempts to warn, validate, or parse structured output — that responsibility belongs to the provider API layer.\n\n### Provider documentation (authoritative)\n- OpenAI\n  - https://developers.openai.com/api/docs/guides/structured-outputs.md?lang=javascript\n  - https://developers.openai.com/api/reference/resources/responses/methods/create/index.md\n- Anthropic\n  - https://platform.claude.com/docs/en/build-with-claude/structured-outputs.md\n  - https://platform.claude.com/docs/en/api/typescript/messages/create.md\n- Gemini\n  - https://ai.google.dev/gemini-api/docs/structured-output.md.txt\n\n### Implementation notes in this repo\nStructured output enforcement is implemented in the completion provider adapters and request builders:\n- @src/completion/providers/CompletionProviderUtils.ts \n  - `buildAgentEnvelopeSchema(...)` (provider-compatible, shallow schema)\n  - `DEFAULT_PROVIDER_ENDPOINTS` and `getProviderEndpoint(...)`\n  - provider extractors:\n    - `extractOpenAIResponsesContent(...)`\n    - `extractOpenAIChatContent(...)`\n    - `extractAnthropicContent(...)`\n    - `extractGeminiContent(...)`\n- @src/completion/providers/CompletionProviderOpenAI.ts \n  - Builds OpenAI requests (Responses API by default; supports chat-completions when override is used)\n- @src/completion/providers/CompletionProviderAnthropic.ts \n  - Builds Anthropic Messages API requests with structured output config\n- @src/completion/providers/CompletionProviderGemini.ts \n  - Builds Gemini `:generateContent` requests and ensures the correct endpoint suffix\n- @src/completion/providers/CompletionProviders.ts \n  - `buildProviderRequest(...)` dispatches per provider\n\n### Debug logging (context)\n- Provider-focused request/response debug logging lives in @src/completion/CompletionTools.ts.\n- Debug is controlled by `isDebugEnabled(provider)` — a simple function that can be toggled by editing it directly. **No environment variables are used** because this is a library (`dist/index.js`) with no build-time env injection; `process.env` checks would not work reliably for consumers.\n- When enabled, logs include:\n  - Sanitized request URL (query params stripped to avoid leaking API keys).\n  - For Gemini: full `llmConfig` (model + sanitized `apiUrlOverride`) to help diagnose endpoint/model mismatches.\n  - Truncated JSON response (≤2000 chars).\n\n### Acceptance\n- The system should always request structured output via the provider's native structured output / schema mechanism.\n- If a provider cannot support structured output, it should not be integrated without a deliberate design decision and documentation update.",
+      "context": [
+        "src/completion/providers/CompletionProviderUtils.ts",
+        "src/completion/providers/CompletionProviderOpenAI.ts",
+        "src/completion/providers/CompletionProviderAnthropic.ts",
+        "src/completion/providers/CompletionProviderGemini.ts",
+        "src/completion/providers/CompletionProviders.ts",
+        "src/completion/CompletionTools.ts"
+      ],
+      "createdAt": "2026-02-17T10:04:06.098Z",
+      "updatedAt": "2026-02-17T10:49:54.002Z",
+      "blockers": [],
+      "completedAt": "2026-02-17T10:49:54.002Z"
+    },
+    {
+      "id": "6e978639-fbd4-4210-861e-87022310400b",
+      "status": "+",
+      "title": "Non-LLM History Summarization",
+      "description": "Implement non-LLM based summarization for file operations in the chat history.\n      - Goal: Replace verbose `readFile`/`writeFile` calls in history with concise summaries (e.g., `[Agent File Operations: Patch src/foo.ts (diff +30/-5)]`) to save tokens.\n      - Scope:\n        - Analyze chat history for repetitive file operations.\n        - Create a summarizer that compresses contiguous file read/write operations into a single summary block.\n        - Ensure the summary retains critical context (operation type, file path, size/diff stats).\n      - Implementation:\n        - Added `completionHistorySummarizer.ts` with `summarizeHistory` function.\n        - Integrated into `CompletionTools.ts` via `CompletionRequest.historySummarization`.\n        - Enabled by default in `orchestrator.ts` with `keepLastTurns: 2`.\n      - Tests:\n        - Unit tests for the summarizer logic (handling various file op sequences).\n        - Integration test in `CompletionTools.test.ts`.",
+      "context": [],
+      "createdAt": "2026-02-24T14:10:56.141Z",
+      "updatedAt": "2026-02-25T00:35:25.256Z",
+      "completedAt": "2026-02-25T00:35:25.256Z"
+    },
+    {
+      "id": "96be1e1a-858c-4aa4-9f47-bbf732d1fbdd",
+      "status": "+",
+      "title": "Advanced File Reading Tools",
+      "description": "Implement advanced file reading tools to allow LLMs to read partial files or structure, reducing token usage compared to reading full files.\n      - Tools:\n        - `readFileRange(path, startLine, endLine)`: Read specific lines of a file.\n        - `readFileStructure(path)`: Extract definitions/structure (e.g. using regex or simple parsing) to give an overview without full content.\n        - `grepFile(path, pattern)`: Search for patterns within a file.\n      - Tests:\n        - Unit tests for each tool to ensure correct output format and error handling.\n        - Integration test verifying that the LLM can use these tools effectively to navigate code.",
+      "context": [],
+      "createdAt": "2026-02-24T14:10:56.210Z",
+      "updatedAt": "2026-02-24T21:21:47.653Z",
+      "blockers": [],
+      "completedAt": "2026-02-24T21:21:47.653Z"
+    },
+    {
+      "id": "942c9c75-cddb-42dc-afe2-f6f5d7bacaaa",
+      "status": "+",
+      "title": "Enhanced searchFiles Tool",
+      "description": "Enhance the `searchFiles` tool to support explicit search modes for better precision and usability.\n      - Goal: Allow the agent to specify whether it wants to search by file path, file content (text), or exact match.\n      - Changes:\n        - Add `mode` parameter to `searchFiles`: `'path' | 'content' | 'exact'`.\n        - 'path': Fuzzy search on file paths (current behavior).\n        - 'content': Grep-like search within file contents.\n        - 'exact': Exact substring match on file paths or content (depending on context, or split further).\n      - Tests:\n        - Unit tests for each search mode to ensure correct filtering and ranking.",
+      "context": [],
+      "createdAt": "2026-02-24T14:10:56.357Z",
+      "updatedAt": "2026-03-02T19:35:24.830Z",
+      "completedAt": "2026-03-02T19:35:24.830Z"
+    },
+    {
+      "id": "1da128b2-a803-4ae8-9559-38b6aeea9761",
+      "status": "+",
+      "title": "Compilation and linting tools",
+      "description": "Add a 'compile-check' tool that lets agents/LLMs validate that recent file edits did not break compilation/typechecking.\n\nImplementation direction\n- Mimic the architecture of '@src/test/TestTools.ts': create a new module '@src/compile/CompileTools.ts' with optional supporting files:\n  - '@src/compile/constants.ts' for defaults and supported commands\n  - '@src/compile/types.ts' for result/diagnostic types\n  - '@src/compile/utils.ts' for parsing/normalization helpers\n\nLanguage support (initial)\n- JavaScript/TypeScript\n  - Prefer TypeScript typecheck when a TS project is present.\n  - Typical command: 'npx tsc --noEmit --pretty false --incremental false' (or repo-configured script).\n- Python\n  - Syntax/bytecode compile: 'python -m compileall' (or equivalent).\n  - Optionally support 'python -m py_compile' for targeted file checks.\n\nModes\n1) Targeted compile ('scope' = 'file')\n   - Input 'paths' is used to focus diagnostics and, when supported, to run a narrower check.\n   - Falls back to project-context compilation when single-file compilation is not meaningful.\n2) Project compile ('scope' = 'project', default)\n   - Runs compilation/typechecking for the entire workspace.\n\nInputs\n- paths?: string[] (optional) paths to focus diagnostics (and enable targeted checks)\n- scope?: 'file' | 'project' (default 'project')\n- workspaceRoot?: string (default repository/workspace root)\n- strict?: boolean (default true) fail on warnings when supported\n\nOutputs\n- success: boolean\n- exitCode: number\n- summary: { errors: number, warnings: number }\n- diagnostics: Array<{ file?: string, line?: number, column?: number, severity: 'error'|'warning', code?: string, message: string }>\n- rawOutput: string\n- command: { bin: string, args: string[], cwd: string } (for debuggability)\n\nBehavior\n- Read-only: never modifies files.\n- Deterministic output: disable colors, stable ordering where possible.\n- Mirror TestTools approach: use a single entrypoint tool that executes the appropriate command for the detected language/project and parses output into normalized diagnostics.\n\nUse cases\n- After applying diffs: run targeted compile for touched files; then optionally run full project compile before finishing.\n\nAcceptance criteria\n- Tool returns failed result when compilation/typechecking emits errors (non-zero exit code or parsed errors).\n- Diagnostics include exact file and line/column when available.\n- Supports JS/TS and Python in the initial implementation.\n- Works consistently on CI and locally.",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2026-02-26T11:44:59.450Z",
+      "updatedAt": "2026-02-26T22:32:16.059Z",
+      "completedAt": "2026-02-26T22:32:16.059Z"
+    },
+    {
+      "id": "3ed4935c-0bd0-4db1-80f6-b2b9910a5218",
+      "status": "+",
+      "title": "writeDiffToFile patch",
+      "description": "'First add a new alternative tool writeStructuredDiffToFile that accepts a structured diff object `{ deletions: number[]; insertions: { line: number; text: string }[] }` (line numbers are 1-based) to apply edits deterministically. Add tests for structured diff application (deletions, insertions, mixed order, out-of-range guards). Then improve patch application robustness by treating hunks independently: apply each hunk via diff.applyPatch; if a hunk fails, split into mini-hunks (per operation), then target deletions/insertions by anchoring within a line-number window and context before/after. Ignore no-op hunks (hunks that contain no additions or deletions) instead of failing. Continue applying remaining hunks even if some fail, and retain legacy fuzzy/synthesis as the final fallback. Update tests to cover mixed-quality hunks, inline escaped newlines, and per-hunk recovery behavior.'",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2026-02-26T15:07:14.947Z",
+      "updatedAt": "2026-03-02T19:35:26.496Z",
+      "completedAt": "2026-03-02T19:35:26.496Z"
+    },
+    {
+      "id": "b4e916cf-c6d1-4970-ba45-2d696b7f56d9",
+      "status": "+",
+      "title": "Project Environment Auto-Detection Utility",
+      "description": "Context / Problem\nFor a client using the library, when pointing to a local directory path, we want to automatically detect if it is a code project, its primary programming language, and its frameworks. Currently, clients have to implement their own heuristics or prompt the user manually, even when standard manifest files (like package.json or Cargo.toml) clearly indicate the stack.\n\n\nProposed Solution\nAdd a utility function to thefactory-tools that scans a given directory and infers the environment.\n\n\nProposed API\n\n\nimport type { ProgrammingLanguage } from 'thefactory-tools'\n\nexport interface DetectedEnvironment {\n  isCodeProject: boolean\n  language: ProgrammingLanguage | 'other' | ''\n  frameworks: string[] // e.g. ['react', 'nextjs']\n  testFrameworks: string[] // e.g. ['jest']\n}\n\n/**\n * Scans the target directory and returns inferred project environment details.\n */\nexport async function detectProjectEnvironment(dirPath: string): Promise<DetectedEnvironment>\n\nExpected Behavior / Detection Heuristics\nThe function should look for standard files and dependencies, for example:\n\n\n\nJavaScript / TypeScript: Look for package.json. If typescript is in dependencies or tsconfig.json exists, language is typescript. Frameworks can be inferred by checking dependencies for react, vue, next, express, etc.\n\nPython: Look for requirements.txt, pyproject.toml, or Pipfile.\n\nRust: Look for Cargo.toml.\n\nGo: Look for go.mod.\n\nJava/Kotlin: Look for pom.xml or build.gradle.\n\nC#: Look for *.csproj or *.sln.\n\n\nWe also want to also include Swift, Objective-C, Flutter, PHP, Ruby, Scala, C, C++,",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2026-03-24T21:26:43.686Z",
+      "updatedAt": "2026-03-24T22:53:08.333Z",
+      "completedAt": "2026-03-24T22:53:08.333Z"
+    },
+    {
+      "id": "8003f50c-bad7-4143-9d04-071d69ca175f",
+      "status": "-",
+      "title": "Checkpoints (git-based snapshots)",
+      "description": "Goal\nAdd first-class git-based checkpoints so an agent can create lightweight, named safety snapshots of the current repository state before risky work, inspect available checkpoints, diff against them, and restore the workspace to a prior checkpoint when needed. This is meant to reduce fear of destructive edits and give the agent a fast recovery path similar to checkpoint/snapshot flows used by tools like Cursor and Claude Code.\n\nWhy this matters\n- Agents regularly perform multi-step edits, test runs, refactors, and git operations that can leave the workspace in a bad state.\n- Existing low-level git tools are useful, but they do not yet provide an agent-friendly, task-level checkpoint workflow with clear naming, metadata, and safe restore semantics.\n- A checkpoint abstraction should be cheap enough to use often and explicit enough that the agent can confidently say: 'I will create a checkpoint before proceeding.'\n\nRecommended product shape\nImplement a dedicated checkpoint layer on top of git in `src/git` rather than forcing agents to compose raw git primitives every time. The API should feel like a safety system, not just a thin wrapper around commit/stash commands.\n\nCore capabilities\n1. Create checkpoint\n   - Capture the current repository state under a generated checkpoint id plus optional human title/message.\n   - Include metadata useful to agents/UI: id, title, description/message, createdAt, baseRef/HEAD sha, working-tree status summary, and whether untracked files were included.\n   - Checkpoints must support dirty working trees; they are specifically for pre-change safety.\n\n2. List checkpoints\n   - Return checkpoints in reverse chronological order with lightweight metadata.\n   - Support filtering by branch/session if such metadata is tracked.\n\n3. Inspect checkpoint\n   - Read a single checkpoint's metadata and optionally a summary of what differed at capture time.\n\n4. Diff against checkpoint\n   - Show how the current workspace differs from a checkpoint (or how two checkpoints differ).\n   - Reuse existing git diff/report primitives where possible.\n\n5. Restore checkpoint\n   - Restore repository state back to a checkpoint safely.\n   - Must be explicit about what happens to current uncommitted changes.\n   - Prefer safety options like `autoStashCurrent`, `confirmIfDirty`, and clear conflict/error reporting.\n\n6. Delete checkpoint\n   - Remove old checkpoints/metadata when no longer needed.\n\nImplementation direction\nUse git-native storage so checkpoints are durable, local, and fast. The most practical v1 is:\n- Persist checkpoint metadata in a dedicated local store under `.factory/checkpoints/` (JSON manifest/index).\n- Store the actual snapshot using a git-backed mechanism that works for dirty trees, such as a dedicated stash/commit strategy under managed refs.\n- Prefer a managed-ref approach over plain user-visible stash entries if possible, so this feature does not collide with a developer's normal stash workflow.\n- Each checkpoint should map metadata -> underlying git object/ref deterministically.\n\nImportant design constraints\n- Never require a clean working tree to create a checkpoint.\n- Do not push checkpoints to remotes; this is local safety state.\n- Do not pollute normal branch history with noisy safety commits on the current branch.\n- Avoid relying on the user's ordinary `git stash` namespace unless carefully namespaced/managed.\n- Restores must be reversible/safe by default; if restoring would discard current changes, either block or auto-stash them first.\n- The feature should work even when the agent has not yet made a commit on its task branch.\n\nSuggested public API shape\nA new `GitCheckpointTools` module (or additions to `GitTools`) with functions along the lines of:\n- `createCheckpoint({ repoPath, title?, description?, includeUntracked?, metadata? })`\n- `listCheckpoints({ repoPath, limit?, branch? })`\n- `getCheckpoint({ repoPath, checkpointId })`\n- `diffCheckpoint({ repoPath, checkpointId, against?: 'working-tree' | 'HEAD' | { checkpointId: string }, includePatch?, maxPatchBytes?, maxPatchedFiles? })`\n- `restoreCheckpoint({ repoPath, checkpointId, autoStashCurrent?, includeUntracked?, confirmIfDirty?, dryRun? })`\n- `deleteCheckpoint({ repoPath, checkpointId })`\n\nData model expectations\nCheckpoint metadata should likely include:\n- `id: string`\n- `title?: string`\n- `description?: string`\n- `createdAt: string`\n- `headSha: string`\n- `branch?: string`\n- `includesUntracked: boolean`\n- `gitRef` or `objectSha` for the stored snapshot\n- optional contextual metadata like `chatId`, `storyId`, `featureId`, `agentRunId` when available\n\nSafety/restore semantics\n- If the current workspace is dirty during restore, default behavior should be conservative: either require confirmation or auto-stash current changes before restore.\n- Restore should report exactly what happened: reset applied, stash created, conflicts encountered, untracked files restored/skipped, etc.\n- If possible, support dry-run restore planning similar to merge planning so clients can preview impact.\n\nIntegration opportunities\n- Orchestrator / AgentRunnerTools: create an automatic checkpoint before high-risk phases such as large code edits, broad renames, patch application, or merges.\n- Chats/agent UX: agent can explicitly tell the user a checkpoint was created and later offer restore options.\n- Git reporting: diff checkpoint against current work using existing structured diff/report shapes to minimize new UI work.\n\nAcceptance criteria\n- Agent can create a checkpoint from a dirty working tree without committing to the current branch.\n- Agent can list and inspect prior checkpoints with stable metadata.\n- Agent can restore to a checkpoint safely, with protection for current uncommitted work.\n- Agent can diff current state vs checkpoint using existing git diff/report infrastructure where practical.\n- Checkpoints are local-only, durable across process restarts, and do not interfere with ordinary user git workflows.\n- Clear tests cover: dirty-tree checkpoint creation, restore with current changes present, untracked-file handling, deletion, restart durability, and diff/report behavior.\n\nRecommended implementation breakdown\n1. Define checkpoint types + persistence manifest in `src/git/gitTypes.ts` and supporting helpers.\n2. Implement low-level managed-ref snapshot creation/restoration helpers in `src/git/gitHelpers.ts` / dedicated checkpoint module.\n3. Expose checkpoint APIs from `src/git/GitTools.ts` (or new `src/git/checkpoints/GitCheckpointTools.ts`).\n4. Add tests using temp repos for dirty state, untracked files, restore safety, and persistence.\n5. Optionally add orchestrator/agent integration as a follow-up feature once the raw checkpoint API is stable.\n\nNon-goals for v1\n- Remote/shared checkpoints.\n- Cross-repo checkpoints.\n- UI implementation details.\n- Automatic checkpointing policy baked into every workflow before the API is proven.\n\nNotes for implementers\n- Reuse the project's existing git safety patterns: structured responses, dry-run options, impact reporting, and cleanup guarantees.\n- Favor deterministic, serializable outputs so checkpoints can be surfaced cleanly in clients and future remote transports.\n- If there is a tradeoff between a simpler stash-backed v1 and a more isolated managed-ref design, choose the approach that best protects user workflows and makes restore semantics explicit.",
+      "context": [
+        "src/git/GitTools.ts",
+        "src/git/gitTypes.ts",
+        "src/git/gitHelpers.ts",
+        "src/agentRunner/AgentRunnerTools.ts",
+        "src/orchestrator.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2026-03-25T01:30:00.837Z",
+      "updatedAt": "2026-03-25T01:30:00.837Z"
+    },
+    {
+      "id": "09d68b0e-5d6a-4308-8929-8b81c3ae38f7",
+      "status": "+",
+      "title": "single updateStory and updateFeature exposed",
+      "description": "we used to have all the story and feature agentic tools in @src/agent/AgentTools.ts as `updateStoryTitle`, `updateFeatureDescription` etc, but we really just need `updateStory` and `updateFeature`.\nMake sure it's exposed and that it shows up in @src/agent/agentUtils.ts , @src/agent/agentHelpers.ts and @src/chats/chatsConstants.ts correctly so that when the project builds the types will be generated correctly.",
+      "context": [
+        "src/agent/AgentTools.ts",
+        "src/agent/agentUtils.ts",
+        "src/agent/agentHelpers.ts",
+        "src/chats/chatsConstants.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2026-04-21T09:00:49.759Z",
+      "updatedAt": "2026-04-21T09:17:41.085Z",
+      "completedAt": "2026-04-21T09:17:41.085Z"
+    },
+    {
+      "id": "72e82e99-b45a-46f2-afb6-98beaaf3134e",
+      "status": "+",
+      "title": "running tests and compile checks when running isolated tools",
+      "description": "Currently when using @src/agentRunner/AgentRunnerTools.ts and starting an isolated run, if the LLM calls `runTests` or `compileCheck` it fails with something like this:\n\nstrict compile is blocked because node_modules/.bin/tsc cannot resolve ../lib/tsc.js\n\ntargeted optimization test execution is blocked because node_modules/.bin/vitest cannot resolve dist/cli-wrapper.js\n\n\nThe exact error is:\n\n      \"rawText\": \"node:internal/modules/esm/resolve:275\\n    throw new ERR_MODULE_NOT_FOUND(\\n          ^\\n\\nError [ERR_MODULE_NOT_FOUND]: Cannot find module '/private/var/folders/25/4dns7s115_q13z992np622qw0000gn/T/thefactory-tools-TQKePF/workspace/node_modules/.bin/dist/cli-wrapper.js' imported from /private/var/folders/25/4dns7s115_q13z992np622qw0000gn/T/thefactory-tools-TQKePF/workspace/node_modules/.bin/vitest\\n    at finalizeResolution (node:internal/modules/esm/resolve:275:11)\\n    at moduleResolve (node:internal/modules/esm/resolve:865:10)\\n    at defaultResolve (node:internal/modules/esm/resolve:991:11)\\n    at #cachedDefaultResolve (node:internal/modules/esm/loader:719:20)\\n    at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:736:38)\\n    at ModuleLoader.resolveSync (node:internal/modules/esm/loader:765:52)\\n    at #resolve (node:internal/modules/esm/loader:701:17)\\n    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:621:35)\\n    at ModuleJob.syncLink (node:internal/modules/esm/module_job:160:33)\\n    at ModuleJob.link (node:internal/modules/esm/module_job:245:17) {\\n  code: 'ERR_MODULE_NOT_FOUND',\\n  url: 'file:///private/var/folders/25/4dns7s115_q13z992np622qw0000gn/T/thefactory-tools-TQKePF/workspace/node_modules/.bin/dist/cli-wrapper.js'\\n}\\n\\nNode.js v24.14.0\\n\"",
+      "context": [
+        "src/agentRunner/AgentRunnerTools.ts"
+      ],
+      "blockers": [],
+      "createdAt": "2026-04-21T09:18:47.804Z",
+      "updatedAt": "2026-04-21T22:11:10.397Z",
+      "completedAt": "2026-04-21T22:11:10.397Z"
+    }
+  ],
+  "createdAt": "2025-09-16T12:52:27.160Z",
+  "updatedAt": "2026-04-21T09:18:47.806Z"
+}

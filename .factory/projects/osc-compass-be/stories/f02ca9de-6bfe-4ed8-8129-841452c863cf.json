@@ -1,0 +1,162 @@
+{
+  "id": "f02ca9de-6bfe-4ed8-8129-841452c863cf",
+  "status": "+",
+  "title": "Anonymous accounts and email magic-link auth via Cognito & SES",
+  "description": "Scope\n- Pivot to Cognito Hosted UI passwordless (email OTP). Cognito sends emails via its integration; no backend SES; no app-owned magic links.\n- Client initiates OAuth2 authorization code flow with PKCE to Cognito Hosted UI; Cognito redirects to the client app with code; client calls backend to exchange the code for tokens.\n- Maintain anonymous account creation. Maintain UserProfile records and identity links in DynamoDB (COGNITO + EMAIL). Telegram remains unchanged.\n- Enforce email uniqueness both in Cognito (alias) and application-level identities.\n\nEndpoints\n1) POST /auth/oauth2/exchange\n   - Body: { code: string, redirectUri: string, codeVerifier?: string }.\n   - Exchanges authorization code for tokens via Cognito token endpoint (grant_type=authorization_code). Use Authorization: Basic base64(client_id:client_secret) if a client secret is configured. Include code_verifier when using PKCE.\n   - Returns LoginResultModel (idToken, accessToken, refreshToken, expiresIn, tokenType).\n   - After exchange, ensure a UserProfile exists and link identities (IdentityProvider.COGNITO by sub; IdentityProvider.EMAIL if available in id token claims).\n\n2) POST /auth/refresh\n   - Body: { refreshToken: string }.\n   - Exchanges refresh token via Cognito token endpoint (grant_type=refresh_token) and returns LoginResultModel with new id/access tokens.\n\n3) POST /auth/anonymous\n   - Creates an anonymous Cognito user (generated username), authenticates (admin/shared backend password if applicable), returns LoginResultModel.\n   - Ensures UserProfile exists and links IdentityProvider.COGNITO with providerUserId = Cognito sub.\n\n4) POST /auth/link/email/initiate (JWT protected via Cognito access token)\n   - Body: { email: string }.\n   - Validates email not linked to another user. Sets/updates Cognito email attribute and calls GetUserAttributeVerificationCode('email') so Cognito sends the verification code via SES.\n   - Returns StatusModel { status: 'CODE_SENT' }.\n\n5) POST /auth/link/email/confirm (JWT protected)\n   - Body: { code: string }.\n   - Calls VerifyUserAttribute('email', code). On success, ensures UserProfile exists and links IdentityProvider.EMAIL (email) and IdentityProvider.COGNITO (sub) in DynamoDB.\n\nRemoved endpoints\n- POST /auth/login/email/initiate and GET /auth/login/email/confirm.\n- GET /auth/link/email/confirm (magic-link based).\n\nConfiguration\n- Add: cognito.domain (Hosted UI domain). Keep cognito.clientId, cognito.clientSecret (optional), cognito.userPoolId.\n- Remove backend SES requirement and magic-link settings. SES remains in Cognito domain only. Make SES_FROM_EMAIL non-required in validation.\n\nSecurity\n- Use PKCE for browser authorize; backend token exchange uses client secret (confidential client) when configured.\n- Protected endpoints use Cognito JWT guard (access tokens) with JWKS validation.\n\nAcceptance criteria\n- /auth/oauth2/exchange exchanges codes for tokens correctly; /auth/refresh refreshes tokens.\n- Anonymous account creation returns tokens and creates profile + identity.\n- Email link flows use Cognito verification codes (initiate/confirm) — no backend SES or magic links.\n- Magic-link and email modules removed; seed script no longer creates MagicLinkTokens table.\n- Swagger docs updated.\n- COGNITO_UPDATE.md updated with Hosted UI settings, PKCE, OAuth scopes, and token exchange details.",
+  "features": [
+    {
+      "id": "81935046-1966-47a3-9c97-fc36a238c766",
+      "status": "+",
+      "title": "Add enums and config scaffolding for email link auth",
+      "description": "- Add AuthStrategyName.EmailLink = 'emailLink'.\n- Extend IdentityProvider with EMAIL.\n- Introduce/validate config keys: cognito.userPoolId, cognito.backendPassword, magicLink.expirySeconds, magicLink.baseUrl, ses.fromEmail, PUBLIC_API_BASE_URL (for constructing confirmation links). \n- Validate required config at startup with clear errors (e.g., missing backend password or userPoolId).",
+      "context": [],
+      "createdAt": "2025-11-07T11:55:55.675Z",
+      "updatedAt": "2025-11-07T14:05:51.413Z",
+      "blockers": [],
+      "completedAt": "2025-11-07T14:05:51.413Z"
+    },
+    {
+      "id": "f82305b5-b86c-499c-ba85-418f63027a7a",
+      "status": "+",
+      "title": "SES EmailService",
+      "description": "- Implement EmailService using AWS SES v3 (SESv2Client).\n- API: sendMail({ to, subject, html, text }).\n- Config: ses.fromEmail (required), ses.region (defaults to aws.region). Use default AWS credential provider chain.\n- Provide minimal email templates for 'login' and 'link' (plain text + simple HTML), with configurable subject prefix.\n- Unit tests with a mocked SES client.",
+      "context": [],
+      "createdAt": "2025-11-07T11:55:55.677Z",
+      "updatedAt": "2025-11-07T14:10:11.206Z",
+      "completedAt": "2025-11-07T14:10:11.206Z"
+    },
+    {
+      "id": "cd245af5-63fa-4dc3-9e57-0bc17576ee62",
+      "status": "+",
+      "title": "MagicLink token storage (DynamoDB) and service",
+      "description": "- Add TABLE_MAGIC_LINK_TOKENS constant and DynamoDB repository.\n- Schema: tokenHash (PK), purpose ('login'|'link'), email, userId (for 'link'), expiresAt (TTL), usedAt (nullable), createdAt.\n- Implement MagicLinkService: generateToken(purpose, email, userId?), hash & store with expiry; validateAndConsume(token) -> returns record or throws if invalid/expired/used.\n- Use secure hashing (e.g., HMAC-SHA256 with server key or SHA-256 + per-token random salt stored per record).\n- Enforce atomic one-time use with a conditional update (only mark usedAt if not already set), to prevent race conditions.\n- Ensure DynamoDB TTL is enabled on 'expiresAt'.\n- Build links using PUBLIC_API_BASE_URL and the GET confirmation endpoints.\n- Unit tests for generation, validation, expiry, atomic consumption, and one-time use.",
+      "context": [],
+      "createdAt": "2025-11-07T11:55:55.679Z",
+      "updatedAt": "2025-11-07T13:06:14.695Z",
+      "completedAt": "2025-11-07T13:06:14.695Z"
+    },
+    {
+      "id": "19ec2778-b043-45f0-890f-abc55e9e5231",
+      "status": "+",
+      "title": "Cognito admin helper service for backend-managed flows",
+      "description": "- Implement CognitoAdminService wrapping AWS Cognito admin APIs: createUser (or ensure user), setPermanentPassword(shared), findUserByEmail, updateUserEmail(verified), getSubByUsername, adminInitiateAuth (USER_PASSWORD_AUTH), refreshTokens.\n- Handle SECRET_HASH computation when client secret is configured.\n- Return normalized results (sub, tokens) for use by controllers.\n- Unit tests with mocked Cognito client.",
+      "context": [],
+      "createdAt": "2025-11-07T11:55:55.680Z",
+      "updatedAt": "2025-11-07T13:10:15.455Z",
+      "completedAt": "2025-11-07T13:10:15.455Z"
+    },
+    {
+      "id": "4026aa83-de8b-4415-99f4-4a314fc25cf5",
+      "status": "+",
+      "title": "POST /auth/anonymous endpoint",
+      "description": "- Endpoint: POST /auth/anonymous.\n- Flow: generate username 'anon-<uuid or timestamp>', ensure Cognito user exists with shared backend password, initiate auth to get id/access/refresh tokens.\n- Ensure a UserProfile exists; link IdentityProvider.COGNITO (providerUserId = sub).\n- Response: LoginResultModel (JSON).\n- Error handling: surfacing Cognito errors; config validation.\n- Tests: happy path and failures.",
+      "context": [],
+      "createdAt": "2025-11-07T11:55:55.681Z",
+      "updatedAt": "2025-11-07T13:15:28.521Z",
+      "completedAt": "2025-11-07T13:15:28.521Z"
+    },
+    {
+      "id": "f1dc82ae-750a-47a3-9c7a-32e6e1e9965b",
+      "status": "+",
+      "title": "POST /auth/login/email/initiate endpoint",
+      "description": "- Endpoint: POST /auth/login/email/initiate.\n- DTO: { email: string } with validation.\n- Validations: if email already linked to a user, allow; if not linked, allow (will create on confirm). Optionally cross-check Cognito for conflicts.\n- Generate magic link token (purpose='login'), store hashed with expiry, send email via SES with link to GET /auth/login/email/confirm?token=...\n- Response: StatusModel { status: 'CODE_SENT' }.\n- Tests for rate limiting hooks (if available), validation, and success.",
+      "context": [],
+      "createdAt": "2025-11-07T11:55:55.683Z",
+      "updatedAt": "2025-11-07T14:14:38.490Z",
+      "completedAt": "2025-11-07T14:14:38.490Z"
+    },
+    {
+      "id": "615f2927-ec2a-415a-9a08-f33e09112448",
+      "status": "+",
+      "title": "GET /auth/login/email/confirm endpoint",
+      "description": "- Endpoint: GET /auth/login/email/confirm?token=...\n- Validate and consume token (not used/expired, purpose='login').\n- Find or create Cognito user for the email, set email + email_verified=true.\n- Ensure UserProfile exists; link IdentityProvider.COGNITO (sub) and IdentityProvider.EMAIL (email).\n- Initiate Cognito auth with shared backend password; return LoginResultModel (JSON tokens directly).\n- Tests: token invalid/expired/used, happy path, and user creation flow.",
+      "context": [],
+      "createdAt": "2025-11-07T11:55:55.684Z",
+      "updatedAt": "2025-11-07T13:22:36.617Z",
+      "completedAt": "2025-11-07T13:22:36.617Z"
+    },
+    {
+      "id": "2f036c97-7862-4b51-97be-109c244f67b0",
+      "status": "+",
+      "title": "POST /auth/link/email/initiate endpoint (auth required)",
+      "description": "- Endpoint: POST /auth/link/email/initiate (Authorization: Bearer <token>).\n- DTO: { email: string } with validation.\n- Validations: email must not be linked to a different user (check identities table and optionally Cognito), else reject.\n- Generate magic link token (purpose='link') bound to the requesting user (store userId or Cognito sub); store hashed with expiry; send SES email with GET link.\n- Response: StatusModel { status: 'CODE_SENT' }.\n- Tests for conflict handling and happy path.",
+      "context": [],
+      "createdAt": "2025-11-07T11:55:55.685Z",
+      "updatedAt": "2025-11-07T14:15:47.273Z",
+      "completedAt": "2025-11-07T14:15:47.273Z"
+    },
+    {
+      "id": "15733fd9-303b-4030-828a-035860197ca8",
+      "status": "+",
+      "title": "GET /auth/link/email/confirm endpoint",
+      "description": "- Endpoint: GET /auth/link/email/confirm?token=...\n- Validate and consume token (not used/expired, purpose='link').\n- Ensure email is still free; link email to the user encoded in the token.\n- Update Cognito user email + email_verified=true for that user.\n- Link IdentityProvider.EMAIL in DynamoDB; ensure profile exists.\n- Optionally initiate Cognito auth and return LoginResultModel JSON.\n- Tests: conflicting email, token used/expired, happy path.",
+      "context": [],
+      "createdAt": "2025-11-07T11:55:55.685Z",
+      "updatedAt": "2025-11-07T13:33:09.742Z",
+      "completedAt": "2025-11-07T13:33:09.742Z"
+    },
+    {
+      "id": "711ad162-60c1-4931-b20c-5954ced5e72c",
+      "status": "+",
+      "title": "POST /auth/refresh endpoint",
+      "description": "- Endpoint: POST /auth/refresh.\n- DTO: { refreshToken: string, username?: string, idToken?: string }.\n- Exchanges refresh token for new id/access tokens via Cognito. If SECRET_HASH is required by the app client, accept username or derive it from idToken ('cognito:username').\n- Response: LoginResultModel with new id/access tokens; refresh token typically unchanged.\n- Tests: with and without client secret, invalid refresh token cases.",
+      "context": [],
+      "createdAt": "2025-11-07T11:55:55.686Z",
+      "updatedAt": "2025-11-07T14:16:33.272Z",
+      "completedAt": "2025-11-07T14:16:33.272Z"
+    },
+    {
+      "id": "e449d994-040f-4326-820c-8cf515cde29a",
+      "status": "+",
+      "title": "DTOs and Swagger documentation",
+      "description": "- Add DTOs: EmailInitiateModel, RefreshModel with class-validator and Swagger decorators.\n- Annotate new endpoints with ApiOperation, ApiOkResponse/CreatedResponse as appropriate.\n- Ensure confirmation (GET) endpoints return LoginResultModel JSON directly in Swagger.\n- Update README and env.example with new config keys.",
+      "context": [],
+      "createdAt": "2025-11-07T11:55:55.687Z",
+      "updatedAt": "2025-11-07T13:36:21.385Z",
+      "completedAt": "2025-11-07T13:36:21.385Z"
+    },
+    {
+      "id": "932e5f7d-ff98-4c7e-921e-86a58233cf80",
+      "status": "+",
+      "title": "Tests and validation",
+      "description": "- Add unit tests for MagicLinkService, EmailService (mocked), CognitoAdminService (mocked), and controller flows.\n- Add config validation tests (missing required keys).\n- Add identity linking tests: email uniqueness, linking to correct user.\n- Ensure CI passes and coverage is acceptable.",
+      "context": [],
+      "createdAt": "2025-11-07T11:55:55.688Z",
+      "updatedAt": "2025-11-07T14:17:16.333Z",
+      "completedAt": "2025-11-07T14:17:16.333Z"
+    },
+    {
+      "id": "9b2a0ed6-4374-4eca-b156-801628eae64a",
+      "status": "+",
+      "title": "Cognito JWT auth guard for protected endpoints",
+      "description": "- Implement a NestJS AuthGuard that validates AWS Cognito JWTs using the user pool JWKS (RS256). Cache and rotate keys automatically.\n- Extract claims (sub, cognito:username, email if present) and attach to request context.\n- Apply the guard to POST /auth/link/email/initiate (and any future protected auth endpoints).\n- Add Swagger bearer auth scheme annotation where applicable.\n- Tests: valid/invalid tokens, signature/issuer/audience checks.",
+      "context": [],
+      "createdAt": "2025-11-07T12:48:10.893Z",
+      "updatedAt": "2025-11-07T13:45:45.663Z",
+      "completedAt": "2025-11-07T13:45:45.663Z"
+    },
+    {
+      "id": "914a0f1a-6caf-4328-b8c5-82d0587b65cb",
+      "status": "+",
+      "title": "COGNITO_UPDATE.md - Cognito configuration checklist",
+      "description": "- Add COGNITO_UPDATE.md documenting required Cognito setup:\n  - User pool: configure email as username attribute or enable email as an alias to enforce uniqueness.\n  - App client: enable USER_PASSWORD_AUTH and REFRESH_TOKEN_AUTH flows; set refresh token validity to desired long duration (e.g., 3650 days ~10 years); configure client secret if applicable.\n  - Ensure backend IAM permissions for AdminCreateUser, AdminSetUserPassword, AdminUpdateUserAttributes, InitiateAuth, ListUsers.\n  - Enable email verification; backend will set email_verified=true on link/login confirmation.\n  - SES: verify sender domain/email in the correct region.\n  - DynamoDB: create MagicLinkTokens table; enable TTL on 'expiresAt' attribute.\n  - Optional: configure a user pool domain for future hosted UI needs.\n- Include troubleshooting notes for common errors (USERNAME_EXISTS, alias conflicts, SECRET_HASH mismatch).",
+      "context": [],
+      "createdAt": "2025-11-07T12:48:10.894Z",
+      "updatedAt": "2025-11-07T13:47:11.670Z",
+      "completedAt": "2025-11-07T13:47:11.670Z"
+    },
+    {
+      "id": "fe32c8dd-4067-41e4-ac08-b67a4860f2ec",
+      "status": "+",
+      "title": "Hosted UI passwordless (OAuth2 code exchange) + remove magic-link/email modules",
+      "description": "Implementation tasks\n- Add endpoint: POST /auth/oauth2/exchange { code, redirectUri, codeVerifier? } → call Cognito oauth2/token (authorization_code) with Authorization: Basic (client_id:client_secret) when configured; include code_verifier. Return LoginResultModel.\n- Ensure /auth/refresh uses Cognito oauth2/token (refresh_token) and returns LoginResultModel.\n- Implement email linking via Cognito codes:\n  - POST /auth/link/email/initiate (JWT): validate uniqueness; set email attr; call GetUserAttributeVerificationCode('email'); return StatusModel { status: 'CODE_SENT' }.\n  - POST /auth/link/email/confirm (JWT): body { code }; call VerifyUserAttribute('email', code); ensure UserProfile + link Identities (COGNITO + EMAIL).\n- Remove custom magic link login and SES usage from backend:\n  - Delete src/auth/magic-link/**/*.\n  - Delete src/auth/email-link.controller.ts and src/auth/email-link.controller.spec.ts.\n  - Delete src/email/**/*.\n  - Update src/auth/auth.module.ts: remove MagicLinkModule and EmailModule imports; remove EmailLinkController.\n  - Update src/auth/auth.controller.ts: add /auth/oauth2/exchange and link endpoints (initiate/confirm) as above.\n  - Add src/auth/services/cognito-oauth.service.ts to wrap Cognito oauth2/token calls.\n- Configuration and validation:\n  - Add cognito.domain; require COGNITO_DOMAIN in validation.\n  - Make SES_FROM_EMAIL optional; magic-link envs are not required.\n- Seed script and docs:\n  - Update scripts/seed_database.sh to remove MagicLinkTokens table creation and TTL.\n  - Update docs/COGNITO_UPDATE.md to Hosted UI passwordless: domain, authorization code grant, PKCE, scopes, redirect to client app, token exchange via backend.\n\nNotes\n- We preserve /auth/anonymous and the admin-only username/password login path for admin flows.\n- No Cognito Hosted UI redirect URLs are needed in backend; they are configured in Cognito and used by the client web app.\n- JWT guard remains unchanged and will continue to protect link endpoints.",
+      "context": [],
+      "createdAt": "2025-11-08T01:11:59.809Z",
+      "updatedAt": "2025-11-08T01:29:20.090Z",
+      "completedAt": "2025-11-08T01:29:20.090Z"
+    }
+  ],
+  "createdAt": "2025-11-07T11:55:05.331Z",
+  "updatedAt": "2025-11-10T23:52:53.711Z",
+  "completedAt": "2025-11-10T23:52:53.711Z"
+}

@@ -1,0 +1,401 @@
+{
+  "id": "13dca20f-c974-46ab-98dd-f814b30cf391",
+  "status": "+",
+  "title": "Code Intelligence",
+  "description": "Objective\nProvide language‑agnostic code intelligence for agents by scanning source code with Tree‑sitter and persisting a compact, project‑wide catalogue for fast lookups of interfaces/types and code declarations. The tool performs ephemeral, in‑memory parsing (no long‑lived ASTs), writes a single durable catalogue file, and updates incrementally via FilesWatcher.\n\nNew extension: external dependency scanning (node_modules, opt‑in)\n- Opt‑in support for scanning selected JS/TS dependencies from 'node_modules', including symlinked local packages (e.g., 'thefactory-db').\n- Controlled via 'createCodeIntelTools' options block 'externalNodeModules' with allowlisting. Defaults keep external scanning disabled to preserve performance.\n- External packages appear as first‑class packages in the catalogue using their npm package name as the key and path 'node_modules/<pkgName>'. FilesWatcher does not watch 'node_modules'.\n\nPrimary design decisions (Tree‑sitter first)\n- Parsing model: Use Tree‑sitter to parse files in memory during scans, extract only the minimal metadata we need, then immediately release the syntax tree. No LRU or long‑lived AST caches in v1.\n- Persistence model: Store only compact metadata in '.factory/code_intel.json' (one file for the entire project). No code bodies are persisted. At runtime, keep an in‑memory mirror of this catalogue for quick lookups.\n- Code extraction on demand: For getCode(), if declaration byte ranges were captured during the most recent scan of the file, slice code directly from the file. If ranges are missing or stale (e.g., across restarts), re‑parse only that single file with Tree‑sitter to compute the declaration range and slice. No persistent code cache.\n- Performance constraints: Initial full scan for typical mono‑repos must be sub‑minute under default ignores; incremental package rescans after small changes should complete within seconds. Scans exclude heavy/irrelevant directories while the FilesWatcher remains agnostic.\n\nSupported languages (v1)\n- JavaScript/TypeScript (js/ts)\n- Python\n- External deps scanning: JS/TS only in v1; Python externals are out of scope.\n\nLanguage strategy model (Tree‑sitter strategies)\n- Distinct per‑language scanning strategies, each implementing:\n  • scanPackage(ctx, pkgName, pkgPath): Promise<PartialCatalogueForPackage>\n  • extractMemberCode(ctx, entry): Promise<{ code: string, kind: CodeIntelMember['kind'] }>\n  • computeDependencies(ctx, source): string[] (names or 'package/name')\n- Language detection per package (unchanged):\n  • JS/TS: any of tsconfig.json, package.json, *.ts/*.tsx/*.js/*.jsx files.\n  • Python: any of pyproject.toml, setup.py, requirements.txt, *.py files (excluding __pycache__).\n  • If both detected, prefer JS/TS when *.ts/tsx present; else prefer Python when *.py dominates; deterministic tie‑break via filename patterns.\n  • If none detected, skip package (no entries) or mark as unknown (no‑op scanner).\n\nScanning overview (Tree‑sitter, per strategy)\n- JS/TS strategy:\n  • Identify exported interfaces, type aliases, classes, functions, consts, enums in .ts/.tsx/.js/.jsx and .d.ts files; prefer .d.ts for type declarations when present.\n  • For external deps, prioritize '.d.ts' files first to minimize parse cost; fall back to ts/js sources only when no '.d.ts' is present (configurable via options).\n  • Compute dependencies from import/re‑export specifiers and type identifier references in the declaration. Normalize to 'name' (same package) or 'package/name' (cross‑package).\n  • Extract descriptions from leading JSDoc blocks (first line only).\n- Python strategy:\n  • Identify classes (class X:), functions (def x(...):), enums (class X(enum.Enum):), Protocols (typing/typing_extensions Protocol), and type aliases (TypeAlias or detectable PEP 695 patterns).\n  • Compute dependencies from 'import' and 'from ... import ...', class bases, and type annotations in signatures. Normalize to 'name' or 'package/name'.\n  • Extract descriptions from top‑level or object docstrings (first line).\n\nFilesWatcher integration (agnostic watcher, filtered scanning)\n- Watch only the provided rootPath using @src/file/FilesWatcher.ts. The watcher remains agnostic (no special‑casing for package.json or node_modules).\n- Package boundaries:\n  • Each immediate subfolder of rootPath is a package named by that subfolder (e.g., rootPath/react-app -> 'react-app').\n  • Files directly under rootPath belong to a special 'local' pseudo‑package with path '.'.\n- On changes within rootPath/<pkgName>/**, debounce and run scanPackage(pkgName). On changes directly under rootPath, debounce and rescan 'local'.\n- Scanning ignores (applied only when enumerating files to parse): node_modules, .pnpm, .yarn, vendor, .venv, __pycache__, dist, build, coverage, .git, .next, out, target, .tox, .mypy_cache, and other common generated/cache directories. Only include code files: .ts/.tsx/.js/.jsx/.d.ts and .py by default.\n- External deps: FilesWatcher does not watch 'node_modules'; external packages are included only when allowlisted and scanned during init() or explicit scanDependencies().\n\nCatalogue persistence (single file, atomic)\n- Path: '.factory/code_intel.json'\n- Top‑level object keys are package names (including 'local' and any external npm package names). Each value is a package object with:\n  • path: relative path to package root (e.g., 'apps/web', 'packages/utils', '.' for local, 'node_modules/<pkg>' for externals).\n  • description: brief description of the package; derive from local metadata or heuristic; 'local' may be empty.\n  • members: object keyed by unique member names (interface/type/class/function/const/enum). Each member has:\n    – path: relative file path to the member declaration.\n    – description: first JSDoc/leading comment line (JS/TS) or docstring first line (Python) if available.\n    – dependencies: string[] where 'name' means same‑package and 'package/name' means cross‑package.\n- No code bodies are stored in the catalogue; only metadata for durability and size efficiency.\n- Writes are atomic: write to a temp file then rename to '.factory/code_intel.json'.\n\nCode extraction and in‑memory data\n- During scans, capture declaration byte ranges in memory alongside the in‑process catalogue view for fast getCode slicing. These ranges are not persisted.\n- If a member has no in‑memory range (e.g., fresh process start), getCode(name, pkg) re‑parses only the file containing the declaration with Tree‑sitter, computes the range, and slices the code on demand.\n- No LRU caches in v1. Trees are released after each scan or on‑demand parse completes.\n\nAPIs and signatures (Tree‑sitter powered)\n- createCodeIntelTools(rootPath: string, opts?): CodeIntelTools\n  • Optional opts:\n    – includeGlobs?: string[]\n    – ignoreGlobs?: string[]\n    – externalNodeModules?: {\n        allowlist?: string[]            // e.g., ['chokidar', 'thefactory-db']\n        includeDtsOnly?: boolean        // default true; parse .d.ts first for externals\n      }\n- CodeIntelTools.init(): Promise<void>\n  • Performs an initial scanDependencies() and optionally starts FilesWatcher (when enabled by caller).\n- CodeIntelTools.subscribe(handler: (update: { updatedPackages: string[], at: number }) => void): () => void\n  • Subscribes to catalogue updates and returns an unsubscribe.\n- CodeIntelTools.scanDependencies(): Promise<void>\n  • Full rescan of all packages under rootPath; invokes scanPackage(pkgName) per package using the detected language strategy. When externalNodeModules.allowlist is provided, scans those npm packages under 'node_modules/<name>'.\n- CodeIntelTools.getInterface(name: string, pkg?: string, deep?: boolean): Promise<CodeIntelMember[]>\n  • JS/TS: returns interface/type declarations; for classes, may project to an interface. Python: returns Protocols, type aliases, and class definitions when used as structural types. When deep=true, includes transitive dependencies across packages, including allowlisted externals.\n- CodeIntelTools.getCode(name: string, pkg?: string): Promise<CodeIntelMember>\n  • Returns a single CodeIntelMember with resolved declaration and metadata. For external packages, slices code from 'node_modules/<pkg>/**' with captured or on‑demand computed ranges.\n- CodeIntelTools.getCatalogue(): Promise<CodeIntelCatalogue>\n  • Returns the current in‑memory catalogue view.\n\nCodeIntelMember model (unchanged)\n- Proper class encapsulating metadata and code:\n  • packageName: string\n  • name: string\n  • kind: 'interface' | 'type' | 'class' | 'function' | 'const' | 'enum' | 'unknown'\n  • path: string (relative file path to declaration)\n  • description?: string\n  • dependencies: string[] (same rules as catalogue)\n  • code: string (the extracted declaration text)\n  • toJSON(): serializable representation safe for storage/transport\n\nDeep expansion semantics (unchanged with external support)\n- When deep=true, resolve transitive dependencies using the catalogue dependency graph, returning an array of CodeIntelMember with the root item first, followed by breadth‑first (or topo‑sorted) dependents across packages (local and allowlisted externals). Cycles are prevented via a visited set and a reasonable max‑depth.\n\nAcceptance criteria\n- init() triggers scanDependencies() using Tree‑sitter and starts FilesWatcher when requested.\n- Any change under rootPath/<pkgName>/** triggers a debounced scanPackage(pkgName); changes under rootPath files trigger a 'local' rescan. Subscribers receive updates with updatedPackages.\n- Scanning ignores heavy directories by default (as listed) while the FilesWatcher itself remains agnostic.\n- External deps scanning is disabled by default. When 'externalNodeModules.allowlist' is provided:\n  • The catalogue includes entries for those npm packages under their name keys with path 'node_modules/<pkg>'.\n  • External scans prefer '.d.ts' files when 'includeDtsOnly' is true (default).\n  • Files under 'node_modules' are not watched; rescans happen only on init() or explicit scanDependencies().\n  • getCode for external members works across restarts via on‑demand parse.\n  • deep=true traverses cross‑package dependencies into externals and returns a stable order without cycles.\n- The persisted '.factory/code_intel.json' conforms exactly to the defined single‑file structure and dependency naming rules; no code bodies are stored.\n- getInterface returns correct declarations per language semantics; getCode returns code by slicing source using Tree‑sitter‑derived ranges or a one‑off re‑parse.\n- All results are toJSON‑safe and consistent across restarts.",
+  "features": [
+    {
+      "id": "82242512-d119-4da0-908b-70436b1615c8",
+      "status": "+",
+      "title": "Define CodeIntel models and tool surface",
+      "description": "Create types and interfaces for Code Intelligence.\n- Add 'src/codeIntel/codeIntelTypes.ts' defining:\n  • CodeIntelMember class with fields: packageName, name, kind, path, description?, dependencies: string[], code: string, toJSON().\n  • CodeIntelCatalogue type (single-file format) and CodeIntelPackage/CodeIntelMemberEntry shapes.\n  • CodeIntelTools interface with: init(), subscribe(handler), scanDependencies(), getInterface(name, pkg?, deep?), getCode(name, pkg?), getCatalogue().\n- Ensure return types use CodeIntelMember: getInterface -> Promise<CodeIntelMember[]>, getCode -> Promise<CodeIntelMember>.\nAcceptance:\n- Types compile and are exported.\n- CodeIntelMember serializes via toJSON without functions or cycles.",
+      "context": [],
+      "createdAt": "2025-10-16T13:06:57.932Z",
+      "updatedAt": "2025-10-22T12:40:39.381Z",
+      "blockers": [],
+      "completedAt": "2025-10-22T12:40:39.381Z"
+    },
+    {
+      "id": "a54b4970-f513-4d68-aef0-4940220a9839",
+      "status": "+",
+      "title": "Single-file catalogue persistence at '.factory/code_intel.json'",
+      "description": "Implement catalogue load/save utilities and schema validation.\n- Path: '.factory/code_intel.json'.\n- Implement atomic writes (temp file + rename) and safe reads with fallback to empty on first run.\n- Enforce dependency naming rules: same-package deps as 'name'; cross-package deps as 'package/name'.\n- Validate shapes when loading; coerce or drop invalid entries with clear logs.\nAcceptance:\n- Save/load round-trip preserves data precisely.\n- Writes are atomic; no partial files even under interruptions.\n- Invalid catalogue input does not crash; issues are logged and ignored.",
+      "context": [],
+      "createdAt": "2025-10-16T13:06:57.934Z",
+      "updatedAt": "2025-10-21T17:35:26.009Z",
+      "completedAt": "2025-10-21T17:35:26.009Z"
+    },
+    {
+      "id": "681c43f3-9b8b-4904-a4f8-45958915b951",
+      "status": "+",
+      "title": "Factory and FilesWatcher integration (createCodeIntelTools)",
+      "description": "Implement createCodeIntelTools(rootPath: string) with FilesWatcher.\n- Use @src/file/FilesWatcher.ts to watch only rootPath.\n- Package boundaries: immediate subfolders are packages; direct files under rootPath belong to 'local'.\n- On change under rootPath/<pkgName>/**, debounce and run scanPackage(pkgName). On changes under rootPath files, rescan 'local'.\n- init() performs scanDependencies() then starts watching.\n- Implement subscribe(handler) patterned after StoryTools: returns an unsubscribe and emits updates on catalogue changes with { updatedPackages, at }.\nAcceptance:\n- Starting tools.init() writes an initial catalogue and begins watching.\n- Changes trigger debounced per-package rescans; subscribers are notified exactly once per burst.",
+      "context": [],
+      "createdAt": "2025-10-16T13:06:57.937Z",
+      "updatedAt": "2025-10-21T18:06:23.638Z",
+      "completedAt": "2025-10-21T18:06:23.638Z"
+    },
+    {
+      "id": "c4aaafc6-b67b-4f4b-8644-0e9c135a0481",
+      "status": "+",
+      "title": "Implement scanDependencies and scanPackage",
+      "description": "Build scanners to populate the catalogue with language-strategy selection.\n- scanDependencies(): discover packages (immediate subfolders + 'local'); for each package:\n  • detect language via the detector (JS/TS or Python; unknown skipped)\n  • invoke the selected strategy.scanPackage(ctx, pkgName, pkgPath)\n  • merge per-package results into the in-memory catalogue and persist to '.factory/code_intel.json' using atomic writes\n- scanPackage(pkgName): orchestrator that determines pkgPath, selects the language strategy, and delegates to strategy.scanPackage; normalize dependency names to 'name' or 'package/name'; extract brief descriptions; do not store code bodies.\n- Debounce: cooperate with FilesWatcher so per-package rescans are debounced and only changed packages are merged and persisted.\n- Idempotency: re-running scanDependencies without filesystem changes is a no-op; maintain stable ordering of members when writing.\n- Validation: ensure resulting catalogue conforms to schema; drop or coerce invalid entries with clear logs.\nAcceptance:\n- After a full scan, '.factory/code_intel.json' contains all discovered packages and members with correct paths and dependency naming; unknown/no-language packages are omitted without errors.\n- Per-package rescans (triggered by the watcher) only update affected packages and notify subscribers once per burst.\n- Re-running scanDependencies with no changes yields no write and no subscriber event.",
+      "context": [],
+      "createdAt": "2025-10-16T13:06:57.938Z",
+      "updatedAt": "2025-10-21T18:13:16.107Z",
+      "completedAt": "2025-10-21T18:13:16.107Z"
+    },
+    {
+      "id": "a3858872-b47f-4c33-b647-d04419b8198f",
+      "status": "+",
+      "title": "getCode(name, pkg?) returning CodeIntelMember",
+      "description": "Implement getCode to return the concrete code declaration and metadata for a symbol using Tree-sitter node ranges.\n- Resolve the member via the catalogue (default pkg='local' when omitted).\n- If a declaration byte range was captured during the most recent scan, slice code directly from the source file using that range.\n- Otherwise, re-parse only the file containing the declaration with Tree-sitter, locate the precise syntax node for the declaration (including export/default modifiers, decorators, and leading doc/JSDoc as appropriate), compute the declaration's byte range, and slice the exact code.\n- Do not use heuristic/balanced-brace scanning; do not persist code or maintain an AST LRU. Release the syntax tree immediately after slicing.\n- Return a single CodeIntelMember with code and metadata; dependencies are taken from the catalogue; kind is resolved by the language strategy.\nAcceptance:\n- Given a known exported symbol, getCode returns the exact declaration text by slicing the Tree-sitter node range.\n- When no in-memory range is available (e.g., fresh start), a single-file Tree-sitter parse is performed and the correct slice is returned.\n- Errors are reported cleanly when the symbol or file is missing.",
+      "context": [],
+      "createdAt": "2025-10-16T13:06:57.940Z",
+      "updatedAt": "2025-10-21T18:21:04.009Z",
+      "completedAt": "2025-10-21T18:21:04.009Z"
+    },
+    {
+      "id": "d1b45b5d-f570-4d8d-8f58-8f100ee61691",
+      "status": "+",
+      "title": "Subscribe API and update events",
+      "description": "Provide a subscribe(handler) API similar to StoryTools.\n- Add internal subscriber list; return an unsubscribe function.\n- Emit updates after catalogue writes with payload: { updatedPackages: string[], at: number }.\n- Debounce emissions to one event per scan burst.\nAcceptance:\n- Subscribers receive events on initial scan and subsequent changes.\n- Unsubscribe stops further notifications for that handler.",
+      "context": [],
+      "createdAt": "2025-10-16T13:06:57.941Z",
+      "updatedAt": "2025-10-21T18:24:41.167Z",
+      "completedAt": "2025-10-21T18:24:41.167Z"
+    },
+    {
+      "id": "01929438-2deb-467b-9b39-dad6409c9650",
+      "status": "+",
+      "title": "Exports and documentation",
+      "description": "Wire CodeIntelTools into public exports and add documentation.\n- Export from 'src/index.ts': re-export CodeIntelTools factory and types.\n- Add a section to docs/FILE_ORGANISATION.md documenting: createCodeIntelTools(rootPath), API signatures, subscribe semantics, deep expansion behavior, FilesWatcher model, and the '.factory/code_intel.json' format with examples.\nAcceptance:\n- Types and factory are importable by clients.\n- Docs clearly explain usage and catalogue schema with same-package vs cross-package dependency naming.",
+      "context": [],
+      "createdAt": "2025-10-16T13:06:57.942Z",
+      "updatedAt": "2025-10-22T12:58:46.932Z",
+      "blockers": [],
+      "completedAt": "2025-10-22T12:58:46.932Z"
+    },
+    {
+      "id": "2911e57f-285e-412c-a4e5-ee3fca44bd55",
+      "status": "+",
+      "title": "Language strategies and detection (JS/TS + Python)",
+      "description": "Introduce a pluggable language strategy abstraction with per-package detection.\n- Define a CodeIntelLanguageStrategy interface with: scanPackage(ctx, pkgName, pkgPath), extractMemberCode(ctx, entry), computeDependencies(ctx, source).\n- Implement a detector that classifies each package as 'js-ts' or 'python' based on file extensions and common config files (tsconfig.json/package.json for JS/TS; pyproject.toml/setup.py/requirements.txt for Python). Deterministic tie-break rules apply.\n- Do not persist language in the catalogue; detection runs on each scan.\nAcceptance:\n- Detection yields stable results for mixed repos with both JS/TS and Python.\n- Strategies can be swapped or extended without altering the persisted catalogue schema.\n- Unknown/no-language packages are skipped gracefully (no entries, no crashes).",
+      "context": [],
+      "createdAt": "2025-10-16T13:17:04.161Z",
+      "updatedAt": "2025-10-21T17:37:41.186Z",
+      "completedAt": "2025-10-21T17:37:41.186Z"
+    },
+    {
+      "id": "076b1f1a-32e7-4436-9204-839aac4a6908",
+      "status": "+",
+      "title": "JavaScript/TypeScript scanning strategy",
+      "description": "Implement JS/TS strategy using Tree-sitter to scan packages and extract code.\n- Parse .ts/.tsx/.js/.jsx and .d.ts using Tree-sitter TypeScript/TSX grammars.\n- Discover exported members: interfaces, type aliases, classes, functions, consts, enums, and re-exports. Prefer .d.ts for type declarations when present.\n- Dependencies: derive from import/export specifiers and identifier/type references within the declaration body. Normalize names to same-package ('name') or cross-package ('package/name').\n- Description: extract the first line of the leading JSDoc block when present; otherwise empty.\n- extractMemberCode: perform an on-demand Tree-sitter parse of the file (or reuse captured byte ranges from the most recent scan) and slice the exact declaration text by the syntax node range. Do not use balanced-brace heuristics.\n- During package scans, capture declaration byte ranges in memory to speed later getCode calls; do not persist these ranges.\nAcceptance:\n- Exports are correctly identified with their kinds and file paths via Tree-sitter queries.\n- Dependencies resolve to expected names per rules; cross-package references include 'package/'.\n- Declaration snippets are obtained by slicing the node range and are syntactically intact and trimmed to the member.",
+      "context": [],
+      "createdAt": "2025-10-16T13:17:04.162Z",
+      "updatedAt": "2025-10-21T17:54:14.020Z",
+      "completedAt": "2025-10-21T17:54:14.020Z"
+    },
+    {
+      "id": "43a2611f-72da-4b00-b15d-b11c31da5c8d",
+      "status": "+",
+      "title": "Python scanning strategy",
+      "description": "Implement Python strategy using Tree-sitter to scan packages and extract code.\n- Parse .py files using the Tree-sitter Python grammar (exclude __pycache__ and ignored dirs).\n- Discover classes (class X:), functions (def x(...):), enums (class X(enum.Enum):), Protocols (typing/typing_extensions.Protocol), and type aliases (X: TypeAlias = ... or recognizable PEP 695 patterns).\n- Dependencies: collect names from 'import ...', 'from pkg import Name', base classes (class X(Base, Protocol): ...), and type hints in signatures. Normalize names to same-package ('name') or cross-package ('package/name').\n- Description: first line of the docstring for class/function/module member when present.\n- extractMemberCode: perform an on-demand Tree-sitter parse of the file (or reuse captured byte ranges from the most recent scan) and slice the exact declaration text by the syntax node range, including decorators and the leading docstring when appropriate. Do not use regex/indent or balanced-brace heuristics.\n- During package scans, capture declaration byte ranges in memory to speed later getCode calls; do not persist these ranges.\nAcceptance:\n- Symbols are detected with accurate kinds and file paths via Tree-sitter queries.\n- Dependencies reflect imported names and type annotations; same-package vs cross-package naming is correct.\n- Declaration snippets are obtained by slicing the node range, preserve indentation, and are self-contained.",
+      "context": [],
+      "createdAt": "2025-10-16T13:17:04.164Z",
+      "updatedAt": "2025-10-21T18:03:03.151Z",
+      "completedAt": "2025-10-21T18:03:03.151Z"
+    },
+    {
+      "id": "63d38301-f74f-4a34-b223-0f7be3b53ab8",
+      "status": "+",
+      "title": "getInterface semantics per language",
+      "description": "Implement getInterface with language-aware behavior.\n- JS/TS: resolve interface/type symbols; deep=true inlines dependent interfaces/types first, then classes if referenced as types.\n- Python: resolve Protocols, type aliases, and, when appropriate, classes used as structural types; deep=true includes transitive imports/annotations.\n- Ensure return ordering is stable: root item first, then dependencies in topo order; visit guard against cycles.\nAcceptance:\n- For representative JS/TS and Python examples, deep=true returns all transitive definitions; deep=false returns only the root.\n- Cycles and duplicates are safely handled.",
+      "context": [],
+      "createdAt": "2025-10-16T13:17:04.167Z",
+      "updatedAt": "2025-10-22T12:54:57.211Z",
+      "blockers": [],
+      "completedAt": "2025-10-22T12:54:57.211Z"
+    },
+    {
+      "id": "7e774d36-ab3f-4c5f-92c5-96c0a55eefd6",
+      "status": "+",
+      "title": "Basic tests for JS/TS and Python strategies",
+      "description": "Add minimal, representative tests to validate scanning and retrieval across both languages.\n- Create small fixture packages under a temp rootPath: one JS/TS (with interfaces/types/classes) and one Python (with Protocols/classes/type aliases).\n- Verify catalogue structure, member kinds, dependencies, and that getInterface/getCode return proper CodeIntelMember results.\n- Validate that the FilesWatcher-triggered rescans update just the impacted package and invoke subscribers.\nAcceptance:\n- Tests pass locally and in CI; cover key paths for both strategies and deep expansion behavior.",
+      "context": [],
+      "createdAt": "2025-10-16T13:17:04.168Z",
+      "updatedAt": "2025-10-22T12:43:57.089Z",
+      "blockers": [],
+      "completedAt": "2025-10-22T12:43:57.089Z"
+    },
+    {
+      "id": "d82ebca2-a821-4183-8992-39244d123c1e",
+      "status": "+",
+      "title": "Tree-sitter grammars and query definitions",
+      "description": "Bundle the required Tree-sitter grammars (as WASM) and define per-language query specifications for member discovery, dependencies, and doc extraction, with a zero-config runtime loader and a language pack shape for future extensibility.\n\nDeliverables:\n- Grammars (WASM):\n  • JavaScript/TypeScript: tree-sitter-typescript (typescript, tsx) and tree-sitter-javascript (javascript, jsx) to cover .ts/.tsx/.js/.jsx and .d.ts.\n  • Python: tree-sitter-python for .py files.\n  • WASM files will be bundled under 'assets/treesitter/<lang>.wasm'.\n\n- Co-located Language Modules & Naming:\n  • All language-specific logic will be co-located within its own directory, e.g., 'src/codeIntel/javascript/' and 'src/codeIntel/python/'.\n  • Each module will contain its strategy ('codeIntelStrategyJavascript.ts'), LanguagePack implementation ('codeIntelLanguagePackJavascript.ts'), and Tree-sitter queries.\n  • The public-facing interfaces for the CodeIntel feature remain centralized in '@src/codeIntel/codeIntelTypes.ts' and must not expose third-party types.\n\n- Internal LanguagePack Abstraction:\n  • An internal 'CodeIntelLanguagePack' interface will be defined to encapsulate all Tree-sitter parsing logic, separating it from the high-level strategy code. This interface is an implementation detail and is not part of the public API.\n  • The pack is responsible for:\n    – Loading its specific WASM grammar via the central loader.\n    – Providing the compiled Tree-sitter queries for member and dependency discovery.\n    – Providing helper functions to interpret query results, such as classifying a syntax node into a 'CodeIntelMemberKind' and computing the full declaration range (including decorators and docs).\n\n- Centralized Parser & WASM Loader:\n  • A central loader ('src/codeIntel/languagePackLoader.ts') will manage the singleton instance of the Tree-sitter Parser and handle on-demand, lazy loading of the WASM grammar files. This ensures clients need no native toolchain or postinstall steps.\n\n- Query Specifications & Capture Conventions:\n  • Stable capture names will be used across languages to simplify strategy code: @member.node, @member.name, @doc.leading, @dep.import, etc.\n  • JS/TS queries: Identify exported interfaces, types, classes, functions, consts, enums, and re-exports. Capture imports and leading JSDoc.\n  • Python queries: Identify class/function definitions, enums, Protocols, and type aliases. Capture imports, base classes, and leading docstrings.\n\n- Declaration Range Computation:\n  • Language packs will provide helpers to compute the full declaration range for a matched node, expanding the slice to include modifiers (export/default), decorators, and the associated doc block.\n\n- Tests:\n  • Fixtures for JS/TS and Python that validate query captures (members, deps, docs) and that computed declaration ranges yield syntactically intact slices including intended leading docs.\n\nAcceptance:\n- WASM grammars load successfully via the runtime loader; no native compilation required for clients.\n- Queries identify exported members with correct names/kinds and produce declaration byte ranges that, when sliced, are correct and include intended leading docs.\n- Dependency captures populate expected 'name' or 'package/name' entries for common import/re-export (JS/TS) and import/base/annotation (Python) forms.\n- The internal LanguagePack abstraction is implemented and used by the JS/TS and Python strategies, demonstrating a clean separation of concerns and easy extensibility for additional languages.",
+      "context": [],
+      "createdAt": "2025-10-16T17:50:15.166Z",
+      "updatedAt": "2025-10-23T18:08:21.489Z",
+      "blockers": [],
+      "completedAt": "2025-10-23T18:08:21.489Z"
+    },
+    {
+      "id": "41a1192b-b8be-4e78-8514-493c7e3f606e",
+      "status": "+",
+      "title": "Fix Module Resolution Error in CodeIntelTools.test.ts",
+      "description": "The test suite `src/codeIntel/CodeIntelTools.test.ts` fails with an error: 'Failed to load url src/helpers.js'. This is caused by an incorrect import path in `src/codeIntel/CodeIntelTools.ts`. The path needs to be corrected to properly resolve the module and allow the test suite to execute.",
+      "context": [],
+      "createdAt": "2025-10-27T17:20:19.715Z",
+      "updatedAt": "2025-10-27T17:22:40.927Z",
+      "completedAt": "2025-10-27T17:22:40.927Z"
+    },
+    {
+      "id": "92702b17-0d81-430d-8852-cbf4b16c4792",
+      "status": "+",
+      "title": "Fix JavaScript Language Loading in Tree-sitter Parser",
+      "description": "The test 'javascript/ts pack finds exported members...' fails with an 'Argument must be a Language' error. The `CodeIntelLanguagePackJavascript` is not correctly initializing the Tree-sitter language object before it's passed to `parser.setLanguage()`. The language pack must ensure the parser is properly loaded and available before any parsing is attempted.",
+      "context": [],
+      "createdAt": "2025-10-27T17:20:19.718Z",
+      "updatedAt": "2025-10-27T17:27:06.720Z",
+      "completedAt": "2025-10-27T17:27:06.720Z"
+    },
+    {
+      "id": "daa0ac67-0a3e-4f49-b7ac-14a44761cb1f",
+      "status": "+",
+      "title": "Fix Python Language Loading in Tree-sitter Parser",
+      "description": "The test 'python pack finds top-level members...' fails with an 'Argument must be a Language' error. The `CodeIntelLanguagePackPython` is not correctly initializing the Tree-sitter language object before it's passed to `parser.setLanguage()`. The language pack must ensure the parser is properly loaded and available before any parsing is attempted.",
+      "context": [],
+      "createdAt": "2025-10-27T17:20:19.721Z",
+      "updatedAt": "2025-10-27T17:28:52.631Z",
+      "completedAt": "2025-10-27T17:28:52.631Z"
+    },
+    {
+      "id": "380526ba-cc6a-4c88-9eb5-c97f67bfe646",
+      "status": "+",
+      "title": "Fix Package Discovery During Full Scan",
+      "description": "The initial `scanDependencies()` call only processes the 'local' pseudo-package, failing to discover and scan subdirectory packages like 'jslib' and 'pylib' as expected by the tests. The package discovery logic within `scanDependencies` must be corrected to ensure it properly identifies and scans all immediate subdirectories of the `rootPath`.",
+      "context": [],
+      "createdAt": "2025-10-27T17:43:37.735Z",
+      "updatedAt": "2025-10-27T22:05:25.362Z",
+      "completedAt": "2025-10-27T22:05:25.362Z"
+    },
+    {
+      "id": "7588a886-411f-4a8c-904c-fc80666b73ba",
+      "status": "+",
+      "title": "Repair FilesWatcher Integration for Debounced Rescans",
+      "description": "Tests for FilesWatcher are timing out, indicating that file changes are not triggering debounced package rescans and notifying subscribers. This needs to be fixed to ensure incremental updates work correctly. The issue could be in the watcher setup, event handling, or the debouncing mechanism.",
+      "context": [],
+      "createdAt": "2025-10-27T17:43:37.737Z",
+      "updatedAt": "2025-10-27T22:07:28.017Z",
+      "completedAt": "2025-10-27T22:07:28.017Z"
+    },
+    {
+      "id": "f5fd637b-0da8-4db8-9328-08e99af25697",
+      "status": "+",
+      "title": "Correct Tree-sitter WASM Grammar Loading Path",
+      "description": "The language pack loader fails to find the `typescript.wasm` file, indicating a path resolution issue. The project may use an alias like `@assets` that is not being resolved correctly during testing. The loading mechanism must be fixed to find grammar files in all environments.",
+      "context": [],
+      "createdAt": "2025-10-27T17:43:37.739Z",
+      "updatedAt": "2025-10-27T22:09:46.266Z",
+      "completedAt": "2025-10-27T22:09:46.266Z"
+    },
+    {
+      "id": "f5325f1f-6d24-432e-8f4a-392280d28cc9",
+      "status": "+",
+      "title": "Fix Tree-sitter Query Syntax in JavaScript Language Pack",
+      "description": "The JavaScript/TypeScript language pack fails to load due to a syntax error in its Tree-sitter query, indicated by `QueryError: Bad pattern structure...`. This error prevents the pack from initializing, causing all downstream tests that rely on JS/TS code intelligence (like scanning the 'jslib' test package) to fail. The fix involves correcting the query syntax in `codeIntelLanguagePackJavascript.ts`.",
+      "context": [],
+      "createdAt": "2025-10-27T23:20:23.091Z",
+      "updatedAt": "2025-10-27T23:23:18.950Z",
+      "completedAt": "2025-10-27T23:23:18.950Z"
+    },
+    {
+      "id": "5790c462-4fb3-4d92-9b8d-152e87f51a5d",
+      "status": "+",
+      "title": "Update Python Tree-sitter Query to Capture TypeAlias Declarations",
+      "description": "The Python language pack's Tree-sitter query does not correctly identify all member types, specifically missing `TypeAlias` declarations (e.g., `Name = str`). This is evidenced by test failures where the 'Name' alias is not captured from test fixtures. The fix requires updating the Python Tree-sitter query to correctly identify and extract these type alias declarations.",
+      "context": [],
+      "createdAt": "2025-10-27T23:20:23.093Z",
+      "updatedAt": "2025-10-27T23:26:28.942Z",
+      "completedAt": "2025-10-27T23:26:28.942Z"
+    },
+    {
+      "id": "f9f8b3f9-102c-4d63-bc7c-2c2f05d048e0",
+      "status": "+",
+      "title": "Fix FilesWatcher Debounced Rescan and Subscriber Notification",
+      "description": "Tests for the `FilesWatcher` integration are failing with a `waitFor timeout`, indicating that file changes are not triggering a debounced rescan and notifying subscribers as expected. This suggests a logic error in `CodeIntelTools.ts` in the pipeline from handling watcher events to invoking the subscription handler. The fix requires debugging this event handling and notification mechanism.",
+      "context": [],
+      "createdAt": "2025-10-27T23:20:23.095Z",
+      "updatedAt": "2025-10-27T23:20:23.095Z",
+      "completedAt": "2025-10-27T23:20:23.095Z"
+    },
+    {
+      "id": "b8061b36-7ea0-42e5-ba74-8cffabcd585e",
+      "status": "+",
+      "title": "Integration Test: Run CodeIntel on 'TheFactory Tools' Project",
+      "description": "To ensure robust, real-world performance, this feature adds an integration test that runs the Code Intelligence tool against its own codebase ('TheFactory Tools' project). This 'meta-test' will validate the entire pipeline, from scanning and catalogue creation to querying, on a familiar and complex TypeScript project.\n\n### Acceptance Criteria:\n- A new integration test file is created (e.g., 'test/integration/code-intel-meta.test.ts').\n- The test initializes 'CodeIntelTools' with the project's root directory as 'rootPath'.\n- After the initial scan, the test uses 'getInterface' and 'getCode' to query for well-known symbols within the project, such as:\n    - The 'CodeIntelTools' class itself.\n    - The 'createCodeIntelTools' factory function.\n    - The 'CodeIntelMember' model.\n    - Key interfaces or types used in the project.\n- Assertions will verify:\n    - The correct identification of the member's 'name', 'kind', 'packageName', and 'path'.\n    - The successful extraction of its source 'code'.\n    - The presence of a 'description' if JSDoc comments exist.\n    - The accuracy of its 'dependencies' list.\n- This test will serve as a living example and a powerful regression suite, ensuring that CodeIntel correctly analyzes the very code that defines it.",
+      "context": [],
+      "createdAt": "2025-10-27T23:22:05.711Z",
+      "updatedAt": "2025-10-27T23:37:53.850Z",
+      "blockers": [],
+      "completedAt": "2025-10-27T23:37:53.850Z"
+    },
+    {
+      "id": "cad45a1b-a300-4917-b0cd-735217acc282",
+      "status": "+",
+      "title": "Fix Tree-sitter Query Syntax in JavaScript Language Pack",
+      "description": "The JavaScript/TypeScript language pack fails to load due to a syntax error in its Tree-sitter query, indicated by `QueryError: Bad pattern structure...`. This error prevents the pack from initializing, causing all downstream tests that rely on JS/TS code intelligence (like scanning the 'jslib' test package) to fail. The fix involves correcting the query syntax in `codeIntelLanguagePackJavascript.ts`.",
+      "context": [],
+      "createdAt": "2025-10-27T23:57:05.109Z",
+      "updatedAt": "2025-10-28T12:08:57.612Z",
+      "completedAt": "2025-10-28T12:08:57.612Z"
+    },
+    {
+      "id": "a52a52b3-d9c1-4f09-8397-62ed0c1e7ae1",
+      "status": "+",
+      "title": "Update Python Tree-sitter Query to Capture TypeAlias Declarations",
+      "description": "The Python language pack's Tree-sitter query does not correctly identify all member types, specifically missing `TypeAlias` declarations (e.g., `Name = str`). This is evidenced by test failures where the 'Name' alias is not captured from test fixtures. The fix requires updating the Python Tree-sitter query to correctly identify and extract these type alias declarations.",
+      "context": [],
+      "createdAt": "2025-10-27T23:57:05.112Z",
+      "updatedAt": "2025-10-28T12:12:53.648Z",
+      "completedAt": "2025-10-28T12:12:53.648Z"
+    },
+    {
+      "id": "d16ef8f0-57e1-42f1-94b0-1bed2a549a45",
+      "status": "+",
+      "title": "JS/TS class-to-interface projection for getInterface()",
+      "description": "Problem\n- In JS/TS, getInterface() returns only interfaces/type aliases and skips classes, while getCode() can slice class declarations correctly. This breaks parity: a symbol retrievable via getCode() should also have an interface view.\n\nGoal\n- When getInterface(name, pkg) targets a class, synthesize an interface representing the class' public instance surface using Tree‑sitter, so that classes like '@src/codeIntel/codeIntelTypes.ts:CodeIntelMember' yield a structural interface.\n\nScope (JS/TS v1)\n- Trigger: If resolution finds a class symbol, project its public instance API into a synthetic interface.\n- Members included:\n  • Properties: public instance fields. Preserve optional flag ('?') and readonly modifiers.\n  • Accessors: getters/setters collapsed into a single property signature using getter return type or setter param type.\n  • Methods: public instance methods. Include type parameters, parameter names/types, optional flag, and annotated return type. Overloads: use the implementation signature in v1.\n- Exclusions:\n  • Static members are excluded (per confirmation).\n  • Private/protected (including '#private') excluded.\n  • Constructors and decorators excluded from the shape.\n- Types:\n  • Use explicit annotations when present; when missing, default to 'unknown' (per confirmation). No inference in v1.\n- Description:\n  • Inherit the first JSDoc line from the class declaration when present.\n- Dependencies:\n  • Compute from type identifiers referenced in member signatures and type parameters. Normalize as existing rules: same‑package 'name'; cross‑package 'package/name'.\n- Output shape:\n  • Return a CodeIntelMember with kind='interface', name identical to the class name, path of the class source, description per above, dependencies per above, and code rendered as 'interface Name { ... }'.\n  • Synthetic members are not persisted into '.factory/code_intel.json'.\n- Parsing model:\n  • Use the same on‑demand Tree‑sitter parse approach as getCode(): if no in‑memory range/context, parse the file, extract class members, compute the projection, then release the tree immediately.\n\nBehavior and resolution order\n- getInterface continues to return native interfaces/type aliases when they exist.\n- If no native interface/type alias matches, but a class matches, return the synthetic interface projection for that class.\n- deep=true returns the root synthetic interface first, followed by transitive dependencies in breadth‑first/topo order, with cycle guards.\n\nAcceptance criteria\n- For a TS class like CodeIntelMember, getInterface('CodeIntelMember') returns a synthetic interface with only public instance members.\n- Static members are excluded; private/protected and constructors are excluded.\n- Accessors are represented as a single property signature.\n- Missing annotations render as 'unknown'; no inference beyond explicit annotations.\n- Native interface/type alias behavior is unchanged; classes are only projected when requested and when no native interface/type alias is found for the same name.\n- deep=true includes transitive dependencies derived from member signatures; ordering is stable and cycles handled.\n- No changes to the persisted '.factory/code_intel.json'; synthetic entries are never written.\n- Performance: one‑off file parse only when needed; all ASTs released immediately after use.\n\nImplementation outline\n- JS/TS strategy: add a projection path for class symbols within getInterface() resolution.\n- Language pack helpers:\n  • enumerateClassMembers(node): extract public instance fields, accessors, methods; capture names, modifiers, optional, readonly, type params, signatures.\n  • renderInterface(name, members): produce interface code text.\n  • collectTypeDepsFromSignatures(members): return normalized dependency names.\n- Orchestration:\n  • Adjust getInterface resolution order to try native interface/type first, then class projection.\n  • Ensure no persistence changes; synthetic results live only in memory per request.\n\nTests\n- Add TS fixtures with classes containing: public/protected/private, static, getters/setters, generics, optional props, readonly, methods with/without annotations.\n- Validate:\n  • Only public instance members are present.\n  • Accessors collapsed to property signature.\n  • Missing annotations become 'unknown'.\n  • Dependencies computed from types referenced in member signatures.\n  • deep=true returns transitive dependencies in stable order.\n  • Regression: native interfaces/types unaffected and still returned normally.\n\nNon‑goals (v1)\n- No projection for static members or constructor signatures.\n- No type inference or doc‑based type extraction; explicit annotations only.\n- Python class→Protocol projection is out of scope for this feature (can be a follow‑up).",
+      "context": [],
+      "createdAt": "2025-10-28T21:14:47.928Z",
+      "updatedAt": "2025-10-28T21:35:36.417Z",
+      "completedAt": "2025-10-28T21:35:36.417Z"
+    },
+    {
+      "id": "8bbdb5706-bd4f-4b0d-bdce-20362940702e",
+      "status": "+",
+      "title": "JS/TS: scan external dependencies from node_modules (allowlist)",
+      "description": "Objective: Add opt-in scanning of selected packages from 'node_modules' for JS/TS so agents can resolve interfaces/types and code declarations from external dependencies, including symlinked local packages.\n\nBehavior\n- Disabled by default. When enabled via options.externalNodeModules.allowlist, only listed npm names are scanned.\n- Supports scoped packages. The catalogue key equals the npm package name token exactly (e.g., 'foo', '@scope/pkg'), and the package path is 'node_modules/<npmName>' (e.g., 'node_modules/@scope/pkg').\n- Symlinked local externals under node_modules are treated the same as normal externals.\n- No Python changes in this feature.\n\nAcceptance criteria\n- Default: after init/scanDependencies(), the catalogue contains no entries for node_modules packages.\n- With allowlist=['chokidar'], catalogue includes key 'chokidar' with path 'node_modules/chokidar' and discovered members.\n- With allowlist including a symlinked local package (e.g., 'thefactory-db'), the catalogue includes key 'thefactory-db' with path 'node_modules/thefactory-db'.\n- With allowlist=['@scope/pkg'], the catalogue includes key '@scope/pkg' with path 'node_modules/@scope/pkg' and discovered members.",
+      "context": [],
+      "createdAt": "2025-10-30T00:01:41.293Z",
+      "updatedAt": "2025-10-30T10:44:22.300Z",
+      "blockers": [],
+      "completedAt": "2025-10-30T10:44:22.300Z"
+    },
+    {
+      "id": "4d252dc8-e7eb-4dcd-9b4b-f47a922b1287",
+      "status": "+",
+      "title": "External discovery and catalogue naming rules",
+      "description": "Objective: Define discovery and naming policy for external packages scanned from 'node_modules', with deterministic collision behavior.\n\nBehavior\n- Discovery source: '<projectRoot>/node_modules/<pkgName>' for each allowlisted name. Scoped names are supported ('@scope/pkg' resolves to 'node_modules/@scope/pkg').\n- Catalogue key: use the allowlist token exactly (e.g., 'foo', '@scope/pkg'). Package.path must be 'node_modules/<token>'. Member paths are file paths relative to this directory.\n- Collision policy (deterministic): if a top‑level workspace directory exists with the same key as an allowlisted external (e.g., 'foo'), the workspace package is preferred and the external instance is skipped. Emit one warning per collision with code 'external_collision_skipped' and context { name, externalPath, localPath }.\n- Language detection: reuse existing per‑path detection; unsupported languages are skipped.\n\nAcceptance criteria\n- External entries use their npm package name (including scope) as the catalogue key with path 'node_modules/<token>'.\n- Dependency normalization continues to emit 'name' for same‑package and 'package/name' for cross‑package, working identically for external packages.\n- When a collision occurs (workspace 'foo' and node_modules 'foo'), only the workspace package remains; a warning is logged; no duplicate keys.",
+      "context": [],
+      "createdAt": "2025-10-30T00:01:41.296Z",
+      "updatedAt": "2025-10-30T11:59:56.205Z",
+      "blockers": [],
+      "completedAt": "2025-10-30T11:26:21.847Z"
+    },
+    {
+      "id": "0a4a681a-88f9-442e-b946-ae4d29fe4026",
+      "status": "+",
+      "title": "External scanning strategy: .d.ts-first for performance",
+      "description": "Objective: Keep external scans fast by prioritizing type declarations for allowlisted packages.\n\nBehavior\n- For allowlisted externals and includeDtsOnly=true (default), scan only '*.d.ts' files and record their members. If a package has no '.d.ts' files, fall back to scanning '.ts', '.tsx', '.js', '.jsx'.\n- We do not consult package.json 'types' in v1; file presence drives selection.\n- Apply existing ignores inside external packages (dist, build, coverage, etc.).\n\nAcceptance criteria\n- In typical external packages like 'chokidar', only '.d.ts' files are parsed by default when present, reducing scan time.\n- Preference rules mirror current '.d.ts' precedence in the JS/TS strategy (no regressions).\n- Initial scan with one or two allowed externals adds roughly under ~1s per external on a developer machine (informational, not a hard test gate).",
+      "context": [],
+      "createdAt": "2025-10-30T00:01:41.298Z",
+      "updatedAt": "2025-10-30T10:44:38.332Z",
+      "completedAt": "2025-10-30T10:44:38.332Z"
+    },
+    {
+      "id": "07097c6f-7a66-4e91-abd9-2df5a723f4fa",
+      "status": "+",
+      "title": "Options API: external node_modules configuration",
+      "description": "Objective: Extend createCodeIntelTools options with a dedicated block to control external scanning.\n\nType and API\n- TypeScript signature:\n  interface CodeIntelToolsOptions {\n    includeGlobs?: string[]\n    ignoreGlobs?: string[]\n    externalNodeModules?: {\n      allowlist?: string[] // e.g., ['chokidar','thefactory-db','@scope/pkg']\n      includeDtsOnly?: boolean // default true; when false, also scan ts/js sources for externals\n    }\n  }\n\nBehavior\n- When allowlist is non-empty, scan only the listed packages from 'node_modules'.\n- includeDtsOnly defaults to true; when true, restrict scanning to '.d.ts' for externals where possible.\n- FilesWatcher policy for externals remains unchanged (no watching of node_modules).\n\nAcceptance criteria\n- Type updates compile; options remain backwards compatible and optional.\n- Passing { externalNodeModules: { allowlist: ['chokidar'] } } results in a 'chokidar' package in the catalogue post-init.\n- Leaving options undefined leads to the current behavior (no external scanning).",
+      "context": [],
+      "createdAt": "2025-10-30T00:01:41.300Z",
+      "updatedAt": "2025-10-30T10:44:40.009Z",
+      "completedAt": "2025-10-30T10:44:40.009Z"
+    },
+    {
+      "id": "2d44aa1a-ebca-49d6-af22-f02ad8005bd3",
+      "status": "+",
+      "title": "Cross-package resolution and getCode/getInterface for externals",
+      "description": "Objective: Enable seamless access to external members via existing APIs with clear path resolution and restart semantics.\n\nBehavior\n- getCode(name, packageName) accepts an external package name (e.g., 'chokidar', '@scope/pkg') and returns the member with code sliced from 'node_modules/<pkg>/**' files.\n- Path resolution order for extracting a member is:\n  1) <root>/node_modules/<packageName>/<relativePath> (when packageName is allowlisted),\n  2) <root>/<packageName>/<relativePath>,\n  3) <root>/<relativePath>.\n- On-demand parsing: if in-memory ranges are absent (e.g., after restart), re-parse only the specific file in 'node_modules/<pkg>' to compute the slice and return code.\n- getInterface(name, packageName, deep?) resolves in the given external package with the same semantics as locals; deep traversal may cross into externals.\n\nAcceptance criteria\n- After enabling allowlist=['chokidar'], calling getCode('FSWatcher', 'chokidar') returns a non-empty code slice and proper kind.\n- After process restart without a rescan, getCode for an external member triggers a single-file parse under node_modules and returns code.\n- Cross-package dependency tokens like '@scope/pkg/Name' are traversed by deep expansion when present in dependencies.",
+      "context": [],
+      "createdAt": "2025-10-30T00:01:41.301Z",
+      "updatedAt": "2025-10-30T10:44:41.339Z",
+      "completedAt": "2025-10-30T10:44:41.339Z"
+    },
+    {
+      "id": "315a767e-7f45-4946-a2c7-54b3f4c48019",
+      "status": "+",
+      "title": "Watcher policy for externals (no node_modules watching)",
+      "description": "Objective: Keep FilesWatcher agnostic and avoid heavy watching under 'node_modules'.\n\nBehavior\n- FilesWatcher continues to watch only the configured project root path and remains agnostic to node_modules contents.\n- External packages are not watched. They are included or refreshed only via init() or explicit scanDependencies() calls.\n- Debounce/persist notifications behave the same.\n\nAcceptance criteria\n- Edits made inside 'node_modules/<pkg>' do not trigger automatic watcher rescan events or subscriber notifications.\n- Calling scanDependencies() after such edits updates the external catalogue entries.\n- Subscribers receive notifications after scan with 'updatedPackages' including the external package names.",
+      "context": [],
+      "createdAt": "2025-10-30T00:01:41.303Z",
+      "updatedAt": "2025-10-30T10:44:42.810Z",
+      "completedAt": "2025-10-30T10:44:42.810Z"
+    },
+    {
+      "id": "f38180e1-f45b-4715-8684-233957c7c049",
+      "status": "+",
+      "title": "Deep traversal across local→external edges (JS/TS)",
+      "description": "Objective: Allow deep dependency expansion to cross into allowed external packages, including scoped packages.\n\nBehavior\n- When deep=true, dependencies qualified as 'package/name' (where package refers to an external in the allowlist, including scoped tokens like '@scope/pkg') are enqueued and resolved if present in the catalogue.\n- Ordering rules and cycle prevention remain identical to the current implementation (root first, then topo-ordered dependencies; JS/TS emits types/enums before classes).\n\nAcceptance criteria\n- Given a local type that depends on '@scope/pkg/SType' and allowlist includes '@scope/pkg', getInterface(local, 'local', true) returns a list including 'SType' from the external package in a stable order.\n- Cycles across local↔external are prevented and do not hang or duplicate entries; the visited set logic uniformly keys nodes as 'pkg/name'.",
+      "context": [],
+      "createdAt": "2025-10-30T00:01:41.304Z",
+      "updatedAt": "2025-10-30T10:44:44.126Z",
+      "completedAt": "2025-10-30T10:44:44.126Z"
+    },
+    {
+      "id": "edbff6dd-29c6-4f20-b13a-e70892219150",
+      "status": "+",
+      "title": "Persistence and durability for external packages",
+      "description": "Objective: Persist external entries in the single catalogue file without code bodies, with correct relative paths and scoped names.\n\nBehavior\n- Persist external packages under their exact npm name key (supports scope), with path 'node_modules/<pkgName>'.\n- Member entries store only metadata: path (relative to that external path), optional description, dependencies; no code bodies.\n- Writes remain atomic as per the existing persistence model.\n\nAcceptance criteria\n- After an external scan, '.factory/code_intel.json' contains keys for allowlisted external packages and their members (metadata only), including scoped packages.\n- After process restart, getCode for external members re-parses on demand and returns correct slices without needing a full rescan.\n- JSON output remains stable and toJSON-safe across restarts.",
+      "context": [],
+      "createdAt": "2025-10-30T00:01:41.306Z",
+      "updatedAt": "2025-10-30T10:44:45.492Z",
+      "blockers": [],
+      "completedAt": "2025-10-30T10:44:45.492Z"
+    },
+    {
+      "id": "203b4499-1cbe-428f-9682-f0eb45c77ce8",
+      "status": "+",
+      "title": "Tests: external scanning and resolution via node_modules",
+      "description": "Objective: Add Vitest tests that codify the node_modules-based external scanning behavior, including defaults, collisions, symlinks, scoped packages, and restart reparses.\n\nTest cases (JS/TS)\n1) Default behavior (no allowlist):\n   - init() -> catalogue should not include any node_modules packages.\n2) Allowlist single external:\n   - createCodeIntelTools(ROOT, { externalNodeModules: { allowlist: ['chokidar'] }})\n   - init() -> catalogue includes 'chokidar'; expect representative member(s) from '.d.ts' and getCode returns a non-empty slice.\n3) Allowlist symlinked local external:\n   - Create a local package directory and symlink it into 'node_modules/<name>'; include in allowlist; catalogue includes the package; getCode works.\n4) Collision policy (workspace vs external):\n   - Create a workspace folder 'foo' and node_modules 'foo'; allowlist ['foo']; init() -> catalogue contains only workspace 'foo'; assert a warning logged with code 'external_collision_skipped'.\n5) On-demand re-parse after restart:\n   - After initial scan, create a fresh CodeIntelTools instance (no in-memory ranges) and call getCode on a known external member; it re-parses only the relevant file and returns code.\n6) Deep traversal across local→external edge (scoped):\n   - Local type references '@scope/pkg/SType'; allowlist includes '@scope/pkg'; deep expansion includes the external item with stable ordering.\n\nNotes\n- Keep tests self-contained and not network dependent; rely on locally created node_modules content.\n- Do not watch node_modules during tests; use scanDependencies() or init() only.\n- Python remains unchanged in these tests.",
+      "context": [],
+      "createdAt": "2025-10-30T00:01:41.308Z",
+      "updatedAt": "2025-10-30T11:59:59.424Z",
+      "blockers": [],
+      "completedAt": "2025-10-30T11:33:58.322Z"
+    },
+    {
+      "id": "9b00d6a9-b9a8-42b3-8bf8-b1739e8d0dcd",
+      "status": "+",
+      "title": "Documentation: external allowlisting, naming, and performance notes",
+      "description": "Objective: Update documentation to explain how to enable and use external dependency scanning, with explicit guidance for scoped packages, collision policy, and performance.\n\nDocs updates\n- In docs/FILE_ORGANISATION.md and story notes, document:\n  - Options API externalNodeModules: structure, defaults, and examples (including scoped tokens like '@scope/pkg').\n  - Allowlisting model and discovery path ('node_modules/<pkgName>').\n  - Catalogue naming rules and collision policy (workspace wins; warning code 'external_collision_skipped').\n  - .d.ts-first strategy for performance and includeDtsOnly toggle.\n  - Watcher policy (no node_modules watching) and when rescans occur.\n  - On-demand reparse after restart for externals; no code bodies persisted.\n  - Limitations: Python externals not supported in v1; external scanning is opt-in and scoped.\n\nAcceptance criteria\n- Documentation contains runnable snippets demonstrating enabling 'chokidar' and '@scope/pkg' scanning.\n- Clear caveats around performance, collision policy, and non-watched behavior are included.\n- Docs merged without altering existing acceptance criteria for default behavior.\n\nNotes for implementers and users (summarized)\n- Options API:\n  ```ts\n  createCodeIntelTools(root, {\n    externalNodeModules: { allowlist: ['chokidar', '@scope/pkg'], includeDtsOnly: true }\n  })\n  ```\n- Discovery & naming: entries appear with keys equal to the npm name (e.g., 'chokidar', '@scope/pkg') and path 'node_modules/<name>'.\n- Collision policy: if a workspace folder shares the same name, the external is skipped and a warning 'external_collision_skipped' is logged once per name.\n- Watcher: node_modules is never watched; rescans of externals occur only via init() or scanDependencies().\n- Persistence & restarts: catalogue stores metadata only; getCode() re-parses on demand after restarts.\n- Limitations: JS/TS externals only in v1.\n\nRunnable examples\n- Single external ('chokidar'):\n  ```ts\n  const tools = createCodeIntelTools(process.cwd(), {\n    externalNodeModules: { allowlist: ['chokidar'] },\n  })\n  await tools.init()\n  const item = await tools.getCode('FSWatcher', 'chokidar')\n  console.log(item.kind, item.packageName, item.path)\n  ```\n- Scoped package ('@scope/pkg'):\n  ```ts\n  const tools = createCodeIntelTools(process.cwd(), {\n    externalNodeModules: { allowlist: ['@scope/pkg'] },\n  })\n  await tools.init()\n  const items = await tools.getInterface('LocalType', 'local', true)\n  ```",
+      "context": [],
+      "createdAt": "2025-10-30T00:01:41.310Z",
+      "updatedAt": "2025-10-30T11:43:17.518Z",
+      "completedAt": "2025-10-30T11:43:17.518Z"
+    },
+    {
+      "id": "fdbf9823-f8e8-443c-85aa-ffacd178f9c8",
+      "status": "+",
+      "title": "Auto external dependencies scanning",
+      "description": "Add option 'autoExternalDependencies?: boolean' to 'createCodeIntelTools(rootPath, opts?)'. When enabled, automatically discover and scan external dependencies actually used by the project and include them in the code intelligence catalogue.\n\nJS/TS behavior:\n- Discover external packages by scanning non‑relative import and re‑export specifiers across local packages; normalize to base npm package name (e.g., '@scope/pkg', 'lodash/map' → 'lodash').\n- For each resolved package present under 'node_modules/<pkg>', scan it as an external package keyed by '<pkg>' with 'path' = 'node_modules/<pkg>'.\n- Prefer '.d.ts' files for externals to minimize parsing cost; for v1 we can remain d.ts‑only for externals.\n- FilesWatcher does not watch 'node_modules'; externals are scanned during init() or explicit 'scanDependencies()'.\n- 'getCode' on externals works via captured ranges or on‑demand single‑file re‑parse.\n\nPython behavior:\n- Discover external modules by scanning 'import ...' and 'from ... import ...' in local code; exclude relative imports.\n- Locate site‑packages under typical virtualenvs ('.venv' or 'venv'); scan only referenced packages. Prefer '.pyi' stubs when available; otherwise skip for v1.\n- External python packages appear keyed by their distribution/module name with 'path' set to 'site-packages/<pkg>'. FilesWatcher does not watch these paths.\n\nDeep expansion:\n- Include externals in deep queries while preventing cycles and preserving a stable order.\n\nPersistence:\n- Single atomic file '.factory/code_intel.json' includes external packages as first‑class entries; no code bodies stored.\n\nNotes:\n- Existing options for include/ignore globs and 'externalNodeModules' are considered deprecated and ignored when 'autoExternalDependencies' is true.\n\nAcceptance criteria:\n- With 'autoExternalDependencies=true', 'getCatalogue()' lists external packages referenced by local code for js/ts and python.\n- JS/TS externals scanned from 'node_modules' (prefer '.d.ts'); symlinked workspace deps supported.\n- Python externals scanned from detected 'site-packages' under '.venv'/'venv' (prefer '.pyi'); skipped if no environment is found.\n- FilesWatcher does not watch external paths; rescans occur on init() or explicit 'scanDependencies()'.\n- 'getCode(name, pkg)' works for externals across restarts via on‑demand parse.\n- Deep expansion traverses externals with a stable, de‑cycled order.",
+      "context": [],
+      "createdAt": "2025-11-05T16:48:31.755Z",
+      "updatedAt": "2025-11-05T17:09:44.997Z",
+      "completedAt": "2025-11-05T17:09:44.997Z"
+    },
+    {
+      "id": "e2cdbc3f-8b55-4576-9a97-e250cc961bc9",
+      "status": "+",
+      "title": "Auto externals: devDependency filter and local full scan",
+      "description": "Extend auto external dependency scanning with finer controls for JS/TS.\n\nOptions API additions (createCodeIntelTools):\n- interface CodeIntelToolsOptions {\n    autoExternalDependencies?: boolean\n    autoExternalDevDependencies?: boolean // default false\n    localDependenciesFullScan?: boolean   // default false\n  }\n\nBehavior\n- DevDependency filter (JS/TS):\n  • When autoExternalDependencies=true, discover externals from non‑relative import/re‑export specifiers per local package.\n  • For each importer, consult its nearest package.json. Include externals only if listed under dependencies, peerDependencies, or optionalDependencies.\n  • Exclude externals that are present only in devDependencies unless autoExternalDevDependencies=true.\n  • If an external is undeclared and only present under node_modules, exclude by default (conservative) unless explicitly permitted via the devDependencies flag.\n\n- Local external full scan (JS/TS):\n  • Detect local externals when node_modules/<pkg> is a symlink or its realpath is inside rootPath (workspace).\n  • When localDependenciesFullScan=true, override the .d.ts‑only policy for these packages: if .d.ts are absent or insufficient, scan .ts/.tsx/.js/.jsx sources to populate members and dependencies.\n  • FilesWatcher remains agnostic; node_modules is not watched. Externals refresh on init() or explicit scanDependencies().\n\nPersistence & APIs\n- Persist external packages in '.factory/code_intel.json' as first‑class entries (metadata only: path, members, dependencies). No code bodies persisted.\n- getCode(name, pkg) slices code via captured ranges or on‑demand file re‑parse under node_modules.\n- Deep=true traversals include externals with stable ordering and cycle prevention.\n\nAcceptance criteria\n- With autoExternalDependencies=true and autoExternalDevDependencies=false:\n  • dev‑only packages like 'vitest' are excluded from getCatalogue().\n- With autoExternalDevDependencies=true:\n  • dev‑only packages referenced by local code are included.\n- With localDependenciesFullScan=true:\n  • A symlinked local external such as 'thefactory-db' without .d.ts is fully scanned from sources and members are populated; getCode('DocumentInput','thefactory-db') returns non‑empty code and correct kind.\n- With localDependenciesFullScan=false:\n  • .d.ts‑first behavior remains; externals without stubs may have minimal results.\n- Deep expansion traverses these externals and preserves order; cycles are prevented.\n- After restart, getCode for external members re‑parses only the target file under node_modules and returns code successfully.",
+      "context": [],
+      "createdAt": "2025-11-05T18:26:30.226Z",
+      "updatedAt": "2025-11-05T22:43:50.069Z",
+      "completedAt": "2025-11-05T22:43:50.069Z"
+    }
+  ],
+  "createdAt": "2025-10-16T12:19:28.600Z",
+  "updatedAt": "2025-10-30T00:04:43.248Z",
+  "completedAt": "2025-11-05T22:43:50.069Z"
+}

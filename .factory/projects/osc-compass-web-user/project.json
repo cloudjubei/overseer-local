@@ -1,0 +1,14 @@
+{
+  "title": "Compass Web User",
+  "description": "The Compass user facing app for macro/micro goals, journaling and health tracking.",
+  "repo_url": "https://github.com/OSCGROUPLTD/compass-web-user.git",
+  "codeInfo": {
+    "language": "typescript",
+    "framework": "nextjs",
+    "testFramework": "jest"
+  },
+  "createdAt": "2025-11-07T10:26:44.843Z",
+  "updatedAt": "2026-03-25T10:14:29.218Z",
+  "scopeGroupIds": [],
+  "mainGroupId": "49f65521-3929-4514-8751-532c6c318829"
+}

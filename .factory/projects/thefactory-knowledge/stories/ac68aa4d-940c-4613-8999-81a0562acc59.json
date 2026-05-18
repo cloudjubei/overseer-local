@@ -1,0 +1,66 @@
+{
+  "id": "ac68aa4d-940c-4613-8999-81a0562acc59",
+  "status": "+",
+  "title": "Graphiti doc led improvements - Upgrade Searching capabilities to match Graphiti guidance",
+  "description": "References\n- Graph namespacing: https://help.getzep.com/graphiti/core-concepts/graph-namespacing\n- Communities: https://help.getzep.com/graphiti/core-concepts/communities\n- Searching: https://help.getzep.com/graphiti/working-with-data/searching\n- SDK Reference: https://help.getzep.com/v3/sdk-reference\n\nProblem:\n- We wrap Graphiti.search but only expose a narrow interface and do significant post-filtering.\n- We do not expose label/property filters, center-node pivots beyond a few flows, or ranked node search results beyond an area-limited fulltext query.\n\nWhat Graphiti provides\n- Hybrid search over nodes/edges with:\n  - free-text + vector + graph proximity ranking,\n  - center_node_uuid to bias results around a pivot,\n  - group_ids to constrain namespace,\n  - control over number of results and, in some setups, label filters.",
+  "features": [
+    {
+      "id": "9a6bba49-cb39-4b34-b298-b0f24356a8f4",
+      "status": "+",
+      "title": "General search API",
+      "description": "Add GET /search and POST /areas/{area_name}/search with parameters:\n  - query: str\n  - top_k: int\n  - center_node_uuid: optional\n  - group_ids: optional list\n  - include_labels: optional list of labels to prioritize or filter\n  - edge_types: optional list (e.g., CALLS, DEPENDS_ON_CLASS) for post-filtering\nReturn:\n  - edges: Graphiti result edges (with scores), optionally filtered by edge_types and constrained to nodes in the area.\n  - nodes: top node hits using db.index.fulltext.queryNodes limited to the given labels and area scope.",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-09-17T09:33:31.075Z",
+      "updatedAt": "2025-09-18T01:45:59.072Z",
+      "completedAt": "2025-09-18T01:45:59.072Z"
+    },
+    {
+      "id": "ff310ad4-a491-468f-add4-79b2750e3c67",
+      "status": "+",
+      "title": "Class/Method-centric semantic search",
+      "description": "Add endpoints:\n  - GET /code-projects/{area}/search/classes?query=...\n  - GET /code-projects/{area}/search/methods?query=...\nInternally apply include_labels filters to restrict to Entity:Class or Entity:Method nodes and return top matches with their defining files and dependencies.",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-09-17T09:33:44.637Z",
+      "updatedAt": "2025-09-18T01:53:43.202Z",
+      "completedAt": "2025-09-18T01:53:43.202Z"
+    },
+    {
+      "id": "2b3bc7e5-4488-4a42-bcb7-503c163c5ebe",
+      "status": "+",
+      "title": "Neighborhood and path exploration",
+      "description": "Add GET /graph/neighborhood?uuid=...&depth=N&edge_types=...\n  - Use Cypher to return the induced subgraph within N hops (2–3 is typical), optionally filtering edge types.\n  - Useful for agents to understand localized contexts.",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-09-17T09:33:54.100Z",
+      "updatedAt": "2025-09-19T10:52:22.629Z",
+      "completedAt": "2025-09-19T10:52:22.629Z"
+    },
+    {
+      "id": "3d54ba91-2695-4ab8-8f1a-28a0c36ea3c3",
+      "status": "+",
+      "title": "Scoring transparency",
+      "description": "Include Graphiti-provided scores in responses. Standardize response schemas for edges/nodes with score.\nAdd observability metrics for search latency and hit counts.\n\nYou can see the sample responses here:\nhttps://help.getzep.com/v3/sdk-reference/graph/search",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-09-17T09:34:06.152Z",
+      "updatedAt": "2025-09-19T11:54:07.822Z",
+      "completedAt": "2025-09-19T11:54:07.822Z"
+    },
+    {
+      "id": "a4aa7b02-62bc-4166-85af-4951e640a2a5",
+      "status": "+",
+      "title": "Tests",
+      "description": "There needs to be adequate testing to prove that the new search is working correctly",
+      "context": [],
+      "createdAt": "2025-09-19T10:30:44.698Z",
+      "updatedAt": "2025-09-19T11:42:32.434Z",
+      "blockers": [],
+      "completedAt": "2025-09-19T11:37:52.336Z"
+    }
+  ],
+  "createdAt": "2025-09-17T09:33:01.137Z",
+  "updatedAt": "2025-09-19T11:44:59.827Z",
+  "completedAt": "2025-09-19T11:54:07.823Z"
+}

@@ -1,0 +1,83 @@
+{
+  "id": "054f8bb3-1d18-49af-98c3-60b732cbcdcb",
+  "status": "+",
+  "title": "Web Search tool",
+  "description": "Create at least 3 versions of web search tools for the agent (for 3 different standard providers).\nInclude EXA as a tool.\nMake sure to update the README.md",
+  "features": [
+    {
+      "id": "0a14b6ba-ebf6-43ac-9be0-518d9c03f124",
+      "status": "+",
+      "title": "Create Foundation for Web Search Tools",
+      "description": "Create a new file `src/tools/webSearchTools.ts`. This file will define a generic interface for web search tools and a factory function `createWebSearchTools`. It will also handle reading required API keys (e.g., `EXA_API_KEY`, `TAVILY_API_KEY`, `SERPAPI_API_KEY`) from environment variables.",
+      "context": [],
+      "createdAt": "2025-09-16T12:59:58.899Z",
+      "completedAt": "2025-09-16T08:51:13.210Z",
+      "updatedAt": "2025-09-16T12:59:58.899Z"
+    },
+    {
+      "id": "1af75556-11f7-43aa-b549-fb1cdf0a5b77",
+      "status": "+",
+      "title": "Implement EXA Web Search Tool",
+      "description": "In `src/tools/webSearchTools.ts`, implement the EXA search tool. This implementation should make calls to the EXA API to perform web searches based on a given query.",
+      "context": [],
+      "createdAt": "2025-09-16T12:59:58.899Z",
+      "completedAt": "2025-09-16T08:33:45.377Z",
+      "updatedAt": "2025-09-16T12:59:58.899Z"
+    },
+    {
+      "id": "a54426c3-3068-4533-ac6c-8f83c7c14c5c",
+      "status": "+",
+      "title": "Implement Tavily Web Search Tool",
+      "description": "In `src/tools/webSearchTools.ts`, implement the Tavily search tool. This implementation will use the Tavily API to perform web searches.",
+      "context": [],
+      "createdAt": "2025-09-16T12:59:58.899Z",
+      "completedAt": "2025-09-16T03:24:52.256Z",
+      "updatedAt": "2025-09-16T12:59:58.899Z"
+    },
+    {
+      "id": "3c28e3a3-8d64-4c6c-98e5-08977d981a08",
+      "status": "+",
+      "title": "Implement SerpAPI Web Search Tool",
+      "description": "In `src/tools/webSearchTools.ts`, implement a search tool using SerpAPI to provide access to major search engines like Google or Bing.",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T12:59:58.899Z",
+      "completedAt": "2025-09-16T07:26:58.509Z",
+      "updatedAt": "2025-09-16T12:59:58.899Z"
+    },
+    {
+      "id": "5d2016e8-148e-4534-ad83-e9256b807744",
+      "status": "+",
+      "title": "Integrate Web Search Tools into Core Toolset",
+      "description": "Modify `src/tools/tools.ts` to import and call `createWebSearchTools`. The new search functions should be merged into the main composed tools object to make them available to other parts of the system.",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T12:59:58.899Z",
+      "completedAt": "2025-09-16T05:51:09.325Z",
+      "updatedAt": "2025-09-16T12:59:58.899Z"
+    },
+    {
+      "id": "77c7e2a0-a86e-4957-a310-fb37700027d9",
+      "status": "+",
+      "title": "Expose Web Search Tools via Chat",
+      "description": "Modify `src/tools/chatTools.ts` to add a new chat-callable tool, `webSearch`. This tool should accept a `query` and an optional `provider` argument (e.g., 'exa', 'tavily', 'serpapi') to dispatch the call to the correct implementation.",
+      "context": [],
+      "createdAt": "2025-09-16T12:59:58.899Z",
+      "completedAt": "2025-09-16T04:08:53.954Z",
+      "updatedAt": "2025-09-16T12:59:58.899Z"
+    },
+    {
+      "id": "f2dc9740-4f20-4cfb-9757-4d9e3c93589a",
+      "status": "+",
+      "title": "Update README.md with Web Search Tool Documentation",
+      "description": "Update the main `README.md` file to add a section documenting the new web search functionality. This should include the list of available providers and instructions on how to configure the necessary API keys via environment variables.",
+      "context": [],
+      "createdAt": "2025-09-16T12:59:58.899Z",
+      "completedAt": "2025-09-16T01:56:16.756Z",
+      "updatedAt": "2025-09-16T12:59:58.899Z"
+    }
+  ],
+  "createdAt": "2025-09-16T12:59:58.899Z",
+  "completedAt": "2025-09-16T08:51:13.210Z",
+  "updatedAt": "2025-09-16T12:59:58.899Z"
+}

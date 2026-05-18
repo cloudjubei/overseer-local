@@ -660,34 +660,53 @@ export default function ChatsNavigationSidebar({
   }, [projectChats, getProjectTitle, getGroupTitle, getStoryTitle, getFeatureTitle])
 
   if (activeSelectionType === 'group') {
+    // Flat "history"-style list of every chat for this group (the
+    // General chat + any topics), sorted by recency. Matches web's
+    // GroupChatView — groups have no stories so the categories
+    // grouping doesn't apply, and the toggle would be useless.
+    const groupChats = chatsByGroupId[activeGroupId ?? ''] ?? []
+    const hasGeneralRow = groupChats.some(
+      (c) => c.key === getChatContextKey(groupContext),
+    )
+    const sortedTopics = [...groupChats].sort((a, b) => {
+      const at = a.chat.updatedAt ?? ''
+      const bt = b.chat.updatedAt ?? ''
+      return bt.localeCompare(at)
+    })
+
     return (
-      <div className="flex-1 min-h-0 overflow-auto px-2 pb-3 space-y-3">
-        <div className="space-y-3">
-          <div className="space-y-1">
-            <div className="px-2">
-              <SectionHeader title="Group" isOpen={true} onToggle={() => {}} />
-            </div>
-            <div className="px-2">
-              <ConnectedChatButton
-                ctx={groupContext}
-                label={titleForContext(
-                  groupContext,
-                  {
-                    getProjectTitle,
-                    getGroupTitle,
-                    getStoryTitle,
-                    getFeatureTitle,
-                  },
-                  chatsByGroupId[activeGroupId ?? '']?.find(
-                    (c) => c.key === getChatContextKey(groupContext),
-                  )?.chat.title,
-                )}
-                isActive={isActive(groupContext)}
-                onClick={ensureOpen}
-                chatBadgeColor={chatBadgeColor}
-              />
-            </div>
-          </div>
+      <div className="flex-1 min-h-0 overflow-auto px-2 pb-3 space-y-1">
+        <div className="px-2">
+          <SectionHeader title="Group chats" isOpen={true} onToggle={() => {}} />
+        </div>
+        <div className="px-2 space-y-1">
+          {!hasGeneralRow && (
+            <ConnectedChatButton
+              ctx={groupContext}
+              label={titleForContext(
+                groupContext,
+                { getProjectTitle, getGroupTitle, getStoryTitle, getFeatureTitle },
+                undefined,
+              )}
+              isActive={isActive(groupContext)}
+              onClick={ensureOpen}
+              chatBadgeColor={chatBadgeColor}
+            />
+          )}
+          {sortedTopics.map((c) => (
+            <ConnectedChatButton
+              key={c.key}
+              ctx={c.chat.context}
+              label={titleForContext(
+                c.chat.context,
+                { getProjectTitle, getGroupTitle, getStoryTitle, getFeatureTitle },
+                c.chat.title,
+              )}
+              isActive={isActive(c.chat.context)}
+              onClick={ensureOpen}
+              chatBadgeColor={chatBadgeColor}
+            />
+          ))}
         </div>
       </div>
     )

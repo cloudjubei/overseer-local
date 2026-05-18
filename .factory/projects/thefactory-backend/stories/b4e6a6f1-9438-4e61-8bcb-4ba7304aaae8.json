@@ -1,0 +1,21 @@
+{
+  "id": "b4e6a6f1-9438-4e61-8bcb-4ba7304aaae8",
+  "status": "-",
+  "title": "Phase 3: Production Deployment",
+  "description": "Prepare the backend for production deployment, including hosting research, deployment configs, CI/CD, and monitoring.",
+  "features": [
+    {
+      "id": "25eacb4a-af3c-4653-89b9-5b8837859e3f",
+      "status": "-",
+      "title": "Research Cost-Effective Hosting Options",
+      "description": "Research cost-effective hosting options suitable for a solo developer running this backend (Node.js + PostgreSQL + Git filesystem interactions + AI tool calling integrations). Evaluate providers like Render, Railway, Fly.io, or DigitalOcean App Platform. Produce a summary of costs, setup requirements, and limitations.",
+      "context": [
+        "docs/01-backend.md"
+      ],
+      "createdAt": "2026-04-21T23:18:38.304Z",
+      "updatedAt": "2026-04-21T23:18:38.304Z"
+    }
+  ],
+  "createdAt": "2026-04-21T23:10:16.312Z",
+  "updatedAt": "2026-04-21T23:18:38.305Z"
+}

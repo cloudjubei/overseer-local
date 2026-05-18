@@ -1,0 +1,155 @@
+{
+  "id": "15a2115a-b435-43f7-a8bc-3346a8868753",
+  "status": "+",
+  "title": "Areas of knowledge",
+  "description": "Now that we have the knowledge graph working using graphiti (included for reference under /graphiti )- clients will want to ask questions about certain 'areas'/'contexts'/'scopes'. Imagine a knowledge graph about finance - it contains information about stocks, companies, cryptocurrencies, commodities etc. The user might want to limit the scope of a context when asking about Bitcoin to just cryptocurrencies - but maybe they want to see how Bitcoin affects the other knowledge or what commonalities it has.\n\nAnother example is a code project - knowing how rendering works is one scope. Inside is the knowledge about various little components. Alongside, how navigation works. Apart from rendering, another separate scope would be networking.\n\nThe system for this needs to allow a user to view and edit various scopes and to see what little pieces of information are held there.\nThese scopes would then allow anyone to learn about a given topic in a limited way. \nThe best use case for this is to pass such a limited scope to an LLM Agent. They could then carry out a story with a hopefully small enough context to limit token usage, improve their speed and comprehension.\nAgentic tools that would help with this need to be taken into consideration.\n\nA few examples of questions that could be answered by these areas of knowledge:\n# CODE:\n- I want to add a new service to project X, what's the standard that other such services follow that I should adhere to?\n- I am making a new special View, what's the recommended style?\n- I need feature Y, does something similar already exist or should I create it from scratch?\n\n# INVESTMENT:\n- I want to invest in XRP, how is it performing against the other top cryptocurrencies?\n- I want sell some cryptocurrencies and enter the commodities market, how are the top commodities faring compared to the cryptocurrencies?\n\n#PURCHASES\n- I want to buy a new pair of sneakers, what's the latest opinion on the maker company?\n- I want to buy a house in London, what are the sought after properties arround Notting Hill ?\n\n### Another note - Blueprints:\nIt would be ideal to have tools that would give snippets of information about specific parts of a coding project. If an agent wanted to help and wanted to find out how the structure of the project is, what are the guidelines, conventions etc- it should be possible to do this. If there are some very strong opinions or major architectural decisions - it must be possible to gather these. For any project - it must be possible to create blueprints - the standards that certain pieces of knowledge will follow. For a coding project it's as explained (a code structure or how certain things tie together), for a knowledge graph about purchasing houses or apartments - it might be what data must be present for each, for investment - it might be what information each asset should have and how the timeseries for each is.\n\n# TESTS\nAs an easy way to see if the whole system is working, we want to have a test setup for at least 3 different knowledge graph scenarios:\na coding project, investment, purchasing property.\nWe want to have a way to see that for each scenario, if the user wants to gather meaningful information (for that area) they will receive information that makes sense from that knowledge graph.",
+  "features": [
+    {
+      "id": "db934d89-f61d-4874-a247-f277200d014b",
+      "status": "+",
+      "title": "Implement Core Model and Service for Areas of Knowledge",
+      "description": "Define the data model for an 'Area of Knowledge' in the graph. Update `graph_service.py` to support CRUD operations (Create, Read, Update, Delete) for these areas. An 'Area' will be represented as a distinct node type in the knowledge graph, serving as a container for related concepts.",
+      "context": [],
+      "createdAt": "2025-09-16T13:01:31.410Z",
+      "completedAt": "2025-09-15T13:55:26.517Z",
+      "updatedAt": "2025-09-16T13:01:31.410Z"
+    },
+    {
+      "id": "79168319-e339-4765-8ab8-9941c09d7254",
+      "status": "+",
+      "title": "Create FastAPI Endpoints for Managing Areas of Knowledge",
+      "description": "Implement a new FastAPI router at `/areas`. This router will provide RESTful endpoints for managing Areas of Knowledge. It should include endpoints for `POST /areas` (create), `GET /areas` (list), `GET /areas/{area_name}` (retrieve), `PUT /areas/{area_name}` (update), and `DELETE /areas/{area_name}` (delete). These endpoints will use the functionality added to `graph_service.py`.",
+      "context": [],
+      "createdAt": "2025-09-16T13:01:31.410Z",
+      "completedAt": "2025-09-15T15:36:05.809Z",
+      "updatedAt": "2025-09-16T13:01:31.410Z"
+    },
+    {
+      "id": "0fadda3f-1ddf-4ec7-bf0a-8ccceea84336",
+      "status": "+",
+      "title": "Implement Logic and API to Link Entities to Areas",
+      "description": "Develop the mechanism to associate existing graph entities (nodes) with specific Areas of Knowledge. This will be achieved by creating a `BELONGS_TO` relationship between an entity node and an area node. Create API endpoints to manage these associations: `POST /areas/{area_name}/entities`, `GET /areas/{area_name}/entities`, and `DELETE /areas/{area_name}/entities/{entity_id}`.",
+      "context": [],
+      "createdAt": "2025-09-16T13:01:31.410Z",
+      "completedAt": "2025-09-15T22:12:46.808Z",
+      "updatedAt": "2025-09-16T13:01:31.410Z"
+    },
+    {
+      "id": "770a5d0b-8c4e-4bf7-80a2-cd59825c1253",
+      "status": "+",
+      "title": "Enable Querying within a Specific Area of Knowledge",
+      "description": "Implement functionality to execute queries that are scoped to a single Area of Knowledge. This involves creating a new service method in @src/graph_service.py that filters the graph to include only the nodes and relationships within a given area before running the query. Expose this via a new API endpoint, `POST /areas/{area_name}/query`.\nAlways build this upon the existing graphiti based code.\nThe full graphiti library is available in 'graphiti/' for reference.",
+      "context": [
+        "src/graph_service.py"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:01:31.410Z",
+      "completedAt": "2025-09-15T17:18:35.050Z",
+      "updatedAt": "2025-09-16T13:01:31.410Z"
+    },
+    {
+      "id": "2e73dab8-10bb-4908-a3de-a7090c4fbd4d",
+      "status": "+",
+      "title": "Implement Core Model and Service for Blueprints",
+      "description": "Define the data model for 'Blueprints', which act as templates or schemas for knowledge within an Area. A Blueprint should define required properties and relationships for a type of entity. Update @src/graph_service.py  to manage `Blueprint` nodes and their association with `Area` nodes via an `APPLIES_TO` relationship.\n\nAlways build this upon the existing graphiti based code.\nThe full graphiti library is available in 'graphiti/' for reference.",
+      "context": [
+        "src/graph_service.py"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:01:31.410Z",
+      "completedAt": "2025-09-15T18:59:56.612Z",
+      "updatedAt": "2025-09-16T13:01:31.410Z"
+    },
+    {
+      "id": "b0404af3-7525-429a-b9eb-c8bc9b1a52a9",
+      "status": "+",
+      "title": "Create FastAPI Endpoints for Managing Blueprints",
+      "description": "Implement a new FastAPI router at `routers/blueprints`. Provide CRUD endpoints for creating, reading, updating, and deleting blueprints. Also, include an endpoint to associate a blueprint with an Area of Knowledge, e.g., `POST /areas/{area_name}/blueprints`.\n\n\nAlways build this upon the existing graphiti based code.\nThe full graphiti library is available in 'graphiti/' for reference.",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:01:31.410Z",
+      "completedAt": "2025-09-15T15:06:29.445Z",
+      "updatedAt": "2025-09-16T13:01:31.410Z"
+    },
+    {
+      "id": "fdc845ca-af1d-46bc-8966-cd9eb4a9475f",
+      "status": "+",
+      "title": "Develop a High-Level Toolset for Agent Interaction",
+      "description": "Create a new module @src/agent_tools.py that provides a simple, high-level functional interface for LLM agents. These functions will wrap the API calls for managing and querying Areas and Blueprints, such as `list_knowledge_areas()`, `get_info_in_area(area_name, query)`, and `find_blueprint_for(entity_type, area_name)`.\n\n\nAlways build this upon the existing graphiti based code.\nThe full graphiti library is available in 'graphiti/' for reference.",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:01:31.410Z",
+      "completedAt": "2025-09-15T11:01:24.395Z",
+      "updatedAt": "2025-09-16T13:01:31.410Z"
+    },
+    {
+      "id": "2105112f-3d14-4c81-8b8a-06b19b0daa93",
+      "status": "+",
+      "title": "Create Test Scenario for a Coding Project Knowledge Graph",
+      "description": "Develop a test suite under @tests/scenarios/test_coding_project.py. This test will programmatically create a 'Coding Project' Area, define Blueprints for 'services' and 'views', ingest sample data representing a codebase, and run assertions to verify that scoped queries and blueprint information can be retrieved correctly.\nDocument how to run it succinctly in @README.md .\nThis test must run against a running graphiti graph - it should create an isolated space for that and clean it up after the test has finished.\n\nAlways build this upon the existing graphiti based code.\nThe full graphiti library is available in 'graphiti/' for reference.",
+      "context": [
+        "README.md"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:01:31.410Z",
+      "completedAt": "2025-09-15T20:37:17.308Z",
+      "updatedAt": "2025-09-16T13:01:31.410Z"
+    },
+    {
+      "id": "f68649f0-dbf7-4085-8c35-cb1f2ce95cbf",
+      "status": "+",
+      "title": "Create Test Scenario for an Investment Knowledge Graph",
+      "description": "Develop a test suite under @tests/scenarios/test_investment.py. This test will set up an 'Investment' Area with sub-areas, ingest sample data for cryptocurrencies and commodities, and verify that the system can answer comparative questions by querying within the specific areas.\n\nDocument how to run it succinctly in @README.md .\nThis test must run against a running graphiti graph - it should create an isolated space for that and clean it up after the test has finished.\n\nAlways build this upon the existing graphiti based code.\nThe full graphiti library is available in 'graphiti/' for reference.",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:01:31.410Z",
+      "completedAt": "2025-09-15T12:31:55.151Z",
+      "updatedAt": "2025-09-16T13:01:31.410Z"
+    },
+    {
+      "id": "346cff1b-a052-422f-9e9c-e2bb8a694f92",
+      "status": "+",
+      "title": "Create Test Scenario for a Property Purchasing Knowledge Graph",
+      "description": "Develop a test suite under @tests/scenarios/test_property_purchase.py . This test will establish a 'Property' Area, define a Blueprint for what constitutes a property listing, ingest sample data for properties in a specific location, and confirm that the system can retrieve relevant, structured information based on user-like queries.\n\n\nDocument how to run it succinctly in @README.md  .\nThis test must run against a running graphiti graph - it should create an isolated space for that and clean it up after the test has finished.\n\nAlways build this upon the existing graphiti based code.\nThe full graphiti library is available in 'graphiti/' for reference.",
+      "context": [
+        "tests/scenarios/test_property_purchase.py",
+        "README.md"
+      ],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:01:31.410Z",
+      "completedAt": "2025-09-15T17:49:05.639Z",
+      "updatedAt": "2025-09-16T13:01:31.410Z"
+    },
+    {
+      "id": "e89fcc15-6379-4798-a504-2989f837d9ca",
+      "status": "+",
+      "title": "A test graph needs to be created for test scenarios",
+      "description": "To beging work on testing various scenarios against the project, a new neo4j instance needs to run against which all future testing code can run to create/delete nodes etc quickly.\nWrite all the necessary code for this and any extra documentation needed inside @README.md",
+      "plan": "",
+      "context": [
+        "README.md"
+      ],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:01:31.410Z",
+      "completedAt": "2025-09-15T13:34:36.362Z",
+      "updatedAt": "2025-09-16T13:01:31.410Z"
+    },
+    {
+      "id": "fef2c37a-c666-4ed2-b44a-6e5346b01ae8",
+      "status": "+",
+      "title": "Create Test Scenario creating a graph for this code project",
+      "description": "Develop a test suite under @tests/scenarios/test_thefactory_db.py . \nIt needs to create a whole graph of this project (by scanning all the `.py` code files in `/src` ), with all classes linked properly, so the test can check for relationships between them.\nThis test needs to show the following:\n1) List all the files in the project\n2) List all the external dependencies (libraries) used in the project\n3) List all the classes in the project\n4) For each class to see which classes are its dependencies (internal and external - libraries)\n5) List all the types/interfaces used in the project\n6) For each class to see what interface it exposes.\n\nIf at any point any functionality is missing - it needs to be added to satisfy these test requirements.\n\n\n\n\nDocument how to run it succinctly in @README.md  .\nThis test must run against a running graphiti graph - it should create an isolated space for that and clean it up after the test has finished.\n\nAlways build this upon the existing graphiti based code.\nThe full graphiti library is available in 'graphiti/' for reference.",
+      "plan": "",
+      "context": [],
+      "acceptance": [],
+      "blockers": [],
+      "createdAt": "2025-09-16T13:01:31.410Z",
+      "completedAt": "2025-09-15T10:20:47.900Z",
+      "updatedAt": "2025-09-16T13:01:31.410Z"
+    }
+  ],
+  "createdAt": "2025-09-16T13:01:31.410Z",
+  "completedAt": "2025-09-15T22:12:46.808Z",
+  "updatedAt": "2025-09-16T13:01:31.410Z"
+}

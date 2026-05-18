@@ -1,0 +1,131 @@
+{
+  "id": "5568d901-6b27-462f-b869-eea8a8adefbd",
+  "status": "+",
+  "title": "Telegram bot as the first non-fully-authed client",
+  "description": "We want to allow users using Telegram (the chat app) to be able to interface with our backend. For this purpose we need to adapt our authentication service to allow non-fully-authed users that authenticate via a special access code (they will provide) + id (their Telegram app will provide so that it uniquely identifies a user) + secret (the Telegram app will know it).\nFor all sorts and purposes these users can for now access all capabilities that normal users do - they simply don't have an e-mail associated with their account, but at some point we can ask a user to merge accounts - i.e. to provide auth for both Telegram and standard email + password auth to be able to link the two accounts together. In the future we will want to support further logins like these - for instance via Whatsapp or Facebook - but for now these do not need to be implemented, we just need to know that that will come.",
+  "features": [
+    {
+      "id": "c0f19040-0f3d-4a23-a26c-dab7d47584fa",
+      "status": "+",
+      "title": "Refactor User Model to Support Multiple Authentication Identities",
+      "description": "To accommodate different authentication methods (Cognito, Telegram, etc.), the user profile model needs to be the central record for a user. Create a new `Identity` entity/interface that links a specific provider (e.g., 'COGNITO', 'TELEGRAM') and a unique identifier (e.g., Cognito `sub`, Telegram ID) to a central `UserProfile`. This involves updating the `UserProfile` interface in `src/profiles/interfaces/user-profile.interface.ts` and modifying the `DynamoDBUserProfilesRepository` to support querying and linking these identities. This is a foundational change to allow a single user to have multiple ways to log in.",
+      "context": [],
+      "createdAt": "2025-09-17T15:33:07.695Z",
+      "updatedAt": "2025-09-17T15:55:13.797Z",
+      "completedAt": "2025-09-17T15:55:13.797Z"
+    },
+    {
+      "id": "cc54c258-afd0-4e37-9bf7-76a876929937",
+      "status": "+",
+      "title": "Generalize the Authentication Provider Interface",
+      "description": "Refactor the existing `AuthProvider` interface in `src/auth/interfaces/auth-provider.interface.ts` to be more generic. It should support different authentication strategies beyond the current email/password flow. This may involve creating a new `IAuthStrategy` interface that different providers (like a new `CognitoStrategy` and a future `TelegramStrategy`) will implement. The main `AuthService` will then delegate to the appropriate strategy.",
+      "context": [],
+      "createdAt": "2025-09-17T15:33:07.696Z",
+      "updatedAt": "2025-09-17T15:58:47.741Z",
+      "completedAt": "2025-09-17T15:58:47.741Z"
+    },
+    {
+      "id": "e5a51d9e-4618-4868-91fb-e1eaee7229ca",
+      "status": "+",
+      "title": "Implement Telegram Authentication Provider/Strategy",
+      "description": "Create a new `TelegramAuthProvider` or `TelegramAuthStrategy` that implements the newly generalized authentication interface. This provider will contain the logic to authenticate a user via their Telegram ID, a provided access code, and a shared secret stored in environment variables. On successful authentication, it should find an existing user profile linked to that Telegram ID or create a new one if it's the user's first time logging in.",
+      "context": [],
+      "createdAt": "2025-09-17T15:33:07.696Z",
+      "updatedAt": "2025-09-17T16:07:00.758Z",
+      "completedAt": "2025-09-17T16:07:00.758Z"
+    },
+    {
+      "id": "c9bcd4d7-1267-4e34-806c-951afa00d721",
+      "status": "+",
+      "title": "Add API Endpoint and DTO for Telegram Login",
+      "description": "Create a new endpoint `POST /auth/telegram/login` in `src/auth/auth.controller.ts`. Define a new `TelegramLoginDto` in `src/auth/dto/` to validate the incoming request body, which should include the `telegramId` and `accessCode`. The shared secret should be validated on the backend from configuration and not be part of the DTO.",
+      "context": [],
+      "createdAt": "2025-09-17T15:33:07.696Z",
+      "updatedAt": "2025-09-17T16:11:47.709Z",
+      "completedAt": "2025-09-17T16:11:47.709Z"
+    },
+    {
+      "id": "b475394b-29d2-4472-b956-82c7fce99b8e",
+      "status": "+",
+      "title": "Update Auth Service for Telegram Login and JWT Generation",
+      "description": "Modify `src/auth/auth.service.ts` to include a new `loginWithTelegram` method. This method will use the `TelegramAuthProvider` to validate the user's credentials. Upon successful validation, the service must generate a standard JWT containing the central `userId` from the user's profile. This ensures that the session token is uniform, regardless of the login method used, allowing other services and guards to function correctly.",
+      "context": [],
+      "createdAt": "2025-09-17T15:33:07.696Z",
+      "updatedAt": "2025-09-17T16:13:51.176Z",
+      "completedAt": "2025-09-17T16:13:51.176Z"
+    },
+    {
+      "id": "9e041a55-7712-4920-85be-5a01937c457a",
+      "status": "+",
+      "title": "Legacy code needs to be removed",
+      "description": "Now that there's the Telegram login - all previous legacy code must be removed leaving only the new ways of login - i.e. via Telegram and via Cognito. No deprecated or legacy code should be left.\n\nScan the whole repository and clean things up so that they are cohesive, modularised and easy to read and understand.",
+      "context": [],
+      "createdAt": "2025-09-17T22:30:52.308Z",
+      "updatedAt": "2025-09-17T23:24:47.083Z",
+      "completedAt": "2025-09-17T23:24:47.083Z"
+    },
+    {
+      "id": "b12494d8-c896-4b67-90f4-0668c7213590",
+      "status": "+",
+      "title": "Update README.md",
+      "description": "@README.md needs to be updated so that the AWS deployment section is for a EC2 + Node.js runtime using PM2.\nIt needs to include a dummy step by step guide to do this.\nAnd it must be assumed that both Cognito and DynamoDB are required.",
+      "context": [
+        "README.md"
+      ],
+      "createdAt": "2025-09-17T22:58:01.022Z",
+      "updatedAt": "2025-09-17T23:26:37.543Z",
+      "completedAt": "2025-09-17T23:26:37.543Z"
+    },
+    {
+      "id": "aec5eed3-73c5-448c-b28a-8b148e357fa5",
+      "status": "+",
+      "title": "Update DATABASE_INFO.md",
+      "description": "@docs/DATABASE_INFO.md should be updated so that it walks the user step by step with setting up the database on AWS.\nThe user should use the AWS CLI - the guide should include information about running an initial seed script that needs to be included @scripts/seed_database\nSo that the user can easily follow the steps and only provide the necessary credentials.\n\nFor the local development section - assume only the docker-compose way - make sure that the DYNAMODB_ENDPOINT is required in tests and on app startup.",
+      "context": [
+        "docs/DATABASE_INFO.md"
+      ],
+      "createdAt": "2025-09-17T22:59:52.165Z",
+      "updatedAt": "2025-09-17T23:43:35.983Z",
+      "blockers": [],
+      "completedAt": "2025-09-17T23:43:35.983Z"
+    },
+    {
+      "id": "2663f0aa-4431-40d2-b80a-e5c1a9d62834",
+      "status": "+",
+      "title": "There needs to be a `/health` endpoint",
+      "description": "For AWS to be able to see that the backend is healthy we need a  `/health` endpoint that simply returns 200 OK . The `/` endpoint should do the same.",
+      "context": [],
+      "createdAt": "2025-09-17T23:04:33.634Z",
+      "updatedAt": "2025-09-17T23:27:29.864Z",
+      "completedAt": "2025-09-17T23:27:29.864Z"
+    },
+    {
+      "id": "85ac6f9b-9285-42eb-9a5c-8417be385f03",
+      "status": "+",
+      "title": "Use the NestJs Swagger/OpenAPI CLI plugin",
+      "description": "As explained here:\nhttps://docs.nestjs.com/openapi/cli-plugin\n\nWe should use the Swagger plugin to avoid all the unnecessary boilerplate code with the extra not needed annotations.\nGo over all the code and remove the annotations where they are not needed.\n\nUPDATE - this was the previous FEATURE DESCRIPTION - but turns out that the CLI plugin doesn't function well, so add all the annotations on all the endpoints and DTOs and remove the cli plugin info - it is completely unreliable.",
+      "context": [],
+      "createdAt": "2025-09-17T23:07:55.431Z",
+      "updatedAt": "2025-09-18T00:47:57.527Z",
+      "blockers": [],
+      "completedAt": "2025-09-18T00:47:57.527Z"
+    },
+    {
+      "id": "b1a2303a-0a34-4387-a559-53234ab6c50a",
+      "status": "+",
+      "title": "Langfuse documentation",
+      "description": "a lot of the Langfuse documentation that is currently in @README.md  should be moved to @docs/CONFIGURATION.md .\nSuccinctly talk about Langfuse in Readme",
+      "context": [
+        "README.md",
+        "docs/CONFIGURATION.md"
+      ],
+      "createdAt": "2025-09-17T23:41:55.921Z",
+      "updatedAt": "2025-09-18T00:12:45.304Z",
+      "blockers": [],
+      "completedAt": "2025-09-18T00:12:45.304Z"
+    }
+  ],
+  "createdAt": "2025-09-17T14:44:50.629Z",
+  "updatedAt": "2025-09-17T14:44:50.629Z",
+  "completedAt": "2025-09-18T00:47:57.527Z"
+}

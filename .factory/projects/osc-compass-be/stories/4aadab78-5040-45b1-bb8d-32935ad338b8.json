@@ -1,0 +1,92 @@
+{
+  "id": "4aadab78-5040-45b1-bb8d-32935ad338b8",
+  "status": "+",
+  "title": "LOCAL: Health-data unit test hardening + service split",
+  "description": "Source: `docs/IMPROVEMENTS_LOCAL.md`\n\nGoal: Achieve near-100% unit test coverage for health-data sync/ingest logic by splitting `HealthDataService` into testable units, adding explicit domain error types, and standardizing deterministic time usage via `src/common/utils/date-utils.ts`.\n\nNon-goals: Any real-provider OAuth/browser flows; CI integration testing (covered in separate story).",
+  "features": [
+    {
+      "id": "42266857-7f3f-445a-a02d-605ac260dc09",
+      "status": "+",
+      "title": "Define domain error taxonomy for health-data sync/ingest (typed errors)",
+      "description": "From `docs/IMPROVEMENTS_LOCAL.md`.\n\n- Introduce explicit error types for sync/ingest (e.g. ProviderAuthError, ProviderRateLimitError, ProviderTransientError, DataValidationError, PersistenceError).\n- Ensure mapping to stored sync-error state is consistent and unit-testable.\n\nAcceptance:\n- Unit tests cover error mapping for each error type.\n- No behavior change in external API; just clearer classification + tests.",
+      "context": [],
+      "createdAt": "2026-03-11T10:49:45.871Z",
+      "updatedAt": "2026-03-12T10:40:01.129Z",
+      "completedAt": "2026-03-12T10:40:01.129Z"
+    },
+    {
+      "id": "c8961271-3432-4d02-a72c-52825b4d3c79",
+      "status": "+",
+      "title": "Standardize deterministic 'now' usage via src/common/utils/DateUtils.ts",
+      "description": "From `docs/IMPROVEMENTS_LOCAL.md`.\n\n- Establish project-wide convention: time-dependent logic uses `DateUtils` helpers (and a `now()` helper there if needed).\n- Add/adjust tests to mock/spyon `DateUtils` `now()` (or equivalent) rather than relying on real clock.\n\nAcceptance:\n- Health-data unit tests contain no flaky real-time dependencies.\n- Documented convention is applied in health-data module code.",
+      "context": [],
+      "createdAt": "2026-03-11T10:49:45.876Z",
+      "updatedAt": "2026-03-12T09:16:59.790Z",
+      "blockers": [],
+      "completedAt": "2026-03-12T09:16:59.790Z"
+    },
+    {
+      "id": "f5974cf4-5741-4ca0-9d7a-60434a7c2ca1",
+      "status": "+",
+      "title": "Refactor: extract daily aggregate writer from HealthDataService",
+      "description": "From `docs/IMPROVEMENTS_LOCAL.md` service split.\n\n- Move daily deep-merge logic into a dedicated service/class/function.\n- Ensure canonical precedence rules are explicit and unit-tested.\n\nAcceptance:\n- Existing behavior preserved.\n- Dedicated unit tests cover merge/precedence edge cases.",
+      "context": [],
+      "createdAt": "2026-03-11T10:49:45.881Z",
+      "updatedAt": "2026-03-12T00:48:42.159Z",
+      "completedAt": "2026-03-12T00:48:42.159Z"
+    },
+    {
+      "id": "192b82bd-d7ff-454d-b59e-77e7a6393d4f",
+      "status": "+",
+      "title": "Refactor: extract raw payload persistence writer from HealthDataService",
+      "description": "From `docs/IMPROVEMENTS_LOCAL.md` service split.\n\n- Isolate raw provider payload persistence (per-hour/per-day raw writes) into a dedicated unit.\n\nAcceptance:\n- Unit tests validate raw write decisions and keying (hourKey/dayKey, etc.).",
+      "context": [],
+      "createdAt": "2026-03-11T10:49:45.886Z",
+      "updatedAt": "2026-03-12T00:48:44.499Z",
+      "completedAt": "2026-03-12T00:48:44.499Z"
+    },
+    {
+      "id": "7e5e6105-3a36-4a11-9564-998669f9ea50",
+      "status": "+",
+      "title": "Refactor: extract sync-state/cursor writer from HealthDataService",
+      "description": "From `docs/IMPROVEMENTS_LOCAL.md` service split.\n\n- Isolate cursor + sync-state transitions (success/failure, lastSync timestamps, error persistence) into dedicated unit.\n\nAcceptance:\n- Unit tests cover cursor updates, idempotency expectations, and failure-state persistence.",
+      "context": [],
+      "createdAt": "2026-03-11T10:49:45.890Z",
+      "updatedAt": "2026-03-12T00:48:50.900Z",
+      "completedAt": "2026-03-12T00:48:50.900Z"
+    },
+    {
+      "id": "beed2e87-9845-469d-a54a-9c6a0abff141",
+      "status": "+",
+      "title": "Unit test matrix: sync ingest happy path + multi-window enumeration",
+      "description": "From `docs/IMPROVEMENTS_LOCAL.md`.\n\n- Add unit tests for sync across multiple date windows (e.g. enumerateUtcDayWindows usage) and correct adapter calls.\n\nAcceptance:\n- Tests cover: single-day, multi-day, clamped windows, empty windows.",
+      "context": [],
+      "createdAt": "2026-03-11T10:49:45.894Z",
+      "updatedAt": "2026-03-12T20:18:28.536Z",
+      "completedAt": "2026-03-12T20:18:28.536Z"
+    },
+    {
+      "id": "e8c80b9d-4074-46a7-a3a2-310f620e1d38",
+      "status": "+",
+      "title": "Unit test matrix: persistence behavior for daily/raw writes (including partial failures)",
+      "description": "From `docs/IMPROVEMENTS_LOCAL.md`.\n\n- Cover cases where one write fails (daily vs raw) and ensure error classification + sync-state are correct.\n\nAcceptance:\n- Tests explicitly assert which writes are attempted, and what is recorded on error.",
+      "context": [],
+      "createdAt": "2026-03-11T10:49:45.898Z",
+      "updatedAt": "2026-03-13T08:13:22.286Z",
+      "completedAt": "2026-03-13T08:13:22.286Z"
+    },
+    {
+      "id": "228ba35f-0d9a-4e0c-b95a-c1669a7ddbae",
+      "status": "+",
+      "title": "Unit test matrix: idempotency + duplicate data handling",
+      "description": "From `docs/IMPROVEMENTS_LOCAL.md`.\n\n- Ensure re-running sync with same windows/payload does not create inconsistent state.\n\nAcceptance:\n- Tests validate stable outputs for repeated inputs.",
+      "context": [],
+      "createdAt": "2026-03-11T10:49:45.902Z",
+      "updatedAt": "2026-03-13T08:43:13.140Z",
+      "completedAt": "2026-03-13T08:43:13.140Z"
+    }
+  ],
+  "createdAt": "2026-03-11T10:17:52.304Z",
+  "updatedAt": "2026-03-11T10:17:52.304Z",
+  "completedAt": "2026-03-13T08:43:13.140Z"
+}

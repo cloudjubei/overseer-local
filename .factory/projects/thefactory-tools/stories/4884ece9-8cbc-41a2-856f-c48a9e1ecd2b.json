@@ -1,0 +1,51 @@
+{
+  "id": "4884ece9-8cbc-41a2-856f-c48a9e1ecd2b",
+  "status": "+",
+  "title": "Agent Runner Orchestration",
+  "description": "Extract and centralize the agent execution and orchestration logic into the tools library under `src/agentRunner/`. This provides clients with an easy-to-use `AgentRunnerTools` API to launch completions, manage complex tool lifecycles (send/resume/retry/abort), handle message preprocessing, and orchestrate isolated agents seamlessly — eliminating the need for each client to reimplement this logic themselves.",
+  "features": [
+    {
+      "id": "82021313-2722-4367-88cf-b57b17dd5803",
+      "status": "+",
+      "title": "AgentRunnerTools Foundation & Abort Management",
+      "description": "Create the new module folder `src/agentRunner/` and introduce `src/agentRunner/AgentRunnerTools.ts` following the project's standard tool/module patterns. Establish the primary `AgentRunnerTools` surface and internal state for per-chat abort handling:\n\n- Keep an internal `abortControllers: Record<string, AbortController>` keyed by `getChatContextKey(chatContext)`.\n- Expose methods to create/cleanup abort signals and `abortCompletion(chatContext)`.\n- Ensure abort cleanup is always run after completion flows terminate (success/error/abort).\n\nAcceptance criteria:\n- New folder/module structure exists and compiles.\n- `AgentRunnerTools` can create an abort signal per chat context and abort an in-flight completion deterministically.\n- No client needs to implement `AbortController` bookkeeping for completions.",
+      "context": [],
+      "createdAt": "2026-03-16T15:37:13.983Z",
+      "updatedAt": "2026-03-17T00:17:16.296Z",
+      "completedAt": "2026-03-17T00:17:16.296Z"
+    },
+    {
+      "id": "b0fc284f-b746-4de3-a3a4-29d73d0ab004",
+      "status": "+",
+      "title": "Completion Pipeline & Preprocessing",
+      "description": "Implement the shared completion pipeline pieces inside `AgentRunnerTools`:\n\n- `sendCompletion(chatContext, llmConfig, messages, systemPrompt)` convenience wrapper around `createCompletionTools().sendCompletion`.\n- Message preprocessing:\n  - Transform user messages with `files: string[]` into inline `@path` mentions appended to the content (tool messages pass through unchanged).\n- LLM config enrichment:\n  - If `LLMConfig` is missing pricing fields, enrich with costs using optional `LLMCostsTools.getPrice(provider, model)`.\n\nAcceptance criteria:\n- Clients can call `AgentRunnerTools.sendCompletion(...)` without reimplementing preprocessing/pricing logic.\n- Preprocessing behavior matches the client manager: attachment lists become stable `Attached files:\\n@...` blocks.\n- LLM pricing enrichment is best-effort and non-fatal when costs data is absent.",
+      "context": [],
+      "createdAt": "2026-03-16T15:37:56.500Z",
+      "updatedAt": "2026-03-17T00:17:20.558Z",
+      "completedAt": "2026-03-17T00:17:20.558Z"
+    },
+    {
+      "id": "428a4aa3-7723-424f-abfa-c896417b9fda",
+      "status": "+",
+      "title": "Tool Orchestration Lifecycle (Send, Resume, Retry)",
+      "description": "Add tool-enabled completion orchestration to `AgentRunnerTools`, aligning with the client manager behavior:\n\n- Implement `sendCompletionTools(...)` to:\n  - Persist the user message via `ChatsTools.addChatMessages`.\n  - Run a tool-calling completion loop via `createCompletionWithToolsParams(...)` + `completion.sendCompletionWithTools(...)`.\n- Implement `retryCompletionTools(...)` by deleting the last chat message (via `ChatsTools.deleteLastMessage`) then re-running tool completion.\n- Implement `resumeCompletionTools(...)` using `completion.resumeCompletionTools(...)` with provided `toolsGranted`.\n- Include the \"ignored trailing confirmations\" behavior:\n  - If a user sends a new message while there are trailing `tool` messages with `toolResult.type === 'require_confirmation'`, mark them as `not_allowed` and persist the updated chat history before continuing.\n\nAcceptance criteria:\n- Clients can send/resume/retry tool completions using only `AgentRunnerTools` + injected tool executor.\n- Unconfirmed trailing tool calls are deterministically persisted as `not_allowed` when superseded by a new user message.\n- Abort cleanup runs after each lifecycle method completes.",
+      "context": [],
+      "createdAt": "2026-03-16T15:44:00.781Z",
+      "updatedAt": "2026-03-17T00:17:22.210Z",
+      "completedAt": "2026-03-17T00:17:22.210Z"
+    },
+    {
+      "id": "2d06bf7d-f2c6-4373-8940-68ef3b5b9a79",
+      "status": "+",
+      "title": "Tool Execution Routing Mechanism",
+      "description": "Define and implement the tool execution routing integration point for `AgentRunnerTools` so clients can plug in how tools are executed (e.g., via an orchestrator / tools manager / IPC bridge).\n\n- Introduce a `callTool(toolCall: ToolCall, ctx: { projectId?: string; chatContext: ChatContext }) => Promise<any>` callback (exact signature TBD) that `AgentRunnerTools` uses during tool-enabled completion.\n- Implement argument enrichment to match the client behavior:\n  - If `chatContext.storyId` is set and the tool args do not contain `storyId`, inject it.\n  - If `chatContext.featureId` is set and the tool args do not contain `featureId`, inject it.\n  - (Optionally) design for projectId injection as a future extension (group chats etc).\n\nAcceptance criteria:\n- Tool execution can be fully delegated to the client via a single callback.\n- `storyId`/`featureId` argument enrichment is applied consistently for all tool calls.\n- The interface is documented and stable enough for external clients to implement easily.",
+      "context": [],
+      "createdAt": "2026-03-16T15:46:47.741Z",
+      "updatedAt": "2026-03-17T00:17:24.089Z",
+      "completedAt": "2026-03-17T00:17:24.089Z"
+    }
+  ],
+  "createdAt": "2026-03-16T15:37:00.532Z",
+  "updatedAt": "2026-03-16T15:37:00.532Z",
+  "completedAt": "2026-03-17T00:17:24.089Z"
+}

@@ -1,0 +1,61 @@
+{
+  "id": "a74270b9-73ec-4d08-841b-3247fcc9234c",
+  "status": "+",
+  "title": "WHOOP OAuth integration + provider discovery wiring",
+  "description": "Implement WHOOP OAuth integration following `docs/WHOOP.md` and related OAuth provider docs.\n\nScope driven by the WHOOP doc + our recent audit:\n- HealthData must import OAuthProviderModule so `HealthDataService.sync()` can discover connected providers + fetch valid tokens.\n- `OAuthProviderService.listConnectedProviders(userId)` is a required API for sync workflows and must be implemented.\n- WHOOP callbacks differ per environment; create one WHOOP App per environment so Redirect URIs are correct.\n\nReferences:\n- `docs/WHOOP.md`\n- `docs/OAUTH_PROVIDER.md`",
+  "features": [
+    {
+      "id": "805545b8-4316-4867-a8a5-f9d40281b51c",
+      "status": "+",
+      "title": "Implement required OAuthProviderService.listConnectedProviders(userId)",
+      "description": "Add `listConnectedProviders(userId)` to `OAuthProviderService`.\n\nAcceptance criteria:\n- Returns `HealthDataProvider[]` (or `OAuthProviderType[]` depending on domain boundary) representing providers the user has actively connected.\n- Must be backed by the existing tokens repository (no direct DB access from health-data).\n- Excludes providers with no tokens stored and providers that are revoked (if revocation is tracked).\n- Unit tests cover at least: no tokens, single provider, multiple providers, revoked/stale handling (as applicable to current schema).",
+      "context": [],
+      "createdAt": "2026-03-04T09:12:58.889Z",
+      "updatedAt": "2026-03-04T10:42:47.637Z",
+      "completedAt": "2026-03-04T10:42:47.637Z"
+    },
+    {
+      "id": "dd5851b8-b9d1-4613-8189-4163b3cd94cf",
+      "status": "+",
+      "title": "Wire OAuthProviderModule into HealthDataModule",
+      "description": "Update Nest module wiring so `HealthDataService` can inject `OAuthProviderService`.\n\nAcceptance criteria:\n- `src/health-data/health-data.module.ts` imports `OAuthProviderModule`.\n- `HealthDataService` can inject `OAuthProviderService` without circular dependency issues.\n- Compile check passes.",
+      "context": [],
+      "createdAt": "2026-03-04T09:16:41.281Z",
+      "updatedAt": "2026-03-04T10:50:21.690Z",
+      "completedAt": "2026-03-04T10:50:21.690Z"
+    },
+    {
+      "id": "8435da1e-002b-4637-b751-e4f206fe1480",
+      "status": "+",
+      "title": "Add WHOOP OAuth handler + register in OAuthProviderModule",
+      "description": "Implement `WhoopOAuthHandler` (authorization URL, code exchange, token refresh) and register it in `OAUTH_PROVIDER_HANDLERS` map.\n\nAcceptance criteria:\n- `IOAuthProviderHandler` implementation exists for WHOOP.\n- Handler is registered under provider key `'whoop'` in `src/oauth-provider/oauth-provider.module.ts`.\n- `GET /oauth/connect/whoop` returns an authorization URL containing expected query params and scopes.\n- `GET /oauth/callback/whoop` exchanges code and persists tokens.\n- Refresh flow works via `OAuthProviderService.getValidToken('whoop', userId)`.\n- Unit tests cover handler URL building and refresh/exchange happy paths (with provider HTTP mocked).",
+      "context": [],
+      "createdAt": "2026-03-04T09:17:25.510Z",
+      "updatedAt": "2026-03-04T11:37:50.948Z",
+      "completedAt": "2026-03-04T11:37:50.948Z"
+    },
+    {
+      "id": "e2e7037b-827b-4c0c-b39a-3a92f3a2166b",
+      "status": "+",
+      "title": "Add WHOOP config + environment-specific redirect URI guidance",
+      "description": "Ensure configuration supports WHOOP OAuth for each environment.\n\nAcceptance criteria:\n- `environment.configuration.ts` includes `oauth.providers.whoop` with required fields (clientId, clientSecret, redirectUri, auth/token URLs, scopes).\n- Docs and config support 'one WHOOP app per env' by allowing different redirect URIs per env.\n- E2E or integration coverage validates config shape is required at startup (or fails fast with clear error).",
+      "context": [],
+      "createdAt": "2026-03-04T09:17:31.810Z",
+      "updatedAt": "2026-03-04T13:43:56.983Z",
+      "completedAt": "2026-03-04T13:42:27.598Z"
+    },
+    {
+      "id": "9b476970-0e52-4be7-8f9e-d24b5efbfd7e",
+      "status": "+",
+      "title": "Implement HealthDataService.sync() provider discovery + WHOOP sync using OAuth tokens",
+      "description": "Implement provider-aware health-data sync using OAuth module APIs.\n\nAcceptance criteria:\n- `HealthDataService.sync()` calls `OAuthProviderService.listConnectedProviders(userId)`.\n- For each connected provider, obtains token via `OAuthProviderService.getValidToken(provider, userId)`.\n- WHOOP adapter is invoked to pull + normalize raw timeseries/events and daily summaries into OW formats.\n- Endpoint `POST /health-data/sync/me` syncs all connected providers.\n- E2E tests cover at least WHOOP happy-path sync (HTTP mocked) and multi-provider iteration semantics.",
+      "context": [],
+      "createdAt": "2026-03-04T09:17:39.666Z",
+      "updatedAt": "2026-03-05T23:30:02.618Z",
+      "completedAt": "2026-03-05T23:30:02.618Z"
+    }
+  ],
+  "createdAt": "2026-03-04T09:01:45.395Z",
+  "updatedAt": "2026-03-04T09:01:45.395Z",
+  "completedAt": "2026-03-05T23:30:02.618Z"
+}

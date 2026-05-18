@@ -1,0 +1,9 @@
+{
+  "id": "caa803d2-5183-49d4-a173-dd34d4c4ff2a",
+  "status": "-",
+  "title": "Sub-agents",
+  "description": "currently when calling @completionTools there's one huge prompt for an agent to go off and call tools.\nThe way that Cursor and other competitors use their agents, is they try to chop up a task into small, digestible pieces, and send each of these small task to a precise sub-agent.\nThe main benefit is that these sub-agents work on something small, require a much simpler prompt, will end up having a much smaller context window and need to be exposed to a smaller set of tools.\nWe already had setup this project to have the Planner, Contexter, Tester and Developer agents via @agentRunnerTools - but they are not being used as described above to accomplish a task from even a single chat message.\n\nThis story is first research and then leading to a proper plan and finally implementation of a new sub-agent architecture and tools that enable it.",
+  "features": [],
+  "createdAt": "2026-03-25T01:25:47.784Z",
+  "updatedAt": "2026-03-25T01:25:47.784Z"
+}

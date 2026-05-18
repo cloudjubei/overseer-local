@@ -1,0 +1,41 @@
+{
+  "id": "42ba10fe-1531-4844-9218-03215c1ef416",
+  "status": "+",
+  "title": "Implement tone/personality lock in all prompts",
+  "description": "Goal\n- Inject the system-prompt block from Adrian's tone-personality-lock-contract.md into all prompts that generate user-facing output.\n- Same pattern as how the perceptual intelligence prompt block was added.\n\nWhy this matters\n- Dogfooding surfaced that Zenor's tone drifts between overly friendly and overly corporate depending on the flow. Adrian has created a tone/personality lock contract that operationalises the personality spec with plain-language rules, banned phrasing on both ends, and a system-prompt block.\n- This is the enforcement layer that sits between who Zenor is and how it actually sounds across all surfaces.\n\nTone Lock Block to Inject\n```text\nTone lock (MVP5):\n- Same personality on every surface: calm, observant, precise, grounded, lightly warm.\n- Plain spoken English. Short sentences. No corporate analyst voice. No support-bot cheer.\n- Do not swing between formal memo tone and casual buddy tone in the same thread.\n- Friendly = clear + present + respectful. Professional = careful + honest + composed. Never sterile, never performative.\n- Follow voice-and-personality-contract + humanisation-layer-contract. If unsure, choose plainer and calmer.\n```\n\nSurfaces to cover\n- Responder (general conversation)\n- Journal (reflection, acknowledgement)\n- Evening check-in (sentiment, encouragement)\n- Morning check-in\n- Weekly review\n- Momentum\n- Macro goals\n- Micro goals\n- Onboarding",
+  "features": [
+    {
+      "id": "ec306cf6-b458-4367-b15f-c7c4d9d26471",
+      "status": "+",
+      "title": "Inject tone lock into Core Conversation & Onboarding prompts",
+      "description": "Scope\n- Add the standard MVP5 Tone Lock block to prompts for Responder (general conversation), Journal (reflection, acknowledgement), and Onboarding.\n- Follow the existing pattern used for the perceptual intelligence prompt block.\n\nAcceptance criteria\n- The tone lock block is present in the system prompts for these three surfaces.\n- System instructions do not contradict the tone lock.",
+      "context": [],
+      "createdAt": "2026-04-20T22:02:19.705Z",
+      "updatedAt": "2026-04-20T22:35:21.521Z",
+      "completedAt": "2026-04-20T22:35:21.521Z"
+    },
+    {
+      "id": "c8dbb2e7-b9c3-4e2d-9a26-99969ef99786",
+      "status": "+",
+      "title": "Inject tone lock into Check-in & Review prompts",
+      "description": "Scope\n- Add the standard MVP5 Tone Lock block to prompts for Evening check-in (sentiment, encouragement), Morning check-in, and Weekly review.\n- Ensure the tone flex for pace, density, and framing remains appropriate for check-ins, but the core register (plain, calm) is enforced.\n\nAcceptance criteria\n- The tone lock block is present in the system prompts for these three surfaces.",
+      "context": [],
+      "createdAt": "2026-04-20T22:02:19.714Z",
+      "updatedAt": "2026-04-20T22:35:23.224Z",
+      "completedAt": "2026-04-20T22:35:23.224Z"
+    },
+    {
+      "id": "cf8b39c4-2cd8-4ac9-90ef-de465c93ec75",
+      "status": "+",
+      "title": "Inject tone lock into Goals & Momentum prompts",
+      "description": "Scope\n- Add the standard MVP5 Tone Lock block to prompts for Momentum, Macro goals, and Micro goals.\n\nAcceptance criteria\n- The tone lock block is present in the system prompts for these three surfaces.",
+      "context": [],
+      "createdAt": "2026-04-20T22:02:19.724Z",
+      "updatedAt": "2026-04-20T22:35:24.438Z",
+      "completedAt": "2026-04-20T22:35:24.438Z"
+    }
+  ],
+  "createdAt": "2026-04-20T22:01:31.090Z",
+  "updatedAt": "2026-04-20T22:02:19.724Z",
+  "completedAt": "2026-04-20T22:35:24.438Z"
+}

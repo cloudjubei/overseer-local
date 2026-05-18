@@ -1,0 +1,63 @@
+{
+  "id": "3acecabb-6878-4e50-b6ce-076176647050",
+  "status": "+",
+  "title": "Better Agent Task Operations",
+  "description": "## Description\nImplement a persistent, mutable task state cache that stays in the agent's context window across turns. This allows the agent to maintain state about its current task, plan, and progress without relying solely on the conversation history, which can be truncated or summarized.\n\n### Updated understanding (single source of truth)\n- We are **not** introducing a separate `AgentDynamicContext` type/module.\n- The persistent dynamic task state lives on `Chat` as `chat.dynamicContext?: ChatDynamicContext`.\n\n### Where it is defined\n- Type: `ChatDynamicContext` in `src/chats/chatsTypes.ts`\n- Storage location: `Chat.dynamicContext?: ChatDynamicContext` (same file)\n\n### Persistence/update mechanism\n- `ChatsTools.updateDynamicContext(context, patch)` merges a partial patch into the stored `chat.dynamicContext` and persists it with the chat.\n- This makes dynamic context available to any consumer that can load the Chat.\n\n### Current Status\n- [x] `ChatDynamicContext` and `Chat.dynamicContext` exist (`src/chats/chatsTypes.ts`).\n- [x] `ChatsTools.updateDynamicContext(context, patch)` exists and persists merged state (`src/chats/ChatsTools.ts`).\n- [~] Completion loop supports *temporary* dynamic-context injection via `getDynamicContext` (implemented in `src/completion/CompletionTools.ts`).\n- [ ] Orchestrator wiring to load dynamic context from Chat and pass `getDynamicContext` is not implemented.\n- [ ] Developer-facing tool naming/convenience for updating dynamic context (if needed beyond `ChatsTools.updateDynamicContext`) is not implemented.\n\n### Technical Plan (revised)\n1. **Chat as storage**: Ensure orchestrator always has a `ChatContext` available and uses `ChatsTools.getChat(...)` to load `chat.dynamicContext` each turn.\n2. **Completion injection**: Implement `getDynamicContext` in orchestrator to return `chat.dynamicContext` (rendered as the existing Markdown block headed by `# CURRENT TASK STATE`).\n3. **Updates from tool calls**: When a tool call wants to update task state, route it through `ChatsTools.updateDynamicContext(context, patch)` so the state is persisted to the chat.\n4. **Type consolidation**: Keep only `ChatDynamicContext` (no duplicate `AgentDynamicContext`).\n\n### Acceptance Criteria\n- [x] Dynamic context is stored on `Chat` (`Chat.dynamicContext?: ChatDynamicContext`).\n- [x] Dynamic context can be merged/persisted via `ChatsTools.updateDynamicContext`.\n- [~] `sendCompletionWithTools` supports dynamic context injection per turn (temporary provider request injection).\n- [ ] Orchestrator maintains and injects the chat's dynamic context across turns.\n- [ ] Developer agent can persist updates to dynamic context during a conversation (via chat tools or a thin wrapper tool, depending on desired UX).",
+  "features": [
+    {
+      "id": "71c99ceb-d4f5-429e-be1d-1d8a2bdd3764",
+      "status": "+",
+      "title": "Dynamic context is stored on Chat (ChatDynamicContext)",
+      "description": "### Updated understanding\n- We are **not** introducing a separate `AgentDynamicContext` type/module.\n- The persistent dynamic task state lives on `Chat` as `chat.dynamicContext?: ChatDynamicContext`.\n\n### Where it is defined\n- Type: `ChatDynamicContext` in `src/chats/chatsTypes.ts`\n- Storage location: `Chat.dynamicContext?: ChatDynamicContext` (same file)\n\n### Persistence/update mechanism\n- `ChatsTools.updateDynamicContext(context, patch)` merges a partial patch into the stored dynamic context and persists it with the chat.\n- This makes dynamic context available to any consumer that can load the Chat.\n\n### Cleanup performed\n- Removed the obsolete `AgentDynamicContext` scaffolding/commented import from `src/agentRun/agentRunTypes.ts` to avoid duplicated types.\n\n### Acceptance\n- Chat-based dynamic context is the single source of truth.\n- No separate `src/agentDynamicContext/*` module is required for this story.",
+      "context": [],
+      "createdAt": "2026-03-02T22:04:13.470Z",
+      "updatedAt": "2026-03-03T23:56:19.802Z",
+      "blockers": [],
+      "completedAt": "2026-03-03T23:56:19.802Z"
+    },
+    {
+      "id": "56b8a734-3cf6-42ce-8fdb-fe9600f0f697",
+      "status": "+",
+      "title": "Dynamic Context Injection in Completion Loop",
+      "description": "Update `sendCompletionWithToolsSingle` to support dynamic context injection via callback, and make the injected block explicit agent 'working memory' instructions.\n\n### Current implementation status\n- **Implemented in**: `src/completion/CompletionTools.ts`\n- **Signature includes**: `getDynamicContext?: () => Promise<ChatDynamicContext | undefined>` (on `sendCompletionWithToolsSingle`)\n\n### Behavior (provider-safe)\n- On each provider request (i.e. each single turn), if `getDynamicContext` returns a context object, it is rendered into a Markdown block headed by `# CURRENT TASK STATE`.\n- The dynamic context is injected by **augmenting the request's `systemPrompt` string** (prefixing the `# CURRENT TASK STATE` block before the existing system prompt).\n  - This is intentionally provider-safe: some provider adapters ignore/drop `role: 'system'` entries in the message list.\n- The injected block must include explicit instructions to the agent that:\n  - This dynamic context is the agent's 'working memory' across turns.\n  - The agent should rely on it (not conversation history) for task, plan, and progress.\n  - After any significant step, the agent should use the provided tool (e.g. `ChatsTools.updateDynamicContext` or a thin wrapper) to persist updates.\n- The injected content is **not** persisted to chat / run history (only affects the provider request for that turn).\n\n### Tool-result hiding (noise reduction)\n- Before sending messages to providers, the completion loop should **hide prior tool call messages with successful results** (e.g. toolResult.type === 'ok') so the provider sees less redundant history.\n- Rationale: the direct effect of successful tool calls should be reflected immediately in `# CURRENT TASK STATE`, making the raw tool output redundant and token-expensive.\n- Failed/errored/not-allowed tool results should remain visible.\n\n### Notes\n- `sendCompletionWithTools` (the multi-turn loop) simply passes `getDynamicContext` through to `sendCompletionWithToolsSingle`; it does not perform injection itself.\n- This feature is intentionally `ChatDynamicContext`-based (no `AgentDynamicContext` type/module).\n\n### Remaining gaps / follow-ups\n- Ensure all call sites compile and pass `getDynamicContext` where needed (or omit it).\n- Add/adjust tests to validate:\n  - systemPrompt augmentation includes working-memory instructions.\n  - successful tool results are hidden before provider requests.\n  - injected dynamic context is not persisted.",
+      "context": [],
+      "createdAt": "2026-03-02T22:04:20.943Z",
+      "updatedAt": "2026-03-04T00:00:51.721Z",
+      "completedAt": "2026-03-04T00:00:51.721Z"
+    },
+    {
+      "id": "da117cc6-60ed-4317-8353-323edeffdad0",
+      "status": "+",
+      "title": "Dynamic context update tool (persists Chat.dynamicContext)",
+      "description": "Implement a developer-facing tool (or thin wrapper) for updating `Chat.dynamicContext`.\n\n### Goal\n- Make it easy for agent/tool calls to persist task state updates during a conversation.\n\n### Implementation direction\n- Route updates through `ChatsTools.updateDynamicContext(context, patch)` so the state is merged and persisted on the Chat.\n- Avoid introducing a separate `AgentDynamicContext` type/module; use `ChatDynamicContext` only.\n\n### Notes\n- Decide on UX: either expose `ChatsTools.updateDynamicContext` directly, or provide a convenience wrapper like `updateTaskState` that accepts a partial `ChatDynamicContext` patch.",
+      "context": [],
+      "createdAt": "2026-03-02T22:07:01.799Z",
+      "updatedAt": "2026-03-04T00:23:44.648Z",
+      "blockers": [],
+      "completedAt": "2026-03-04T00:23:44.648Z"
+    },
+    {
+      "id": "d6e0f1cd-8554-4230-8869-09398b48ad38",
+      "status": "+",
+      "title": "Orchestrator integration: load/inject Chat.dynamicContext",
+      "description": "Integrate chat-persisted dynamic context into the orchestrator.\n\n### Requirements\n- Each turn, load the Chat via `ChatsTools.getChat(context)` and read `chat.dynamicContext`.\n- Pass `getDynamicContext` into `sendCompletionWithTools` so the completion request gets the injected `# CURRENT TASK STATE` block.\n- Ensure tool calls that update task state persist via `ChatsTools.updateDynamicContext(context, patch)`.\n\n### Acceptance\n- Dynamic context survives across turns because it is stored on the Chat, not in ephemeral in-memory state.\n- No separate `AgentDynamicContext` is used/created.",
+      "context": [],
+      "createdAt": "2026-03-02T22:07:40.752Z",
+      "updatedAt": "2026-03-04T00:26:31.672Z",
+      "completedAt": "2026-03-04T00:26:31.672Z"
+    },
+    {
+      "id": "68351e59-8856-45a3-85d6-094e0fefcff8",
+      "status": "+",
+      "title": "Tests: Dynamic Context Injection in CompletionTools",
+      "description": "Add/adjust unit tests to validate `sendCompletionWithTools` dynamic context injection behavior.\n\n### Scope\n- Add tests that verify:\n  - When `getDynamicContext` returns a context object, a `system` message headed `# CURRENT TASK STATE` is prepended to the provider-request messages.\n  - The injected dynamic-context message is not persisted into the returned `CompletionResponseTurns.results[*].messages` history (turn-local only).\n  - When `getDynamicContext` returns `undefined`, no injection occurs.\n\n### Notes\n- Existing `src/completion/CompletionTools.test.ts` currently has multiple failing tests in the repo state; this feature covers fixing/adjusting the relevant tests and adding new ones as needed.\n- Prefer minimal mocking around the provider request body (spy on `fetch` body JSON) to assert message order and content.",
+      "context": [],
+      "createdAt": "2026-03-03T09:36:21.155Z",
+      "updatedAt": "2026-03-04T02:24:36.137Z",
+      "completedAt": "2026-03-04T02:24:36.137Z"
+    }
+  ],
+  "createdAt": "2026-03-02T20:40:59.178Z",
+  "updatedAt": "2026-03-03T21:42:37.050Z",
+  "completedAt": "2026-03-04T02:24:36.137Z"
+}

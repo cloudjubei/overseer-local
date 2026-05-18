@@ -1,0 +1,66 @@
+{
+  "id": "3a8c34c7-a549-4ff0-9df7-6c6ec80ff0ed",
+  "status": "+",
+  "title": "Graphiti doc led improvements - Adopt first-class Graph Namespacing",
+  "description": "References\n- Graph namespacing: https://help.getzep.com/graphiti/core-concepts/graph-namespacing\n- Communities: https://help.getzep.com/graphiti/core-concepts/communities\n- Searching: https://help.getzep.com/graphiti/working-with-data/searching\n\nProblem:\n- We partially emulate scoping using:\n  - group_id on Entity nodes (Graphiti-native), and\n  - projectId we set manually on nodes for multi-tenancy, and\n  - Area nodes (Entity:Area) as logical groupings.\n- These concepts overlap and are not exposed uniformly through the API. We should align with Graphiti’s namespacing model to enable clear, safe isolation across tenants/projects/environments.\n\nWhat Graphiti provides\n- A formal namespacing pattern via group_id and collection/model settings so multiple graphs can co-exist in the same database/cluster without leakage.",
+  "features": [
+    {
+      "id": "37f00678-36ac-41ea-9bab-8c1b3fa8d639",
+      "status": "+",
+      "title": "Configuration & bootstrapping",
+      "description": "Add settings to explicitly control Graphiti namespacing for this service:\n  - GRAPHITI_GROUP_ID: default to provider’s get_default_group_id, but allow override per deployment.\n  - GRAPHITI_COLLECTION and GRAPHITI_MODEL already exist in config; surface and document how they align to Graphiti namespacing and vector store segregation.\nExpose group_id consistently in API/agent methods so callers can scope read/write operations.",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-09-17T09:29:26.852Z",
+      "updatedAt": "2025-09-17T10:03:34.753Z",
+      "completedAt": "2025-09-17T10:03:34.753Z"
+    },
+    {
+      "id": "e1e64ebf-38ad-498a-a16e-c43c5d040413",
+      "status": "+",
+      "title": "Ingestion alignment",
+      "description": "Update CodeIngestionService.ingest_repository to accept group_id explicitly and:\n  - pass it to all service.create_node calls (we already do this, keep it consistent), and\n  - ensure link_entity_to_area and any post-write operations do not lose the group_id context.\nAdd end-to-end tests that ingest two projects with different group_ids and verify queries do not leak results.",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-09-17T09:29:43.105Z",
+      "updatedAt": "2025-09-17T11:01:29.595Z",
+      "completedAt": "2025-09-17T11:01:29.595Z"
+    },
+    {
+      "id": "00235fd2-a61d-4451-9e3e-8c348bf4a62d",
+      "status": "+",
+      "title": "Query alignment",
+      "description": "Extend routers and agent_tools to accept optional group_ids (list) consistently:\n  - /areas (list/get/update/delete)\n  - /blueprints\n  - /code-projects queries (files, dependencies, classes, types, refs)\nEnsure GraphService list/get methods always apply the graph namespacing filter when provided (we already have helpers _project_condition and group_ids in some methods; standardize usage and add group_id filtering for all relevant endpoints).",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-09-17T09:30:01.014Z",
+      "updatedAt": "2025-09-17T11:14:12.202Z",
+      "completedAt": "2025-09-17T11:14:12.202Z"
+    },
+    {
+      "id": "8580fa5e-2865-4b88-b6ad-d7f87779bd9e",
+      "status": "+",
+      "title": "Documentation",
+      "description": "Document the recommended mapping for this project:\n  - Tenant or deploy environment -> group_id\n  - Project/Repository -> Area node (Entity:Area), optionally also a projectId property for human-readable filtering.\n  - Avoid using projectId as a primary isolation boundary; prefer group_id for true namespacing.",
+      "context": [],
+      "blockers": [],
+      "createdAt": "2025-09-17T09:30:18.418Z",
+      "updatedAt": "2025-09-17T11:14:47.312Z",
+      "completedAt": "2025-09-17T11:14:47.312Z"
+    },
+    {
+      "id": "7a203243-a339-4395-8076-d5918080feab",
+      "status": "+",
+      "title": "Testing",
+      "description": "Go over all the existing tests and update them with the new grouping idea.\n\nCreate a standalone test that pushes the boundaries of this idea so that we know that it's working correctly to the max.",
+      "context": [],
+      "createdAt": "2025-09-17T22:32:21.806Z",
+      "updatedAt": "2025-09-17T23:42:31.917Z",
+      "blockers": [],
+      "completedAt": "2025-09-17T23:33:30.266Z"
+    }
+  ],
+  "createdAt": "2025-09-17T09:26:33.235Z",
+  "updatedAt": "2025-09-17T09:31:09.935Z",
+  "completedAt": "2025-09-17T23:33:30.266Z"
+}

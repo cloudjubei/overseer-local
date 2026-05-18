@@ -102,6 +102,7 @@ dist/
 .factory/.temp
 .factory/chats
 .factory/runs
+.factory/credentials
 .factory copy/
 
 # Vendorized build artifacts

@@ -1,0 +1,58 @@
+{
+  "id": "0329edb4-f9bf-407e-a553-b0355ec5a8d4",
+  "status": "+",
+  "title": "Local LLM benchmark suite",
+  "description": "Track the repository's local LLM benchmark design and implementation so models can be evaluated by giving them a single benchmark document, letting them perform all required repo tasks, and then verifying the entire run automatically with one command.",
+  "blockers": [],
+  "rejection": "Do not rely on manually saving final chat responses as benchmark artifacts. The benchmark must be automatically verifiable from repository state and task-owned output files produced by the model.",
+  "features": [
+    {
+      "id": "2fce8d39-c7c2-449f-9de7-64f34756cd11",
+      "status": "+",
+      "title": "Single-doc benchmark flow with aggregate verification",
+      "description": "Operator flow for TheFactory Tools benchmark must be fully single-step after the LLM run: reset the repo to the benchmark baseline, start a conversation with the LLM by giving it exactly one document at `docs/local-llm-benchmark/prompt.md`, let the model carry out every prepared benchmark task from that one document, then run exactly `npm run llm-benchmark-verify`. That npm command must verify all prepared tasks together and produce one aggregate authoritative report. The benchmark prompt folder should avoid leaking auxiliary instructions beyond the single prompt doc; if possible `docs/local-llm-benchmark/` should contain only that prompt doc, while machine-only verifier/task metadata should live under less model-visible paths such as `scripts/llm-benchmark/`. The model must not rely on the operator to manually save or copy its final prose. Instead, the prompt must require the model to write deterministic benchmark-owned artifacts directly into the repository under `.benchmark-results/`, and the aggregate verifier must consume those artifacts plus repository state to determine pass/fail.",
+      "plan": "Replace the current per-task/manual-report workflow with one prompt doc, model-written benchmark artifacts under `.benchmark-results/`, one aggregate verifier command in package.json, and README instructions that make the benchmark repeatable for local LLM evaluation.",
+      "context": [],
+      "acceptance": "A single prompt doc exists at `docs/local-llm-benchmark/prompt.md`; the benchmark can be run by giving only that doc to the LLM; the model writes its own benchmark artifacts into `.benchmark-results/`; and `npm run llm-benchmark-verify` verifies the full suite and emits one authoritative aggregate report.",
+      "blockers": [],
+      "createdAt": "2026-04-21T10:02:59.749Z",
+      "updatedAt": "2026-04-21T12:14:54.167Z",
+      "completedAt": "2026-04-21T12:14:54.167Z"
+    },
+    {
+      "id": "13466062-9320-4a47-bc87-c450e2b88fcd",
+      "status": "+",
+      "title": "Exact local LLM benchmark contract and task requirements",
+      "description": "Exact implementation-ready benchmark contract for TheFactory Tools. Prompt contract: the only model-facing benchmark document is `docs/local-llm-benchmark/prompt.md`, and that single document must instruct the model to complete every prepared benchmark task. Artifact contract: the model itself must write deterministic benchmark-owned files to these exact paths: `.benchmark-results/investigation.json`, `.benchmark-results/bugfix.json`, `.benchmark-results/implementation.json`, and `.benchmark-results/summary.json`. Verifier contract: `npm run llm-benchmark-verify` must run an aggregate verifier backed by code under `scripts/llm-benchmark/` that validates all prepared tasks together and writes one authoritative machine-readable report to `.benchmark-results/verification-report.json` in addition to console output. Baseline contract: verification assumes the repo has first been reset to the intended benchmark baseline; the aggregate verifier should fail or clearly warn when unrelated dirty state is present outside the benchmark-allowed changes, because git diff against baseline is part of the benchmark evidence. Prompt-visibility contract: `docs/local-llm-benchmark/` should ideally contain only `prompt.md`; machine-only task metadata, schemas, and verifier logic should live outside that folder when possible. Exact task requirements to preserve: (1) investigation task: read-only provider/request-shape analysis around `src/completion/providers/`, explicitly covering which providers share OpenAI-style builders, how tool serialization differs between Responses API and Chat Completions, at least one real compatibility risk, and one recommended regression test. The required investigation artifact at `.benchmark-results/investigation.json` should be a JSON object containing at minimum: `providersUsingOpenAIStyle` (string[]), `responsesApiToolFormat` (string), `chatCompletionsToolFormat` (string), `compatibilityRisk` (string), and `recommendedRegressionTest` (string). (2) bug-fix task: target the OpenAI-compatible tool-format behavior centered on `src/completion/providers/completionProviderOpenAI.ts`. Writable scope should be constrained to the exact allowlist of `src/completion/providers/completionProviderOpenAI.ts`, its direct test file once finalized in repo implementation, and the benchmark-owned artifact `.benchmark-results/bugfix.json`. The bug-fix artifact should minimally record the model's claimed changed files and verification command. Verification must enforce changed-file scope, ensure benchmark harness files were not modified, and run the exact required provider test command once the benchmark test file is seeded. (3) implementation task: target helper edge cases centered on `truncateDeepStrings` in `src/completion/providers/completionProviderUtils.ts`. Writable scope should be constrained to `src/completion/providers/completionProviderUtils.ts`, its direct test file once finalized in repo implementation, and `.benchmark-results/implementation.json`. Verification expectations must include visible tests and edge-case behavior for preserving primitives, recursive truncation in nested arrays/objects, correct boundary handling at max length, correct handling of empty arrays/objects, and not mutating the original input graph. The implementation artifact should minimally record the model's claimed changed files and verification command. Suite summary artifact: `.benchmark-results/summary.json` should summarize what the model believes it completed across all tasks, but the verifier output remains authoritative. Aggregate verifier requirements: inspect artifact presence and JSON shape, compare claimed changed files against observed repo changes, verify only allowed files changed, protect benchmark harness paths from modification, run the required verification commands for the seeded bug-fix and implementation tasks, and emit a single aggregate verdict through `npm run llm-benchmark-verify`. README requirement: it must document this exact workflow — give the LLM only `docs/local-llm-benchmark/prompt.md`, let it write its own verifiable artifacts, then run the single npm command.",
+      "plan": "Use this feature as the implementation source of truth for exact prompt path, artifact names, aggregate verifier output, git-baseline assumptions, and per-task artifact/verification contracts while converting the repo to the new benchmark workflow.",
+      "context": [],
+      "acceptance": "The story precisely records: the single prompt doc path (`docs/local-llm-benchmark/prompt.md`), exact artifact files under `.benchmark-results/`, the aggregate verifier output file `.benchmark-results/verification-report.json`, the `npm run llm-benchmark-verify` command, baseline/git-diff assumptions, and exact preserved contracts for the investigation, bug-fix, and implementation tasks.",
+      "blockers": [],
+      "createdAt": "2026-04-21T10:07:18.703Z",
+      "updatedAt": "2026-04-21T12:15:10.832Z",
+      "completedAt": "2026-04-21T12:15:10.832Z"
+    },
+    {
+      "id": "d745fe76-33ad-40ea-946a-e3e64e146b4e",
+      "status": "+",
+      "title": "Fixture-isolated synthetic benchmark tasks with autonomous single-doc execution",
+      "description": "Refactor the local LLM benchmark so every prepared task operates only on a dedicated synthetic fixture area and benchmark-owned output artifacts, never on actual project implementation files. The model-facing experience must remain a single-document operator flow: after resetting the repository to the benchmark baseline, the operator gives the model exactly one neutral task document at `docs/local-llm-benchmark/prompt.md`; the model performs all tasks from that document in one continuous run without asking permission to continue or to use tools, writes deterministic benchmark-owned artifacts under `.benchmark-results/`, and avoids touching any non-fixture project files. The prepared tasks should be small synthetic repository exercises that verify core tool-use behavior such as inspection-only analysis, targeted bug fixing, bounded helper implementation, targeted test execution, and disciplined artifact writing. The aggregate verifier invoked by `npm run llm-benchmark-verify` must authoritatively validate the entire run by checking actual repository changes, enforcing confinement to approved fixture and artifact paths, running task-specific validations, and rejecting undeclared or out-of-scope edits even if the model's self-report claims success.",
+      "plan": "Replace any repo-derived benchmark fixtures with a small synthetic fixture suite under a dedicated benchmark fixture tree. Keep the model-facing prompt neutral and task-oriented. Harden the verifier so it validates actual git/file changes, requires expected fixture edits and deterministic artifacts, runs task-specific tests, and fails on any touched path outside the approved fixture/output roots. Add tests for undeclared edits, wrong fixes, and successful synthetic-task runs.",
+      "context": [
+        "Benchmark tasks must be tiny, synthetic, and benchmark-owned rather than derived from real project implementation files.",
+        "The model should receive a single neutral task document and remain unaware that the run is a benchmark or performance measurement.",
+        "All work must be confined to dedicated fixture paths and benchmark-owned output artifacts.",
+        "Verification must be authoritative: it must inspect actual repo changes and task outcomes rather than trusting self-reported artifacts alone."
+      ],
+      "acceptance": "A reset benchmark baseline includes only synthetic benchmark fixture tasks and no real project implementation edits are required to complete the run. A model can be given only `docs/local-llm-benchmark/prompt.md`, complete all tasks within the fixture/output roots in one uninterrupted run, and then `npm run llm-benchmark-verify` authoritatively passes only when the actual fixture tasks were correctly completed and no out-of-scope files were touched.",
+      "blockers": [],
+      "rejection": "",
+      "createdAt": "2026-04-21T12:28:27.868Z",
+      "updatedAt": "2026-04-21T22:11:28.678Z",
+      "completedAt": "2026-04-21T22:11:28.678Z"
+    }
+  ],
+  "createdAt": "2026-04-21T09:59:23.575Z",
+  "updatedAt": "2026-04-21T12:28:27.869Z",
+  "completedAt": "2026-04-21T22:11:28.678Z"
+}

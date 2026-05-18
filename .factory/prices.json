@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-06T15:00:07.702Z",
+  "updatedAt": "2026-05-17T12:08:47.341Z",
   "prices": [
     {
       "provider": "openai",
@@ -17064,7 +17064,7 @@
     {
       "provider": "vertex_ai",
       "model": "vertex_ai/gemini-embedding-2-preview",
-      "inputPerMTokensUSD": 0.15,
+      "inputPerMTokensUSD": 0.19999999999999998,
       "outputPerMTokensUSD": 0,
       "currency": "USD"
     },
@@ -18042,6 +18042,116 @@
       "inputPerMTokensUSD": 1,
       "outputPerMTokensUSD": 3.1999999999999997,
       "currency": "USD"
+    },
+    {
+      "provider": "bedrock_converse",
+      "model": "jp.anthropic.claude-sonnet-4-6",
+      "inputPerMTokensUSD": 3.3000000000000003,
+      "outputPerMTokensUSD": 16.5,
+      "currency": "USD",
+      "cacheReadInputPerMTokensUSD": 0.33
+    },
+    {
+      "provider": "azure_ai",
+      "model": "azure_ai/gpt-5.4",
+      "inputPerMTokensUSD": 2.5,
+      "outputPerMTokensUSD": 15,
+      "currency": "USD",
+      "cacheReadInputPerMTokensUSD": 0.25
+    },
+    {
+      "provider": "azure_ai",
+      "model": "azure_ai/gpt-5.4-2026-03-05",
+      "inputPerMTokensUSD": 2.5,
+      "outputPerMTokensUSD": 15,
+      "currency": "USD",
+      "cacheReadInputPerMTokensUSD": 0.25
+    },
+    {
+      "provider": "azure_ai",
+      "model": "azure_ai/gpt-5.4-pro",
+      "inputPerMTokensUSD": 30,
+      "outputPerMTokensUSD": 180,
+      "currency": "USD",
+      "cacheReadInputPerMTokensUSD": 3
+    },
+    {
+      "provider": "azure_ai",
+      "model": "azure_ai/gpt-5.4-pro-2026-03-05",
+      "inputPerMTokensUSD": 30,
+      "outputPerMTokensUSD": 180,
+      "currency": "USD",
+      "cacheReadInputPerMTokensUSD": 3
+    },
+    {
+      "provider": "azure_ai",
+      "model": "azure_ai/gpt-5.4-mini",
+      "inputPerMTokensUSD": 0.75,
+      "outputPerMTokensUSD": 4.5,
+      "currency": "USD",
+      "cacheReadInputPerMTokensUSD": 0.075
+    },
+    {
+      "provider": "azure_ai",
+      "model": "azure_ai/gpt-5.4-mini-2026-03-17",
+      "inputPerMTokensUSD": 0.75,
+      "outputPerMTokensUSD": 4.5,
+      "currency": "USD",
+      "cacheReadInputPerMTokensUSD": 0.075
+    },
+    {
+      "provider": "azure_ai",
+      "model": "azure_ai/gpt-5.4-nano",
+      "inputPerMTokensUSD": 0.19999999999999998,
+      "outputPerMTokensUSD": 1.25,
+      "currency": "USD",
+      "cacheReadInputPerMTokensUSD": 0.02
+    },
+    {
+      "provider": "azure_ai",
+      "model": "azure_ai/gpt-5.4-nano-2026-03-17",
+      "inputPerMTokensUSD": 0.19999999999999998,
+      "outputPerMTokensUSD": 1.25,
+      "currency": "USD",
+      "cacheReadInputPerMTokensUSD": 0.02
+    },
+    {
+      "provider": "openai",
+      "model": "gpt-realtime-2",
+      "inputPerMTokensUSD": 4,
+      "outputPerMTokensUSD": 16,
+      "currency": "USD",
+      "cacheReadInputPerMTokensUSD": 0.39999999999999997
+    },
+    {
+      "provider": "openrouter",
+      "model": "openrouter/qwen/qwen3.6-plus",
+      "inputPerMTokensUSD": 0.325,
+      "outputPerMTokensUSD": 1.95,
+      "currency": "USD"
+    },
+    {
+      "provider": "sambanova",
+      "model": "sambanova/MiniMax-M2.7",
+      "inputPerMTokensUSD": 0.3,
+      "outputPerMTokensUSD": 1.2,
+      "currency": "USD"
+    },
+    {
+      "provider": "xai",
+      "model": "xai/grok-4.3",
+      "inputPerMTokensUSD": 1.25,
+      "outputPerMTokensUSD": 2.5,
+      "currency": "USD",
+      "cacheReadInputPerMTokensUSD": 0.19999999999999998
+    },
+    {
+      "provider": "xai",
+      "model": "xai/grok-4.3-latest",
+      "inputPerMTokensUSD": 1.25,
+      "outputPerMTokensUSD": 2.5,
+      "currency": "USD",
+      "cacheReadInputPerMTokensUSD": 0.19999999999999998
     }
   ]
 }

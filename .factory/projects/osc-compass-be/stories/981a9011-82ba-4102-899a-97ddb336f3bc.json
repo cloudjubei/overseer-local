@@ -1,0 +1,72 @@
+{
+  "id": "981a9011-82ba-4102-899a-97ddb336f3bc",
+  "status": "+",
+  "title": "Usage monitoring and logging",
+  "description": "Just like the conversations are stored - we need to make sure that all endpoint interactions for a given user are stored, so that we could retrace any users steps by following these logs.\nThis should be all stored in a new database table \"ActivityLog\"",
+  "features": [
+    {
+      "id": "4072d1f6-424b-4b43-97b8-468372234f31",
+      "status": "+",
+      "title": "Create Activity Log Module, Interface, and Tokens",
+      "description": "Create the basic structure for the new activity log module. This includes creating the `src/activity-log` directory, the `IActivityLog` interface in `src/activity-log/interfaces/activity-log.interface.ts`, the `ActivityLogModule` in `src/activity-log/activity-log.module.ts`, and the injection tokens in `src/activity-log/tokens.ts`.",
+      "context": [],
+      "createdAt": "2025-09-18T12:59:49.013Z",
+      "updatedAt": "2025-09-18T15:58:49.300Z",
+      "completedAt": "2025-09-18T15:58:49.300Z"
+    },
+    {
+      "id": "da250131-4cc5-488b-841d-6d68bf15c50b",
+      "status": "+",
+      "title": "Implement Activity Log Repository",
+      "description": "Create the `IActivityLogsRepository` interface and the `DynamoDbActivityLogsRepository` implementation. This will handle the persistence of `ActivityLog` entities to DynamoDB. Also, add the new `ActivityLog` table name to `src/database/tables.ts`.",
+      "context": [],
+      "createdAt": "2025-09-18T12:59:49.013Z",
+      "updatedAt": "2025-09-18T16:00:11.146Z",
+      "completedAt": "2025-09-18T16:00:11.146Z"
+    },
+    {
+      "id": "fa576c65-b43b-4f2a-8c46-2376edb4c6ef",
+      "status": "+",
+      "title": "Implement Activity Log Service",
+      "description": "Create the `ActivityLogService` in `src/activity-log/activity-log.service.ts`. This service will use the `IActivityLogsRepository` to create and store new activity log entries.",
+      "context": [],
+      "createdAt": "2025-09-18T12:59:49.013Z",
+      "updatedAt": "2025-09-18T16:01:09.359Z",
+      "completedAt": "2025-09-18T16:01:09.359Z"
+    },
+    {
+      "id": "0e2c1f87-cdc4-4f6a-951c-eb7b3c200afb",
+      "status": "+",
+      "title": "Implement Global Logging Interceptor",
+      "description": "Create a new global interceptor `src/common/interceptors/logging.interceptor.ts`. This interceptor will capture request details (user ID, path, method, body) and response details (status code, body) and use the `ActivityLogService` to persist them.",
+      "context": [],
+      "createdAt": "2025-09-18T12:59:49.013Z",
+      "updatedAt": "2025-09-18T16:03:07.875Z",
+      "completedAt": "2025-09-18T16:03:07.875Z"
+    },
+    {
+      "id": "2915f3b5-b7bf-48a1-ae10-cfe0cc8caf94",
+      "status": "+",
+      "title": "Integrate Activity Log Module and Interceptor",
+      "description": "Import and register the `ActivityLogModule` in `src/app.module.ts`. Apply the `LoggingInterceptor` globally in `src/main.ts` using `app.useGlobalInterceptors()`.",
+      "context": [],
+      "createdAt": "2025-09-18T12:59:49.014Z",
+      "updatedAt": "2025-09-18T16:04:55.994Z",
+      "completedAt": "2025-09-18T16:04:55.994Z"
+    },
+    {
+      "id": "68f86e33-916b-40b2-b303-002ffb35eb82",
+      "status": "+",
+      "title": "Update Database Seeding Script for ActivityLog Table",
+      "description": "Update the `scripts/seed_database` script to include the creation of the new `ActivityLog` DynamoDB table. The table should have a composite primary key of `userId` (Partition Key) and `timestamp` (Sort Key).",
+      "context": [],
+      "createdAt": "2025-09-18T12:59:49.014Z",
+      "updatedAt": "2025-09-19T08:41:38.534Z",
+      "blockers": [],
+      "completedAt": "2025-09-19T08:17:23.802Z"
+    }
+  ],
+  "createdAt": "2025-09-18T12:33:29.647Z",
+  "updatedAt": "2025-09-18T12:59:05.934Z",
+  "completedAt": "2025-09-19T08:17:23.802Z"
+}

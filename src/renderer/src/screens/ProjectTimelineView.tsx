@@ -246,28 +246,23 @@ export default function ProjectTimelineView() {
     }
   }, [projectId])
 
-  const storyProjectIdByStoryId = React.useMemo(() => {
-    const out: Record<string, string> = {}
-    for (const p of Object.keys(storyIdsByProject)) {
-      const storyIds = storyIdsByProject[p]
-      for (const storyId of storyIds) {
-        out[storyId] = p
-      }
-    }
-    return out
-  }, [storyIdsByProject])
-
   const displayedStories = React.useMemo(() => {
     if (showAllProjects) {
-      return Object.values(storiesById)
-        .map((story) => ({
-          ...(story as any),
-          projectId: storyProjectIdByStoryId[(story as any).id],
-        }))
-        .filter((story: any) => !!story.projectId)
+      // Iterate `storyIdsByProject` (not `storiesById`) so each entry's
+      // projectId is the map key — guarantees we don't drop stories with
+      // missing reverse lookups.
+      const out: Array<Story & { projectId: string }> = []
+      for (const pid of Object.keys(storyIdsByProject)) {
+        for (const storyId of storyIdsByProject[pid] ?? []) {
+          const story = storiesById[storyId]
+          if (!story) continue
+          out.push({ ...(story as any), projectId: pid } as Story & { projectId: string })
+        }
+      }
+      return out
     }
     if (!project) return []
-    return storyIdsByProject[project.id]
+    return (storyIdsByProject[project.id] ?? [])
       .map((id) => {
         const story = storiesById[id]
         return story
@@ -275,7 +270,7 @@ export default function ProjectTimelineView() {
           : null
       })
       .filter(Boolean) as Array<Story & { projectId: string }>
-  }, [storiesById, project, showAllProjects, storyProjectIdByStoryId])
+  }, [storiesById, project, showAllProjects, storyIdsByProject])
 
   const displayedFeatures = React.useMemo(() => {
     return displayedStories

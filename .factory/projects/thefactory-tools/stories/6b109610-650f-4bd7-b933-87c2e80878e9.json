@@ -1,0 +1,61 @@
+{
+  "id": "6b109610-650f-4bd7-b933-87c2e80878e9",
+  "status": "+",
+  "title": "Bring back unit tests & introduce test coverage",
+  "description": "Currently the whole TestTools are unusable - the spec has completely changed and they need to be reworked to follow ProjectTools and StoryTools.\nThe test writing and reading is done via FileTools - the only concern of the TestTools should be the general running of tests.\nWe need to be able to run python and javascript/typescript tests (similar to how the current `runTest` functions for python) - the function needs to work out the language based on the extension.\nThere needs to be a function `runTestCoverage` that will provide test coverage in a standardised way (i.e. as a json object) specifying some standard information per file:\n- % statements\n- %branch\n- % functions\n- %lines\n- lines not covered by tests",
+  "features": [
+    {
+      "id": "dae6fe9a-ffaf-4148-8dca-df868824d0e9",
+      "status": "+",
+      "title": "Refactor TestTools to Remove File Operations",
+      "description": "Modify `src/tools/TestTools.ts` to remove the `getTest`, `updateTest`, and `deleteTest` functions. This change aligns with the new architecture where `TestTools` is responsible only for test execution, not file management. Ensure the `createTestTools` factory function is updated to export only the test execution functions and correctly utilizes the `getTestPath` helper from `src/utils.ts`.",
+      "context": [],
+      "createdAt": "2025-09-22T22:35:27.363Z",
+      "updatedAt": "2025-09-22T22:45:28.218Z",
+      "completedAt": "2025-09-22T22:45:28.218Z"
+    },
+    {
+      "id": "4ac19df7-bdde-496a-9496-ed855bfd55ed",
+      "status": "+",
+      "title": "Implement Language-Aware `runTest` Function",
+      "description": "Update the `runTest` function in `src/tools/TestTools.ts` to support both Python and JavaScript/TypeScript. The function must detect the language from the file extension. Use `python3` for `.py` files and `vitest` for `.js`, `.jsx`, `.ts`, and `.tsx` files. The function should properly resolve the test file path using `getTestPath`.",
+      "context": [],
+      "createdAt": "2025-09-22T22:35:27.365Z",
+      "updatedAt": "2025-09-22T22:46:53.809Z",
+      "completedAt": "2025-09-22T22:46:53.809Z"
+    },
+    {
+      "id": "b748cfcc-e77a-4f70-9470-5b7c8dfd5967",
+      "status": "+",
+      "title": "Implement `runTestCoverage` for Python",
+      "description": "Add a new `runTestCoverage` function to `src/tools/TestTools.ts` to generate test coverage reports for Python files. Use the 'coverage' library to produce a JSON report, then parse it to create a standardized JSON object containing per-file statistics for statement, branch, function, and line coverage, plus a list of uncovered lines.",
+      "context": [],
+      "createdAt": "2025-09-22T22:35:27.367Z",
+      "updatedAt": "2025-09-22T22:49:35.667Z",
+      "completedAt": "2025-09-22T22:49:35.667Z"
+    },
+    {
+      "id": "dff7aac7-b5fe-47c5-9164-de12319e73dc",
+      "status": "+",
+      "title": "Extend `runTestCoverage` to Support JavaScript/TypeScript",
+      "description": "Enhance the `runTestCoverage` function to also support JavaScript and TypeScript. Use `vitest`'s built-in coverage reporting to generate a JSON output. This output must be parsed and transformed into the same standardized JSON format used for Python coverage reports to ensure consistent results across languages.",
+      "context": [],
+      "createdAt": "2025-09-22T22:35:27.369Z",
+      "updatedAt": "2025-09-22T22:53:28.307Z",
+      "completedAt": "2025-09-22T22:53:28.307Z"
+    },
+    {
+      "id": "3e1fdd2e-f1ca-42bd-aff2-6f1ad5423611",
+      "status": "+",
+      "title": "Update Tool Composition and Documentation",
+      "description": "Update `src/tools/Tools.ts` to correctly integrate the refactored `TestTools`, reflecting the removal of file operation methods and the addition of `runTestCoverage`. Also, update `docs/FILE_ORGANISATION.md` to document the new `TestTools` API and the standardized test coverage report format.",
+      "context": [],
+      "createdAt": "2025-09-22T22:35:27.370Z",
+      "updatedAt": "2025-09-22T22:56:41.060Z",
+      "completedAt": "2025-09-22T22:56:41.060Z"
+    }
+  ],
+  "createdAt": "2025-09-19T20:24:48.088Z",
+  "updatedAt": "2025-09-22T21:54:13.128Z",
+  "completedAt": "2025-09-22T22:56:41.061Z"
+}
