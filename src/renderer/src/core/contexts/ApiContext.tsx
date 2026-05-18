@@ -8,11 +8,12 @@ import { useAuth } from './AuthContext'
  * Desktop's equivalent of web's [`ApiContext`](../../../../../../thefactory-overseer-web/src/core/contexts/ApiContext.tsx) —
  * same wiring (one hey-api HTTP client + one WsClient), but the base URL and
  * token come from `AuthContext` (backed by safeStorage IPC) instead of Vite
- * env vars + localStorage. Both clients are reconstructed when the base URL
- * changes; auth changes are picked up live via the `getToken()` accessor.
+ * env vars + localStorage. `ws` is always non-null to mirror web's surface;
+ * when no base URL is configured yet, the underlying socket simply never
+ * connects (gated on `token` below).
  */
 export type ApiContextValue = {
-  ws: WsClient | null
+  ws: WsClient
   wsState: WsConnectionState
 }
 
@@ -25,14 +26,15 @@ export function ApiProvider({ children }: { children: ReactNode }) {
   const authRef = useRef({ token, markUnauthorized, clearUnauthorized })
   authRef.current = { token, markUnauthorized, clearUnauthorized }
 
-  const ws = useMemo<WsClient | null>(() => {
-    if (!baseUrl) return null
-    return new WsClient({
-      baseUrl,
-      getToken: () => authRef.current.token,
-      onStateChange: setWsState,
-    })
-  }, [baseUrl])
+  const ws = useMemo<WsClient>(
+    () =>
+      new WsClient({
+        baseUrl: baseUrl ?? '',
+        getToken: () => authRef.current.token,
+        onStateChange: setWsState,
+      }),
+    [baseUrl],
+  )
 
   useEffect(() => {
     if (!baseUrl) return
@@ -45,13 +47,13 @@ export function ApiProvider({ children }: { children: ReactNode }) {
   }, [baseUrl])
 
   useEffect(() => {
-    if (!ws || !token) {
-      ws?.disconnect()
+    if (!baseUrl || !token) {
+      ws.disconnect()
       return
     }
     ws.connect()
     return () => ws.disconnect()
-  }, [ws, token])
+  }, [ws, baseUrl, token])
 
   const value = useMemo<ApiContextValue>(() => ({ ws, wsState }), [ws, wsState])
 

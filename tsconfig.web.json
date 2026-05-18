@@ -13,9 +13,11 @@
     "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
-      "@renderer/*": [
-        "src/renderer/src/*"
-      ]
+      "@renderer/*": ["src/renderer/src/*"],
+      "@api/*": ["src/renderer/src/api/*"],
+      "@core/*": ["src/renderer/src/core/*"],
+      "@services/*": ["src/renderer/src/services/*"],
+      "@generated/*": ["src/renderer/src/generated/*"]
     }
   }
 }

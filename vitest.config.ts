@@ -11,6 +11,10 @@ export default defineConfig({
     dedupe: ['react', 'react-dom'],
     alias: {
       '@renderer': resolve(__dirname, 'src/renderer/src'),
+      '@api': resolve(__dirname, 'src/renderer/src/api'),
+      '@core': resolve(__dirname, 'src/renderer/src/core'),
+      '@services': resolve(__dirname, 'src/renderer/src/services'),
+      '@generated': resolve(__dirname, 'src/renderer/src/generated'),
     },
   },
   test: {
