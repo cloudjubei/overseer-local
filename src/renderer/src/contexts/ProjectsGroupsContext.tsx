@@ -8,6 +8,7 @@ import type {
   ProjectsGroupCreateInput,
 } from 'thefactory-tools'
 import { projectsGroupsService } from '../services/projectsGroupsService'
+import { projectsService } from '../services/projectsService'
 
 export type ProjectsGroupsContextValue = {
   groups: ProjectsGroup[]
@@ -173,6 +174,21 @@ export function ProjectsGroupsProvider({ children }: { children: React.ReactNode
         // @ts-ignore allow projects field in patch
         { projects: newProjects } as any,
       )
+    }
+
+    // Keep the project spec's `mainGroupId` in sync. Without this the
+    // spec would still point at the old group even though
+    // `group.projects` no longer includes this project — the next time
+    // the edit form opens, it would read `p.mainGroupId` and show the
+    // wrong group selected. `null` clears the field (upstream
+    // `updateProject` distinguishes `null` = clear from `undefined` =
+    // leave alone).
+    try {
+      await projectsService.updateProject(projectId, {
+        mainGroupId: groupId,
+      } as any)
+    } catch (e) {
+      console.warn('setProjectGroup: failed to sync spec.mainGroupId', e)
     }
 
     // optimistic local update; subscription should reconcile
