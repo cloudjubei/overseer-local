@@ -55,11 +55,20 @@ Desktop talks to `thefactory-backend` over the same HTTP + WS surface the web ap
 
 ### 3. Re-point the renderer at the backend client
 
-The renderer's contexts under `src/renderer/core/contexts/` are structurally identical to web's `src/core/contexts/`. Swap their data source from "Electron IPC → legacy managers" to "backend HTTP + WS."
+Web's contexts live under `src/renderer/src/core/contexts/` and are mounted by `App.tsx`'s `ConnectedShell` post-auth (mirror of [thefactory-overseer-web/src/App.tsx](../../thefactory-overseer-web/src/App.tsx)'s provider tree). Auth state persists via `safeStorage` IPC; everything else now flows over HTTP + WS. The legacy renderer trees (`contexts/`, `services/`, `hooks/`, `navigation/`, `components/`, screens other than `LoginScreen`) have been moved into `src/legacy/renderer/`.
 
-- For every context (`Projects`, `ProjectsGroups`, `Stories`, `Chats`, `Files`, `Git`, `Agents`, `Tests`, `Tools`, `LiveData`, `Costs`, `AppSettings`, …): replace its IPC calls with the generated SDK + `WsClient`.
-- Where web has already lifted a context into `thefactory-ui/headless` (e.g. badge math, `chatsSeen` store, form state hooks), desktop imports from there directly instead of maintaining its own copy. Any context still duplicated between web and desktop is a parity bug — file a follow-up to promote it to `thefactory-ui/headless`.
-- Delete the IPC keys, preload bridges, and main-process routers that backed the old data flow. Keep the IPC layer for genuinely Electron-only surfaces (window controls, native menus, system tray, OS notifications, native file pickers).
+What remains is porting the consumer surface — sidebar, routing, and per-domain screens — onto the new contexts. Track these as their own bullets:
+
+- **Routing shell.** Lift web's `Routes` + `MainShell` + `Sidebar` + `AuthedRoot` pattern (uses `react-router-dom`). Desktop's hash-based `Navigator` from `src/legacy/renderer/navigation/` is retired.
+- **Per-domain screen migration.** Each screen in `src/legacy/renderer/screens/` is rewritten against the new contexts and lands under `src/renderer/src/ui/screens/` to match web's path layout. Order, lightest first:
+  - `WelcomeView` / `ProjectsListView` (consumes `useProjects`, `useProjectsGroups`).
+  - `StoriesView`, `StoryDetailsView` (`useStories`, `useProjects`).
+  - `SettingsView` + its sub-screens (`useAppSettings`, `useLLMConfigs`, `useGitCredentials`, `useWebSearchKeys`).
+  - `FilesView` (`useFiles`).
+  - `ChatView`, `GroupChatView` (`useChats` — large; lift web's compound chat surface from `thefactory-ui/web/compound/`).
+  - `AgentsView`, `TestsView`, `ToolsView`, `LiveDataView`, `GitView`, `ProjectTimelineView`.
+- **Local primitives that legacy screens depended on** (`CommandMenu`, `FileMentionsTextarea`, `RichText`, `DiagnosticsOverlay`, `ShortcutsHelp`, `ErrorBubble`, `ContextInfoButton`) get rewritten or re-pointed at `thefactory-ui/web` if a peer already exists. Hooks (`useShortcuts`, `useTheme`, `useLiveData`, etc.) get the same treatment.
+- **Headless drift check.** Where web has already lifted a piece into `thefactory-ui/headless` (badge math, `chatsSeen` store, form state hooks, `useTooltipState`, `useToastQueue`), desktop imports from there directly. Any context or hook still duplicated between web and desktop is a parity bug — file a follow-up against [thefactory-ui/docs/implementation-plan.md § B.5](../../thefactory-ui/docs/implementation-plan.md) instead of keeping the desktop copy.
 
 ### 4. Main-process slimming
 
