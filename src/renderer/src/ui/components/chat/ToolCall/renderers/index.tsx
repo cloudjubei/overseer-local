@@ -1,0 +1,103 @@
+import type { ReactNode } from 'react'
+import {
+  renderToolPreview,
+  type RenderToolPreviewArgs,
+  type ToolPreviewHooks,
+} from 'thefactory-ui/web'
+import { useStories } from '@core/contexts/StoriesContext'
+import { useActiveProject } from '@core/contexts/ProjectsContext'
+import StoryAndFeatureCallout from '@ui/components/stories/StoryAndFeatureCallout'
+import FeatureCard from '@ui/components/stories/FeatureCard'
+import DependencyBullet from '@ui/components/stories/DependencyBullet'
+import { asRecord, tryString } from '../utils'
+import type { ToolCall } from '../types'
+
+/**
+ * Web wrapper around the shared `renderToolPreview` registry in
+ * `thefactory-ui`. Injects host-specific lookups (stories / features /
+ * projects) + story-card / feature-card renderers so the hover preview
+ * renders identically to desktop.
+ *
+ * Exposed as the `renderToolCall` callback that `MessageList` forwards to
+ * every `ToolCallCard`.
+ */
+export function renderToolCall(props: {
+  toolCall: ToolCall
+  result?: unknown
+  resultType?: unknown
+}): ReactNode {
+  // Hook into web's contexts via a tiny inner component — `renderToolCall`
+  // itself is invoked from MessageRow (a component) so it's a render-prop,
+  // which lets us call `useStories()` / `useActiveProject()` legally.
+  return <ConnectedToolPreview {...(props as RenderToolPreviewArgs)} />
+}
+
+function ConnectedToolPreview(args: RenderToolPreviewArgs) {
+  const { getStory, getFeature } = useStories()
+  const { projectId } = useActiveProject()
+
+  const hooks: ToolPreviewHooks = {
+    getStory: (id) => {
+      const s = getStory(id)
+      if (!s) return undefined
+      return {
+        id: s.id,
+        title: s.title,
+        description: s.description,
+        status: s.status as string | undefined,
+        features: (s.features ?? []).map((f) => ({
+          id: f.id,
+          title: f.title,
+          description: f.description,
+        })),
+      }
+    },
+    getFeature: (storyId, featureId) => {
+      const f = getFeature(storyId, featureId)
+      if (!f) return undefined
+      return {
+        id: f.id,
+        title: f.title,
+        description: f.description,
+        status: f.status as string | undefined,
+      }
+    },
+    renderFeatureCard: (story, feature) => {
+      const s = getStory(story.id)
+      const f = s ? getFeature(s.id, feature.id) : undefined
+      if (!s || !f || !projectId) return null
+      return <FeatureCard projectId={projectId} story={s} feature={f} />
+    },
+    renderStoryBullet: (storyId) => <DependencyBullet dependency={storyId} />,
+    renderStoryAndFeatureCallout: ({ storyId, featureId }) => (
+      <StoryAndFeatureCallout storyId={storyId} featureId={featureId} />
+    ),
+  }
+
+  return <>{renderToolPreview({ ...args, hooks })}</>
+}
+
+export function getToolHeaderPath(toolCall: ToolCall): string | undefined {
+  const args = asRecord(toolCall.arguments)
+  switch (toolCall.name) {
+    case 'writeFile':
+    case 'readFileStructure':
+    case 'listContents':
+    case 'getAstOutline':
+      return tryString(args.path)
+    case 'addFeature':
+    case 'updateStory':
+    case 'updateFeature':
+    case 'reorderFeature':
+    case 'finishFeature':
+    case 'blockFeature': {
+      const storyId = tryString(args.storyId)
+      const featureId = tryString(args.featureId)
+      if (storyId && featureId) return `story ${storyId} / feature ${featureId}`
+      if (storyId) return `story ${storyId}`
+      return undefined
+    }
+    default:
+      return undefined
+  }
+}

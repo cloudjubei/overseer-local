@@ -15,6 +15,7 @@ export default defineConfig({
       '@core': resolve(__dirname, 'src/renderer/src/core'),
       '@services': resolve(__dirname, 'src/renderer/src/services'),
       '@generated': resolve(__dirname, 'src/renderer/src/generated'),
+      '@ui': resolve(__dirname, 'src/renderer/src/ui'),
     },
   },
   test: {

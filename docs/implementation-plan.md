@@ -31,46 +31,17 @@ Things genuinely blocked on a third-party decision or external trigger, not on e
 
 The work to land "desktop is a pure backend client." Order is dependency-driven.
 
-### 1. Move the existing LOCAL implementation into `src/legacy/`
+### 1. Adapt `BackendConnectionPanel` for desktop's auth model
 
-The current desktop ships everything via in-process managers under [src/logic/](../src/logic/) plus their main-process IPC handlers under [src/main/](../src/main/). This entire stack is going away as a runtime dependency — but the code stays in the repo for reference (algorithms, edge-case handling, data shapes, file-watcher patterns we may need to recall later).
+The wholesale lift of web's `src/ui/` brought [`BackendConnectionPanel`](../src/renderer/src/ui/components/settings/BackendConnectionPanel.tsx) into desktop's Developer settings. As shipped it reads `VITE_API_BASE_URL` (web's env var) and only supports replace/clear of the bearer token. Desktop needs:
 
-Concretely:
+- URL row reads from `useAuth().baseUrl` (safeStorage-backed), not `import.meta.env.VITE_API_BASE_URL`.
+- "Change URL" input + "Test connection" button reusing [`LoginScreen`](../src/renderer/src/ui/screens/LoginScreen.tsx)'s `/health` flow.
+- Reset-credential action clears both fields (mirrors `useAuth().clear`).
 
-- Create `src/legacy/` and move the current contents of `src/logic/` and `src/main/` (everything that's not pure Electron-window-chrome) under it. Preserve the original folder structure so a reader can navigate it like the old tree.
-- Wire `src/legacy/` out of the build — no compilation, no imports from live code, no tests against it. A `src/legacy/README.md` explains what's there, when it was deprecated (2026-05), and why (backend-only cutover). Link to this plan.
-- Delete the old IPC routes that pointed at the legacy managers. Renderer screens stay in place for now and will be re-pointed at the backend client in §B.3 — they'll be visibly broken in between, which is fine for an internal cutover branch.
-- Confirm [ARCHITECTURE.md § `src/legacy/`](./ARCHITECTURE.md#srclegacy) still accurately describes the move once the files land.
+Long-term, this whole panel is a parity-bug candidate for promotion into `thefactory-ui/headless` per [thefactory-ui/docs/implementation-plan.md § B.5](../../thefactory-ui/docs/implementation-plan.md) — both clients want the same surface with platform-specific storage injected.
 
-Goal: every later step starts from a clean slate, with no live code importing from the old managers.
-
-### 2. Backend client — HTTP + WS, lifted from web
-
-Desktop talks to `thefactory-backend` over the same HTTP + WS surface the web app uses. Goal: one client, two consumers (web today, desktop tomorrow, mobile next).
-
-- Generate the API client from `thefactory-backend/swagger/swagger.json` via `@hey-api/openapi-ts`. Mirror web's `openapi-ts.config.ts` exactly so the typed surface is identical.
-- Lift `WsClient` and the auth shape from [thefactory-overseer-web/src/api/](../../thefactory-overseer-web/src/api/) into desktop's renderer. Same `reconnecting-websocket`-style logic; runs in the renderer (Chromium) without any Node shim.
-- Auth: paste-and-store `apiKeyCredentialId` against backend's `LLMConfigEntry` — mirrors web 1:1. Credentials stored via Electron's `safeStorage`.
-- First-run screen: backend URL input + paste-and-store credential + "test connection" button. No auto-discovery, no sidecar fallback.
-
-### 3. Re-point the renderer at the backend client
-
-Web's contexts live under `src/renderer/src/core/contexts/` and are mounted by `App.tsx`'s `ConnectedShell` post-auth (mirror of [thefactory-overseer-web/src/App.tsx](../../thefactory-overseer-web/src/App.tsx)'s provider tree). Auth state persists via `safeStorage` IPC; everything else now flows over HTTP + WS. The legacy renderer trees (`contexts/`, `services/`, `hooks/`, `navigation/`, `components/`, screens other than `LoginScreen`) have been moved into `src/legacy/renderer/`.
-
-What remains is porting the consumer surface — sidebar, routing, and per-domain screens — onto the new contexts. Track these as their own bullets:
-
-- **Routing shell.** Lift web's `Routes` + `MainShell` + `Sidebar` + `AuthedRoot` pattern (uses `react-router-dom`). Desktop's hash-based `Navigator` from `src/legacy/renderer/navigation/` is retired.
-- **Per-domain screen migration.** Each screen in `src/legacy/renderer/screens/` is rewritten against the new contexts and lands under `src/renderer/src/ui/screens/` to match web's path layout. Order, lightest first:
-  - `WelcomeView` / `ProjectsListView` (consumes `useProjects`, `useProjectsGroups`).
-  - `StoriesView`, `StoryDetailsView` (`useStories`, `useProjects`).
-  - `SettingsView` + its sub-screens (`useAppSettings`, `useLLMConfigs`, `useGitCredentials`, `useWebSearchKeys`).
-  - `FilesView` (`useFiles`).
-  - `ChatView`, `GroupChatView` (`useChats` — large; lift web's compound chat surface from `thefactory-ui/web/compound/`).
-  - `AgentsView`, `TestsView`, `ToolsView`, `LiveDataView`, `GitView`, `ProjectTimelineView`.
-- **Local primitives that legacy screens depended on** (`CommandMenu`, `FileMentionsTextarea`, `RichText`, `DiagnosticsOverlay`, `ShortcutsHelp`, `ErrorBubble`, `ContextInfoButton`) get rewritten or re-pointed at `thefactory-ui/web` if a peer already exists. Hooks (`useShortcuts`, `useTheme`, `useLiveData`, etc.) get the same treatment.
-- **Headless drift check.** Where web has already lifted a piece into `thefactory-ui/headless` (badge math, `chatsSeen` store, form state hooks, `useTooltipState`, `useToastQueue`), desktop imports from there directly. Any context or hook still duplicated between web and desktop is a parity bug — file a follow-up against [thefactory-ui/docs/implementation-plan.md § B.5](../../thefactory-ui/docs/implementation-plan.md) instead of keeping the desktop copy.
-
-### 4. Main-process slimming
+### 2. Main-process slimming
 
 Once the renderer talks to the backend directly (over HTTP + WS, not IPC), the main process becomes a thin shell. Trim it accordingly:
 
@@ -78,18 +49,7 @@ Once the renderer talks to the backend directly (over HTTP + WS, not IPC), the m
 - Native bridges that the renderer can't do itself: file picker, "open in Finder/Explorer," "open external URL," app-protocol handlers (deep links).
 - That's it. No data services, no file watchers, no project / story / chat / git logic — those all live in `thefactory-backend` now.
 
-### 5. Settings → Connection screen
-
-Mirror web's connection settings, with the Electron-specific extras:
-
-- Backend URL (input + "test connection").
-- Credential (paste-and-store, `apiKeyCredentialId` resolving an `LLMConfigEntry` — same flow as web).
-- Connection status indicator (online / connecting / disconnected).
-- Reset-credential action.
-
-This screen is also where the "you're disconnected" banner is configured (see §B.6).
-
-### 6. Disconnected-state UX
+### 3. Disconnected-state UX
 
 When the network drops, behaviour mirrors mobile:
 
@@ -99,7 +59,7 @@ When the network drops, behaviour mirrors mobile:
 - Automatic reconnect (the lifted `reconnecting-websocket` logic already handles this).
 - No local cache. If the renderer has no data because the WS was never connected, show the empty / loading state, not a snapshot.
 
-### 7. Build + packaging cleanup
+### 4. Build + packaging cleanup
 
 - Remove `thefactory-tools` + `thefactory-db` from desktop's runtime deps (they move to `thefactory-backend`'s deps; desktop no longer imports them).
 - Trim `electron-builder` / `electron-vite` config of the old main-process modules.
@@ -114,7 +74,7 @@ When the network drops, behaviour mirrors mobile:
 - **Renderer talks to `thefactory-backend` over HTTP + WS**, exactly like web. Same generated SDK, same WS event stream.
 - **Main process is window chrome + native bridges only** — no data services, no file watchers, no embedded Node runtime, no Postgres, no sidecar, no bundled backend. The user runs (or connects to) a `thefactory-backend` instance separately.
 - **No backward compatibility, no data migration.** Existing `~/.factory/` trees are not auto-imported; this is treated as a fresh install.
-- **No offline mode, no local cache, no sync layer.** Network drops show a disconnected banner; data screens stay on their last-known render. See §B.6.
+- **No offline mode, no local cache, no sync layer.** Network drops show a disconnected banner; data screens stay on their last-known render. See §B.3.
 - **What stays Electron-side:** window controls, native menus, system tray, OS notifications, native file pickers, app-protocol handlers, settings + theme state (UI-level only — same `AppSettings` / `chatsSeen` localStorage model the web uses). IPC stays for these surfaces; everything else is direct HTTP + WS.
 
 ---

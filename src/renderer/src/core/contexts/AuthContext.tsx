@@ -19,6 +19,9 @@ export type AuthContextValue = {
   setBaseUrl: (baseUrl: string | null) => Promise<void>
   setToken: (token: string | null) => Promise<void>
   setBoth: (state: { baseUrl: string | null; token: string | null }) => Promise<void>
+  /** Convenience: clears just the bearer token, leaves `baseUrl` in place. Parity with web. */
+  clearToken: () => Promise<void>
+  /** Wipes both fields. Desktop-specific (web's `clearToken` is the only "clear" path). */
   clear: () => Promise<void>
   markUnauthorized: () => void
   clearUnauthorized: () => void
@@ -70,6 +73,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [setBoth, baseUrl],
   )
 
+  const clearToken = useCallback(() => setToken(null), [setToken])
+
   const clear = useCallback(async () => {
     const next = await authService.clear()
     setBaseUrlState(next.baseUrl)
@@ -89,6 +94,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setBaseUrl,
       setToken,
       setBoth,
+      clearToken,
       clear,
       markUnauthorized,
       clearUnauthorized,
@@ -101,6 +107,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setBaseUrl,
       setToken,
       setBoth,
+      clearToken,
       clear,
       markUnauthorized,
       clearUnauthorized,

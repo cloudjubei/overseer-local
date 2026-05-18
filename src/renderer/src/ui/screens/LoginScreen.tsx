@@ -1,8 +1,9 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Spinner } from 'thefactory-ui/web'
-import { useAuth } from '../core/contexts/AuthContext'
-import { health } from '../generated/backend'
-import { extractErrorMessage } from '../api/errorMessage'
+import { useAuth } from '@core/contexts/AuthContext'
+import { health } from '@generated/backend'
+import { extractErrorMessage } from '@api/errorMessage'
 
 const DEFAULT_URL = 'http://localhost:3000'
 
@@ -13,12 +14,13 @@ type TestState =
   | { kind: 'error'; message: string }
 
 /**
- * First-run gate. Captures the backend URL + bearer credential, lets the user
- * verify the combination against `/health`, then persists via `authService`
- * (Electron `safeStorage`). Mirror of web's login flow without the OAuth /
- * callback path — desktop is paste-and-store only.
+ * First-run gate. Desktop's replacement for [web's same-named screen](../../../../../../thefactory-overseer-web/src/ui/screens/LoginScreen.tsx) —
+ * captures the backend URL + bearer credential, lets the user verify the
+ * combination against `/health`, then persists via `authService` (Electron
+ * `safeStorage`). No OAuth / callback path — desktop is paste-and-store only.
  */
 export default function LoginScreen() {
+  const navigate = useNavigate()
   const { setBoth } = useAuth()
   const [baseUrl, setBaseUrl] = useState(DEFAULT_URL)
   const [token, setToken] = useState('')
@@ -55,6 +57,7 @@ export default function LoginScreen() {
         baseUrl: baseUrl.trim().replace(/\/+$/, ''),
         token: token.trim() || null,
       })
+      navigate('/', { replace: true })
     } finally {
       setSaving(false)
     }

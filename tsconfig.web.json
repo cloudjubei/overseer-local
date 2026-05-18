@@ -17,7 +17,8 @@
       "@api/*": ["src/renderer/src/api/*"],
       "@core/*": ["src/renderer/src/core/*"],
       "@services/*": ["src/renderer/src/services/*"],
-      "@generated/*": ["src/renderer/src/generated/*"]
+      "@generated/*": ["src/renderer/src/generated/*"],
+      "@ui/*": ["src/renderer/src/ui/*"]
     }
   }
 }
