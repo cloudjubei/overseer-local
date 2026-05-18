@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import ModalHost from './navigation/ModalHost'
-import { ToastProvider } from 'thefactory-ui/web'
+import { ToastProvider, Spinner } from 'thefactory-ui/web'
 import { NavigatorProvider } from './navigation/Navigator'
 import { ShortcutsBootstrap, ShortcutsProvider } from './hooks/useShortcuts'
 import CommandMenu from './components/ui/CommandMenu'
@@ -10,7 +10,10 @@ import { ProjectsProvider, useProjectContext } from './contexts/ProjectContext'
 import { useTheme } from './hooks/useTheme'
 import useLiveData from './hooks/useLiveData'
 import LoadingScreen from './screens/LoadingScreen'
+import LoginScreen from './screens/LoginScreen'
 import { AppSettingsProvider, useAppSettings } from './contexts/AppSettingsContext'
+import { AuthProvider, useAuth } from './core/contexts/AuthContext'
+import { ApiProvider } from './core/contexts/ApiContext'
 import { NotificationClickHandler } from './hooks/useNotifications'
 import { LLMConfigProvider } from './contexts/LLMConfigContext'
 import { AgentsProvider } from './contexts/AgentsContext'
@@ -37,40 +40,69 @@ function ServicesBootstrap() {
 
 function App() {
   return (
+    <AuthProvider>
+      <ApiProvider>
+        <ToastProvider>
+          <AuthGate />
+        </ToastProvider>
+      </ApiProvider>
+    </AuthProvider>
+  )
+}
+
+/**
+ * Decides between the first-run LoginScreen and the legacy app shell. While the
+ * backend-only cutover is mid-flight (§B.3 still pending), the legacy providers
+ * remain wrapped here — they call IPC routes that no longer register, so
+ * connected-state screens are visibly broken until B.3 lands.
+ */
+function AuthGate() {
+  const { ready, baseUrl, token } = useAuth()
+  if (!ready) {
+    return (
+      <div className="w-full h-full flex items-center justify-center">
+        <Spinner size={28} />
+      </div>
+    )
+  }
+  if (!baseUrl || !token) return <LoginScreen />
+  return <LegacyShell />
+}
+
+function LegacyShell() {
+  return (
     <AppSettingsProvider>
-      <ToastProvider>
-        <ProjectsGroupsProvider>
-          <ProjectsProvider>
-            <StoriesProvider>
-              <FilesProvider>
-                <NavigatorProvider>
-                  <ShortcutsProvider>
-                    <LLMConfigProvider>
-                      <GitHubCredentialsProvider>
-                        <GitProvider>
-                          <CostsProvider>
-                            <ChatsProvider>
-                              <AgentsProvider>
-                                <ServicesBootstrap />
-                                <ShortcutsBootstrap />
-                                <NotificationClickHandler />
-                                <NotificationSoundBootstrap />
-                                <CommandMenu />
-                                <ShortcutsHelp />
-                                <MainApp />
-                              </AgentsProvider>
-                            </ChatsProvider>
-                          </CostsProvider>
-                        </GitProvider>
-                      </GitHubCredentialsProvider>
-                    </LLMConfigProvider>
-                  </ShortcutsProvider>
-                </NavigatorProvider>
-              </FilesProvider>
-            </StoriesProvider>
-          </ProjectsProvider>
-        </ProjectsGroupsProvider>
-      </ToastProvider>
+      <ProjectsGroupsProvider>
+        <ProjectsProvider>
+          <StoriesProvider>
+            <FilesProvider>
+              <NavigatorProvider>
+                <ShortcutsProvider>
+                  <LLMConfigProvider>
+                    <GitHubCredentialsProvider>
+                      <GitProvider>
+                        <CostsProvider>
+                          <ChatsProvider>
+                            <AgentsProvider>
+                              <ServicesBootstrap />
+                              <ShortcutsBootstrap />
+                              <NotificationClickHandler />
+                              <NotificationSoundBootstrap />
+                              <CommandMenu />
+                              <ShortcutsHelp />
+                              <MainApp />
+                            </AgentsProvider>
+                          </ChatsProvider>
+                        </CostsProvider>
+                      </GitProvider>
+                    </GitHubCredentialsProvider>
+                  </LLMConfigProvider>
+                </ShortcutsProvider>
+              </NavigatorProvider>
+            </FilesProvider>
+          </StoriesProvider>
+        </ProjectsProvider>
+      </ProjectsGroupsProvider>
     </AppSettingsProvider>
   )
 }

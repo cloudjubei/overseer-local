@@ -20,10 +20,12 @@ import type { GitCredentialsService } from '@renderer/services/gitCredentialsSer
 import type { LLMConfigsService } from '@renderer/services/llmConfigsService'
 import type { CodeIntelService } from '@renderer/services/codeIntelService'
 import type { DiagnosticsService } from '@renderer/services/diagnosticsService'
+import type { AuthService } from '@renderer/services/authService'
 
 declare global {
   interface Window {
     electron: ElectronAPI
+    authService: AuthService
     dbService: DBService
     factoryAgentRunService: FactoryAgentRunService
     factoryToolsService: FactoryToolsService

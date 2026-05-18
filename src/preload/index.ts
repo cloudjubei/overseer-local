@@ -2,6 +2,12 @@ import { electronAPI } from '@electron-toolkit/preload'
 import { contextBridge, ipcRenderer } from 'electron'
 import IPC_HANDLER_KEYS from './ipcHandlersKeys'
 
+const AUTH_API = {
+  get: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.AUTH_GET),
+  set: (state) => ipcRenderer.invoke(IPC_HANDLER_KEYS.AUTH_SET, state),
+  clear: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.AUTH_CLEAR),
+}
+
 const FILES_API = {
   updateAllTools: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.FILES_UPDATE_ALL_TOOLS),
   subscribe: (callback) => {
@@ -460,6 +466,7 @@ if (process.contextIsolated) {
   try {
     contextBridge.exposeInMainWorld('electron', electronAPI)
 
+    contextBridge.exposeInMainWorld('authService', AUTH_API)
     contextBridge.exposeInMainWorld('storiesService', STORIES_API)
     contextBridge.exposeInMainWorld('projectsService', PROJECTS_API)
     contextBridge.exposeInMainWorld('codeIntelService', CODE_INTEL_API)

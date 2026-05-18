@@ -213,6 +213,11 @@ const IPC_HANDLER_KEYS = {
   GIT_CREDENTIALS_UPDATE: 'git:credentials:update',
   GIT_CREDENTIALS_REMOVE: 'git:credentials:remove',
   GIT_CREDENTIALS_GET: 'git:credentials:get',
+
+  // Backend connection (B.2 cutover)
+  AUTH_GET: 'auth:get',
+  AUTH_SET: 'auth:set',
+  AUTH_CLEAR: 'auth:clear',
 }
 
 export default IPC_HANDLER_KEYS
