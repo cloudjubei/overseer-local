@@ -2,6 +2,21 @@
 
 `overseer-local` is an Electron app — a main process plus a React 19 renderer — that integrates `thefactory-tools` (agents), `thefactory-db` (data storage), and `thefactory-ui` (the shared UI package).
 
+> **Direction note (2026-05).** Desktop is moving to a **backend-only** runtime: the renderer talks to [`thefactory-backend`](../../thefactory-backend) over HTTP + WS, the main process keeps only Electron-specific chrome (window controls, native menus, system tray, OS notifications, native file pickers). The plan and rationale are in [docs/implementation-plan.md](./implementation-plan.md). This file still documents the in-process-manager architecture because the migration is mid-flight; references below to managers / IPC data routes describe the **current** state, and most of them are slated for removal alongside the move-to-`src/legacy/` work in §B.1 of the plan.
+
+## `src/legacy/`
+
+The current in-process LOCAL implementation (everything under `src/logic/` and the data-bearing parts of `src/main/`) is being moved verbatim into `src/legacy/` as part of the backend-only cutover (see [docs/implementation-plan.md § B.1](./implementation-plan.md)). Folder structure is preserved so a reader can navigate it like the old tree.
+
+Rules:
+
+- **Nothing in live code may import from `src/legacy/`.** The build excludes it; lint / typecheck don't touch it; no tests run against it.
+- The folder is kept purely for reference: algorithms, edge-case handling, data shapes, file-watcher patterns we may want to recall later when re-implementing equivalent surfaces in `thefactory-backend` or when investigating historical behaviour.
+- `src/legacy/README.md` explains what's in there, when it was deprecated (2026-05), and why. It also links back to this section.
+- Don't add new code to `src/legacy/`. If a piece of legacy code becomes load-bearing again, bring it back into live code with a clean home and delete the legacy copy.
+
+If you find yourself wishing the legacy code was wired in, the answer is almost always to port the relevant slice into the backend instead — desktop is a pure backend client going forward.
+
 ## Where UI conventions live
 
 The renderer consumes [`thefactory-ui`](../../thefactory-ui/). UI conventions — Save buttons as icon-only, modal Cancel removed, custom theme colours as arb-value CSS-var syntax, the 2-line CSS shim pipeline, `Select` vs `NativeSelect` naming — live in [thefactory-ui/docs/ARCHITECTURE.md § Consumer-facing UI conventions](../../thefactory-ui/docs/ARCHITECTURE.md#consumer-facing-ui-conventions). Read that section first when touching anything under `src/renderer/`.
