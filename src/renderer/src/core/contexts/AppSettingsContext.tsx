@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
+import { mergeSettings } from 'thefactory-ui/headless'
 import {
   DEFAULT_APP_SETTINGS,
   type AppSettings,
@@ -23,39 +24,7 @@ function readFromStorage(): AppSettings {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY)
     if (!raw) return DEFAULT_APP_SETTINGS
-    const parsed = JSON.parse(raw) as Partial<AppSettings>
-    return {
-      ...DEFAULT_APP_SETTINGS,
-      ...parsed,
-      userPreferences: {
-        ...DEFAULT_APP_SETTINGS.userPreferences,
-        ...(parsed.userPreferences ?? {}),
-        shortcuts: {
-          ...DEFAULT_APP_SETTINGS.userPreferences.shortcuts,
-          ...(parsed.userPreferences?.shortcuts ?? {}),
-        },
-      },
-      notifications: {
-        ...DEFAULT_APP_SETTINGS.notifications,
-        ...(parsed.notifications ?? {}),
-        categories: {
-          ...DEFAULT_APP_SETTINGS.notifications.categories,
-          ...(parsed.notifications?.categories ?? {}),
-        },
-        badgesEnabled: {
-          ...DEFAULT_APP_SETTINGS.notifications.badgesEnabled,
-          ...(parsed.notifications?.badgesEnabled ?? {}),
-        },
-        badgeColors: {
-          ...DEFAULT_APP_SETTINGS.notifications.badgeColors,
-          ...(parsed.notifications?.badgeColors ?? {}),
-        },
-        gitBadgeSubToggles: {
-          ...DEFAULT_APP_SETTINGS.notifications.gitBadgeSubToggles,
-          ...(parsed.notifications?.gitBadgeSubToggles ?? {}),
-        },
-      },
-    }
+    return mergeSettings(JSON.parse(raw) as Partial<AppSettings>)
   } catch {
     return DEFAULT_APP_SETTINGS
   }
