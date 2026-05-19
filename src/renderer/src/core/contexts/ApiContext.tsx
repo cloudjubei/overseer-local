@@ -34,26 +34,22 @@ export function ApiProvider({ children }: { children: ReactNode }) {
   const authRef = useRef({ token, markUnauthorized, clearUnauthorized })
   authRef.current = { token, markUnauthorized, clearUnauthorized }
 
-  const sdkRef = useRef<{ baseUrl: string; teardown: () => void } | null>(null)
+  // No cleanup-on-unmount: `configureBackendClient` is idempotent (ejects
+  // old interceptors before installing new) and lives on the module-level
+  // singleton client. Tearing down on unmount would, under StrictMode's
+  // mount→unmount→mount cycle, eject the interceptors without a follow-up
+  // render to reinstall them — leaving the SDK silently unauthenticated.
+  // The next mount of ApiProvider re-runs configure, ejecting stragglers.
+  const sdkRef = useRef<{ baseUrl: string } | null>(null)
   if (baseUrl && sdkRef.current?.baseUrl !== baseUrl) {
-    sdkRef.current?.teardown()
-    sdkRef.current = {
+    configureBackendClient({
       baseUrl,
-      teardown: configureBackendClient({
-        baseUrl,
-        getToken: () => authRef.current.token,
-        onUnauthorized: () => authRef.current.markUnauthorized(),
-        onAuthorized: () => authRef.current.clearUnauthorized(),
-      }),
-    }
+      getToken: () => authRef.current.token,
+      onUnauthorized: () => authRef.current.markUnauthorized(),
+      onAuthorized: () => authRef.current.clearUnauthorized(),
+    })
+    sdkRef.current = { baseUrl }
   }
-  useEffect(
-    () => () => {
-      sdkRef.current?.teardown()
-      sdkRef.current = null
-    },
-    [],
-  )
 
   const ws = useMemo<WsClient>(
     () =>
