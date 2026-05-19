@@ -2,7 +2,18 @@
 
 `overseer-local` is the desktop Electron client for `thefactory-overseer`. It is a **pure backend client**: the renderer talks to [`thefactory-backend`](../../thefactory-backend) over HTTP + WS, mirroring [`thefactory-overseer-web`](../../thefactory-overseer-web) 1:1. The main process keeps only Electron-specific chrome (window, OS bridges) plus a `safeStorage`-backed auth bridge. There is no embedded backend, no Postgres, no sidecar, no file watchers.
 
-The backend-only cutover landed in 2026-05; the runtime model, rationale, and outstanding follow-ups live in [docs/implementation-plan.md](./implementation-plan.md).
+The backend-only cutover landed in 2026-05. Outstanding follow-ups (all blocked on external triggers — signing certs, deferred features) live in [docs/implementation-plan.md](./implementation-plan.md); the build/sign/publish pipeline plan is in [docs/DEPLOYMENT.md](./DEPLOYMENT.md).
+
+## Cross-client parity mandate
+
+The three frontend clients — web, desktop, mobile — must mirror each other as closely as the host platform allows. Side-by-side they should read like the same app adapted to its surface, not three independent products. Concretely:
+
+- **Shared spine is [thefactory-ui](../../thefactory-ui).** Tokens, headless hooks/stores, business logic, contexts, badge math, sanitisers, form state machines — all live there. Each client is mostly presentation glue around the shared spine.
+- **File layout, screen names, navigation structure, context names, hook names match across clients.** Desktop's `src/renderer/ui/screens/StoriesScreen.tsx` and the equivalent web/mobile paths read the same.
+- **Divergences are explicit and justified.** Electron-specific chrome (native menus, system tray, OS notifications) is accepted divergence; gratuitous divergence is not. When desktop needs to drift, the drift is documented at the call site with a comment pointing to the equivalent code in web/mobile.
+- **Cross-client changes land together.** If a feature touches the chat surface, all three clients ship the change in the same release window. New shared code goes into `thefactory-ui` first; clients pull it in.
+
+A new contributor opening web, desktop, and mobile side by side should be able to navigate by analogy. If they can't, something has drifted and the drift needs to be fixed.
 
 ## `src/legacy/`
 
@@ -31,7 +42,7 @@ desktop (this repo)                       web
   src/renderer/src/App.tsx                src/App.tsx
 ```
 
-UI conventions live in [thefactory-ui/docs/ARCHITECTURE.md § Consumer-facing UI conventions](../../thefactory-ui/docs/ARCHITECTURE.md#consumer-facing-ui-conventions). Read that section first when touching anything under `src/renderer/src/ui/`. The parity mandate ("the three frontend clients must mirror each other as closely as the host platform allows") is in [docs/implementation-plan.md](./implementation-plan.md).
+UI conventions live in [thefactory-ui/docs/ARCHITECTURE.md § Consumer-facing UI conventions](../../thefactory-ui/docs/ARCHITECTURE.md#consumer-facing-ui-conventions). Read that section first when touching anything under `src/renderer/src/ui/`. The behavioural parity rules (what counts as accepted vs gratuitous divergence) are in the **Cross-client parity mandate** section above.
 
 ## Process model
 
