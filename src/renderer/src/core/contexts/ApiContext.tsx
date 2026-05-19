@@ -11,6 +11,14 @@ import { useAuth } from './AuthContext'
  * env vars + localStorage. `ws` is always non-null to mirror web's surface;
  * when no base URL is configured yet, the underlying socket simply never
  * connects (gated on `token` below).
+ *
+ * Bootstrap timing: the HTTP client is configured during render (not in a
+ * useEffect) because React fires useEffects child-first. If we configured in
+ * an effect, child providers (StoriesProvider, FilesProvider, …) would fire
+ * their own refresh effects — and HTTP calls — before this provider's effect
+ * set the axios baseURL, sending the first request to the dev server origin
+ * instead of the backend. Doing the configure inline guarantees the SDK is
+ * ready before any child renders or mounts.
  */
 export type ApiContextValue = {
   ws: WsClient
@@ -26,6 +34,27 @@ export function ApiProvider({ children }: { children: ReactNode }) {
   const authRef = useRef({ token, markUnauthorized, clearUnauthorized })
   authRef.current = { token, markUnauthorized, clearUnauthorized }
 
+  const sdkRef = useRef<{ baseUrl: string; teardown: () => void } | null>(null)
+  if (baseUrl && sdkRef.current?.baseUrl !== baseUrl) {
+    sdkRef.current?.teardown()
+    sdkRef.current = {
+      baseUrl,
+      teardown: configureBackendClient({
+        baseUrl,
+        getToken: () => authRef.current.token,
+        onUnauthorized: () => authRef.current.markUnauthorized(),
+        onAuthorized: () => authRef.current.clearUnauthorized(),
+      }),
+    }
+  }
+  useEffect(
+    () => () => {
+      sdkRef.current?.teardown()
+      sdkRef.current = null
+    },
+    [],
+  )
+
   const ws = useMemo<WsClient>(
     () =>
       new WsClient({
@@ -35,16 +64,6 @@ export function ApiProvider({ children }: { children: ReactNode }) {
       }),
     [baseUrl],
   )
-
-  useEffect(() => {
-    if (!baseUrl) return
-    return configureBackendClient({
-      baseUrl,
-      getToken: () => authRef.current.token,
-      onUnauthorized: () => authRef.current.markUnauthorized(),
-      onAuthorized: () => authRef.current.clearUnauthorized(),
-    })
-  }, [baseUrl])
 
   useEffect(() => {
     if (!baseUrl || !token) {

@@ -1,6 +1,5 @@
 import { useEffect } from 'react'
-import type { ReactNode } from 'react'
-import { Navigate, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom'
+import { Navigate, Outlet, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { AgentsProvider } from '@core/contexts/AgentsContext'
 import { ApiProvider } from '@core/contexts/ApiContext'
 import { AppSettingsProvider } from '@core/contexts/AppSettingsContext'
@@ -62,11 +61,58 @@ import WelcomeView from '@ui/screens/WelcomeView'
  *   the renderer loads from `file://` in production).
  * - No `/auth/github/callback` route — desktop's `LoginScreen` is paste-and-
  *   store against `safeStorage` IPC; the OAuth callback flow is web-only.
+ * - `BackendGate` is a layout route hosting all data providers; `LoginScreen`
+ *   lives outside it. Web doesn't need this — its `baseUrl` is a build-time
+ *   constant and its `token` loads synchronously from `localStorage`, so its
+ *   data providers can mount immediately. Desktop's auth state is async
+ *   (safeStorage IPC), so the gate enforces the invariant that no data
+ *   provider mounts (and so no HTTP call fires) before the SDK is configured.
  */
-function RequireAuth({ children }: { children: ReactNode }) {
-  const { token } = useAuth()
-  if (!token) return <Navigate to="/login" replace />
-  return <>{children}</>
+function BackendGate() {
+  const { ready, baseUrl, token } = useAuth()
+  if (!ready) return <LoadingScreen label="Initializing…" />
+  if (!baseUrl || !token) return <Navigate to="/login" replace />
+  return (
+    <LLMConfigsProvider>
+      <GitCredentialsProvider>
+        <WebSearchKeysProvider>
+          <OverseerProvider>
+            <ProjectsProvider>
+              <ProjectsGroupsProvider>
+                <StoriesProvider>
+                  <FilesProvider>
+                    <GitProvider>
+                      <CostsProvider>
+                        <ChatsProvider>
+                          <AgentsProvider>
+                            <TestsProvider>
+                              <ToolsProvider>
+                                <EntitiesProvider>
+                                  <LiveDataProvidersProvider>
+                                    <IngestionProvider>
+                                      <EventNotifier />
+                                      <DiagnosticsOverlay />
+                                      <ShortcutsHelp />
+                                      <CommandMenu />
+                                      <Outlet />
+                                    </IngestionProvider>
+                                  </LiveDataProvidersProvider>
+                                </EntitiesProvider>
+                              </ToolsProvider>
+                            </TestsProvider>
+                          </AgentsProvider>
+                        </ChatsProvider>
+                      </CostsProvider>
+                    </GitProvider>
+                  </FilesProvider>
+                </StoriesProvider>
+              </ProjectsGroupsProvider>
+            </ProjectsProvider>
+          </OverseerProvider>
+        </WebSearchKeysProvider>
+      </GitCredentialsProvider>
+    </LLMConfigsProvider>
+  )
 }
 
 function MainShell() {
@@ -197,128 +243,26 @@ export default function App() {
       <ShortcutsProvider>
         <AuthProvider>
           <ApiProvider>
-            <LLMConfigsProvider>
-              <GitCredentialsProvider>
-                <WebSearchKeysProvider>
-                  <OverseerProvider>
-                    <ProjectsProvider>
-                      <ProjectsGroupsProvider>
-                        <StoriesProvider>
-                          <FilesProvider>
-                            <GitProvider>
-                              <CostsProvider>
-                                <ChatsProvider>
-                                  <AgentsProvider>
-                                    <TestsProvider>
-                                      <ToolsProvider>
-                                        <EntitiesProvider>
-                                          <LiveDataProvidersProvider>
-                                            <IngestionProvider>
-                                              <EventNotifier />
-                                              <DiagnosticsOverlay />
-                                              <ShortcutsHelp />
-                                              <CommandMenu />
-                                              <div className="flex flex-col h-full w-full overflow-hidden">
-                                                <DisconnectedBanner />
-                                                <div className="flex flex-1 min-h-0 overflow-hidden">
-                                                  <Routes>
-                                                  <Route path="/login" element={<LoginScreen />} />
-                                                  <Route
-                                                    path="/"
-                                                    element={
-                                                      <RequireAuth>
-                                                        <AuthedRoot />
-                                                      </RequireAuth>
-                                                    }
-                                                  />
-                                                  <Route
-                                                    path="/groups/:groupId/chat/:contextKey"
-                                                    element={
-                                                      <RequireAuth>
-                                                        <GroupShell />
-                                                      </RequireAuth>
-                                                    }
-                                                  />
-                                                  <Route
-                                                    path="/groups/:groupId/:tab"
-                                                    element={
-                                                      <RequireAuth>
-                                                        <GroupShell />
-                                                      </RequireAuth>
-                                                    }
-                                                  />
-                                                  <Route
-                                                    path="/groups/:groupId"
-                                                    element={
-                                                      <RequireAuth>
-                                                        <GroupShell />
-                                                      </RequireAuth>
-                                                    }
-                                                  />
-                                                  <Route
-                                                    path="/projects/:projectId/stories/:storyId"
-                                                    element={
-                                                      <RequireAuth>
-                                                        <MainShell />
-                                                      </RequireAuth>
-                                                    }
-                                                  />
-                                                  <Route
-                                                    path="/projects/:projectId/chat/:contextKey"
-                                                    element={
-                                                      <RequireAuth>
-                                                        <MainShell />
-                                                      </RequireAuth>
-                                                    }
-                                                  />
-                                                  <Route
-                                                    path="/projects/:projectId/files/*"
-                                                    element={
-                                                      <RequireAuth>
-                                                        <MainShell />
-                                                      </RequireAuth>
-                                                    }
-                                                  />
-                                                  <Route
-                                                    path="/projects/:projectId/:tab"
-                                                    element={
-                                                      <RequireAuth>
-                                                        <MainShell />
-                                                      </RequireAuth>
-                                                    }
-                                                  />
-                                                  <Route
-                                                    path="/projects/:projectId"
-                                                    element={
-                                                      <RequireAuth>
-                                                        <MainShell />
-                                                      </RequireAuth>
-                                                    }
-                                                  />
-                                                  <Route
-                                                    path="*"
-                                                    element={<Navigate to="/" replace />}
-                                                  />
-                                                </Routes>
-                                                </div>
-                                              </div>
-                                            </IngestionProvider>
-                                          </LiveDataProvidersProvider>
-                                        </EntitiesProvider>
-                                      </ToolsProvider>
-                                    </TestsProvider>
-                                  </AgentsProvider>
-                                </ChatsProvider>
-                              </CostsProvider>
-                            </GitProvider>
-                          </FilesProvider>
-                        </StoriesProvider>
-                      </ProjectsGroupsProvider>
-                    </ProjectsProvider>
-                  </OverseerProvider>
-                </WebSearchKeysProvider>
-              </GitCredentialsProvider>
-            </LLMConfigsProvider>
+            <div className="flex flex-col h-full w-full overflow-hidden">
+              <DisconnectedBanner />
+              <div className="flex flex-1 min-h-0 overflow-hidden">
+                <Routes>
+                  <Route path="/login" element={<LoginScreen />} />
+                  <Route element={<BackendGate />}>
+                    <Route path="/" element={<AuthedRoot />} />
+                    <Route path="/groups/:groupId/chat/:contextKey" element={<GroupShell />} />
+                    <Route path="/groups/:groupId/:tab" element={<GroupShell />} />
+                    <Route path="/groups/:groupId" element={<GroupShell />} />
+                    <Route path="/projects/:projectId/stories/:storyId" element={<MainShell />} />
+                    <Route path="/projects/:projectId/chat/:contextKey" element={<MainShell />} />
+                    <Route path="/projects/:projectId/files/*" element={<MainShell />} />
+                    <Route path="/projects/:projectId/:tab" element={<MainShell />} />
+                    <Route path="/projects/:projectId" element={<MainShell />} />
+                  </Route>
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+              </div>
+            </div>
           </ApiProvider>
         </AuthProvider>
       </ShortcutsProvider>
