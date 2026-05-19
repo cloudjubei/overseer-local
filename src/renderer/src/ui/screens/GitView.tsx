@@ -155,9 +155,6 @@ export default function GitView() {
     window.addEventListener('pointerup', onUp)
   }
 
-  if (!isLoaded) return <LoadingScreen label="Loading git status…" />
-  if (loadError) return <LoadingScreen label="Could not load git" error={loadError.message} />
-
   const localBranches = branches.filter((b) => b.isLocal)
   // A branch can be both local AND remote (normal state after a push). Desktop
   // shows such branches in both sections; we mirror that so Remotes isn't
@@ -169,10 +166,16 @@ export default function GitView() {
   // Default the rail selection to the current branch on mount so the full
   // set of rail actions (Commit, Pull, Push, …) is visible immediately —
   // without this only Refresh shows until the user clicks something.
+  // Lives above the `isLoaded` / `loadError` short-circuits so the hook
+  // order stays stable across the not-yet-loaded → loaded transition (React
+  // Rules of Hooks).
   useEffect(() => {
     if (selectedBranchName || selectedStashRef) return
     if (currentBranchName) setSelectedBranchName(currentBranchName)
   }, [currentBranchName, selectedBranchName, selectedStashRef])
+
+  if (!isLoaded) return <LoadingScreen label="Loading git status…" />
+  if (loadError) return <LoadingScreen label="Could not load git" error={loadError.message} />
 
   const selectedBranch = selectedBranchName
     ? branches.find((b) => b.name === selectedBranchName)

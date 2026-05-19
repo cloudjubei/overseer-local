@@ -25,6 +25,7 @@ import { ShortcutsProvider } from '@core/shortcuts/ShortcutsContext'
 import CommandMenu from '@ui/components/ui/CommandMenu'
 import ShortcutsHelp from '@ui/components/ui/ShortcutsHelp'
 import DiagnosticsOverlay from '@ui/components/shell/DiagnosticsOverlay'
+import DisconnectedBanner from '@ui/components/shell/DisconnectedBanner'
 import EventNotifier from '@ui/components/shell/EventNotifier'
 import ScreenErrorBoundary from '@ui/components/shell/ScreenErrorBoundary'
 import Sidebar from '@ui/components/shell/Sidebar'
@@ -217,8 +218,10 @@ export default function App() {
                                               <DiagnosticsOverlay />
                                               <ShortcutsHelp />
                                               <CommandMenu />
-                                              <div className="flex h-full w-full overflow-hidden">
-                                                <Routes>
+                                              <div className="flex flex-col h-full w-full overflow-hidden">
+                                                <DisconnectedBanner />
+                                                <div className="flex flex-1 min-h-0 overflow-hidden">
+                                                  <Routes>
                                                   <Route path="/login" element={<LoginScreen />} />
                                                   <Route
                                                     path="/"
@@ -297,6 +300,7 @@ export default function App() {
                                                     element={<Navigate to="/" replace />}
                                                   />
                                                 </Routes>
+                                                </div>
                                               </div>
                                             </IngestionProvider>
                                           </LiveDataProvidersProvider>

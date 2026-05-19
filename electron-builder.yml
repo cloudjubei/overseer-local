@@ -19,11 +19,6 @@ mac:
   identity: null
   entitlements: build/entitlements.mac.plist
   entitlementsInherit: build/entitlements.mac.plist
-  extendInfo:
-    - NSCameraUsageDescription: Application requests access to the device's camera.
-    - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
-    - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
-    - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
   notarize: false
 dmg:
   artifactName: ${name}-${version}.${ext}
@@ -36,7 +31,7 @@ linux:
   category: Utility
 appImage:
   artifactName: ${name}-${version}.${ext}
+# `npmRebuild: false` is safe because desktop has no native Node deps post-cutover
+# (no thefactory-db, no Postgres bindings, no sharp). Re-enable if a future
+# native dep is added.
 npmRebuild: false
-publish:
-  provider: generic
-  url: https://example.com/auto-updates

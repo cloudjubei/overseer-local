@@ -1,12 +1,12 @@
 # Architecture Overview
 
-`overseer-local` is an Electron app — a main process plus a React 19 renderer — that integrates `thefactory-tools` (agents), `thefactory-db` (data storage), and `thefactory-ui` (the shared UI package).
+`overseer-local` is the desktop Electron client for `thefactory-overseer`. It is a **pure backend client**: the renderer talks to [`thefactory-backend`](../../thefactory-backend) over HTTP + WS, mirroring [`thefactory-overseer-web`](../../thefactory-overseer-web) 1:1. The main process keeps only Electron-specific chrome (window, OS bridges) plus a `safeStorage`-backed auth bridge. There is no embedded backend, no Postgres, no sidecar, no file watchers.
 
-> **Direction note (2026-05).** Desktop is moving to a **backend-only** runtime: the renderer talks to [`thefactory-backend`](../../thefactory-backend) over HTTP + WS, the main process keeps only Electron-specific chrome (window controls, native menus, system tray, OS notifications, native file pickers). The plan and rationale are in [docs/implementation-plan.md](./implementation-plan.md). This file still documents the in-process-manager architecture because the migration is mid-flight; references below to managers / IPC data routes describe the **current** state, and most of them are slated for removal alongside the move-to-`src/legacy/` work in §B.1 of the plan.
+The backend-only cutover landed in 2026-05; the runtime model, rationale, and outstanding follow-ups live in [docs/implementation-plan.md](./implementation-plan.md).
 
 ## `src/legacy/`
 
-The in-process LOCAL implementation (everything that was under `src/logic/` and the data-bearing parts of `src/main/`) has been moved verbatim into `src/legacy/` as part of the backend-only cutover (2026-05; see [docs/implementation-plan.md § B.1](./implementation-plan.md)). Folder structure is preserved so a reader can navigate it like the old tree; imports inside the legacy tree are likely dangling and that's intentional — the tree is excluded from build / typecheck / lint / tests.
+The in-process LOCAL implementation (everything that was under `src/logic/`, the data-bearing parts of `src/main/`, and the original renderer's screens / services / hooks / navigation / components) is preserved verbatim under `src/legacy/` for reference. Folder structure is preserved so a reader can navigate it like the old tree; imports inside the legacy tree are likely dangling and that's intentional — the tree is excluded from build / typecheck / lint / tests.
 
 Rules:
 
@@ -17,93 +17,89 @@ Rules:
 
 If you find yourself wishing the legacy code was wired in, the answer is almost always to port the relevant slice into the backend instead — desktop is a pure backend client going forward.
 
-## Where UI conventions live
+## Cross-client parity
 
-The renderer consumes [`thefactory-ui`](../../thefactory-ui/). UI conventions — Save buttons as icon-only, modal Cancel removed, custom theme colours as arb-value CSS-var syntax, the 2-line CSS shim pipeline, `Select` vs `NativeSelect` naming — live in [thefactory-ui/docs/ARCHITECTURE.md § Consumer-facing UI conventions](../../thefactory-ui/docs/ARCHITECTURE.md#consumer-facing-ui-conventions). Read that section first when touching anything under `src/renderer/`.
+The renderer mirrors [`thefactory-overseer-web`](../../thefactory-overseer-web) module-for-module:
 
-This file documents what's specific to `overseer-local`: the Electron chrome, the IPC contract, and the renderer's local UI pieces.
+```
+desktop (this repo)                       web
+  src/renderer/src/api/                   src/api/
+  src/renderer/src/core/{contexts,...}    src/core/{contexts,...}
+  src/renderer/src/generated/backend/     src/generated/backend/
+  src/renderer/src/services/              src/services/
+  src/renderer/src/ui/                    src/ui/
+  src/renderer/src/App.tsx                src/App.tsx
+```
 
-## Renderer: local UI pieces
+UI conventions live in [thefactory-ui/docs/ARCHITECTURE.md § Consumer-facing UI conventions](../../thefactory-ui/docs/ARCHITECTURE.md#consumer-facing-ui-conventions). Read that section first when touching anything under `src/renderer/src/ui/`. The parity mandate ("the three frontend clients must mirror each other as closely as the host platform allows") is in [docs/implementation-plan.md](./implementation-plan.md).
 
-These pieces are in this repo because they wire local data or implement project-specific behaviour:
+## Process model
 
-- **Wrappers around package primitives that wire local data** — [`FileMentionsTextarea.tsx`](../src/renderer/src/components/ui/FileMentionsTextarea.tsx), [`FileSelector.tsx`](../src/renderer/src/components/ui/FileSelector.tsx), [`RichText.tsx`](../src/renderer/src/components/ui/RichText.tsx). They feed `useFiles()` / `useStories()` data into the package primitives.
-- **Project-specific composites** — [`CommandMenu.tsx`](../src/renderer/src/components/ui/CommandMenu.tsx), [`ContextInfoButton.tsx`](../src/renderer/src/components/ui/ContextInfoButton.tsx), [`ErrorBubble.tsx`](../src/renderer/src/components/ui/ErrorBubble.tsx), [`DiagnosticsOverlay.tsx`](../src/renderer/src/components/ui/DiagnosticsOverlay.tsx), [`ShortcutsHelp.tsx`](../src/renderer/src/components/ui/ShortcutsHelp.tsx).
-- **App-level CSS rules** in [`src/renderer/src/styles/app.css`](../src/renderer/src/styles/app.css) — body, html, .empty.
+### Main process — `src/main/`
 
-Everything else — icons (action + navigation + project-decoration sets), the project-icon picker registry (`PROJECT_ICON_REGISTRY` / `PROJECT_ICONS` / `renderProjectIcon`), all primitive components, and screen-level CSS (`stories.css`, `story-details.css`, `board.css`, `docs.css`, `settings.css`) — ships from `thefactory-ui`. [`src/renderer/src/screens/projects/projectIcons.tsx`](../src/renderer/src/screens/projects/projectIcons.tsx) is a re-export shim from `thefactory-ui/web` so legacy local-import paths keep working.
+A thin Electron shell. Responsibilities:
 
-## Core components
+- **Window chrome.** Creates the `BrowserWindow`, handles `ready-to-show`, the unresponsive-window dialog, and the `window-all-closed` / `activate` lifecycle.
+- **External URL bridge.** `setWindowOpenHandler` routes `target="_blank"` / `shell.openExternal` requests out to the OS browser.
+- **Auth IPC.** [`registerAuthIpc`](../src/main/registerAuthIpc.ts) exposes `auth:get|set|clear` against an [`authStore`](../src/main/authStore.ts) backed by Electron's `safeStorage`. The store keeps `{ baseUrl, token }` in `<userData>/auth.bin` (token encrypted; falls back to plaintext only when `safeStorage` is unavailable, which happens on Linux without keyring).
 
-### Electron main process (`src/`)
+That's the whole surface. No data services, no file watchers, no embedded Node runtime, no project / story / chat / git logic — those all live in `thefactory-backend`.
 
-- **DatabaseManager** ([`src/db/DatabaseManager.js`](../src/db/DatabaseManager.js))
-  - Manages `thefactory-db` connection lifecycle via `openDatabase({ connectionString })`.
-  - Exposes DB status and CRUD/search for entities/documents over IPC.
-  - Emits DB status updates to the renderer.
-- **FactoryToolsManager** ([`src/factory-tools/FactoryToolsManager.js`](../src/factory-tools/FactoryToolsManager.js))
-  - Integrates with `thefactory-tools` to run agents (`createOrchestrator`, `createAgentRunStore`, `createPricingManager`).
-  - Starts story/feature runs, forwards credentials / LLM config, and injects `dbConnectionString` from `DatabaseManager`.
-  - Streams run events to the renderer over IPC; persists run history locally (`.factory` directory via run store).
-- **DocumentIngestionManager** ([`src/document_ingestion/DocumentIngestionManager.js`](../src/document_ingestion/DocumentIngestionManager.js))
-  - Watches project files (via `FilesManager`) and upserts documents into `thefactory-db` via `DatabaseManager`.
+### Preload — `src/preload/`
 
-### Preload ([`src/preload.js`](../src/preload.js))
+Two responsibilities, both minimal:
 
-Defines the IPC surface exposed to the renderer. Surfaces include `dbService`, `factoryService`, `documentIngestionService`.
+- Re-exposes `@electron-toolkit/preload`'s `electronAPI` to `window.electron`.
+- Bridges the auth IPC handlers to `window.authService` (`get | set | clear`).
 
-### Renderer (`src/renderer`)
+`src/preload/ipcHandlersKeys.ts` lists the three live IPC channels (`AUTH_GET | AUTH_SET | AUTH_CLEAR`).
 
-- Consumes `dbService` for DB status and document/entity CRUD/search.
-- Consumes `factoryService` to start/cancel/list agent runs and subscribe to run updates.
-- Renders UI via `thefactory-ui` primitives + the local UI pieces listed above.
+### Renderer — `src/renderer/src/`
 
-### External packages
+A React 19 SPA wrapped in `HashRouter` (HashRouter rather than BrowserRouter because the renderer loads from `file://` in production). Structure:
 
-- **`thefactory-db`** — external data storage client used by `DatabaseManager` and renderer types. Provides entities/documents CRUD, search, and match APIs.
-- **`thefactory-tools`** — orchestrator and tooling for running agents, tracking run history, and pricing. The orchestrator accepts a `dbConnectionString` so agents can use the shared DB.
-- **`thefactory-ui`** — shared UI package. See [thefactory-ui/docs/ARCHITECTURE.md](../../thefactory-ui/docs/ARCHITECTURE.md).
+- `api/` — `WsClient` (reconnecting WebSocket against `/ws`), `bootstrap` (configures the generated `axios` client and installs a 401 interceptor), `helpers` / `errorMessage` / `types`. Lifted verbatim from web.
+- `core/contexts/` — 20 React contexts (`Auth`, `Api`, `AppSettings`, `Projects`, `ProjectsGroups`, `Stories`, `Chats`, `Files`, `Git`, `GitCredentials`, `Agents`, `Tests`, `Tools`, `LLMConfigs`, `Costs`, `Entities`, `Ingestion`, `LiveDataProviders`, `Overseer`, `WebSearchKeys`). All mirror web except `AuthContext` (desktop reads/writes via the `auth:*` IPC instead of `localStorage`) and `ApiContext` (always-non-null `WsClient` constructed from `useAuth().baseUrl`).
+- `core/{chats,files,hooks,notifications,shortcuts,types}/` — supporting headless utilities (chat key derivation, file-tree / mention parsing, project-settings hook, badge math, keyboard shortcuts, settings types).
+- `generated/backend/` — output of `@hey-api/openapi-ts` against `thefactory-backend/swagger/swagger.json`. Regenerate via `npm run generate:backend`.
+- `services/authService.ts` — the renderer-side typed handle for the `window.authService` preload bridge.
+- `ui/` — screens (`AgentsView`, `ChatView`, `FilesView`, `GitView`, `LoginScreen`, …) and components (`Sidebar`, `ScreenErrorBoundary`, settings panels, etc.). All mirror web except `LoginScreen.tsx` (paste-and-store flow against `safeStorage` instead of localStorage + env var) and `BackendConnectionPanel.tsx` (reads baseUrl from `AuthContext`; gains a "Replace URL" form and a "Reset all" button).
 
-## High-level data flow
-
-1. **Startup and wiring** ([`src/managers.js`](../src/managers.js)). Main process constructs and initialises all managers. `FactoryToolsManager` gets a reference to `DatabaseManager` so it can pass the active DB connection string into agent runs.
-
-2. **DB connection lifecycle** ([`src/db/DatabaseManager.js`](../src/db/DatabaseManager.js)). Renderer calls `dbService.connect(connectionString)` via IPC. `DatabaseManager` opens the DB with `thefactory-db`, updates internal status, and emits status to the renderer (`IPC_HANDLER_KEYS.DB_SUBSCRIBE`). All DB document/entity operations are handled by `DatabaseManager` through IPC (e.g. `DB_DOCUMENTS_ADD`, `DB_ENTITIES_SEARCH`).
-
-3. **Document ingestion** ([`src/document_ingestion/DocumentIngestionManager.js`](../src/document_ingestion/DocumentIngestionManager.js)). Triggered from the renderer (`DOCUMENT_INGESTION_ALL` / `DOCUMENT_INGESTION_PROJECT`) or by file-change handlers. For each file: classify document type, compute content hash/metadata, upsert into `thefactory-db` through `DatabaseManager`.
-
-4. **Running agents** ([`src/factory-tools/FactoryToolsManager.js`](../src/factory-tools/FactoryToolsManager.js)). Renderer requests a run via `factoryService.startRun`. `FactoryToolsManager` starts the run using the orchestrator created by `thefactory-tools` and includes the current `dbConnectionString`. The orchestrator emits run events (updates, completed, cancelled, error); `FactoryToolsManager` forwards them over IPC (`FACTORY_RUNS_SUBSCRIBE`). Run history and ratings are persisted locally through `createAgentRunStore` in the `.factory` directory. Pricing data is managed via `createPricingManager`.
-
-## Renderer integration surface ([`src/preload.js`](../src/preload.js))
-
-- **`dbService`** — `connect`, `getStatus`, `subscribe` to DB status. CRUD, search, match for entities/documents.
-- **`factoryService`** — `startRun`, `cancelRun`, list active/history runs, delete history, rate run. `subscribeRuns` for orchestrator updates.
-- **`documentIngestionService`** — `ingestAllProjects`, `ingestProject` triggers ingestion pipelines.
+The auth gate lives in `App.tsx`'s `RequireAuth` wrapper: any route except `/login` redirects to `/login` when `useAuth().token` is null. Once authenticated, `AuthedRoot` redirects to the active project's `stories` tab (or `WelcomeView` if zero projects).
 
 ## Storage
 
-- **`thefactory-db`** (external) — primary storage for entities and documents used across the app and by agents. Connection string is configured via app settings or environment (e.g. `THEFACTORY_DB_URL`) and passed to both `DatabaseManager` and the orchestrator.
-- **`.factory` directory** (local) — agent run history and pricing caches managed by `thefactory-tools`.
+- **Auth state** — `<userData>/auth.bin` (managed by `authStore`; token encrypted via `safeStorage`).
+- **UI preferences** — same `localStorage` model the web uses (`AppSettings`, `chatsSeen`, sidebar collapse, etc.). Per-process, not synced across machines.
+- **Everything else** — lives in `thefactory-backend`.
 
-## IPC contract ([`src/ipcHandlersKeys.js`](../src/ipcHandlersKeys.js))
+## Build + tooling
 
-- **DB:** `DB_CONNECT`, `DB_GET_STATUS`, `DB_SUBSCRIBE`, `DB_ENTITIES_*`, `DB_DOCUMENTS_*`.
-- **Factory (runs):** `FACTORY_RUNS_START`, `FACTORY_RUNS_CANCEL`, `FACTORY_RUNS_LIST_ACTIVE`, `FACTORY_RUNS_LIST_HISTORY`, `FACTORY_RUNS_DELETE_HISTORY`, `FACTORY_RUNS_RATE`, `FACTORY_RUNS_SUBSCRIBE`.
-- **Document ingestion:** `DOCUMENT_INGESTION_ALL`, `DOCUMENT_INGESTION_PROJECT`.
-
-## Configuration
-
-- **DB connection** — provided by the renderer via `dbService.connect(connectionString)` and persisted in app settings (renderer UI at [`src/renderer/src/screens/settings/database/DatabaseSettings.tsx`](../src/renderer/src/screens/settings/database/DatabaseSettings.tsx)).
-- **Agent pricing and run history** — paths derive from the project root (`.factory` directory) managed by `FactoryToolsManager`.
+- **Bundler.** `electron-vite` produces three bundles (`main`, `preload`, `renderer`). Aliases (`@api`, `@core`, `@services`, `@generated`, `@ui`, `@renderer`) are defined identically in `tsconfig.web.json`, `electron.vite.config.ts`, and `vitest.config.ts`.
+- **Typecheck.** `npm run typecheck` runs `tsc --noEmit` against `tsconfig.node.json` (main + preload + types) and `tsconfig.web.json` (renderer). Both `exclude` `src/legacy/**/*`.
+- **Tests.** `npm run test` (vitest). Covers main-process `authStore`, the API layer (`WsClient`), and the lifted core/UI headless pieces (chat key, badge math, file utilities, shortcuts, hook tests). Per [memory `no_frontend_unit_tests`](../../../.claude/projects/-Users-cloud-Documents-Work-thefactory-tools/memory/feedback_no_frontend_unit_tests.md): UI components in `src/renderer/src/ui/` are not unit-tested; logical pieces under `core/` and `api/` are.
+- **Packaging.** `electron-builder` produces signed installers (mac/win/linux). Outstanding cleanup items live in [docs/implementation-plan.md](./implementation-plan.md) (build + packaging cleanup task).
 
 ## Conceptual diagram
 
 ```
-App (Renderer) -> IPC (preload) -> Main Process
-- DB operations:  renderer -> DB_API -> DatabaseManager -> thefactory-db
-- Agent runs:     renderer -> FACTORY_API -> FactoryToolsManager -> orchestrator (thefactory-tools)
-                  └─ orchestrator receives dbConnectionString to access the shared DB
-- Ingestion:      renderer -> DOCUMENT_INGESTION_API -> DocumentIngestionManager -> DatabaseManager -> thefactory-db
+┌───────────────────────────────────────────────────────────────┐
+│ Renderer (Chromium)                                           │
+│   React 19 SPA · HashRouter · 20 context providers            │
+│   ───────────                                                 │
+│   • HTTP via generated SDK (axios)  ──┐                       │
+│   • WS  via WsClient (reconnecting) ──┤                       │
+│   • safeStorage IPC for auth        ──┘                       │
+└──────┬──────────────────────────────┬─────────────────────────┘
+       │ window.authService            │ http(s) + ws(s)
+       ▼                               ▼
+┌────────────────┐               ┌─────────────────────────────┐
+│ Main (Node)    │               │ thefactory-backend          │
+│   BrowserWin   │               │   Fastify + Postgres + …    │
+│   external URL │               │   /projects /stories /chat … │
+│   authStore    │               │   /ws (broadcast envelopes) │
+│   (safeStorage)│               └─────────────────────────────┘
+└────────────────┘
 ```
 
 ## Related docs
@@ -111,67 +107,6 @@ App (Renderer) -> IPC (preload) -> Main Process
 - File map and entry points: [docs/FILE_ORGANISATION.md](./FILE_ORGANISATION.md)
 - Engineering patterns: [docs/PATTERNS.md](./PATTERNS.md)
 - Package registry and interfaces: [docs/PACKAGES.md](./PACKAGES.md)
-- Multi-platform roadmap: [docs/MULTI_PLATFORM_ARCHITECTURE.md](./MULTI_PLATFORM_ARCHITECTURE.md)
+- Multi-platform roadmap: [docs/MULTI_PLATFORM_ARCHITECTURE.md](./MULTI_PLATFORM_ARCHITECTURE.md) and [docs/PLATFORM_ADAPTATIONS.md](./PLATFORM_ADAPTATIONS.md)
 - Shared UI package: [thefactory-ui/docs/ARCHITECTURE.md](../../thefactory-ui/docs/ARCHITECTURE.md)
-
----
-
-## Agent prompting strategy
-
-Agents receive a curated slice of project documentation in their system prompt. The system prompt is built in `thefactory-tools/src/orchestrator.ts` inside `constructSystemPrompt(...)`. A `ContextAssembler` selects, summarises, and injects targeted doc slices based on the story type and the touched paths.
-
-### Always-included context
-
-- Project mission and top-level layout — a 10–20 line digest derived from `docs/FILE_ORGANISATION.md`.
-- Architectural core — a short summary from `docs/ARCHITECTURE.md` (Main process vs Preload vs Renderer, DB, agents).
-- A `DocIndex` — a compact list of deep-dive docs with one-line descriptions and paths.
-
-### Conditional context (selected by story area)
-
-- **Main-process manager or IPC changes** — include the Managers pattern from `docs/PATTERNS.md`.
-- **UI components/screens** — include the "GO TO UI" summary from `docs/ux` and links to `docs/styleguide` and `docs/design`, plus the [Consumer-facing UI conventions](../../thefactory-ui/docs/ARCHITECTURE.md#consumer-facing-ui-conventions) from `thefactory-ui`.
-- **DB or ingestion work** — include the DB and ingestion sections of this file plus the IPC contract.
-- **Agents / orchestrator features** — include a paragraph on orchestrator integration, `dbConnectionString` passing, run / pricing storage.
-- **Packages / new dependencies** — include the relevant excerpt from `docs/PACKAGES.md`.
-
-Agents are instructed to request specific sections by path and heading (e.g. `docs/PATTERNS.md#Preload-Exposure`) when they need more detail than the injected digest covers.
-
-### Token budgeting
-
-A fixed budget of 800–1500 tokens is reserved for documentation context (model-dependent). Priority order: story-specific pattern snippet > architecture digest > DocIndex. Beyond budget, long examples drop and rules / headings / API names stay.
-
-### `ContextAssembler` utilities
-
-- `getDocDigest(path, maxTokens)` — load, strip examples, summarise key headers and bullet points.
-- `pickDocs(story)` — map from story classification to required docs.
-- `buildDocIndex()` — 6–12 bullets listing key docs with 1-liners and paths.
-- `cacheDigestsByHash()` — compute and cache content hashes for docs.
-
-`constructSystemPrompt(...)` accepts options (`featureArea`, `changedPaths`, `uiWork`, `mainProcessWork`, `dbWork`) and composes the final system prompt in order: role and guardrails → architecture digest → pattern snippet(s) → DocIndex → story-specific instructions → instructions for requesting additional sections.
-
-### Classification signals
-
-- `changedPaths` contain `src/<domain>/<Domain>Manager.js` or `src/ipcHandlersKeys.js` → include the PATTERNS Manager section.
-- `changedPaths` touch `src/preload.js` or `src/renderer/services` → include Preload Exposure and Renderer Consumption from `PATTERNS.md`.
-- `changedPaths` under `src/renderer` or `docs/ux`/`styleguide`/`design` → include UI "GO TO" summary, styleguide links, and the `thefactory-ui` consumer-conventions section.
-- Story mentions DB, entities, documents, ingestion → include the DB/ingestion digest.
-- Story mentions orchestrator, pricing, runs → include the orchestrator digest.
-- Story mentions packages or dependencies → include the `PACKAGES.md` excerpt.
-
-### Safety and scope
-
-- Only public project documentation is injected. Secrets and `.env` values stay out.
-- Summaries are preferred over raw code; concrete IPC keys and API names appear only when necessary.
-
-### Verbatim agent-facing prompt tips
-
-- "Follow the Managers pattern documented in `docs/PATTERNS.md` when touching main-process services."
-- "Use the IPC keys from `src/ipcHandlersKeys.js`; expose APIs via `src/preload.js` and update `src/types/external.d.ts`."
-- "For UI, follow `docs/ux` 'GO TO UI', `docs/styleguide`, and the consumer-facing conventions in `thefactory-ui/docs/ARCHITECTURE.md` — Save is icon-only, modal Cancel is removed, custom theme colours use arb-value CSS-var syntax."
-- "Request additional doc sections by path and heading when needed."
-
-### Maintenance
-
-- Keep `docs/ARCHITECTURE.md`, `docs/PATTERNS.md`, `docs/PACKAGES.md`, and `docs/FILE_ORGANISATION.md` current.
-- New UI guidance lands as a concise 'GO TO UI' entry under `docs/ux`, linked from `FILE_ORGANISATION.md` and the DocIndex.
-- Cached digests recompute when file hashes change.
+- Web client (parity reference): [thefactory-overseer-web/docs/ARCHITECTURE.md](../../thefactory-overseer-web/docs/ARCHITECTURE.md)

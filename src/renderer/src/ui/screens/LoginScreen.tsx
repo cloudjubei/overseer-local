@@ -5,7 +5,7 @@ import { useAuth } from '@core/contexts/AuthContext'
 import { health } from '@generated/backend'
 import { extractErrorMessage } from '@api/errorMessage'
 
-const DEFAULT_URL = 'http://localhost:3000'
+const DEFAULT_URL = 'http://localhost:7001'
 
 type TestState =
   | { kind: 'idle' }
@@ -82,7 +82,7 @@ export default function LoginScreen() {
             type="url"
             value={baseUrl}
             onChange={(e) => setBaseUrl(e.target.value)}
-            placeholder="http://localhost:3000"
+            placeholder="http://localhost:7001"
             className="w-full rounded border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-2 py-1.5"
             spellCheck={false}
             autoComplete="off"

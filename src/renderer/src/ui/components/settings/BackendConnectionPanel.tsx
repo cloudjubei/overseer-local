@@ -2,37 +2,93 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { useApi } from '@core/contexts/ApiContext'
 import { useAuth } from '@core/contexts/AuthContext'
-import { Alert, Button, Field, Input, Surface } from 'thefactory-ui/web'
+import { health } from '@generated/backend'
+import { extractErrorMessage } from '@api/errorMessage'
+import { Alert, Button, Field, Input, Spinner, Surface } from 'thefactory-ui/web'
 import { IconSave } from 'thefactory-ui/web/icons'
 import { maskSecret } from '@ui/utils/mask'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000'
+type TestState =
+  | { kind: 'idle' }
+  | { kind: 'testing' }
+  | { kind: 'ok'; version: string; uptime: number }
+  | { kind: 'error'; message: string }
 
+/**
+ * Desktop's adaptation of web's [`BackendConnectionPanel`](../../../../../../thefactory-overseer-web/src/ui/components/settings/BackendConnectionPanel.tsx).
+ * The visual shell + token-replace flow are identical; the URL panel and
+ * Reset-all controls are desktop-only because the base URL is part of the
+ * `safeStorage`-backed `AuthContext` here (web's URL is build-time-fixed via
+ * `VITE_API_BASE_URL`).
+ *
+ * The long-term home for this surface is `thefactory-ui/headless` with a
+ * `TokenStorage` adapter — see [thefactory-ui/docs/implementation-plan.md § B.5](../../../../../../thefactory-ui/docs/implementation-plan.md).
+ */
 export default function BackendConnectionPanel() {
-  const { token, unauthorized, setToken, clearToken } = useAuth()
+  const { baseUrl, token, unauthorized, setToken, clearToken, setBaseUrl, clear } = useAuth()
   const { wsState } = useApi()
-  const [next, setNext] = useState('')
-  const [saved, setSaved] = useState(false)
+  const [nextToken, setNextToken] = useState('')
+  const [tokenSaved, setTokenSaved] = useState(false)
+  const [nextUrl, setNextUrl] = useState('')
+  const [urlSaved, setUrlSaved] = useState(false)
+  const [testState, setTestState] = useState<TestState>({ kind: 'idle' })
 
-  const onReplace = (e: FormEvent) => {
+  const onReplaceToken = (e: FormEvent) => {
     e.preventDefault()
-    const trimmed = next.trim()
+    const trimmed = nextToken.trim()
     if (trimmed.length === 0) return
-    setToken(trimmed)
-    setNext('')
-    setSaved(true)
+    void setToken(trimmed)
+    setNextToken('')
+    setTokenSaved(true)
+  }
+
+  const onReplaceUrl = (e: FormEvent) => {
+    e.preventDefault()
+    const trimmed = nextUrl.trim().replace(/\/+$/, '')
+    if (trimmed.length === 0) return
+    void setBaseUrl(trimmed)
+    setNextUrl('')
+    setUrlSaved(true)
+    setTestState({ kind: 'idle' })
+  }
+
+  const onTestUrl = async () => {
+    const candidate = nextUrl.trim().replace(/\/+$/, '') || (baseUrl ?? '')
+    if (candidate.length === 0) return
+    setTestState({ kind: 'testing' })
+    try {
+      const res = await health({
+        throwOnError: true,
+        baseURL: candidate,
+        auth: () => token ?? undefined,
+      })
+      setTestState({
+        kind: 'ok',
+        version: String(res.data?.version ?? 'unknown'),
+        uptime: Number(res.data?.uptime ?? 0),
+      })
+    } catch (err) {
+      setTestState({
+        kind: 'error',
+        message: extractErrorMessage(err, 'Could not reach the backend.'),
+      })
+    }
   }
 
   return (
     <section className="flex flex-col gap-3">
       <header>
         <h2 className="text-xl font-semibold">Backend connection</h2>
-        <p className="text-sm opacity-70">Where this web app talks to the backend.</p>
+        <p className="text-sm opacity-70">Where this desktop client talks to the backend.</p>
       </header>
 
       <Surface as="dl" className="flex flex-col gap-2 p-4">
         <Row label="API URL">
-          <code className="text-xs">{API_BASE_URL}</code>
+          {baseUrl ? (
+            <code className="text-xs">{baseUrl}</code>
+          ) : (
+            <span className="text-sm opacity-70">Not set</span>
+          )}
         </Row>
         <Row label="WebSocket">
           <StatusDot state={wsState} />
@@ -51,22 +107,84 @@ export default function BackendConnectionPanel() {
         <Alert>The current token was rejected by the backend. Update it below.</Alert>
       )}
 
-      <Surface as="form" onSubmit={onReplace} className="flex flex-col gap-3 p-4">
+      <Surface as="form" onSubmit={onReplaceUrl} className="flex flex-col gap-3 p-4">
+        <h3 className="text-sm font-semibold">Replace URL</h3>
+        <Field label="New URL">
+          <Input
+            type="url"
+            value={nextUrl}
+            onChange={(e) => {
+              setNextUrl(e.target.value)
+              setUrlSaved(false)
+              setTestState({ kind: 'idle' })
+            }}
+            autoComplete="off"
+            spellCheck={false}
+            placeholder="http://localhost:7001"
+          />
+        </Field>
+        {urlSaved && (
+          <p className="text-xs" style={{ color: 'var(--color-green-700)' }}>
+            URL updated.
+          </p>
+        )}
+        {testState.kind === 'ok' && (
+          <p className="text-xs" style={{ color: 'var(--color-green-700)' }}>
+            Reachable: version {testState.version}, uptime {Math.round(testState.uptime)}s.
+          </p>
+        )}
+        {testState.kind === 'error' && (
+          <p className="text-xs" style={{ color: 'var(--color-red-700)' }}>
+            {testState.message}
+          </p>
+        )}
+        <div className="flex justify-between items-center">
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => void onTestUrl()}
+            disabled={
+              testState.kind === 'testing' ||
+              (nextUrl.trim().length === 0 && (baseUrl ?? '').length === 0)
+            }
+          >
+            {testState.kind === 'testing' ? (
+              <span className="inline-flex items-center gap-2">
+                <Spinner size={14} /> Testing…
+              </span>
+            ) : (
+              'Test connection'
+            )}
+          </Button>
+          <Button
+            type="submit"
+            variant="secondary"
+            size="icon"
+            disabled={nextUrl.trim().length === 0}
+            title="Save URL"
+            aria-label="Save URL"
+          >
+            <IconSave className="w-4 h-4" />
+          </Button>
+        </div>
+      </Surface>
+
+      <Surface as="form" onSubmit={onReplaceToken} className="flex flex-col gap-3 p-4">
         <h3 className="text-sm font-semibold">Replace token</h3>
         <Field label="New token">
           <Input
             type="password"
-            value={next}
+            value={nextToken}
             onChange={(e) => {
-              setNext(e.target.value)
-              setSaved(false)
+              setNextToken(e.target.value)
+              setTokenSaved(false)
             }}
             autoComplete="off"
             spellCheck={false}
             placeholder="Paste a new bearer token"
           />
         </Field>
-        {saved && (
+        {tokenSaved && (
           <p className="text-xs" style={{ color: 'var(--color-green-700)' }}>
             Token updated.
           </p>
@@ -76,8 +194,8 @@ export default function BackendConnectionPanel() {
             type="button"
             variant="ghost"
             onClick={() => {
-              clearToken()
-              setSaved(false)
+              void clearToken()
+              setTokenSaved(false)
             }}
             disabled={!token}
           >
@@ -87,13 +205,23 @@ export default function BackendConnectionPanel() {
             type="submit"
             variant="secondary"
             size="icon"
-            disabled={next.trim().length === 0}
+            disabled={nextToken.trim().length === 0}
             title="Save token"
             aria-label="Save token"
           >
             <IconSave className="w-4 h-4" />
           </Button>
         </div>
+      </Surface>
+
+      <Surface className="flex items-center justify-between gap-3 p-4">
+        <div className="flex flex-col gap-0.5">
+          <h3 className="text-sm font-semibold">Reset connection</h3>
+          <p className="text-xs opacity-70">Clears both URL and token; returns you to the login screen.</p>
+        </div>
+        <Button type="button" variant="ghost" onClick={() => void clear()} disabled={!baseUrl && !token}>
+          Reset all
+        </Button>
       </Surface>
     </section>
   )

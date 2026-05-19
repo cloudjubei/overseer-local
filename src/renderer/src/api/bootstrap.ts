@@ -1,10 +1,17 @@
 /**
- * Configures the generated hey-api client exactly once and installs a single
- * response interceptor for 401 detection. Safe to call multiple times under
- * React StrictMode double-mounts: the prior interceptor is ejected before a
- * new one is installed.
+ * Configures the generated hey-api client and installs the request/response
+ * interceptors the renderer relies on. Safe to call multiple times under
+ * React StrictMode double-mounts: any prior interceptors are ejected before
+ * new ones are installed.
+ *
+ * Authorization is owned end-to-end by the request interceptor: the bearer
+ * header is set on every outgoing request, and any axios `auth` field is
+ * stripped so the adapter never tries to compute HTTP Basic on top. We don't
+ * delegate to hey-api's `config.auth`: routing it through `axios.defaults`
+ * lets the xhr adapter synthesise a Basic header from the function value
+ * (`btoa(':')`), which then overwrites the bearer set by `setAuthParams`.
  */
-import type { AxiosError } from 'axios'
+import type { AxiosError, InternalAxiosRequestConfig } from 'axios'
 import { client } from '../generated/backend/client.gen'
 
 export type BootstrapOptions = {
@@ -14,7 +21,8 @@ export type BootstrapOptions = {
   onAuthorized: () => void
 }
 
-let activeInterceptorId: number | null = null
+let activeRequestInterceptorId: number | null = null
+let activeResponseInterceptorId: number | null = null
 
 export function configureBackendClient({
   baseUrl,
@@ -24,12 +32,26 @@ export function configureBackendClient({
 }: BootstrapOptions): () => void {
   client.setConfig({
     baseURL: baseUrl.replace(/\/+$/, ''),
-    auth: () => getToken() ?? undefined,
   })
 
-  ejectActiveInterceptor()
+  ejectActiveInterceptors()
 
-  activeInterceptorId = client.instance.interceptors.response.use(
+  activeRequestInterceptorId = client.instance.interceptors.request.use(
+    (config: InternalAxiosRequestConfig) => {
+      // Strip any axios `auth` so the xhr adapter doesn't synthesise a Basic
+      // Authorization header that would overwrite the bearer set below.
+      if ('auth' in config) {
+        delete (config as { auth?: unknown }).auth
+      }
+      const token = getToken()
+      if (token) {
+        config.headers.set('Authorization', `Bearer ${token}`)
+      }
+      return config
+    },
+  )
+
+  activeResponseInterceptorId = client.instance.interceptors.response.use(
     (response) => {
       onAuthorized()
       return response
@@ -40,11 +62,16 @@ export function configureBackendClient({
     },
   )
 
-  return ejectActiveInterceptor
+  return ejectActiveInterceptors
 }
 
-function ejectActiveInterceptor(): void {
-  if (activeInterceptorId === null) return
-  client.instance.interceptors.response.eject(activeInterceptorId)
-  activeInterceptorId = null
+function ejectActiveInterceptors(): void {
+  if (activeRequestInterceptorId !== null) {
+    client.instance.interceptors.request.eject(activeRequestInterceptorId)
+    activeRequestInterceptorId = null
+  }
+  if (activeResponseInterceptorId !== null) {
+    client.instance.interceptors.response.eject(activeResponseInterceptorId)
+    activeResponseInterceptorId = null
+  }
 }

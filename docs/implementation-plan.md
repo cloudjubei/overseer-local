@@ -27,44 +27,17 @@ Things genuinely blocked on a third-party decision or external trigger, not on e
 
 ---
 
-## B. Pending tasks — backend-only cutover
+## B. Pending tasks
 
-The work to land "desktop is a pure backend client." Order is dependency-driven.
+### 1. Smoke-test signed installers against a live backend
 
-### 1. Adapt `BackendConnectionPanel` for desktop's auth model
+The backend-only cutover (2026-05) shipped clean typecheck / tests / build. The last open item is a manual smoke test of `electron-builder` output on each target OS:
 
-The wholesale lift of web's `src/ui/` brought [`BackendConnectionPanel`](../src/renderer/src/ui/components/settings/BackendConnectionPanel.tsx) into desktop's Developer settings. As shipped it reads `VITE_API_BASE_URL` (web's env var) and only supports replace/clear of the bearer token. Desktop needs:
+- macOS — `npm run build:mac`, install the DMG, paste backend URL + token, navigate stories + chats.
+- Windows — `npm run build:win`, install the NSIS installer, repeat.
+- Linux — `npm run build:linux`, install the AppImage / snap / deb, repeat.
 
-- URL row reads from `useAuth().baseUrl` (safeStorage-backed), not `import.meta.env.VITE_API_BASE_URL`.
-- "Change URL" input + "Test connection" button reusing [`LoginScreen`](../src/renderer/src/ui/screens/LoginScreen.tsx)'s `/health` flow.
-- Reset-credential action clears both fields (mirrors `useAuth().clear`).
-
-Long-term, this whole panel is a parity-bug candidate for promotion into `thefactory-ui/headless` per [thefactory-ui/docs/implementation-plan.md § B.5](../../thefactory-ui/docs/implementation-plan.md) — both clients want the same surface with platform-specific storage injected.
-
-### 2. Main-process slimming
-
-Once the renderer talks to the backend directly (over HTTP + WS, not IPC), the main process becomes a thin shell. Trim it accordingly:
-
-- Window chrome: window controls, native menus, system tray icon, OS-level notifications, auto-updater.
-- Native bridges that the renderer can't do itself: file picker, "open in Finder/Explorer," "open external URL," app-protocol handlers (deep links).
-- That's it. No data services, no file watchers, no project / story / chat / git logic — those all live in `thefactory-backend` now.
-
-### 3. Disconnected-state UX
-
-When the network drops, behaviour mirrors mobile:
-
-- Persistent banner at the top of the window when the WS is disconnected.
-- Disable actions that need the WS (sending chat messages, creating stories) — show a tooltip on hover explaining why.
-- Read-only views keep rendering their last-known data; they don't blank out.
-- Automatic reconnect (the lifted `reconnecting-websocket` logic already handles this).
-- No local cache. If the renderer has no data because the WS was never connected, show the empty / loading state, not a snapshot.
-
-### 4. Build + packaging cleanup
-
-- Remove `thefactory-tools` + `thefactory-db` from desktop's runtime deps (they move to `thefactory-backend`'s deps; desktop no longer imports them).
-- Trim `electron-builder` / `electron-vite` config of the old main-process modules.
-- Update the GitHub Actions release workflow so installer artifacts are pure-client (no bundled Node backend, no Postgres binary).
-- Smoke-test signed installers on macOS + Windows + Linux against a live backend.
+Confirm the renderer reaches the backend, the WS connects, and disconnect-banner appears when the backend is stopped mid-session.
 
 ---
 
@@ -74,7 +47,7 @@ When the network drops, behaviour mirrors mobile:
 - **Renderer talks to `thefactory-backend` over HTTP + WS**, exactly like web. Same generated SDK, same WS event stream.
 - **Main process is window chrome + native bridges only** — no data services, no file watchers, no embedded Node runtime, no Postgres, no sidecar, no bundled backend. The user runs (or connects to) a `thefactory-backend` instance separately.
 - **No backward compatibility, no data migration.** Existing `~/.factory/` trees are not auto-imported; this is treated as a fresh install.
-- **No offline mode, no local cache, no sync layer.** Network drops show a disconnected banner; data screens stay on their last-known render. See §B.3.
+- **No offline mode, no local cache, no sync layer.** Network drops show a disconnected banner ([`DisconnectedBanner`](../src/renderer/src/ui/components/shell/DisconnectedBanner.tsx)); data screens stay on their last-known render.
 - **What stays Electron-side:** window controls, native menus, system tray, OS notifications, native file pickers, app-protocol handlers, settings + theme state (UI-level only — same `AppSettings` / `chatsSeen` localStorage model the web uses). IPC stays for these surfaces; everything else is direct HTTP + WS.
 
 ---

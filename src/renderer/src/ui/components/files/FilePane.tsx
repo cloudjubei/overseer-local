@@ -5,14 +5,13 @@ import { useFiles } from '@core/contexts/FilesContext'
 import { useAuth } from '@core/contexts/AuthContext'
 import { FilePane as FilePaneBase } from 'thefactory-ui/web'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000'
-
 async function fetchFileBlobUrl(
+  baseUrl: string,
   projectId: string,
   path: string,
   token: string | null,
 ): Promise<string> {
-  const url = `${API_BASE_URL}/api/v1/projects/${encodeURIComponent(projectId)}/files/raw?path=${encodeURIComponent(path)}`
+  const url = `${baseUrl.replace(/\/+$/, '')}/api/v1/projects/${encodeURIComponent(projectId)}/files/raw?path=${encodeURIComponent(path)}`
   const r = await fetch(url, {
     headers: token ? { Authorization: `Bearer ${token}` } : undefined,
   })
@@ -32,7 +31,7 @@ export default function FilePane() {
     renameFile,
     deleteFiles,
   } = useFiles()
-  const { token } = useAuth()
+  const { token, baseUrl } = useAuth()
   const { projectId } = useParams<{ projectId: string }>()
 
   const meta = files.find((f) => f.relativePath === selectedPath)
@@ -40,9 +39,10 @@ export default function FilePane() {
   const getBinaryUrl = useCallback(
     async (path: string) => {
       if (!projectId) throw new Error('No active project')
-      return fetchFileBlobUrl(projectId, path, token)
+      if (!baseUrl) throw new Error('No backend URL configured')
+      return fetchFileBlobUrl(baseUrl, projectId, path, token)
     },
-    [projectId, token],
+    [baseUrl, projectId, token],
   )
 
   const onWrite = useCallback(

@@ -2,8 +2,7 @@
   "extends": "@electron-toolkit/tsconfig/tsconfig.web.json",
   "include": [
     "src/renderer/**/*",
-    "src/preload/*.d.ts",
-    "src/types/**/*"
+    "src/preload/*.d.ts"
   ],
   "exclude": ["src/legacy/**/*"],
   "compilerOptions": {

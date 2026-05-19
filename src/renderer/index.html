@@ -3,10 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <title>Overseer</title>
-    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+    <!--
+      Content Security Policy. `connect-src` permits HTTP(S) + WS(S) so the
+      renderer can reach the user-configured `thefactory-backend` URL (set
+      via LoginScreen / BackendConnectionPanel — could be localhost or any
+      remote host). Scripts and styles stay scoped to 'self' / 'unsafe-inline'
+      to match what Vite + thefactory-ui emit.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP
+    -->
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' http: https: ws: wss:"
     />
   </head>
 
