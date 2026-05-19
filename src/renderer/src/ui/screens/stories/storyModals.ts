@@ -3,7 +3,7 @@
  * `StoriesView` can open them and `StoriesModalHost` can render them without
  * a circular import.
  */
-import type { Feature, GetStoryResponse } from '@generated/backend'
+import type { Feature, GetStoryResponse } from 'thefactory-ui/headless/api'
 
 import type { FeatureFormInitialValues } from '@ui/components/stories/FeatureForm'
 

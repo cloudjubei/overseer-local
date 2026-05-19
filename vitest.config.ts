@@ -8,14 +8,19 @@ export default defineConfig({
     // Mirror electron.vite.config.ts: `thefactory-ui` is linked via `file:`
     // and ships its own `node_modules/react`, so without dedupe vitest ends
     // up with two React copies and hooks fail with "Invalid hook call".
-    dedupe: ['react', 'react-dom'],
+    dedupe: ['react', 'react-dom', 'reconnecting-websocket'],
     alias: {
       '@renderer': resolve(__dirname, 'src/renderer/src'),
-      '@api': resolve(__dirname, 'src/renderer/src/api'),
       '@core': resolve(__dirname, 'src/renderer/src/core'),
       '@services': resolve(__dirname, 'src/renderer/src/services'),
-      '@generated': resolve(__dirname, 'src/renderer/src/generated'),
       '@ui': resolve(__dirname, 'src/renderer/src/ui'),
+      // Force a single resolution path for `reconnecting-websocket` so the
+      // test's `vi.mock` intercepts imports made by `thefactory-ui`'s
+      // bundled `WsClient` chunk as well as direct imports here.
+      'reconnecting-websocket': resolve(
+        __dirname,
+        'node_modules/reconnecting-websocket/dist/reconnecting-websocket-mjs.js',
+      ),
     },
   },
   test: {

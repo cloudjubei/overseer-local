@@ -4,7 +4,7 @@ import type {
   GetGitCredentialResponse,
   GitCredentialCreateInput,
   GitCredentialEditInput,
-} from '@generated/backend'
+} from 'thefactory-ui/headless/api'
 import { Alert, Button, Field, Input, SecretInput } from 'thefactory-ui/web'
 import { IconSave } from 'thefactory-ui/web/icons'
 

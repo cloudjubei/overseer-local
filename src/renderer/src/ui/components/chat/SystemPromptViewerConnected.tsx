@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { useChats } from '@core/contexts/ChatsContext'
 import { useStories } from '@core/contexts/StoriesContext'
 import { useActiveProject } from '@core/contexts/ProjectsContext'
-import type { ChatContext } from '@generated/backend'
+import type { ChatContext } from 'thefactory-ui/headless/api'
 import { interpolatePrompt, SystemPromptViewerModal, type PromptVariables } from 'thefactory-ui/web'
 
 export type SystemPromptViewerConnectedProps = {

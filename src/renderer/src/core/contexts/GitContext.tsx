@@ -26,23 +26,23 @@ import {
   gitUnstage,
   listGitStashes,
   listUnifiedGitBranches,
-  type GitCommitResponse,
-  type GitFetchResponse,
-  type GitFileChange,
-  type GitMergeApplyInput,
-  type GitMergePlan,
-  type GitMergePlanInput,
-  type GitMergeReport,
-  type GitMergeReportInput,
-  type GitMergeResult,
-  type GitPullResponse,
-  type GitPushResponse,
-  type GitStashResponse,
-  type GitLogCommit,
-  type GitStashListItem,
-} from '../../generated/backend'
-import { unwrapGitEnvelope } from '../../api/helpers'
+  unwrapGitEnvelope,
+} from 'thefactory-ui/headless/api'
 import type {
+  GitCommitResponse,
+  GitFetchResponse,
+  GitFileChange,
+  GitMergeApplyInput,
+  GitMergePlan,
+  GitMergePlanInput,
+  GitMergeReport,
+  GitMergeReportInput,
+  GitMergeResult,
+  GitPullResponse,
+  GitPushResponse,
+  GitStashResponse,
+  GitLogCommit,
+  GitStashListItem,
   CommitInput,
   CreateBranchInput,
   FetchInput,
@@ -53,7 +53,7 @@ import type {
   StashApplyInput,
   StashDropInput,
   StashInput,
-} from '../../api/types'
+} from 'thefactory-ui/headless/api'
 import { useApi } from './ApiContext'
 import { useActiveProject } from './ProjectsContext'
 

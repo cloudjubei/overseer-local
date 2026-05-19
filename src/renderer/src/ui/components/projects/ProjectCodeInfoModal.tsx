@@ -9,7 +9,7 @@ import {
   SelectValue,
 } from 'thefactory-ui/web'
 import { IconSave } from 'thefactory-ui/web/icons'
-import type { ProgrammingLanguage } from '@generated/backend'
+import type { ProgrammingLanguage } from 'thefactory-ui/headless/api'
 
 // Per-language framework / test-framework registries — duplicated from
 // `thefactory-tools/projectConstants.ts` so the web doesn't have to pull the

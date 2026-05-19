@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import type { DragEvent } from 'react'
-import type { GetStoryResponse } from '@generated/backend'
+import type { GetStoryResponse } from 'thefactory-ui/headless/api'
 import { StatusControl, STATUS_OPTIONS, type StoryStatus as Status } from 'thefactory-ui/web'
 
 const DND_MIME = 'application/x-thefactory-story-id'

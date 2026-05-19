@@ -10,7 +10,7 @@ import {
   type CreateProjectsGroupData,
   type ListProjectsGroupsResponse,
   type UpdateProjectsGroupData,
-} from '../../generated/backend'
+} from 'thefactory-ui/headless/api'
 import { useApi } from './ApiContext'
 import { useAuth } from './AuthContext'
 

@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
-import { listProjects, type GetProjectResponse } from '../../generated/backend'
+import { listProjects, type GetProjectResponse } from 'thefactory-ui/headless/api'
 import { useApi } from './ApiContext'
 import { useAppSettings } from './AppSettingsContext'
 import { useAuth } from './AuthContext'

@@ -1,4 +1,4 @@
-import type { Entity } from '@generated/backend'
+import type { Entity } from 'thefactory-ui/headless/api'
 
 export type Zoom = 'day' | 'week' | 'month'
 

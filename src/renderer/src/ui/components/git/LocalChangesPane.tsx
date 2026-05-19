@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import type { DragEvent, MouseEvent } from 'react'
 import { useGit } from '@core/contexts/GitContext'
 import type { LocalDiffEntry } from '@core/contexts/GitContext'
-import { extractServerError } from '@api/helpers'
+import { extractServerError } from 'thefactory-ui/headless/api'
 import {
   Alert,
   ConfirmDialog,

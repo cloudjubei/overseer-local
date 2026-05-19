@@ -8,7 +8,7 @@ import {
   type ChatContext as ChatCtx,
   type GetChatResponse,
   type StartAgentRunData,
-} from '../../generated/backend'
+} from 'thefactory-ui/headless/api'
 import { useChats } from './ChatsContext'
 import { useGitCredentials } from './GitCredentialsContext'
 import { useLLMConfigs } from './LLMConfigsContext'

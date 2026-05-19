@@ -9,7 +9,7 @@
  * `/projects/:projectId/chat/:contextKey`.
  */
 
-import type { ChatContext } from '../../generated/backend'
+import type { ChatContext } from 'thefactory-ui/headless/api'
 
 const PROJECTS = 'projects'
 const GROUPS = 'groups'

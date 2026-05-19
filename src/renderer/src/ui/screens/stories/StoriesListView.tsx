@@ -9,7 +9,7 @@ import type {
   StoriesListStatusFilter,
   StoriesViewMode,
 } from '@core/types/settings'
-import type { GetStoryResponse } from '@generated/backend'
+import type { GetStoryResponse } from 'thefactory-ui/headless/api'
 import {
   SegmentedControl,
   Spinner,

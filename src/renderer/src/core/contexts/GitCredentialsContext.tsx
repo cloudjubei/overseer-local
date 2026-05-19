@@ -8,7 +8,7 @@ import {
   type GetGitCredentialResponse,
   type GitCredentialCreateInput,
   type GitCredentialEditInput,
-} from '../../generated/backend'
+} from 'thefactory-ui/headless/api'
 import { useAuth } from './AuthContext'
 
 export type GitCredentialsContextValue = {

@@ -7,11 +7,13 @@ import {
   listOverseerAuthProviders,
   pollOverseerGithubDeviceFlow,
   startOverseerGithubDeviceFlow,
-  type GetProjectResponse,
-  type OverseerAuthProviders,
-  type ProjectDataLocation,
-} from '@generated/backend'
-import { getResponseDataMessage } from '@api/helpers'
+  getResponseDataMessage,
+} from 'thefactory-ui/headless/api'
+import type {
+  GetProjectResponse,
+  OverseerAuthProviders,
+  ProjectDataLocation,
+} from 'thefactory-ui/headless/api'
 import { useOverseer } from '@core/contexts/OverseerContext'
 import { useProjects } from '@core/contexts/ProjectsContext'
 import { Alert } from 'thefactory-ui/web'

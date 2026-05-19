@@ -9,7 +9,7 @@ import {
   resetOverseer,
   setOverseerRemote,
   type OverseerState,
-} from '@generated/backend'
+} from 'thefactory-ui/headless/api'
 import { useApi } from './ApiContext'
 import { useAuth } from './AuthContext'
 

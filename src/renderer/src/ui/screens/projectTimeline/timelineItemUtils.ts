@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react'
-import type { Entity, Feature, GetStoryResponse } from '@generated/backend'
+import type { Entity, Feature, GetStoryResponse } from 'thefactory-ui/headless/api'
 import type { RowDefinition, RowItem, TimelineLabel } from './ProjectTimelineTypes'
 
 export const ENTITY_TYPE = 'TimelineLabel'

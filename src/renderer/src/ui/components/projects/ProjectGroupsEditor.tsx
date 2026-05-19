@@ -25,7 +25,7 @@ import {
   type GroupType,
   type ProjectsGroup,
 } from '@core/contexts/ProjectsGroupsContext'
-import { extractErrorMessage } from '@api/errorMessage'
+import { extractErrorMessage } from 'thefactory-ui/headless/api'
 
 function GroupNameModal({
   title,

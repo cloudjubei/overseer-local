@@ -2,11 +2,13 @@ import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState }
 import type { FormEvent } from 'react'
 import {
   listLlmModels,
-  type GetLlmConfigResponse,
-  type LlmConfigCreateInput,
-  type LlmConfigEditInput,
-} from '@generated/backend'
-import { extractErrorMessage } from '@api/errorMessage'
+  extractErrorMessage,
+} from 'thefactory-ui/headless/api'
+import type {
+  GetLlmConfigResponse,
+  LlmConfigCreateInput,
+  LlmConfigEditInput,
+} from 'thefactory-ui/headless/api'
 import { useLLMConfigs } from '@core/contexts/LLMConfigsContext'
 import {
   Alert,

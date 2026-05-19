@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import { useLLMConfigs } from '@core/contexts/LLMConfigsContext'
-import type { GetLlmConfigResponse } from '@generated/backend'
+import type { GetLlmConfigResponse } from 'thefactory-ui/headless/api'
 import { Alert, Button, ConfirmDialog, Modal } from 'thefactory-ui/web'
 import {
   IconChat,

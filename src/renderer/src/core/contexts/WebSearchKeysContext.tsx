@@ -4,9 +4,11 @@ import {
   deleteWebSearchKey,
   listWebSearchKeys,
   updateWebSearchKeys,
-  type WebSearchKeyEntry,
-} from '../../generated/backend'
-import type { WebSearchKeyUpsertInput } from '../../api/types'
+} from 'thefactory-ui/headless/api'
+import type {
+  WebSearchKeyEntry,
+  WebSearchKeyUpsertInput,
+} from 'thefactory-ui/headless/api'
 import { useAuth } from './AuthContext'
 
 export type WebSearchKeysContextValue = {

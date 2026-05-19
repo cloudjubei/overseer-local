@@ -1,7 +1,11 @@
-import { getPricing, refreshPricing as refreshPricingApi } from '@generated/backend'
-import type { ModelPrice } from '@generated/backend'
-import type { PricingSnapshot } from '@api/types'
-
+import {
+  getPricing,
+  refreshPricing as refreshPricingApi,
+} from 'thefactory-ui/headless/api'
+import type {
+  ModelPrice,
+  PricingSnapshot,
+} from 'thefactory-ui/headless/api'
 export type { ModelPrice }
 
 let cache: PricingSnapshot | null = null

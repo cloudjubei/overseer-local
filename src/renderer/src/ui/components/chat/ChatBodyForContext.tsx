@@ -5,7 +5,7 @@ import {
   type ChatBodyProps,
   type PromptVariables,
 } from 'thefactory-ui/web'
-import type { ChatContext } from '@generated/backend'
+import type { ChatContext } from 'thefactory-ui/headless/api'
 import { useAgents } from '@core/contexts/AgentsContext'
 import { useChats } from '@core/contexts/ChatsContext'
 import { useFiles } from '@core/contexts/FilesContext'

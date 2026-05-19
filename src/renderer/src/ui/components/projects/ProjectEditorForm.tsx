@@ -16,7 +16,7 @@ import {
   Textarea,
   renderProjectIcon,
 } from 'thefactory-ui/web'
-import type { GetProjectResponse, UpdateProjectData } from '@generated/backend'
+import type { GetProjectResponse, UpdateProjectData } from 'thefactory-ui/headless/api'
 import { useGitCredentials } from '@core/contexts/GitCredentialsContext'
 import { useProjectsGroups } from '@core/contexts/ProjectsGroupsContext'
 import ProjectCodeInfoModal, { type CodeInfoValue } from './ProjectCodeInfoModal'

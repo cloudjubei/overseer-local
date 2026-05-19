@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { useGit } from '@core/contexts/GitContext'
-import type { GitMergePlan, GitMergeReport, GitMergeResult } from '@generated/backend'
+import type { GitMergePlan, GitMergeReport, GitMergeResult } from 'thefactory-ui/headless/api'
 import {
   Alert,
   Button,

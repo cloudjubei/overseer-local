@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from 'react'
-import type { ChatContext } from '../../generated/backend'
+import type { ChatContext } from 'thefactory-ui/headless/api'
 import { getChatContextKey } from '../chats/chatKey'
 import { useAgents } from '../contexts/AgentsContext'
 import { useAppSettings } from '../contexts/AppSettingsContext'

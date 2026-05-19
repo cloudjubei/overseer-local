@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useActiveProject } from '@core/contexts/ProjectsContext'
 import { useGit } from '@core/contexts/GitContext'
-import { readFile as readFileSdk, writeFile as writeFileSdk } from '@generated/backend'
-import type { GitConflictEntry } from '@generated/backend'
+import {
+  readFile as readFileSdk,
+  writeFile as writeFileSdk,
+} from 'thefactory-ui/headless/api'
+import type { GitConflictEntry } from 'thefactory-ui/headless/api'
 import { Alert, Button, Modal, Spinner } from 'thefactory-ui/web'
 
 export type MergeConflictResolverProps = {

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import type { Feature, FeatureCreateInput, FeatureEditInput } from '@generated/backend'
+import type { Feature, FeatureCreateInput, FeatureEditInput } from 'thefactory-ui/headless/api'
 import {
   FileSelector,
   Modal,

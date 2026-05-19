@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useTools } from '@core/contexts/ToolsContext'
-import type { ToolDescriptor, ToolExecuteResult, ToolPreviewResult } from '@api/types'
+import type { ToolDescriptor, ToolExecuteResult, ToolPreviewResult } from 'thefactory-ui/headless/api'
 import {
   Alert,
   Button,

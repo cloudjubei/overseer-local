@@ -8,7 +8,7 @@ import {
   type GetLlmConfigResponse,
   type LlmConfigCreateInput,
   type LlmConfigEditInput,
-} from '../../generated/backend'
+} from 'thefactory-ui/headless/api'
 import { useAuth } from './AuthContext'
 
 export type LLMConfigsContextValue = {

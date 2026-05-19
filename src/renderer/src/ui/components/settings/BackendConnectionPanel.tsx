@@ -2,8 +2,10 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { useApi } from '@core/contexts/ApiContext'
 import { useAuth } from '@core/contexts/AuthContext'
-import { health } from '@generated/backend'
-import { extractErrorMessage } from '@api/errorMessage'
+import {
+  health,
+  extractErrorMessage,
+} from 'thefactory-ui/headless/api'
 import { Alert, Button, Field, Input, Spinner, Surface } from 'thefactory-ui/web'
 import { IconSave } from 'thefactory-ui/web/icons'
 import { maskSecret } from '@ui/utils/mask'

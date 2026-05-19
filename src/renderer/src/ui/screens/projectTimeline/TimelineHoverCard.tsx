@@ -1,5 +1,5 @@
 import React from 'react'
-import type { GetStoryResponse } from '@generated/backend'
+import type { GetStoryResponse } from 'thefactory-ui/headless/api'
 import { FeatureCard, StoryCard, type StoryStatus } from 'thefactory-ui/web'
 import type { HoverInfo } from './ProjectTimelineTypes'
 import DependencyBullet from '@ui/components/stories/DependencyBullet'

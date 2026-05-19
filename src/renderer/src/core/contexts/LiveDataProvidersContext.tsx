@@ -7,12 +7,14 @@ import {
   getLiveDataPayload,
   listLiveDataProviders,
   updateLiveDataProvider,
-  type LiveDataPayload,
-  type LiveDataProvider,
-  type LiveDataProviderCreateInput,
-  type LiveDataProviderEditInput,
-} from '../../generated/backend'
-import type { LiveDataUpdatedEvent } from '../../api/types'
+} from 'thefactory-ui/headless/api'
+import type {
+  LiveDataPayload,
+  LiveDataProvider,
+  LiveDataProviderCreateInput,
+  LiveDataProviderEditInput,
+  LiveDataUpdatedEvent,
+} from 'thefactory-ui/headless/api'
 import { useApi } from './ApiContext'
 import { useActiveProject } from './ProjectsContext'
 

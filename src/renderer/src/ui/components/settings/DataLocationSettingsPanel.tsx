@@ -1,4 +1,4 @@
-import { setProjectDataLocation } from '@generated/backend'
+import { setProjectDataLocation } from 'thefactory-ui/headless/api'
 import { useActiveProject } from '@core/contexts/ProjectsContext'
 import DataLocationPanel, { type DataLocation } from './DataLocationPanel'
 

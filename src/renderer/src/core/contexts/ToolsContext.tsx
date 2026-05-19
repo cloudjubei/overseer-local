@@ -1,7 +1,15 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
-import { executeTool, listTools, previewTool } from '../../generated/backend'
-import type { ToolDescriptor, ToolExecuteResult, ToolPreviewResult } from '../../api/types'
+import {
+  executeTool,
+  listTools,
+  previewTool,
+} from 'thefactory-ui/headless/api'
+import type {
+  ToolDescriptor,
+  ToolExecuteResult,
+  ToolPreviewResult,
+} from 'thefactory-ui/headless/api'
 import { useAuth } from './AuthContext'
 import { useActiveProject } from './ProjectsContext'
 

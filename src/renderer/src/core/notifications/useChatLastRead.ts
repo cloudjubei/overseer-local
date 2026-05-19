@@ -5,7 +5,7 @@ import {
   type UseChatLastReadApi as HeadlessApi,
 } from 'thefactory-ui/headless'
 import { getChatContextKey } from '../chats/chatKey'
-import type { ChatContext } from '../../generated/backend'
+import type { ChatContext } from 'thefactory-ui/headless/api'
 
 const LS_PREFIX = 'chat:last-read:'
 const EVT_KEY = 'chat-last-read-changed'

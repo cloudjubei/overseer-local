@@ -1,6 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
-import { getPricing, refreshPricing } from '@generated/backend'
-import type { PricingEntry, PricingSnapshot } from '@api/types'
+import {
+  getPricing,
+  refreshPricing,
+} from 'thefactory-ui/headless/api'
+import type {
+  PricingEntry,
+  PricingSnapshot,
+} from 'thefactory-ui/headless/api'
 import { useAuth } from '@core/contexts/AuthContext'
 import { Alert, Button, Input, Spinner, Surface } from 'thefactory-ui/web'
 import { IconRefresh } from 'thefactory-ui/web/icons'

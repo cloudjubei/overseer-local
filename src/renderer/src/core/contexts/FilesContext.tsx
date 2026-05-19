@@ -10,7 +10,7 @@ import {
   writeFile,
   type FileMeta,
   type FilesResult,
-} from '../../generated/backend'
+} from 'thefactory-ui/headless/api'
 import { classifyFileByExtension } from 'thefactory-ui/web'
 import { useApi } from './ApiContext'
 import { useActiveProject } from './ProjectsContext'

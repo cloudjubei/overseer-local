@@ -2,9 +2,10 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Spinner } from 'thefactory-ui/web'
 import { useAuth } from '@core/contexts/AuthContext'
-import { health } from '@generated/backend'
-import { extractErrorMessage } from '@api/errorMessage'
-
+import {
+  health,
+  extractErrorMessage,
+} from 'thefactory-ui/headless/api'
 const DEFAULT_URL = 'http://localhost:7001'
 
 type TestState =

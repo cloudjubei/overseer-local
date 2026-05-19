@@ -1,4 +1,4 @@
-import type { ChatMessage } from '@api/types'
+import type { ChatMessage } from 'thefactory-ui/headless/api'
 import { UsageModal as UsageModalBase } from 'thefactory-ui/web'
 import { useCosts } from '@core/contexts/CostsContext'
 import { getPrice } from '@services/pricingService'

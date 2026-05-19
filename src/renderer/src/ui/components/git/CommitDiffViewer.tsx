@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import type { PointerEvent } from 'react'
 import { useActiveProject } from '@core/contexts/ProjectsContext'
-import { getGitBranchDiffSummary } from '@generated/backend'
-import type { GitDiffSummary } from '@generated/backend'
+import { getGitBranchDiffSummary } from 'thefactory-ui/headless/api'
+import type { GitDiffSummary } from 'thefactory-ui/headless/api'
 import {
   Alert,
   DiffViewer,

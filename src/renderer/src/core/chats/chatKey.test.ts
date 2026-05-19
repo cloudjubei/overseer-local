@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { getChatContext, getChatContextKey } from './chatKey'
-import type { ChatContext } from '../../generated/backend'
+import type { ChatContext } from 'thefactory-ui/headless/api'
 
 /**
  * Round-trip every chat context type through `getChatContextKey` →

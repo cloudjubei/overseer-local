@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from 'vitest'
 import type ReconnectingWebSocket from 'reconnecting-websocket'
-import { WsClient, type WsConnectionState } from './WsClient'
+import { WsClient, type WsConnectionState } from 'thefactory-ui/headless/api'
 
 /**
  * reconnecting-websocket is mocked so tests don't open real sockets. The mock

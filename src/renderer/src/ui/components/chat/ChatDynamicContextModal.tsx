@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useChats } from '@core/contexts/ChatsContext'
-import type { ChatContext } from '@generated/backend'
+import type { ChatContext } from 'thefactory-ui/headless/api'
 import { Modal } from 'thefactory-ui/web'
 
 export type ChatDynamicContextModalProps = {

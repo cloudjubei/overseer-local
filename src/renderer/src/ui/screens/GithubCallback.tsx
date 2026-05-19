@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { completeOverseerGithubAuth } from '@generated/backend'
-import { getResponseDataMessage } from '@api/helpers'
+import {
+  completeOverseerGithubAuth,
+  getResponseDataMessage,
+} from 'thefactory-ui/headless/api'
 import LoadingScreen from './LoadingScreen'
 
 /**

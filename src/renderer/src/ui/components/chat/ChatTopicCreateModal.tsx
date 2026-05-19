@@ -1,6 +1,6 @@
 import { useChats } from '@core/contexts/ChatsContext'
 import { useActiveProject } from '@core/contexts/ProjectsContext'
-import type { GetChatResponse } from '@generated/backend'
+import type { GetChatResponse } from 'thefactory-ui/headless/api'
 import { ChatTopicCreateModal as ChatTopicCreateModalBase } from 'thefactory-ui/web'
 
 export type ChatTopicCreateModalProps = {

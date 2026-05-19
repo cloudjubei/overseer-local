@@ -26,11 +26,11 @@ import {
   createProject,
   deleteProject,
   updateProject,
-  type GetProjectResponse,
-} from '@generated/backend'
+  extractErrorMessage,
+} from 'thefactory-ui/headless/api'
+import type { GetProjectResponse } from 'thefactory-ui/headless/api'
 import { useProjects } from '@core/contexts/ProjectsContext'
 import { useProjectsGroups } from '@core/contexts/ProjectsGroupsContext'
-import { extractErrorMessage } from '@api/errorMessage'
 import {
   ProjectEditorForm,
   blankProjectForm,

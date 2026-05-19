@@ -1,4 +1,4 @@
-import type { PricingSnapshot } from '@api/types'
+import type { PricingSnapshot } from 'thefactory-ui/headless/api'
 
 const STALE_MS = 24 * 60 * 60 * 1000
 

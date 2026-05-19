@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useGitCredentials } from '@core/contexts/GitCredentialsContext'
-import type { GetGitCredentialResponse } from '@generated/backend'
+import type { GetGitCredentialResponse } from 'thefactory-ui/headless/api'
 import { Alert, Button, ConfirmDialog, Modal } from 'thefactory-ui/web'
 import { IconDelete, IconEdit, IconPlus } from 'thefactory-ui/web/icons'
 import GitCredentialsForm from './GitCredentialsForm'

@@ -12,15 +12,17 @@ import {
   resumeCompletion,
   sendCompletionWithTools,
   updateChat,
-  type ChatContext as ChatCtx,
-  type GetChatResponse,
-  type GetChatsSettingsResponse,
-  type GetLlmConfigResponse,
-  type SendCompletionWithToolsData,
-  type SendCompletionWithToolsResponse,
-  type UpdateChatData,
-} from '../../generated/backend'
-import type { ChatMessage } from '../../api/types'
+} from 'thefactory-ui/headless/api'
+import type {
+  ChatContext as ChatCtx,
+  GetChatResponse,
+  GetChatsSettingsResponse,
+  GetLlmConfigResponse,
+  SendCompletionWithToolsData,
+  SendCompletionWithToolsResponse,
+  UpdateChatData,
+  ChatMessage,
+} from 'thefactory-ui/headless/api'
 import { getChatContextKey } from '../chats/chatKey'
 import { useApi } from './ApiContext'
 import { useAuth } from './AuthContext'

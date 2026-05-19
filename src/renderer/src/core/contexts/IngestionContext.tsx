@@ -1,7 +1,10 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
-import { ingestAll, ingestProject } from '../../generated/backend'
-import type { IngestionProgressData } from '../../api/types'
+import {
+  ingestAll,
+  ingestProject,
+} from 'thefactory-ui/headless/api'
+import type { IngestionProgressData } from 'thefactory-ui/headless/api'
 import { useApi } from './ApiContext'
 
 /** Visible state for one in-flight or recently completed ingestion job. */

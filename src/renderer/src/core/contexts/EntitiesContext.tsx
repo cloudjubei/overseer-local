@@ -9,7 +9,7 @@ import {
   type Entity,
   type EntityInput,
   type EntityPatch,
-} from '../../generated/backend'
+} from 'thefactory-ui/headless/api'
 import { useApi } from './ApiContext'
 import { useActiveProject } from './ProjectsContext'
 

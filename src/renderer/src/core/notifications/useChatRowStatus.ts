@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import type { ChatContext } from '../../generated/backend'
+import type { ChatContext } from 'thefactory-ui/headless/api'
 import { getChatContextKey } from '../chats/chatKey'
 import { useChats } from '../contexts/ChatsContext'
 import { CHATS_SEEN_EVENT, isChatUnread, readChatsSeen, type ChatsSeenMap } from './chatsSeen'

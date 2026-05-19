@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import type { ChatContext } from '@generated/backend'
+import type { ChatContext } from 'thefactory-ui/headless/api'
 import { ChatHeader, ChatSidebarPanel as ChatSidebarPanelBase } from 'thefactory-ui/web'
 import { getChatContextKey } from '@core/chats/chatKey'
 import ChatBodyForContext from './ChatBodyForContext'

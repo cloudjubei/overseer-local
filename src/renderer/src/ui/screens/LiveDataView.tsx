@@ -5,7 +5,7 @@ import type {
   LiveDataProvider,
   LiveDataProviderCreateInput,
   LiveDataProviderEditInput,
-} from '@generated/backend'
+} from 'thefactory-ui/headless/api'
 import {
   Alert,
   Button,

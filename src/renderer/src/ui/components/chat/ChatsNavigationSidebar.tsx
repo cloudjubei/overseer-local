@@ -3,7 +3,7 @@ import { useChats } from '@core/contexts/ChatsContext'
 import { useStories } from '@core/contexts/StoriesContext'
 import { useChatRowStatus } from '@core/notifications/useChatRowStatus'
 import { getChatContextKey } from '@core/chats/chatKey'
-import type { ChatContext, GetChatResponse, GetStoryResponse } from '@generated/backend'
+import type { ChatContext, GetChatResponse, GetStoryResponse } from 'thefactory-ui/headless/api'
 import { NotificationBadge, SpinnerWithDot } from 'thefactory-ui/web'
 import { IconChevron } from 'thefactory-ui/web/icons'
 

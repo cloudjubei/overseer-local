@@ -11,7 +11,7 @@ import {
   type Entity,
   type Feature,
   type GetStoryResponse,
-} from '@generated/backend'
+} from 'thefactory-ui/headless/api'
 import {
   Alert,
   Button,

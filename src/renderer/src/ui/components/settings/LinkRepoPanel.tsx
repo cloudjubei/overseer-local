@@ -1,6 +1,8 @@
 import { useState, type FormEvent } from 'react'
-import { initializeRepo } from '@generated/backend'
-import { getResponseDataMessage } from '@api/helpers'
+import {
+  initializeRepo,
+  getResponseDataMessage,
+} from 'thefactory-ui/headless/api'
 import { useActiveProject } from '@core/contexts/ProjectsContext'
 import { Alert } from 'thefactory-ui/web'
 import { Button } from 'thefactory-ui/web'

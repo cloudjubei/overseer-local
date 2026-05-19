@@ -10,10 +10,16 @@ import {
   startCoverageRun,
   startTestsRun,
   startTestsRunAll,
-} from '../../generated/backend'
-import { isCoverage, isTestRun } from '../../api/helpers'
-import type { CoverageResult, TestsResult } from '../../generated/backend'
-import type { CoverageInput, RunTestsInput, TestsProgressData } from '../../api/types'
+  isCoverage,
+  isTestRun,
+} from 'thefactory-ui/headless/api'
+import type {
+  CoverageResult,
+  TestsResult,
+  CoverageInput,
+  RunTestsInput,
+  TestsProgressData,
+} from 'thefactory-ui/headless/api'
 import { useApi } from './ApiContext'
 import { useActiveProject } from './ProjectsContext'
 

@@ -1,13 +1,27 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
-import type { ReactNode } from 'react'
-import { authService } from '../../services/authService'
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react'
+import {
+  AuthProvider as HeadlessAuthProvider,
+  useAuth as useHeadlessAuth,
+  type TokenStorage,
+} from 'thefactory-ui/headless/api'
+import { authService, type AuthState } from '../../services/authService'
 
 /**
- * Desktop's equivalent of web's [`AuthContext`](../../../../../../thefactory-overseer-web/src/core/contexts/AuthContext.tsx) —
- * same API surface, but token + baseUrl persist via Electron's `safeStorage`
- * over the `auth:get|set|clear` IPC bridge (`authService`). The renderer
- * reads/writes the state asynchronously; first render observes `null` until
- * the initial `authService.get()` resolves.
+ * Desktop's `useAuth` surface — the headless `AuthContextValue` (token,
+ * unauthorized, setToken, clearToken, markUnauthorized, clearUnauthorized)
+ * plus the desktop-specific baseUrl + ready + setBaseUrl + setBoth + clear,
+ * which persist via Electron's `safeStorage` over the `auth:get|set|clear`
+ * IPC bridge (`authService`). The renderer reads/writes the state
+ * asynchronously; first render observes `null` until the initial
+ * `authService.get()` resolves.
  */
 export type AuthContextValue = {
   baseUrl: string | null
@@ -27,22 +41,76 @@ export type AuthContextValue = {
   clearUnauthorized: () => void
 }
 
-const AuthContext = createContext<AuthContextValue | null>(null)
+// Shared cache between the sync `TokenStorage` adapter and the bridge.
+// `safeStorage` IPC is async, but the headless `AuthProvider` expects a sync
+// `read()`; the cache lets the adapter answer reads immediately after the
+// initial bootstrap pushes the loaded state through `subscribe`.
+let cachedBaseUrl: string | null = null
+let cachedToken: string | null = null
+const tokenListeners = new Set<(t: string | null) => void>()
+
+async function bootstrapAuthState(): Promise<AuthState> {
+  const state = await authService.get()
+  cachedBaseUrl = state.baseUrl
+  cachedToken = state.token
+  tokenListeners.forEach((l) => l(state.token))
+  return state
+}
+
+async function persistAuthState(state: AuthState): Promise<AuthState> {
+  const next = await authService.set(state)
+  cachedBaseUrl = next.baseUrl
+  cachedToken = next.token
+  tokenListeners.forEach((l) => l(next.token))
+  return next
+}
+
+async function clearPersistedAuthState(): Promise<AuthState> {
+  const next = await authService.clear()
+  cachedBaseUrl = next.baseUrl
+  cachedToken = next.token
+  tokenListeners.forEach((l) => l(next.token))
+  return next
+}
+
+const safeStorageTokenAdapter: TokenStorage = {
+  read: () => cachedToken,
+  write: (next) => {
+    cachedToken = next
+    // Pair with the cached baseUrl so authService stays internally consistent
+    // when the headless layer mutates the token via `setToken` from screens
+    // that don't go through the bridge's `setBoth`.
+    void authService.set({ baseUrl: cachedBaseUrl, token: next })
+  },
+  subscribe: (listener) => {
+    tokenListeners.add(listener)
+    return () => {
+      tokenListeners.delete(listener)
+    }
+  },
+}
+
+const DesktopAuthContext = createContext<AuthContextValue | null>(null)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [baseUrl, setBaseUrlState] = useState<string | null>(null)
-  const [token, setTokenState] = useState<string | null>(null)
+  return (
+    <HeadlessAuthProvider storage={safeStorageTokenAdapter}>
+      <DesktopAuthBridge>{children}</DesktopAuthBridge>
+    </HeadlessAuthProvider>
+  )
+}
+
+function DesktopAuthBridge({ children }: { children: ReactNode }) {
+  const { token, unauthorized, markUnauthorized, clearUnauthorized } = useHeadlessAuth()
+  const [baseUrl, setBaseUrlState] = useState<string | null>(cachedBaseUrl)
   const [ready, setReady] = useState(false)
-  const [unauthorized, setUnauthorized] = useState(false)
 
   useEffect(() => {
     let cancelled = false
-    authService
-      .get()
+    void bootstrapAuthState()
       .then((state) => {
         if (cancelled) return
         setBaseUrlState(state.baseUrl)
-        setTokenState(state.token)
       })
       .finally(() => {
         if (!cancelled) setReady(true)
@@ -52,12 +120,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  const setBoth = useCallback(async (state: { baseUrl: string | null; token: string | null }) => {
-    const next = await authService.set(state)
-    setBaseUrlState(next.baseUrl)
-    setTokenState(next.token)
-    setUnauthorized(false)
-  }, [])
+  const setBoth = useCallback(
+    async (next: { baseUrl: string | null; token: string | null }) => {
+      const state = await persistAuthState(next)
+      setBaseUrlState(state.baseUrl)
+      // Token + `unauthorized=false` propagate via the headless provider's
+      // `subscribe` handler in `safeStorageTokenAdapter`.
+    },
+    [],
+  )
 
   const setBaseUrl = useCallback(
     async (next: string | null) => {
@@ -76,14 +147,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const clearToken = useCallback(() => setToken(null), [setToken])
 
   const clear = useCallback(async () => {
-    const next = await authService.clear()
-    setBaseUrlState(next.baseUrl)
-    setTokenState(next.token)
-    setUnauthorized(false)
+    const state = await clearPersistedAuthState()
+    setBaseUrlState(state.baseUrl)
   }, [])
-
-  const markUnauthorized = useCallback(() => setUnauthorized(true), [])
-  const clearUnauthorized = useCallback(() => setUnauthorized(false), [])
 
   const value = useMemo<AuthContextValue>(
     () => ({
@@ -114,11 +180,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     ],
   )
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+  return <DesktopAuthContext.Provider value={value}>{children}</DesktopAuthContext.Provider>
 }
 
 export function useAuth(): AuthContextValue {
-  const ctx = useContext(AuthContext)
+  const ctx = useContext(DesktopAuthContext)
   if (!ctx) throw new Error('useAuth must be used within AuthProvider')
   return ctx
 }

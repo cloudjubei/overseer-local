@@ -16,7 +16,7 @@ import {
   type GetStoryResponse,
   type StoryCreateInput,
   type StoryEditInput,
-} from '../../generated/backend'
+} from 'thefactory-ui/headless/api'
 import { useApi } from './ApiContext'
 import { useProjects } from './ProjectsContext'
 

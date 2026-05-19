@@ -19,7 +19,6 @@
     "build:win": "npm run build && electron-builder --win",
     "build:mac": "electron-vite build && electron-builder --mac",
     "build:linux": "electron-vite build && electron-builder --linux",
-    "generate:backend": "openapi-ts && prettier --write './src/renderer/src/generated/**/*'",
     "test": "vitest run",
     "test:watch": "vitest"
   },
@@ -32,7 +31,6 @@
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.2",
     "@electron-toolkit/utils": "^4.0.0",
-    "axios": "^1.16.1",
     "react-router-dom": "^7.15.1",
     "reconnecting-websocket": "^4.4.0",
     "thefactory-ui": "file:../thefactory-ui",
@@ -42,7 +40,6 @@
     "@electron-toolkit/eslint-config-prettier": "^3.0.0",
     "@electron-toolkit/eslint-config-ts": "^3.1.0",
     "@electron-toolkit/tsconfig": "^2.0.0",
-    "@hey-api/openapi-ts": "^0.96.1",
     "@tailwindcss/postcss": "^4.1.13",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type RefObject } from 'react'
 import { useChats } from '@core/contexts/ChatsContext'
-import type { ChatContext } from '@generated/backend'
+import type { ChatContext } from 'thefactory-ui/headless/api'
 import {
   ChatSettingsDropdown,
   HistorySummarizationSettings,

@@ -1,7 +1,6 @@
 import React, { createContext, useCallback, useContext, useMemo, useRef } from 'react'
-import { getCostsByChat } from '@generated/backend'
-import type { LlmCostAggregateContent } from '@generated/backend'
-
+import { getCostsByChat } from 'thefactory-ui/headless/api'
+import type { LlmCostAggregateContent } from 'thefactory-ui/headless/api'
 export type CostsContextValue = {
   getCost: (chatKey: string) => Promise<LlmCostAggregateContent | undefined>
   getCosts: (chatKeys: string[]) => Promise<Record<string, LlmCostAggregateContent | undefined>>

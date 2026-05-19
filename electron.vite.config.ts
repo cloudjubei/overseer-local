@@ -13,10 +13,8 @@ export default defineConfig({
     resolve: {
       alias: {
         '@renderer': resolve('src/renderer/src'),
-        '@api': resolve('src/renderer/src/api'),
         '@core': resolve('src/renderer/src/core'),
         '@services': resolve('src/renderer/src/services'),
-        '@generated': resolve('src/renderer/src/generated'),
         '@ui': resolve('src/renderer/src/ui'),
       },
       // `thefactory-ui` is linked via `file:` and has its own `node_modules/react`.

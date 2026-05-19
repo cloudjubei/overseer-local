@@ -5,7 +5,7 @@ import { useTests } from '@core/contexts/TestsContext'
 import type { TestsRunningJob } from '@core/contexts/TestsContext'
 import { useActiveProject } from '@core/contexts/ProjectsContext'
 import { useStories } from '@core/contexts/StoriesContext'
-import { listTestConfigCandidates, readFile as readFileSdk } from '@generated/backend'
+import { listTestConfigCandidates, readFile as readFileSdk } from 'thefactory-ui/headless/api'
 import {
   Alert,
   Button,
