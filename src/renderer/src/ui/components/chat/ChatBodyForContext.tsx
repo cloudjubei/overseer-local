@@ -137,10 +137,14 @@ export default function ChatBodyForContext({
 
   // ---- Draft (controlled input value mirrored from the ChatsContext ref) --
   const [draft, setDraftState] = useState<string>(() => getDraft(context))
+  // Pending attachment paths — ephemeral, reset alongside the draft when the
+  // active chat changes.
+  const [attachments, setAttachments] = useState<string[]>([])
   const lastKeyRef = useRef<string>(contextKey)
   if (lastKeyRef.current !== contextKey) {
     lastKeyRef.current = contextKey
     setDraftState(getDraft(context))
+    setAttachments([])
   }
   const onInputChange = useCallback(
     (next: string) => {
@@ -153,14 +157,15 @@ export default function ChatBodyForContext({
   // ---- Send / abort / confirm --------------------------------------------
   const [scrollSignal, setScrollSignal] = useState(0)
   const onSend = useCallback(
-    async (content: string) => {
+    async (content: string, sentAttachments?: string[]) => {
       // Optimistic clear — the textarea blanks immediately so the user sees
       // the send go through. If `sendMessage` rejects, the live state's
       // sendError banner surfaces the error.
       clearDraft(context)
       setDraftState('')
+      setAttachments([])
       setScrollSignal((s) => s + 1)
-      await sendMessage(context, content)
+      await sendMessage(context, content, sentAttachments)
     },
     [clearDraft, context, sendMessage],
   )
@@ -342,6 +347,8 @@ export default function ChatBodyForContext({
       onInputChange={onInputChange}
       inputProps={{
         filePaths: paths,
+        attachments,
+        onChangeAttachments: setAttachments,
         onSearchReferences,
         onUploadAttachment,
         suggestedActions,

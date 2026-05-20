@@ -113,8 +113,12 @@ export type ChatsContextValue = {
    * first, then runs `sendCompletionWithTools`. The backend's chat
    * persistence callbacks write the assistant + tool messages into the
    * chat, so the call is followed by a `refresh()` to pull them in.
+   *
+   * `attachments` are project-relative paths of files uploaded via the
+   * Files API; they ride on the user message's `files` field, which the
+   * backend's `sendCompletionWithFiles` fetches and folds into the prompt.
    */
-  sendMessage: (ctx: ChatCtx, content: string) => Promise<void>
+  sendMessage: (ctx: ChatCtx, content: string, attachments?: string[]) => Promise<void>
   /**
    * Resume the in-flight completion for `ctx`, granting the listed
    * tool-call ids. Tools not in `grantedToolCallIds` come back as
@@ -169,7 +173,7 @@ function nowIso(): string {
   return new Date().toISOString()
 }
 
-function buildUserMessage(content: string): ChatMessage {
+function buildUserMessage(content: string, files?: string[]): ChatMessage {
   const ts = nowIso()
   return {
     role: 'user',
@@ -177,6 +181,7 @@ function buildUserMessage(content: string): ChatMessage {
     startedAt: ts,
     completedAt: ts,
     durationMs: 0,
+    ...(files && files.length > 0 ? { files } : {}),
   }
 }
 
@@ -369,10 +374,10 @@ export function ChatsProvider({ children }: { children: ReactNode }) {
   )
 
   const sendMessage = useCallback(
-    async (ctx: ChatCtx, content: string) => {
+    async (ctx: ChatCtx, content: string, attachments?: string[]) => {
       if (!activeLLMConfig) throw new Error('Configure an LLM before sending messages')
       const trimmed = content.trim()
-      if (trimmed.length === 0) return
+      if (trimmed.length === 0 && (!attachments || attachments.length === 0)) return
 
       updateLiveState(ctx, {
         isSending: true,
@@ -382,7 +387,7 @@ export function ChatsProvider({ children }: { children: ReactNode }) {
       })
       inFlightCtxRef.current = ctx
       try {
-        const userMessage = buildUserMessage(trimmed)
+        const userMessage = buildUserMessage(trimmed, attachments)
         await addChatMessages({
           body: { context: ctx, messages: [userMessage] },
           throwOnError: true,
