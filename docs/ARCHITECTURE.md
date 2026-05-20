@@ -71,12 +71,20 @@ A React 19 SPA wrapped in `HashRouter` (HashRouter rather than BrowserRouter bec
 
 - `api/` — `WsClient` (reconnecting WebSocket against `/ws`), `bootstrap` (configures the generated `axios` client and installs a 401 interceptor), `helpers` / `errorMessage` / `types`. Lifted verbatim from web.
 - `core/contexts/` — 20 React contexts (`Auth`, `Api`, `AppSettings`, `Projects`, `ProjectsGroups`, `Stories`, `Chats`, `Files`, `Git`, `GitCredentials`, `Agents`, `Tests`, `Tools`, `LLMConfigs`, `Costs`, `Entities`, `Ingestion`, `LiveDataProviders`, `Overseer`, `WebSearchKeys`). All mirror web except `AuthContext` (desktop reads/writes via the `auth:*` IPC instead of `localStorage`) and `ApiContext` (always-non-null `WsClient` constructed from `useAuth().baseUrl`).
-- `core/{chats,files,hooks,notifications,shortcuts,types}/` — supporting headless utilities (chat key derivation, file-tree / mention parsing, project-settings hook, badge math, keyboard shortcuts, settings types).
+- `core/{chats,files,hooks,notifications,shortcuts,types}/` — supporting headless utilities (file-tree / mention parsing, project-settings hook, badge math, keyboard shortcuts, settings types). `core/chats/chatKey.ts` is a thin re-export — see the `thefactory-tools` note below.
 - `generated/backend/` — output of `@hey-api/openapi-ts` against `thefactory-backend/swagger/swagger.json`. Regenerate via `npm run generate:backend`.
 - `services/authService.ts` — the renderer-side typed handle for the `window.authService` preload bridge.
 - `ui/` — screens (`AgentsView`, `ChatView`, `FilesView`, `GitView`, `LoginScreen`, …) and components (`Sidebar`, `ScreenErrorBoundary`, settings panels, etc.). All mirror web except `LoginScreen.tsx` (paste-and-store flow against `safeStorage` instead of localStorage + env var) and `BackendConnectionPanel.tsx` (reads baseUrl from `AuthContext`; gains a "Replace URL" form and a "Reset all" button).
 
 The auth gate lives in `App.tsx`'s `RequireAuth` wrapper: any route except `/login` redirects to `/login` when `useAuth().token` is null. Once authenticated, `AuthedRoot` redirects to the active project's `stories` tab (or `WelcomeView` if zero projects).
+
+## Shared utilities from `thefactory-tools`
+
+The renderer is a pure backend client and gets almost everything from the backend SDK + `thefactory-ui`. The **one** narrow exception: pure, node-free helpers whose output must byte-match the backend's own derivation are imported directly from `thefactory-tools/utils` rather than re-implemented.
+
+Currently that's `getChatContextKey` / `getChatContext` (re-exported through `src/renderer/src/core/chats/chatKey.ts`). They derive the `chatKey` used for routing and cost-aggregate lookups. An earlier local re-implementation dropped a leading slash (`projects/X` vs the backend's `/projects/X`), so cost aggregates were stored under one key and queried under another — the UsageModal silently showed `$0`. Importing the upstream helper directly makes that class of drift impossible.
+
+The exception is deliberately narrow — only pure functions whose result must match the backend exactly. Business logic, types, and everything else still come from the generated SDK / `thefactory-ui`. `thefactory-tools` is a `file:`-linked dependency; web and mobile follow the identical rule.
 
 ## Storage
 

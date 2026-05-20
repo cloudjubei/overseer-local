@@ -58,6 +58,7 @@
     "react-router-dom": "^7.15.1",
     "reconnecting-websocket": "^4.4.0",
     "tailwindcss": "^4.1.13",
+    "thefactory-tools": "file:../thefactory-tools",
     "thefactory-ui": "file:../thefactory-ui",
     "typescript": "^5.9.2",
     "uuid": "^13.0.0",

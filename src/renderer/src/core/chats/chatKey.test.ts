@@ -3,32 +3,33 @@ import { getChatContext, getChatContextKey } from './chatKey'
 import type { ChatContext } from 'thefactory-ui/headless/api'
 
 /**
- * Round-trip every chat context type through `getChatContextKey` →
- * `getChatContext`. Locks the local port against drift from upstream's
- * `thefactory-tools/src/chats/chatsUtils.ts`.
+ * Smoke-test the re-export from `thefactory-tools/utils` and lock in the
+ * canonical key form the rest of the renderer (URL slugs, cost-aggregate
+ * lookups) depends on. If upstream ever changes the form, this test
+ * fails loudly here instead of silently breaking the cost wiring.
  */
 describe('chatKey', () => {
   const cases: Array<{ name: string; ctx: ChatContext; key: string }> = [
-    { name: 'PROJECT', ctx: { type: 'PROJECT', projectId: 'p1' }, key: 'projects/p1' },
+    { name: 'PROJECT', ctx: { type: 'PROJECT', projectId: 'p1' }, key: '/projects/p1' },
     {
       name: 'PROJECT_TOPIC',
       ctx: { type: 'PROJECT_TOPIC', projectId: 'p1', topicId: 't1' },
-      key: 'projects/p1/topics/t1',
+      key: '/projects/p1/topics/t1',
     },
     {
       name: 'STORY',
       ctx: { type: 'STORY', projectId: 'p1', storyId: 's1' },
-      key: 'projects/p1/stories/s1',
+      key: '/projects/p1/stories/s1',
     },
     {
       name: 'FEATURE',
       ctx: { type: 'FEATURE', projectId: 'p1', storyId: 's1', featureId: 'f1' },
-      key: 'projects/p1/stories/s1/features/f1',
+      key: '/projects/p1/stories/s1/features/f1',
     },
     {
       name: 'AGENT_RUN_STORY',
       ctx: { type: 'AGENT_RUN_STORY', projectId: 'p1', storyId: 's1', agentRunId: 'r1' },
-      key: 'projects/p1/stories/s1/agents/r1',
+      key: '/projects/p1/stories/s1/agents/r1',
     },
     {
       name: 'AGENT_RUN_FEATURE',
@@ -39,13 +40,13 @@ describe('chatKey', () => {
         featureId: 'f1',
         agentRunId: 'r1',
       },
-      key: 'projects/p1/stories/s1/features/f1/agents/r1',
+      key: '/projects/p1/stories/s1/features/f1/agents/r1',
     },
-    { name: 'GROUP', ctx: { type: 'GROUP', groupId: 'g1' }, key: 'groups/g1' },
+    { name: 'GROUP', ctx: { type: 'GROUP', groupId: 'g1' }, key: '/groups/g1' },
     {
       name: 'GROUP_TOPIC',
       ctx: { type: 'GROUP_TOPIC', groupId: 'g1', topicId: 't1' },
-      key: 'groups/g1/topics/t1',
+      key: '/groups/g1/topics/t1',
     },
   ]
 
@@ -73,13 +74,14 @@ describe('chatKey', () => {
     expect(getChatContext('projects/p1/something/x')).toBeUndefined()
   })
 
-  it('parses a leading slash defensively', () => {
+  it('parses keys with or without a leading slash', () => {
     expect(getChatContext('/projects/p1')?.type).toBe('PROJECT')
+    expect(getChatContext('projects/p1')?.type).toBe('PROJECT')
   })
 
-  it('decodes a GENERAL chat with a multi-underscore timestamp', () => {
-    const ctx = getChatContext('general_2026-05-01_12:34:56')
+  it('decodes a GENERAL chat with a numeric timestamp', () => {
+    const ctx = getChatContext('general_1747687200000')
     expect(ctx?.type).toBe('GENERAL')
-    expect(ctx?.timestamp).toBe('2026-05-01_12:34:56')
+    expect(ctx?.timestamp).toBe('1747687200000')
   })
 })
