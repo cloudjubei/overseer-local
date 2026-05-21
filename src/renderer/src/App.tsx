@@ -1,5 +1,13 @@
 import { useEffect } from 'react'
-import { Navigate, Outlet, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom'
+import {
+  Navigate,
+  Outlet,
+  Route,
+  Routes,
+  useLocation,
+  useNavigate,
+  useParams,
+} from 'react-router-dom'
 import { AgentsProvider } from '@core/contexts/AgentsContext'
 import { ApiProvider } from '@core/contexts/ApiContext'
 import { AppSettingsProvider } from '@core/contexts/AppSettingsContext'
@@ -34,7 +42,7 @@ import {
   SHELL_TAB_DEFS,
   type GroupTabKey,
   type ShellTabKey,
-} from '@ui/components/shell/shellTabDefs'
+} from 'thefactory-ui/headless'
 import { useApplyTheme } from '@ui/hooks/useApplyTheme'
 import AgentsView from '@ui/screens/AgentsView'
 import ChatView from '@ui/screens/ChatView'
@@ -184,7 +192,11 @@ function MainShell() {
 }
 
 function GroupShell() {
-  const { groupId, tab: tabParam, contextKey } = useParams<{
+  const {
+    groupId,
+    tab: tabParam,
+    contextKey,
+  } = useParams<{
     groupId: string
     tab: string
     contextKey: string

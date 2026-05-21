@@ -23,6 +23,11 @@ export type ChatSidebarPanelProps = {
  * Collapsible chat sidebar. When expanded it renders the same `ChatBody`
  * as the full chat screen — there is no stub anymore. The header still
  * offers a shortcut to open the chat in its own route.
+ *
+ * Self-contained on desktop: web factors this body out into a `ChatPanelBody`
+ * so its small-screen `ChatBottomSheet` can reuse it, but desktop is
+ * big-screen only and has no bottom sheet, so the split would be a
+ * single-consumer indirection here.
  */
 export default function ChatSidebarPanel({
   context,

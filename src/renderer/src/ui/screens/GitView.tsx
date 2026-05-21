@@ -302,8 +302,12 @@ export default function GitView() {
       <aside
         className="shrink-0 flex flex-col border-r overflow-hidden transition-[width]"
         style={{
+          // Expanded width is owned entirely by `GitSidebar`'s own resize
+          // state. The aside must NOT impose a second, larger `minWidth` —
+          // that let the resizable inner panel shrink narrower than this
+          // wrapper, detaching the drag handle from the panel's edge.
           width: sidebarCollapsed ? 48 : undefined,
-          minWidth: sidebarCollapsed ? 48 : 200,
+          minWidth: sidebarCollapsed ? 48 : undefined,
           borderColor: 'var(--border-subtle)',
           background: 'var(--surface-base)',
         }}

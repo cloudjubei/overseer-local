@@ -4,7 +4,14 @@ import { useActiveProject } from '@core/contexts/ProjectsContext'
 import { useStories } from '@core/contexts/StoriesContext'
 import { useAgents } from '@core/contexts/AgentsContext'
 import type { Feature, GetStoryResponse } from 'thefactory-ui/headless/api'
-import { Button, StatusControl, StatusPicker, STATUS_LABELS, statusKey } from 'thefactory-ui/web'
+import {
+  Button,
+  OptionPicker,
+  StatusControl,
+  StatusPicker,
+  STATUS_LABELS,
+  statusKey,
+} from 'thefactory-ui/web'
 import { IconBack, IconCalculator, IconChevron, IconEdit, IconPlus } from 'thefactory-ui/web/icons'
 import DependencyBullet from '@ui/components/stories/DependencyBullet'
 import ExclamationChip from '@ui/components/stories/ExclamationChip'
@@ -20,6 +27,13 @@ type Status = GetStoryResponse['status']
 type FeatureSort = 'index_asc' | 'index_desc' | 'status_asc' | 'status_desc'
 
 const STATUS_ORDER: Status[] = ['-', '~', '+', '=', '?']
+
+const FEATURE_SORT_OPTIONS: { value: FeatureSort; label: string }[] = [
+  { value: 'index_asc', label: 'Ascending ↓' },
+  { value: 'index_desc', label: 'Descending ↑' },
+  { value: 'status_asc', label: 'Status ↓' },
+  { value: 'status_desc', label: 'Status ↑' },
+]
 
 /** Match a feature against the search box. Searches by display index
  *  (e.g. `2`, the user-visible position; the uuid is never shown), title
@@ -75,7 +89,9 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
   const [statusFilter, setStatusFilter] = useState<'all' | 'not-done' | Status>('not-done')
   const [sortBy, setSortBy] = useState<FeatureSort>('index_asc')
   const [openFilter, setOpenFilter] = useState(false)
+  const [openSort, setOpenSort] = useState(false)
   const statusFilterRef = useRef<HTMLDivElement>(null)
+  const sortRef = useRef<HTMLDivElement>(null)
 
   const sortedFeaturesBase = useMemo(() => (story ? [...story.features] : []), [story])
 
@@ -230,6 +246,7 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
       : statusFilter === 'not-done'
         ? 'queued'
         : statusKey(statusFilter as Status)
+  const currentSortLabel = FEATURE_SORT_OPTIONS.find((o) => o.value === sortBy)?.label ?? ''
 
   return (
     <div className="flex flex-row flex-1 min-h-0 w-full overflow-hidden">
@@ -385,17 +402,34 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
               </div>
 
               <div className="control flex-1 sm:flex-none basis-1/2 sm:basis-auto">
-                <select
-                  className="ui-select"
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as FeatureSort)}
+                <div
+                  ref={sortRef}
+                  className="status-filter-btn ui-select"
+                  role="button"
+                  aria-haspopup="menu"
+                  aria-expanded={openSort}
                   aria-label="Sort features by"
+                  tabIndex={0}
+                  onClick={() => setOpenSort(true)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') setOpenSort(true)
+                  }}
                 >
-                  <option value="index_asc">Ascending ↓</option>
-                  <option value="index_desc">Descending ↑</option>
-                  <option value="status_asc">Status ↓</option>
-                  <option value="status_desc">Status ↑</option>
-                </select>
+                  <span className="standard-picker__label">{currentSortLabel}</span>
+                </div>
+                {openSort && sortRef.current && (
+                  <OptionPicker
+                    anchorEl={sortRef.current}
+                    value={sortBy}
+                    options={FEATURE_SORT_OPTIONS}
+                    ariaLabel="Sort features by"
+                    onSelect={(v) => {
+                      setSortBy(v as FeatureSort)
+                      setOpenSort(false)
+                    }}
+                    onClose={() => setOpenSort(false)}
+                  />
+                )}
               </div>
             </div>
           </div>

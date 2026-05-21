@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import {
   createFeature,
@@ -107,8 +107,15 @@ export function StoriesProvider({ children }: { children: ReactNode }) {
   const [isLoaded, setIsLoaded] = useState(false)
   const [loadError, setLoadError] = useState<Error | null>(null)
 
+  // Tracks the latest active project so an in-flight `refresh()` whose project
+  // has since been switched away from drops its result instead of clobbering
+  // the new project's stories (stale-response race → flicker + stale list).
+  const activeProjectIdRef = useRef(activeProjectId)
+  activeProjectIdRef.current = activeProjectId
+
   const refresh = useCallback(async () => {
-    if (!activeProjectId) {
+    const reqProjectId = activeProjectId
+    if (!reqProjectId) {
       setStoriesRaw([])
       setOrder([])
       setIsLoaded(true)
@@ -117,16 +124,18 @@ export function StoriesProvider({ children }: { children: ReactNode }) {
     }
     try {
       const [storiesRes, orderRes] = await Promise.all([
-        listStories({ path: { projectId: activeProjectId }, throwOnError: true }),
-        getStoriesOrder({ path: { projectId: activeProjectId }, throwOnError: true }),
+        listStories({ path: { projectId: reqProjectId }, throwOnError: true }),
+        getStoriesOrder({ path: { projectId: reqProjectId }, throwOnError: true }),
       ])
+      if (activeProjectIdRef.current !== reqProjectId) return
       setStoriesRaw(storiesRes.data)
       setOrder(orderRes.data ?? [])
       setLoadError(null)
     } catch (err) {
+      if (activeProjectIdRef.current !== reqProjectId) return
       setLoadError(err instanceof Error ? err : new Error(String(err)))
     } finally {
-      setIsLoaded(true)
+      if (activeProjectIdRef.current === reqProjectId) setIsLoaded(true)
     }
   }, [activeProjectId])
 

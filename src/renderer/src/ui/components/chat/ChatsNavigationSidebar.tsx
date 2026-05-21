@@ -75,8 +75,7 @@ export default function ChatsNavigationSidebar({
   // runs, and group chats under the current project's header. Filter
   // here so the rest of the sidebar machinery stays project-scoped.
   const chats = useMemo(
-    () =>
-      projectId ? allChatsGlobal.filter((c) => c.context.projectId === projectId) : [],
+    () => (projectId ? allChatsGlobal.filter((c) => c.context.projectId === projectId) : []),
     [allChatsGlobal, projectId],
   )
 
@@ -537,7 +536,7 @@ function HistoryList({
     return <p className="text-xs opacity-60 px-1 py-3">No chats yet for this project.</p>
   }
   return (
-    <div className="space-y-1">
+    <div className="space-y-1 pt-1">
       {chats.map((c) => (
         <ChatRow
           key={getChatContextKey(c.context)}

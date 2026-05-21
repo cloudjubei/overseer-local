@@ -73,62 +73,56 @@ export default function LLMSettings() {
                   className="p-3 flex flex-wrap gap-2 md:flex-nowrap md:items-center md:justify-between"
                 >
                   <div className="min-w-0">
-                    <div className="font-medium truncate flex items-center gap-2">
-                      {cfg.name}
-                      {isAgentActive && (
-                        <span className="text-[10px] uppercase tracking-wide rounded bg-(--surface-raised) px-1.5 py-0.5 text-(--text-primary) border border-(--border-subtle)">
-                          Agent active
-                        </span>
-                      )}
-                      {isChatActive && (
-                        <span className="text-[10px] uppercase tracking-wide rounded bg-(--surface-raised) px-1.5 py-0.5 text-(--text-primary) border border-(--border-subtle)">
-                          Chat active
-                        </span>
-                      )}
-                    </div>
+                    <div className="font-medium truncate">{cfg.name}</div>
                     <div className="text-sm text-(--text-secondary) truncate">
                       Provider: {cfg.provider} • Model: {cfg.model || '—'}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <Button
-                      onClick={() => setActiveAgentRun(cfg.id)}
-                      variant={isAgentActive ? 'secondary' : 'outline'}
-                      size="sm"
-                      disabled={isAgentActive}
-                      title={isAgentActive ? 'Already active for agent runs' : 'Use for agent runs'}
-                    >
-                      <IconRobot className="w-4 h-4 mr-1" />
-                      {isAgentActive ? 'Agent active' : 'Set Active'}
-                    </Button>
-                    <Button
-                      onClick={() => setActiveChat(cfg.id)}
-                      variant={isChatActive ? 'secondary' : 'outline'}
-                      size="sm"
-                      disabled={isChatActive}
-                      title={isChatActive ? 'Already active for chat' : 'Use for chat'}
-                    >
-                      <IconChat className="w-4 h-4 mr-1" />
-                      {isChatActive ? 'Chat active' : 'Set Chat Active'}
-                    </Button>
-                    <Button
-                      onClick={() => setModal({ kind: 'edit', config: cfg })}
-                      variant="outline"
-                      size="icon"
-                      title="Edit"
-                      aria-label="Edit"
-                    >
-                      <IconEdit className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      onClick={() => setModal({ kind: 'delete', config: cfg })}
-                      variant="danger"
-                      size="icon"
-                      title="Delete"
-                      aria-label="Delete"
-                    >
-                      <IconDelete className="w-4 h-4" />
-                    </Button>
+                  <div className="flex flex-col gap-2 shrink-0 md:flex-row md:items-center">
+                    <div className="flex items-center gap-2">
+                      <Button
+                        onClick={() => {
+                          if (!isAgentActive) setActiveAgentRun(cfg.id)
+                        }}
+                        variant={isAgentActive ? 'success' : 'outline'}
+                        size="sm"
+                        title={isAgentActive ? 'Active for agent runs' : 'Use for agent runs'}
+                      >
+                        <IconRobot className="w-4 h-4 mr-1" />
+                        {isAgentActive ? 'Agent Active' : 'Activate Agent'}
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          if (!isChatActive) setActiveChat(cfg.id)
+                        }}
+                        variant={isChatActive ? 'success' : 'outline'}
+                        size="sm"
+                        title={isChatActive ? 'Active for chat' : 'Use for chat'}
+                      >
+                        <IconChat className="w-4 h-4 mr-1" />
+                        {isChatActive ? 'Chat Active' : 'Activate Chat'}
+                      </Button>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        onClick={() => setModal({ kind: 'edit', config: cfg })}
+                        variant="outline"
+                        size="icon"
+                        title="Edit"
+                        aria-label="Edit"
+                      >
+                        <IconEdit className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        onClick={() => setModal({ kind: 'delete', config: cfg })}
+                        variant="danger"
+                        size="icon"
+                        title="Delete"
+                        aria-label="Delete"
+                      >
+                        <IconDelete className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               )

@@ -8,13 +8,16 @@ import { useBadgeCounts, type BadgeCounts } from '@core/notifications/useBadgeCo
 import type { BadgeColor, NotificationCategory } from '@core/types/settings'
 import { Button, NotificationBadge, renderProjectIcon, SpinnerWithDot } from 'thefactory-ui/web'
 import { IconCollection, IconFolder, IconFolderOpen, IconMenu } from 'thefactory-ui/web/icons'
-import type { GroupTabKey, ShellTabKey } from './shellTabDefs'
 import {
   GROUP_TAB_DEFS,
   SHELL_TAB_DEFS,
   groupTabToProjectTab,
   projectTabToGroupTab,
-} from './shellTabDefs'
+  splitGroupsAndProjects,
+  type GroupTabKey,
+  type ShellTabKey,
+} from 'thefactory-ui/headless'
+import { navIcon } from './navIcons'
 import ProjectManagerModal from '@ui/components/projects/ProjectManagerModal'
 
 type Props = {
@@ -41,42 +44,22 @@ const FOCUSABLE_ROW_SELECTOR = '[data-sidebar-row]'
 const DND_PROJECT_MIME = 'application/x-thefactory-sidebar-project'
 
 /**
- * Left navigation rail. Mirrors `overseer-local`'s `SidebarView` 1:1 —
- * collapsible, with keyboard nav, drag-reorder of projects within their MAIN
- * group, per-category notification badges, project icons, and group icons.
+ * Left navigation rail — collapsible, with keyboard nav, drag-reorder of
+ * projects within their MAIN group, per-category notification badges, project
+ * icons, and group icons.
+ *
+ * Desktop is big-screen only, so this is the big-screen rail that mirrors
+ * web's `Sidebar` without web's narrow-viewport drawer behaviour.
  *
  * When collapsed, the Projects section shows ONLY the currently active
  * project (or active group) — every other row is hidden so the rail stays
  * scannable at a glance.
  */
-export default function Sidebar({
-  projectId,
-  activeTab,
-  activeGroupId,
-  activeGroupTab,
-}: Props) {
+export default function Sidebar({ projectId, activeTab, activeGroupId, activeGroupTab }: Props) {
   const navigate = useNavigate()
   const { settings, setUserPreferences } = useAppSettings()
   const userCollapsed = settings.userPreferences.sidebarCollapsed === true
-  const isNarrow = useIsNarrowViewport()
-  // On narrow viewports the rail auto-collapses; the user toggle expands
-  // it as a mobile-style drawer (fixed overlay + backdrop) instead of
-  // pushing the content — there isn't room to push.
-  const [drawerOpen, setDrawerOpen] = useState(false)
-  const collapsed = !drawerOpen && (userCollapsed || isNarrow)
-  // Close the drawer when the user navigates somewhere.
-  const onDrawerNavigate = () => {
-    if (isNarrow && drawerOpen) setDrawerOpen(false)
-  }
-  // Close on Esc while the drawer is open.
-  useEffect(() => {
-    if (!drawerOpen) return
-    const onKey = (e: globalThis.KeyboardEvent) => {
-      if (e.key === 'Escape') setDrawerOpen(false)
-    }
-    document.addEventListener('keydown', onKey)
-    return () => document.removeEventListener('keydown', onKey)
-  }, [drawerOpen])
+  const collapsed = userCollapsed
   const { projects, activeProjectId, setActiveProjectId } = useProjects()
   const { groups, reorderProject } = useProjectsGroups()
   const { counts, getProjectBadgeState } = useBadgeCounts()
@@ -139,28 +122,19 @@ export default function Sidebar({
   const onSelectProject = (id: string) => {
     setActiveProjectId(id)
     navigate(`/projects/${id}/${targetProjectTab}`)
-    onDrawerNavigate()
   }
   const onSelectGroup = (id: string) => {
     navigate(`/groups/${id}/${targetGroupTab}`)
-    onDrawerNavigate()
   }
   const onSelectTab = (next: ShellTabKey) => {
     if (!projectId) return
     navigate(`/projects/${projectId}/${next}`)
-    onDrawerNavigate()
   }
   const onSelectGroupTab = (next: GroupTabKey) => {
     if (!activeGroupId) return
     navigate(`/groups/${activeGroupId}/${next}`)
-    onDrawerNavigate()
   }
   const toggleCollapsed = () => {
-    if (isNarrow) {
-      // On narrow viewports the menu icon toggles the slide-out drawer.
-      setDrawerOpen((open) => !open)
-      return
-    }
     setUserPreferences({ sidebarCollapsed: !userCollapsed })
   }
 
@@ -218,268 +192,230 @@ export default function Sidebar({
     ? mainGroups.find((g) => g.projects.includes(activeProject.id))
     : undefined
 
-  const isDrawer = isNarrow && drawerOpen
-  const asideClassName = [
-    'flex flex-col h-full overflow-hidden border-r shrink-0 transition-[width,transform]',
-    // When narrow + drawer-open, slide the panel over the content as a
-    // fixed overlay with backdrop; otherwise behave as the normal rail.
-    isDrawer ? 'fixed inset-y-0 left-0 z-50 shadow-2xl translate-x-0' : '',
-    isNarrow && !drawerOpen ? '' : '',
-  ]
-    .filter(Boolean)
-    .join(' ')
   return (
-    <>
-      {isDrawer ? (
-        <button
-          type="button"
-          onClick={() => setDrawerOpen(false)}
-          aria-label="Dismiss sidebar"
-          className="fixed inset-0 z-40 bg-black/40 transition-opacity"
-        />
-      ) : null}
-      <aside
-        ref={asideRef}
-        onKeyDown={onAsideKeyDown}
-        className={asideClassName}
-        style={{
-          width: collapsed ? COLLAPSED_PX : EXPANDED_PX,
-          borderColor: 'var(--border-subtle)',
-          background: 'var(--surface-base)',
-        }}
+    <aside
+      ref={asideRef}
+      onKeyDown={onAsideKeyDown}
+      className="flex flex-col h-full overflow-hidden border-r shrink-0 transition-[width]"
+      style={{
+        width: collapsed ? COLLAPSED_PX : EXPANDED_PX,
+        borderColor: 'var(--border-subtle)',
+        background: 'var(--surface-base)',
+      }}
+    >
+      <header
+        className={`flex items-center gap-2 p-3 shrink-0 ${
+          collapsed ? 'justify-center' : 'justify-between'
+        }`}
+        style={{ borderColor: 'var(--border-subtle)' }}
       >
-        <header
-          className={`flex items-center gap-2 p-3 shrink-0 ${
-            collapsed ? 'justify-center' : 'justify-between'
-          }`}
-          style={{ borderColor: 'var(--border-subtle)' }}
-        >
-          {!collapsed && (
-            <button
-              type="button"
-              onClick={() => projectId && navigate(`/projects/${projectId}/stories`)}
-              className="flex items-center gap-3 text-sm font-semibold"
-              tabIndex={-1}
-            >
-              <img src="/icon.png" alt="Overseer" className="h-5 w-5 shrink-0" />
-              <span>Overseer</span>
-            </button>
-          )}
+        {!collapsed && (
           <button
             type="button"
-            onClick={toggleCollapsed}
-            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            className="p-1 rounded text-(--text-muted) hover:text-(--text-primary) hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+            onClick={() => projectId && navigate(`/projects/${projectId}/stories`)}
+            className="flex items-center gap-3 text-sm font-semibold"
             tabIndex={-1}
           >
-            <IconMenu className="w-4 h-4" />
+            <img src="/icon.png" alt="Overseer" className="h-5 w-5 shrink-0" />
+            <span>Overseer</span>
           </button>
-        </header>
+        )}
+        <button
+          type="button"
+          onClick={toggleCollapsed}
+          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          className="p-1 rounded text-(--text-muted) hover:text-(--text-primary) hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+          tabIndex={-1}
+        >
+          <IconMenu className="w-4 h-4" />
+        </button>
+      </header>
 
-        <div className="flex-1 overflow-auto">
-          {projectId && (
-            <Section collapsed={collapsed}>
-              {SHELL_TAB_DEFS.filter(
-                (t) => t.key !== 'settings' && !('hiddenInSidebar' in t && t.hiddenInSidebar),
-              ).map((tab) => {
-                const cat = TAB_BADGE_CATEGORY[tab.key]
-                const countKey = cat ? badgeKeyForCategory(cat) : undefined
-                const badgeValue = countKey ? (counts[countKey] as number) : 0
-                const badgeColor = cat ? settings.notifications.badgeColors[cat] : undefined
-                // Chat tab gets the additional "thinking" spinner-with-dot
-                // affordance — matches desktop's StaticNavItem.
-                const thinking = tab.key === 'chat' && counts.chatThinking
-                return (
-                  <NavRow
-                    key={tab.key}
-                    label={tab.label}
-                    icon={tab.icon}
-                    isActive={tab.key === activeTab && !activeGroupId}
-                    onClick={() => onSelectTab(tab.key)}
-                    collapsed={collapsed}
-                    badge={badgeValue}
-                    badgeColor={badgeColor}
-                    thinking={thinking}
-                  />
-                )
-              })}
-            </Section>
-          )}
-
-          {activeGroupId && (
-            <Section collapsed={collapsed}>
-              {GROUP_TAB_DEFS.map((tab) => {
-                // Chat tab gets the "thinking" spinner-with-dot affordance.
-                const thinking = tab.key === 'chat' && counts.chatThinking
-                const badgeValue = tab.key === 'chat' ? counts.chat : 0
-                const badgeColor =
-                  tab.key === 'chat' ? settings.notifications.badgeColors.chat : undefined
-                return (
-                  <NavRow
-                    key={tab.key}
-                    label={tab.label}
-                    icon={tab.icon}
-                    isActive={tab.key === activeGroupTab}
-                    onClick={() => onSelectGroupTab(tab.key)}
-                    collapsed={collapsed}
-                    badge={badgeValue}
-                    badgeColor={badgeColor}
-                    thinking={thinking}
-                  />
-                )
-              })}
-            </Section>
-          )}
-
-          <Section
-            label="Projects"
-            collapsed={collapsed}
-            divider
-            headerActions={
-              !collapsed && (
-                <div className="inline-flex items-center gap-1.5">
-                  <span className="text-xs text-(--text-secondary)">{activeProjects.length}</span>
-                  <Button size="sm" variant="secondary" onClick={() => setManageOpen(true)}>
-                    Manage
-                  </Button>
-                </div>
-              )
-            }
-          >
-            {activeProjects.length === 0 ? (
-              !collapsed && <p className="text-sm opacity-60 px-3 py-1">No projects yet.</p>
-            ) : collapsed ? (
-              // Collapsed: show ONLY the active selection (project or group).
-              // Everything else is hidden so the rail stays scannable.
-              (() => {
-                if (activeGroupId) {
-                  const g = groups.find((gg) => gg.id === activeGroupId)
-                  if (g) return <GroupRow group={g} isActive collapsed onClick={() => undefined} />
-                }
-                if (activeProject) {
-                  return (
-                    <NavRow
-                      label={activeProject.title}
-                      icon={renderProjectIcon(asIconKey(activeProject.metadata?.icon))}
-                      isActive
-                      onClick={() => onSelectProject(activeProject.id)}
-                      collapsed
-                      dataLocation={activeProject.dataLocation}
-                    />
-                  )
-                }
-                return null
-              })()
-            ) : (
-              <>
-                {ungroupedProjects.map((p) => {
-                  const isActive = p.id === activeProjectId && !activeGroupId
-                  const st = getProjectBadgeState(p.id)
-                  // Active project's badges are surfaced by the per-tab row
-                  // above (Chat / Agents / Git / Tests) — skip them on the
-                  // project row itself to avoid double-rendering. Matches
-                  // desktop's ProjectNavItem behaviour.
-                  const chatUnread = isActive ? 0 : st.chat_messages.unread
-                  const chatThinking = isActive ? false : st.chat_messages.thinking
-                  return (
-                    <NavRow
-                      key={p.id}
-                      label={p.title}
-                      icon={renderProjectIcon(asIconKey(p.metadata?.icon))}
-                      isActive={isActive}
-                      onClick={() => onSelectProject(p.id)}
-                      collapsed={collapsed}
-                      dataLocation={p.dataLocation}
-                      badge={chatUnread}
-                      badgeColor={settings.notifications.badgeColors.chat}
-                      thinking={chatThinking}
-                    />
-                  )
-                })}
-                {allGroups.map((g) =>
-                  g.type === 'SCOPE' ? (
-                    <GroupRow
-                      key={g.id}
-                      group={g}
-                      isActive={g.id === activeGroupId}
-                      collapsed={collapsed}
-                      onClick={() => onSelectGroup(g.id)}
-                    />
-                  ) : (
-                    <GroupBlock
-                      key={g.id}
-                      group={g}
-                      projects={activeProjects}
-                      activeProjectId={activeProjectId}
-                      activeGroupId={activeGroupId}
-                      collapsed={collapsed}
-                      isOpen={openGroupIds.has(g.id)}
-                      onToggleOpen={() => toggleGroupOpen(g.id)}
-                      autoOpenForActiveProject={
-                        !!activeProject &&
-                        g.projects.includes(activeProject.id) &&
-                        !activeGroupId &&
-                        activeProjectGroup?.id === g.id
-                      }
-                      onAutoOpen={() => setGroupOpen(g.id, true)}
-                      onSelectProject={onSelectProject}
-                      onSelectGroup={() => onSelectGroup(g.id)}
-                      draggingId={draggingProject?.id ?? null}
-                      onDragStart={onProjectDragStart}
-                      onDragOver={onProjectDragOver}
-                      onDrop={onProjectDrop}
-                      getProjectBadgeState={getProjectBadgeState}
-                      chatBadgeColor={settings.notifications.badgeColors.chat}
-                    />
-                  ),
-                )}
-              </>
-            )}
-          </Section>
-        </div>
-
+      <div className="shrink-0">
         {projectId && (
-          <div className="shrink-0 border-t py-1" style={{ borderColor: 'var(--border-subtle)' }}>
-            {(() => {
-              const settingsTab = SHELL_TAB_DEFS.find((t) => t.key === 'settings')
-              if (!settingsTab) return null
+          <Section collapsed={collapsed}>
+            {SHELL_TAB_DEFS.filter(
+              (t) => t.key !== 'settings' && !('hiddenInSidebar' in t && t.hiddenInSidebar),
+            ).map((tab) => {
+              const cat = TAB_BADGE_CATEGORY[tab.key]
+              const countKey = cat ? badgeKeyForCategory(cat) : undefined
+              const badgeValue = countKey ? (counts[countKey] as number) : 0
+              const badgeColor = cat ? settings.notifications.badgeColors[cat] : undefined
+              // Chat tab gets the additional "thinking" spinner-with-dot
+              // affordance — matches desktop's StaticNavItem.
+              const thinking = tab.key === 'chat' && counts.chatThinking
               return (
                 <NavRow
-                  label={settingsTab.label}
-                  icon={settingsTab.icon}
-                  isActive={activeTab === 'settings' && !activeGroupId}
-                  onClick={() => onSelectTab('settings')}
+                  key={tab.key}
+                  label={tab.label}
+                  icon={navIcon(tab.icon)}
+                  isActive={tab.key === activeTab && !activeGroupId}
+                  onClick={() => onSelectTab(tab.key)}
                   collapsed={collapsed}
+                  badge={badgeValue}
+                  badgeColor={badgeColor}
+                  thinking={thinking}
                 />
               )
-            })()}
-          </div>
+            })}
+          </Section>
         )}
-        {manageOpen && <ProjectManagerModal onRequestClose={() => setManageOpen(false)} />}
-      </aside>
-    </>
-  )
-}
 
-/**
- * `true` while the viewport is narrower than ~768px (Tailwind's `md` breakpoint).
- * Used to auto-collapse the sidebar on phones/portrait tablets without losing
- * the user's preferred desktop layout.
- */
-function useIsNarrowViewport(): boolean {
-  const [narrow, setNarrow] = useState(() => {
-    if (typeof window === 'undefined' || !window.matchMedia) return false
-    return window.matchMedia('(max-width: 767.98px)').matches
-  })
-  useEffect(() => {
-    if (typeof window === 'undefined' || !window.matchMedia) return
-    const mq = window.matchMedia('(max-width: 767.98px)')
-    const onChange = (e: MediaQueryListEvent) => setNarrow(e.matches)
-    mq.addEventListener('change', onChange)
-    return () => mq.removeEventListener('change', onChange)
-  }, [])
-  return narrow
+        {activeGroupId && (
+          <Section collapsed={collapsed}>
+            {GROUP_TAB_DEFS.map((tab) => {
+              // Chat tab gets the "thinking" spinner-with-dot affordance.
+              const thinking = tab.key === 'chat' && counts.chatThinking
+              const badgeValue = tab.key === 'chat' ? counts.chat : 0
+              const badgeColor =
+                tab.key === 'chat' ? settings.notifications.badgeColors.chat : undefined
+              return (
+                <NavRow
+                  key={tab.key}
+                  label={tab.label}
+                  icon={navIcon(tab.icon)}
+                  isActive={tab.key === activeGroupTab}
+                  onClick={() => onSelectGroupTab(tab.key)}
+                  collapsed={collapsed}
+                  badge={badgeValue}
+                  badgeColor={badgeColor}
+                  thinking={thinking}
+                />
+              )
+            })}
+          </Section>
+        )}
+      </div>
+
+      <div className="flex-1 overflow-auto">
+        <Section
+          label="Projects"
+          collapsed={collapsed}
+          divider
+          headerActions={
+            !collapsed && (
+              <div className="inline-flex items-center gap-1.5">
+                <span className="text-xs text-(--text-secondary)">{activeProjects.length}</span>
+                <Button size="sm" variant="secondary" onClick={() => setManageOpen(true)}>
+                  Manage
+                </Button>
+              </div>
+            )
+          }
+        >
+          {activeProjects.length === 0 ? (
+            !collapsed && <p className="text-sm opacity-60 px-3 py-1">No projects yet.</p>
+          ) : collapsed ? (
+            // Collapsed: show ONLY the active selection (project or group).
+            // Everything else is hidden so the rail stays scannable.
+            (() => {
+              if (activeGroupId) {
+                const g = groups.find((gg) => gg.id === activeGroupId)
+                if (g) return <GroupRow group={g} isActive collapsed onClick={() => undefined} />
+              }
+              if (activeProject) {
+                return (
+                  <NavRow
+                    label={activeProject.title}
+                    icon={renderProjectIcon(asIconKey(activeProject.metadata?.icon))}
+                    isActive
+                    onClick={() => onSelectProject(activeProject.id)}
+                    collapsed
+                    dataLocation={activeProject.dataLocation}
+                  />
+                )
+              }
+              return null
+            })()
+          ) : (
+            <>
+              {ungroupedProjects.map((p) => {
+                const isActive = p.id === activeProjectId && !activeGroupId
+                const st = getProjectBadgeState(p.id)
+                // Active project's badges are surfaced by the per-tab row
+                // above (Chat / Agents / Git / Tests) — skip them on the
+                // project row itself to avoid double-rendering. Matches
+                // desktop's ProjectNavItem behaviour.
+                const chatUnread = isActive ? 0 : st.chat_messages.unread
+                const chatThinking = isActive ? false : st.chat_messages.thinking
+                return (
+                  <NavRow
+                    key={p.id}
+                    label={p.title}
+                    icon={renderProjectIcon(asIconKey(p.metadata?.icon))}
+                    isActive={isActive}
+                    onClick={() => onSelectProject(p.id)}
+                    collapsed={collapsed}
+                    dataLocation={p.dataLocation}
+                    badge={chatUnread}
+                    badgeColor={settings.notifications.badgeColors.chat}
+                    thinking={chatThinking}
+                  />
+                )
+              })}
+              {allGroups.map((g) =>
+                g.type === 'SCOPE' ? (
+                  <GroupRow
+                    key={g.id}
+                    group={g}
+                    isActive={g.id === activeGroupId}
+                    collapsed={collapsed}
+                    onClick={() => onSelectGroup(g.id)}
+                  />
+                ) : (
+                  <GroupBlock
+                    key={g.id}
+                    group={g}
+                    projects={activeProjects}
+                    activeProjectId={activeProjectId}
+                    activeGroupId={activeGroupId}
+                    collapsed={collapsed}
+                    isOpen={openGroupIds.has(g.id)}
+                    onToggleOpen={() => toggleGroupOpen(g.id)}
+                    autoOpenForActiveProject={
+                      !!activeProject &&
+                      g.projects.includes(activeProject.id) &&
+                      !activeGroupId &&
+                      activeProjectGroup?.id === g.id
+                    }
+                    onAutoOpen={() => setGroupOpen(g.id, true)}
+                    onSelectProject={onSelectProject}
+                    onSelectGroup={() => onSelectGroup(g.id)}
+                    draggingId={draggingProject?.id ?? null}
+                    onDragStart={onProjectDragStart}
+                    onDragOver={onProjectDragOver}
+                    onDrop={onProjectDrop}
+                    getProjectBadgeState={getProjectBadgeState}
+                    chatBadgeColor={settings.notifications.badgeColors.chat}
+                  />
+                ),
+              )}
+            </>
+          )}
+        </Section>
+      </div>
+
+      {projectId && (
+        <div className="shrink-0 border-t py-1" style={{ borderColor: 'var(--border-subtle)' }}>
+          {(() => {
+            const settingsTab = SHELL_TAB_DEFS.find((t) => t.key === 'settings')
+            if (!settingsTab) return null
+            return (
+              <NavRow
+                label={settingsTab.label}
+                icon={navIcon(settingsTab.icon)}
+                isActive={activeTab === 'settings' && !activeGroupId}
+                onClick={() => onSelectTab('settings')}
+                collapsed={collapsed}
+              />
+            )
+          })()}
+        </div>
+      )}
+      {manageOpen && <ProjectManagerModal onRequestClose={() => setManageOpen(false)} />}
+    </aside>
+  )
 }
 
 function badgeKeyForCategory(cat: NotificationCategory): keyof BadgeCounts {
@@ -518,23 +454,6 @@ function writeOpenGroupIds(ids: Set<string>) {
   } catch {
     // ignore storage errors
   }
-}
-
-function splitGroupsAndProjects(
-  groups: ProjectsGroup[],
-  projects: ReturnType<typeof useProjects>['projects'],
-) {
-  // Only ACTIVE groups appear in the sidebar at all.
-  const allGroups = groups.filter((g) => g.active !== false)
-  // MAIN groups are the only ones that "own" projects (a project's
-  // ungrouped-ness is decided purely by MAIN-group membership). SCOPE groups
-  // are flat selectable rows and don't take projects out of the ungrouped
-  // bucket.
-  const mainGroups = allGroups.filter((g) => g.type !== 'SCOPE')
-  const grouped = new Set<string>()
-  for (const g of mainGroups) for (const id of g.projects) grouped.add(id)
-  const ungroupedProjects = projects.filter((p) => !grouped.has(p.id))
-  return { mainGroups, allGroups, ungroupedProjects }
 }
 
 function Section({

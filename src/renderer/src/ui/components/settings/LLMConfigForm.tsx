@@ -1,9 +1,6 @@
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
-import {
-  listLlmModels,
-  extractErrorMessage,
-} from 'thefactory-ui/headless/api'
+import { listLlmModels, extractErrorMessage } from 'thefactory-ui/headless/api'
 import type {
   GetLlmConfigResponse,
   LlmConfigCreateInput,
@@ -274,25 +271,27 @@ const LLMConfigForm = forwardRef<LLMConfigFormHandle, LLMConfigFormProps>(functi
         <div className="flex items-center gap-2 pb-2 border-b border-(--border-subtle)">
           <Button
             type="button"
-            onClick={() => setActiveAgentRun(initial.id)}
-            variant={isAgentActive ? 'secondary' : 'outline'}
+            onClick={() => {
+              if (!isAgentActive) setActiveAgentRun(initial.id)
+            }}
+            variant={isAgentActive ? 'success' : 'outline'}
             size="sm"
-            disabled={isAgentActive}
-            title={isAgentActive ? 'Already active for agent runs' : 'Use for agent runs'}
+            title={isAgentActive ? 'Active for agent runs' : 'Use for agent runs'}
           >
             <IconRobot className="w-4 h-4 mr-1" />
-            {isAgentActive ? 'Agent active' : 'Set Active'}
+            {isAgentActive ? 'Agent Active' : 'Activate Agent'}
           </Button>
           <Button
             type="button"
-            onClick={() => setActiveChat(initial.id)}
-            variant={isChatActive ? 'secondary' : 'outline'}
+            onClick={() => {
+              if (!isChatActive) setActiveChat(initial.id)
+            }}
+            variant={isChatActive ? 'success' : 'outline'}
             size="sm"
-            disabled={isChatActive}
-            title={isChatActive ? 'Already active for chat' : 'Use for chat'}
+            title={isChatActive ? 'Active for chat' : 'Use for chat'}
           >
             <IconChat className="w-4 h-4 mr-1" />
-            {isChatActive ? 'Chat active' : 'Set Chat Active'}
+            {isChatActive ? 'Chat Active' : 'Activate Chat'}
           </Button>
         </div>
       )}

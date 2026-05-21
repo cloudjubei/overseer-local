@@ -11,6 +11,7 @@ import type {
 } from '@core/types/settings'
 import type { GetStoryResponse } from 'thefactory-ui/headless/api'
 import {
+  OptionPicker,
   SegmentedControl,
   Spinner,
   StatusControl,
@@ -31,6 +32,13 @@ import StoriesModalHost from './StoriesModalHost'
 import type { StoryModalRoute } from './storyModals'
 
 type Status = GetStoryResponse['status']
+
+const STORIES_SORT_OPTIONS: { value: StoriesListSorting; label: string }[] = [
+  { value: 'index_asc', label: 'Ascending ↓' },
+  { value: 'index_desc', label: 'Descending ↑' },
+  { value: 'status_asc', label: 'Status ↓' },
+  { value: 'status_desc', label: 'Status ↑' },
+]
 
 function countFeatures(story: GetStoryResponse) {
   const features = Array.isArray(story.features) ? story.features : []
@@ -115,7 +123,9 @@ export default function StoriesListView() {
   const ulRef = useRef<HTMLUListElement>(null)
 
   const [openFilter, setOpenFilter] = useState(false)
+  const [openSort, setOpenSort] = useState(false)
   const statusFilterRef = useRef<HTMLDivElement>(null)
+  const sortRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -287,6 +297,7 @@ export default function StoriesListView() {
       : statusFilter === 'not-done'
         ? 'queued'
         : statusKey(statusFilter as Status)
+  const currentSortLabel = STORIES_SORT_OPTIONS.find((o) => o.value === sortBy)?.label ?? ''
 
   return (
     <div className="flex flex-row flex-1 min-h-0 w-full overflow-hidden">
@@ -384,17 +395,34 @@ export default function StoriesListView() {
               </div>
 
               <div className="control flex-1 sm:flex-none basis-1/2 sm:basis-auto">
-                <select
-                  className="ui-select"
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as StoriesListSorting)}
+                <div
+                  ref={sortRef}
+                  className="status-filter-btn ui-select"
+                  role="button"
+                  aria-haspopup="menu"
+                  aria-expanded={openSort}
                   aria-label="Sort by"
+                  tabIndex={0}
+                  onClick={() => setOpenSort(true)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') setOpenSort(true)
+                  }}
                 >
-                  <option value="index_asc">Ascending ↓</option>
-                  <option value="index_desc">Descending ↑</option>
-                  <option value="status_asc">Status ↓</option>
-                  <option value="status_desc">Status ↑</option>
-                </select>
+                  <span className="standard-picker__label">{currentSortLabel}</span>
+                </div>
+                {openSort && sortRef.current && (
+                  <OptionPicker
+                    anchorEl={sortRef.current}
+                    value={sortBy}
+                    options={STORIES_SORT_OPTIONS}
+                    ariaLabel="Sort by"
+                    onSelect={(v) => {
+                      setSortBy(v as StoriesListSorting)
+                      setOpenSort(false)
+                    }}
+                    onClose={() => setOpenSort(false)}
+                  />
+                )}
               </div>
             </div>
           </div>

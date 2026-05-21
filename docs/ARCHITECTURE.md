@@ -6,7 +6,11 @@ The backend-only cutover landed in 2026-05. Outstanding follow-ups (all blocked 
 
 ## Cross-client parity mandate
 
-The three frontend clients — web, desktop, mobile — must mirror each other as closely as the host platform allows. Side-by-side they should read like the same app adapted to its surface, not three independent products. Concretely:
+The three frontend clients — web, desktop, mobile — must mirror each other as closely as the host platform allows. Side-by-side they should read like the same app adapted to its surface, not three independent products.
+
+**Web is first-class; desktop is big-screen, mobile is small-screen.** `thefactory-overseer-web` is the source of all new behaviour and the only client with _both_ a big-screen and a small-screen (narrow viewport — `useIsNarrowViewport`, below the `md` / 768px breakpoint) experience. **`overseer-local` (desktop) is big-screen only** and mirrors web's big-screen methodology; **`thefactory-overseer-mobile` (mobile) is small-screen only** and mirrors web's small-screen methodology. Desktop and mobile _stem from_ web — when something works a certain way on web it must be translated to the matching client: a big-screen web change → desktop, a small-screen web change → mobile. Desktop never receives small-screen features; mobile never receives big-screen features. There is no "desktop small-screen" — `isNarrow`-gated code is dormant here.
+
+Concretely:
 
 - **Shared spine is [thefactory-ui](../../thefactory-ui).** Tokens, headless hooks/stores, business logic, contexts, badge math, sanitisers, form state machines — all live there. Each client is mostly presentation glue around the shared spine.
 - **File layout, screen names, navigation structure, context names, hook names match across clients.** Desktop's `src/renderer/ui/screens/StoriesScreen.tsx` and the equivalent web/mobile paths read the same.
@@ -125,7 +129,5 @@ The exception is deliberately narrow — only pure functions whose result must m
 
 - File map and entry points: [docs/FILE_ORGANISATION.md](./FILE_ORGANISATION.md)
 - Engineering patterns: [docs/PATTERNS.md](./PATTERNS.md)
-- Package registry and interfaces: [docs/PACKAGES.md](./PACKAGES.md)
-- Multi-platform roadmap: [docs/MULTI_PLATFORM_ARCHITECTURE.md](./MULTI_PLATFORM_ARCHITECTURE.md) and [docs/PLATFORM_ADAPTATIONS.md](./PLATFORM_ADAPTATIONS.md)
 - Shared UI package: [thefactory-ui/docs/ARCHITECTURE.md](../../thefactory-ui/docs/ARCHITECTURE.md)
 - Web client (parity reference): [thefactory-overseer-web/docs/ARCHITECTURE.md](../../thefactory-overseer-web/docs/ARCHITECTURE.md)
