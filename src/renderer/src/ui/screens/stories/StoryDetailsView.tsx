@@ -361,7 +361,7 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
             <div className="control search-wrapper min-w-0 flex-1 basis-full sm:basis-auto">
               <input
                 type="search"
-                placeholder="Search by id, title, or description"
+                placeholder="Filter features by id, title or description"
                 aria-label="Search features"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
@@ -552,38 +552,32 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
                           )}
                         </div>
 
-                        <div
-                          style={{ gridRow: 3, gridColumn: 2 }}
-                          className="flex items-center justify-between gap-8"
-                          aria-label={`Blockers and actions for Feature ${f.id}`}
-                        >
-                          <div className="flex gap-8">
-                            <div className="chips-list">
-                              <span className="chips-sub__label">References</span>
-                              {blockers.length === 0 ? (
-                                <span className="chips-sub__label" title="No dependencies">
-                                  None
-                                </span>
-                              ) : (
-                                blockers.map((d) => (
-                                  <DependencyBullet key={d.id} dependency={d.id} />
-                                ))
+                        {(blockers.length > 0 || blockersOutbound.length > 0) && (
+                          <div
+                            style={{ gridRow: 3, gridColumn: 2 }}
+                            className="flex items-center justify-between gap-8"
+                            aria-label={`Blockers and actions for Feature ${f.id}`}
+                          >
+                            <div className="flex gap-8">
+                              {blockers.length > 0 && (
+                                <div className="chips-list">
+                                  <span className="chips-sub__label">References</span>
+                                  {blockers.map((d) => (
+                                    <DependencyBullet key={d.id} dependency={d.id} />
+                                  ))}
+                                </div>
                               )}
-                            </div>
-                            <div className="chips-list">
-                              <span className="chips-sub__label">Blocks</span>
-                              {blockersOutbound.length === 0 ? (
-                                <span className="chips-sub__label" title="No dependents">
-                                  None
-                                </span>
-                              ) : (
-                                blockersOutbound.map((d) => (
-                                  <DependencyBullet key={d.id} dependency={d.id} isOutbound />
-                                ))
+                              {blockersOutbound.length > 0 && (
+                                <div className="chips-list">
+                                  <span className="chips-sub__label">Blocks</span>
+                                  {blockersOutbound.map((d) => (
+                                    <DependencyBullet key={d.id} dependency={d.id} isOutbound />
+                                  ))}
+                                </div>
                               )}
                             </div>
                           </div>
-                        </div>
+                        )}
                       </div>
                     </li>
                   )

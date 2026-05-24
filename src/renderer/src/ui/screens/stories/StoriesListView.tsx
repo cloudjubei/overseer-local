@@ -591,35 +591,29 @@ export default function StoriesListView() {
                               )}
                             </div>
                           </div>
-                          <div
-                            className="col col-blockers"
-                            aria-label={`Blockers for Story ${t.id}`}
-                          >
-                            <div className="chips-list">
-                              <span className="chips-sub__label">References</span>
-                              {blockers.length === 0 ? (
-                                <span className="chips-sub__label" title="No dependencies">
-                                  None
-                                </span>
-                              ) : (
-                                blockers.map((d) => (
-                                  <DependencyBullet key={d.id} dependency={d.id} />
-                                ))
+                          {(blockers.length > 0 || blockersOutbound.length > 0) && (
+                            <div
+                              className="col col-blockers"
+                              aria-label={`Blockers for Story ${t.id}`}
+                            >
+                              {blockers.length > 0 && (
+                                <div className="chips-list">
+                                  <span className="chips-sub__label">References</span>
+                                  {blockers.map((d) => (
+                                    <DependencyBullet key={d.id} dependency={d.id} />
+                                  ))}
+                                </div>
+                              )}
+                              {blockersOutbound.length > 0 && (
+                                <div className="chips-list">
+                                  <span className="chips-sub__label">Blocks</span>
+                                  {blockersOutbound.map((d) => (
+                                    <DependencyBullet key={d.id} dependency={d.id} isOutbound />
+                                  ))}
+                                </div>
                               )}
                             </div>
-                            <div className="chips-list">
-                              <span className="chips-sub__label">Blocks</span>
-                              {blockersOutbound.length === 0 ? (
-                                <span className="chips-sub__label" title="No dependents">
-                                  None
-                                </span>
-                              ) : (
-                                blockersOutbound.map((d) => (
-                                  <DependencyBullet key={d.id} dependency={d.id} isOutbound />
-                                ))
-                              )}
-                            </div>
-                          </div>
+                          )}
                         </div>
                       </div>
                       {isDropAfter && <div className="drop-indicator" aria-hidden="true"></div>}

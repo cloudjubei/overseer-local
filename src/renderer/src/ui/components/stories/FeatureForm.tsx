@@ -142,7 +142,10 @@ export default function FeatureForm({
     >
       <div className="grid grid-cols-1 gap-3">
         <div className="flex justify-between items-center">
-          <StatusControl status={form.values.status} onChange={(s) => form.setStatus(s as Status)} />
+          <StatusControl
+            status={form.values.status}
+            onChange={(s) => form.setStatus(s as Status)}
+          />
           <div>
             {project ? (
               <ProjectChip label={project.title} description={project.description} nonActionable />
@@ -170,9 +173,7 @@ export default function FeatureForm({
             className="w-full rounded-md border px-3 py-2 text-sm disabled:opacity-60"
             style={{
               background: 'var(--surface-raised)',
-              borderColor: form.error
-                ? 'var(--status-stuck-soft-border)'
-                : 'var(--border-default)',
+              borderColor: form.error ? 'var(--status-stuck-soft-border)' : 'var(--border-default)',
               color: 'var(--text-primary)',
             }}
             aria-invalid={!!form.error}
@@ -244,9 +245,20 @@ export default function FeatureForm({
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-xs" style={{ color: 'var(--text-secondary)' }}>
-            Context Files
-          </label>
+          <div className="flex items-center justify-between gap-2">
+            <label className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+              Context Files
+            </label>
+            <button
+              type="button"
+              onClick={() => setShowFileSelector(true)}
+              className="chip chip--ok"
+              title="Add context files"
+            >
+              <IconPlus className="w-3 h-3" />
+              <span>Add</span>
+            </button>
+          </div>
           <div
             className="flex flex-wrap items-start gap-2 border rounded-md min-h-12 p-2"
             style={{ borderColor: 'var(--border-default)', background: 'var(--surface-raised)' }}
@@ -259,15 +271,6 @@ export default function FeatureForm({
                 warn={!form.mentionedPaths.has(p)}
               />
             ))}
-            <button
-              type="button"
-              onClick={() => setShowFileSelector(true)}
-              className="chip chip--ok"
-              title="Add context files"
-            >
-              <IconPlus className="w-3 h-3" />
-              <span>Add</span>
-            </button>
           </div>
           <div className="text-xs" style={{ color: 'var(--text-muted)' }}>
             Select any files across the project that provide useful context for this feature. Tip:
@@ -276,9 +279,20 @@ export default function FeatureForm({
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-xs" style={{ color: 'var(--text-secondary)' }}>
-            Blockers
-          </label>
+          <div className="flex items-center justify-between gap-2">
+            <label className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+              Blockers
+            </label>
+            <button
+              type="button"
+              onClick={() => setShowSelector(true)}
+              className="chip chip--ok"
+              title="Add blocker"
+            >
+              <IconPlus className="w-3 h-3" />
+              <span>Add</span>
+            </button>
+          </div>
           <div
             className="chips-list border rounded-md min-h-12 p-2"
             style={{ borderColor: 'var(--border-default)', background: 'var(--surface-raised)' }}
@@ -291,15 +305,6 @@ export default function FeatureForm({
                 interactive={false}
               />
             ))}
-            <button
-              type="button"
-              onClick={() => setShowSelector(true)}
-              className="chip chip--ok"
-              title="Add blocker"
-            >
-              <IconPlus className="w-3 h-3" />
-              <span>Add</span>
-            </button>
           </div>
         </div>
       </div>
@@ -328,7 +333,6 @@ export default function FeatureForm({
           <FileSelector
             files={fileMetas}
             initialSelected={form.values.context}
-            onCancel={() => setShowFileSelector(false)}
             onConfirm={(picked) => {
               for (const p of picked) form.addContextFile(p)
               setShowFileSelector(false)
@@ -340,4 +344,3 @@ export default function FeatureForm({
     </form>
   )
 }
-

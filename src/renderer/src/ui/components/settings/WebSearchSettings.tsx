@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useWebSearchKeys } from '@core/contexts/WebSearchKeysContext'
 import { Alert, SecretInput } from 'thefactory-ui/web'
 
@@ -20,21 +20,25 @@ export default function WebSearchSettings() {
     return m
   }, [keys])
 
-  // Local drafts so typing doesn't fire one upsert per keystroke. Persist on blur.
+  // Sparse local drafts so typing doesn't fire one upsert per keystroke.
+  // Only providers the user has typed into appear here; everything else
+  // falls through to `byProvider` so newly-loaded keys appear immediately.
+  // The previous eager-init `useEffect` set every draft to `''` on first
+  // render — once `byProvider` loaded, the `!== undefined` guard kept the
+  // drafts stuck at empty.
   const [drafts, setDrafts] = useState<Record<string, string>>({})
 
-  useEffect(() => {
-    setDrafts((prev) => {
-      const next: Record<string, string> = { ...prev }
-      for (const p of PROVIDERS) {
-        if (next[p.key] === undefined) next[p.key] = byProvider[p.key] ?? ''
-      }
-      return next
-    })
-  }, [byProvider])
+  const valueFor = (provider: string) =>
+    Object.prototype.hasOwnProperty.call(drafts, provider)
+      ? drafts[provider]
+      : (byProvider[provider] ?? '')
+
+  const onChange = (provider: string, value: string) =>
+    setDrafts((prev) => ({ ...prev, [provider]: value }))
 
   const onBlur = async (provider: string) => {
-    const value = (drafts[provider] ?? '').trim()
+    if (!Object.prototype.hasOwnProperty.call(drafts, provider)) return
+    const value = drafts[provider].trim()
     const existing = byProvider[provider] ?? ''
     if (value === existing) return
     if (value.length === 0) {
@@ -61,8 +65,8 @@ export default function WebSearchSettings() {
               </label>
               <SecretInput
                 id={`websearch-${p.key}`}
-                value={drafts[p.key] ?? ''}
-                onChange={(e) => setDrafts({ ...drafts, [p.key]: e.target.value })}
+                value={valueFor(p.key)}
+                onChange={(e) => onChange(p.key, e.target.value)}
                 onBlur={() => void onBlur(p.key)}
                 wrapperClassName="max-w-md"
                 placeholder={p.placeholder}

@@ -69,14 +69,18 @@ function useDirtyGuard(onClose: () => void) {
     onClose()
   }
 
+  // Per the user-policy: no Cancel — closing the dialog via X / Esc IS the
+  // cancel ("keep editing"). The only footer action is the destructive
+  // Discard.
   const dialog = (
     <ConfirmDialog
       isOpen={showAlert}
       onClose={() => setShowAlert(false)}
+      title="Discard changes?"
       description={alertMessage}
-      confirmLabel="DISCARD ALL"
-      cancelLabel="Go Back"
+      confirmLabel="Discard"
       destructive
+      hideCancel
       closeOnOverlayClick={false}
       onConfirm={() => {
         setShowAlert(false)

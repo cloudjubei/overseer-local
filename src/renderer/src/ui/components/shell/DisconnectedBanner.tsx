@@ -1,12 +1,14 @@
+import { useEffect, useState } from 'react'
 import { useApi } from '@core/contexts/ApiContext'
 import { useAuth } from '@core/contexts/AuthContext'
 
+const GRACE_MS = 3000
+
 /**
- * Persistent strip surfaced when the renderer's WebSocket is not `open` and the
- * user is authenticated. Mirrors the disconnected-state UX called out in
- * [docs/implementation-plan.md § B.1](../../../../../docs/implementation-plan.md) —
- * read-only views keep their last-known data, but the banner signals that
- * live updates have stopped landing.
+ * Persistent strip surfaced when the renderer's WebSocket has been non-`open`
+ * for `GRACE_MS` and the user is authenticated. The grace window collapses
+ * transient flickers (e.g. a refetch that briefly drops the socket) so the
+ * banner only paints on genuine disconnects.
  *
  * `reconnecting-websocket` (wired by [`WsClient`](../../../api/WsClient.ts))
  * handles the actual reconnect; this component is informational only.
@@ -14,11 +16,12 @@ import { useAuth } from '@core/contexts/AuthContext'
 export default function DisconnectedBanner() {
   const { token, baseUrl } = useAuth()
   const { wsState } = useApi()
+  const stableDown = useStableNonOpen(wsState, GRACE_MS)
 
   // Only meaningful once both halves of the connection are configured. Before
   // that, the LoginScreen owns the user's attention.
   if (!token || !baseUrl) return null
-  if (wsState === 'open') return null
+  if (!stableDown) return null
 
   const { label, sublabel } = describe(wsState)
 
@@ -55,4 +58,17 @@ function describe(state: string): { label: string; sublabel: string } {
 function dotColor(state: string): string {
   if (state === 'connecting') return 'var(--color-orange-500, #f59e0b)'
   return 'var(--color-gray-400, #9ca3af)'
+}
+
+function useStableNonOpen(wsState: string, graceMs: number): boolean {
+  const [down, setDown] = useState(false)
+  useEffect(() => {
+    if (wsState === 'open') {
+      setDown(false)
+      return
+    }
+    const t = setTimeout(() => setDown(true), graceMs)
+    return () => clearTimeout(t)
+  }, [wsState, graceMs])
+  return down
 }

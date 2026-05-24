@@ -39,7 +39,7 @@ export default function LLMSettings() {
     <div className="flex flex-col h-full w-full overflow-hidden">
       {/* === LLM Configurations section === */}
       <div className="px-8 py-3 bg-(--surface-base) border-b border-(--border-subtle) flex items-center justify-between shrink-0">
-        <h2 className="text-xl font-semibold">LLM Configurations</h2>
+        <h2 className="text-xl font-semibold">LLMs</h2>
         <Button
           onClick={() => setModal({ kind: 'create' })}
           title="Add config"

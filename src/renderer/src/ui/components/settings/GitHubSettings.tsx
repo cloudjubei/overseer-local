@@ -47,13 +47,12 @@ export default function GitHubSettings() {
           credentials.map((c) => (
             <div
               key={c.id}
-              className="p-3 flex flex-wrap gap-2 md:flex-nowrap md:items-center md:justify-between"
+              className="p-3 flex flex-row items-center gap-2 justify-between"
             >
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <div className="font-medium truncate">{c.name}</div>
-                <div className="text-sm text-(--text-secondary) truncate">
-                  {c.username} • {c.email}
-                </div>
+                <div className="text-sm text-(--text-secondary) truncate">{c.username}</div>
+                <div className="text-sm text-(--text-secondary) truncate">{c.email}</div>
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 <Button

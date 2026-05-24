@@ -1,7 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react'
 import type { Status } from 'thefactory-tools'
 import { StatusControl } from 'thefactory-ui/web'
-import { useFeatureForm, type FeatureFormValues as PackageFeatureFormValues } from 'thefactory-ui/headless'
+import {
+  useFeatureForm,
+  type FeatureFormValues as PackageFeatureFormValues,
+} from 'thefactory-ui/headless'
 import { DependencySelector } from './DependencySelector'
 import DependencyBullet from './DependencyBullet'
 import { FileSelector } from '@renderer/components/ui/FileSelector'
@@ -137,9 +140,7 @@ export default function FeatureForm({
           className="w-full rounded-md border px-3 py-2 text-sm disabled:opacity-60"
           style={{
             background: 'var(--surface-raised)',
-            borderColor: form.error
-              ? 'var(--status-stuck-soft-border)'
-              : 'var(--border-default)',
+            borderColor: form.error ? 'var(--status-stuck-soft-border)' : 'var(--border-default)',
             color: 'var(--text-primary)',
           }}
           aria-invalid={!!form.error}
@@ -356,7 +357,6 @@ export default function FeatureForm({
         >
           <FileSelector
             selected={form.values.context}
-            onCancel={() => setShowFileSelector(false)}
             onConfirm={(paths) => {
               for (const p of paths) form.addContextFile(p)
               setShowFileSelector(false)

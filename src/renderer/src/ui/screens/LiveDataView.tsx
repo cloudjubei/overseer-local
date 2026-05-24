@@ -18,7 +18,7 @@ import {
   Switch,
   Textarea,
 } from 'thefactory-ui/web'
-import { IconDelete, IconEdit } from 'thefactory-ui/web/icons'
+import { IconDelete, IconEdit, IconPlus } from 'thefactory-ui/web/icons'
 
 type FreshnessPolicy = LiveDataProvider['freshnessPolicy']
 type AutoTrigger = LiveDataProvider['autoUpdate']['trigger']
@@ -132,8 +132,14 @@ export default function LiveDataView() {
             {project?.title ?? 'this project'}.
           </p>
         </div>
-        <Button size="sm" onClick={() => setFormModal({ mode: 'create' })}>
-          + Add provider
+        <Button
+          variant="secondary"
+          size="icon"
+          onClick={() => setFormModal({ mode: 'create' })}
+          aria-label="Add live-data provider"
+          title="Add live-data provider"
+        >
+          <IconPlus className="w-4 h-4" />
         </Button>
       </header>
 

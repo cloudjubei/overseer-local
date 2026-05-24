@@ -20,7 +20,6 @@ export type FileSelectorProps = {
   /** Initial selection (matches against `file.relativePath`). */
   selected?: string[]
   onConfirm: (paths: string[]) => void
-  onCancel?: () => void
   allowMultiple?: boolean
   title?: string
 }
@@ -28,7 +27,6 @@ export type FileSelectorProps = {
 export const FileSelector: React.FC<FileSelectorProps> = ({
   selected,
   onConfirm,
-  onCancel,
   allowMultiple = true,
   title,
 }) => {
@@ -38,7 +36,6 @@ export const FileSelector: React.FC<FileSelectorProps> = ({
       files={files}
       initialSelected={selected}
       onConfirm={onConfirm}
-      onCancel={onCancel}
       allowMultiple={allowMultiple}
       title={title}
     />
