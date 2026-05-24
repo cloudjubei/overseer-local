@@ -213,7 +213,13 @@ export function GitProvider({ children }: { children: ReactNode }) {
   const [isLogLoading, setIsLogLoading] = useState(false)
   const logFetchRef = useRef(false)
   const [stashes, setStashes] = useState<GitStashListItem[]>(EMPTY_STASHES)
-  const [isLoaded, setIsLoaded] = useState(false)
+  // `isLoaded` is derived from the projectId that the last refresh actually
+  // settled for. The instant `projectId` changes (e.g. user switches
+  // project), `isLoaded` goes false on the SAME render — no effect needs to
+  // run first, so the UI never paints with stale data of the old project
+  // before flipping into a loading state.
+  const [loadedProjectId, setLoadedProjectId] = useState<string | undefined>(undefined)
+  const isLoaded = loadedProjectId === projectId
   const [loadError, setLoadError] = useState<Error | null>(null)
 
   const [localDiff, setLocalDiff] = useState<LocalDiff | null>(null)
@@ -258,7 +264,7 @@ export function GitProvider({ children }: { children: ReactNode }) {
       setLog(EMPTY_LOG)
       setHasMoreLog(true)
       setStashes(EMPTY_STASHES)
-      setIsLoaded(true)
+      setLoadedProjectId(undefined)
       setLoadError(null)
       return
     }
@@ -284,7 +290,7 @@ export function GitProvider({ children }: { children: ReactNode }) {
     } catch (err) {
       setLoadError(err instanceof Error ? err : new Error(String(err)))
     } finally {
-      setIsLoaded(true)
+      setLoadedProjectId(projectId)
     }
   }, [projectId])
 
@@ -330,7 +336,9 @@ export function GitProvider({ children }: { children: ReactNode }) {
     localDiffAbortRef.current?.abort()
     localDiffLoadedRef.current = false
     logFetchRef.current = false
-    setIsLoaded(false)
+    // `isLoaded` is derived from `loadedProjectId === projectId`, so it
+    // flips false automatically when `projectId` changes — no explicit
+    // setIsLoaded(false) needed.
     setStatus(null)
     setBranches(EMPTY_BRANCHES)
     setLog(EMPTY_LOG)

@@ -15,7 +15,7 @@ import {
   getFilePatch,
   type IntraMode,
 } from 'thefactory-ui/web'
-import { EMPTY_TREE_SHA } from 'thefactory-tools/utils'
+import { EMPTY_TREE_SHA } from 'thefactory-tools/constants'
 
 export type CommitDiffViewerProps = {
   commitSha: string
@@ -104,9 +104,7 @@ export default function CommitDiffViewer({ commitSha }: CommitDiffViewerProps) {
     setSummary(null)
     setSelectedPath(null)
     const found = log.find((c) => c.hash === commitSha)
-    const baseRef = found
-      ? (found.parents?.[0] ?? EMPTY_TREE_SHA)
-      : `${commitSha}^`
+    const baseRef = found ? (found.parents?.[0] ?? EMPTY_TREE_SHA) : `${commitSha}^`
     getGitBranchDiffSummary({
       path: { projectId },
       body: { baseRef, headRef: commitSha, includePatch: true },
@@ -180,7 +178,9 @@ export default function CommitDiffViewer({ commitSha }: CommitDiffViewerProps) {
                   <span className="min-w-0 flex-1 truncate">
                     <PathDisplay path={file.path} />
                   </span>
-                  <GitFileChangesPills patch={file.patch || getFilePatch(summary.patch, file.path)} />
+                  <GitFileChangesPills
+                    patch={file.patch || getFilePatch(summary.patch, file.path)}
+                  />
                 </button>
               )
             })

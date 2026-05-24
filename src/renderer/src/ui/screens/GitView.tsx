@@ -179,14 +179,20 @@ export default function GitView() {
 
   // Default the rail selection to the current branch on mount so the full
   // set of rail actions (Commit, Pull, Push, …) is visible immediately —
-  // without this only Refresh shows until the user clicks something.
+  // without this only Refresh shows until the user clicks something. Gated
+  // on `isLoaded` so the auto-select can never pick from STALE branches:
+  // on project switch the reset effect above clears `selectedBranchName`,
+  // but the GitContext re-fetch is async — without this guard a brief
+  // window exists where `branches` is still the previous project's data
+  // and we'd re-select that project's current branch.
   // Lives above the `isLoaded` / `loadError` short-circuits so the hook
   // order stays stable across the not-yet-loaded → loaded transition (React
   // Rules of Hooks).
   useEffect(() => {
+    if (!isLoaded) return
     if (selectedBranchName || selectedStashRef) return
     if (currentBranchName) setSelectedBranchName(currentBranchName)
-  }, [currentBranchName, selectedBranchName, selectedStashRef])
+  }, [isLoaded, currentBranchName, selectedBranchName, selectedStashRef])
 
   if (!isLoaded) return <LoadingScreen label="Loading git status…" />
   if (loadError) return <LoadingScreen label="Could not load git" error={loadError.message} />
