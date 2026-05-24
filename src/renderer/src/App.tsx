@@ -16,7 +16,8 @@ import { ChatsProvider } from '@core/contexts/ChatsContext'
 import { CostsProvider } from '@core/contexts/CostsContext'
 import { EntitiesProvider } from '@core/contexts/EntitiesContext'
 import { FilesProvider } from '@core/contexts/FilesContext'
-import { GitProvider } from '@core/contexts/GitContext'
+import { GitProvider, useGit } from '@core/contexts/GitContext'
+import { GitCredentialErrorModal } from 'thefactory-ui/web'
 import { GitCredentialsProvider } from '@core/contexts/GitCredentialsContext'
 import { IngestionProvider } from '@core/contexts/IngestionContext'
 import { LiveDataProvidersProvider } from '@core/contexts/LiveDataProvidersContext'
@@ -102,6 +103,7 @@ function BackendGate() {
                                       <DiagnosticsOverlay />
                                       <ShortcutsHelp />
                                       <CommandMenu />
+                                      <GitCredentialErrorModalMount />
                                       <Outlet />
                                     </IngestionProvider>
                                   </LiveDataProvidersProvider>
@@ -279,5 +281,26 @@ export default function App() {
         </AuthProvider>
       </ShortcutsProvider>
     </AppSettingsProvider>
+  )
+}
+
+function GitCredentialErrorModalMount() {
+  const navigate = useNavigate()
+  const { activeProjectId } = useProjects()
+  const { credentialError, clearCredentialError } = useGit()
+  return (
+    <GitCredentialErrorModal
+      isOpen={credentialError !== null}
+      onClose={clearCredentialError}
+      onOpenSettings={() => {
+        clearCredentialError()
+        if (activeProjectId) {
+          navigate(`/projects/${activeProjectId}/settings?tab=github`)
+        }
+      }}
+      op={credentialError?.op}
+      message={credentialError?.message}
+      repoUrl={credentialError?.repoUrl}
+    />
   )
 }

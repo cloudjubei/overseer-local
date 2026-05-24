@@ -24,6 +24,7 @@ import {
   gitStashApply,
   gitStashDrop,
   gitUnstage,
+  isGitCredentialError,
   listGitStashes,
   listUnifiedGitBranches,
   unwrapGitEnvelope,
@@ -143,6 +144,19 @@ export type GitContextValue = {
   applyMerge: (input: GitMergeApplyInput) => Promise<GitMergeResult>
 
   refresh: () => Promise<void>
+
+  /** Set by remote git ops (push/pull/fetch/commit-with-push) when they
+   *  fail with credentials that can't access the repo. Drives the global
+   *  "GitHub credentials don't have access" modal mounted at the app root.
+   *  Null while clean. */
+  credentialError: GitCredentialError | null
+  clearCredentialError: () => void
+}
+
+export type GitCredentialError = {
+  op: 'push' | 'pull' | 'fetch' | 'commit'
+  message: string
+  repoUrl?: string
 }
 
 const GitContext = createContext<GitContextValue | null>(null)
@@ -190,7 +204,7 @@ function persistMergePrefs(projectId: string | undefined, prefs: MergePreference
 
 export function GitProvider({ children }: { children: ReactNode }) {
   const { ws } = useApi()
-  const { projectId } = useActiveProject()
+  const { projectId, project } = useActiveProject()
 
   const [status, setStatus] = useState<GitStatus | null>(null)
   const [branches, setBranches] = useState<GitUnifiedBranch[]>(EMPTY_BRANCHES)
@@ -208,6 +222,11 @@ export function GitProvider({ children }: { children: ReactNode }) {
   const localDiffLoadedRef = useRef(false)
 
   const [selection, setSelectionState] = useState<GitSelection>(null)
+  const [credentialError, setCredentialError] = useState<GitCredentialError | null>(null)
+  const clearCredentialError = useCallback(() => setCredentialError(null), [])
+  useEffect(() => {
+    setCredentialError(null)
+  }, [projectId])
   const [mergePreferences, setMergePreferencesState] = useState<MergePreferences>(() =>
     readMergePrefs(projectId),
   )
@@ -394,7 +413,11 @@ export function GitProvider({ children }: { children: ReactNode }) {
   const commit = useCallback(
     async (input: CommitInput) => {
       const id = requireProject()
-      const { data } = await gitCommit({ path: { projectId: id }, body: input, throwOnError: true })
+      const { data } = await gitCommit({
+        path: { projectId: id },
+        body: input,
+        throwOnError: true,
+      })
       await refresh()
       return data
     },
@@ -404,31 +427,76 @@ export function GitProvider({ children }: { children: ReactNode }) {
   const push = useCallback(
     async (input: PushInput = {}) => {
       const id = requireProject()
-      const { data } = await gitPush({ path: { projectId: id }, body: input, throwOnError: true })
-      await refresh()
-      return data
+      try {
+        const { data } = await gitPush({
+          path: { projectId: id },
+          body: input,
+          throwOnError: true,
+        })
+        await refresh()
+        return data
+      } catch (err) {
+        if (isGitCredentialError(err)) {
+          setCredentialError({
+            op: 'push',
+            message: err instanceof Error ? err.message : String(err),
+            repoUrl: project?.repo_url ?? undefined,
+          })
+        }
+        throw err
+      }
     },
-    [requireProject, refresh],
+    [requireProject, refresh, project?.repo_url],
   )
 
   const pull = useCallback(
     async (input: PullInput = {}) => {
       const id = requireProject()
-      const { data } = await gitPull({ path: { projectId: id }, body: input, throwOnError: true })
-      await refresh()
-      return data
+      try {
+        const { data } = await gitPull({
+          path: { projectId: id },
+          body: input,
+          throwOnError: true,
+        })
+        await refresh()
+        return data
+      } catch (err) {
+        if (isGitCredentialError(err)) {
+          setCredentialError({
+            op: 'pull',
+            message: err instanceof Error ? err.message : String(err),
+            repoUrl: project?.repo_url ?? undefined,
+          })
+        }
+        throw err
+      }
     },
-    [requireProject, refresh],
+    [requireProject, refresh, project?.repo_url],
   )
 
   const fetchOp = useCallback(
     async (input: FetchInput = {}) => {
       const id = requireProject()
-      const { data } = await gitFetch({ path: { projectId: id }, body: input, throwOnError: true })
-      await refresh()
-      return data
+      try {
+        const { data } = await gitFetch({
+          path: { projectId: id },
+          body: input,
+          throwOnError: true,
+        })
+        await refresh()
+        return data
+      } catch (err) {
+        if (isGitCredentialError(err)) {
+          setCredentialError({
+            op: 'fetch',
+            message: err instanceof Error ? err.message : String(err),
+            repoUrl: project?.repo_url ?? undefined,
+          })
+        }
+        throw err
+      }
     },
-    [requireProject, refresh],
+    [requireProject, refresh, project?.repo_url],
   )
 
   const getFileContent = useCallback(
@@ -640,6 +708,8 @@ export function GitProvider({ children }: { children: ReactNode }) {
       buildMergeReport,
       applyMerge,
       refresh,
+      credentialError,
+      clearCredentialError,
     }),
     [
       isLoaded,
@@ -679,6 +749,8 @@ export function GitProvider({ children }: { children: ReactNode }) {
       buildMergeReport,
       applyMerge,
       refresh,
+      credentialError,
+      clearCredentialError,
     ],
   )
 
