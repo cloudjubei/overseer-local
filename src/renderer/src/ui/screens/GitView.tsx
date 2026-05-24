@@ -163,6 +163,20 @@ export default function GitView() {
   const current = branches.find((b) => b.current)
   const currentBranchName = current?.name
 
+  // Switching projects must clear the per-project Git selection — a branch
+  // name from project A might exist in project B with a totally different
+  // SHA, and a commit SHA from project A certainly doesn't resolve in
+  // project B's repo (the `getBranchDiffSummary` route 500s on
+  // `git merge-base <foreign-sha>` with "Not a valid commit name"). Reset
+  // everything here so the auto-select effect below picks the new
+  // project's current branch / tip from scratch.
+  useEffect(() => {
+    setSelectedBranchName(undefined)
+    setSelectedStashRef(undefined)
+    setSelectedCommitSha(undefined)
+    setOpError(null)
+  }, [projectId])
+
   // Default the rail selection to the current branch on mount so the full
   // set of rail actions (Commit, Pull, Push, …) is visible immediately —
   // without this only Refresh shows until the user clicks something.
@@ -339,6 +353,7 @@ export default function GitView() {
             current={current}
             selectedBranchName={selectedBranchName}
             selectedStashRef={selectedStashRef}
+            dirtyCount={dirtyFileCount}
             onSelectBranch={(b) => {
               setSelectedBranchName(b.name)
               setSelectedStashRef(undefined)

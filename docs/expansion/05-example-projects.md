@@ -77,8 +77,8 @@ templates/
 
 Projects produce HTML files that users can view and interact with. This needs to work:
 - **Desktop (overseer-local):** open in an Electron BrowserView/webview, or launch in the system browser
-- **Web (overseer-web):** render in an iframe (sandboxed)
-- **Mobile (future):** render in a React Native WebView
+- **Web (thefactory-overseer-web):** render in an iframe (sandboxed)
+- **Mobile (thefactory-overseer-mobile):** render in a React Native WebView
 - **Exported:** user can download the HTML file(s) and open them anywhere
 
 ### Preview component

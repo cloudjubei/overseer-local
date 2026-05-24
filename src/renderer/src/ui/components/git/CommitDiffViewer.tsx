@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import type { PointerEvent } from 'react'
 import { useActiveProject } from '@core/contexts/ProjectsContext'
+import { useGit } from '@core/contexts/GitContext'
 import { getGitBranchDiffSummary } from 'thefactory-ui/headless/api'
 import type { GitDiffSummary } from 'thefactory-ui/headless/api'
 import {
   Alert,
   DiffViewer,
+  GitFileChangesPills,
   GitFileStatusIcon,
   PathDisplay,
   ResizeHandle,
@@ -13,6 +15,7 @@ import {
   getFilePatch,
   type IntraMode,
 } from 'thefactory-ui/web'
+import { EMPTY_TREE_SHA } from 'thefactory-tools/utils'
 
 export type CommitDiffViewerProps = {
   commitSha: string
@@ -49,6 +52,7 @@ function writeNumberLs(key: string, n: number) {
  */
 export default function CommitDiffViewer({ commitSha }: CommitDiffViewerProps) {
   const { projectId } = useActiveProject()
+  const { log } = useGit()
   const [summary, setSummary] = useState<GitDiffSummary | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -81,7 +85,14 @@ export default function CommitDiffViewer({ commitSha }: CommitDiffViewerProps) {
   const [intra, setIntra] = useState<IntraMode>('word')
 
   // The fetch effect aborts on commit-sha change so a quick click between
-  // commits doesn't render a stale diff.
+  // commits doesn't render a stale diff. Resolving `baseRef`:
+  //   - For an ordinary commit, look it up in `useGit().log` and use its
+  //     `parents[0]`. That also handles the **initial / root commit** (no
+  //     parent) — we fall back to git's empty-tree SHA so the diff renders
+  //     every file as added rather than 500ing on a bad-ref `<sha>^`.
+  //   - For a stash ref (`stash@{0}`) the entry isn't in `log`, so the
+  //     `<ref>^` suffix is correct (git resolves it to the working-tree
+  //     parent of the stash).
   const lastReqRef = useRef<AbortController | null>(null)
   useEffect(() => {
     if (!projectId || !commitSha || commitSha === 'UNCOMMITTED') return
@@ -92,9 +103,13 @@ export default function CommitDiffViewer({ commitSha }: CommitDiffViewerProps) {
     setError(null)
     setSummary(null)
     setSelectedPath(null)
+    const found = log.find((c) => c.hash === commitSha)
+    const baseRef = found
+      ? (found.parents?.[0] ?? EMPTY_TREE_SHA)
+      : `${commitSha}^`
     getGitBranchDiffSummary({
       path: { projectId },
-      body: { baseRef: `${commitSha}^`, headRef: commitSha, includePatch: true },
+      body: { baseRef, headRef: commitSha, includePatch: true },
       signal: controller.signal,
       throwOnError: true,
     })
@@ -111,7 +126,7 @@ export default function CommitDiffViewer({ commitSha }: CommitDiffViewerProps) {
         if (!controller.signal.aborted) setLoading(false)
       })
     return () => controller.abort()
-  }, [projectId, commitSha])
+  }, [projectId, commitSha, log])
 
   if (commitSha === 'UNCOMMITTED') return null
   if (loading) {
@@ -139,7 +154,7 @@ export default function CommitDiffViewer({ commitSha }: CommitDiffViewerProps) {
       >
         <div className="bg-(--surface-muted) px-3 py-2 border-b border-(--border-subtle) text-xs font-semibold text-(--text-secondary) uppercase tracking-wide flex justify-between items-center shrink-0">
           <span>Files ({summary.files.length})</span>
-          <span className="font-mono normal-case">{commitSha.substring(0, 7)}</span>
+          <GitFileChangesPills additions={summary.insertions} deletions={summary.deletions} />
         </div>
         <div className="flex-1 min-h-0 overflow-auto divide-y divide-(--border-subtle)">
           {summary.files.length === 0 ? (
@@ -165,6 +180,7 @@ export default function CommitDiffViewer({ commitSha }: CommitDiffViewerProps) {
                   <span className="min-w-0 flex-1 truncate">
                     <PathDisplay path={file.path} />
                   </span>
+                  <GitFileChangesPills patch={file.patch || getFilePatch(summary.patch, file.path)} />
                 </button>
               )
             })
