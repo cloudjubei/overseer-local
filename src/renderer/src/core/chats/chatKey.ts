@@ -1,10 +1,9 @@
 /**
  * Re-export of `getChatContextKey` / `getChatContext` from
- * `thefactory-tools/utils`. The renderer imports these directly from
- * upstream so the chatKey form (URL slug + cost-aggregate key) stays in
- * lock-step with the backend's `chatContext → chatKey` derivation —
- * matching how the legacy renderer wired up `costsService` directly to
- * `FactoryLLMCostsManager`. Mirrors the same shim in
- * `thefactory-overseer-web/src/core/chats/chatKey.ts`.
+ * `thefactory-tools/utils`. Routing through this shim keeps the chatKey
+ * form (URL slug + cost-aggregate key) in lock-step with the backend's
+ * `chatContext → chatKey` derivation — see `thefactory-ui/docs/ARCHITECTURE.md`
+ * for the narrowly-scoped exception to the "no `thefactory-tools` direct
+ * import" rule. Mirrored in `thefactory-overseer-web` and `thefactory-overseer-mobile`.
  */
 export { getChatContextKey, getChatContext } from 'thefactory-tools/utils'

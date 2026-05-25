@@ -4,13 +4,15 @@ import {
   type RenderToolPreviewArgs,
   type ToolPreviewHooks,
 } from 'thefactory-ui/web'
+import { getToolHeaderPath } from 'thefactory-ui/headless'
 import { useStories } from '@core/contexts/StoriesContext'
 import { useActiveProject } from '@core/contexts/ProjectsContext'
 import StoryAndFeatureCallout from '@ui/components/stories/StoryAndFeatureCallout'
 import FeatureCard from '@ui/components/stories/FeatureCard'
 import DependencyBullet from '@ui/components/stories/DependencyBullet'
-import { asRecord, tryString } from '../utils'
 import type { ToolCall } from '../types'
+
+export { getToolHeaderPath }
 
 /**
  * Web wrapper around the shared `renderToolPreview` registry in
@@ -77,27 +79,3 @@ function ConnectedToolPreview(args: RenderToolPreviewArgs) {
   return <>{renderToolPreview({ ...args, hooks })}</>
 }
 
-export function getToolHeaderPath(toolCall: ToolCall): string | undefined {
-  const args = asRecord(toolCall.arguments)
-  switch (toolCall.name) {
-    case 'writeFile':
-    case 'readFileStructure':
-    case 'listContents':
-    case 'getAstOutline':
-      return tryString(args.path)
-    case 'addFeature':
-    case 'updateStory':
-    case 'updateFeature':
-    case 'reorderFeature':
-    case 'finishFeature':
-    case 'blockFeature': {
-      const storyId = tryString(args.storyId)
-      const featureId = tryString(args.featureId)
-      if (storyId && featureId) return `story ${storyId} / feature ${featureId}`
-      if (storyId) return `story ${storyId}`
-      return undefined
-    }
-    default:
-      return undefined
-  }
-}

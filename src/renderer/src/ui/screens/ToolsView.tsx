@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useTools } from '@core/contexts/ToolsContext'
+import { formatJson } from 'thefactory-ui/headless'
 import type { ToolDescriptor, ToolExecuteResult, ToolPreviewResult } from 'thefactory-ui/headless/api'
 import {
   Alert,
@@ -13,7 +14,6 @@ import {
   Textarea,
 } from 'thefactory-ui/web'
 import { IconChevron } from 'thefactory-ui/web/icons'
-import { formatJson } from '@ui/utils/json'
 
 type ResultView =
   | { kind: 'preview'; result: ToolPreviewResult; durationMs: number }

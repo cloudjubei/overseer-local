@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { formatDateTime } from 'thefactory-ui/headless'
 import {
   getPricing,
   refreshPricing,
@@ -10,7 +11,6 @@ import type {
 import { useAuth } from '@core/contexts/AuthContext'
 import { Alert, Button, Input, Spinner, Surface } from 'thefactory-ui/web'
 import { IconRefresh } from 'thefactory-ui/web/icons'
-import { formatDateTime } from '@ui/utils/date'
 import { getCachedPricing, isStale, setCachedPricing } from './pricingCache'
 
 const FMT = new Intl.NumberFormat('en-US', {

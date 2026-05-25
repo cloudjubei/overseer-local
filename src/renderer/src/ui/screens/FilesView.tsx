@@ -3,8 +3,16 @@ import type { ChangeEvent } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 
 import { useFiles } from '@core/contexts/FilesContext'
-import { arrayBufferToBase64, detectUploadEncoding } from '@core/files/uploadEncoding'
-import { Alert, Button, FileTree, Input, Tooltip, type FileTreeEntry } from 'thefactory-ui/web'
+import {
+  Alert,
+  Button,
+  FileTree,
+  Input,
+  Tooltip,
+  arrayBufferToBase64,
+  detectUploadEncoding,
+  type FileTreeEntry,
+} from 'thefactory-ui/web'
 import { IconArrowLeftMini, IconChevron, IconUpload } from 'thefactory-ui/web/icons'
 
 import FilePane from '@ui/components/files/FilePane'

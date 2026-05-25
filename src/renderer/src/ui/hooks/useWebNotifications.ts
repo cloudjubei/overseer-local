@@ -4,7 +4,7 @@ import { useActiveProject } from '@core/contexts/ProjectsContext'
 import { useProjectSettings } from '@core/hooks/useProjectSettings'
 import { resolveTriState } from '@core/notifications/triState'
 import type { NotificationPrefs } from '@core/types/settings'
-import { playBeep } from '@ui/utils/beep'
+import { playBeep } from 'thefactory-ui/web'
 
 export type NotificationPermissionState = 'granted' | 'denied' | 'default' | 'unsupported'
 

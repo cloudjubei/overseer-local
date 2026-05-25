@@ -8,9 +8,11 @@ import {
   useNavigate,
   useParams,
 } from 'react-router-dom'
+import type { ReactNode } from 'react'
+import { CodeBlockThemeProvider } from 'thefactory-ui/headless'
 import { AgentsProvider } from '@core/contexts/AgentsContext'
 import { ApiProvider } from '@core/contexts/ApiContext'
-import { AppSettingsProvider } from '@core/contexts/AppSettingsContext'
+import { AppSettingsProvider, useAppSettings } from '@core/contexts/AppSettingsContext'
 import { AuthProvider, useAuth } from '@core/contexts/AuthContext'
 import { ChatsProvider } from '@core/contexts/ChatsContext'
 import { CostsProvider } from '@core/contexts/CostsContext'
@@ -250,10 +252,20 @@ function ThemeApplier() {
   return null
 }
 
+function CodeBlockThemeBridge({ children }: { children: ReactNode }) {
+  const { settings } = useAppSettings()
+  return (
+    <CodeBlockThemeProvider value={settings.userPreferences.codeBlockTheme}>
+      {children}
+    </CodeBlockThemeProvider>
+  )
+}
+
 export default function App() {
   return (
     <AppSettingsProvider>
       <ThemeApplier />
+      <CodeBlockThemeBridge>
       <ShortcutsProvider>
         <AuthProvider>
           <ApiProvider>
@@ -280,6 +292,7 @@ export default function App() {
           </ApiProvider>
         </AuthProvider>
       </ShortcutsProvider>
+      </CodeBlockThemeBridge>
     </AppSettingsProvider>
   )
 }

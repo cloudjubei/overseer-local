@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useAgents } from '@core/contexts/AgentsContext'
 import { useChats } from '@core/contexts/ChatsContext'
 import { useStories } from '@core/contexts/StoriesContext'
+import { formatChatTitle } from 'thefactory-ui/headless'
 import { useActiveProject } from '@core/contexts/ProjectsContext'
 import type { ChatContext } from 'thefactory-ui/headless/api'
 import { getChatContext, getChatContextKey } from '@core/chats/chatKey'
@@ -87,7 +88,7 @@ export default function ChatView() {
   const { project, projectId } = useActiveProject()
   const params = useParams<{ projectId: string; contextKey?: string }>()
   const navigate = useNavigate()
-  const { getStory, getFeature } = useStories()
+  const { storyDisplayIndex, featureDisplayIndex } = useStories()
   const { isLoaded, loadError, projectChat, chats, getChat, clearChat, deleteChat } = useChats()
   const { counts } = useBadgeCounts()
   const { deleteRun, rateRun } = useAgents()
@@ -170,18 +171,19 @@ export default function ChatView() {
   const isRunningAgent = isAgentRunChat && (chat?.state === 'created' || chat?.state === 'running')
 
   const totalCost = messages.reduce((sum, m) => sum + (m.usage?.cost ?? 0), 0)
-  const titleHint = renderChatTitle(
-    activeContext,
-    project?.title,
-    getStory,
-    getFeature,
-    chat?.title,
-  )
+  const titleHint = formatChatTitle({
+    context: activeContext,
+    chatTitle: chat?.title,
+    projectName: project?.title,
+    storyDisplayIndex,
+    featureDisplayIndex,
+  })
 
   const header = (
     <ChatHeader
       isCollapsible={false}
       totalCostUSD={totalCost}
+      title={titleHint}
       contextInfoSlot={
         <ContextInfoButton
           storyId={activeContext.storyId}
@@ -373,52 +375,3 @@ function AgentRunHeaderActions({
   )
 }
 
-/**
- * Per-context title hint passed to `ContextInfoButton`. Not rendered as
- * text in the header anymore (desktop doesn't either) — only used as the
- * "i" button's aria-label / tooltip.
- */
-function renderChatTitle(
-  ctx: ChatContext,
-  projectTitle: string | undefined,
-  getStory: (id: string) => { title: string } | undefined,
-  getFeature: (storyId: string, featureId: string) => { title: string } | undefined,
-  chatTitle: string | undefined,
-): string {
-  switch (ctx.type) {
-    case 'PROJECT':
-      return `Project Chat — ${projectTitle ?? 'Project'}`
-    case 'PROJECT_TOPIC':
-      return chatTitle ? `Project ${chatTitle} — ${projectTitle ?? 'Project'}` : 'Project Topic'
-    case 'STORY': {
-      const t = ctx.storyId ? getStory(ctx.storyId)?.title : undefined
-      return `Story Chat — ${t ?? ctx.storyId ?? '?'}`
-    }
-    case 'FEATURE': {
-      const story = ctx.storyId ? (getStory(ctx.storyId)?.title ?? ctx.storyId) : '?'
-      const feature =
-        ctx.storyId && ctx.featureId
-          ? (getFeature(ctx.storyId, ctx.featureId)?.title ?? ctx.featureId)
-          : '?'
-      return `Feature Chat — ${story} / ${feature}`
-    }
-    case 'AGENT_RUN_STORY':
-      return `Agent Story Run — ${ctx.storyId ? (getStory(ctx.storyId)?.title ?? ctx.storyId) : '?'}`
-    case 'AGENT_RUN_FEATURE': {
-      const story = ctx.storyId ? (getStory(ctx.storyId)?.title ?? ctx.storyId) : '?'
-      const feature =
-        ctx.storyId && ctx.featureId
-          ? (getFeature(ctx.storyId, ctx.featureId)?.title ?? ctx.featureId)
-          : '?'
-      return `Agent Feature Run — ${story} / ${feature}`
-    }
-    case 'GROUP':
-      return `Group Chat — ${ctx.groupId?.slice(0, 8) ?? '?'}`
-    case 'GROUP_TOPIC':
-      return chatTitle ? `Group ${chatTitle}` : 'Group Topic'
-    case 'GENERAL':
-      return 'General chat'
-    default:
-      return 'Chat'
-  }
-}

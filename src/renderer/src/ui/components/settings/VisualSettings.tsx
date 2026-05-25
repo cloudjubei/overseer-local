@@ -2,18 +2,32 @@ import { useCallback } from 'react'
 import { useAppSettings } from '@core/contexts/AppSettingsContext'
 import {
   AVAILABLE_THEMES,
+  CODE_BLOCK_THEMES,
   DEFAULT_APP_SETTINGS,
+  type CodeBlockTheme,
   type ShortcutsConfig,
   type ShortcutsModifier,
   type Theme,
 } from '@core/types/settings'
-import { Button, Input } from 'thefactory-ui/web'
-import { NativeSelect as Select } from 'thefactory-ui/web'
+import {
+  Button,
+  Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from 'thefactory-ui/web'
 
 const THEME_LABEL: Record<Theme, string> = {
   light: 'Light',
   dark: 'Dark',
   system: 'System',
+}
+
+const CODE_BLOCK_THEME_LABEL: Record<CodeBlockTheme, string> = {
+  light: 'Light',
+  dark: 'Dark',
 }
 
 export default function VisualSettings() {
@@ -52,18 +66,43 @@ export default function VisualSettings() {
         <label htmlFor="theme" className="block text-sm font-medium">
           Theme
         </label>
-        <Select
-          id="theme"
-          value={settings.theme}
-          onChange={(e) => setTheme(e.target.value as Theme)}
-          className="w-64"
-        >
-          {AVAILABLE_THEMES.map((t) => (
-            <option key={t} value={t}>
-              {THEME_LABEL[t]}
-            </option>
-          ))}
+        <Select value={settings.theme} onValueChange={(v) => setTheme(v as Theme)}>
+          <SelectTrigger id="theme" className="w-64">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {AVAILABLE_THEMES.map((t) => (
+              <SelectItem key={t} value={t}>
+                {THEME_LABEL[t]}
+              </SelectItem>
+            ))}
+          </SelectContent>
         </Select>
+      </div>
+
+      <div className="space-y-2 mt-6">
+        <label htmlFor="code-block-theme" className="block text-sm font-medium">
+          Code block theme
+        </label>
+        <Select
+          value={settings.userPreferences.codeBlockTheme}
+          onValueChange={(v) => setUserPreferences({ codeBlockTheme: v as CodeBlockTheme })}
+        >
+          <SelectTrigger id="code-block-theme" className="w-64">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {CODE_BLOCK_THEMES.map((t) => (
+              <SelectItem key={t} value={t}>
+                {CODE_BLOCK_THEME_LABEL[t]}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <div className="text-[12px] text-(--text-secondary)">
+          Syntax-highlight palette used for tool-call arguments, results, and other inline code
+          blocks. Independent of the overall app theme.
+        </div>
       </div>
 
       <div className="space-y-2 mt-6">
@@ -71,15 +110,16 @@ export default function VisualSettings() {
           Shortcuts modifier key
         </label>
         <Select
-          id="shortcuts-mod"
           value={settings.userPreferences.shortcutsModifier}
-          onChange={(e) =>
-            setUserPreferences({ shortcutsModifier: e.target.value as ShortcutsModifier })
-          }
-          className="w-64"
+          onValueChange={(v) => setUserPreferences({ shortcutsModifier: v as ShortcutsModifier })}
         >
-          <option value="meta">Cmd (⌘) / Meta</option>
-          <option value="ctrl">Ctrl</option>
+          <SelectTrigger id="shortcuts-mod" className="w-64">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="meta">Cmd (⌘) / Meta</SelectItem>
+            <SelectItem value="ctrl">Ctrl</SelectItem>
+          </SelectContent>
         </Select>
         <div className="text-[12px] text-(--text-secondary)">
           This controls which key acts as the modifier for app shortcuts like Cmd/Ctrl+K and +N.

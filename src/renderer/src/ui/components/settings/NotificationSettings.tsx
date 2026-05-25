@@ -13,9 +13,9 @@ import {
   SelectTrigger,
   SelectValue,
   Switch,
+  playBeep,
 } from 'thefactory-ui/web'
 import { useWebNotifications } from '@ui/hooks/useWebNotifications'
-import { playBeep } from '@ui/utils/beep'
 
 const DURATIONS: NotificationPrefs['displayDurationSeconds'][] = [3, 5, 10, 0]
 
