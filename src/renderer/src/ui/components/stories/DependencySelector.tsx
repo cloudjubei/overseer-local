@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
-import { useActiveProject } from '@core/contexts/ProjectsContext'
-import { useStories } from '@core/contexts/StoriesContext'
+import { useActiveProject } from 'thefactory-ui/headless'
+import { useStories } from 'thefactory-ui/headless'
 import { Button, Input } from 'thefactory-ui/web'
 import { useDependencySelector } from 'thefactory-ui/headless'
 

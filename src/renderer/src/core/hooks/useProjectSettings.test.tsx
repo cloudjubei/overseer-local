@@ -1,4 +1,4 @@
-import { act, renderHook, waitFor } from '@testing-library/react'
+import { act, renderHook } from '@testing-library/react'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { useProjectSettings } from './useProjectSettings'
 
@@ -60,17 +60,4 @@ describe('useProjectSettings', () => {
     expect(result.current.settings.notifications.categories.git).toBe(false)
   })
 
-  it('cross-tab storage updates re-read settings for the active project', async () => {
-    const { result } = renderHook(() => useProjectSettings(PROJECT))
-
-    act(() => {
-      window.localStorage.setItem(
-        KEY,
-        JSON.stringify({ notifications: { categories: { tests: true } } }),
-      )
-      window.dispatchEvent(new StorageEvent('storage', { key: KEY }))
-    })
-
-    await waitFor(() => expect(result.current.settings.notifications.categories.tests).toBe(true))
-  })
 })

@@ -3,18 +3,20 @@ import type { ChatContext } from 'thefactory-ui/headless/api'
 import { getChatContextKey } from '../chats/chatKey'
 import { useAgents } from '../contexts/AgentsContext'
 import { useAppSettings } from '../contexts/AppSettingsContext'
-import { useChats } from '../contexts/ChatsContext'
+import { useChats } from 'thefactory-ui/headless'
 import { useGit } from '../contexts/GitContext'
-import { useActiveProject } from '../contexts/ProjectsContext'
-import { useTests } from '../contexts/TestsContext'
+import { useActiveProject } from 'thefactory-ui/headless'
+import { useTests } from 'thefactory-ui/headless'
 import { useProjectSettings } from '../hooks/useProjectSettings'
-import { isChatUnread, markSeen, readChatsSeen, useChatsSeen, writeChatsSeen } from './chatsSeen'
-import { resolveTriState } from './triState'
 import {
+  isChatUnread,
+  markSeen,
+  resolveTriState,
   useBadgeCountsCore,
   type BadgeChatInput,
   type BadgeCounts,
 } from 'thefactory-ui/headless'
+import { readChatsSeen, useChatsSeen, writeChatsSeen } from 'thefactory-ui/web'
 
 export type { BadgeCounts }
 

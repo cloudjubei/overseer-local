@@ -1,7 +1,7 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useActiveProject, useProjects } from '@core/contexts/ProjectsContext'
-import { useStories } from '@core/contexts/StoriesContext'
+import { useActiveProject, useProjects } from 'thefactory-ui/headless'
+import { useStories } from 'thefactory-ui/headless'
 import {
   createEntity,
   deleteEntity,
@@ -30,10 +30,10 @@ import type {
   TimelineLabel,
   Unit,
   Zoom,
-} from './projectTimeline/ProjectTimelineTypes'
+} from 'thefactory-ui/web'
 import { TimelineHoverCard } from './projectTimeline/TimelineHoverCard'
-import { TimelineGridRow } from './projectTimeline/TimelineGridRow'
 import {
+  TimelineGridRow,
   addDays,
   addMonths,
   addWeeks,
@@ -45,8 +45,6 @@ import {
   startOfMonth,
   startOfWeek,
   tsToInput,
-} from './projectTimeline/timelineDateUtils'
-import {
   buildAllProjectsRows,
   buildLabelRows,
   ENTITY_TYPE,
@@ -54,7 +52,7 @@ import {
   mapFeatureToTimelineLabel,
   mapStoryToTimelineLabel,
   normalizeLabels,
-} from './projectTimeline/timelineItemUtils'
+} from 'thefactory-ui/web'
 
 const ROW_HEIGHT_PX = 220
 const COLUMN_WIDTH_PX = 200

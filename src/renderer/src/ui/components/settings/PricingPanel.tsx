@@ -1,17 +1,15 @@
 import { useEffect, useMemo, useState } from 'react'
 import { formatDateTime } from 'thefactory-ui/headless'
 import {
-  getPricing,
-  refreshPricing,
+  getCachedPricing,
+  getPricingState,
+  isPricingStale,
+  refreshPricingState,
 } from 'thefactory-ui/headless/api'
-import type {
-  PricingEntry,
-  PricingSnapshot,
-} from 'thefactory-ui/headless/api'
+import type { PricingEntry, PricingSnapshot } from 'thefactory-ui/headless/api'
 import { useAuth } from '@core/contexts/AuthContext'
 import { Alert, Button, Input, Spinner, Surface } from 'thefactory-ui/web'
 import { IconRefresh } from 'thefactory-ui/web/icons'
-import { getCachedPricing, isStale, setCachedPricing } from './pricingCache'
 
 const FMT = new Intl.NumberFormat('en-US', {
   style: 'currency',
@@ -32,9 +30,8 @@ export default function PricingPanel() {
     setLoading(true)
     setError(null)
     try {
-      const { data } = await getPricing({ throwOnError: true })
+      const data = await getPricingState()
       setSnapshot(data)
-      setCachedPricing(data)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load pricing')
     } finally {
@@ -46,9 +43,8 @@ export default function PricingPanel() {
     setRefreshing(true)
     setError(null)
     try {
-      const { data } = await refreshPricing({ body: {}, throwOnError: true })
+      const data = await refreshPricingState()
       setSnapshot(data)
-      setCachedPricing(data)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to refresh pricing')
     } finally {
@@ -63,7 +59,7 @@ export default function PricingPanel() {
       void load()
       return
     }
-    if (isStale(cached)) {
+    if (isPricingStale(cached)) {
       void refresh()
     }
   }, [token])

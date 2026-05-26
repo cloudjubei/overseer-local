@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { useActiveProject } from '@core/contexts/ProjectsContext'
-import { useLiveDataProviders } from '@core/contexts/LiveDataProvidersContext'
+import { useActiveProject } from 'thefactory-ui/headless'
+import { useLiveDataProviders } from 'thefactory-ui/headless'
 import type {
   LiveDataProvider,
   LiveDataProviderCreateInput,

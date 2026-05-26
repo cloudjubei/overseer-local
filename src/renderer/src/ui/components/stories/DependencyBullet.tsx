@@ -5,8 +5,8 @@ import {
   type ResolvedDependency,
   type StoryStatus,
 } from 'thefactory-ui/web'
-import { useActiveProject } from '@core/contexts/ProjectsContext'
-import { useStories } from '@core/contexts/StoriesContext'
+import { useActiveProject } from 'thefactory-ui/headless'
+import { useStories } from 'thefactory-ui/headless'
 
 export interface DependencyBulletProps {
   className?: string

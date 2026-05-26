@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 
-import { useTests } from '@core/contexts/TestsContext'
-import type { TestsRunningJob } from '@core/contexts/TestsContext'
-import { useActiveProject } from '@core/contexts/ProjectsContext'
-import { useStories } from '@core/contexts/StoriesContext'
+import { useTests } from 'thefactory-ui/headless'
+import type { TestsRunningJob } from 'thefactory-ui/headless'
+import { useActiveProject } from 'thefactory-ui/headless'
+import { useStories } from 'thefactory-ui/headless'
 import { listTestConfigCandidates, readFile as readFileSdk } from 'thefactory-ui/headless/api'
 import {
   Alert,
@@ -21,7 +21,7 @@ import { IconDoubleUp, IconPlay, IconStopCircle } from 'thefactory-ui/web/icons'
 import ChatSidebarPanel from '@ui/components/chat/ChatSidebarPanel'
 import StoriesModalHost from '@ui/screens/stories/StoriesModalHost'
 import type { StoryModalRoute } from '@ui/screens/stories/storyModals'
-import LoadingScreen from './LoadingScreen'
+import { LoadingScreen } from 'thefactory-ui/web'
 
 const TEST_TABS = [
   { value: 'results', label: 'Results' },

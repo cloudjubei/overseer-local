@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { PointerEvent } from 'react'
-import { useActiveProject } from '@core/contexts/ProjectsContext'
+import { useActiveProject } from 'thefactory-ui/headless'
 import { useGit } from '@core/contexts/GitContext'
 import { getPRUrl } from '@ui/components/git/gitPRUrl'
 import {
@@ -34,7 +34,7 @@ import LogPanel from '@ui/components/git/LogPanel'
 import MergeConflictResolver from '@ui/components/git/MergeConflictResolver'
 import MergeDialog from '@ui/components/git/MergeDialog'
 import StashDialog from '@ui/components/git/StashDialog'
-import LoadingScreen from './LoadingScreen'
+import { LoadingScreen } from 'thefactory-ui/web'
 
 type Modal = 'commit' | 'checkout' | 'create-branch' | 'merge' | 'stash' | null
 type MergeArgs = { baseRef: string; branch: string }

@@ -2,12 +2,12 @@ import { useSearchParams } from 'react-router-dom'
 import { CollapsibleSidebar } from 'thefactory-ui/web'
 
 // Subviews
-import VisualSettings from '@ui/components/settings/VisualSettings'
+import { VisualSettings } from 'thefactory-ui/web'
 import LLMSettings from '@ui/components/settings/LLMSettings'
 import NotificationSettings from '@ui/components/settings/NotificationSettings'
-import GitHubSettings from '@ui/components/settings/GitHubSettings'
-import WebSearchSettings from '@ui/components/settings/WebSearchSettings'
-import DatabaseSettings from '@ui/components/settings/DatabaseSettings'
+import { GitHubSettings } from "thefactory-ui/web"
+import { WebSearchSettings } from "thefactory-ui/web"
+import { DatabaseSettings } from "thefactory-ui/web"
 import {
   IconBell,
   IconCpu,

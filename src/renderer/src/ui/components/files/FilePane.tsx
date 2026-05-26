@@ -1,7 +1,7 @@
 import { useCallback } from 'react'
 import { useParams } from 'react-router-dom'
 
-import { useFiles } from '@core/contexts/FilesContext'
+import { useFiles } from 'thefactory-ui/headless'
 import { useAuth } from '@core/contexts/AuthContext'
 import { FilePane as FilePaneBase } from 'thefactory-ui/web'
 

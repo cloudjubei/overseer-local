@@ -1,6 +1,6 @@
 import BackendConnectionPanel from './BackendConnectionPanel'
 import LinkRepoPanel from './LinkRepoPanel'
-import OverseerPanel from './OverseerPanel'
+import { OverseerPanel } from "thefactory-ui/web"
 
 export default function DeveloperSettings() {
   return (

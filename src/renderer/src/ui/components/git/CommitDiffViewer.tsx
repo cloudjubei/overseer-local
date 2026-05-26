@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { PointerEvent } from 'react'
-import { useActiveProject } from '@core/contexts/ProjectsContext'
+import { useActiveProject } from 'thefactory-ui/headless'
 import { useGit } from '@core/contexts/GitContext'
 import { getGitBranchDiffSummary } from 'thefactory-ui/headless/api'
 import type { GitDiffSummary } from 'thefactory-ui/headless/api'

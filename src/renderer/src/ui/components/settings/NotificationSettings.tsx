@@ -1,5 +1,5 @@
 import { useAppSettings } from '@core/contexts/AppSettingsContext'
-import { useActiveProject } from '@core/contexts/ProjectsContext'
+import { useActiveProject } from 'thefactory-ui/headless'
 import { useProjectSettings } from '@core/hooks/useProjectSettings'
 import type { BadgeColor, NotificationCategory, NotificationPrefs } from '@core/types/settings'
 import { BADGE_COLORS } from '@core/types/settings'

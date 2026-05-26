@@ -14,8 +14,8 @@ import type {
   OverseerAuthProviders,
   ProjectDataLocation,
 } from 'thefactory-ui/headless/api'
-import { useOverseer } from '@core/contexts/OverseerContext'
-import { useProjects } from '@core/contexts/ProjectsContext'
+import { useOverseer } from 'thefactory-ui/headless'
+import { useProjects } from 'thefactory-ui/headless'
 import { Alert } from 'thefactory-ui/web'
 import { Button } from 'thefactory-ui/web'
 import { Field } from 'thefactory-ui/web'

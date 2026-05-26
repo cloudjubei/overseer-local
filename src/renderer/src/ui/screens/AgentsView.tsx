@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAgents, type RunChat } from '@core/contexts/AgentsContext'
-import { useActiveProject } from '@core/contexts/ProjectsContext'
-import { useStories } from '@core/contexts/StoriesContext'
+import { useActiveProject } from 'thefactory-ui/headless'
+import { useStories } from 'thefactory-ui/headless'
 import { getChatContextKey } from '@core/chats/chatKey'
 import { AgentRunRowCard, ConfirmDialog, type AgentRunRowCardData } from 'thefactory-ui/web'
 

@@ -1,6 +1,6 @@
 import type { RefObject } from 'react'
 import { ProjectChip, StoryForm as PackageStoryForm, type StoryFormValues } from 'thefactory-ui/web'
-import { useProjects } from '@core/contexts/ProjectsContext'
+import { useProjects } from 'thefactory-ui/headless'
 
 /**
  * Web app wrapper around `thefactory-ui`'s `StoryForm`. Owns only the

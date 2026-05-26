@@ -1,9 +1,9 @@
 import { useCallback, useMemo } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
+import { getPrice } from 'thefactory-ui/headless/api'
 import { ModelChip as ModelChipBase, type ModelChipMode } from 'thefactory-ui/web'
 import { useLLMConfigs } from '@core/contexts/LLMConfigsContext'
-import { getPrice } from '@services/pricingService'
 
 export type ModelChipProps = {
   provider?: string

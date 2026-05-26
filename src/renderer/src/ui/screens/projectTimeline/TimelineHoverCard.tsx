@@ -1,7 +1,7 @@
 import React from 'react'
 import type { GetStoryResponse } from 'thefactory-ui/headless/api'
 import { FeatureCard, StoryCard, type StoryStatus } from 'thefactory-ui/web'
-import type { HoverInfo } from './ProjectTimelineTypes'
+import type { HoverInfo } from 'thefactory-ui/web'
 import DependencyBullet from '@ui/components/stories/DependencyBullet'
 
 function clamp(n: number, min: number, max: number) {

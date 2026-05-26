@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useActiveProject } from '@core/contexts/ProjectsContext'
-import { useStories } from '@core/contexts/StoriesContext'
+import { useActiveProject } from 'thefactory-ui/headless'
+import { useStories } from 'thefactory-ui/headless'
 import { Button, ConfirmDialog, Modal, type StoryFormValues } from 'thefactory-ui/web'
 import { IconDelete, IconSave } from 'thefactory-ui/web/icons'
 import StoryForm from '@ui/components/stories/StoryForm'

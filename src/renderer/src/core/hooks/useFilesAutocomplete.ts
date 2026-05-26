@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { applyMention, parseMention, rankMentionMatches, type MentionParse } from 'thefactory-ui/headless'
-import { useFiles } from '../contexts/FilesContext'
+import { useFiles } from 'thefactory-ui/headless'
 
 export type FilesAutocompleteState = {
   /** The active mention parse, or `null` if the cursor is not in one. */

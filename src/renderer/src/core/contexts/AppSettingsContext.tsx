@@ -1,117 +1,19 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
-import { mergeSettings } from 'thefactory-ui/headless'
-import {
-  DEFAULT_APP_SETTINGS,
-  type AppSettings,
-  type NotificationPrefs,
-  type Theme,
-  type UserPreferences,
-} from '../types/settings'
+import { AppSettingsProvider as HeadlessAppSettingsProvider } from 'thefactory-ui/headless'
+import { localStorageAdapter } from '../storage/localStorageAdapter'
+import { DEFAULT_APP_SETTINGS } from '../types/settings'
 
-const STORAGE_KEY = 'thefactory.appSettings'
+export { useAppSettings, type AppSettingsContextValue } from 'thefactory-ui/headless'
 
-export type AppSettingsContextValue = {
-  settings: AppSettings
-  setTheme: (theme: Theme) => void
-  setUserPreferences: (patch: Partial<UserPreferences>) => void
-  setNotifications: (patch: Partial<NotificationPrefs>) => void
-}
-
-const AppSettingsContext = createContext<AppSettingsContextValue | null>(null)
-
-function readFromStorage(): AppSettings {
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY)
-    if (!raw) return DEFAULT_APP_SETTINGS
-    return mergeSettings(JSON.parse(raw) as Partial<AppSettings>)
-  } catch {
-    return DEFAULT_APP_SETTINGS
-  }
-}
-
-function writeToStorage(next: AppSettings): void {
-  try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
-  } catch {
-    /* localStorage unavailable or quota exceeded */
-  }
-}
-
+/**
+ * App-side adapter: feeds the platform-aware `DEFAULT_APP_SETTINGS` (mac
+ * vs. windows/linux modifier sniff) and the `localStorage`-backed adapter
+ * into the headless `AppSettingsProvider`.
+ */
 export function AppSettingsProvider({ children }: { children: ReactNode }) {
-  const [settings, setSettings] = useState<AppSettings>(readFromStorage)
-
-  // Persist on every committed settings change. Done in an effect (not
-  // inside the state updater) so the write runs exactly once per render —
-  // React 18 strict mode invokes state updaters twice, and any downstream
-  // effect that calls `setSettings` mid-cycle would otherwise risk writing
-  // stale state. The `initialRef` guard skips the mount write — initial
-  // state IS what we just read from storage, no need to echo it back.
-  const initialRef = useRef(true)
-  useEffect(() => {
-    if (initialRef.current) {
-      initialRef.current = false
-      return
-    }
-    writeToStorage(settings)
-  }, [settings])
-
-  useEffect(() => {
-    const onStorage = (ev: StorageEvent) => {
-      if (ev.key !== STORAGE_KEY) return
-      setSettings(readFromStorage())
-    }
-    window.addEventListener('storage', onStorage)
-    return () => window.removeEventListener('storage', onStorage)
-  }, [])
-
-  const setTheme = useCallback((theme: Theme) => {
-    setSettings((current) => ({ ...current, theme }))
-  }, [])
-
-  const setUserPreferences = useCallback((patch: Partial<UserPreferences>) => {
-    setSettings((current) => ({
-      ...current,
-      userPreferences: { ...current.userPreferences, ...patch },
-    }))
-  }, [])
-
-  const setNotifications = useCallback((patch: Partial<NotificationPrefs>) => {
-    setSettings((current) => ({
-      ...current,
-      notifications: {
-        ...current.notifications,
-        ...patch,
-        categories: {
-          ...current.notifications.categories,
-          ...(patch.categories ?? {}),
-        },
-        badgesEnabled: {
-          ...current.notifications.badgesEnabled,
-          ...(patch.badgesEnabled ?? {}),
-        },
-        badgeColors: {
-          ...current.notifications.badgeColors,
-          ...(patch.badgeColors ?? {}),
-        },
-        gitBadgeSubToggles: {
-          ...current.notifications.gitBadgeSubToggles,
-          ...(patch.gitBadgeSubToggles ?? {}),
-        },
-      },
-    }))
-  }, [])
-
-  const value = useMemo<AppSettingsContextValue>(
-    () => ({ settings, setTheme, setUserPreferences, setNotifications }),
-    [settings, setTheme, setUserPreferences, setNotifications],
+  return (
+    <HeadlessAppSettingsProvider storage={localStorageAdapter} defaults={DEFAULT_APP_SETTINGS}>
+      {children}
+    </HeadlessAppSettingsProvider>
   )
-
-  return <AppSettingsContext.Provider value={value}>{children}</AppSettingsContext.Provider>
-}
-
-export function useAppSettings(): AppSettingsContextValue {
-  const ctx = useContext(AppSettingsContext)
-  if (!ctx) throw new Error('useAppSettings must be used within AppSettingsProvider')
-  return ctx
 }

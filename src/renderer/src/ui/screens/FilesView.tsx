@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import type { ChangeEvent } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 
-import { useFiles } from '@core/contexts/FilesContext'
+import { useFiles } from 'thefactory-ui/headless'
 import {
   Alert,
   Button,
@@ -16,7 +16,7 @@ import {
 import { IconArrowLeftMini, IconChevron, IconUpload } from 'thefactory-ui/web/icons'
 
 import FilePane from '@ui/components/files/FilePane'
-import LoadingScreen from './LoadingScreen'
+import { LoadingScreen } from 'thefactory-ui/web'
 
 const FILES_PANE_COLLAPSED_KEY = 'files-pane-collapsed'
 

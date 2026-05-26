@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { ContextFileChip as ContextFileChipBase, type UikitFileMeta } from 'thefactory-ui/web'
-import { useFiles } from '@core/contexts/FilesContext'
+import { useFiles } from 'thefactory-ui/headless'
 
 export type ContextFileChipProps = {
   path: string

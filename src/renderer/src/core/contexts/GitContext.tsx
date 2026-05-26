@@ -56,7 +56,7 @@ import type {
   StashInput,
 } from 'thefactory-ui/headless/api'
 import { useApi } from './ApiContext'
-import { useActiveProject } from './ProjectsContext'
+import { useActiveProject } from 'thefactory-ui/headless'
 
 export type GitSelection =
   | { kind: 'branch'; branchName: string }

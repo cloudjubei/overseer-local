@@ -29,15 +29,15 @@ import {
   extractErrorMessage,
 } from 'thefactory-ui/headless/api'
 import type { GetProjectResponse } from 'thefactory-ui/headless/api'
-import { useProjects } from '@core/contexts/ProjectsContext'
-import { useProjectsGroups } from '@core/contexts/ProjectsGroupsContext'
+import { useProjects } from 'thefactory-ui/headless'
+import { useProjectsGroups } from 'thefactory-ui/headless'
 import {
   ProjectEditorForm,
   blankProjectForm,
   projectToFormState,
   type ProjectFormState,
-} from './ProjectEditorForm'
-import ProjectGroupsEditor from './ProjectGroupsEditor'
+} from 'thefactory-ui/web'
+import { ProjectGroupsEditor } from "thefactory-ui/web"
 
 const ALL_GROUP_ID = '__all__'
 const UNCATEGORIZED_ID = '__uncategorized__'

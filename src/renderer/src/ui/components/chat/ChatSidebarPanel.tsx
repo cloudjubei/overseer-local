@@ -4,13 +4,13 @@ import type { ChatContext } from 'thefactory-ui/headless/api'
 import { ChatHeader, ChatSidebarPanel as ChatSidebarPanelBase } from 'thefactory-ui/web'
 import { getChatContextKey } from '@core/chats/chatKey'
 import ChatBodyForContext from './ChatBodyForContext'
-import ChatDynamicContextModal from './ChatDynamicContextModal'
+import { ChatDynamicContextModal } from 'thefactory-ui/web'
 import ChatSettingsDropdownConnected from './ChatSettingsDropdownConnected'
-import SystemPromptViewerConnected from './SystemPromptViewerConnected'
+import { SystemPromptViewerConnected } from 'thefactory-ui/web'
 import ContextInfoButton from '@ui/components/stories/ContextInfoButton'
 import ModelChip from '@ui/components/agents/ModelChip'
-import UsageModal from './UsageModal'
-import { useChats } from '@core/contexts/ChatsContext'
+import { UsageModalConnected as UsageModal } from 'thefactory-ui/web'
+import { useChats } from 'thefactory-ui/headless'
 
 export type ChatSidebarPanelProps = {
   context: ChatContext

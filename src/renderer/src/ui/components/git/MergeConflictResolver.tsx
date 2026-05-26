@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useActiveProject } from '@core/contexts/ProjectsContext'
+import { useActiveProject } from 'thefactory-ui/headless'
 import { useGit } from '@core/contexts/GitContext'
 import {
   readFile as readFileSdk,

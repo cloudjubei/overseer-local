@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
-import { useProjectsGroups } from '@core/contexts/ProjectsGroupsContext'
-import { useProjects } from '@core/contexts/ProjectsContext'
+import { useProjectsGroups } from 'thefactory-ui/headless'
+import { useProjects } from 'thefactory-ui/headless'
 import { GroupHome, type GroupHomeProjectCard } from 'thefactory-ui/web'
 
 /**

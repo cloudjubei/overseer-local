@@ -5,8 +5,8 @@ import {
   type ToolPreviewHooks,
 } from 'thefactory-ui/web'
 import { getToolHeaderPath } from 'thefactory-ui/headless'
-import { useStories } from '@core/contexts/StoriesContext'
-import { useActiveProject } from '@core/contexts/ProjectsContext'
+import { useStories } from 'thefactory-ui/headless'
+import { useActiveProject } from 'thefactory-ui/headless'
 import StoryAndFeatureCallout from '@ui/components/stories/StoryAndFeatureCallout'
 import FeatureCard from '@ui/components/stories/FeatureCard'
 import DependencyBullet from '@ui/components/stories/DependencyBullet'

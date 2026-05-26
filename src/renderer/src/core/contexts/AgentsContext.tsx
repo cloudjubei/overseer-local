@@ -9,10 +9,10 @@ import {
   type GetChatResponse,
   type StartAgentRunData,
 } from 'thefactory-ui/headless/api'
-import { useChats } from './ChatsContext'
-import { useGitCredentials } from './GitCredentialsContext'
+import { useChats } from 'thefactory-ui/headless'
+import { useGitCredentials } from 'thefactory-ui/headless'
 import { useLLMConfigs } from './LLMConfigsContext'
-import { useWebSearchKeys } from './WebSearchKeysContext'
+import { useWebSearchKeys } from 'thefactory-ui/headless'
 
 export type AgentType = StartAgentRunData['body']['params']['agentType']
 

@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { useActiveProject } from '@core/contexts/ProjectsContext'
+import { useActiveProject } from 'thefactory-ui/headless'
 import { useAppSettings } from '@core/contexts/AppSettingsContext'
-import { useStories } from '@core/contexts/StoriesContext'
+import { useStories } from 'thefactory-ui/headless'
 import { useAgents } from '@core/contexts/AgentsContext'
 import type {
   StoriesListSorting,
@@ -21,13 +21,13 @@ import {
 } from 'thefactory-ui/web'
 import { IconBoard, IconCalculator, IconEdit, IconList, IconPlus } from 'thefactory-ui/web/icons'
 import DependencyBullet from '@ui/components/stories/DependencyBullet'
-import ExclamationChip from '@ui/components/stories/ExclamationChip'
+import { ExclamationChip } from 'thefactory-ui/web'
 import RunAgentButton from '@ui/components/agents/RunAgentButton'
 import ModelChip from '@ui/components/agents/ModelChip'
-import UsageModal from '@ui/components/chat/UsageModal'
+import { UsageModalConnected as UsageModal } from 'thefactory-ui/web'
 import { getChatContextKey } from '@core/chats/chatKey'
 import ChatSidebarPanel from '@ui/components/chat/ChatSidebarPanel'
-import BoardView from './BoardView'
+import { BoardView } from 'thefactory-ui/web'
 import StoriesModalHost from './StoriesModalHost'
 import type { StoryModalRoute } from './storyModals'
 

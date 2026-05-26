@@ -10,7 +10,7 @@ import {
   IconPlus,
   IconRobot,
 } from 'thefactory-ui/web/icons'
-import LLMConfigForm, { type LLMConfigFormHandle } from './LLMConfigForm'
+import { LLMConfigForm, type LLMConfigFormHandle } from "thefactory-ui/web"
 import PricingPanel from './PricingPanel'
 
 type ModalRoute =
@@ -37,8 +37,7 @@ export default function LLMSettings() {
 
   return (
     <div className="flex flex-col h-full w-full overflow-hidden">
-      {/* === LLM Configurations section === */}
-      <div className="px-8 py-3 bg-(--surface-base) border-b border-(--border-subtle) flex items-center justify-between shrink-0">
+      <div className="px-4 py-3 bg-(--surface-base) border-b border-(--border-subtle) flex items-center justify-between shrink-0">
         <h2 className="text-xl font-semibold">LLMs</h2>
         <Button
           onClick={() => setModal({ kind: 'create' })}
@@ -49,7 +48,7 @@ export default function LLMSettings() {
         </Button>
       </div>
 
-      <div className="flex-1 min-h-0 overflow-auto px-8 py-4">
+      <div className="flex-1 min-h-0 overflow-auto no-scrollbar px-4 py-4">
         {loadError && (
           <div className="mb-3">
             <Alert>{loadError.message}</Alert>
@@ -75,7 +74,7 @@ export default function LLMSettings() {
                   <div className="min-w-0">
                     <div className="font-medium truncate">{cfg.name}</div>
                     <div className="text-sm text-(--text-secondary) truncate">
-                      Provider: {cfg.provider} • Model: {cfg.model || '—'}
+                      {cfg.provider} · {cfg.model || '—'}
                     </div>
                   </div>
                   <div className="flex flex-col gap-2 shrink-0 md:flex-row md:items-center">
@@ -138,7 +137,7 @@ export default function LLMSettings() {
       </div>
 
       {/* === Model Pricing section === */}
-      <div className="px-8 py-3 bg-(--surface-base) border-y border-(--border-subtle) flex items-center justify-between shrink-0">
+      <div className="px-4 py-3 bg-(--surface-base) border-y border-(--border-subtle) flex items-center justify-between shrink-0">
         <h2 className="text-xl font-semibold">Model Pricing</h2>
         <Button
           variant="outline"
@@ -157,7 +156,7 @@ export default function LLMSettings() {
         </Button>
       </div>
       {pricingOpen && (
-        <div className="flex-1 min-h-0 overflow-hidden px-8 py-4">
+        <div className="flex-1 min-h-0 overflow-hidden px-4 py-4">
           <PricingPanel />
         </div>
       )}

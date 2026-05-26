@@ -4,7 +4,7 @@ import {
   completeOverseerGithubAuth,
   getResponseDataMessage,
 } from 'thefactory-ui/headless/api'
-import LoadingScreen from './LoadingScreen'
+import { LoadingScreen } from 'thefactory-ui/web'
 
 /**
  * Landing page for the GitHub OAuth redirect flow. GitHub redirects here with

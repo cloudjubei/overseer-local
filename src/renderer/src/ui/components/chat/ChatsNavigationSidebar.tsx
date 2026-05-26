@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useChats } from '@core/contexts/ChatsContext'
-import { useStories } from '@core/contexts/StoriesContext'
+import { useChats } from 'thefactory-ui/headless'
+import { useStories } from 'thefactory-ui/headless'
 import { useChatRowStatus } from '@core/notifications/useChatRowStatus'
 import { getChatContextKey } from '@core/chats/chatKey'
 import type { ChatContext, GetChatResponse, GetStoryResponse } from 'thefactory-ui/headless/api'

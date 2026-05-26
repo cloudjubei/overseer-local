@@ -4,9 +4,9 @@ import {
   rankMentionMatches,
   type ReferenceSuggestion,
 } from 'thefactory-ui/web'
-import { useFiles } from '@core/contexts/FilesContext'
-import { useStories } from '@core/contexts/StoriesContext'
-import { useActiveProject } from '@core/contexts/ProjectsContext'
+import { useFiles } from 'thefactory-ui/headless'
+import { useStories } from 'thefactory-ui/headless'
+import { useActiveProject } from 'thefactory-ui/headless'
 
 export type FileMentionsTextareaProps = {
   id?: string

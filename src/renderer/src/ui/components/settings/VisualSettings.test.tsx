@@ -1,14 +1,24 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { act, render, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { AppSettingsProvider } from '@core/contexts/AppSettingsContext'
-import VisualSettings from './VisualSettings'
+import { AppSettingsProvider, useAppSettings } from '@core/contexts/AppSettingsContext'
+import { VisualSettings } from 'thefactory-ui/web'
 
 const STORAGE_KEY = 'thefactory.appSettings'
+
+function ThemeSetter() {
+  const { setTheme } = useAppSettings()
+  return (
+    <button data-testid="set-dark" onClick={() => setTheme('dark')}>
+      set dark
+    </button>
+  )
+}
 
 function renderPanel() {
   return render(
     <AppSettingsProvider>
       <VisualSettings />
+      <ThemeSetter />
     </AppSettingsProvider>,
   )
 }
@@ -18,16 +28,18 @@ describe('VisualSettings', () => {
     window.localStorage.clear()
   })
 
-  it('renders the current theme and persists changes', () => {
+  it('renders the current theme and persists changes through the context', () => {
     renderPanel()
 
-    const select = screen.getByLabelText(/theme/i) as HTMLSelectElement
-    expect(select.value).toBe('system')
+    const trigger = screen.getByLabelText('Theme') as HTMLButtonElement
+    expect(trigger).toHaveTextContent('System')
 
-    fireEvent.change(select, { target: { value: 'dark' } })
+    act(() => {
+      screen.getByTestId('set-dark').click()
+    })
 
-    expect(select.value).toBe('dark')
     const persisted = JSON.parse(window.localStorage.getItem(STORAGE_KEY) ?? '{}')
     expect(persisted.theme).toBe('dark')
+    expect(trigger).toHaveTextContent('Dark')
   })
 })
