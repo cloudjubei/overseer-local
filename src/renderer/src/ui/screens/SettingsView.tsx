@@ -88,7 +88,13 @@ export default function SettingsView() {
         <div className="h-full min-h-0 overflow-y-auto p-4">
           {activeCategory === 'visual' && <VisualSettings />}
           {activeCategory === 'notifications' && <NotificationSettings />}
-          {activeCategory === 'github' && <GitHubSettings />}
+          {activeCategory === 'github' && (
+            // Electron renderer can't redirect cleanly (file:// host) — use
+            // the device flow only. window.open is trapped by the main
+            // process's setWindowOpenHandler, which routes to
+            // shell.openExternal, so the default openExternalUrl works.
+            <GitHubSettings hostCapabilities={{ canRedirect: false, canOpenBrowser: true }} />
+          )}
           {activeCategory === 'websearch' && <WebSearchSettings />}
           {activeCategory === 'database' && <DatabaseSettings />}
           {activeCategory === 'developer' && <DeveloperSettings />}
