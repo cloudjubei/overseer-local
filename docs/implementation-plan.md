@@ -25,3 +25,33 @@ Things genuinely blocked on a third-party decision or external trigger, not on e
 - Replacing the IPC bridge with direct HTTP from the renderer for **everything**. IPC stays for the Electron-only native surfaces (window controls, native menus, file pickers, deep links). Data goes straight over HTTP + WS.
 - A separate "headless" Electron build for CI / scripting. The CLI is `thefactory-cli` against the backend — see [docs/expansion/04-cli-integration.md](./expansion/04-cli-integration.md).
 - Tests for UI components in the renderer. Same rule as the other frontend clients — typecheck + build + manual run. Tests live in `thefactory-ui/headless` and the backend.
+
+---
+
+## B. Cross-repo feature work (in-flight)
+
+Backed by the cross-repo plan at `/Users/cloud/.claude/plans/splendid-hopping-sunrise.md`. Four independent features; each pickable by a separate developer.
+
+### B.1 GitHub OAuth (device flow) (Feature 1)
+
+The Electron renderer can't reliably redirect (`file://` SPA); device flow only.
+
+- Wire `<GitCredentialsForm hostCapabilities={{ canOpenBrowser: true, canRedirect: false }} />` (component lands in `thefactory-ui` §B.1; backend routes in `thefactory-backend` §E.1).
+- Use `window.electron.shell.openExternal(verification_uri)` for opening the GitHub device entry — bridge via preload if not already exposed.
+
+### B.2 Dictation via Electron Web Speech API (Feature 2 — best-effort)
+
+The bundled Chromium may or may not expose `webkitSpeechRecognition`. Detect once at startup; if unsupported, the mic affordance never renders.
+
+- New [src/renderer/src/speech/webSpeechEngine.ts](../src/renderer/src/speech/webSpeechEngine.ts) implementing `SpeechToTextEngine` (signature from `thefactory-ui/headless`). Continuous + interim results; `onresult` dispatches partial/final; `onerror` surfaces `e.error`.
+- Wire via `<SpeechToTextEngineContext.Provider>` at the renderer root.
+- Main-process permission handler in [src/main/index.ts](../src/main/index.ts) — `session.defaultSession.setPermissionRequestHandler` allowing `media` (microphone) for the renderer origin only.
+- If Electron 30+ on macOS needs `app.commandLine.appendSwitch('enable-speech-dispatcher')` (verify at impl time), apply it before `app.whenReady()` and document in [ARCHITECTURE.md](./ARCHITECTURE.md).
+
+### B.3 Git tools in chat (Feature 3)
+
+No direct changes — the new previews + tool surface land in `thefactory-ui` (§B.3) and `thefactory-tools` (§B.1), and flow through the shared `renderToolPreview` dispatcher mounted in chat.
+
+### B.4 CLI agents end-to-end (Feature 4)
+
+Renderer consumes the same `thefactory-ui` web spine, so most surfaces land for free. Add `<CliConfigForm />` to the renderer's settings stack. ModelChip CLI toggle + `<ToolConfirmationModal />` "Allow permanently" support + cost surface flow through automatically.

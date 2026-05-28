@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import {
   Navigate,
   Outlet,
@@ -10,7 +10,7 @@ import {
 } from 'react-router-dom'
 import type { ReactNode } from 'react'
 import { CodeBlockThemeProvider } from 'thefactory-ui/headless'
-import { AgentsProvider } from '@core/contexts/AgentsContext'
+import { AgentsProvider } from 'thefactory-ui/headless'
 import { ApiProvider } from '@core/contexts/ApiContext'
 import { AppSettingsProvider, useAppSettings } from '@core/contexts/AppSettingsContext'
 import { AuthProvider, useAuth } from '@core/contexts/AuthContext'
@@ -18,7 +18,8 @@ import { ChatsProvider } from 'thefactory-ui/headless'
 import { CostsProvider } from 'thefactory-ui/headless'
 import { EntitiesProvider } from 'thefactory-ui/headless'
 import { FilesProvider } from 'thefactory-ui/headless'
-import { GitProvider, useGit } from '@core/contexts/GitContext'
+import { GitProvider, useGit } from 'thefactory-ui/headless'
+import { localStorageAdapter } from './core/storage/localStorageAdapter'
 import { GitCredentialErrorModal } from 'thefactory-ui/web'
 import { GitCredentialsProvider } from 'thefactory-ui/headless'
 import { IngestionProvider } from 'thefactory-ui/headless'
@@ -54,14 +55,12 @@ import GroupChatView from '@ui/screens/GroupChatView'
 import GroupHomeView from '@ui/screens/GroupHomeView'
 import GitView from '@ui/screens/GitView'
 import LiveDataView from '@ui/screens/LiveDataView'
-import { LoadingScreen } from 'thefactory-ui/web'
+import { LoadingScreen, ProjectTimelineView, WelcomeView } from 'thefactory-ui/web'
 import LoginScreen from '@ui/screens/LoginScreen'
-import ProjectTimelineView from '@ui/screens/ProjectTimelineView'
 import SettingsView from '@ui/screens/SettingsView'
 import StoriesView from '@ui/screens/StoriesView'
 import TestsView from '@ui/screens/TestsView'
 import ToolsView from '@ui/screens/ToolsView'
-import WelcomeView from '@ui/screens/WelcomeView'
 
 /**
  * Desktop's `App.tsx`. Mirrors [web's same-named file](../../../../thefactory-overseer-web/src/App.tsx)
@@ -92,7 +91,7 @@ function BackendGate() {
               <ProjectsGroupsProvider>
                 <StoriesProvider>
                   <FilesProvider>
-                    <GitProvider>
+                    <GitProvider storage={localStorageAdapter}>
                       <CostsProvider>
                         <ChatsProvider>
                           <AgentsProvider>
@@ -159,8 +158,20 @@ function MainShell() {
           ? tabParam
           : 'stories'
 
+  // Track the URL's projectId across renders. Only sync URL → state when
+  // the URL itself just changed (e.g. browser back/forward or deep link),
+  // NOT when `activeProjectId` changed via a sidebar click — in that case
+  // the click already updated state and called `navigate()`, and the URL
+  // takes an extra render to reflect the new path. Without this guard the
+  // URL-sync effect fires on that intermediate render with the OLD URL,
+  // reverting `activeProjectId` back to the previous project and locking
+  // every project-dependent context into an oscillation.
+  const lastUrlProjectIdRef = useRef(projectId)
   useEffect(() => {
+    const urlChanged = lastUrlProjectIdRef.current !== projectId
+    lastUrlProjectIdRef.current = projectId
     if (!projectId) return
+    if (!urlChanged) return
     if (!projects.some((p) => p.id === projectId)) return
     if (projectId !== activeProjectId) setActiveProjectId(projectId)
   }, [projectId, projects, activeProjectId, setActiveProjectId])

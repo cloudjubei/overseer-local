@@ -1,6 +1,6 @@
 import type { Feature, GetStoryResponse } from 'thefactory-ui/headless/api'
 import { FeatureCard as FeatureCardBase, type StoryStatus as Status } from 'thefactory-ui/web'
-import DependencyBullet from './DependencyBullet'
+import { DependencyBullet } from 'thefactory-ui/web'
 import RunAgentButton from '@ui/components/agents/RunAgentButton'
 
 export type FeatureCardProps = {

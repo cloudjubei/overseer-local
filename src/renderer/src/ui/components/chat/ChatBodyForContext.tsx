@@ -6,7 +6,7 @@ import {
   type PromptVariables,
 } from 'thefactory-ui/web'
 import type { ChatContext } from 'thefactory-ui/headless/api'
-import { useAgents } from '@core/contexts/AgentsContext'
+import { useAgents } from 'thefactory-ui/headless'
 import { useChats } from 'thefactory-ui/headless'
 import { useFiles } from 'thefactory-ui/headless'
 import { useStories } from 'thefactory-ui/headless'

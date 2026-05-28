@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useAgents, type AgentType } from '@core/contexts/AgentsContext'
+import { useAgents, type AgentType } from 'thefactory-ui/headless'
 import { getChatContextKey } from '@core/chats/chatKey'
 import { RunAgentButton as RunAgentButtonUI } from 'thefactory-ui/web'
 

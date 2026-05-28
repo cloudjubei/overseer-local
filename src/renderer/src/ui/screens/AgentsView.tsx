@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useAgents, type RunChat } from '@core/contexts/AgentsContext'
+import { useAgents, type RunChat } from 'thefactory-ui/headless'
 import { useActiveProject } from 'thefactory-ui/headless'
 import { useStories } from 'thefactory-ui/headless'
 import { getChatContextKey } from '@core/chats/chatKey'

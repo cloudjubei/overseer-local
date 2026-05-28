@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { DragEvent, KeyboardEvent, ReactNode } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useAppSettings } from '@core/contexts/AppSettingsContext'
 import { useProjects } from 'thefactory-ui/headless'
 import { useProjectsGroups, type ProjectsGroup } from 'thefactory-ui/headless'
@@ -57,6 +57,7 @@ const DND_PROJECT_MIME = 'application/x-thefactory-sidebar-project'
  */
 export default function Sidebar({ projectId, activeTab, activeGroupId, activeGroupTab }: Props) {
   const navigate = useNavigate()
+  const location = useLocation()
   const { settings, setUserPreferences } = useAppSettings()
   const userCollapsed = settings.userPreferences.sidebarCollapsed === true
   const collapsed = userCollapsed
@@ -121,7 +122,14 @@ export default function Sidebar({ projectId, activeTab, activeGroupId, activeGro
 
   const onSelectProject = (id: string) => {
     setActiveProjectId(id)
-    navigate(`/projects/${id}/${targetProjectTab}`)
+    // Switching projects while inside Settings should keep the user on
+    // their current sub-tab (`?tab=llms`, `?tab=github`, …). Settings is
+    // mostly global; only `NotificationSettings` reads per-project state
+    // and that re-renders automatically when `useActiveProject()` flips.
+    // For other tabs, dropping the search params is the right call (a
+    // selected story / file from the previous project doesn't carry over).
+    const search = targetProjectTab === 'settings' ? location.search : ''
+    navigate(`/projects/${id}/${targetProjectTab}${search}`)
   }
   const onSelectGroup = (id: string) => {
     navigate(`/groups/${id}/${targetGroupTab}`)

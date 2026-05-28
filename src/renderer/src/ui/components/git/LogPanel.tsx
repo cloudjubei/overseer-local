@@ -1,5 +1,5 @@
 import { GitCommitGraph } from 'thefactory-ui/web'
-import { useGit } from '@core/contexts/GitContext'
+import { useGit } from 'thefactory-ui/headless'
 
 export type LogPanelProps = {
   selectedCommitSha?: string

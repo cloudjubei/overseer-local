@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { useAgents } from '@core/contexts/AgentsContext'
+import { useAgents } from 'thefactory-ui/headless'
 import { useChats } from 'thefactory-ui/headless'
 import { useStories } from 'thefactory-ui/headless'
 import { formatChatTitle } from 'thefactory-ui/headless'

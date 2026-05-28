@@ -1,5 +1,5 @@
 import { Tooltip } from 'thefactory-ui/web'
-import StoryAndFeatureCallout from './StoryAndFeatureCallout'
+import { StoryAndFeatureCallout } from 'thefactory-ui/web'
 
 export type ContextInfoButtonProps = {
   storyId?: string

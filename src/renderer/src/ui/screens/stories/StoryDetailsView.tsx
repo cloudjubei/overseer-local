@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useActiveProject } from 'thefactory-ui/headless'
 import { useStories } from 'thefactory-ui/headless'
-import { useAgents } from '@core/contexts/AgentsContext'
+import { useAgents } from 'thefactory-ui/headless'
 import type { Feature, GetStoryResponse } from 'thefactory-ui/headless/api'
 import {
   Button,
@@ -13,7 +13,7 @@ import {
   statusKey,
 } from 'thefactory-ui/web'
 import { IconBack, IconCalculator, IconChevron, IconEdit, IconPlus } from 'thefactory-ui/web/icons'
-import DependencyBullet from '@ui/components/stories/DependencyBullet'
+import { DependencyBullet } from 'thefactory-ui/web'
 import { ExclamationChip } from 'thefactory-ui/web'
 import RunAgentButton from '@ui/components/agents/RunAgentButton'
 import ModelChip from '@ui/components/agents/ModelChip'

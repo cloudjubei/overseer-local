@@ -76,16 +76,16 @@ export default function PricingPanel() {
   return (
     <section className="flex flex-col gap-3 h-full min-h-0">
       <div className="shrink-0 flex items-center justify-between gap-3">
-        <p className="text-sm opacity-70">USD per 1M tokens, as the backend has them cached.</p>
+        <p className="text-sm opacity-70">USD per 1M tokens.</p>
         <Button
           size="icon"
           variant="outline"
           onClick={() => void refresh()}
-          disabled={refreshing}
+          disabled={loading || refreshing}
           title="Refresh from upstream"
           aria-label="Refresh from upstream"
         >
-          {refreshing ? <Spinner /> : <IconRefresh className="w-4 h-4" />}
+          {loading || refreshing ? <Spinner /> : <IconRefresh className="w-4 h-4" />}
         </Button>
       </div>
 

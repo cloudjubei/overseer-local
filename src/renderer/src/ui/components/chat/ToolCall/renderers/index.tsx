@@ -7,9 +7,9 @@ import {
 import { getToolHeaderPath } from 'thefactory-ui/headless'
 import { useStories } from 'thefactory-ui/headless'
 import { useActiveProject } from 'thefactory-ui/headless'
-import StoryAndFeatureCallout from '@ui/components/stories/StoryAndFeatureCallout'
+import { StoryAndFeatureCallout } from 'thefactory-ui/web'
 import FeatureCard from '@ui/components/stories/FeatureCard'
-import DependencyBullet from '@ui/components/stories/DependencyBullet'
+import { DependencyBullet } from 'thefactory-ui/web'
 import type { ToolCall } from '../types'
 
 export { getToolHeaderPath }

@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useActiveProject } from 'thefactory-ui/headless'
 import { useAppSettings } from '@core/contexts/AppSettingsContext'
 import { useStories } from 'thefactory-ui/headless'
-import { useAgents } from '@core/contexts/AgentsContext'
+import { useAgents } from 'thefactory-ui/headless'
 import type {
   StoriesListSorting,
   StoriesListStatusFilter,
@@ -20,7 +20,7 @@ import {
   statusKey,
 } from 'thefactory-ui/web'
 import { IconBoard, IconCalculator, IconEdit, IconList, IconPlus } from 'thefactory-ui/web/icons'
-import DependencyBullet from '@ui/components/stories/DependencyBullet'
+import { DependencyBullet } from 'thefactory-ui/web'
 import { ExclamationChip } from 'thefactory-ui/web'
 import RunAgentButton from '@ui/components/agents/RunAgentButton'
 import ModelChip from '@ui/components/agents/ModelChip'

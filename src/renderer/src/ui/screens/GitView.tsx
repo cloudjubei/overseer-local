@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { PointerEvent } from 'react'
 import { useActiveProject } from 'thefactory-ui/headless'
-import { useGit } from '@core/contexts/GitContext'
+import { useGit } from 'thefactory-ui/headless'
 import { getPRUrl } from '@ui/components/git/gitPRUrl'
 import {
   Alert,
@@ -26,15 +26,18 @@ import {
   IconPullRequest,
   IconRefresh,
 } from 'thefactory-ui/web/icons'
-import CommitDialog from '@ui/components/git/CommitDialog'
-import { CheckoutDialog, CreateBranchDialog } from '@ui/components/git/BranchDialogs'
+import {
+  CommitDialog,
+  CheckoutDialog,
+  CreateBranchDialog,
+  LoadingScreen,
+  MergeConflictResolver,
+  MergeDialog,
+  StashDialog,
+} from 'thefactory-ui/web'
 import CommitDiffViewer from '@ui/components/git/CommitDiffViewer'
 import LocalChangesPane from '@ui/components/git/LocalChangesPane'
 import LogPanel from '@ui/components/git/LogPanel'
-import MergeConflictResolver from '@ui/components/git/MergeConflictResolver'
-import MergeDialog from '@ui/components/git/MergeDialog'
-import StashDialog from '@ui/components/git/StashDialog'
-import { LoadingScreen } from 'thefactory-ui/web'
 
 type Modal = 'commit' | 'checkout' | 'create-branch' | 'merge' | 'stash' | null
 type MergeArgs = { baseRef: string; branch: string }
@@ -110,6 +113,13 @@ export default function GitView() {
   const [busy, setBusy] = useState<BusyOp>(null)
   const [opError, setOpError] = useState<string | null>(null)
   const [selectedBranchName, setSelectedBranchName] = useState<string | undefined>()
+  // Which side of a same-named branch the user picked. A branch can appear
+  // in both Branches and Remotes when its local and remote SHAs differ —
+  // the two anchor on different commits, so the section is part of the
+  // selection identity.
+  const [selectedBranchSection, setSelectedBranchSection] = useState<
+    'local' | 'remote' | undefined
+  >()
   const [selectedStashRef, setSelectedStashRef] = useState<string | undefined>()
   const [selectedCommitSha, setSelectedCommitSha] = useState<string | undefined>()
   const [confirmDeleteName, setConfirmDeleteName] = useState<string | null>(null)
@@ -172,6 +182,7 @@ export default function GitView() {
   // project's current branch / tip from scratch.
   useEffect(() => {
     setSelectedBranchName(undefined)
+    setSelectedBranchSection(undefined)
     setSelectedStashRef(undefined)
     setSelectedCommitSha(undefined)
     setOpError(null)
@@ -191,7 +202,13 @@ export default function GitView() {
   useEffect(() => {
     if (!isLoaded) return
     if (selectedBranchName || selectedStashRef) return
-    if (currentBranchName) setSelectedBranchName(currentBranchName)
+    if (currentBranchName) {
+      setSelectedBranchName(currentBranchName)
+      // The current branch's working-tree state (UNCOMMITTED) and its
+      // local tip are the local-side anchors. `sectionMatches` lights up
+      // the remote row too when local/remote SHAs happen to be equal.
+      setSelectedBranchSection('local')
+    }
   }, [isLoaded, currentBranchName, selectedBranchName, selectedStashRef])
 
   if (!isLoaded) return <LoadingScreen label="Loading git status…" />
@@ -212,10 +229,17 @@ export default function GitView() {
       (status?.unstaged.length ?? 0) +
       (status?.untracked.length ?? 0) >
     0
+  // Anchor SHA for the commit graph. When the user picked the Remote row
+  // of a name that exists in both sections, anchor on `remoteSha`; the
+  // local-side anchor stays on `localSha` (or UNCOMMITTED for the current
+  // branch with a dirty tree). If only one side exists, fall back to the
+  // available SHA in either order.
   const branchTipSha = selectedBranch
-    ? selectedBranch.current && hasUncommittedChanges
+    ? selectedBranch.current && hasUncommittedChanges && selectedBranchSection !== 'remote'
       ? 'UNCOMMITTED'
-      : (selectedBranch.localSha ?? selectedBranch.remoteSha ?? undefined)
+      : selectedBranchSection === 'remote'
+        ? (selectedBranch.remoteSha ?? selectedBranch.localSha ?? undefined)
+        : (selectedBranch.localSha ?? selectedBranch.remoteSha ?? undefined)
     : undefined
 
   // Mirror desktop's pre-checkout guard — a dirty tree blocks branch switching
@@ -250,17 +274,47 @@ export default function GitView() {
   // of a branch, also select that branch in the sidebar. Falls back to the
   // remote tracking ref so picking an unpulled-remote commit still works.
   const onSelectBranchBySha = (sha: string) => {
+    // UNCOMMITTED always belongs to the local current branch — the working
+    // tree lives on it. (`sectionMatches` lights up the remote row too
+    // when local/remote SHAs are equivalent for that branch.)
+    if (sha === 'UNCOMMITTED') {
+      const cur = branches.find((b) => b.current && b.isLocal)
+      if (cur) {
+        setSelectedBranchName(cur.name)
+        setSelectedBranchSection('local')
+        setSelectedStashRef(undefined)
+      }
+      return
+    }
+    // Idempotent: if the current selection's tip already matches the sha,
+    // keep it — prevents flipping local↔remote when both happen to point
+    // at the same commit (in-sync branch).
+    if (selectedBranch) {
+      const tip =
+        selectedBranchSection === 'remote'
+          ? selectedBranch.remoteSha
+          : selectedBranch.localSha
+      if (tip === sha) return
+    }
     const local = branches.find((b) => b.isLocal && b.localSha === sha)
     if (local) {
       setSelectedBranchName(local.name)
+      setSelectedBranchSection('local')
       setSelectedStashRef(undefined)
       return
     }
     const remote = branches.find((b) => b.isRemote && b.remoteSha === sha)
     if (remote) {
       setSelectedBranchName(remote.name)
+      setSelectedBranchSection('remote')
       setSelectedStashRef(undefined)
+      return
     }
+    // No branch tip matches — historical commit. Clear the sidebar so the
+    // selection doesn't imply a wrong association.
+    setSelectedBranchName(undefined)
+    setSelectedBranchSection(undefined)
+    setSelectedStashRef(undefined)
   }
 
   const onSwitchToSelected = () => {
@@ -358,10 +412,12 @@ export default function GitView() {
             stashes={stashes}
             current={current}
             selectedBranchName={selectedBranchName}
+            selectedBranchSection={selectedBranchSection}
             selectedStashRef={selectedStashRef}
             dirtyCount={dirtyFileCount}
-            onSelectBranch={(b) => {
+            onSelectBranch={(b, section) => {
               setSelectedBranchName(b.name)
+              setSelectedBranchSection(section)
               setSelectedStashRef(undefined)
               setSelectedCommitSha(undefined)
             }}
@@ -369,6 +425,7 @@ export default function GitView() {
             onSelectStash={(ref) => {
               setSelectedStashRef(ref)
               setSelectedBranchName(undefined)
+              setSelectedBranchSection(undefined)
               setSelectedCommitSha(undefined)
             }}
           />
