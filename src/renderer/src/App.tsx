@@ -25,7 +25,8 @@ import { GitCredentialsProvider } from 'thefactory-ui/headless'
 import { IngestionProvider } from 'thefactory-ui/headless'
 import { LiveDataProvidersProvider } from 'thefactory-ui/headless'
 import { LLMConfigsProvider } from '@core/contexts/LLMConfigsContext'
-import { OverseerProvider } from 'thefactory-ui/headless'
+import { NativeDictationTriggerContext, OverseerProvider } from 'thefactory-ui/headless'
+import { macOsDictationTrigger } from './core/speech/macOsDictationTrigger'
 import { ProjectsProvider, useProjects } from 'thefactory-ui/headless'
 import { ProjectsGroupsProvider, useProjectsGroups } from 'thefactory-ui/headless'
 import { StoriesProvider } from 'thefactory-ui/headless'
@@ -274,6 +275,7 @@ function CodeBlockThemeBridge({ children }: { children: ReactNode }) {
 
 export default function App() {
   return (
+    <NativeDictationTriggerContext.Provider value={macOsDictationTrigger}>
     <AppSettingsProvider>
       <ThemeApplier />
       <CodeBlockThemeBridge>
@@ -305,6 +307,7 @@ export default function App() {
       </ShortcutsProvider>
       </CodeBlockThemeBridge>
     </AppSettingsProvider>
+    </NativeDictationTriggerContext.Provider>
   )
 }
 

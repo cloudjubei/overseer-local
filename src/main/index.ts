@@ -1,7 +1,8 @@
-import { app, shell, BrowserWindow, nativeImage, dialog } from 'electron'
+import { app, shell, BrowserWindow, nativeImage, dialog, session } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { registerAuthIpc } from './registerAuthIpc'
+import { registerSystemDictationIpc } from './registerSystemDictationIpc'
 
 const getAppIcon = () => {
   // In dev (electron-forge start + vite), __dirname points to .vite/build, so use process.cwd()
@@ -62,6 +63,20 @@ app.whenReady().then(async () => {
   electronApp.setAppUserModelId('com.electron')
 
   registerAuthIpc()
+  // Bridge for the chat composer's mic button: triggers macOS native
+  // Dictation via `osascript`. See `registerSystemDictationIpc` for
+  // the full rationale and the Accessibility-permission gating.
+  registerSystemDictationIpc()
+
+  // Allow the renderer to capture microphone audio for any future
+  // in-renderer audio capture path. macOS native Dictation (the
+  // current desktop dictation flow) doesn't touch the renderer mic,
+  // so this is dormant today; kept ready for a future hosted-STT
+  // engine that runs `getUserMedia` from the renderer.
+  session.defaultSession.setPermissionRequestHandler((_webContents, permission, callback) => {
+    if (permission === 'media') return callback(true)
+    callback(false)
+  })
 
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)

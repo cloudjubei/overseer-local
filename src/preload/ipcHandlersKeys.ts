@@ -9,6 +9,8 @@ const IPC_HANDLER_KEYS = {
   AUTH_GET: 'auth:get',
   AUTH_SET: 'auth:set',
   AUTH_CLEAR: 'auth:clear',
+  SYSTEM_DICTATION_TRIGGER: 'system-dictation:trigger',
+  SYSTEM_DICTATION_OPEN_SETTINGS: 'system-dictation:open-settings',
 }
 
 export default IPC_HANDLER_KEYS
