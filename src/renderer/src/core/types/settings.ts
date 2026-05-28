@@ -7,13 +7,16 @@ import { DEFAULT_APP_SETTINGS as HEADLESS_DEFAULTS, type AppSettings } from 'the
 
 export {
   AVAILABLE_THEMES,
+  BADGE_COLOR_CATEGORIES,
   BADGE_COLORS,
   CODE_BLOCK_THEMES,
   DEFAULT_NOTIFICATION_PREFS,
   DEFAULT_PROJECT_SETTINGS,
   DEFAULT_SHORTCUTS,
+  isBadgeColorCategory,
   type AppSettings,
   type BadgeColor,
+  type BadgeColorCategory,
   type ChatBadgeCountMode,
   type CodeBlockTheme,
   type NotificationCategory,

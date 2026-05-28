@@ -6,6 +6,7 @@ import { useProjects } from 'thefactory-ui/headless'
 import { useProjectsGroups, type ProjectsGroup } from 'thefactory-ui/headless'
 import { useBadgeCounts, type BadgeCounts } from '@core/notifications/useBadgeCounts'
 import type { BadgeColor, NotificationCategory } from '@core/types/settings'
+import { isBadgeColorCategory } from '@core/types/settings'
 import { Button, NotificationBadge, renderProjectIcon, SpinnerWithDot } from 'thefactory-ui/web'
 import { IconCollection, IconFolder, IconFolderOpen, IconMenu } from 'thefactory-ui/web/icons'
 import {
@@ -249,7 +250,10 @@ export default function Sidebar({ projectId, activeTab, activeGroupId, activeGro
               const cat = TAB_BADGE_CATEGORY[tab.key]
               const countKey = cat ? badgeKeyForCategory(cat) : undefined
               const badgeValue = countKey ? (counts[countKey] as number) : 0
-              const badgeColor = cat ? settings.notifications.badgeColors[cat] : undefined
+              const badgeColor =
+                cat && isBadgeColorCategory(cat)
+                  ? settings.notifications.badgeColors[cat]
+                  : undefined
               // Chat tab gets the additional "thinking" spinner-with-dot
               // affordance — matches desktop's StaticNavItem.
               const thinking = tab.key === 'chat' && counts.chatThinking

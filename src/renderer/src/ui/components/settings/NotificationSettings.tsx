@@ -2,7 +2,7 @@ import { useAppSettings } from '@core/contexts/AppSettingsContext'
 import { useActiveProject } from 'thefactory-ui/headless'
 import { useProjectSettings } from '@core/hooks/useProjectSettings'
 import type { BadgeColor, NotificationCategory, NotificationPrefs } from '@core/types/settings'
-import { BADGE_COLORS } from '@core/types/settings'
+import { BADGE_COLORS, isBadgeColorCategory } from '@core/types/settings'
 import {
   Alert,
   Button,
@@ -112,7 +112,7 @@ export default function NotificationSettings() {
                   }
                   label={CATEGORY_LABEL[c]}
                 />
-                {prefs.badgesEnabled[c] && (
+                {prefs.badgesEnabled[c] && isBadgeColorCategory(c) && (
                   <div className="w-32">
                     <Select
                       value={prefs.badgeColors[c]}
