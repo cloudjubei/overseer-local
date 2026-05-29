@@ -1,9 +1,6 @@
-import { useEffect, useRef, useState } from 'react'
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { PointerEvent } from 'react'
-import { useActiveProject } from 'thefactory-ui/headless'
-import { useGit } from 'thefactory-ui/headless'
-import { getGitBranchDiffSummary } from 'thefactory-ui/headless/api'
-import type { GitDiffSummary } from 'thefactory-ui/headless/api'
+import type { GitDiffSummary, GitFileChange, GitLogCommit } from 'thefactory-ui/headless/api'
 import {
   Alert,
   DiffViewer,
@@ -17,8 +14,25 @@ import {
 } from 'thefactory-ui/web'
 import { EMPTY_TREE_SHA } from 'thefactory-tools/constants'
 
+/**
+ * Fetches the file-level diff between two refs. Caller-supplied so the
+ * same viewer renders a project commit, an overseer commit, or any
+ * future repo scope without baking the SDK path in here.
+ */
+export type CommitDiffFetcher = (
+  input: { baseRef: string; headRef: string; includePatch: boolean },
+  signal: AbortSignal,
+) => Promise<GitDiffSummary>
+
 export type CommitDiffViewerProps = {
   commitSha: string
+  /**
+   * Loaded log for parent-SHA lookup. The root commit has no parent — we
+   * fall back to git's empty-tree SHA so the diff renders every file as
+   * added rather than 500ing on a bad-ref `<sha>^`.
+   */
+  log: GitLogCommit[]
+  fetcher: CommitDiffFetcher
 }
 
 const LEFT_WIDTH_KEY = 'CommitDiffViewer.leftWidthPx'
@@ -45,14 +59,54 @@ function writeNumberLs(key: string, n: number) {
 }
 
 /**
- * Read-only diff for a single commit or stash — fetched via
- * `getBranchDiffSummary({ baseRef: "<sha>^", headRef: "<sha>" })`. Same
- * layout as desktop's `GitCommitChanges`: file list on the left, the rich
- * `DiffViewer` on the right with wrap/ignoreWS/intra-line toggles.
+ * One row in the file list. Memoised so a selection change in a commit
+ * with thousands of files only re-renders the two affected rows (newly-
+ * selected and previously-selected) instead of the whole list. Custom
+ * `arePropsEqual` makes the comparison cheap: stable identities on the
+ * file object, the memoised patch reference, the stable click handler.
  */
-export default function CommitDiffViewer({ commitSha }: CommitDiffViewerProps) {
-  const { projectId } = useActiveProject()
-  const { log } = useGit()
+type FileRowProps = {
+  file: GitFileChange
+  patch: string
+  isSelected: boolean
+  onSelect: (path: string) => void
+}
+
+const FileRow = memo(
+  function FileRow({ file, patch, isSelected, onSelect }: FileRowProps) {
+    return (
+      <button
+        type="button"
+        onClick={() => onSelect(file.path)}
+        className={`w-full flex items-center gap-2 px-2 py-1.5 text-left text-xs ${
+          isSelected
+            ? 'bg-sky-50 dark:bg-sky-900/25 text-sky-900 dark:text-sky-100'
+            : 'hover:bg-(--surface-muted)'
+        }`}
+        title={file.path}
+      >
+        <GitFileStatusIcon status={file.status} className="w-3.5 h-3.5 shrink-0" />
+        <span className="min-w-0 flex-1 truncate">
+          <PathDisplay path={file.path} />
+        </span>
+        <GitFileChangesPills patch={patch} />
+      </button>
+    )
+  },
+  (a, b) =>
+    a.file === b.file &&
+    a.patch === b.patch &&
+    a.isSelected === b.isSelected &&
+    a.onSelect === b.onSelect,
+)
+
+/**
+ * Read-only diff for a single commit or stash — fetched via the supplied
+ * `fetcher` (typically `getGitBranchDiffSummary({ baseRef: "<sha>^",
+ * headRef: "<sha>" })`). File list on the left, the rich `DiffViewer` on
+ * the right with wrap/ignoreWS/intra-line toggles.
+ */
+export default function CommitDiffViewer({ commitSha, log, fetcher }: CommitDiffViewerProps) {
   const [summary, setSummary] = useState<GitDiffSummary | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -84,18 +138,9 @@ export default function CommitDiffViewer({ commitSha }: CommitDiffViewerProps) {
   const [ignoreWS, setIgnoreWS] = useState(false)
   const [intra, setIntra] = useState<IntraMode>('word')
 
-  // The fetch effect aborts on commit-sha change so a quick click between
-  // commits doesn't render a stale diff. Resolving `baseRef`:
-  //   - For an ordinary commit, look it up in `useGit().log` and use its
-  //     `parents[0]`. That also handles the **initial / root commit** (no
-  //     parent) — we fall back to git's empty-tree SHA so the diff renders
-  //     every file as added rather than 500ing on a bad-ref `<sha>^`.
-  //   - For a stash ref (`stash@{0}`) the entry isn't in `log`, so the
-  //     `<ref>^` suffix is correct (git resolves it to the working-tree
-  //     parent of the stash).
   const lastReqRef = useRef<AbortController | null>(null)
   useEffect(() => {
-    if (!projectId || !commitSha || commitSha === 'UNCOMMITTED') return
+    if (!commitSha || commitSha === 'UNCOMMITTED') return
     lastReqRef.current?.abort()
     const controller = new AbortController()
     lastReqRef.current = controller
@@ -105,13 +150,8 @@ export default function CommitDiffViewer({ commitSha }: CommitDiffViewerProps) {
     setSelectedPath(null)
     const found = log.find((c) => c.hash === commitSha)
     const baseRef = found ? (found.parents?.[0] ?? EMPTY_TREE_SHA) : `${commitSha}^`
-    getGitBranchDiffSummary({
-      path: { projectId },
-      body: { baseRef, headRef: commitSha, includePatch: true },
-      signal: controller.signal,
-      throwOnError: true,
-    })
-      .then(({ data }) => {
+    fetcher({ baseRef, headRef: commitSha, includePatch: true }, controller.signal)
+      .then((data) => {
         if (controller.signal.aborted) return
         setSummary(data)
         setSelectedPath(data.files[0]?.path ?? null)
@@ -124,7 +164,26 @@ export default function CommitDiffViewer({ commitSha }: CommitDiffViewerProps) {
         if (!controller.signal.aborted) setLoading(false)
       })
     return () => controller.abort()
-  }, [projectId, commitSha, log])
+  }, [commitSha, log, fetcher])
+
+  // Memoise per-file patches once per loaded summary. `getFilePatch` scans
+  // the entire combined `summary.patch` to find a file's section, so
+  // calling it inline for every row turns into O(n · |patch|) work on
+  // every render — devastating for commits with thousands of files when
+  // a row click forces the list to re-render. The Map is computed once
+  // and reused across renders + handed to memoised rows as a stable
+  // string reference per path.
+  const patchByPath = useMemo(() => {
+    const m = new Map<string, string>()
+    if (!summary) return m
+    const combined = summary.patch ?? ''
+    for (const f of summary.files) {
+      m.set(f.path, f.patch || getFilePatch(combined, f.path) || '')
+    }
+    return m
+  }, [summary])
+
+  const onSelectFile = useCallback((path: string) => setSelectedPath(path), [])
 
   if (commitSha === 'UNCOMMITTED') return null
   if (loading) {
@@ -138,10 +197,7 @@ export default function CommitDiffViewer({ commitSha }: CommitDiffViewerProps) {
   if (!summary) return null
 
   const activeFile = summary.files.find((f) => f.path === selectedPath) ?? summary.files[0]
-  // Some backends return per-file `patch`; others fall back to the combined
-  // `summary.patch`. Splitting it per-path keeps the diff viewer focused on
-  // one file at a time — matches desktop's `getFilePatch` helper.
-  const filePatch = activeFile?.patch || getFilePatch(summary.patch, activeFile?.path || '')
+  const filePatch = activeFile ? (patchByPath.get(activeFile.path) ?? '') : ''
 
   return (
     <div className="flex flex-row min-h-0 h-full bg-(--surface-base)">
@@ -160,30 +216,15 @@ export default function CommitDiffViewer({ commitSha }: CommitDiffViewerProps) {
               No file changes in this commit.
             </div>
           ) : (
-            summary.files.map((file) => {
-              const isSelected = file.path === activeFile?.path
-              return (
-                <button
-                  key={file.path}
-                  type="button"
-                  onClick={() => setSelectedPath(file.path)}
-                  className={`w-full flex items-center gap-2 px-2 py-1.5 text-left text-xs ${
-                    isSelected
-                      ? 'bg-sky-50 dark:bg-sky-900/25 text-sky-900 dark:text-sky-100'
-                      : 'hover:bg-(--surface-muted)'
-                  }`}
-                  title={file.path}
-                >
-                  <GitFileStatusIcon status={file.status} className="w-3.5 h-3.5 shrink-0" />
-                  <span className="min-w-0 flex-1 truncate">
-                    <PathDisplay path={file.path} />
-                  </span>
-                  <GitFileChangesPills
-                    patch={file.patch || getFilePatch(summary.patch, file.path)}
-                  />
-                </button>
-              )
-            })
+            summary.files.map((file) => (
+              <FileRow
+                key={file.path}
+                file={file}
+                patch={patchByPath.get(file.path) ?? ''}
+                isSelected={file.path === activeFile?.path}
+                onSelect={onSelectFile}
+              />
+            ))
           )}
         </div>
       </div>

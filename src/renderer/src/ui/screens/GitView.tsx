@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import type { PointerEvent } from 'react'
 import { useActiveProject } from 'thefactory-ui/headless'
 import { useGit } from 'thefactory-ui/headless'
+import { getGitBranchDiffSummary } from 'thefactory-ui/headless/api'
 import { getPRUrl } from '@ui/components/git/gitPRUrl'
 import {
   Alert,
@@ -35,7 +36,7 @@ import {
   MergeDialog,
   StashDialog,
 } from 'thefactory-ui/web'
-import CommitDiffViewer from '@ui/components/git/CommitDiffViewer'
+import CommitDiffViewer, { type CommitDiffFetcher } from '@ui/components/git/CommitDiffViewer'
 import LocalChangesPane from '@ui/components/git/LocalChangesPane'
 import LogPanel from '@ui/components/git/LogPanel'
 
@@ -99,6 +100,7 @@ export default function GitView() {
     branches,
     stashes,
     status,
+    log,
     localDiff,
     push,
     pull,
@@ -109,6 +111,18 @@ export default function GitView() {
     dropStash,
     deleteBranch,
   } = useGit()
+  const commitDiffFetcher = useCallback<CommitDiffFetcher>(
+    async ({ baseRef, headRef, includePatch }, signal) => {
+      const { data } = await getGitBranchDiffSummary({
+        path: { projectId: projectId ?? '' },
+        body: { baseRef, headRef, includePatch },
+        signal,
+        throwOnError: true,
+      })
+      return data
+    },
+    [projectId],
+  )
   const [modal, setModal] = useState<Modal>(null)
   const [busy, setBusy] = useState<BusyOp>(null)
   const [opError, setOpError] = useState<string | null>(null)
@@ -212,7 +226,14 @@ export default function GitView() {
   }, [isLoaded, currentBranchName, selectedBranchName, selectedStashRef])
 
   if (!isLoaded) return <LoadingScreen label="Loading git status…" />
-  if (loadError) return <LoadingScreen label="Could not load git" error={loadError.message} />
+  if (loadError)
+    return (
+      <LoadingScreen
+        label="Could not load git"
+        error={loadError.message}
+        onRetry={() => void refresh()}
+      />
+    )
 
   const selectedBranch = selectedBranchName
     ? branches.find((b) => b.name === selectedBranchName)
@@ -445,7 +466,7 @@ export default function GitView() {
           // (stashes aren't part of the branch history), so the file/diff
           // viewer takes the full pane.
           <section className="flex flex-col flex-1 min-h-0">
-            <CommitDiffViewer commitSha={selectedStashRef} />
+            <CommitDiffViewer commitSha={selectedStashRef} log={log} fetcher={commitDiffFetcher} />
           </section>
         ) : (
           <>
@@ -468,7 +489,11 @@ export default function GitView() {
                 parent navigation already indicates which view this is). */}
             <section className="flex flex-col flex-1 min-h-0">
               {selectedCommitSha && selectedCommitSha !== 'UNCOMMITTED' ? (
-                <CommitDiffViewer commitSha={selectedCommitSha} />
+                <CommitDiffViewer
+                  commitSha={selectedCommitSha}
+                  log={log}
+                  fetcher={commitDiffFetcher}
+                />
               ) : (
                 <LocalChangesPane onResolveConflict={(file) => setConflictResolverFile(file)} />
               )}

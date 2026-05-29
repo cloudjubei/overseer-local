@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import type { ChangeEvent } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 
@@ -48,6 +48,23 @@ export default function FilesView() {
     if (tail.length === 0) return null
     return tail.split('/').map(decodeURIComponent).join('/')
   }, [projectId, location.pathname])
+
+  // Drop both the URL tail and the in-context selection synchronously when
+  // the active project changes. A selected file from project A must NOT
+  // carry over to project B just because the two happen to share a
+  // same-named file. `useLayoutEffect` commits the clear before any
+  // child useEffect runs, so the URL → selectFile sync below sees a
+  // cleared URL and bails. Mirrors the same fix in overseer-web FilesView.
+  const prevProjectIdRef = useRef(projectId)
+  useLayoutEffect(() => {
+    if (prevProjectIdRef.current === projectId) return
+    prevProjectIdRef.current = projectId
+    if (!projectId) return
+    selectFile(null)
+    if (urlFilePath !== null) {
+      navigate(`/projects/${projectId}/files`, { replace: true })
+    }
+  }, [projectId, urlFilePath, navigate, selectFile])
 
   useEffect(() => {
     if (urlFilePath === null) return

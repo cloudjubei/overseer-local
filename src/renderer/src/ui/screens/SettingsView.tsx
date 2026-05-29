@@ -80,9 +80,17 @@ export default function SettingsView() {
       storageKey="settings-panel-collapsed"
       headerSubtitle=""
     >
+      {/* `llms` and `developer` get edge-to-edge wrappers — both can swap
+          into a fill-the-pane subview (LLM playground, overseer Git view)
+          where a `p-4` outer margin would clip the embedded UI. Each
+          category applies its own padding when it actually wants it. */}
       {activeCategory === 'llms' ? (
         <div className="h-full w-full min-h-0 overflow-hidden">
           <LLMSettings />
+        </div>
+      ) : activeCategory === 'developer' ? (
+        <div className="h-full w-full min-h-0 overflow-hidden">
+          <DeveloperSettings />
         </div>
       ) : (
         <div className="h-full min-h-0 overflow-y-auto p-4">
@@ -97,7 +105,6 @@ export default function SettingsView() {
           )}
           {activeCategory === 'websearch' && <WebSearchSettings />}
           {activeCategory === 'database' && <DatabaseSettings />}
-          {activeCategory === 'developer' && <DeveloperSettings />}
         </div>
       )}
     </CollapsibleSidebar>
