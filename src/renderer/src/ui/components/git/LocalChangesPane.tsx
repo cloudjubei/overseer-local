@@ -3,6 +3,7 @@ import type { DragEvent, MouseEvent } from 'react'
 import { useGit } from 'thefactory-ui/headless'
 import type { LocalDiffEntry } from 'thefactory-ui/headless'
 import { extractServerError } from 'thefactory-ui/headless/api'
+import { mergeUnstagedWithUntracked } from 'thefactory-tools/utils'
 import {
   Alert,
   ConfirmDialog,
@@ -154,14 +155,14 @@ export default function LocalChangesPane({ onResolveConflict }: LocalChangesPane
   // don't have a diff entry of their own) — surfaced alongside the unstaged
   // section since that's their staging "from" position.
   const stagedEntries = useMemo<LocalDiffEntry[]>(() => localDiff?.staged ?? [], [localDiff])
-  const unstagedEntries = useMemo<LocalDiffEntry[]>(() => {
-    const tracked = localDiff?.unstaged ?? []
-    const untracked = (status?.untracked ?? []).map<LocalDiffEntry>((path) => ({
-      path,
-      status: '?',
-    }))
-    return [...tracked, ...untracked]
-  }, [localDiff, status])
+  const unstagedEntries = useMemo<LocalDiffEntry[]>(
+    () =>
+      mergeUnstagedWithUntracked(localDiff?.unstaged ?? [], status?.untracked ?? [], (path) => ({
+        path,
+        status: '?',
+      })),
+    [localDiff, status],
+  )
 
   // Selection bookkeeping when the underlying lists change — drop entries
   // for paths that disappeared, and auto-select the first row if nothing is
