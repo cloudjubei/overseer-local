@@ -13,6 +13,8 @@ import {
   IconRail,
   IconRailButton,
   ResizeHandle,
+  useLocalStorageBool,
+  useLocalStorageNumber,
 } from 'thefactory-ui/web'
 import {
   IconArchive,
@@ -50,47 +52,6 @@ const DIRTY_TREE_MESSAGE =
 const SIDEBAR_COLLAPSED_KEY = 'GitView.sidebarCollapsed'
 const TOP_HEIGHT_KEY = 'GitView.commitGraphHeightPx'
 const DEFAULT_TOP_HEIGHT = 280
-
-function readBoolLs(key: string, fallback: boolean): boolean {
-  if (typeof window === 'undefined') return fallback
-  try {
-    const v = window.localStorage.getItem(key)
-    if (v === null) return fallback
-    return v === '1'
-  } catch {
-    return fallback
-  }
-}
-
-function writeBoolLs(key: string, val: boolean) {
-  if (typeof window === 'undefined') return
-  try {
-    window.localStorage.setItem(key, val ? '1' : '0')
-  } catch {
-    // best-effort
-  }
-}
-
-function readNumberLs(key: string, fallback: number): number {
-  if (typeof window === 'undefined') return fallback
-  try {
-    const v = window.localStorage.getItem(key)
-    if (v === null) return fallback
-    const n = parseInt(v, 10)
-    return Number.isFinite(n) && n > 0 ? n : fallback
-  } catch {
-    return fallback
-  }
-}
-
-function writeNumberLs(key: string, n: number) {
-  if (typeof window === 'undefined') return
-  try {
-    window.localStorage.setItem(key, String(Math.round(n)))
-  } catch {
-    // best-effort
-  }
-}
 
 export default function GitView() {
   const { projectId, project } = useActiveProject()
@@ -146,20 +107,10 @@ export default function GitView() {
   // Collapsible left aside — matches the Files/Tools pattern (inline, no
   // shared component). Width transitions are animated; collapsed = 48px,
   // expanded delegates to the lifted `GitSidebar`'s own width state.
-  const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(() =>
-    readBoolLs(SIDEBAR_COLLAPSED_KEY, false),
-  )
-  useEffect(() => {
-    writeBoolLs(SIDEBAR_COLLAPSED_KEY, sidebarCollapsed)
-  }, [sidebarCollapsed])
+  const [sidebarCollapsed, setSidebarCollapsed] = useLocalStorageBool(SIDEBAR_COLLAPSED_KEY, false)
 
   // Vertical split between commit graph (top) and changes/diff (bottom).
-  const [topHeightPx, setTopHeightPx] = useState<number>(() =>
-    readNumberLs(TOP_HEIGHT_KEY, DEFAULT_TOP_HEIGHT),
-  )
-  useEffect(() => {
-    writeNumberLs(TOP_HEIGHT_KEY, topHeightPx)
-  }, [topHeightPx])
+  const [topHeightPx, setTopHeightPx] = useLocalStorageNumber(TOP_HEIGHT_KEY, DEFAULT_TOP_HEIGHT)
   const onTopResizeStart = (e: PointerEvent<HTMLDivElement>) => {
     e.preventDefault()
     const startY = e.clientY

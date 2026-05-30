@@ -1,35 +1,18 @@
 import { useEffect, useState, type PointerEvent } from 'react'
-import { Alert, Button, GitCommitGraph, ResizeHandle, Tooltip } from 'thefactory-ui/web'
+import {
+  Alert,
+  Button,
+  GitCommitGraph,
+  ResizeHandle,
+  Tooltip,
+  useLocalStorageNumber,
+} from 'thefactory-ui/web'
 import { IconChevronLeft, IconInfo, IconRefresh } from 'thefactory-ui/web/icons'
-import { useOverseerGit } from 'thefactory-ui/headless'
+import { OVERSEER_AUTOMATION_TOOLTIP, useOverseerGit } from 'thefactory-ui/headless'
 import CommitDiffViewer from '@ui/components/git/CommitDiffViewer'
-
-const AUTOMATION_TOOLTIP =
-  'The overseer repo commits automatically (every 10s for non-chat, 60s for chats), squashes daily to `main`, and pushes on the daily schedule. This view is read-only.'
 
 const TOP_HEIGHT_KEY = 'OverseerGitView.commitGraphHeightPx'
 const DEFAULT_TOP_HEIGHT = 280
-
-function readNumberLs(key: string, fallback: number): number {
-  if (typeof window === 'undefined') return fallback
-  try {
-    const v = window.localStorage.getItem(key)
-    if (v === null) return fallback
-    const n = parseInt(v, 10)
-    return Number.isFinite(n) && n > 0 ? n : fallback
-  } catch {
-    return fallback
-  }
-}
-
-function writeNumberLs(key: string, n: number) {
-  if (typeof window === 'undefined') return
-  try {
-    window.localStorage.setItem(key, String(Math.round(n)))
-  } catch {
-    // best-effort
-  }
-}
 
 export type OverseerGitViewProps = {
   onBack: () => void
@@ -54,12 +37,7 @@ export default function OverseerGitView({ onBack }: OverseerGitViewProps) {
     if (!selectedCommitSha && log.length > 0) setSelectedCommitSha(log[0].hash)
   }, [log, selectedCommitSha])
 
-  const [topHeightPx, setTopHeightPx] = useState<number>(() =>
-    readNumberLs(TOP_HEIGHT_KEY, DEFAULT_TOP_HEIGHT),
-  )
-  useEffect(() => {
-    writeNumberLs(TOP_HEIGHT_KEY, topHeightPx)
-  }, [topHeightPx])
+  const [topHeightPx, setTopHeightPx] = useLocalStorageNumber(TOP_HEIGHT_KEY, DEFAULT_TOP_HEIGHT)
 
   const onTopResizeStart = (e: PointerEvent<HTMLDivElement>) => {
     e.preventDefault()
@@ -91,7 +69,7 @@ export default function OverseerGitView({ onBack }: OverseerGitViewProps) {
             <IconChevronLeft className="h-4 w-4" />
           </Button>
           <h2 className="text-sm font-semibold">Overseer Git</h2>
-          <Tooltip content={<span className="max-w-xs">{AUTOMATION_TOOLTIP}</span>}>
+          <Tooltip content={<span className="max-w-xs">{OVERSEER_AUTOMATION_TOOLTIP}</span>}>
             <span
               className="inline-flex h-5 w-5 items-center justify-center rounded opacity-70 hover:opacity-100"
               aria-label="About this view"

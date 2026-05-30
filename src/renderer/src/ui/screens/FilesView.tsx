@@ -67,7 +67,6 @@ export default function FilesView() {
   }, [projectId, urlFilePath, navigate, selectFile])
 
   useEffect(() => {
-    if (urlFilePath === null) return
     if (selectedPath !== urlFilePath) selectFile(urlFilePath)
   }, [urlFilePath, selectedPath, selectFile])
 
@@ -119,7 +118,7 @@ export default function FilesView() {
           : { contentBase64: arrayBufferToBase64(await file.arrayBuffer()) }
       const uploadedPath = await uploadFile(file.name, body)
       await refresh()
-      selectFile(uploadedPath)
+      onSelect(uploadedPath)
     } catch (err) {
       setUploadError(err instanceof Error ? err.message : 'Failed to upload file')
     } finally {

@@ -1,8 +1,6 @@
 import { Button, Surface, Tooltip } from 'thefactory-ui/web'
 import { IconBranch, IconInfo } from 'thefactory-ui/web/icons'
-
-const AUTOMATION_TOOLTIP =
-  'The overseer repo commits automatically (every 10s for non-chat, 60s for chats), squashes daily to `main`, and pushes on the daily schedule. This view is read-only.'
+import { OVERSEER_AUTOMATION_TOOLTIP } from 'thefactory-ui/headless'
 
 export type OverseerGitPanelProps = {
   onOpen: () => void
@@ -13,7 +11,7 @@ export default function OverseerGitPanel({ onOpen }: OverseerGitPanelProps) {
     <section className="flex flex-col gap-3">
       <div className="flex items-center gap-2">
         <h3 className="text-sm font-semibold">Overseer Git</h3>
-        <Tooltip content={<span className="max-w-xs">{AUTOMATION_TOOLTIP}</span>}>
+        <Tooltip content={<span className="max-w-xs">{OVERSEER_AUTOMATION_TOOLTIP}</span>}>
           <span
             className="inline-flex h-5 w-5 items-center justify-center rounded opacity-70 hover:opacity-100"
             aria-label="About this view"

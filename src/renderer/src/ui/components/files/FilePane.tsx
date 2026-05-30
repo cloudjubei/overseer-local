@@ -1,5 +1,5 @@
 import { useCallback } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 
 import { useFiles } from 'thefactory-ui/headless'
 import { useAuth } from '@core/contexts/AuthContext'
@@ -33,6 +33,7 @@ export default function FilePane() {
   } = useFiles()
   const { token, baseUrl } = useAuth()
   const { projectId } = useParams<{ projectId: string }>()
+  const navigate = useNavigate()
 
   const meta = files.find((f) => f.relativePath === selectedPath)
 
@@ -54,9 +55,10 @@ export default function FilePane() {
 
   const onDelete = useCallback(
     async (path: string) => {
+      if (projectId) navigate(`/projects/${projectId}/files`, { replace: true })
       await deleteFiles([path])
     },
-    [deleteFiles],
+    [deleteFiles, navigate, projectId],
   )
 
   return (

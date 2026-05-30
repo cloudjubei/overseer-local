@@ -10,6 +10,7 @@ import {
   ResizeHandle,
   Spinner,
   getFilePatch,
+  useLocalStorageNumber,
   type IntraMode,
 } from 'thefactory-ui/web'
 import { EMPTY_TREE_SHA } from 'thefactory-tools/constants'
@@ -36,27 +37,6 @@ export type CommitDiffViewerProps = {
 }
 
 const LEFT_WIDTH_KEY = 'CommitDiffViewer.leftWidthPx'
-
-function readNumberLs(key: string, fallback: number): number {
-  if (typeof window === 'undefined') return fallback
-  try {
-    const v = window.localStorage.getItem(key)
-    if (v === null) return fallback
-    const n = parseInt(v, 10)
-    return Number.isFinite(n) && n > 0 ? n : fallback
-  } catch {
-    return fallback
-  }
-}
-
-function writeNumberLs(key: string, n: number) {
-  if (typeof window === 'undefined') return
-  try {
-    window.localStorage.setItem(key, String(Math.round(n)))
-  } catch {
-    // best-effort
-  }
-}
 
 /**
  * One row in the file list. Memoised so a selection change in a commit
@@ -113,10 +93,7 @@ export default function CommitDiffViewer({ commitSha, log, fetcher }: CommitDiff
   const [selectedPath, setSelectedPath] = useState<string | null>(null)
 
   // Resizable file-list column — persists across sessions like desktop.
-  const [leftWidth, setLeftWidth] = useState<number>(() => readNumberLs(LEFT_WIDTH_KEY, 300))
-  useEffect(() => {
-    writeNumberLs(LEFT_WIDTH_KEY, leftWidth)
-  }, [leftWidth])
+  const [leftWidth, setLeftWidth] = useLocalStorageNumber(LEFT_WIDTH_KEY, 300)
   const onLeftResizeStart = (e: PointerEvent<HTMLDivElement>) => {
     e.preventDefault()
     const startX = e.clientX
