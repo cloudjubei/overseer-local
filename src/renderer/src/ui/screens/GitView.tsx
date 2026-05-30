@@ -38,7 +38,7 @@ import {
   MergeDialog,
   StashDialog,
 } from 'thefactory-ui/web'
-import CommitDiffViewer, { type CommitDiffFetcher } from '@ui/components/git/CommitDiffViewer'
+import { CommitDiffViewer, type CommitDiffFetcher } from 'thefactory-ui/web'
 import LocalChangesPane from '@ui/components/git/LocalChangesPane'
 import LogPanel from '@ui/components/git/LogPanel'
 

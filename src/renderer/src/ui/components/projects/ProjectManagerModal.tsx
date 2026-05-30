@@ -31,23 +31,26 @@ import {
 import type { GetProjectResponse } from 'thefactory-ui/headless/api'
 import { useProjects } from 'thefactory-ui/headless'
 import { useProjectsGroups } from 'thefactory-ui/headless'
+import { useTemplates, type Template } from 'thefactory-ui/headless'
 import {
   ProjectEditorForm,
   blankProjectForm,
   projectToFormState,
   type ProjectFormState,
 } from 'thefactory-ui/web'
-import { ProjectGroupsEditor } from "thefactory-ui/web"
+import { ProjectGroupsEditor, TemplatePicker } from "thefactory-ui/web"
+import { IconRocket } from 'thefactory-ui/web/icons'
 
 const ALL_GROUP_ID = '__all__'
 const UNCATEGORIZED_ID = '__uncategorized__'
 
-type ViewMode = 'list' | 'create' | 'edit' | 'groups'
+type ViewMode = 'list' | 'create' | 'from-template' | 'edit' | 'groups'
 
 const TITLE_BY_MODE: Record<ViewMode, string> = {
   list: 'Manage Projects',
   groups: 'Edit Groups',
   create: 'Create Project',
+  'from-template': 'Start from Template',
   edit: 'Edit Project',
 }
 
@@ -61,6 +64,7 @@ const TITLE_BY_MODE: Record<ViewMode, string> = {
 export default function ProjectManagerModal({ onRequestClose }: { onRequestClose: () => void }) {
   const { projects, refresh: refreshProjects } = useProjects()
   const { groups, reorderProject, refresh: refreshGroups } = useProjectsGroups()
+  const { createFromTemplate } = useTemplates()
 
   const [mode, setMode] = useState<ViewMode>('list')
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -70,6 +74,10 @@ export default function ProjectManagerModal({ onRequestClose }: { onRequestClose
   const [deleteCandidate, setDeleteCandidate] = useState<GetProjectResponse | null>(null)
   const [currentGroupId, setCurrentGroupId] = useState<string>(ALL_GROUP_ID)
   const [discardOpen, setDiscardOpen] = useState(false)
+  const [templatePick, setTemplatePick] = useState<Template | null>(null)
+  const [templateProjectId, setTemplateProjectId] = useState('')
+  const [templateMainGroupId, setTemplateMainGroupId] = useState<string | null>(null)
+  const [templateErrors, setTemplateErrors] = useState<string[]>([])
   // Flips to true on the first user-driven setForm in create/edit mode.
   // Background resets (resetForm, startCreate, startEdit) flip it back to false.
   const formDirtyRef = useRef(false)
@@ -126,6 +134,47 @@ export default function ProjectManagerModal({ onRequestClose }: { onRequestClose
     setEditingId(null)
     formDirtyRef.current = false
     setMode('create')
+  }
+
+  const startFromTemplate = () => {
+    setTemplatePick(null)
+    setTemplateProjectId('')
+    let nextMainGroupId: string | null = null
+    if (currentGroupId !== ALL_GROUP_ID && currentGroupId !== UNCATEGORIZED_ID) {
+      const g = groups.find((gg) => gg.id === currentGroupId)
+      if (g?.type === 'MAIN') nextMainGroupId = g.id
+    }
+    setTemplateMainGroupId(nextMainGroupId)
+    setTemplateErrors([])
+    setMode('from-template')
+  }
+
+  const handleSubmitFromTemplate = async (e: FormEvent) => {
+    e.preventDefault()
+    setTemplateErrors([])
+    const errors: string[] = []
+    if (!templatePick) errors.push('Pick a template to start from.')
+    if (!templateProjectId.trim()) errors.push('ID is required.')
+    if (projects.some((p) => p.id === templateProjectId.trim()))
+      errors.push(`Project id "${templateProjectId}" already exists.`)
+    if (errors.length > 0) {
+      setTemplateErrors(errors)
+      return
+    }
+    setSaving(true)
+    try {
+      await createFromTemplate({
+        templateId: templatePick!.id,
+        id: templateProjectId.trim(),
+        mainGroupId: templateMainGroupId ?? undefined,
+      })
+      await Promise.all([refreshProjects(), refreshGroups()])
+      setMode('list')
+    } catch (err) {
+      setTemplateErrors([extractErrorMessage(err, 'Could not create project from template.')])
+    } finally {
+      setSaving(false)
+    }
   }
 
   const startEdit = (p: GetProjectResponse) => {
@@ -274,15 +323,41 @@ export default function ProjectManagerModal({ onRequestClose }: { onRequestClose
             <IconBack className="w-4 h-4" />
           </Button>
         )}
+        {mode === 'from-template' && (
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setMode('list')}
+            title="Back to projects"
+          >
+            <IconBack className="w-4 h-4" />
+          </Button>
+        )}
       </div>
       <div className="flex items-center gap-2">
         {mode === 'list' && (
-          <Button size="icon" onClick={startCreate} title="Add project" aria-label="Add project">
-            <IconPlus className="w-4 h-4" />
-          </Button>
+          <>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={startFromTemplate}
+              title="Start from template"
+              aria-label="Start from template"
+            >
+              <IconRocket className="w-4 h-4" />
+            </Button>
+            <Button size="icon" onClick={startCreate} title="Add project" aria-label="Add project">
+              <IconPlus className="w-4 h-4" />
+            </Button>
+          </>
         )}
         {mode === 'create' && (
           <Button type="submit" form={formId} loading={saving} disabled={saving}>
+            Create
+          </Button>
+        )}
+        {mode === 'from-template' && (
+          <Button type="submit" form="project-from-template-form" loading={saving} disabled={saving}>
             Create
           </Button>
         )}
@@ -427,6 +502,79 @@ export default function ProjectManagerModal({ onRequestClose }: { onRequestClose
             formId={formId}
             onSubmit={handleSubmit}
           />
+        )}
+
+        {mode === 'from-template' && (
+          <form
+            id="project-from-template-form"
+            onSubmit={handleSubmitFromTemplate}
+            className="flex flex-col gap-4"
+          >
+            <div>
+              <div className="mb-2 text-sm font-medium">Pick a template</div>
+              <TemplatePicker
+                value={templatePick?.id}
+                onSelect={(t) => {
+                  setTemplatePick(t)
+                  if (!templateProjectId.trim()) {
+                    setTemplateProjectId(
+                      t.id + '-' + Math.random().toString(36).slice(2, 8),
+                    )
+                  }
+                }}
+              />
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <label htmlFor="from-template-id" className="text-sm font-medium">
+                Project ID
+              </label>
+              <input
+                id="from-template-id"
+                value={templateProjectId}
+                onChange={(e) => setTemplateProjectId(e.target.value)}
+                placeholder="my-investments"
+                className="rounded-md border border-(--border-subtle) bg-(--surface-base) px-3 py-2 text-sm"
+              />
+              <div className="text-xs text-(--text-secondary)">
+                Used as the on-disk folder name. Title and description come from the template.
+              </div>
+            </div>
+
+            {groups.filter((g) => g.type === 'MAIN').length > 0 && (
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium">Group (optional)</label>
+                <Select
+                  value={templateMainGroupId ?? ''}
+                  onValueChange={(v) => setTemplateMainGroupId(v === '' ? null : v)}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="No group" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">No group</SelectItem>
+                    {groups
+                      .filter((g) => g.type === 'MAIN')
+                      .map((g) => (
+                        <SelectItem key={g.id} value={g.id}>
+                          {g.title}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            {templateErrors.length > 0 && (
+              <Alert variant="error">
+                <ul className="list-disc pl-5">
+                  {templateErrors.map((m, i) => (
+                    <li key={i}>{m}</li>
+                  ))}
+                </ul>
+              </Alert>
+            )}
+          </form>
         )}
       </div>
 

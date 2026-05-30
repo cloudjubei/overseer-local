@@ -29,6 +29,7 @@ import { NativeDictationTriggerContext, OverseerProvider } from 'thefactory-ui/h
 import { macOsDictationTrigger } from './core/speech/macOsDictationTrigger'
 import { ProjectsProvider, useProjects } from 'thefactory-ui/headless'
 import { ProjectsGroupsProvider, useProjectsGroups } from 'thefactory-ui/headless'
+import { TemplatesProvider } from 'thefactory-ui/headless'
 import { StoriesProvider } from 'thefactory-ui/headless'
 import { TestsProvider } from 'thefactory-ui/headless'
 import { ToolsProvider } from 'thefactory-ui/headless'
@@ -60,6 +61,7 @@ import { LoadingScreen, ProjectTimelineView, WelcomeView } from 'thefactory-ui/w
 import LoginScreen from '@ui/screens/LoginScreen'
 import SettingsView from '@ui/screens/SettingsView'
 import StoriesView from '@ui/screens/StoriesView'
+import ProjectAppTab from '@ui/screens/ProjectAppTab'
 import TestsView from '@ui/screens/TestsView'
 import ToolsView from '@ui/screens/ToolsView'
 
@@ -90,6 +92,7 @@ function BackendGate() {
           <OverseerProvider>
             <ProjectsProvider>
               <ProjectsGroupsProvider>
+                <TemplatesProvider>
                 <StoriesProvider>
                   <FilesProvider>
                     <GitProvider storage={localStorageAdapter}>
@@ -118,6 +121,7 @@ function BackendGate() {
                     </GitProvider>
                   </FilesProvider>
                 </StoriesProvider>
+                </TemplatesProvider>
               </ProjectsGroupsProvider>
             </ProjectsProvider>
           </OverseerProvider>
@@ -191,6 +195,7 @@ function MainShell() {
         <div className="flex-1 min-h-0">
           <ScreenErrorBoundary key={tab} screen={screenLabel}>
             {tab === 'stories' && <StoriesView />}
+            {tab === 'app' && <ProjectAppTab />}
             {tab === 'chat' && <ChatView />}
             {tab === 'agents' && <AgentsView />}
             {tab === 'files' && <FilesView />}

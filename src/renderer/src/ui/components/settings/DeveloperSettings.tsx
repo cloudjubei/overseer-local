@@ -1,10 +1,8 @@
 import { useSearchParams } from 'react-router-dom'
-import { OverseerPanel } from 'thefactory-ui/web'
+import { OverseerGitPanel, OverseerGitView, OverseerPanel } from 'thefactory-ui/web'
 import { OverseerGitProvider } from 'thefactory-ui/headless'
-import OverseerGitView from '@ui/screens/OverseerGitView'
 import BackendConnectionPanel from './BackendConnectionPanel'
 import LinkRepoPanel from './LinkRepoPanel'
-import OverseerGitPanel from './OverseerGitPanel'
 
 const GIT_SUBTAB = 'git'
 
