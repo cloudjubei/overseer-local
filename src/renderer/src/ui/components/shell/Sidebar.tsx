@@ -244,9 +244,17 @@ export default function Sidebar({ projectId, activeTab, activeGroupId, activeGro
       <div className="shrink-0">
         {projectId && (
           <Section collapsed={collapsed}>
-            {SHELL_TAB_DEFS.filter(
-              (t) => t.key !== 'settings' && !('hiddenInSidebar' in t && t.hiddenInSidebar),
-            ).map((tab) => {
+            {SHELL_TAB_DEFS.filter((t) => {
+              if (t.key === 'settings') return false
+              if ('hiddenInSidebar' in t && t.hiddenInSidebar) return false
+              if (t.key === 'app') {
+                const meta = projects.find((p) => p.id === projectId)?.metadata as
+                  | { hasApp?: unknown }
+                  | undefined
+                return meta?.hasApp === true
+              }
+              return true
+            }).map((tab) => {
               const cat = TAB_BADGE_CATEGORY[tab.key]
               const countKey = cat ? badgeKeyForCategory(cat) : undefined
               const badgeValue = countKey ? (counts[countKey] as number) : 0
