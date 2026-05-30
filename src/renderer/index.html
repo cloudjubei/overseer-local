@@ -7,13 +7,15 @@
       Content Security Policy. `connect-src` permits HTTP(S) + WS(S) so the
       renderer can reach the user-configured `thefactory-backend` URL (set
       via LoginScreen / BackendConnectionPanel — could be localhost or any
-      remote host). Scripts and styles stay scoped to 'self' / 'unsafe-inline'
-      to match what Vite + thefactory-ui emit.
+      remote host). `frame-src` permits HTTP(S) so the project "App" tab can
+      frame the backend's `/projects/:id/view/*` surface (same user-configured
+      host as `connect-src`). Scripts and styles stay scoped to 'self' /
+      'unsafe-inline' to match what Vite + thefactory-ui emit.
       https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP
     -->
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' http: https: ws: wss:"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' http: https: ws: wss:; frame-src 'self' http: https:"
     />
   </head>
 
