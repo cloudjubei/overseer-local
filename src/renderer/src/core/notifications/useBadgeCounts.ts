@@ -9,37 +9,19 @@ import { useActiveProject } from 'thefactory-ui/headless'
 import { useTests } from 'thefactory-ui/headless'
 import { useProjectSettings } from '../hooks/useProjectSettings'
 import {
+  aggregateGroupBadgeState,
+  EMPTY_BADGE_STATE,
   isChatUnread,
   markSeen,
   resolveTriState,
   useBadgeCountsCore,
   type BadgeChatInput,
   type BadgeCounts,
+  type BadgeState,
 } from 'thefactory-ui/headless'
 import { readChatsSeen, useChatsSeen, writeChatsSeen } from 'thefactory-ui/web'
 
 export type { BadgeCounts }
-
-/**
- * Per-project badge state. Mirrors desktop's `ProjectBadgeState` shape from
- * `useNotifications.getProjectBadgeState`. Git + tests are scoped to the
- * ACTIVE project on web (those contexts only track the active one), so for
- * non-active projects those channels return zero — matching desktop's
- * behaviour when a project's git status hasn't been polled yet.
- */
-export type ProjectBadgeState = {
-  agent_runs: { running: number }
-  chat_messages: { unread: number; thinking: boolean }
-  git: { incoming: number; uncommitted: number }
-  tests: { failing: number }
-}
-
-export const EMPTY_PROJECT_BADGE_STATE: ProjectBadgeState = {
-  agent_runs: { running: 0 },
-  chat_messages: { unread: 0, thinking: false },
-  git: { incoming: 0, uncommitted: 0 },
-  tests: { failing: 0 },
-}
 
 export type UseBadgeCountsApi = {
   /** Active-project / global counts (single source for sidebar header + favicon). */
@@ -47,8 +29,13 @@ export type UseBadgeCountsApi = {
   /** Mark a chat as read up to its latest message. */
   markChatSeen: (ctx: ChatContext) => void
   /** Per-project breakdown for sidebar project rows. Filtering respects
-   *  the same `badgesEnabled` toggles `counts` uses. */
-  getProjectBadgeState: (projectId: string) => ProjectBadgeState
+   *  the same `badgesEnabled` toggles `counts` uses. Git + tests are scoped
+   *  to the ACTIVE project (those contexts only track the active one), so
+   *  non-active projects report zero on those channels. */
+  getProjectBadgeState: (projectId: string) => BadgeState
+  /** Group badge state — member projects rolled up via the shared
+   *  `aggregateGroupBadgeState`, plus the group's own chat unread. */
+  getGroupBadgeState: (groupId: string, memberProjectIds: ReadonlyArray<string>) => BadgeState
 }
 
 function latestMessageAt(
@@ -94,7 +81,7 @@ export function useBadgeCounts(): UseBadgeCountsApi {
   // Annotate every chat with its derived unread + thinking state. Used twice:
   // once for the global `counts` (across all chats), and once filtered by
   // project for `getProjectBadgeState`.
-  type AnnotatedChat = BadgeChatInput & { projectId?: string }
+  type AnnotatedChat = BadgeChatInput & { projectId?: string; groupId?: string }
 
   const annotatedChats: AnnotatedChat[] = useMemo(() => {
     return chats.map((chat) => {
@@ -117,6 +104,7 @@ export function useBadgeCounts(): UseBadgeCountsApi {
         unreadMessages,
         isThinking: getChatLiveState(chat.context).isSending,
         projectId: chat.context.projectId,
+        groupId: chat.context.groupId,
       }
     })
   }, [chats, seen, getChatLiveState])
@@ -161,8 +149,8 @@ export function useBadgeCounts(): UseBadgeCountsApi {
     chatBadgeCountMode: prefs.chatBadgeCountMode,
   })
 
-  // Pre-bucket annotated chats by projectId so `getProjectBadgeState` is O(1)
-  // amortised. Empty projects bucket to no rows.
+  // Pre-bucket annotated chats by projectId / groupId so `getProjectBadgeState`
+  // and `getGroupBadgeState` are O(1) amortised. Empty buckets yield no rows.
   const chatsByProjectId = useMemo(() => {
     const out = new Map<string, AnnotatedChat[]>()
     for (const c of annotatedChats) {
@@ -174,26 +162,42 @@ export function useBadgeCounts(): UseBadgeCountsApi {
     return out
   }, [annotatedChats])
 
-  const getProjectBadgeState = useCallback(
-    (projectId: string): ProjectBadgeState => {
-      if (!projectId) return EMPTY_PROJECT_BADGE_STATE
+  const chatsByGroupId = useMemo(() => {
+    const out = new Map<string, AnnotatedChat[]>()
+    for (const c of annotatedChats) {
+      if (!c.groupId) continue
+      const bucket = out.get(c.groupId) ?? []
+      bucket.push(c)
+      out.set(c.groupId, bucket)
+    }
+    return out
+  }, [annotatedChats])
 
-      const projectChats = chatsByProjectId.get(projectId) ?? []
-      const chatEnabled = prefs.badgesEnabled.chat !== false
+  const chatEnabled = prefs.badgesEnabled.chat !== false
+  const chatBadgeFor = useCallback(
+    (list: AnnotatedChat[]): { unread: number; thinking: boolean } => {
+      if (!chatEnabled) return { unread: 0, thinking: false }
       let chatsWithUnread = 0
       let totalUnread = 0
       let anyThinking = false
-      if (chatEnabled) {
-        for (const c of projectChats) {
-          if (c.unreadMessages > 0) {
-            chatsWithUnread += 1
-            totalUnread += c.unreadMessages
-          }
-          if (!anyThinking && c.isThinking) anyThinking = true
+      for (const c of list) {
+        if (c.unreadMessages > 0) {
+          chatsWithUnread += 1
+          totalUnread += c.unreadMessages
         }
+        if (c.isThinking) anyThinking = true
       }
-      const chatUnread =
-        prefs.chatBadgeCountMode === 'total_messages' ? totalUnread : chatsWithUnread
+      const unread = prefs.chatBadgeCountMode === 'total_messages' ? totalUnread : chatsWithUnread
+      return { unread, thinking: anyThinking }
+    },
+    [chatEnabled, prefs.chatBadgeCountMode],
+  )
+
+  const getProjectBadgeState = useCallback(
+    (projectId: string): BadgeState => {
+      if (!projectId) return EMPTY_BADGE_STATE
+
+      const chat = chatBadgeFor(chatsByProjectId.get(projectId) ?? [])
 
       const runEnabled = prefs.badgesEnabled.agent_runs !== false
       const running = runEnabled ? getProjectRunningCount(projectId) : 0
@@ -217,12 +221,13 @@ export function useBadgeCounts(): UseBadgeCountsApi {
 
       return {
         agent_runs: { running },
-        chat_messages: { unread: chatUnread, thinking: anyThinking },
+        chat_messages: { unread: chat.unread, thinking: chat.thinking },
         git: { incoming, uncommitted },
         tests: { failing: failingTests },
       }
     },
     [
+      chatBadgeFor,
       chatsByProjectId,
       getProjectRunningCount,
       activeProjectId,
@@ -230,10 +235,23 @@ export function useBadgeCounts(): UseBadgeCountsApi {
       status,
       lastRun,
       prefs.badgesEnabled,
-      prefs.chatBadgeCountMode,
       prefs.gitBadgeSubToggles,
     ],
   )
 
-  return { counts, markChatSeen, getProjectBadgeState }
+  const getGroupBadgeState = useCallback(
+    (groupId: string, memberProjectIds: ReadonlyArray<string>): BadgeState => {
+      const byProject: Record<string, BadgeState> = {}
+      for (const pid of memberProjectIds) byProject[pid] = getProjectBadgeState(pid)
+      const agg = aggregateGroupBadgeState(memberProjectIds, byProject)
+      // Fold in the group's own GROUP / GROUP_TOPIC chats.
+      const groupChat = chatBadgeFor(chatsByGroupId.get(groupId) ?? [])
+      agg.chat_messages.unread += groupChat.unread
+      agg.chat_messages.thinking = agg.chat_messages.thinking || groupChat.thinking
+      return agg
+    },
+    [getProjectBadgeState, chatsByGroupId, chatBadgeFor],
+  )
+
+  return { counts, markChatSeen, getProjectBadgeState, getGroupBadgeState }
 }

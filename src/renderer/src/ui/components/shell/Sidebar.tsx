@@ -64,7 +64,7 @@ export default function Sidebar({ projectId, activeTab, activeGroupId, activeGro
   const collapsed = userCollapsed
   const { projects, activeProjectId, setActiveProjectId } = useProjects()
   const { groups, reorderProject } = useProjectsGroups()
-  const { counts, getProjectBadgeState } = useBadgeCounts()
+  const { counts, getProjectBadgeState, getGroupBadgeState } = useBadgeCounts()
 
   const asideRef = useRef<HTMLElement>(null)
   const [draggingProject, setDraggingProject] = useState<{ id: string; groupId: string } | null>(
@@ -374,14 +374,30 @@ export default function Sidebar({ projectId, activeTab, activeGroupId, activeGro
                   />
                 )
               })}
-              {allGroups.map((g) =>
-                g.type === 'SCOPE' ? (
+              {allGroups.map((g) => {
+                // Group badges show CHAT unread only (no git/tests at group
+                // scope). A SCOPE group, and an OPEN folder, show just the
+                // group's OWN chats; a CLOSED folder shows the aggregate of
+                // the group + its member projects. The active group skips its
+                // row badge — surfaced on the per-group-tab nav row instead.
+                const groupIsActive = g.id === activeGroupId
+                const groupOpen = openGroupIds.has(g.id)
+                const rolled =
+                  g.type === 'SCOPE' || groupOpen
+                    ? getGroupBadgeState(g.id, [])
+                    : getGroupBadgeState(g.id, g.projects)
+                const groupUnread = groupIsActive ? 0 : rolled.chat_messages.unread
+                const groupThinking = groupIsActive ? false : rolled.chat_messages.thinking
+                return g.type === 'SCOPE' ? (
                   <GroupRow
                     key={g.id}
                     group={g}
-                    isActive={g.id === activeGroupId}
+                    isActive={groupIsActive}
                     collapsed={collapsed}
                     onClick={() => onSelectGroup(g.id)}
+                    badge={groupUnread}
+                    badgeColor={settings.notifications.badgeColors.chat}
+                    thinking={groupThinking}
                   />
                 ) : (
                   <GroupBlock
@@ -408,9 +424,11 @@ export default function Sidebar({ projectId, activeTab, activeGroupId, activeGro
                     onDrop={onProjectDrop}
                     getProjectBadgeState={getProjectBadgeState}
                     chatBadgeColor={settings.notifications.badgeColors.chat}
+                    headerBadge={groupUnread}
+                    headerThinking={groupThinking}
                   />
-                ),
-              )}
+                )
+              })}
             </>
           )}
         </Section>
@@ -445,6 +463,11 @@ function badgeKeyForCategory(cat: NotificationCategory): keyof BadgeCounts {
 
 function asIconKey(v: unknown): string | undefined {
   return typeof v === 'string' ? v : undefined
+}
+
+/** Cap a numeric badge at "99+" so wide counts don't blow out the row. */
+function cap99(n: number): string {
+  return n > 99 ? '99+' : `${n}`
 }
 
 const OPEN_GROUPS_LS_KEY = 'thefactory-overseer-web:sidebar.openGroupIds'
@@ -528,6 +551,8 @@ function GroupBlock({
   onDrop,
   getProjectBadgeState,
   chatBadgeColor,
+  headerBadge,
+  headerThinking = false,
 }: {
   group: ProjectsGroup
   projects: ReturnType<typeof useProjects>['projects']
@@ -551,6 +576,11 @@ function GroupBlock({
     chat_messages: { unread: number; thinking: boolean }
   }
   chatBadgeColor?: BadgeColor
+  /** Group chat badge for the header row. The parent resolves it to the
+   *  group's OWN chats when the folder is open (members show their own rows)
+   *  and to the aggregate (group + members) when collapsed. */
+  headerBadge?: number
+  headerThinking?: boolean
 }) {
   // Auto-expand when the active project lives in this group. We don't ever
   // auto-collapse — once the user toggles a group closed, navigating away
@@ -592,6 +622,24 @@ function GroupBlock({
         >
           {group.title}
         </button>
+        {(headerThinking || (headerBadge ?? 0) > 0) && (
+          <span className="inline-flex items-center justify-center shrink-0 pr-2">
+            {headerThinking ? (
+              <SpinnerWithDot
+                size={14}
+                showDot={(headerBadge ?? 0) > 0}
+                dotColorClass={chatBadgeColor ? `bg-${chatBadgeColor}-500` : undefined}
+                dotTitle={(headerBadge ?? 0) > 0 ? `${cap99(headerBadge!)} unread chats` : undefined}
+              />
+            ) : (
+              <NotificationBadge
+                text={cap99(headerBadge!)}
+                color={chatBadgeColor}
+                tooltipLabel={group.title}
+              />
+            )}
+          </span>
+        )}
       </div>
       {isOpen && (
         <div id={`group-${group.id}`} className="flex flex-col gap-0.5">
@@ -635,11 +683,17 @@ function GroupRow({
   isActive,
   collapsed,
   onClick,
+  badge,
+  badgeColor,
+  thinking = false,
 }: {
   group: ProjectsGroup
   isActive: boolean
   collapsed: boolean
   onClick: () => void
+  badge?: number
+  badgeColor?: BadgeColor
+  thinking?: boolean
 }) {
   const icon =
     group.type === 'SCOPE' ? (
@@ -654,6 +708,9 @@ function GroupRow({
       isActive={isActive}
       onClick={onClick}
       collapsed={collapsed}
+      badge={badge}
+      badgeColor={badgeColor}
+      thinking={thinking}
     />
   )
 }
@@ -695,7 +752,6 @@ function NavRow({
   dataLocation?: 'central' | 'inProject'
 }) {
   const hasBadge = badge !== undefined && badge > 0
-  const cap99 = (n: number) => (n > 99 ? '99+' : `${n}`)
   const badgeColorClass = badgeColor ? `bg-${badgeColor}-500` : undefined
   return (
     <button

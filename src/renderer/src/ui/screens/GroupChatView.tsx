@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ChatHeader } from 'thefactory-ui/web'
+import { ChatHeader, NotificationBadge, SpinnerWithDot } from 'thefactory-ui/web'
 import { IconPlus } from 'thefactory-ui/web/icons'
 import type { ChatContext, ChatContextGroup, GetChatResponse } from 'thefactory-ui/headless/api'
 import { useChats } from 'thefactory-ui/headless'
 import { useProjectsGroups } from 'thefactory-ui/headless'
+import { useChatRowStatus } from '@core/notifications/useChatRowStatus'
 import { useChatContextLastRead as useChatLastRead } from 'thefactory-ui/web'
 import { getChatContext, getChatContextKey } from '@core/chats/chatKey'
 import ChatBodyForContext from '@ui/components/chat/ChatBodyForContext'
@@ -337,18 +338,29 @@ function ChatRow({
   isActive: boolean
   onSelectContext: (ctx: ChatContext) => void
 }) {
+  const { isThinking, isUnread, unreadCount } = useChatRowStatus(ctx)
+  const cap = (n: number) => (n > 99 ? '99+' : `${n}`)
   return (
     <button
       type="button"
       onClick={() => onSelectContext(ctx)}
       aria-current={isActive ? 'true' : undefined}
-      className="w-full text-left px-2 py-1.5 rounded text-sm truncate"
+      className="w-full flex items-center gap-2 text-left px-2 py-1.5 rounded text-sm"
       style={{
         background: isActive ? 'var(--color-brand-50)' : 'transparent',
         color: isActive ? 'var(--color-brand-700)' : 'inherit',
       }}
     >
-      {label}
+      <span className="flex-1 truncate">{label}</span>
+      {isThinking ? (
+        <SpinnerWithDot size={14} showDot={isUnread} />
+      ) : isUnread ? (
+        <NotificationBadge
+          className="h-4 min-w-4 px-1 text-[10px]"
+          text={cap(unreadCount)}
+          tooltipLabel={`${unreadCount} unread messages`}
+        />
+      ) : null}
     </button>
   )
 }
