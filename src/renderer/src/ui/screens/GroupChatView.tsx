@@ -5,6 +5,7 @@ import { IconPlus } from 'thefactory-ui/web/icons'
 import type { ChatContext, ChatContextGroup, GetChatResponse } from 'thefactory-ui/headless/api'
 import { useChats } from 'thefactory-ui/headless'
 import { useProjectsGroups } from 'thefactory-ui/headless'
+import { formatBadgeCount } from 'thefactory-ui/headless'
 import { useChatRowStatus } from '@core/notifications/useChatRowStatus'
 import { useChatContextLastRead as useChatLastRead } from 'thefactory-ui/web'
 import { getChatContext, getChatContextKey } from '@core/chats/chatKey'
@@ -339,7 +340,6 @@ function ChatRow({
   onSelectContext: (ctx: ChatContext) => void
 }) {
   const { isThinking, isUnread, unreadCount } = useChatRowStatus(ctx)
-  const cap = (n: number) => (n > 99 ? '99+' : `${n}`)
   return (
     <button
       type="button"
@@ -357,7 +357,7 @@ function ChatRow({
       ) : isUnread ? (
         <NotificationBadge
           className="h-4 min-w-4 px-1 text-[10px]"
-          text={cap(unreadCount)}
+          text={formatBadgeCount(unreadCount)}
           tooltipLabel={`${unreadCount} unread messages`}
         />
       ) : null}

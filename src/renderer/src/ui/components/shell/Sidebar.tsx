@@ -12,6 +12,7 @@ import { IconCollection, IconFolder, IconFolderOpen, IconMenu } from 'thefactory
 import {
   GROUP_TAB_DEFS,
   SHELL_TAB_DEFS,
+  formatBadgeCount,
   groupTabToProjectTab,
   projectTabToGroupTab,
   splitGroupsAndProjects,
@@ -465,11 +466,6 @@ function asIconKey(v: unknown): string | undefined {
   return typeof v === 'string' ? v : undefined
 }
 
-/** Cap a numeric badge at "99+" so wide counts don't blow out the row. */
-function cap99(n: number): string {
-  return n > 99 ? '99+' : `${n}`
-}
-
 const OPEN_GROUPS_LS_KEY = 'thefactory-overseer-web:sidebar.openGroupIds'
 
 /** Read the persisted set of expanded sidebar group ids. Survives navigation
@@ -629,11 +625,11 @@ function GroupBlock({
                 size={14}
                 showDot={(headerBadge ?? 0) > 0}
                 dotColorClass={chatBadgeColor ? `bg-${chatBadgeColor}-500` : undefined}
-                dotTitle={(headerBadge ?? 0) > 0 ? `${cap99(headerBadge!)} unread chats` : undefined}
+                dotTitle={(headerBadge ?? 0) > 0 ? `${formatBadgeCount(headerBadge!)} unread chats` : undefined}
               />
             ) : (
               <NotificationBadge
-                text={cap99(headerBadge!)}
+                text={formatBadgeCount(headerBadge!)}
                 color={chatBadgeColor}
                 tooltipLabel={group.title}
               />
@@ -804,12 +800,12 @@ function NavRow({
             size={collapsed ? 12 : 14}
             showDot={hasBadge}
             dotColorClass={badgeColorClass}
-            dotTitle={hasBadge ? `${cap99(badge!)} unread chats` : undefined}
+            dotTitle={hasBadge ? `${formatBadgeCount(badge!)} unread chats` : undefined}
           />
         </span>
       ) : hasBadge ? (
         <NotificationBadge
-          text={cap99(badge!)}
+          text={formatBadgeCount(badge!)}
           color={badgeColor}
           className={
             collapsed ? 'absolute top-1 right-1 h-[14px] min-w-[14px] px-0.5 text-[8px]' : ''
