@@ -3,7 +3,7 @@ import type { DragEvent, MouseEvent } from 'react'
 import { useGit } from 'thefactory-ui/headless'
 import type { LocalDiffEntry } from 'thefactory-ui/headless'
 import { extractServerError } from 'thefactory-ui/headless/api'
-import { mergeUnstagedWithUntracked } from 'thefactory-tools/utils'
+import { mergeUnstagedWithUntracked } from 'thefactory-ui/headless'
 import {
   Alert,
   ConfirmDialog,

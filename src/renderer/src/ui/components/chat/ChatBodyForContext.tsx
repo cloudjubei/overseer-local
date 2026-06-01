@@ -13,7 +13,7 @@ import { useStories } from 'thefactory-ui/headless'
 import { useActiveProject } from 'thefactory-ui/headless'
 import { getChatContextKey } from '@core/chats/chatKey'
 import { useBadgeCounts } from '@core/notifications/useBadgeCounts'
-import { useChatLastRead } from '@core/notifications/useChatLastRead'
+import { useChatContextLastRead as useChatLastRead } from 'thefactory-ui/web'
 import { Button } from 'thefactory-ui/web'
 import { getToolHeaderPath, renderToolCall } from './ToolCall/renderers'
 

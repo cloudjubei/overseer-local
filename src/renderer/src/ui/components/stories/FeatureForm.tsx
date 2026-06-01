@@ -16,7 +16,7 @@ import { useFiles } from 'thefactory-ui/headless'
 import { DependencyBullet } from 'thefactory-ui/web'
 import DependencySelector from './DependencySelector'
 import ContextFileChip from './ContextFileChip'
-import FileMentionsTextarea from '@ui/components/ui/FileMentionsTextarea'
+import { FileMentionsTextareaConnected as FileMentionsTextarea } from 'thefactory-ui/web'
 
 /**
  * Feature form — visual parity with desktop's `FeatureForm`. Status pill +

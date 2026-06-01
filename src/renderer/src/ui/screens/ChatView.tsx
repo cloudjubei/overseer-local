@@ -17,7 +17,7 @@ import ChatSettingsDropdownConnected from '@ui/components/chat/ChatSettingsDropd
 import { ChatTopicCreateModalConnected as ChatTopicCreateModal } from 'thefactory-ui/web'
 import { SystemPromptViewerConnected } from 'thefactory-ui/web'
 import { UsageModalConnected as UsageModal } from 'thefactory-ui/web'
-import ContextInfoButton from '@ui/components/stories/ContextInfoButton'
+import { ContextInfoButton } from 'thefactory-ui/web'
 import ModelChip from '@ui/components/agents/ModelChip'
 import { LoadingScreen } from 'thefactory-ui/web'
 

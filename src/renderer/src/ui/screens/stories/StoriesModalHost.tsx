@@ -3,7 +3,7 @@ import { useActiveProject } from 'thefactory-ui/headless'
 import { useStories } from 'thefactory-ui/headless'
 import { Button, ConfirmDialog, Modal, type StoryFormValues } from 'thefactory-ui/web'
 import { IconDelete, IconSave } from 'thefactory-ui/web/icons'
-import StoryForm from '@ui/components/stories/StoryForm'
+import { StoryFormConnected as StoryForm } from 'thefactory-ui/web'
 import FeatureForm from '@ui/components/stories/FeatureForm'
 import type { StoryModalRoute } from './storyModals'
 
