@@ -1,9 +1,9 @@
 import React, { useCallback, useMemo } from 'react'
 import {
   FileMentionsTextarea as FileMentionsTextareaPackage,
-  rankMentionMatches,
   type ReferenceSuggestion,
 } from 'thefactory-ui/web'
+import { rankMentionMatches } from 'thefactory-ui/headless'
 import { useFiles } from 'thefactory-ui/headless'
 import { useStories } from 'thefactory-ui/headless'
 import { useActiveProject } from 'thefactory-ui/headless'

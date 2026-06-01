@@ -3,7 +3,7 @@ import type { PointerEvent } from 'react'
 import { useActiveProject } from 'thefactory-ui/headless'
 import { useGit } from 'thefactory-ui/headless'
 import { getGitBranchDiffSummary } from 'thefactory-ui/headless/api'
-import { getPRUrl } from '@ui/components/git/gitPRUrl'
+import { getPRUrl } from 'thefactory-tools/utils'
 import {
   Alert,
   Button,

@@ -1,5 +1,0 @@
-export { default as MessageList } from './MessageList'
-export { default as ChatInput } from './ChatInput'
-export { default as ChatSidebar } from './ChatSidebar'
-export { default as ChatSidebarPanel } from './ChatSidebarPanel'
-export { default as ChatSidebarModalPanel } from './ChatSidebarModalPanel'
