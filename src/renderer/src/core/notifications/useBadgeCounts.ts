@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from 'react'
 import type { ChatContext } from 'thefactory-ui/headless/api'
 import { getChatContextKey } from '../chats/chatKey'
-import { useAppSettings } from '../contexts/AppSettingsContext'
+import { useAppSettings } from 'thefactory-ui/headless'
 import { useChats } from 'thefactory-ui/headless'
 import { useGit } from 'thefactory-ui/headless'
 import { useActiveProject } from 'thefactory-ui/headless'

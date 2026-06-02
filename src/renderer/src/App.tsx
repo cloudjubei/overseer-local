@@ -12,19 +12,19 @@ import type { ReactNode } from 'react'
 import { CodeBlockThemeProvider } from 'thefactory-ui/headless'
 import { AgentsProvider } from 'thefactory-ui/headless'
 import { ApiProvider } from '@core/contexts/ApiContext'
-import { AppSettingsProvider, useAppSettings } from '@core/contexts/AppSettingsContext'
+import { AppSettingsProviderConnected, localStorageAdapter } from 'thefactory-ui/web'
+import { useAppSettings } from 'thefactory-ui/headless'
 import { AuthProvider, useAuth } from '@core/contexts/AuthContext'
 import { ChatsProvider } from 'thefactory-ui/headless'
 import { CostsProvider } from 'thefactory-ui/headless'
 import { EntitiesProvider } from 'thefactory-ui/headless'
 import { FilesProvider } from 'thefactory-ui/headless'
 import { GitProvider, useGit } from 'thefactory-ui/headless'
-import { localStorageAdapter } from './core/storage/localStorageAdapter'
 import { GitCredentialErrorModal } from 'thefactory-ui/web'
 import { GitCredentialsProvider } from 'thefactory-ui/headless'
 import { IngestionProvider } from 'thefactory-ui/headless'
 import { LiveDataProvidersProvider } from 'thefactory-ui/headless'
-import { LLMConfigsProvider } from '@core/contexts/LLMConfigsContext'
+import { LLMConfigsProviderConnected } from 'thefactory-ui/web'
 import { NativeDictationTriggerContext, OverseerProvider } from 'thefactory-ui/headless'
 import { macOsDictationTrigger } from './core/speech/macOsDictationTrigger'
 import { ProjectsProvider, useProjects } from 'thefactory-ui/headless'
@@ -34,7 +34,7 @@ import { StoriesProvider } from 'thefactory-ui/headless'
 import { TestsProvider } from 'thefactory-ui/headless'
 import { ToolsProvider } from 'thefactory-ui/headless'
 import { WebSearchKeysProvider } from 'thefactory-ui/headless'
-import { ShortcutsProvider } from '@core/shortcuts/ShortcutsContext'
+import { ShortcutsProviderConnected } from 'thefactory-ui/web'
 import { CommandMenu } from 'thefactory-ui/web'
 import { ShortcutsHelp } from 'thefactory-ui/web'
 import { DiagnosticsOverlay } from "thefactory-ui/web"
@@ -85,7 +85,7 @@ function BackendGate() {
   if (!ready) return <LoadingScreen label="Initializing…" />
   if (!baseUrl || !token) return <Navigate to="/login" replace />
   return (
-    <LLMConfigsProvider>
+    <LLMConfigsProviderConnected>
       <GitCredentialsProvider>
         <WebSearchKeysProvider>
           <OverseerProvider>
@@ -126,7 +126,7 @@ function BackendGate() {
           </OverseerProvider>
         </WebSearchKeysProvider>
       </GitCredentialsProvider>
-    </LLMConfigsProvider>
+    </LLMConfigsProviderConnected>
   )
 }
 
@@ -279,10 +279,10 @@ function CodeBlockThemeBridge({ children }: { children: ReactNode }) {
 export default function App() {
   return (
     <NativeDictationTriggerContext.Provider value={macOsDictationTrigger}>
-    <AppSettingsProvider>
+    <AppSettingsProviderConnected>
       <ThemeApplier />
       <CodeBlockThemeBridge>
-      <ShortcutsProvider>
+      <ShortcutsProviderConnected>
         <AuthProvider>
           <ApiProvider>
             <div className="flex flex-col h-full w-full overflow-hidden">
@@ -307,9 +307,9 @@ export default function App() {
             </div>
           </ApiProvider>
         </AuthProvider>
-      </ShortcutsProvider>
+      </ShortcutsProviderConnected>
       </CodeBlockThemeBridge>
-    </AppSettingsProvider>
+    </AppSettingsProviderConnected>
     </NativeDictationTriggerContext.Provider>
   )
 }

@@ -1,6 +1,7 @@
 import { act, render, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { AppSettingsProvider, useAppSettings } from '@core/contexts/AppSettingsContext'
+import { AppSettingsProviderConnected } from 'thefactory-ui/web'
+import { useAppSettings } from 'thefactory-ui/headless'
 import { VisualSettings } from 'thefactory-ui/web'
 
 const STORAGE_KEY = 'thefactory.appSettings'
@@ -16,10 +17,10 @@ function ThemeSetter() {
 
 function renderPanel() {
   return render(
-    <AppSettingsProvider>
+    <AppSettingsProviderConnected>
       <VisualSettings />
       <ThemeSetter />
-    </AppSettingsProvider>,
+    </AppSettingsProviderConnected>,
   )
 }
 

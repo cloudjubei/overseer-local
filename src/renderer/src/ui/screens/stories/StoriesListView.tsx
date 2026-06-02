@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useActiveProject } from 'thefactory-ui/headless'
-import { useAppSettings } from '@core/contexts/AppSettingsContext'
+import { useAppSettings } from 'thefactory-ui/headless'
 import { useStories } from 'thefactory-ui/headless'
 import { useAgents } from 'thefactory-ui/headless'
 import type {

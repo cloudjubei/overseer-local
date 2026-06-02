@@ -1,21 +1,27 @@
-import { useActiveProject, useProjectAppView } from 'thefactory-ui/headless'
+import {
+  useActiveProject,
+  useProjectAppView,
+  useProjectDataBridge,
+} from 'thefactory-ui/headless'
 import { ProjectAppView } from 'thefactory-ui/web'
 
 /**
  * Desktop peer of the App tab. Mirrors web's `ProjectAppTab` 1:1 — the
- * Electron renderer is Chromium, so it reuses the web `ProjectAppView`. The
- * App↔Overseer bridge transport is available via `onBridgeMessage`; the first
- * real handlers (`data.*`) land with live-data Stage 1.
+ * Electron renderer is Chromium, so it reuses the web `ProjectAppView`.
+ * `useProjectDataBridge` services the embedded app's `overseer:data.*`
+ * requests against the active project; the write credential stays in the host.
  */
 export default function ProjectAppTab() {
   const { projectId } = useActiveProject()
   const { url, key, error } = useProjectAppView(projectId)
+  const onBridgeMessage = useProjectDataBridge(projectId)
 
   return (
     <div className="w-full h-full bg-(--bg-surface)">
       <ProjectAppView
         url={url}
         remountKey={key}
+        onBridgeMessage={onBridgeMessage}
         fallback={
           <div className="flex h-full items-center justify-center p-8 text-center text-(--text-secondary)">
             <div>

@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { useLLMConfigs } from '@core/contexts/LLMConfigsContext'
+import { useLLMConfigs } from 'thefactory-ui/headless'
 import type { GetLlmConfigResponse } from 'thefactory-ui/headless/api'
 import { Alert, Button, ConfirmDialog, Modal } from 'thefactory-ui/web'
 import {

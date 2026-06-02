@@ -1,14 +1,15 @@
 import { act, renderHook, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { AppSettingsProvider, useAppSettings } from './AppSettingsContext'
+import { AppSettingsProviderConnected } from 'thefactory-ui/web'
+import { useAppSettings } from 'thefactory-ui/headless'
 
 const STORAGE_KEY = 'thefactory.appSettings'
 
 function wrapper({ children }: { children: React.ReactNode }) {
-  return <AppSettingsProvider>{children}</AppSettingsProvider>
+  return <AppSettingsProviderConnected>{children}</AppSettingsProviderConnected>
 }
 
-describe('AppSettingsContext', () => {
+describe('AppSettingsProviderConnected', () => {
   beforeEach(() => {
     window.localStorage.clear()
   })
@@ -89,9 +90,7 @@ describe('AppSettingsContext', () => {
 
     // Fresh mount = next-session simulation. Should rehydrate from storage.
     const second = renderHook(() => useAppSettings(), { wrapper })
-    expect(second.result.current.settings.userPreferences.storiesListViewSorting).toBe(
-      'index_desc',
-    )
+    expect(second.result.current.settings.userPreferences.storiesListViewSorting).toBe('index_desc')
     expect(second.result.current.settings.userPreferences.storiesListViewStatusFilter).toBe(
       'not-done',
     )

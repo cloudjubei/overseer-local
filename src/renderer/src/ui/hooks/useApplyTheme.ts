@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from 'react'
-import { useAppSettings } from '@core/contexts/AppSettingsContext'
+import { useAppSettings } from 'thefactory-ui/headless'
 import {
   useResolvedTheme,
   type SystemThemeSource,

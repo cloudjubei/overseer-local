@@ -1,6 +1,7 @@
 import { act, render } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { AppSettingsProvider, useAppSettings } from '@core/contexts/AppSettingsContext'
+import { AppSettingsProviderConnected } from 'thefactory-ui/web'
+import { useAppSettings } from 'thefactory-ui/headless'
 import type { Theme } from '@core/types/settings'
 import { useApplyTheme } from './useApplyTheme'
 
@@ -14,9 +15,9 @@ function Probe({ onReady }: { onReady: (setTheme: (t: Theme) => void) => void })
 function renderWithTheme(): { setTheme: (t: Theme) => void } {
   let setTheme!: (t: Theme) => void
   render(
-    <AppSettingsProvider>
+    <AppSettingsProviderConnected>
       <Probe onReady={(s) => (setTheme = s)} />
-    </AppSettingsProvider>,
+    </AppSettingsProviderConnected>,
   )
   return { setTheme }
 }

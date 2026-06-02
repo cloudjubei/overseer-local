@@ -2,7 +2,7 @@ import {
   useProjectSettings as useProjectSettingsCore,
   type ProjectSettingsApi,
 } from 'thefactory-ui/headless'
-import { localStorageAdapter } from '../storage/localStorageAdapter'
+import { localStorageAdapter } from 'thefactory-ui/web'
 
 export type { ProjectSettingsApi }
 
