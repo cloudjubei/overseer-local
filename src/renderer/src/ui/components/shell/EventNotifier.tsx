@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useApi } from '@core/contexts/ApiContext'
-import { useWebNotifications } from '@ui/hooks/useWebNotifications'
+import { useWebNotifications } from 'thefactory-ui/web'
 
 /**
  * Bridges WS broadcast events to OS-level notifications. Renders nothing.

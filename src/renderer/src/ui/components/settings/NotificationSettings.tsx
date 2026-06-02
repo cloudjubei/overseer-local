@@ -15,7 +15,7 @@ import {
   Switch,
   playBeep,
 } from 'thefactory-ui/web'
-import { useWebNotifications } from '@ui/hooks/useWebNotifications'
+import { useWebNotifications } from 'thefactory-ui/web'
 
 const DURATIONS: NotificationPrefs['displayDurationSeconds'][] = [3, 5, 10, 0]
 
