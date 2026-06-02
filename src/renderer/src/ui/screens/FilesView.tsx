@@ -15,7 +15,7 @@ import {
 } from 'thefactory-ui/web'
 import { IconArrowLeftMini, IconChevron, IconUpload } from 'thefactory-ui/web/icons'
 
-import FilePane from '@ui/components/files/FilePane'
+import FilePaneConnected from '@ui/components/files/FilePaneConnected'
 import { LoadingScreen } from 'thefactory-ui/web'
 
 const FILES_PANE_COLLAPSED_KEY = 'files-pane-collapsed'
@@ -216,7 +216,7 @@ export default function FilesView() {
           </button>
         )}
         <div className="flex-1 min-h-0 overflow-hidden">
-          <FilePane />
+          <FilePaneConnected />
         </div>
       </main>
     </div>

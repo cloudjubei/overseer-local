@@ -18,7 +18,7 @@ type Props = {
  * web-specific concerns: which agent context to start, where to navigate
  * the chat to, and the transient error display.
  */
-export default function RunAgentButton({ projectId, storyId, featureId, className }: Props) {
+export default function RunAgentButtonConnected({ projectId, storyId, featureId, className }: Props) {
   const { startAgent } = useAgents()
   const navigate = useNavigate()
   const [err, setErr] = useState<string | null>(null)

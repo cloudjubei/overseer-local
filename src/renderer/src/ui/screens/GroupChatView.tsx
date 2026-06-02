@@ -15,7 +15,7 @@ import ChatSettingsDropdownConnected from '@ui/components/chat/ChatSettingsDropd
 import { ChatTopicCreateModalConnected as ChatTopicCreateModal } from 'thefactory-ui/web'
 import { SystemPromptViewerConnected } from 'thefactory-ui/web'
 import { UsageModalConnected as UsageModal } from 'thefactory-ui/web'
-import ModelChip from '@ui/components/agents/ModelChip'
+import ModelChipConnected from '@ui/components/agents/ModelChipConnected'
 import { LoadingScreen } from 'thefactory-ui/web'
 
 const LAST_SELECTED_PREFIX = 'group-chat-last-selected-context'
@@ -184,7 +184,7 @@ export default function GroupChatView() {
       onOpenSettings={() => setSettingsOpen((v) => !v)}
       settingsBtnRef={settingsBtnRef}
       isSettingsOpen={settingsOpen}
-      modelChip={<ModelChip editable className="border-blue-500" mode="chat" />}
+      modelChip={<ModelChipConnected editable className="border-blue-500" mode="chat" />}
       settingsDropdown={
         <ChatSettingsDropdownConnected
           context={activeContext}

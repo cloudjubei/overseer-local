@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { ContextFileChip as ContextFileChipBase, type UikitFileMeta } from 'thefactory-ui/web'
 import { useFiles } from 'thefactory-ui/headless'
 
-export type ContextFileChipProps = {
+export type ContextFileChipConnectedProps = {
   path: string
   onRemove?: () => void
   warn?: boolean
@@ -15,7 +15,7 @@ export type ContextFileChipProps = {
  * minimal `{name, relativePath, absolutePath}` triple when the file
  * isn't in the project's file list (deleted / not yet ingested).
  */
-export default function ContextFileChip({ path, onRemove, warn }: ContextFileChipProps) {
+export default function ContextFileChipConnected({ path, onRemove, warn }: ContextFileChipConnectedProps) {
   const { files } = useFiles()
   const file = useMemo<UikitFileMeta>(() => {
     const exact = files.find(

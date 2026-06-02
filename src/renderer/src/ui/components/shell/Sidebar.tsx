@@ -37,7 +37,6 @@ const EXPANDED_PX = 248
 /** Maps each shell tab to the notification category whose count it should show. */
 const TAB_BADGE_CATEGORY: Partial<Record<ShellTabKey, NotificationCategory>> = {
   chat: 'chat',
-  agents: 'agent_runs',
   git: 'git',
 }
 
@@ -459,7 +458,7 @@ export default function Sidebar({ projectId, activeTab, activeGroupId, activeGro
 
 function badgeKeyForCategory(cat: NotificationCategory): keyof BadgeCounts {
   // The `BadgeCounts` keys mirror notification categories one-for-one.
-  return cat === 'agent_runs' ? 'agent_runs' : (cat as keyof BadgeCounts)
+  return cat
 }
 
 function asIconKey(v: unknown): string | undefined {

@@ -8,7 +8,7 @@ import { getToolHeaderPath } from 'thefactory-ui/headless'
 import { useStories } from 'thefactory-ui/headless'
 import { useActiveProject } from 'thefactory-ui/headless'
 import { StoryAndFeatureCallout } from 'thefactory-ui/web'
-import FeatureCard from '@ui/components/stories/FeatureCard'
+import FeatureCardConnected from '@ui/components/stories/FeatureCardConnected'
 import { DependencyBullet } from 'thefactory-ui/web'
 import type { ToolCall } from '../types'
 
@@ -68,7 +68,7 @@ function ConnectedToolPreview(args: RenderToolPreviewArgs) {
       const s = getStory(story.id)
       const f = s ? getFeature(s.id, feature.id) : undefined
       if (!s || !f || !projectId) return null
-      return <FeatureCard projectId={projectId} story={s} feature={f} />
+      return <FeatureCardConnected projectId={projectId} story={s} feature={f} />
     },
     renderStoryBullet: (storyId) => <DependencyBullet dependency={storyId} />,
     renderStoryAndFeatureCallout: ({ storyId, featureId }) => (

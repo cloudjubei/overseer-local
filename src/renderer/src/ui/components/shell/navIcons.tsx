@@ -6,7 +6,6 @@ import {
   IconFiles,
   IconHome,
   IconMonitor,
-  IconRobot,
   IconSettings,
   IconTests,
   IconTimeline,
@@ -30,7 +29,6 @@ const ICONS: Record<NavIconKey, ReactNode> = {
   timeline: <IconTimeline />,
   tools: <IconToolbox />,
   settings: <IconSettings />,
-  agents: <IconRobot />,
 }
 
 export function navIcon(key: NavIconKey): ReactNode {

@@ -8,11 +8,11 @@ import { ChatDynamicContextModal } from 'thefactory-ui/web'
 import ChatSettingsDropdownConnected from './ChatSettingsDropdownConnected'
 import { SystemPromptViewerConnected } from 'thefactory-ui/web'
 import { ContextInfoButton } from 'thefactory-ui/web'
-import ModelChip from '@ui/components/agents/ModelChip'
+import ModelChipConnected from '@ui/components/agents/ModelChipConnected'
 import { UsageModalConnected as UsageModal } from 'thefactory-ui/web'
 import { useChats } from 'thefactory-ui/headless'
 
-export type ChatSidebarPanelProps = {
+export type ChatSidebarPanelConnectedProps = {
   context: ChatContext
   chatContextTitle: string
   initialWidth?: number
@@ -29,12 +29,12 @@ export type ChatSidebarPanelProps = {
  * big-screen only and has no bottom sheet, so the split would be a
  * single-consumer indirection here.
  */
-export default function ChatSidebarPanel({
+export default function ChatSidebarPanelConnected({
   context,
   chatContextTitle,
   initialWidth = 380,
   onWidthChange,
-}: ChatSidebarPanelProps) {
+}: ChatSidebarPanelConnectedProps) {
   const navigate = useNavigate()
   const { projectId: urlProjectId } = useParams<{ projectId: string }>()
   const { getChat, clearChat, deleteChat } = useChats()
@@ -95,7 +95,7 @@ export default function ChatSidebarPanel({
                 settingsBtnRef={settingsBtnRef}
                 isSettingsOpen={settingsOpen}
                 isRunningAgent={isRunningAgent}
-                modelChip={<ModelChip editable className="border-blue-500" mode="chat" />}
+                modelChip={<ModelChipConnected editable className="border-blue-500" mode="chat" />}
                 settingsDropdown={
                   <ChatSettingsDropdownConnected
                     context={context}

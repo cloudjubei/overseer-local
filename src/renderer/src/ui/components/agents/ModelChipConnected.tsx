@@ -5,7 +5,7 @@ import { getPrice } from 'thefactory-ui/headless/api'
 import { ModelChip as ModelChipBase, type ModelChipMode } from 'thefactory-ui/web'
 import { useLLMConfigs } from '@core/contexts/LLMConfigsContext'
 
-export type ModelChipProps = {
+export type ModelChipConnectedProps = {
   provider?: string
   model?: string
   className?: string
@@ -13,13 +13,13 @@ export type ModelChipProps = {
   mode?: ModelChipMode
 }
 
-export default function ModelChip({
+export default function ModelChipConnected({
   provider,
   model,
   className,
   editable = false,
   mode = 'chat',
-}: ModelChipProps) {
+}: ModelChipConnectedProps) {
   const navigate = useNavigate()
   const { projectId } = useParams<{ projectId: string }>()
   const {

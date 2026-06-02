@@ -15,11 +15,11 @@ import {
 import { IconBack, IconCalculator, IconChevron, IconEdit, IconPlus } from 'thefactory-ui/web/icons'
 import { DependencyBullet } from 'thefactory-ui/web'
 import { ExclamationChip } from 'thefactory-ui/web'
-import RunAgentButton from '@ui/components/agents/RunAgentButton'
-import ModelChip from '@ui/components/agents/ModelChip'
+import RunAgentButtonConnected from '@ui/components/agents/RunAgentButtonConnected'
+import ModelChipConnected from '@ui/components/agents/ModelChipConnected'
 import { UsageModalConnected as UsageModal } from 'thefactory-ui/web'
 import { getChatContextKey } from '@core/chats/chatKey'
-import ChatSidebarPanel from '@ui/components/chat/ChatSidebarPanel'
+import ChatSidebarPanelConnected from '@ui/components/chat/ChatSidebarPanelConnected'
 import StoriesModalHost from './StoriesModalHost'
 import type { StoryModalRoute } from './storyModals'
 
@@ -293,10 +293,10 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
                   onClick={(e) => e.stopPropagation()}
                   onPointerDown={(e) => e.stopPropagation()}
                 >
-                  <RunAgentButton projectId={projectId} storyId={story.id} />
+                  <RunAgentButtonConnected projectId={projectId} storyId={story.id} />
                 </div>
               )}
-              <ModelChip editable />
+              <ModelChipConnected editable />
               <button
                 type="button"
                 onClick={(e) => {
@@ -543,7 +543,7 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
                               onClick={(e) => e.stopPropagation()}
                               onPointerDown={(e) => e.stopPropagation()}
                             >
-                              <RunAgentButton
+                              <RunAgentButtonConnected
                                 projectId={projectId}
                                 storyId={story.id}
                                 featureId={f.id}
@@ -599,7 +599,7 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
       </div>
 
       {projectId && (
-        <ChatSidebarPanel
+        <ChatSidebarPanelConnected
           context={{ type: 'STORY', projectId, storyId: story.id }}
           chatContextTitle={story.title || `Story ${sIndex}`}
         />

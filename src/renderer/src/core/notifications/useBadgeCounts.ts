@@ -1,7 +1,6 @@
 import { useCallback, useMemo } from 'react'
 import type { ChatContext } from 'thefactory-ui/headless/api'
 import { getChatContextKey } from '../chats/chatKey'
-import { useAgents } from 'thefactory-ui/headless'
 import { useAppSettings } from '../contexts/AppSettingsContext'
 import { useChats } from 'thefactory-ui/headless'
 import { useGit } from 'thefactory-ui/headless'
@@ -60,7 +59,6 @@ export function useBadgeCounts(): UseBadgeCountsApi {
   const { settings: projectSettings } = useProjectSettings(activeProjectId)
   const projectOverride = projectSettings.notifications.categories
   const { chats, getChatLiveState } = useChats()
-  const { runsActive, getProjectRunningCount } = useAgents()
   const { status, branches } = useGit()
   const { lastRun } = useTests()
 
@@ -124,7 +122,6 @@ export function useBadgeCounts(): UseBadgeCountsApi {
 
   const counts = useBadgeCountsCore({
     chats: activeProjectChats,
-    activeAgentRuns: runsActive.filter((r) => r.context.projectId === activeProjectId).length,
     git: status
       ? {
           uncommittedFileCount:
@@ -138,7 +135,6 @@ export function useBadgeCounts(): UseBadgeCountsApi {
     failingTests: lastRun?.summary.failed,
     enabled: {
       chat: resolveTriState(prefs.badgesEnabled.chat, projectOverride.chat),
-      agent_runs: resolveTriState(prefs.badgesEnabled.agent_runs, projectOverride.agent_runs),
       git: resolveTriState(prefs.badgesEnabled.git, projectOverride.git),
       tests: resolveTriState(prefs.badgesEnabled.tests, projectOverride.tests),
     },
@@ -199,9 +195,6 @@ export function useBadgeCounts(): UseBadgeCountsApi {
 
       const chat = chatBadgeFor(chatsByProjectId.get(projectId) ?? [])
 
-      const runEnabled = prefs.badgesEnabled.agent_runs !== false
-      const running = runEnabled ? getProjectRunningCount(projectId) : 0
-
       // Git + tests on web only track the active project; other projects
       // report 0 (parity with desktop, which also reports 0 for projects
       // whose status hasn't been polled yet).
@@ -220,7 +213,6 @@ export function useBadgeCounts(): UseBadgeCountsApi {
       const failingTests = isActive && testsEnabled ? (lastRun?.summary.failed ?? 0) : 0
 
       return {
-        agent_runs: { running },
         chat_messages: { unread: chat.unread, thinking: chat.thinking },
         git: { incoming, uncommitted },
         tests: { failing: failingTests },
@@ -229,7 +221,6 @@ export function useBadgeCounts(): UseBadgeCountsApi {
     [
       chatBadgeFor,
       chatsByProjectId,
-      getProjectRunningCount,
       activeProjectId,
       branches,
       status,

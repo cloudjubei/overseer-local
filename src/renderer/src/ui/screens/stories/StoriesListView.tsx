@@ -22,11 +22,11 @@ import {
 import { IconBoard, IconCalculator, IconEdit, IconList, IconPlus } from 'thefactory-ui/web/icons'
 import { DependencyBullet } from 'thefactory-ui/web'
 import { ExclamationChip } from 'thefactory-ui/web'
-import RunAgentButton from '@ui/components/agents/RunAgentButton'
-import ModelChip from '@ui/components/agents/ModelChip'
+import RunAgentButtonConnected from '@ui/components/agents/RunAgentButtonConnected'
+import ModelChipConnected from '@ui/components/agents/ModelChipConnected'
 import { UsageModalConnected as UsageModal } from 'thefactory-ui/web'
 import { getChatContextKey } from '@core/chats/chatKey'
-import ChatSidebarPanel from '@ui/components/chat/ChatSidebarPanel'
+import ChatSidebarPanelConnected from '@ui/components/chat/ChatSidebarPanelConnected'
 import { BoardView } from 'thefactory-ui/web'
 import StoriesModalHost from './StoriesModalHost'
 import type { StoryModalRoute } from './storyModals'
@@ -322,7 +322,7 @@ export default function StoriesListView() {
             />
           </div>
           <div className="right flex items-center gap-2">
-            <ModelChip editable />
+            <ModelChipConnected editable />
             <button
               type="button"
               onClick={() => setUsageOpen(true)}
@@ -586,7 +586,7 @@ export default function StoriesListView() {
                                   onClick={(e) => e.stopPropagation()}
                                   onPointerDown={(e) => e.stopPropagation()}
                                 >
-                                  <RunAgentButton projectId={projectId} storyId={t.id} />
+                                  <RunAgentButtonConnected projectId={projectId} storyId={t.id} />
                                 </div>
                               )}
                             </div>
@@ -637,7 +637,7 @@ export default function StoriesListView() {
       </section>
 
       {projectId && (
-        <ChatSidebarPanel
+        <ChatSidebarPanelConnected
           context={{ type: 'PROJECT', projectId }}
           chatContextTitle={project ? `Project Chat — ${project.title}` : 'Project Chat'}
         />

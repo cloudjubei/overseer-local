@@ -1,9 +1,9 @@
 import type { Feature, GetStoryResponse } from 'thefactory-ui/headless/api'
 import { FeatureCard as FeatureCardBase, type StoryStatus as Status } from 'thefactory-ui/web'
 import { DependencyBullet } from 'thefactory-ui/web'
-import RunAgentButton from '@ui/components/agents/RunAgentButton'
+import RunAgentButtonConnected from '@ui/components/agents/RunAgentButtonConnected'
 
-export type FeatureCardProps = {
+export type FeatureCardConnectedProps = {
   projectId: string
   story: GetStoryResponse
   feature: Feature
@@ -15,7 +15,7 @@ export type FeatureCardProps = {
   onPillClick?: () => void
 }
 
-export default function FeatureCard({
+export default function FeatureCardConnected({
   projectId,
   story,
   feature,
@@ -25,7 +25,7 @@ export default function FeatureCard({
   showActions = false,
   isNew = false,
   onPillClick,
-}: FeatureCardProps) {
+}: FeatureCardConnectedProps) {
   const dependency = `${story.id}.${feature.id}`
 
   const headerLeft = isNew ? (
@@ -55,7 +55,7 @@ export default function FeatureCard({
       headerLeft={headerLeft}
       actions={
         showActions ? (
-          <RunAgentButton projectId={projectId} storyId={story.id} featureId={feature.id} />
+          <RunAgentButtonConnected projectId={projectId} storyId={story.id} featureId={feature.id} />
         ) : undefined
       }
       renderBlocker={(dep) => <DependencyBullet dependency={dep} interactive={false} />}

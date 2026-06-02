@@ -50,7 +50,6 @@ import {
   type ShellTabKey,
 } from 'thefactory-ui/headless'
 import { useApplyTheme } from '@ui/hooks/useApplyTheme'
-import AgentsView from '@ui/screens/AgentsView'
 import ChatView from '@ui/screens/ChatView'
 import FilesView from '@ui/screens/FilesView'
 import GroupChatView from '@ui/screens/GroupChatView'
@@ -197,7 +196,6 @@ function MainShell() {
             {tab === 'stories' && <StoriesView />}
             {tab === 'app' && <ProjectAppTab />}
             {tab === 'chat' && <ChatView />}
-            {tab === 'agents' && <AgentsView />}
             {tab === 'files' && <FilesView />}
             {tab === 'git' && <GitView />}
             {tab === 'tests' && <TestsView />}

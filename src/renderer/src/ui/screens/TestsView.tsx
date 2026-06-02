@@ -18,7 +18,7 @@ import {
   type TestConfigCandidate,
 } from 'thefactory-ui/web'
 import { IconDoubleUp, IconPlay, IconStopCircle } from 'thefactory-ui/web/icons'
-import ChatSidebarPanel from '@ui/components/chat/ChatSidebarPanel'
+import ChatSidebarPanelConnected from '@ui/components/chat/ChatSidebarPanelConnected'
 import StoriesModalHost from '@ui/screens/stories/StoriesModalHost'
 import type { StoryModalRoute } from '@ui/screens/stories/storyModals'
 import { LoadingScreen } from 'thefactory-ui/web'
@@ -302,7 +302,7 @@ function TestsViewInner() {
       </section>
 
       {(projectId || urlProjectId) && (
-        <ChatSidebarPanel
+        <ChatSidebarPanelConnected
           context={{
             type: 'PROJECT_TOPIC',
             projectId: (projectId ?? urlProjectId) as string,

@@ -15,7 +15,7 @@ import { useStories } from 'thefactory-ui/headless'
 import { useFiles } from 'thefactory-ui/headless'
 import { DependencyBullet } from 'thefactory-ui/web'
 import DependencySelector from './DependencySelector'
-import ContextFileChip from './ContextFileChip'
+import ContextFileChipConnected from './ContextFileChipConnected'
 import { FileMentionsTextareaConnected as FileMentionsTextarea } from 'thefactory-ui/web'
 
 /**
@@ -264,7 +264,7 @@ export default function FeatureForm({
             style={{ borderColor: 'var(--border-default)', background: 'var(--surface-raised)' }}
           >
             {form.values.context.map((p, idx) => (
-              <ContextFileChip
+              <ContextFileChipConnected
                 key={p}
                 path={p}
                 onRemove={() => form.removeContextAt(idx)}

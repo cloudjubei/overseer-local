@@ -18,7 +18,7 @@ import { ChatTopicCreateModalConnected as ChatTopicCreateModal } from 'thefactor
 import { SystemPromptViewerConnected } from 'thefactory-ui/web'
 import { UsageModalConnected as UsageModal } from 'thefactory-ui/web'
 import { ContextInfoButton } from 'thefactory-ui/web'
-import ModelChip from '@ui/components/agents/ModelChip'
+import ModelChipConnected from '@ui/components/agents/ModelChipConnected'
 import { LoadingScreen } from 'thefactory-ui/web'
 
 const SIDEBAR_MODE_KEY = 'chat-sidebar-mode'
@@ -203,7 +203,7 @@ export default function ChatView() {
       settingsBtnRef={settingsBtnRef}
       isSettingsOpen={settingsOpen}
       isRunningAgent={isRunningAgent}
-      modelChip={<ModelChip editable className="border-blue-500" mode="chat" />}
+      modelChip={<ModelChipConnected editable className="border-blue-500" mode="chat" />}
       settingsDropdown={
         <ChatSettingsDropdownConnected
           context={activeContext}
@@ -297,7 +297,7 @@ export default function ChatView() {
               onDelete={() => {
                 if (window.confirm('Delete this agent run? Messages will be removed.')) {
                   void deleteRun(chat).then(() => {
-                    if (projectId) navigate(`/projects/${projectId}/agents`)
+                    if (projectId) navigate(`/projects/${projectId}/chat`)
                   })
                 }
               }}

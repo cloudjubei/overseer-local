@@ -20,7 +20,7 @@ async function fetchFileBlobUrl(
   return URL.createObjectURL(blob)
 }
 
-export default function FilePane() {
+export default function FilePaneConnected() {
   const {
     selectedPath,
     files,
