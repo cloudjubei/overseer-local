@@ -6,7 +6,7 @@ import { useChats } from 'thefactory-ui/headless'
 import { useGit } from 'thefactory-ui/headless'
 import { useActiveProject } from 'thefactory-ui/headless'
 import { useTests } from 'thefactory-ui/headless'
-import { useProjectSettings } from '../hooks/useProjectSettings'
+import { useProjectSettingsConnected as useProjectSettings } from 'thefactory-ui/web'
 import {
   aggregateGroupBadgeState,
   EMPTY_BADGE_STATE,

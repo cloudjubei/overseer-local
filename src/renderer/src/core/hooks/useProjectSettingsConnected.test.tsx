@@ -1,6 +1,6 @@
 import { act, renderHook } from '@testing-library/react'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { useProjectSettings } from './useProjectSettings'
+import { useProjectSettingsConnected as useProjectSettings } from 'thefactory-ui/web'
 
 const PROJECT = 'p1'
 const KEY = `thefactory.projectSettings.${PROJECT}`

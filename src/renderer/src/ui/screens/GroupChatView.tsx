@@ -15,7 +15,7 @@ import ChatSettingsDropdownConnected from '@ui/components/chat/ChatSettingsDropd
 import { ChatTopicCreateModalConnected as ChatTopicCreateModal } from 'thefactory-ui/web'
 import { SystemPromptViewerConnected } from 'thefactory-ui/web'
 import { UsageModalConnected as UsageModal } from 'thefactory-ui/web'
-import ModelChipConnected from '@ui/components/agents/ModelChipConnected'
+import { ModelChipConnected } from 'thefactory-ui/web'
 import { LoadingScreen } from 'thefactory-ui/web'
 
 const LAST_SELECTED_PREFIX = 'group-chat-last-selected-context'

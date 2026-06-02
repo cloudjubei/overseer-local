@@ -18,7 +18,7 @@ import { ChatTopicCreateModalConnected as ChatTopicCreateModal } from 'thefactor
 import { SystemPromptViewerConnected } from 'thefactory-ui/web'
 import { UsageModalConnected as UsageModal } from 'thefactory-ui/web'
 import { ContextInfoButton } from 'thefactory-ui/web'
-import ModelChipConnected from '@ui/components/agents/ModelChipConnected'
+import { ModelChipConnected } from 'thefactory-ui/web'
 import { LoadingScreen } from 'thefactory-ui/web'
 
 const SIDEBAR_MODE_KEY = 'chat-sidebar-mode'

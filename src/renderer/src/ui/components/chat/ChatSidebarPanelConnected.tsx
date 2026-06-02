@@ -8,7 +8,7 @@ import { ChatDynamicContextModal } from 'thefactory-ui/web'
 import ChatSettingsDropdownConnected from './ChatSettingsDropdownConnected'
 import { SystemPromptViewerConnected } from 'thefactory-ui/web'
 import { ContextInfoButton } from 'thefactory-ui/web'
-import ModelChipConnected from '@ui/components/agents/ModelChipConnected'
+import { ModelChipConnected } from 'thefactory-ui/web'
 import { UsageModalConnected as UsageModal } from 'thefactory-ui/web'
 import { useChats } from 'thefactory-ui/headless'
 

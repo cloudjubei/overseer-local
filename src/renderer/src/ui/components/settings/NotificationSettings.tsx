@@ -1,6 +1,6 @@
 import { useAppSettings } from 'thefactory-ui/headless'
 import { useActiveProject } from 'thefactory-ui/headless'
-import { useProjectSettings } from '@core/hooks/useProjectSettings'
+import { useProjectSettingsConnected as useProjectSettings } from 'thefactory-ui/web'
 import type { BadgeColor, NotificationCategory, NotificationPrefs } from '@core/types/settings'
 import { BADGE_COLORS, isBadgeColorCategory } from '@core/types/settings'
 import {

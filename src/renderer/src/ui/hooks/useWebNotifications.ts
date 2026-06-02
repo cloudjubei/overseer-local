@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useAppSettings } from 'thefactory-ui/headless'
 import { useActiveProject } from 'thefactory-ui/headless'
-import { useProjectSettings } from '@core/hooks/useProjectSettings'
+import { useProjectSettingsConnected as useProjectSettings } from 'thefactory-ui/web'
 import { resolveTriState } from 'thefactory-ui/headless'
 import type { NotificationPrefs } from '@core/types/settings'
 import { playBeep } from 'thefactory-ui/web'

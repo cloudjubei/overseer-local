@@ -16,7 +16,7 @@ import { IconBack, IconCalculator, IconChevron, IconEdit, IconPlus } from 'thefa
 import { DependencyBullet } from 'thefactory-ui/web'
 import { ExclamationChip } from 'thefactory-ui/web'
 import RunAgentButtonConnected from '@ui/components/agents/RunAgentButtonConnected'
-import ModelChipConnected from '@ui/components/agents/ModelChipConnected'
+import { ModelChipConnected } from 'thefactory-ui/web'
 import { UsageModalConnected as UsageModal } from 'thefactory-ui/web'
 import { getChatContextKey } from '@core/chats/chatKey'
 import ChatSidebarPanelConnected from '@ui/components/chat/ChatSidebarPanelConnected'
