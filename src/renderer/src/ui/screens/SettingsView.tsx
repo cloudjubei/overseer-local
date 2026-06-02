@@ -4,7 +4,7 @@ import { CollapsibleSidebar } from 'thefactory-ui/web'
 // Subviews
 import { VisualSettings } from 'thefactory-ui/web'
 import LLMSettings from '@ui/components/settings/LLMSettings'
-import NotificationSettings from '@ui/components/settings/NotificationSettings'
+import { NotificationSettings } from 'thefactory-ui/web'
 import { GitHubSettings } from "thefactory-ui/web"
 import { WebSearchSettings } from "thefactory-ui/web"
 import { DatabaseSettings } from "thefactory-ui/web"
