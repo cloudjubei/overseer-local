@@ -1,11 +1,16 @@
 import { useState } from 'react'
-import { useActiveProject } from 'thefactory-ui/headless'
-import { useLiveDataProviders } from 'thefactory-ui/headless'
-import type {
-  LiveDataProvider,
-  LiveDataProviderCreateInput,
-  LiveDataProviderEditInput,
-} from 'thefactory-ui/headless/api'
+import {
+  useActiveProject,
+  useDataSources,
+  emptySourceForm,
+  sourceToForm,
+  formToSourceInput,
+  validateSourceForm,
+  humanizeMs,
+  isSourceFresh,
+  type LiveDataSourceForm,
+} from 'thefactory-ui/headless'
+import type { DataSource, DataRecord } from 'thefactory-ui/headless/api'
 import {
   Alert,
   Button,
@@ -16,76 +21,8 @@ import {
   NativeSelect as Select,
   Surface,
   Switch,
-  Textarea,
 } from 'thefactory-ui/web'
 import { IconDelete, IconEdit, IconPlus } from 'thefactory-ui/web/icons'
-
-type FreshnessPolicy = LiveDataProvider['freshnessPolicy']
-type AutoTrigger = LiveDataProvider['autoUpdate']['trigger']
-type Scope = LiveDataProvider['scope']
-
-type ProviderForm = {
-  name: string
-  description: string
-  url: string
-  freshnessPolicy: FreshnessPolicy
-  autoEnabled: boolean
-  autoTrigger: AutoTrigger
-  scope: Scope
-}
-
-const FRESHNESS_OPTIONS: FreshnessPolicy[] = ['daily', 'weekly', 'monthly']
-
-const EMPTY_FORM: ProviderForm = {
-  name: '',
-  description: '',
-  url: '',
-  freshnessPolicy: 'daily',
-  autoEnabled: true,
-  autoTrigger: 'onAppLaunch',
-  scope: 'project',
-}
-
-function urlFromConfig(config: unknown): string {
-  if (typeof config !== 'object' || config === null) return ''
-  const v = (config as Record<string, unknown>)['url']
-  return typeof v === 'string' ? v : ''
-}
-
-function formToCreateInput(form: ProviderForm, projectId: string): LiveDataProviderCreateInput {
-  return {
-    name: form.name.trim(),
-    description: form.description.trim(),
-    freshnessPolicy: form.freshnessPolicy,
-    autoUpdate: { enabled: form.autoEnabled, trigger: form.autoTrigger },
-    scope: form.scope,
-    ...(form.scope === 'project' ? { projectId } : {}),
-    config: form.url.trim() ? { url: form.url.trim() } : {},
-  }
-}
-
-function formToEditInput(form: ProviderForm): LiveDataProviderEditInput {
-  return {
-    name: form.name.trim(),
-    description: form.description.trim(),
-    freshnessPolicy: form.freshnessPolicy,
-    autoUpdate: { enabled: form.autoEnabled, trigger: form.autoTrigger },
-    scope: form.scope,
-    config: form.url.trim() ? { url: form.url.trim() } : {},
-  }
-}
-
-function providerToForm(p: LiveDataProvider): ProviderForm {
-  return {
-    name: p.name,
-    description: p.description,
-    url: urlFromConfig(p.config),
-    freshnessPolicy: p.freshnessPolicy,
-    autoEnabled: p.autoUpdate.enabled,
-    autoTrigger: p.autoUpdate.trigger,
-    scope: p.scope,
-  }
-}
 
 function formatLastUpdated(ts: string | undefined): string {
   if (!ts) return 'never'
@@ -93,23 +30,38 @@ function formatLastUpdated(ts: string | undefined): string {
   return Number.isNaN(d.getTime()) ? ts : d.toLocaleString()
 }
 
-type FormModalRoute = { mode: 'create' } | { mode: 'edit'; provider: LiveDataProvider } | null
+function summarizeContent(content: unknown): string {
+  if (content && typeof content === 'object') {
+    const latest = (content as { latest?: { v?: unknown; t?: unknown } }).latest
+    if (latest && typeof latest === 'object' && 'v' in latest) {
+      return `${String(latest.v)}${latest.t ? ` @ ${String(latest.t)}` : ''}`
+    }
+  }
+  const json = JSON.stringify(content)
+  return json.length > 80 ? `${json.slice(0, 80)}…` : json
+}
+
+type FormRoute = { mode: 'create' } | { mode: 'edit'; source: DataSource } | null
 
 export default function LiveDataView() {
   const { projectId, project } = useActiveProject()
   const {
     isLoaded,
     loadError,
-    providers,
-    createProvider,
-    updateProvider,
-    deleteProvider,
-    fetchProvider,
-    getProviderPayload,
-  } = useLiveDataProviders()
+    sources,
+    subscribedSourceIds,
+    refreshing,
+    createSource,
+    updateSource,
+    deleteSource,
+    refreshSource,
+    subscribe,
+    unsubscribe,
+    readSourceRecords,
+  } = useDataSources()
 
-  const [formModal, setFormModal] = useState<FormModalRoute>(null)
-  const [pendingDelete, setPendingDelete] = useState<LiveDataProvider | null>(null)
+  const [formRoute, setFormRoute] = useState<FormRoute>(null)
+  const [deleting, setDeleting] = useState<DataSource | null>(null)
 
   if (!projectId) {
     return (
@@ -128,292 +80,229 @@ export default function LiveDataView() {
         <div className="min-w-0">
           <h1 className="text-2xl font-semibold">Live data</h1>
           <p className="text-xs opacity-60 mt-1">
-            JSON sources fetched on a freshness schedule. Project-scoped + globals visible from{' '}
-            {project?.title ?? 'this project'}.
+            Shared data sources. Subscribe {project?.title ?? 'this project'} to the ones its agents
+            should see.
           </p>
         </div>
         <Button
           variant="secondary"
           size="icon"
-          onClick={() => setFormModal({ mode: 'create' })}
-          aria-label="Add live-data provider"
-          title="Add live-data provider"
+          onClick={() => setFormRoute({ mode: 'create' })}
+          aria-label="Add data source"
+          title="Add data source"
         >
           <IconPlus className="w-4 h-4" />
         </Button>
       </header>
 
       <div className="flex-1 overflow-auto px-4 sm:px-8 py-6 flex flex-col gap-4">
-        {loadError && <Alert>{loadError.message}</Alert>}
+        {loadError && <Alert variant="error">{loadError.message}</Alert>}
+
         {!isLoaded ? (
-          <p className="text-sm opacity-60">Loading providers…</p>
-        ) : providers.length === 0 ? (
-          <p className="text-sm opacity-60">
-            No live-data providers configured for this project yet.
-          </p>
+          <p className="text-sm opacity-60">Loading data sources…</p>
+        ) : sources.length === 0 ? (
+          <p className="text-sm opacity-60">No data sources yet.</p>
         ) : (
-          providers.map((p) => (
-            <ProviderCard
-              key={p.id}
-              provider={p}
-              onUpdate={(patch) => void updateProvider(p.id, patch)}
-              onFetch={() => void fetchProvider(p.id)}
-              onEdit={() => setFormModal({ mode: 'edit', provider: p })}
-              onDelete={() => setPendingDelete(p)}
-              loadPayload={() => getProviderPayload(p.id)}
+          sources.map((source) => (
+            <SourceCard
+              key={source.id}
+              source={source}
+              subscribed={subscribedSourceIds.has(source.id)}
+              refreshing={refreshing[source.id] === true}
+              onSubscribe={() => subscribe(source.id)}
+              onUnsubscribe={() => unsubscribe(source.id)}
+              onRefresh={() => refreshSource(source.id)}
+              onEdit={() => setFormRoute({ mode: 'edit', source })}
+              onDelete={() => setDeleting(source)}
+              readRecords={() => readSourceRecords(source.id)}
             />
           ))
         )}
       </div>
 
-      <ProviderFormModal
-        route={formModal}
-        onClose={() => setFormModal(null)}
-        projectId={projectId}
-        onCreate={async (input) => {
-          await createProvider(input)
-          setFormModal(null)
-        }}
-        onEdit={async (id, patch) => {
-          await updateProvider(id, patch)
-          setFormModal(null)
-        }}
-      />
+      {formRoute && (
+        <SourceFormModal
+          route={formRoute}
+          onClose={() => setFormRoute(null)}
+          onCreate={createSource}
+          onUpdate={updateSource}
+        />
+      )}
 
       <ConfirmDialog
-        isOpen={pendingDelete !== null}
-        onClose={() => setPendingDelete(null)}
-        onConfirm={async () => {
-          if (pendingDelete) await deleteProvider(pendingDelete.id)
-        }}
-        title="Delete live-data provider?"
-        description={
-          pendingDelete
-            ? `"${pendingDelete.name}" and its cached payload will be removed.`
-            : undefined
-        }
+        isOpen={deleting !== null}
+        title="Delete data source?"
+        description={`"${deleting?.name ?? ''}" and its fetched records will be removed. Every project subscribed to it loses this data.`}
         confirmLabel="Delete"
         destructive
+        onConfirm={async () => {
+          if (deleting) await deleteSource(deleting.id)
+          setDeleting(null)
+        }}
+        onClose={() => setDeleting(null)}
       />
     </div>
   )
 }
 
-function ProviderCard({
-  provider,
-  onUpdate,
-  onFetch,
+function SourceCard({
+  source,
+  subscribed,
+  refreshing,
+  onSubscribe,
+  onUnsubscribe,
+  onRefresh,
   onEdit,
   onDelete,
-  loadPayload,
+  readRecords,
 }: {
-  provider: LiveDataProvider
-  onUpdate: (patch: LiveDataProviderEditInput) => void
-  onFetch: () => void
+  source: DataSource
+  subscribed: boolean
+  refreshing: boolean
+  onSubscribe: () => Promise<unknown>
+  onUnsubscribe: () => Promise<unknown>
+  onRefresh: () => Promise<unknown>
   onEdit: () => void
   onDelete: () => void
-  loadPayload: () => Promise<{ data?: unknown } | null>
+  readRecords: () => Promise<DataRecord[]>
 }) {
-  const [showData, setShowData] = useState(false)
-  const [data, setData] = useState<unknown>(undefined)
-  const [dataLoading, setDataLoading] = useState(false)
-  const [dataError, setDataError] = useState<string | undefined>(undefined)
+  const [expanded, setExpanded] = useState(false)
+  const [records, setRecords] = useState<DataRecord[] | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const fresh = isSourceFresh(source)
 
-  const toggleData = async () => {
-    const next = !showData
-    setShowData(next)
-    if (next && data === undefined) await refreshData()
+  const toggleRecords = async () => {
+    const next = !expanded
+    setExpanded(next)
+    if (next && records === null) {
+      try {
+        setRecords(await readRecords())
+      } catch (err) {
+        setError(err instanceof Error ? err.message : String(err))
+      }
+    }
   }
 
-  const refreshData = async () => {
-    setDataLoading(true)
-    setDataError(undefined)
+  const onRefreshClick = async () => {
+    setError(null)
     try {
-      const payload = await loadPayload()
-      setData(payload?.data ?? null)
+      await onRefresh()
+      if (expanded) setRecords(await readRecords())
     } catch (err) {
-      setDataError(err instanceof Error ? err.message : String(err))
-    } finally {
-      setDataLoading(false)
+      setError(err instanceof Error ? err.message : String(err))
     }
   }
 
   return (
-    <Surface className="flex flex-col gap-3 p-4">
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <div className="min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="font-semibold truncate">{provider.name}</span>
-            <ScopeBadge scope={provider.scope} />
-            <FreshnessBadge isFresh={provider.isFresh} />
-          </div>
-          {provider.description && (
-            <p className="text-xs opacity-70 mt-1">{provider.description}</p>
-          )}
-        </div>
-        <div className="flex items-center gap-2 shrink-0">
-          <Button size="sm" variant="secondary" onClick={() => void toggleData()}>
-            {showData ? 'Hide data' : 'Show data'}
+    <Surface className="flex flex-col gap-2 p-4">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="font-medium">{source.name}</span>
+        <span className="badge badge--soft badge--queued text-[10px] uppercase tracking-wide">
+          {source.recordType}
+        </span>
+        <span
+          className={`badge badge--soft ${fresh ? 'badge--done' : 'badge--working'} text-[10px] uppercase tracking-wide`}
+        >
+          {fresh ? 'fresh' : 'stale'}
+        </span>
+        <span
+          className={`badge badge--soft ${source.autoUpdate ? 'badge--done' : 'badge--empty'} text-[10px] uppercase tracking-wide`}
+        >
+          {source.autoUpdate ? 'auto' : 'manual'}
+        </span>
+        <div className="ml-auto flex items-center gap-2">
+          <Button
+            variant={subscribed ? 'secondary' : 'primary'}
+            onClick={subscribed ? onUnsubscribe : onSubscribe}
+          >
+            {subscribed ? 'Subscribed ✓' : 'Subscribe'}
           </Button>
           <Button
-            size="sm"
-            onClick={onFetch}
-            disabled={!!provider.isUpdating}
-            loading={!!provider.isUpdating}
+            variant="secondary"
+            loading={refreshing}
+            disabled={refreshing}
+            onClick={onRefreshClick}
           >
-            {provider.isUpdating ? 'Updating…' : 'Update now'}
+            Update now
           </Button>
-          <Button size="sm" variant="secondary" onClick={onEdit} aria-label="Edit provider">
-            <IconEdit className="w-4 h-4" />
+          <Button variant="ghost" size="icon" onClick={onEdit} title="Edit">
+            <IconEdit className="h-4 w-4" />
           </Button>
-          <Button size="sm" variant="danger" onClick={onDelete} aria-label="Delete provider">
-            <IconDelete className="w-4 h-4" />
+          <Button variant="ghost" size="icon" onClick={onDelete} title="Delete">
+            <IconDelete className="h-4 w-4" />
           </Button>
         </div>
       </div>
 
-      <div className="text-xs opacity-70">
-        Last updated: {formatLastUpdated(provider.lastUpdated)}
-      </div>
+      <p className="text-xs text-(--text-secondary)">
+        Freshness {humanizeMs(source.freshness)} · Last refreshed{' '}
+        {formatLastUpdated(source.lastRefreshedAt)}
+      </p>
 
-      {showData && (
-        <div className="flex flex-col gap-2">
-          {dataLoading ? (
-            <p className="text-xs opacity-60">Loading latest data…</p>
-          ) : dataError ? (
-            <Alert>{dataError}</Alert>
-          ) : (
-            <pre
-              className="max-h-80 overflow-auto rounded border p-2 text-xs font-mono"
-              style={{
-                background: 'var(--surface-muted)',
-                borderColor: 'var(--border-subtle)',
-              }}
-            >
-              {data == null ? 'No data cached yet.' : JSON.stringify(data, null, 2)}
-            </pre>
-          )}
-          <Button size="sm" variant="link" onClick={() => void refreshData()}>
-            Refresh data preview
-          </Button>
-        </div>
-      )}
+      {error && <Alert variant="error">{error}</Alert>}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <Field label="Freshness policy">
-          <Select
-            size="sm"
-            value={provider.freshnessPolicy}
-            onChange={(e) => onUpdate({ freshnessPolicy: e.target.value as FreshnessPolicy })}
-          >
-            {FRESHNESS_OPTIONS.map((p) => (
-              <option key={p} value={p}>
-                {p}
-              </option>
-            ))}
-          </Select>
-        </Field>
-
-        <div className="flex flex-col gap-2">
-          <Switch
-            checked={provider.autoUpdate.enabled}
-            onCheckedChange={(checked) =>
-              onUpdate({ autoUpdate: { ...provider.autoUpdate, enabled: checked } })
-            }
-            label="Automated checks"
-          />
-          {provider.autoUpdate.enabled && (
-            <Field label="When">
-              <Select
-                size="sm"
-                value={provider.autoUpdate.trigger}
-                onChange={(e) =>
-                  onUpdate({
-                    autoUpdate: {
-                      ...provider.autoUpdate,
-                      trigger: e.target.value as AutoTrigger,
-                    },
-                  })
-                }
-              >
-                <option value="onAppLaunch">On app launch</option>
-                <option value="scheduled">On schedule</option>
-              </Select>
-            </Field>
-          )}
-        </div>
+      <div>
+        <button
+          type="button"
+          className="text-xs text-(--accent) hover:underline"
+          onClick={() => void toggleRecords()}
+        >
+          {expanded ? 'Hide records' : 'Show records'}
+        </button>
+        {expanded && (
+          <div className="mt-2 max-h-80 overflow-auto rounded border border-(--border-subtle) bg-(--surface-muted) p-2 font-mono text-xs">
+            {records === null ? (
+              'Loading…'
+            ) : records.length === 0 ? (
+              'No records yet — try Update now.'
+            ) : (
+              <ul className="flex flex-col gap-1">
+                {records.slice(0, 20).map((r, i) => (
+                  <li key={r.key ? String(r.key) : i}>
+                    <span className="text-(--text-secondary)">{r.key ? String(r.key) : '—'}</span>:{' '}
+                    {summarizeContent(r.content)}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
       </div>
     </Surface>
   )
 }
 
-function ScopeBadge({ scope }: { scope: Scope }) {
-  const className =
-    scope === 'project' ? 'badge badge--soft badge--queued' : 'badge badge--soft badge--empty'
-  return <span className={`${className} text-[10px] uppercase tracking-wide`}>{scope}</span>
-}
-
-function FreshnessBadge({ isFresh }: { isFresh: boolean | undefined }) {
-  const className = isFresh ? 'badge badge--soft badge--done' : 'badge badge--soft badge--working'
-  return (
-    <span className={`${className} text-[10px] uppercase tracking-wide`}>
-      {isFresh ? 'fresh' : 'stale'}
-    </span>
-  )
-}
-
-function ProviderFormModal({
+function SourceFormModal({
   route,
   onClose,
-  projectId,
   onCreate,
-  onEdit,
+  onUpdate,
 }: {
-  route: FormModalRoute
+  route: { mode: 'create' } | { mode: 'edit'; source: DataSource }
   onClose: () => void
-  projectId: string
-  onCreate: (input: LiveDataProviderCreateInput) => Promise<void>
-  onEdit: (id: string, patch: LiveDataProviderEditInput) => Promise<void>
+  onCreate: (input: ReturnType<typeof formToSourceInput>) => Promise<unknown>
+  onUpdate: (id: string, patch: ReturnType<typeof formToSourceInput>) => Promise<unknown>
 }) {
-  const initialForm = route?.mode === 'edit' ? providerToForm(route.provider) : EMPTY_FORM
-  const isEdit = route?.mode === 'edit'
-
-  const [form, setForm] = useState<ProviderForm>(initialForm)
-  const [error, setError] = useState<string | undefined>(undefined)
+  const [form, setForm] = useState<LiveDataSourceForm>(
+    route.mode === 'edit' ? sourceToForm(route.source) : emptySourceForm(),
+  )
+  const [error, setError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
-  // Reset the form when the host opens it on a different route. Using the
-  // provider id (or `'create'`) as a key on the modal would also work, but
-  // this keeps the modal as a long-lived child to avoid a teardown flash.
-  const routeKey = route?.mode === 'edit' ? `edit:${route.provider.id}` : 'create'
-  const [lastKey, setLastKey] = useState(routeKey)
-  if (lastKey !== routeKey) {
-    setLastKey(routeKey)
-    setForm(initialForm)
-    setError(undefined)
-  }
-
-  const close = () => {
-    setError(undefined)
-    onClose()
-  }
+  const set = <K extends keyof LiveDataSourceForm>(key: K, value: LiveDataSourceForm[K]) =>
+    setForm((f) => ({ ...f, [key]: value }))
 
   const submit = async () => {
-    setError(undefined)
-    if (!form.name.trim()) {
-      setError('Name is required.')
-      return
-    }
-    if (form.url && !/^https?:\/\//i.test(form.url)) {
-      setError('Fetch URL must start with http:// or https://')
+    const validation = validateSourceForm(form)
+    if (validation) {
+      setError(validation)
       return
     }
     setSaving(true)
     try {
-      if (route?.mode === 'edit') {
-        await onEdit(route.provider.id, formToEditInput(form))
-      } else {
-        await onCreate(formToCreateInput(form, projectId))
-      }
+      const input = formToSourceInput(form)
+      if (route.mode === 'edit') await onUpdate(route.source.id, input)
+      else await onCreate(input)
+      onClose()
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err))
     } finally {
@@ -423,96 +312,128 @@ function ProviderFormModal({
 
   return (
     <Modal
-      isOpen={route !== null}
-      onClose={close}
-      title={isEdit ? 'Edit live-data provider' : 'Add live-data provider'}
+      isOpen
       size="lg"
-      footer={
-        <div className="flex justify-end gap-2">
-          <Button variant="secondary" onClick={close} disabled={saving}>
-            Cancel
-          </Button>
-          <Button onClick={() => void submit()} disabled={saving} loading={saving}>
-            {saving ? (isEdit ? 'Saving…' : 'Adding…') : isEdit ? 'Save changes' : 'Add provider'}
-          </Button>
-        </div>
-      }
+      title={route.mode === 'edit' ? 'Edit data source' : 'Add data source'}
+      onClose={onClose}
     >
       <div className="flex flex-col gap-3">
-        {error && <Alert>{error}</Alert>}
-
+        {error && <Alert variant="error">{error}</Alert>}
         <Field label="Name">
           <Input
             value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
-            placeholder="Display name"
+            onChange={(e) => set('name', e.target.value)}
+            placeholder="US stock prices"
           />
         </Field>
-
-        <Field label="Description">
-          <Textarea
-            value={form.description}
-            onChange={(e) => setForm({ ...form, description: e.target.value })}
-            placeholder="What does this provider fetch?"
-            rows={2}
-          />
-        </Field>
-
-        <Field
-          label="Fetch URL"
-          hint="Optional. Stored on `config.url` for the generic JSON fetcher."
-        >
+        <Field label="Record type">
           <Input
-            value={form.url}
-            onChange={(e) => setForm({ ...form, url: e.target.value })}
-            placeholder="https://example.com/data.json"
+            value={form.recordType}
+            onChange={(e) => set('recordType', e.target.value)}
+            placeholder="stock-quote"
           />
         </Field>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <Field label="Freshness policy">
+        <div className="grid grid-cols-2 items-end gap-2">
+          <Field label="Freshness">
+            <Input
+              type="number"
+              min="1"
+              value={form.freshnessValue}
+              onChange={(e) => set('freshnessValue', e.target.value)}
+            />
+          </Field>
+          <Field label="Unit">
             <Select
-              value={form.freshnessPolicy}
+              value={form.freshnessUnit}
               onChange={(e) =>
-                setForm({ ...form, freshnessPolicy: e.target.value as FreshnessPolicy })
+                set('freshnessUnit', e.target.value as LiveDataSourceForm['freshnessUnit'])
               }
             >
-              {FRESHNESS_OPTIONS.map((p) => (
-                <option key={p} value={p}>
-                  {p}
-                </option>
-              ))}
-            </Select>
-          </Field>
-
-          <Field label="Visibility">
-            <Select
-              value={form.scope}
-              onChange={(e) => setForm({ ...form, scope: e.target.value as Scope })}
-            >
-              <option value="project">This project only</option>
-              <option value="global">All projects (global)</option>
+              <option value="minutes">minutes</option>
+              <option value="hours">hours</option>
+              <option value="days">days</option>
             </Select>
           </Field>
         </div>
-
-        <div className="flex flex-col gap-2">
-          <Switch
-            checked={form.autoEnabled}
-            onCheckedChange={(checked) => setForm({ ...form, autoEnabled: checked })}
-            label="Automated checks"
+        <Switch
+          checked={form.autoUpdate}
+          onCheckedChange={(v) => set('autoUpdate', v)}
+          label="Auto-update on a schedule"
+        />
+        <Field label="Fetch URL">
+          <Input
+            value={form.url}
+            onChange={(e) => set('url', e.target.value)}
+            placeholder="https://api.example.com/prices"
           />
-          {form.autoEnabled && (
-            <Field label="When">
-              <Select
-                value={form.autoTrigger}
-                onChange={(e) => setForm({ ...form, autoTrigger: e.target.value as AutoTrigger })}
-              >
-                <option value="onAppLaunch">On app launch</option>
-                <option value="scheduled">On schedule</option>
-              </Select>
+        </Field>
+        <Field
+          label="Items path"
+          hint="Dotted path to the array of items in the response, e.g. data.items"
+        >
+          <Input
+            value={form.itemsPath}
+            onChange={(e) => set('itemsPath', e.target.value)}
+            placeholder="data"
+          />
+        </Field>
+        <Field label="Kind">
+          <Select
+            value={form.kind}
+            onChange={(e) => set('kind', e.target.value as LiveDataSourceForm['kind'])}
+          >
+            <option value="sample">sample (numeric → history)</option>
+            <option value="snapshot">snapshot (object stored as-is)</option>
+          </Select>
+        </Field>
+        <Field label="Map: key" hint="Dotted path to each item's dedup key, e.g. symbol">
+          <Input
+            value={form.mapKey}
+            onChange={(e) => set('mapKey', e.target.value)}
+            placeholder="symbol"
+          />
+        </Field>
+        {form.kind === 'sample' && (
+          <>
+            <Field label="Map: value" hint="Dotted path to the numeric value">
+              <Input
+                value={form.mapValue}
+                onChange={(e) => set('mapValue', e.target.value)}
+                placeholder="price"
+              />
             </Field>
-          )}
+            <Field
+              label="Map: time (optional)"
+              hint="Dotted path to the point timestamp; defaults to refresh time"
+            >
+              <Input
+                value={form.mapTime}
+                onChange={(e) => set('mapTime', e.target.value)}
+                placeholder="asOf"
+              />
+            </Field>
+            <Field label="History cap (optional)">
+              <Input
+                type="number"
+                min="1"
+                value={form.historyCap}
+                onChange={(e) => set('historyCap', e.target.value)}
+              />
+            </Field>
+          </>
+        )}
+        <div className="mt-2 flex justify-end gap-2">
+          <Button variant="secondary" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button
+            variant="primary"
+            loading={saving}
+            disabled={saving}
+            onClick={() => void submit()}
+          >
+            {route.mode === 'edit' ? 'Save' : 'Create'}
+          </Button>
         </div>
       </div>
     </Modal>

@@ -23,7 +23,7 @@ import { GitProvider, useGit } from 'thefactory-ui/headless'
 import { GitCredentialErrorModal } from 'thefactory-ui/web'
 import { GitCredentialsProvider } from 'thefactory-ui/headless'
 import { IngestionProvider } from 'thefactory-ui/headless'
-import { LiveDataProvidersProvider } from 'thefactory-ui/headless'
+import { DataSourcesProvider } from 'thefactory-ui/headless'
 import { LLMConfigsProviderConnected } from 'thefactory-ui/web'
 import { NativeDictationTriggerContext, OverseerProvider } from 'thefactory-ui/headless'
 import { macOsDictationTrigger } from './core/speech/macOsDictationTrigger'
@@ -101,7 +101,7 @@ function BackendGate() {
                             <TestsProvider>
                               <ToolsProvider>
                                 <EntitiesProvider>
-                                  <LiveDataProvidersProvider>
+                                  <DataSourcesProvider>
                                     <IngestionProvider>
                                       <EventNotifier />
                                       <DiagnosticsOverlay />
@@ -110,7 +110,7 @@ function BackendGate() {
                                       <GitCredentialErrorModalMount />
                                       <Outlet />
                                     </IngestionProvider>
-                                  </LiveDataProvidersProvider>
+                                  </DataSourcesProvider>
                                 </EntitiesProvider>
                               </ToolsProvider>
                             </TestsProvider>
