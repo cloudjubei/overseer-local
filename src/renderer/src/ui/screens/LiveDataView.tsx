@@ -131,12 +131,16 @@ export default function LiveDataView() {
 
       <ConfirmDialog
         isOpen={deleting !== null}
-        title="Delete data source?"
-        description={`"${deleting?.name ?? ''}" and its fetched records will be removed. Every project subscribed to it loses this data.`}
-        confirmLabel="Delete"
+        title={deleting?.system ? 'Delete system provider?' : 'Delete data source?'}
+        description={
+          deleting?.system
+            ? `"${deleting.name}" is a system provider that platform features depend on — deleting it can break them until it re-seeds on restart. Only continue if you know exactly what you're doing.`
+            : `"${deleting?.name ?? ''}" and its fetched records will be removed. Every project subscribed to it loses this data.`
+        }
+        confirmLabel={deleting?.system ? 'Delete system provider' : 'Delete'}
         destructive
         onConfirm={async () => {
-          if (deleting) await deleteSource(deleting.id)
+          if (deleting) await deleteSource(deleting.id, deleting.system === true)
           setDeleting(null)
         }}
         onClose={() => setDeleting(null)}
@@ -210,6 +214,14 @@ function SourceCard({
         >
           {source.autoUpdate ? 'auto' : 'manual'}
         </span>
+        {source.system && (
+          <span
+            className="badge badge--soft badge--review text-[10px] uppercase tracking-wide"
+            title="System provider — managed by the platform"
+          >
+            system
+          </span>
+        )}
         <div className="ml-auto flex items-center gap-2">
           <Button
             variant={subscribed ? 'secondary' : 'primary'}
@@ -288,6 +300,10 @@ function SourceFormModal({
   )
   const [error, setError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const [showAdvanced, setShowAdvanced] = useState(false)
+  // A system provider's wiring is managed by the platform; tunables (name,
+  // freshness, auto-update) stay editable, but the fetch/mapping is read-only.
+  const lockWiring = route.mode === 'edit' && route.source.system === true
   const set = <K extends keyof LiveDataSourceForm>(key: K, value: LiveDataSourceForm[K]) =>
     setForm((f) => ({ ...f, [key]: value }))
 
@@ -319,6 +335,12 @@ function SourceFormModal({
     >
       <div className="flex flex-col gap-3">
         {error && <Alert variant="error">{error}</Alert>}
+        {lockWiring && (
+          <Alert variant="info">
+            System provider — its fetch + data wiring is managed by the platform and locked. You can
+            still rename it and adjust its refresh schedule.
+          </Alert>
+        )}
         <Field label="Name">
           <Input
             value={form.name}
@@ -331,6 +353,7 @@ function SourceFormModal({
             value={form.recordType}
             onChange={(e) => set('recordType', e.target.value)}
             placeholder="stock-quote"
+            disabled={lockWiring}
           />
         </Field>
         <div className="grid grid-cols-2 items-end gap-2">
@@ -365,63 +388,102 @@ function SourceFormModal({
             value={form.url}
             onChange={(e) => set('url', e.target.value)}
             placeholder="https://api.example.com/prices"
+            disabled={lockWiring}
           />
         </Field>
-        <Field
-          label="Items path"
-          hint="Dotted path to the array of items in the response, e.g. data.items"
-        >
-          <Input
-            value={form.itemsPath}
-            onChange={(e) => set('itemsPath', e.target.value)}
-            placeholder="data"
-          />
-        </Field>
-        <Field label="Kind">
-          <Select
-            value={form.kind}
-            onChange={(e) => set('kind', e.target.value as LiveDataSourceForm['kind'])}
+
+        <div className="rounded border border-(--border-subtle)">
+          <button
+            type="button"
+            className="flex w-full items-center justify-between px-3 py-2 text-sm font-medium"
+            onClick={() => setShowAdvanced((s) => !s)}
           >
-            <option value="sample">sample (numeric → history)</option>
-            <option value="snapshot">snapshot (object stored as-is)</option>
-          </Select>
-        </Field>
-        <Field label="Map: key" hint="Dotted path to each item's dedup key, e.g. symbol">
-          <Input
-            value={form.mapKey}
-            onChange={(e) => set('mapKey', e.target.value)}
-            placeholder="symbol"
-          />
-        </Field>
-        {form.kind === 'sample' && (
-          <>
-            <Field label="Map: value" hint="Dotted path to the numeric value">
-              <Input
-                value={form.mapValue}
-                onChange={(e) => set('mapValue', e.target.value)}
-                placeholder="price"
-              />
-            </Field>
-            <Field
-              label="Map: time (optional)"
-              hint="Dotted path to the point timestamp; defaults to refresh time"
-            >
-              <Input
-                value={form.mapTime}
-                onChange={(e) => set('mapTime', e.target.value)}
-                placeholder="asOf"
-              />
-            </Field>
-            <Field label="History cap (optional)">
-              <Input
-                type="number"
-                min="1"
-                value={form.historyCap}
-                onChange={(e) => set('historyCap', e.target.value)}
-              />
-            </Field>
-          </>
-        )}
+            <span>Advanced — how to read the response</span>
+            <span className="text-(--text-secondary)">{showAdvanced ? '▾' : '▸'}</span>
+          </button>
+          {showAdvanced && (
+            <div className="flex flex-col gap-3 border-t border-(--border-subtle) p-3">
+              <p className="text-xs text-(--text-secondary)">
+                Tells the platform how to read the fetched JSON. You only need these when building a
+                custom source from a new URL.
+              </p>
+              <Field
+                label="Items path"
+                hint="Where the list of items sits in the response — e.g. products. Leave blank for the whole response."
+              >
+                <Input
+                  value={form.itemsPath}
+                  onChange={(e) => set('itemsPath', e.target.value)}
+                  placeholder="data"
+                  disabled={lockWiring}
+                />
+              </Field>
+              <Field
+                label="Kind"
+                hint="sample = a number to track over time (builds history); snapshot = store each item as-is."
+              >
+                <Select
+                  value={form.kind}
+                  onChange={(e) => set('kind', e.target.value as LiveDataSourceForm['kind'])}
+                  disabled={lockWiring}
+                >
+                  <option value="sample">sample (numeric → history)</option>
+                  <option value="snapshot">snapshot (object stored as-is)</option>
+                </Select>
+              </Field>
+              <Field
+                label="Map: key"
+                hint="The field that uniquely identifies each item, so a refresh updates the right row — e.g. symbol."
+              >
+                <Input
+                  value={form.mapKey}
+                  onChange={(e) => set('mapKey', e.target.value)}
+                  placeholder="symbol"
+                  disabled={lockWiring}
+                />
+              </Field>
+              {form.kind === 'sample' && (
+                <>
+                  <Field
+                    label="Map: value"
+                    hint="The field holding the number to track — e.g. price."
+                  >
+                    <Input
+                      value={form.mapValue}
+                      onChange={(e) => set('mapValue', e.target.value)}
+                      placeholder="price"
+                      disabled={lockWiring}
+                    />
+                  </Field>
+                  <Field
+                    label="Map: time (optional)"
+                    hint="The field holding each point's timestamp; defaults to the refresh time."
+                  >
+                    <Input
+                      value={form.mapTime}
+                      onChange={(e) => set('mapTime', e.target.value)}
+                      placeholder="asOf"
+                      disabled={lockWiring}
+                    />
+                  </Field>
+                  <Field
+                    label="History cap (optional)"
+                    hint="Keep only the most recent N points per item."
+                  >
+                    <Input
+                      type="number"
+                      min="1"
+                      value={form.historyCap}
+                      onChange={(e) => set('historyCap', e.target.value)}
+                      disabled={lockWiring}
+                    />
+                  </Field>
+                </>
+              )}
+            </div>
+          )}
+        </div>
+
         <div className="mt-2 flex justify-end gap-2">
           <Button variant="secondary" onClick={onClose}>
             Cancel
