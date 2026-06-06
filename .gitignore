@@ -104,6 +104,7 @@ dist/
 .factory/runs
 .factory/credentials
 .factory copy/
+.factory/knowledge
 
 # Vendorized build artifacts
 vendor/
