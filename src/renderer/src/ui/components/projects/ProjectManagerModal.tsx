@@ -24,6 +24,7 @@ import {
 } from 'thefactory-ui/web/icons'
 import {
   createProject,
+  createProjectGithubRepo,
   deleteProject,
   updateProject,
   extractErrorMessage,
@@ -32,13 +33,14 @@ import type { GetProjectResponse } from 'thefactory-ui/headless/api'
 import { useProjects } from 'thefactory-ui/headless'
 import { useProjectsGroups } from 'thefactory-ui/headless'
 import { useTemplates, type Template } from 'thefactory-ui/headless'
+import { useProjectGithubRepo } from 'thefactory-ui/headless'
 import {
   ProjectEditorForm,
   blankProjectForm,
   projectToFormState,
   type ProjectFormState,
 } from 'thefactory-ui/web'
-import { ProjectGroupsEditor, TemplatePicker } from "thefactory-ui/web"
+import { ProjectGroupsEditor, TemplatePicker } from 'thefactory-ui/web'
 import { IconRocket } from 'thefactory-ui/web/icons'
 
 const ALL_GROUP_ID = '__all__'
@@ -69,6 +71,7 @@ export default function ProjectManagerModal({ onRequestClose }: { onRequestClose
   const [mode, setMode] = useState<ViewMode>('list')
   const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState<ProjectFormState>(blankProjectForm())
+  const github = useProjectGithubRepo({ defaultName: form.id.trim() || 'project' })
   const [formErrors, setFormErrors] = useState<string[]>([])
   const [saving, setSaving] = useState(false)
   const [deleteCandidate, setDeleteCandidate] = useState<GetProjectResponse | null>(null)
@@ -208,6 +211,7 @@ export default function ProjectManagerModal({ onRequestClose }: { onRequestClose
       if (!form.id.trim()) errors.push('ID is required.')
       if (projects.some((p) => p.id === form.id.trim()))
         errors.push(`Project id "${form.id}" already exists.`)
+      if (github.validationError) errors.push(github.validationError)
     }
     if (!form.title.trim()) errors.push('Title is required.')
     if (!form.description.trim()) errors.push('Description is required.')
@@ -225,20 +229,25 @@ export default function ProjectManagerModal({ onRequestClose }: { onRequestClose
       // "no main group" choice (the backend distinguishes it from
       // `undefined`, which means "leave alone").
       if (mode === 'create') {
-        await createProject({
-          body: {
-            id: form.id.trim(),
-            title: form.title.trim(),
-            description: form.description.trim(),
-            repo_url: form.repo_url.trim() || undefined,
-            active: form.active,
-            metadata: { ...form.metadata },
-            codeInfo: form.codeInfo,
-            mainGroupId: form.mainGroupId ?? undefined,
-            scopeGroupIds: form.scopeGroupIds,
-          },
-          throwOnError: true,
-        })
+        const projectMeta = {
+          id: form.id.trim(),
+          title: form.title.trim(),
+          description: form.description.trim(),
+          repo_url: form.repo_url.trim() || undefined,
+          active: form.active,
+          metadata: { ...form.metadata },
+          codeInfo: form.codeInfo,
+          mainGroupId: form.mainGroupId ?? undefined,
+          scopeGroupIds: form.scopeGroupIds,
+        }
+        if (github.ready) {
+          await createProjectGithubRepo({
+            body: { name: github.repoName, private: true, projectMeta },
+            throwOnError: true,
+          })
+        } else {
+          await createProject({ body: projectMeta, throwOnError: true })
+        }
       } else if (editingId) {
         await updateProject({
           path: { id: editingId },
@@ -357,7 +366,12 @@ export default function ProjectManagerModal({ onRequestClose }: { onRequestClose
           </Button>
         )}
         {mode === 'from-template' && (
-          <Button type="submit" form="project-from-template-form" loading={saving} disabled={saving}>
+          <Button
+            type="submit"
+            form="project-from-template-form"
+            loading={saving}
+            disabled={saving}
+          >
             Create
           </Button>
         )}
@@ -501,6 +515,7 @@ export default function ProjectManagerModal({ onRequestClose }: { onRequestClose
             formErrors={formErrors}
             formId={formId}
             onSubmit={handleSubmit}
+            github={github}
           />
         )}
 
@@ -517,9 +532,7 @@ export default function ProjectManagerModal({ onRequestClose }: { onRequestClose
                 onSelect={(t) => {
                   setTemplatePick(t)
                   if (!templateProjectId.trim()) {
-                    setTemplateProjectId(
-                      t.id + '-' + Math.random().toString(36).slice(2, 8),
-                    )
+                    setTemplateProjectId(t.id + '-' + Math.random().toString(36).slice(2, 8))
                   }
                 }}
               />

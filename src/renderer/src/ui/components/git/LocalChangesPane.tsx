@@ -3,7 +3,7 @@ import type { DragEvent, MouseEvent } from 'react'
 import { useGit } from 'thefactory-ui/headless'
 import type { LocalDiffEntry } from 'thefactory-ui/headless'
 import { extractServerError } from 'thefactory-ui/headless/api'
-import { mergeUnstagedWithUntracked } from 'thefactory-ui/headless'
+import { mergeUnstagedWithUntracked, nextLocalChangesSelection } from 'thefactory-ui/headless'
 import {
   Alert,
   ConfirmDialog,
@@ -164,30 +164,33 @@ export default function LocalChangesPane({ onResolveConflict }: LocalChangesPane
     [localDiff, status],
   )
 
-  // Selection bookkeeping when the underlying lists change — drop entries
-  // for paths that disappeared, and auto-select the first row if nothing is
-  // selected so the diff pane is never blank.
+  // Selection bookkeeping when the underlying lists change. Delegates to the
+  // shared `nextLocalChangesSelection`: fully staging/unstaging the selected
+  // file advances to the next file in the SAME area (SourceTree-style); a
+  // partial stage keeps it; an emptied area falls back to the other side. The
+  // previous lists are kept in a ref so the helper can locate the "next" file
+  // by the index the departed file used to occupy.
+  const prevPathsRef = useRef<{ staged: string[]; unstaged: string[] }>({
+    staged: [],
+    unstaged: [],
+  })
   useEffect(() => {
+    const staged = stagedEntries.map((f) => f.path)
+    const unstaged = unstagedEntries.map((f) => f.path)
+    const { staged: oldStaged, unstaged: oldUnstaged } = prevPathsRef.current
     setSelection((prev) => {
-      const stagedPaths = new Set(stagedEntries.map((f) => f.path))
-      const unstagedPaths = new Set(unstagedEntries.map((f) => f.path))
-      const next = new Set<AreaKey>()
-      for (const k of prev) {
-        const [area, ...rest] = k.split(':')
-        const p = rest.join(':')
-        if (
-          (area === 'staged' && stagedPaths.has(p)) ||
-          (area === 'unstaged' && unstagedPaths.has(p))
-        ) {
-          next.add(k as AreaKey)
-        }
+      // The primary as of the OLD lists + OLD selection (staged wins, mirroring
+      // `primarySelected`), plus its index in its old area list.
+      let prevPrimary: { area: Area; path: string; index: number } | null = null
+      const si = oldStaged.findIndex((p) => prev.has(makeKey('staged', p)))
+      if (si >= 0) prevPrimary = { area: 'staged', path: oldStaged[si], index: si }
+      else {
+        const ui = oldUnstaged.findIndex((p) => prev.has(makeKey('unstaged', p)))
+        if (ui >= 0) prevPrimary = { area: 'unstaged', path: oldUnstaged[ui], index: ui }
       }
-      if (next.size === 0) {
-        if (stagedEntries[0]) next.add(makeKey('staged', stagedEntries[0].path))
-        else if (unstagedEntries[0]) next.add(makeKey('unstaged', unstagedEntries[0].path))
-      }
-      return next
+      return nextLocalChangesSelection({ prevSelection: prev, prevPrimary, staged, unstaged })
     })
+    prevPathsRef.current = { staged, unstaged }
   }, [stagedEntries, unstagedEntries])
 
   // Pick the "primary" selection — the first entry in document order so the
@@ -511,6 +514,7 @@ export default function LocalChangesPane({ onResolveConflict }: LocalChangesPane
             onIntraChange={(intra) => setDiffOpts((p) => ({ ...p, intra }))}
             isStaged={selectedArea === 'staged'}
             isConflicted={selectedConflicted}
+            selectionMode="drag"
             onApplyPatch={handleApplyPatch}
             onDiscardPatch={handleDiscardPatch}
             onResolveConflict={
