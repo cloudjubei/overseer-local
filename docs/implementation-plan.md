@@ -54,4 +54,8 @@ No direct changes — the new previews + tool surface land in `thefactory-ui` (�
 
 ### B.4 CLI agents end-to-end (Feature 4)
 
-Renderer consumes the same `thefactory-ui` web spine, so most surfaces land for free. Add `<CliConfigForm />` to the renderer's settings stack. ModelChip CLI toggle + `<ToolConfirmationModal />` "Allow permanently" support + cost surface flow through automatically.
+Renderer consumes the same `thefactory-ui` web spine, so most surfaces land for free.
+
+- **Settings → LLMs CLI section — DONE.** `CliConfigsProvider` mounts in the renderer `App.tsx` (inside `LLMConfigsProviderConnected`); `LLMSettings.tsx` renders a collapsible **CLI Agents** section with `<CliConfigForm />` **between the LLM list and Model Pricing**.
+- **Chat dispatch** flows through the shared `createChatsContext` runner-aware fork (`sendChatCompletionWithTools`, `runner: 'cli'`) — no per-app code.
+- Remaining per-app wiring: thread `ChatContext` into `<ModelChipConnected chatContext={…} />`; bind `usePendingToolGrants` into the chat connector for the `<ToolConfirmationModal />` "Allow permanently" path; `UsageModal` "By executor" renders once `getCost` maps `bySource`.

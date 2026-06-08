@@ -25,6 +25,7 @@ import { GitCredentialsProvider } from 'thefactory-ui/headless'
 import { IngestionProvider } from 'thefactory-ui/headless'
 import { DataSourcesProvider } from 'thefactory-ui/headless'
 import { LLMConfigsProviderConnected } from 'thefactory-ui/web'
+import { CliConfigsProvider } from 'thefactory-ui/headless'
 import { NativeDictationTriggerContext, OverseerProvider } from 'thefactory-ui/headless'
 import { macOsDictationTrigger } from './core/speech/macOsDictationTrigger'
 import { ProjectsProvider, useProjects } from 'thefactory-ui/headless'
@@ -86,6 +87,7 @@ function BackendGate() {
   if (!baseUrl || !token) return <Navigate to="/login" replace />
   return (
     <LLMConfigsProviderConnected>
+      <CliConfigsProvider>
       <GitCredentialsProvider>
         <WebSearchKeysProvider>
           <OverseerProvider>
@@ -126,6 +128,7 @@ function BackendGate() {
           </OverseerProvider>
         </WebSearchKeysProvider>
       </GitCredentialsProvider>
+      </CliConfigsProvider>
     </LLMConfigsProviderConnected>
   )
 }

@@ -11,6 +11,7 @@ import {
   IconRobot,
 } from 'thefactory-ui/web/icons'
 import { LLMConfigForm, type LLMConfigFormHandle } from "thefactory-ui/web"
+import { CliConfigForm } from 'thefactory-ui/web'
 import PricingPanel from './PricingPanel'
 
 type ModalRoute =
@@ -33,6 +34,7 @@ export default function LLMSettings() {
   } = useLLMConfigs()
   const [modal, setModal] = useState<ModalRoute | null>(null)
   const [pricingOpen, setPricingOpen] = useState(true)
+  const [cliOpen, setCliOpen] = useState(false)
   const formRef = useRef<LLMConfigFormHandle | null>(null)
 
   return (
@@ -135,6 +137,31 @@ export default function LLMSettings() {
           models.
         </div>
       </div>
+
+      {/* === CLI Agents section === */}
+      <div className="px-4 py-3 bg-(--surface-base) border-y border-(--border-subtle) flex items-center justify-between shrink-0">
+        <h2 className="text-xl font-semibold">CLI Agents</h2>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => setCliOpen((v) => !v)}
+          title={cliOpen ? 'Collapse' : 'Expand'}
+          aria-label={cliOpen ? 'Collapse CLI agents' : 'Expand CLI agents'}
+          aria-expanded={cliOpen}
+        >
+          <span
+            className="inline-flex transition-transform"
+            style={{ transform: cliOpen ? 'rotate(0deg)' : 'rotate(-90deg)' }}
+          >
+            <IconChevronDown className="h-5 w-5" />
+          </span>
+        </Button>
+      </div>
+      {cliOpen && (
+        <div className="px-4 py-4">
+          <CliConfigForm />
+        </div>
+      )}
 
       {/* === Model Pricing section === */}
       <div className="px-4 py-3 bg-(--surface-base) border-y border-(--border-subtle) flex items-center justify-between shrink-0">
