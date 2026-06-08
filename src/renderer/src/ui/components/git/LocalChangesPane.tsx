@@ -1,9 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { DragEvent, MouseEvent } from 'react'
 import { useGit } from 'thefactory-ui/headless'
-import type { LocalDiffEntry } from 'thefactory-ui/headless'
+import type { LocalDiffEntry, ChangesArea, ChangesAreaKey } from 'thefactory-ui/headless'
 import { extractServerError } from 'thefactory-ui/headless/api'
-import { mergeUnstagedWithUntracked, nextLocalChangesSelection } from 'thefactory-ui/headless'
+import {
+  localChangesKey,
+  mergeUnstagedWithUntracked,
+  nextLocalChangesSelection,
+} from 'thefactory-ui/headless'
 import {
   Alert,
   ConfirmDialog,
@@ -21,12 +25,11 @@ export type LocalChangesPaneProps = {
   onResolveConflict?: (filePath: string) => void
 }
 
-type Area = 'staged' | 'unstaged'
-type AreaKey = `${Area}:${string}`
-
-function makeKey(area: Area, path: string): AreaKey {
-  return `${area}:${path}`
-}
+// Reuse the shared key vocabulary so the selection keys this pane builds match
+// the format `nextLocalChangesSelection` compares against verbatim.
+type Area = ChangesArea
+type AreaKey = ChangesAreaKey
+const makeKey = localChangesKey
 
 function entryToLocalFile(entry: LocalDiffEntry): GitLocalFileEntry {
   return {
