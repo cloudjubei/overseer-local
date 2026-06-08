@@ -1,13 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { DragEvent, MouseEvent } from 'react'
 import { useGit } from 'thefactory-ui/headless'
-import type { LocalDiffEntry, ChangesArea, ChangesAreaKey } from 'thefactory-ui/headless'
+import type { LocalDiffEntry, ChangesArea } from 'thefactory-ui/headless'
 import { extractServerError } from 'thefactory-ui/headless/api'
-import {
-  localChangesKey,
-  mergeUnstagedWithUntracked,
-  nextLocalChangesSelection,
-} from 'thefactory-ui/headless'
+import { mergeUnstagedWithUntracked, useLocalChangesSelection } from 'thefactory-ui/headless'
 import {
   Alert,
   ConfirmDialog,
@@ -25,11 +21,7 @@ export type LocalChangesPaneProps = {
   onResolveConflict?: (filePath: string) => void
 }
 
-// Reuse the shared key vocabulary so the selection keys this pane builds match
-// the format `nextLocalChangesSelection` compares against verbatim.
 type Area = ChangesArea
-type AreaKey = ChangesAreaKey
-const makeKey = localChangesKey
 
 function entryToLocalFile(entry: LocalDiffEntry): GitLocalFileEntry {
   return {
@@ -69,7 +61,6 @@ export default function LocalChangesPane({ onResolveConflict }: LocalChangesPane
   const [error, setError] = useState<string | null>(null)
 
   // Pane sizing — persisted across sessions like desktop.
-  const rootRef = useRef<HTMLDivElement | null>(null)
   const [leftWidth, setLeftWidth] = useState<number>(() => {
     if (typeof window === 'undefined') return 320
     const stored = window.localStorage.getItem(LEFT_WIDTH_KEY)
@@ -133,11 +124,6 @@ export default function LocalChangesPane({ onResolveConflict }: LocalChangesPane
     window.addEventListener('pointerup', onUp)
   }
 
-  // Multi-select state — keyed by `${area}:${path}` so a file can be selected
-  // in both staged and unstaged independently (the same path can appear in
-  // both when a partial change is staged).
-  const [selection, setSelection] = useState<Set<AreaKey>>(new Set())
-  const lastSelectedRef = useRef<{ area: Area; path: string } | null>(null)
   const [dragOverArea, setDragOverArea] = useState<Area | null>(null)
 
   // Confirmation modal state.
@@ -167,46 +153,20 @@ export default function LocalChangesPane({ onResolveConflict }: LocalChangesPane
     [localDiff, status],
   )
 
-  // Selection bookkeeping when the underlying lists change. Delegates to the
-  // shared `nextLocalChangesSelection`: fully staging/unstaging the selected
-  // file advances to the next file in the SAME area (SourceTree-style); a
-  // partial stage keeps it; an emptied area falls back to the other side. The
-  // previous lists are kept in a ref so the helper can locate the "next" file
-  // by the index the departed file used to occupy.
-  const prevPathsRef = useRef<{ staged: string[]; unstaged: string[] }>({
-    staged: [],
-    unstaged: [],
-  })
-  useEffect(() => {
-    const staged = stagedEntries.map((f) => f.path)
-    const unstaged = unstagedEntries.map((f) => f.path)
-    const { staged: oldStaged, unstaged: oldUnstaged } = prevPathsRef.current
-    setSelection((prev) => {
-      // The primary as of the OLD lists + OLD selection (staged wins, mirroring
-      // `primarySelected`), plus its index in its old area list.
-      let prevPrimary: { area: Area; path: string; index: number } | null = null
-      const si = oldStaged.findIndex((p) => prev.has(makeKey('staged', p)))
-      if (si >= 0) prevPrimary = { area: 'staged', path: oldStaged[si], index: si }
-      else {
-        const ui = oldUnstaged.findIndex((p) => prev.has(makeKey('unstaged', p)))
-        if (ui >= 0) prevPrimary = { area: 'unstaged', path: oldUnstaged[ui], index: ui }
-      }
-      return nextLocalChangesSelection({ prevSelection: prev, prevPrimary, staged, unstaged })
-    })
-    prevPathsRef.current = { staged, unstaged }
-  }, [stagedEntries, unstagedEntries])
+  // Selection model (multi-select, shift/cmd, advance-on-stage) lives in the
+  // shared hook; the pane maps row gestures + rendering onto it.
+  const stagedPaths = useMemo(() => stagedEntries.map((f) => f.path), [stagedEntries])
+  const unstagedPaths = useMemo(() => unstagedEntries.map((f) => f.path), [unstagedEntries])
+  const { primary, isSelected, selectedPathsIn, selectSingle, toggleOne, selectRange } =
+    useLocalChangesSelection(stagedPaths, unstagedPaths)
 
-  // Pick the "primary" selection — the first entry in document order so the
-  // right-pane diff doesn't flicker as the user toggles checkboxes.
+  // Resolve the primary key back to its diff entry for the right-pane diff.
   const primarySelected = useMemo(() => {
-    for (const f of stagedEntries) {
-      if (selection.has(makeKey('staged', f.path))) return { area: 'staged' as const, file: f }
-    }
-    for (const f of unstagedEntries) {
-      if (selection.has(makeKey('unstaged', f.path))) return { area: 'unstaged' as const, file: f }
-    }
-    return null
-  }, [stagedEntries, unstagedEntries, selection])
+    if (!primary) return null
+    const list = primary.area === 'staged' ? stagedEntries : unstagedEntries
+    const file = list.find((f) => f.path === primary.path)
+    return file ? { area: primary.area, file } : null
+  }, [primary, stagedEntries, unstagedEntries])
 
   const runOp = async (op: () => Promise<unknown>) => {
     setBusy(true)
@@ -246,35 +206,9 @@ export default function LocalChangesPane({ onResolveConflict }: LocalChangesPane
     e.stopPropagation()
     const target = e.target as HTMLElement | null
     if (target?.tagName === 'INPUT' || target?.closest('button')) return
-    const k = makeKey(area, path)
-    const mod = e.metaKey || e.ctrlKey
-    const shift = e.shiftKey
-    if (mod) {
-      setSelection((prev) => {
-        const next = new Set(prev)
-        if (next.has(k)) next.delete(k)
-        else next.add(k)
-        return next
-      })
-      lastSelectedRef.current = { area, path }
-      return
-    }
-    if (shift && lastSelectedRef.current?.area === area) {
-      const list = area === 'staged' ? stagedEntries : unstagedEntries
-      const i1 = list.findIndex((f) => f.path === lastSelectedRef.current!.path)
-      const i2 = list.findIndex((f) => f.path === path)
-      if (i1 >= 0 && i2 >= 0) {
-        const [lo, hi] = i1 < i2 ? [i1, i2] : [i2, i1]
-        setSelection((prev) => {
-          const next = new Set(prev)
-          for (let i = lo; i <= hi; i++) next.add(makeKey(area, list[i].path))
-          return next
-        })
-        return
-      }
-    }
-    setSelection(new Set([k]))
-    lastSelectedRef.current = { area, path }
+    if (e.metaKey || e.ctrlKey) toggleOne(area, path)
+    else if (e.shiftKey) selectRange(area, path)
+    else selectSingle(area, path)
   }
 
   // Checkbox toggling on a row stages/unstages that single file. Matches
@@ -290,9 +224,9 @@ export default function LocalChangesPane({ onResolveConflict }: LocalChangesPane
   // the whole multi-selection; otherwise just the dragged row.
   const onDragStartRow = (area: Area, path: string) => (e: DragEvent) => {
     e.dataTransfer.effectAllowed = 'move'
-    const list = area === 'staged' ? stagedEntries : unstagedEntries
-    const selInArea = list.map((f) => f.path).filter((p) => selection.has(makeKey(area, p)))
-    const paths = selection.has(makeKey(area, path)) && selInArea.length > 0 ? selInArea : [path]
+    const list = area === 'staged' ? stagedPaths : unstagedPaths
+    const selInArea = selectedPathsIn(area, list)
+    const paths = isSelected(area, path) && selInArea.length > 0 ? selInArea : [path]
     try {
       e.dataTransfer.setData('text/plain', JSON.stringify({ area, paths }))
     } catch {
@@ -381,15 +315,14 @@ export default function LocalChangesPane({ onResolveConflict }: LocalChangesPane
       )
     }
     return entries.map((entry) => {
-      const key = makeKey(area, entry.path)
       const checked = area === 'staged'
       const localFile = entryToLocalFile(entry)
       return (
         <GitFileRow
-          key={key}
+          key={`${area}:${entry.path}`}
           file={localFile}
           checked={checked}
-          selected={selection.has(key)}
+          selected={isSelected(area, entry.path)}
           draggable
           onToggle={() => toggleChecked(area, entry.path)}
           onReset={() => doReset([entry.path])}
@@ -432,7 +365,7 @@ export default function LocalChangesPane({ onResolveConflict }: LocalChangesPane
   }
 
   return (
-    <div ref={rootRef} className="flex flex-row min-h-0 h-full">
+    <div className="flex flex-row min-h-0 h-full">
       {/* Left: resizable column with staged (top) + unstaged (bottom) */}
       <div
         ref={leftPaneRef}
