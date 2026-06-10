@@ -5,6 +5,7 @@ import { useAppSettings } from 'thefactory-ui/headless'
 import { useChats } from 'thefactory-ui/headless'
 import { useGit } from 'thefactory-ui/headless'
 import { useActiveProject } from 'thefactory-ui/headless'
+import { useProjectActivities } from 'thefactory-ui/headless'
 import { useTests } from 'thefactory-ui/headless'
 import { useProjectSettingsConnected as useProjectSettings } from 'thefactory-ui/web'
 import {
@@ -61,6 +62,13 @@ export function useBadgeCounts(): UseBadgeCountsApi {
   const { chats, getChatLiveState } = useChats()
   const { status, branches } = useGit()
   const { lastRun } = useTests()
+  const {
+    runningCount: activityRunningCount,
+    working: activityWorking,
+    paused: activityPaused,
+    liveForScope: activityLiveForScope,
+    pausedForScope: activityPausedForScope,
+  } = useProjectActivities(activeProjectId)
 
   // Subscribes to the singleton chats-seen store via useSyncExternalStore —
   // no per-hook state, no window-event listeners here. Multiple
@@ -133,10 +141,12 @@ export function useBadgeCounts(): UseBadgeCountsApi {
         }
       : undefined,
     failingTests: lastRun?.summary.failed,
+    activity: { runningCount: activityRunningCount, isWorking: activityWorking, isPaused: activityPaused },
     enabled: {
       chat: resolveTriState(prefs.badgesEnabled.chat, projectOverride.chat),
       git: resolveTriState(prefs.badgesEnabled.git, projectOverride.git),
       tests: resolveTriState(prefs.badgesEnabled.tests, projectOverride.tests),
+      activity: resolveTriState(prefs.badgesEnabled.activity, projectOverride.activity),
     },
     gitSubToggles: {
       incoming_commits: prefs.gitBadgeSubToggles.incoming_commits,
@@ -216,12 +226,15 @@ export function useBadgeCounts(): UseBadgeCountsApi {
         chat_messages: { unread: chat.unread, thinking: chat.thinking },
         git: { incoming, uncommitted },
         tests: { failing: failingTests },
+        activity: { running: activityLiveForScope(projectId), paused: activityPausedForScope(projectId) },
       }
     },
     [
       chatBadgeFor,
       chatsByProjectId,
       activeProjectId,
+      activityLiveForScope,
+      activityPausedForScope,
       branches,
       status,
       lastRun,

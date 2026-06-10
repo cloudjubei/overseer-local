@@ -4,10 +4,12 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { useAppSettings } from 'thefactory-ui/headless'
 import { useProjects } from 'thefactory-ui/headless'
 import { useProjectsGroups, type ProjectsGroup } from 'thefactory-ui/headless'
+import { useSeedActivities } from 'thefactory-ui/headless'
 import { useBadgeCounts, type BadgeCounts } from '@core/notifications/useBadgeCounts'
 import type { BadgeColor, NotificationCategory } from '@core/types/settings'
 import { isBadgeColorCategory } from '@core/types/settings'
 import { Button, NotificationBadge, renderProjectIcon, SpinnerWithDot } from 'thefactory-ui/web'
+import { IconPause } from 'thefactory-ui/web/icons'
 import { IconCollection, IconFolder, IconFolderOpen, IconMenu } from 'thefactory-ui/web/icons'
 import {
   GROUP_TAB_DEFS,
@@ -102,6 +104,9 @@ export default function Sidebar({ projectId, activeTab, activeGroupId, activeGro
   // Inactive projects are hidden from the sidebar entirely. They remain
   // editable from the "Manage Projects" modal and can be reactivated there.
   const activeProjects = useMemo(() => projects.filter((p) => p.active !== false), [projects])
+  // Seed every project's activity state so each row shows live spinners + paused
+  // icons, not just the active project (which self-seeds).
+  useSeedActivities(useMemo(() => activeProjects.map((p) => p.id), [activeProjects]))
 
   const { mainGroups, allGroups, ungroupedProjects } = useMemo(
     () => splitGroupsAndProjects(groups, activeProjects),
@@ -264,14 +269,29 @@ export default function Sidebar({ projectId, activeTab, activeGroupId, activeGro
             }).map((tab) => {
               const cat = TAB_BADGE_CATEGORY[tab.key]
               const countKey = cat ? badgeKeyForCategory(cat) : undefined
-              const badgeValue = countKey ? (counts[countKey] as number) : 0
-              const badgeColor =
-                cat && isBadgeColorCategory(cat)
+              // The App tab carries the background-activity badge/spinner (the
+              // embedded app's detached runs) rather than a notification category.
+              const isApp = tab.key === 'app'
+              // Don't re-spin the App nav row while the user is viewing the app —
+              // they can see the work happening (matches the active chat).
+              const viewingApp = isApp && tab.key === activeTab && !activeGroupId
+              const badgeValue = isApp
+                ? viewingApp
+                  ? 0
+                  : counts.activity
+                : countKey
+                  ? (counts[countKey] as number)
+                  : 0
+              const badgeColor = isApp
+                ? settings.notifications.badgeColors.activity
+                : cat && isBadgeColorCategory(cat)
                   ? settings.notifications.badgeColors[cat]
                   : undefined
-              // Chat tab gets the additional "thinking" spinner-with-dot
-              // affordance — matches desktop's StaticNavItem.
-              const thinking = tab.key === 'chat' && counts.chatThinking
+              // Chat thinking + App activity both get the spinner-with-dot affordance.
+              const thinking =
+                (tab.key === 'chat' && counts.chatThinking) ||
+                (isApp && counts.activityWorking && !viewingApp)
+              const paused = isApp && counts.activityPaused && !viewingApp
               return (
                 <NavRow
                   key={tab.key}
@@ -283,6 +303,7 @@ export default function Sidebar({ projectId, activeTab, activeGroupId, activeGro
                   badge={badgeValue}
                   badgeColor={badgeColor}
                   thinking={thinking}
+                  paused={paused}
                 />
               )
             })}
@@ -377,7 +398,8 @@ export default function Sidebar({ projectId, activeTab, activeGroupId, activeGro
                     dataLocation={p.dataLocation}
                     badge={chatUnread}
                     badgeColor={settings.notifications.badgeColors.chat}
-                    thinking={chatThinking}
+                    thinking={chatThinking || st.activity.running > 0}
+                    paused={st.activity.running === 0 && st.activity.paused > 0}
                   />
                 )
               })}
@@ -394,7 +416,10 @@ export default function Sidebar({ projectId, activeTab, activeGroupId, activeGro
                     ? getGroupBadgeState(g.id, [])
                     : getGroupBadgeState(g.id, g.projects)
                 const groupUnread = groupIsActive ? 0 : rolled.chat_messages.unread
-                const groupThinking = groupIsActive ? false : rolled.chat_messages.thinking
+                const groupThinking =
+                  groupIsActive ? false : rolled.chat_messages.thinking || rolled.activity.running > 0
+                const groupPaused =
+                  groupIsActive ? false : rolled.activity.running === 0 && rolled.activity.paused > 0
                 return g.type === 'SCOPE' ? (
                   <GroupRow
                     key={g.id}
@@ -405,6 +430,7 @@ export default function Sidebar({ projectId, activeTab, activeGroupId, activeGro
                     badge={groupUnread}
                     badgeColor={settings.notifications.badgeColors.chat}
                     thinking={groupThinking}
+                    paused={groupPaused}
                   />
                 ) : (
                   <GroupBlock
@@ -433,6 +459,7 @@ export default function Sidebar({ projectId, activeTab, activeGroupId, activeGro
                     chatBadgeColor={settings.notifications.badgeColors.chat}
                     headerBadge={groupUnread}
                     headerThinking={groupThinking}
+                    headerPaused={groupPaused}
                   />
                 )
               })}
@@ -555,6 +582,7 @@ function GroupBlock({
   chatBadgeColor,
   headerBadge,
   headerThinking = false,
+  headerPaused = false,
 }: {
   group: ProjectsGroup
   projects: ReturnType<typeof useProjects>['projects']
@@ -576,6 +604,7 @@ function GroupBlock({
   /** Per-project badge resolver from the parent's `useBadgeCounts`. */
   getProjectBadgeState: (projectId: string) => {
     chat_messages: { unread: number; thinking: boolean }
+    activity: { running: number; paused: number }
   }
   chatBadgeColor?: BadgeColor
   /** Group chat badge for the header row. The parent resolves it to the
@@ -583,6 +612,7 @@ function GroupBlock({
    *  and to the aggregate (group + members) when collapsed. */
   headerBadge?: number
   headerThinking?: boolean
+  headerPaused?: boolean
 }) {
   // Auto-expand when the active project lives in this group. We don't ever
   // auto-collapse — once the user toggles a group closed, navigating away
@@ -624,7 +654,7 @@ function GroupBlock({
         >
           {group.title}
         </button>
-        {(headerThinking || (headerBadge ?? 0) > 0) && (
+        {(headerThinking || headerPaused || (headerBadge ?? 0) > 0) && (
           <span className="inline-flex items-center justify-center shrink-0 pr-2">
             {headerThinking ? (
               <SpinnerWithDot
@@ -633,6 +663,10 @@ function GroupBlock({
                 dotColorClass={chatBadgeColor ? `bg-${chatBadgeColor}-500` : undefined}
                 dotTitle={(headerBadge ?? 0) > 0 ? `${formatBadgeCount(headerBadge!)} unread chats` : undefined}
               />
+            ) : headerPaused ? (
+              <span className="text-blue-500" title="Paused activity — resumes when you open it">
+                <IconPause className="w-3.5 h-3.5" />
+              </span>
             ) : (
               <NotificationBadge
                 text={formatBadgeCount(headerBadge!)}
@@ -669,7 +703,8 @@ function GroupBlock({
                 dataLocation={p.dataLocation}
                 badge={chatUnread}
                 badgeColor={chatBadgeColor}
-                thinking={chatThinking}
+                thinking={chatThinking || st.activity.running > 0}
+                paused={st.activity.running === 0 && st.activity.paused > 0}
               />
             )
           })}
@@ -688,6 +723,7 @@ function GroupRow({
   badge,
   badgeColor,
   thinking = false,
+  paused = false,
 }: {
   group: ProjectsGroup
   isActive: boolean
@@ -696,6 +732,7 @@ function GroupRow({
   badge?: number
   badgeColor?: BadgeColor
   thinking?: boolean
+  paused?: boolean
 }) {
   const icon =
     group.type === 'SCOPE' ? (
@@ -713,6 +750,7 @@ function GroupRow({
       badge={badge}
       badgeColor={badgeColor}
       thinking={thinking}
+      paused={paused}
     />
   )
 }
@@ -726,6 +764,7 @@ function NavRow({
   badge,
   badgeColor,
   thinking = false,
+  paused = false,
   indent = false,
   draggable = false,
   isDragging = false,
@@ -744,6 +783,9 @@ function NavRow({
   /** When true, render a `SpinnerWithDot` instead of (or alongside) the
    * numeric badge — used by the Chat row to surface "any chat thinking". */
   thinking?: boolean
+  /** When true (and not thinking), render a paused icon — a resumable activity
+   * that isn't live in the server (e.g. orphaned after a restart). */
+  paused?: boolean
   indent?: boolean
   draggable?: boolean
   isDragging?: boolean
@@ -808,6 +850,17 @@ function NavRow({
             dotColorClass={badgeColorClass}
             dotTitle={hasBadge ? `${formatBadgeCount(badge!)} unread chats` : undefined}
           />
+        </span>
+      ) : paused ? (
+        <span
+          className={
+            collapsed
+              ? 'absolute top-1 right-1 inline-flex items-center justify-center text-blue-500'
+              : 'inline-flex items-center justify-center text-blue-500'
+          }
+          title="Paused activity — resumes when you open it"
+        >
+          <IconPause className={collapsed ? 'w-3 h-3' : 'w-3.5 h-3.5'} />
         </span>
       ) : hasBadge ? (
         <NotificationBadge
