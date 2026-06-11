@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import {
   ChatBody,
+  CliRunArtifactPanel,
   interpolatePrompt,
   type ChatBodyProps,
   type PromptVariables,
@@ -331,6 +332,11 @@ export default function ChatBodyForContext({
       getToolHeaderPath={getToolHeaderPath}
       onResolveFile={onResolveFile}
       renderDependency={renderDependency}
+      renderCliRunArtifact={
+        context.projectId
+          ? (runId) => <CliRunArtifactPanel key={runId} runId={runId} projectId={context.projectId!} />
+          : undefined
+      }
       onSend={onSend}
       onAbort={onAbort}
       onConfirmTools={onConfirmTools}

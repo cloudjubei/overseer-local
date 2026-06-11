@@ -3,13 +3,15 @@ import {
   useProjectAppView,
   useProjectDataBridge,
 } from 'thefactory-ui/headless'
-import { ProjectAppView } from 'thefactory-ui/web'
+import { ModelChipConnected, ProjectAppView } from 'thefactory-ui/web'
 
 /**
  * Desktop peer of the App tab. Mirrors web's `ProjectAppTab` 1:1 — the
- * Electron renderer is Chromium, so it reuses the web `ProjectAppView`.
- * `useProjectDataBridge` services the embedded app's `overseer:data.*`
- * requests against the active project; the write credential stays in the host.
+ * Electron renderer is Chromium, so it reuses the web `ProjectAppView` under
+ * the same slim toolbar hosting the activity-model chip (the LLM config the
+ * app's background activities run on). `useProjectDataBridge` services the
+ * embedded app's `overseer:data.*` requests against the active project; the
+ * write credential stays in the host.
  */
 export default function ProjectAppTab() {
   const { projectId } = useActiveProject()
@@ -17,27 +19,32 @@ export default function ProjectAppTab() {
   const onBridgeMessage = useProjectDataBridge(projectId)
 
   return (
-    <div className="w-full h-full bg-(--bg-surface)">
-      <ProjectAppView
-        url={url}
-        remountKey={key}
-        onBridgeMessage={onBridgeMessage}
-        fallback={
-          <div className="flex h-full items-center justify-center p-8 text-center text-(--text-secondary)">
-            <div>
-              <p className="text-base font-medium text-(--text-primary)">
-                {error ? 'App view unavailable' : 'No app to view yet'}
-              </p>
-              <p className="mt-2 text-sm">
-                {error
-                  ? error.message
-                  : 'Run a story to scaffold this project’s app surface, then come back to this tab.'}
-              </p>
+    <div className="flex w-full h-full flex-col bg-(--bg-surface)">
+      <div className="flex items-center justify-end px-3 py-1 border-b shrink-0">
+        <ModelChipConnected editable mode="activity" />
+      </div>
+      <div className="flex-1 min-h-0">
+        <ProjectAppView
+          url={url}
+          remountKey={key}
+          onBridgeMessage={onBridgeMessage}
+          fallback={
+            <div className="flex h-full items-center justify-center p-8 text-center text-(--text-secondary)">
+              <div>
+                <p className="text-base font-medium text-(--text-primary)">
+                  {error ? 'App view unavailable' : 'No app to view yet'}
+                </p>
+                <p className="mt-2 text-sm">
+                  {error
+                    ? error.message
+                    : 'Run a story to scaffold this project’s app surface, then come back to this tab.'}
+                </p>
+              </div>
             </div>
-          </div>
-        }
-        style={{ width: '100%', height: '100%' }}
-      />
+          }
+          style={{ width: '100%', height: '100%' }}
+        />
+      </div>
     </div>
   )
 }
