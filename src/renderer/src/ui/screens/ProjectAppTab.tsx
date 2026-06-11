@@ -7,11 +7,11 @@ import { ModelChipConnected, ProjectAppView } from 'thefactory-ui/web'
 
 /**
  * Desktop peer of the App tab. Mirrors web's `ProjectAppTab` 1:1 — the
- * Electron renderer is Chromium, so it reuses the web `ProjectAppView` under
- * the same slim toolbar hosting the activity-model chip (the LLM config the
- * app's background activities run on). `useProjectDataBridge` services the
- * embedded app's `overseer:data.*` requests against the active project; the
- * write credential stays in the host.
+ * Electron renderer is Chromium, so it reuses the web `ProjectAppView` with the
+ * activity-model chip (the LLM config the app's background activities run on)
+ * floated over the surface's top-right, aligned with the app's own tab row.
+ * `useProjectDataBridge` services the embedded app's `overseer:data.*` requests
+ * against the active project; the write credential stays in the host.
  */
 export default function ProjectAppTab() {
   const { projectId } = useActiveProject()
@@ -20,14 +20,12 @@ export default function ProjectAppTab() {
 
   return (
     <div className="flex w-full h-full flex-col bg-(--bg-surface)">
-      <div className="flex items-center justify-end px-3 py-1 border-b shrink-0">
-        <ModelChipConnected editable mode="activity" />
-      </div>
       <div className="flex-1 min-h-0">
         <ProjectAppView
           url={url}
           remountKey={key}
           onBridgeMessage={onBridgeMessage}
+          topRightOverlay={<ModelChipConnected editable mode="activity" />}
           fallback={
             <div className="flex h-full items-center justify-center p-8 text-center text-(--text-secondary)">
               <div>
