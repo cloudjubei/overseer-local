@@ -17,6 +17,9 @@ export type ChatSidebarPanelConnectedProps = {
   chatContextTitle: string
   initialWidth?: number
   onWidthChange?: (width: number, isFinal: boolean) => void
+  /** Controlled collapsed state (e.g. so an app's "Discuss" action can expand it). */
+  collapsed?: boolean
+  onCollapsedChange?: (next: boolean) => void
 }
 
 /**
@@ -34,6 +37,8 @@ export default function ChatSidebarPanelConnected({
   chatContextTitle,
   initialWidth = 380,
   onWidthChange,
+  collapsed,
+  onCollapsedChange,
 }: ChatSidebarPanelConnectedProps) {
   const navigate = useNavigate()
   const { projectId: urlProjectId } = useParams<{ projectId: string }>()
@@ -62,6 +67,8 @@ export default function ChatSidebarPanelConnected({
     <ChatSidebarPanelBase
       initialWidth={initialWidth}
       onWidthChange={onWidthChange}
+      collapsed={collapsed}
+      onCollapsedChange={onCollapsedChange}
       collapsedTitle={chatContextTitle}
       collapsedAriaLabel="Open chat"
       expandedAriaLabel="Chat sidebar"

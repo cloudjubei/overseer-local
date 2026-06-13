@@ -10,6 +10,7 @@ import type { ChatContext } from 'thefactory-ui/headless/api'
 import { useAgents } from 'thefactory-ui/headless'
 import { useChats } from 'thefactory-ui/headless'
 import { useFiles } from 'thefactory-ui/headless'
+import { useTools } from 'thefactory-ui/headless'
 import { useStories } from 'thefactory-ui/headless'
 import { useActiveProject } from 'thefactory-ui/headless'
 import { getChatContextKey } from '@core/chats/chatKey'
@@ -55,6 +56,7 @@ export default function ChatBodyForContext({
   } = useChats()
   const { cancelRun } = useAgents()
   const { paths, files, uploadFile } = useFiles()
+  const { previewTool } = useTools()
   const { project } = useActiveProject()
   const { stories, getStory, getFeature, storyDisplayIndex, featureDisplayIndex } = useStories()
   const { markChatSeen } = useBadgeCounts()
@@ -341,6 +343,9 @@ export default function ChatBodyForContext({
       onAbort={onAbort}
       onConfirmTools={onConfirmTools}
       onCancelToolConfirmation={onCancelToolConfirmation}
+      previewTool={
+        context.projectId ? (_id, toolName, args) => previewTool(toolName, args) : undefined
+      }
       onDeleteLastMessage={onDeleteLastMessage}
       canSend={activeLLMConfig !== null}
       numberMessagesToSend={completionSettings?.numberMessagesToSend}
