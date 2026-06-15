@@ -1,10 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useActiveProject } from 'thefactory-ui/headless'
 import { useStories } from 'thefactory-ui/headless'
+import { useAgents } from 'thefactory-ui/headless'
+import type { ChatContext } from 'thefactory-ui/headless/api'
 import { Button, ConfirmDialog, Modal, type StoryFormValues } from 'thefactory-ui/web'
 import { IconDelete, IconSave } from 'thefactory-ui/web/icons'
 import { StoryFormConnected as StoryForm } from 'thefactory-ui/web'
 import FeatureForm from '@ui/components/stories/FeatureForm'
+import RunAgentButtonConnected from '@ui/components/agents/RunAgentButtonConnected'
+import ChatSidebarPanelConnected from '@ui/components/chat/ChatSidebarPanelConnected'
 import type { StoryModalRoute } from './storyModals'
 
 /**
@@ -513,10 +517,14 @@ function EditFeatureModal({
   featureId: string
   onClose: () => void
 }) {
-  const { stories, updateFeature } = useStories()
+  const { projectId } = useActiveProject()
+  const { stories, updateFeature, deleteFeature } = useStories()
+  const { runsActive } = useAgents()
   const story = stories.find((s) => s.id === storyId)
   const feature = story?.features.find((f) => f.id === featureId)
   const [submitting, setSubmitting] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const { setHasChanges, setAlertMessage, setShowAlert, attemptClose, dialog } =
     useDirtyGuard(onClose)
 
@@ -530,6 +538,30 @@ function EditFeatureModal({
 
   const formId = 'feature-edit-form'
 
+  const featureChatContext: ChatContext | null = projectId
+    ? { type: 'FEATURE', projectId, storyId, featureId }
+    : null
+  const featureChatTitle = feature.title || 'Feature'
+
+  const storyHasActiveRun = runsActive.some(
+    (r) => r.context.storyId === storyId && !r.context.featureId,
+  )
+  const featureHasActiveRun = runsActive.some((r) => r.context.featureId === featureId)
+
+  const handleDelete = async () => {
+    setShowDeleteConfirm(false)
+    setDeleting(true)
+    try {
+      await deleteFeature(storyId, featureId)
+      onClose()
+    } catch (e) {
+      setAlertMessage(`Failed to delete feature: ${e instanceof Error ? e.message : String(e)}`)
+      setShowAlert(true)
+    } finally {
+      setDeleting(false)
+    }
+  }
+
   return (
     <>
       <Modal
@@ -537,21 +569,53 @@ function EditFeatureModal({
         onClose={attemptClose}
         isOpen
         size="md"
+        sidePanel={
+          featureChatContext ? (
+            <ChatSidebarPanelConnected
+              context={featureChatContext}
+              chatContextTitle={featureChatTitle}
+            />
+          ) : undefined
+        }
         footer={
-          <div className="flex justify-end gap-2">
-            <Button
-              type="submit"
-              form={formId}
-              variant="secondary"
-              size="icon"
-              disabled={submitting}
-              loading={submitting}
-              aria-keyshortcuts="Control+Enter Meta+Enter"
-              title="Save (Cmd/Ctrl+Enter)"
-              aria-label="Save"
-            >
-              <IconSave className="w-4 h-4" />
-            </Button>
+          <div className="grid grid-cols-3 items-center gap-2">
+            <div className="justify-self-start">
+              <Button
+                className="btn-secondary"
+                variant="danger"
+                onClick={() => setShowDeleteConfirm(true)}
+                disabled={submitting || deleting}
+              >
+                <div className="flex items-center gap-2">
+                  <IconDelete className="w-4 h-4" />
+                  Delete
+                </div>
+              </Button>
+            </div>
+            <div className="justify-self-center">
+              {projectId && !storyHasActiveRun && !featureHasActiveRun && (
+                <RunAgentButtonConnected
+                  projectId={projectId}
+                  storyId={storyId}
+                  featureId={featureId}
+                />
+              )}
+            </div>
+            <div className="justify-self-end">
+              <Button
+                type="submit"
+                form={formId}
+                variant="secondary"
+                size="icon"
+                disabled={submitting || deleting}
+                loading={submitting}
+                aria-keyshortcuts="Control+Enter Meta+Enter"
+                title="Save (Cmd/Ctrl+Enter)"
+                aria-label="Save"
+              >
+                <IconSave className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
         }
       >
@@ -575,11 +639,21 @@ function EditFeatureModal({
             },
           }}
           storyId={storyId}
-          submitting={submitting}
+          submitting={submitting || deleting}
           onDirty={setHasChanges}
           formId={formId}
         />
       </Modal>
+
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        title="Delete Feature"
+        description="Are you sure you want to delete this feature? This action cannot be undone."
+        confirmLabel="Delete"
+        destructive
+        onConfirm={handleDelete}
+      />
       {dialog}
     </>
   )

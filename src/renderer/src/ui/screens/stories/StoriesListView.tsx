@@ -19,7 +19,7 @@ import {
   STATUS_LABELS,
   statusKey,
 } from 'thefactory-ui/web'
-import { IconBoard, IconCalculator, IconEdit, IconList, IconPlus } from 'thefactory-ui/web/icons'
+import { IconBoard, IconCalculator, IconList, IconPlus } from 'thefactory-ui/web/icons'
 import { DependencyBullet } from 'thefactory-ui/web'
 import { ExclamationChip } from 'thefactory-ui/web'
 import RunAgentButtonConnected from '@ui/components/agents/RunAgentButtonConnected'
@@ -568,28 +568,15 @@ export default function StoriesListView() {
                             </div>
                           </div>
                           <div className="col col-actions">
-                            <div className="flex items-center justify-end gap-2">
-                              <button
-                                type="button"
-                                className="btn-secondary btn-icon"
-                                aria-label="Edit story"
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  handleEditStory(t)
-                                }}
+                            {!storyRun && projectId && (
+                              <div
+                                className="no-drag flex items-center justify-end"
+                                onClick={(e) => e.stopPropagation()}
+                                onPointerDown={(e) => e.stopPropagation()}
                               >
-                                <IconEdit className="h-4 w-4" />
-                              </button>
-                              {!storyRun && projectId && (
-                                <div
-                                  className="no-drag"
-                                  onClick={(e) => e.stopPropagation()}
-                                  onPointerDown={(e) => e.stopPropagation()}
-                                >
-                                  <RunAgentButtonConnected projectId={projectId} storyId={t.id} />
-                                </div>
-                              )}
-                            </div>
+                                <RunAgentButtonConnected projectId={projectId} storyId={t.id} />
+                              </div>
+                            )}
                           </div>
                           {(blockers.length > 0 || blockersOutbound.length > 0) && (
                             <div

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
   useActiveProject,
   useDataSources,
@@ -23,6 +23,7 @@ import {
   Switch,
 } from 'thefactory-ui/web'
 import { IconDelete, IconEdit, IconPlus } from 'thefactory-ui/web/icons'
+import { parseLiteLLMPrices } from 'thefactory-tools/utils'
 
 function formatLastUpdated(ts: string | undefined): string {
   if (!ts) return 'never'
@@ -39,6 +40,129 @@ function summarizeContent(content: unknown): string {
   }
   const json = JSON.stringify(content)
   return json.length > 80 ? `${json.slice(0, 80)}…` : json
+}
+
+type PriceRow = ReturnType<typeof parseLiteLLMPrices>[number]
+
+function formatRate(n: number | undefined): string {
+  if (typeof n !== 'number' || !Number.isFinite(n)) return '—'
+  return `$${n.toFixed(2)}`
+}
+
+/** Cap on rows rendered at once so a multi-thousand-model source stays responsive. */
+const RECORDS_RENDER_CAP = 200
+
+/**
+ * Records viewer for a data source. When the records parse as LLM prices (the
+ * `LLM Model Prices` source), it shows a searchable provider/model price table
+ * by default with a raw-records toggle; for any other source it shows the raw
+ * records. Both views are searchable and report the full count so the catalogue
+ * size is never hidden behind a fixed-size slice.
+ */
+function RecordsPanel({ records }: { records: DataRecord[] }) {
+  const [query, setQuery] = useState('')
+  const [mode, setMode] = useState<'prices' | 'raw'>('prices')
+
+  const prices = useMemo<PriceRow[]>(() => {
+    const doc: Record<string, unknown> = {}
+    for (const r of records) {
+      if (r.key != null) doc[String(r.key)] = r.content
+    }
+    return parseLiteLLMPrices(doc)
+  }, [records])
+
+  const hasPrices = prices.length > 0
+  const view = hasPrices ? mode : 'raw'
+  const q = query.trim().toLowerCase()
+
+  const filteredPrices = useMemo(() => {
+    if (!q) return prices
+    return prices.filter((p) => `${p.provider} ${p.model}`.toLowerCase().includes(q))
+  }, [prices, q])
+
+  const filteredRecords = useMemo(() => {
+    if (!q) return records
+    return records.filter((r) => String(r.key ?? '').toLowerCase().includes(q))
+  }, [records, q])
+
+  const grandTotal = view === 'prices' ? prices.length : records.length
+  const matched = view === 'prices' ? filteredPrices.length : filteredRecords.length
+  const noun = view === 'prices' ? 'models' : 'records'
+
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex flex-wrap items-center gap-2">
+        {hasPrices && (
+          <div className="flex overflow-hidden rounded border border-(--border-subtle) text-xs">
+            <button
+              type="button"
+              className={`px-2 py-1 ${view === 'prices' ? 'bg-(--surface-raised) font-medium' : 'text-(--text-secondary)'}`}
+              onClick={() => setMode('prices')}
+            >
+              Prices
+            </button>
+            <button
+              type="button"
+              className={`px-2 py-1 ${view === 'raw' ? 'bg-(--surface-raised) font-medium' : 'text-(--text-secondary)'}`}
+              onClick={() => setMode('raw')}
+            >
+              Raw
+            </button>
+          </div>
+        )}
+        <Input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder={view === 'prices' ? 'Filter by provider or model…' : 'Filter by key…'}
+          className="h-7 flex-1 text-xs"
+        />
+      </div>
+
+      <div className="text-[11px] text-(--text-secondary)">
+        {q ? `${matched.toLocaleString()} of ${grandTotal.toLocaleString()}` : grandTotal.toLocaleString()}{' '}
+        {noun}
+        {matched > RECORDS_RENDER_CAP ? ` · showing first ${RECORDS_RENDER_CAP}` : ''}
+      </div>
+
+      <div className="max-h-80 overflow-auto rounded border border-(--border-subtle) bg-(--surface-muted) text-xs">
+        {view === 'prices' ? (
+          <table className="min-w-full">
+            <thead className="sticky top-0 bg-(--surface-raised) text-(--text-secondary)">
+              <tr>
+                <th className="px-2 py-1 text-left font-medium">Provider</th>
+                <th className="px-2 py-1 text-left font-medium">Model</th>
+                <th className="px-2 py-1 text-right font-medium">Input /1M</th>
+                <th className="px-2 py-1 text-right font-medium">Output /1M</th>
+                <th className="px-2 py-1 text-right font-medium">Cache read /1M</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredPrices.slice(0, RECORDS_RENDER_CAP).map((p) => (
+                <tr key={`${p.provider}:${p.model}`} className="border-t border-(--border-subtle)">
+                  <td className="px-2 py-1">{p.provider}</td>
+                  <td className="px-2 py-1 font-mono">{p.model}</td>
+                  <td className="px-2 py-1 text-right">{formatRate(p.inputPerMTokensUSD)}</td>
+                  <td className="px-2 py-1 text-right">{formatRate(p.outputPerMTokensUSD)}</td>
+                  <td className="px-2 py-1 text-right">
+                    {formatRate(p.cacheReadInputPerMTokensUSD)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <ul className="flex flex-col gap-1 p-2 font-mono">
+            {filteredRecords.slice(0, RECORDS_RENDER_CAP).map((r, i) => (
+              <li key={r.key ? String(r.key) : i}>
+                <span className="text-(--text-secondary)">{r.key ? String(r.key) : '—'}</span>:{' '}
+                {summarizeContent(r.content)}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
+  )
 }
 
 type FormRoute = { mode: 'create' } | { mode: 'edit'; source: DataSource } | null
@@ -262,20 +386,17 @@ function SourceCard({
           {expanded ? 'Hide records' : 'Show records'}
         </button>
         {expanded && (
-          <div className="mt-2 max-h-80 overflow-auto rounded border border-(--border-subtle) bg-(--surface-muted) p-2 font-mono text-xs">
+          <div className="mt-2">
             {records === null ? (
-              'Loading…'
+              <div className="rounded border border-(--border-subtle) bg-(--surface-muted) p-2 font-mono text-xs">
+                Loading…
+              </div>
             ) : records.length === 0 ? (
-              'No records yet — try Update now.'
+              <div className="rounded border border-(--border-subtle) bg-(--surface-muted) p-2 font-mono text-xs">
+                No records yet — try Update now.
+              </div>
             ) : (
-              <ul className="flex flex-col gap-1">
-                {records.slice(0, 20).map((r, i) => (
-                  <li key={r.key ? String(r.key) : i}>
-                    <span className="text-(--text-secondary)">{r.key ? String(r.key) : '—'}</span>:{' '}
-                    {summarizeContent(r.content)}
-                  </li>
-                ))}
-              </ul>
+              <RecordsPanel records={records} />
             )}
           </div>
         )}
