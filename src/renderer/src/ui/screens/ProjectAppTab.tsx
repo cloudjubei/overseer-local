@@ -44,8 +44,16 @@ export default function ProjectAppTab() {
       }
       if (name === 'chat.discuss') {
         if (!projectId) return { error: 'No active project' }
-        const { title, seed } = (req.payload ?? {}) as { title?: string; seed?: string }
-        const chat = await createProjectTopic(projectId, (title ?? '').trim() || 'Discussion')
+        const { title, seed, systemPrompt } = (req.payload ?? {}) as {
+          title?: string
+          seed?: string
+          systemPrompt?: string
+        }
+        const chat = await createProjectTopic(
+          projectId,
+          (title ?? '').trim() || 'Discussion',
+          systemPrompt,
+        )
         setSidebarEnabled(true)
         setChatContext(chat.context)
         setChatTitle(chat.title ?? title ?? 'Discussion')
