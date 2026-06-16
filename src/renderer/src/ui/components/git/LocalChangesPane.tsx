@@ -52,7 +52,7 @@ export default function LocalChangesPane({ onResolveConflict }: LocalChangesPane
     loadLocalDiff,
     stage,
     unstage,
-    reset,
+    discardUnstaged,
     removeFiles,
     applyPatch,
   } = useGit()
@@ -127,7 +127,7 @@ export default function LocalChangesPane({ onResolveConflict }: LocalChangesPane
   const [dragOverArea, setDragOverArea] = useState<Area | null>(null)
 
   // Confirmation modal state.
-  const [confirmReset, setConfirmReset] = useState<string[] | null>(null)
+  const [confirmReset, setConfirmReset] = useState<{ paths: string[]; area: Area } | null>(null)
   const [confirmRemove, setConfirmRemove] = useState<string[] | null>(null)
 
   // Initial load (and re-load whenever the project changes — context resets
@@ -192,9 +192,9 @@ export default function LocalChangesPane({ onResolveConflict }: LocalChangesPane
     if (paths.length === 0) return
     void runOp(() => unstage(paths))
   }
-  const doReset = (paths: string[]) => {
+  const doReset = (paths: string[], area: Area) => {
     if (paths.length === 0) return
-    setConfirmReset(paths)
+    setConfirmReset({ paths, area })
   }
   const doRemove = (paths: string[]) => {
     if (paths.length === 0) return
@@ -325,7 +325,7 @@ export default function LocalChangesPane({ onResolveConflict }: LocalChangesPane
           selected={isSelected(area, entry.path)}
           draggable
           onToggle={() => toggleChecked(area, entry.path)}
-          onReset={() => doReset([entry.path])}
+          onReset={() => doReset([entry.path], area)}
           onRemove={() => doRemove([entry.path])}
           onResolveConflict={
             entry.isConflicted && onResolveConflict
@@ -470,18 +470,23 @@ export default function LocalChangesPane({ onResolveConflict }: LocalChangesPane
         isOpen={confirmReset !== null}
         onClose={() => setConfirmReset(null)}
         onConfirm={async () => {
-          const paths = confirmReset ?? []
+          const pending = confirmReset
           setConfirmReset(null)
-          await runOp(() => reset(paths))
+          if (!pending) return
+          await runOp(() =>
+            pending.area === 'staged' ? unstage(pending.paths) : discardUnstaged(pending.paths),
+          )
         }}
-        title="Discard local changes"
-        description={
-          confirmReset && confirmReset.length === 1
-            ? `Discard local changes to "${confirmReset[0]}"? This cannot be undone.`
-            : `Discard local changes to ${confirmReset?.length ?? 0} file(s)? This cannot be undone.`
-        }
+        title={confirmReset?.area === 'staged' ? 'Discard staged changes' : 'Discard local changes'}
+        description={(() => {
+          const n = confirmReset?.paths.length ?? 0
+          const subject = n === 1 ? `"${confirmReset?.paths[0]}"` : `${n} file(s)`
+          return confirmReset?.area === 'staged'
+            ? `Discard the staged changes for ${subject}? The working-tree copy is kept.`
+            : `Discard unstaged changes to ${subject}? This cannot be undone.`
+        })()}
         confirmLabel="Discard"
-        destructive
+        destructive={confirmReset?.area !== 'staged'}
       />
       <ConfirmDialog
         isOpen={confirmRemove !== null}

@@ -101,12 +101,13 @@ export default function ChatBodyForContext({
     [template, promptVariables],
   )
 
-  // Mirror desktop's `messagesWithSystem`: when the chat is empty, surface
-  // the interpolated system prompt as a synthetic system bubble so the user
-  // can see what's being sent + the "Start chatting" hint appears.
+  // Always surface the interpolated system prompt as a leading synthetic system
+  // bubble (MessageList pins it as the collapsible SystemPromptBubble). Prepending
+  // unconditionally — not only when empty — keeps it mounted across the first
+  // send, so the canvas no longer jumps when the chat goes from empty to its
+  // first message.
   const messagesWithSystem = useMemo(() => {
     const original = chat?.messages ?? []
-    if (original.length > 0) return original
     if (!effectivePrompt) return original
     return [
       {
@@ -116,6 +117,7 @@ export default function ChatBodyForContext({
         completedAt: '',
         durationMs: 0,
       },
+      ...original,
     ]
   }, [chat?.messages, effectivePrompt])
 
