@@ -336,22 +336,24 @@ export default function Sidebar({ projectId, activeTab, activeGroupId, activeGro
         )}
       </div>
 
+      {/* Fixed "Projects" header — a divider between the menu items (above)
+          and the scrolling project list (below). Only the list scrolls. */}
+      <div className="shrink-0 mt-2 pt-2 border-t" style={{ borderColor: 'var(--border-subtle)' }}>
+        {!collapsed && (
+          <div className="flex items-center justify-between gap-2 px-3 py-1">
+            <span className="text-[10px] uppercase tracking-wider opacity-60">Projects</span>
+            <div className="inline-flex items-center gap-1.5">
+              <span className="text-xs text-(--text-secondary)">{activeProjects.length}</span>
+              <Button size="sm" variant="secondary" onClick={() => setManageOpen(true)}>
+                Manage
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
+
       <div className="flex-1 overflow-auto">
-        <Section
-          label="Projects"
-          collapsed={collapsed}
-          divider
-          headerActions={
-            !collapsed && (
-              <div className="inline-flex items-center gap-1.5">
-                <span className="text-xs text-(--text-secondary)">{activeProjects.length}</span>
-                <Button size="sm" variant="secondary" onClick={() => setManageOpen(true)}>
-                  Manage
-                </Button>
-              </div>
-            )
-          }
-        >
+        <div className="flex flex-col gap-0.5 pb-3">
           {activeProjects.length === 0 ? (
             !collapsed && <p className="text-sm opacity-60 px-3 py-1">No projects yet.</p>
           ) : collapsed ? (
@@ -416,10 +418,12 @@ export default function Sidebar({ projectId, activeTab, activeGroupId, activeGro
                     ? getGroupBadgeState(g.id, [])
                     : getGroupBadgeState(g.id, g.projects)
                 const groupUnread = groupIsActive ? 0 : rolled.chat_messages.unread
-                const groupThinking =
-                  groupIsActive ? false : rolled.chat_messages.thinking || rolled.activity.running > 0
-                const groupPaused =
-                  groupIsActive ? false : rolled.activity.running === 0 && rolled.activity.paused > 0
+                const groupThinking = groupIsActive
+                  ? false
+                  : rolled.chat_messages.thinking || rolled.activity.running > 0
+                const groupPaused = groupIsActive
+                  ? false
+                  : rolled.activity.running === 0 && rolled.activity.paused > 0
                 return g.type === 'SCOPE' ? (
                   <GroupRow
                     key={g.id}
@@ -465,7 +469,7 @@ export default function Sidebar({ projectId, activeTab, activeGroupId, activeGro
               })}
             </>
           )}
-        </Section>
+        </div>
       </div>
 
       {projectId && (
@@ -661,7 +665,11 @@ function GroupBlock({
                 size={14}
                 showDot={(headerBadge ?? 0) > 0}
                 dotColorClass={chatBadgeColor ? `bg-${chatBadgeColor}-500` : undefined}
-                dotTitle={(headerBadge ?? 0) > 0 ? `${formatBadgeCount(headerBadge!)} unread chats` : undefined}
+                dotTitle={
+                  (headerBadge ?? 0) > 0
+                    ? `${formatBadgeCount(headerBadge!)} unread chats`
+                    : undefined
+                }
               />
             ) : headerPaused ? (
               <span className="text-blue-500" title="Paused activity — resumes when you open it">

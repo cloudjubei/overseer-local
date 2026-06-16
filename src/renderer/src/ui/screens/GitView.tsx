@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import type { PointerEvent } from 'react'
 import { useActiveProject } from 'thefactory-ui/headless'
 import { useGit } from 'thefactory-ui/headless'
-import { getGitBranchDiffSummary } from 'thefactory-ui/headless/api'
+import { extractServerError, getGitBranchDiffSummary } from 'thefactory-ui/headless/api'
 import { getPRUrl } from 'thefactory-ui/headless'
 import {
   Alert,
@@ -98,6 +98,7 @@ export default function GitView() {
   const [selectedStashRef, setSelectedStashRef] = useState<string | undefined>()
   const [selectedCommitSha, setSelectedCommitSha] = useState<string | undefined>()
   const [confirmDeleteName, setConfirmDeleteName] = useState<string | null>(null)
+  const [forceDelete, setForceDelete] = useState(false)
   const [conflictResolverFile, setConflictResolverFile] = useState<string | null>(null)
   // Direction-specific args for the merge dialog so the rail's "Merge" and
   // "Merge In" both open the same modal but pre-filled with the right
@@ -228,7 +229,7 @@ export default function GitView() {
     try {
       await op()
     } catch (err) {
-      setOpError(err instanceof Error ? err.message : `Failed to ${kind}`)
+      setOpError(extractServerError(err, `Failed to ${kind}`).message)
     } finally {
       setBusy(null)
     }
@@ -263,9 +264,7 @@ export default function GitView() {
     // at the same commit (in-sync branch).
     if (selectedBranch) {
       const tip =
-        selectedBranchSection === 'remote'
-          ? selectedBranch.remoteSha
-          : selectedBranch.localSha
+        selectedBranchSection === 'remote' ? selectedBranch.remoteSha : selectedBranch.localSha
       if (tip === sha) return
     }
     const local = branches.find((b) => b.isLocal && b.localSha === sha)
@@ -322,7 +321,7 @@ export default function GitView() {
         if (op === 'pop') setSelectedStashRef(undefined)
       }
     } catch (err) {
-      setOpError(err instanceof Error ? err.message : `Failed to ${op} stash`)
+      setOpError(extractServerError(err, `Failed to ${op} stash`).message)
     }
   }
 
@@ -608,7 +607,10 @@ export default function GitView() {
               <IconRailButton
                 icon={<IconDelete className="w-5 h-5 text-red-600 dark:text-red-400" />}
                 label="Delete"
-                onClick={() => setConfirmDeleteName(selectedBranch.name)}
+                onClick={() => {
+                  setForceDelete(false)
+                  setConfirmDeleteName(selectedBranch.name)
+                }}
                 disabled={railBusy}
                 tooltip={`Delete branch "${selectedBranch.name}"`}
               />
@@ -654,20 +656,31 @@ export default function GitView() {
         onClose={() => setConfirmDeleteName(null)}
         onConfirm={async () => {
           if (!confirmDeleteName) return
+          setOpError(null)
           try {
-            await deleteBranch(confirmDeleteName)
+            await deleteBranch(confirmDeleteName, { force: forceDelete })
             if (selectedBranchName === confirmDeleteName) setSelectedBranchName(undefined)
           } catch (err) {
-            setOpError(err instanceof Error ? err.message : 'Failed to delete branch')
+            setOpError(extractServerError(err, 'Failed to delete branch').message)
           } finally {
             setConfirmDeleteName(null)
           }
         }}
         title="Delete branch"
         description={
-          confirmDeleteName
-            ? `Delete the branch "${confirmDeleteName}"? This cannot be undone.`
-            : undefined
+          confirmDeleteName ? (
+            <div className="flex flex-col gap-3">
+              <span>Delete the branch &quot;{confirmDeleteName}&quot;? This cannot be undone.</span>
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={forceDelete}
+                  onChange={(e) => setForceDelete(e.target.checked)}
+                />
+                Use force (delete even if not fully merged)
+              </label>
+            </div>
+          ) : undefined
         }
         confirmLabel="Delete"
         destructive
