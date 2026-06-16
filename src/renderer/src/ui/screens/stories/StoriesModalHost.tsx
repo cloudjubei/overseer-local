@@ -163,6 +163,7 @@ function CreateStoryModal({ onClose }: { onClose: () => void }) {
 function EditStoryModal({ storyId, onClose }: { storyId: string; onClose: () => void }) {
   const { projectId } = useActiveProject()
   const { stories, updateStory, deleteStory } = useStories()
+  const { runsActive } = useAgents()
   const story = stories.find((s) => s.id === storyId) ?? null
 
   const [submitting, setSubmitting] = useState(false)
@@ -172,6 +173,10 @@ function EditStoryModal({ storyId, onClose }: { storyId: string; onClose: () => 
     useDirtyGuard(onClose)
 
   const formId = 'story-edit-form'
+
+  const storyHasActiveRun = runsActive.some(
+    (r) => r.context.storyId === storyId && !r.context.featureId,
+  )
 
   const handleSubmit = async (values: StoryFormValues) => {
     setSubmitting(true)
@@ -211,23 +216,27 @@ function EditStoryModal({ storyId, onClose }: { storyId: string; onClose: () => 
         onClose={attemptClose}
         isOpen
         footer={
-          <div className="flex justify-between gap-2">
-            {story ? (
-              <Button
-                className="btn-secondary"
-                variant="danger"
-                onClick={() => setShowDeleteConfirm(true)}
-                disabled={submitting || deleting}
-              >
-                <div className="flex items-center gap-2">
+          <div className="grid grid-cols-3 items-center gap-2">
+            <div className="justify-self-start">
+              {story && (
+                <Button
+                  variant="danger"
+                  size="icon"
+                  onClick={() => setShowDeleteConfirm(true)}
+                  disabled={submitting || deleting}
+                  aria-label="Delete"
+                  title="Delete"
+                >
                   <IconDelete className="w-4 h-4" />
-                  Delete
-                </div>
-              </Button>
-            ) : (
-              <span />
-            )}
-            <div className="flex justify-end gap-2">
+                </Button>
+              )}
+            </div>
+            <div className="justify-self-center">
+              {projectId && !storyHasActiveRun && (
+                <RunAgentButtonConnected projectId={projectId} storyId={storyId} />
+              )}
+            </div>
+            <div className="justify-self-end">
               <Button
                 type="submit"
                 form={formId}
@@ -574,6 +583,7 @@ function EditFeatureModal({
             <ChatSidebarPanelConnected
               context={featureChatContext}
               chatContextTitle={featureChatTitle}
+              attached
             />
           ) : undefined
         }
@@ -581,15 +591,14 @@ function EditFeatureModal({
           <div className="grid grid-cols-3 items-center gap-2">
             <div className="justify-self-start">
               <Button
-                className="btn-secondary"
                 variant="danger"
+                size="icon"
                 onClick={() => setShowDeleteConfirm(true)}
                 disabled={submitting || deleting}
+                aria-label="Delete"
+                title="Delete"
               >
-                <div className="flex items-center gap-2">
-                  <IconDelete className="w-4 h-4" />
-                  Delete
-                </div>
+                <IconDelete className="w-4 h-4" />
               </Button>
             </div>
             <div className="justify-self-center">

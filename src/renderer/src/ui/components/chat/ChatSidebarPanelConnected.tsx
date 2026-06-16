@@ -20,6 +20,8 @@ export type ChatSidebarPanelConnectedProps = {
   /** Controlled collapsed state (e.g. so an app's "Discuss" action can expand it). */
   collapsed?: boolean
   onCollapsedChange?: (next: boolean) => void
+  /** Render attached to a dialog (rounded outer corners + single collapsed button). */
+  attached?: boolean
 }
 
 /**
@@ -39,6 +41,7 @@ export default function ChatSidebarPanelConnected({
   onWidthChange,
   collapsed,
   onCollapsedChange,
+  attached,
 }: ChatSidebarPanelConnectedProps) {
   const navigate = useNavigate()
   const { projectId: urlProjectId } = useParams<{ projectId: string }>()
@@ -72,6 +75,7 @@ export default function ChatSidebarPanelConnected({
       collapsedTitle={chatContextTitle}
       collapsedAriaLabel="Open chat"
       expandedAriaLabel="Chat sidebar"
+      attached={attached}
     >
       {({ setCollapsed }) => (
         <div className="relative h-full flex flex-col bg-(--surface-base)">
