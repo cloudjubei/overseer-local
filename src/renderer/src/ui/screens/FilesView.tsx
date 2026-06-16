@@ -21,8 +21,18 @@ import { LoadingScreen } from 'thefactory-ui/web'
 const FILES_PANE_COLLAPSED_KEY = 'files-pane-collapsed'
 
 export default function FilesView() {
-  const { isLoaded, loadError, files, paths, selectedPath, selectFile, uploadFile, refresh } =
-    useFiles()
+  const {
+    isLoaded,
+    loadError,
+    files,
+    paths,
+    selectedPath,
+    selectFile,
+    uploadFile,
+    refresh,
+    renameFolder,
+    deleteFolder,
+  } = useFiles()
   const navigate = useNavigate()
   const location = useLocation()
   const { projectId } = useParams<{ projectId: string }>()
@@ -198,6 +208,8 @@ export default function FilesView() {
                 selectedPath={selectedPath}
                 query={filter}
                 onSelectFile={onSelect}
+                onRenameFolder={renameFolder}
+                onDeleteFolder={deleteFolder}
               />
             </div>
           </>

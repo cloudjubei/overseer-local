@@ -53,6 +53,7 @@ export default function LocalChangesPane({ onResolveConflict }: LocalChangesPane
     stage,
     unstage,
     discardUnstaged,
+    discardStaged,
     removeFiles,
     applyPatch,
   } = useGit()
@@ -474,7 +475,7 @@ export default function LocalChangesPane({ onResolveConflict }: LocalChangesPane
           setConfirmReset(null)
           if (!pending) return
           await runOp(() =>
-            pending.area === 'staged' ? unstage(pending.paths) : discardUnstaged(pending.paths),
+            pending.area === 'staged' ? discardStaged(pending.paths) : discardUnstaged(pending.paths),
           )
         }}
         title={confirmReset?.area === 'staged' ? 'Discard staged changes' : 'Discard local changes'}
@@ -482,11 +483,11 @@ export default function LocalChangesPane({ onResolveConflict }: LocalChangesPane
           const n = confirmReset?.paths.length ?? 0
           const subject = n === 1 ? `"${confirmReset?.paths[0]}"` : `${n} file(s)`
           return confirmReset?.area === 'staged'
-            ? `Discard the staged changes for ${subject}? The working-tree copy is kept.`
+            ? `Discard the staged changes for ${subject}? This cannot be undone. Any unstaged edits are kept.`
             : `Discard unstaged changes to ${subject}? This cannot be undone.`
         })()}
         confirmLabel="Discard"
-        destructive={confirmReset?.area !== 'staged'}
+        destructive
       />
       <ConfirmDialog
         isOpen={confirmRemove !== null}
