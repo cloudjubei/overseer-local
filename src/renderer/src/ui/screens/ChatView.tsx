@@ -111,10 +111,19 @@ export default function ChatView() {
       }
     }
     if (!projectId) return null
+    // Only honor a remembered selection if that chat still exists — otherwise a
+    // just-deleted chat (still in lastSelected/lastOpened) would be re-resolved
+    // and the UI would re-land on it. A PROJECT context is always valid (the
+    // project chat is synthesised when not yet persisted).
+    const stillExists = (ctx: ChatContext | undefined): ctx is ChatContext =>
+      !!ctx &&
+      ctx.projectId === projectId &&
+      (ctx.type === 'PROJECT' ||
+        chats.some((c) => getChatContextKey(c.context) === getChatContextKey(ctx)))
     const lastSelected = readLastSelected()
-    if (lastSelected && lastSelected.projectId === projectId) return lastSelected
+    if (stillExists(lastSelected)) return lastSelected
     const lastOpened = lastOpenedFor(projectId, chats)
-    if (lastOpened) return lastOpened
+    if (stillExists(lastOpened)) return lastOpened
     if (projectChat) return projectChat.context
     return { type: 'PROJECT', projectId }
   }, [params.contextKey, projectChat, projectId, chats])
