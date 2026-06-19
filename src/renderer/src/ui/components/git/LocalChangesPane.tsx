@@ -56,6 +56,8 @@ export default function LocalChangesPane({ onResolveConflict }: LocalChangesPane
     discardStaged,
     removeFiles,
     applyPatch,
+    recoverTextDiff,
+    applyTextRecovery,
   } = useGit()
 
   const [busy, setBusy] = useState(false)
@@ -130,6 +132,7 @@ export default function LocalChangesPane({ onResolveConflict }: LocalChangesPane
   // Confirmation modal state.
   const [confirmReset, setConfirmReset] = useState<{ paths: string[]; area: Area } | null>(null)
   const [confirmRemove, setConfirmRemove] = useState<string[] | null>(null)
+  const [confirmRecovery, setConfirmRecovery] = useState<string | null>(null)
 
   // Initial load (and re-load whenever the project changes — context resets
   // localDiff to null, so this re-fetches).
@@ -352,6 +355,9 @@ export default function LocalChangesPane({ onResolveConflict }: LocalChangesPane
   const selectedPath = primarySelected?.file.path
   const selectedConflicted = primarySelected?.file.isConflicted
   const selectedArea = primarySelected?.area
+  const selectedBinary = primarySelected?.file.binary
+  const selectedBeforeSize = primarySelected?.file.beforeSize
+  const selectedAfterSize = primarySelected?.file.afterSize
 
   // Wire partial-patch staging — `cached: true` writes to the index only;
   // `reverse: true` unstages already-cached hunks. Desktop's flow exactly.
@@ -363,6 +369,12 @@ export default function LocalChangesPane({ onResolveConflict }: LocalChangesPane
     if (!selectedPath) return
     setConfirmReset(null)
     await runOp(() => applyPatch({ patch, cached: false, reverse: true }))
+  }
+
+  // Quick-fix recovery: preview is in-memory; applying rewrites the file.
+  const handleRecoverText = () => {
+    if (!selectedPath) throw new Error('No file selected')
+    return recoverTextDiff(selectedPath, selectedArea === 'staged')
   }
 
   return (
@@ -452,6 +464,13 @@ export default function LocalChangesPane({ onResolveConflict }: LocalChangesPane
             isStaged={selectedArea === 'staged'}
             isConflicted={selectedConflicted}
             selectionMode="drag"
+            binary={selectedBinary}
+            beforeSize={selectedBeforeSize}
+            afterSize={selectedAfterSize}
+            onRecoverText={handleRecoverText}
+            onApplyTextRecovery={() => {
+              if (selectedPath) setConfirmRecovery(selectedPath)
+            }}
             onApplyPatch={handleApplyPatch}
             onDiscardPatch={handleDiscardPatch}
             onResolveConflict={
@@ -505,6 +524,19 @@ export default function LocalChangesPane({ onResolveConflict }: LocalChangesPane
         }
         confirmLabel="Delete"
         destructive
+      />
+      <ConfirmDialog
+        isOpen={confirmRecovery !== null}
+        onClose={() => setConfirmRecovery(null)}
+        onConfirm={async () => {
+          const path = confirmRecovery
+          setConfirmRecovery(null)
+          if (!path) return
+          await runOp(() => applyTextRecovery(path))
+        }}
+        title="Apply text recovery"
+        description={`Rewrite "${confirmRecovery ?? ''}" with the sanitized text (NUL / invalid bytes removed)? This overwrites the working-tree file.`}
+        confirmLabel="Apply fix"
       />
     </div>
   )

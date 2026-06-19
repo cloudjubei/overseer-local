@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type RefObject } from 'react'
-import { useChats } from 'thefactory-ui/headless'
+import { useChats, useChatCliRunner } from 'thefactory-ui/headless'
 import type { ChatContext } from 'thefactory-ui/headless/api'
 import {
   ChatSettingsDropdown,
@@ -34,6 +34,7 @@ export default function ChatSettingsDropdownConnected({
   onDeleteChat,
 }: ChatSettingsDropdownConnectedProps) {
   const { getEffectiveChatSettings, updateChatSettings, settingsBlocked } = useChats()
+  const { cliRunner } = useChatCliRunner(context)
 
   const effective = getEffectiveChatSettings(context)
   const completion = effective.completionSettings
@@ -104,6 +105,7 @@ export default function ChatSettingsDropdownConnected({
       onClose={onClose}
       settingsBtnRef={settingsBtnRef}
       blocked={settingsBlocked}
+      cliBacked={!!cliRunner}
       completion={completion}
       draftPrompt={draftPrompt}
       setDraftPrompt={setDraftPrompt}

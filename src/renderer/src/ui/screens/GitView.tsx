@@ -671,6 +671,21 @@ export default function GitView() {
           confirmDeleteName ? (
             <div className="flex flex-col gap-3">
               <span>Delete the branch &quot;{confirmDeleteName}&quot;? This cannot be undone.</span>
+              {(() => {
+                const target = branches.find((b) => b.name === confirmDeleteName)
+                if (!target?.isRemote) return null
+                // Make the outward-facing effect explicit before confirming: a
+                // remote-only branch is deleted on origin (affects everyone); a
+                // branch that's also local keeps its origin copy (so it reappears
+                // under Remotes rather than vanishing).
+                return (
+                  <span className="text-sm text-(--text-secondary)">
+                    {target.isLocal
+                      ? 'This deletes your local branch only — a copy remains on “origin” (it will still show under Remotes).'
+                      : 'This branch exists only on the remote — deleting it removes it from “origin” for everyone.'}
+                  </span>
+                )
+              })()}
               <label className="flex items-center gap-2 text-sm">
                 <input
                   type="checkbox"
