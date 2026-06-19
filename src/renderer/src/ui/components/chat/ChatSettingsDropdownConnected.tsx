@@ -33,7 +33,7 @@ export default function ChatSettingsDropdownConnected({
   settingsBtnRef,
   onDeleteChat,
 }: ChatSettingsDropdownConnectedProps) {
-  const { getEffectiveChatSettings, updateChatSettings } = useChats()
+  const { getEffectiveChatSettings, updateChatSettings, settingsBlocked } = useChats()
 
   const effective = getEffectiveChatSettings(context)
   const completion = effective.completionSettings
@@ -103,6 +103,7 @@ export default function ChatSettingsDropdownConnected({
       isOpen={isOpen}
       onClose={onClose}
       settingsBtnRef={settingsBtnRef}
+      blocked={settingsBlocked}
       completion={completion}
       draftPrompt={draftPrompt}
       setDraftPrompt={setDraftPrompt}
