@@ -132,7 +132,6 @@ export default function LocalChangesPane({ onResolveConflict }: LocalChangesPane
   // Confirmation modal state.
   const [confirmReset, setConfirmReset] = useState<{ paths: string[]; area: Area } | null>(null)
   const [confirmRemove, setConfirmRemove] = useState<string[] | null>(null)
-  const [confirmRecovery, setConfirmRecovery] = useState<string | null>(null)
 
   // Initial load (and re-load whenever the project changes — context resets
   // localDiff to null, so this re-fetches).
@@ -468,9 +467,13 @@ export default function LocalChangesPane({ onResolveConflict }: LocalChangesPane
             beforeSize={selectedBeforeSize}
             afterSize={selectedAfterSize}
             onRecoverText={handleRecoverText}
-            onApplyTextRecovery={() => {
-              if (selectedPath) setConfirmRecovery(selectedPath)
-            }}
+            onApplyTextRecovery={
+              selectedPath
+                ? async () => {
+                    await applyTextRecovery(selectedPath)
+                  }
+                : undefined
+            }
             onApplyPatch={handleApplyPatch}
             onDiscardPatch={handleDiscardPatch}
             onResolveConflict={
@@ -524,19 +527,6 @@ export default function LocalChangesPane({ onResolveConflict }: LocalChangesPane
         }
         confirmLabel="Delete"
         destructive
-      />
-      <ConfirmDialog
-        isOpen={confirmRecovery !== null}
-        onClose={() => setConfirmRecovery(null)}
-        onConfirm={async () => {
-          const path = confirmRecovery
-          setConfirmRecovery(null)
-          if (!path) return
-          await runOp(() => applyTextRecovery(path))
-        }}
-        title="Apply text recovery"
-        description={`Rewrite "${confirmRecovery ?? ''}" with the sanitized text (NUL / invalid bytes removed)? This overwrites the working-tree file.`}
-        confirmLabel="Apply fix"
       />
     </div>
   )
