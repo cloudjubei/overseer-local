@@ -467,13 +467,7 @@ export default function LocalChangesPane({ onResolveConflict }: LocalChangesPane
             beforeSize={selectedBeforeSize}
             afterSize={selectedAfterSize}
             onRecoverText={handleRecoverText}
-            onApplyTextRecovery={
-              selectedPath
-                ? async () => {
-                    await applyTextRecovery(selectedPath)
-                  }
-                : undefined
-            }
+            onApplyTextRecovery={selectedPath ? () => applyTextRecovery(selectedPath) : undefined}
             onApplyPatch={handleApplyPatch}
             onDiscardPatch={handleDiscardPatch}
             onResolveConflict={
