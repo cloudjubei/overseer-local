@@ -322,7 +322,7 @@ export default function StoriesListView() {
             />
           </div>
           <div className="right flex items-center gap-2">
-            <ModelChipConnected editable />
+            <ModelChipConnected editable mode="agentRun" />
             <button
               type="button"
               onClick={() => setUsageOpen(true)}

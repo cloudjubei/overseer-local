@@ -296,7 +296,7 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
                   <RunAgentButtonConnected projectId={projectId} storyId={story.id} />
                 </div>
               )}
-              <ModelChipConnected editable />
+              <ModelChipConnected editable mode="agentRun" />
               <button
                 type="button"
                 onClick={(e) => {
