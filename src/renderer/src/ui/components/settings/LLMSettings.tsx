@@ -9,6 +9,7 @@ import {
   IconEdit,
   IconPlus,
   IconRobot,
+  IconRocket,
 } from 'thefactory-ui/web/icons'
 import { LLMConfigForm, type LLMConfigFormHandle } from 'thefactory-ui/web'
 import { CliConfigForm, CliAddCredentialForm } from 'thefactory-ui/web'
@@ -72,6 +73,8 @@ export default function LLMSettings() {
     setActiveChat,
     activeAgentRunConfigId,
     setActiveAgentRun,
+    activeActivityConfigId,
+    setActiveActivity,
   } = useLLMConfigs()
   const [modal, setModal] = useState<ModalRoute | null>(null)
   const [cliModalOpen, setCliModalOpen] = useState(false)
@@ -109,6 +112,7 @@ export default function LLMSettings() {
                 configs.map((cfg) => {
                   const isAgentActive = activeAgentRunConfigId === cfg.id
                   const isChatActive = activeChatConfigId === cfg.id
+                  const isActivityActive = activeActivityConfigId === cfg.id
                   return (
                     <div
                       key={cfg.id}
@@ -143,6 +147,21 @@ export default function LLMSettings() {
                           >
                             <IconChat className="w-4 h-4 mr-1" />
                             {isChatActive ? 'Chat Active' : 'Activate Chat'}
+                          </Button>
+                          <Button
+                            onClick={() => {
+                              if (!isActivityActive) setActiveActivity(cfg.id)
+                            }}
+                            variant={isActivityActive ? 'success' : 'outline'}
+                            size="sm"
+                            title={
+                              isActivityActive
+                                ? 'Active for background activities'
+                                : 'Use for background activities'
+                            }
+                          >
+                            <IconRocket className="w-4 h-4 mr-1" />
+                            {isActivityActive ? 'Activity Active' : 'Activate Activity'}
                           </Button>
                         </div>
                         <div className="flex items-center gap-2">

@@ -25,7 +25,11 @@ import ChatSidebarPanelConnected from '@ui/components/chat/ChatSidebarPanelConne
 export default function ProjectAppTab() {
   const { projectId, project } = useActiveProject()
   const { url, key, error } = useProjectAppView(projectId)
-  const dataBridge = useProjectDataBridge(projectId)
+  // The embedded app declares (via `overseer:app.capabilities`) whether its background activities are
+  // API-only (a `requiresApi` activity, e.g. knowledge-analyze). When so, the activity chip disables CLI
+  // and the bridge never sends a CLI model for this app.
+  const [activitiesApiOnly, setActivitiesApiOnly] = useState(false)
+  const dataBridge = useProjectDataBridge(projectId, { activitiesApiOnly })
   const { createProjectTopic, sendMessage } = useChats()
   const { createStory } = useStories()
 
@@ -37,6 +41,11 @@ export default function ProjectAppTab() {
   const onBridgeMessage = useCallback(
     async (req: BridgeRequest) => {
       const name = bridgeMessageName(req.type)
+      if (name === 'app.capabilities') {
+        const { activitiesApiOnly: apiOnly } = (req.payload ?? {}) as { activitiesApiOnly?: boolean }
+        setActivitiesApiOnly(!!apiOnly)
+        return { ok: true }
+      }
       if (name === 'chat.requestSidebar') {
         setSidebarEnabled(true)
         setChatContext((c) => c ?? (projectId ? { type: 'PROJECT', projectId } : null))
@@ -83,7 +92,7 @@ export default function ProjectAppTab() {
           url={url}
           remountKey={key}
           onBridgeMessage={onBridgeMessage}
-          topRightOverlay={<ModelChipConnected editable mode="activity" />}
+          topRightOverlay={<ModelChipConnected editable mode="activity" apiOnly={activitiesApiOnly} />}
           fallback={
             <div className="flex h-full items-center justify-center p-8 text-center text-(--text-secondary)">
               <div>
