@@ -23,6 +23,7 @@ import {
 } from 'thefactory-ui/headless'
 import { navIcon } from './navIcons'
 import ProjectManagerModal from '@ui/components/projects/ProjectManagerModal'
+import BackgroundTasksTrigger from '@ui/components/shell/BackgroundTasksTrigger'
 
 type Props = {
   projectId?: string
@@ -66,7 +67,14 @@ export default function Sidebar({ projectId, activeTab, activeGroupId, activeGro
   const collapsed = userCollapsed
   const { projects, activeProjectId, setActiveProjectId } = useProjects()
   const { groups, reorderProject } = useProjectsGroups()
-  const { counts, getProjectBadgeState, getGroupBadgeState } = useBadgeCounts()
+  const { counts, markAppOpened, getProjectBadgeState, getGroupBadgeState } = useBadgeCounts()
+
+  // Stamp the app tab "seen" while the user is on it (on open + when a run settles as they watch),
+  // so the unseen-results badge clears + stays cleared.
+  const onAppTab = activeTab === 'app' && !activeGroupId
+  useEffect(() => {
+    if (onAppTab) markAppOpened()
+  }, [onAppTab, counts.activity, markAppOpened])
 
   const asideRef = useRef<HTMLElement>(null)
   const [draggingProject, setDraggingProject] = useState<{ id: string; groupId: string } | null>(
@@ -241,16 +249,19 @@ export default function Sidebar({ projectId, activeTab, activeGroupId, activeGro
             <span>Overseer</span>
           </button>
         )}
-        <button
-          type="button"
-          onClick={toggleCollapsed}
-          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          className="p-1 rounded text-(--text-muted) hover:text-(--text-primary) hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
-          tabIndex={-1}
-        >
-          <IconMenu className="w-4 h-4" />
-        </button>
+        <div className="flex items-center gap-1">
+          <BackgroundTasksTrigger />
+          <button
+            type="button"
+            onClick={toggleCollapsed}
+            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            className="p-1 rounded text-(--text-muted) hover:text-(--text-primary) hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+            tabIndex={-1}
+          >
+            <IconMenu className="w-4 h-4" />
+          </button>
+        </div>
       </header>
 
       <div className="shrink-0">
@@ -275,10 +286,12 @@ export default function Sidebar({ projectId, activeTab, activeGroupId, activeGro
               // Don't re-spin the App nav row while the user is viewing the app —
               // they can see the work happening (matches the active chat).
               const viewingApp = isApp && tab.key === activeTab && !activeGroupId
+              // The App tab's number badge = unseen RESULTS (runs finished since last opened); a
+              // live run shows via the spinner (activityWorking), not the number.
               const badgeValue = isApp
                 ? viewingApp
                   ? 0
-                  : counts.activity
+                  : counts.activityUnseen
                 : countKey
                   ? (counts[countKey] as number)
                   : 0
@@ -494,9 +507,11 @@ export default function Sidebar({ projectId, activeTab, activeGroupId, activeGro
   )
 }
 
-function badgeKeyForCategory(cat: NotificationCategory): keyof BadgeCounts {
-  // The `BadgeCounts` keys mirror notification categories one-for-one.
-  return cat
+function badgeKeyForCategory(cat: NotificationCategory): keyof BadgeCounts | undefined {
+  // Most `BadgeCounts` keys mirror notification categories one-for-one; `cross-project` is the
+  // exception — it's an account-global badge (rendered on the inspector trigger), not a per-scope
+  // channel, so it maps to no key here.
+  return cat === 'cross-project' ? undefined : cat
 }
 
 function asIconKey(v: unknown): string | undefined {

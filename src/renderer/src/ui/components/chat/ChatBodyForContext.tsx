@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } fro
 import {
   ChatBody,
   CliRunArtifactPanel,
+  CrossProjectWaitingBar,
   interpolatePrompt,
   type ChatBodyProps,
   type PromptVariables,
@@ -9,6 +10,7 @@ import {
 import type { ChatContext } from 'thefactory-ui/headless/api'
 import { useAgents } from 'thefactory-ui/headless'
 import { useChats } from 'thefactory-ui/headless'
+import { useCrossProjectRequests } from 'thefactory-ui/headless'
 import { useFiles } from 'thefactory-ui/headless'
 import { useTools } from 'thefactory-ui/headless'
 import { useStories } from 'thefactory-ui/headless'
@@ -123,6 +125,11 @@ export default function ChatBodyForContext({
 
   const isAgentRunChat = context.type === 'AGENT_RUN_STORY' || context.type === 'AGENT_RUN_FEATURE'
   const isRunningAgent = isAgentRunChat && (chat?.state === 'created' || chat?.state === 'running')
+
+  // A → B cross-project block: while this chat has an open feature request out to another
+  // project, the composer is replaced by a read-only "Waiting on «B»…" bar (D.7).
+  const { waitingViewForChat } = useCrossProjectRequests()
+  const waitingView = waitingViewForChat(context)
 
   // Suggested actions = the last assistant message's `suggestedActions` (chip
   // row above the input). Only shown when the chat isn't currently streaming
@@ -323,6 +330,8 @@ export default function ChatBodyForContext({
         </Button>
       ) : null}
     </div>
+  ) : waitingView ? (
+    <CrossProjectWaitingBar view={waitingView} />
   ) : undefined
 
   return (
@@ -338,7 +347,9 @@ export default function ChatBodyForContext({
       renderDependency={renderDependency}
       renderCliRunArtifact={
         context.projectId
-          ? (runId) => <CliRunArtifactPanel key={runId} runId={runId} projectId={context.projectId!} />
+          ? (runId) => (
+              <CliRunArtifactPanel key={runId} runId={runId} projectId={context.projectId!} />
+            )
           : undefined
       }
       onSend={onSend}

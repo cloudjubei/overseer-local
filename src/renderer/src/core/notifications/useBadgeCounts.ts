@@ -19,7 +19,7 @@ import {
   type BadgeCounts,
   type BadgeState,
 } from 'thefactory-ui/headless'
-import { readChatsSeen, useChatsSeen, writeChatsSeen } from 'thefactory-ui/web'
+import { readChatsSeen, useAppTabLastOpened, useChatsSeen, writeChatsSeen } from 'thefactory-ui/web'
 
 export type { BadgeCounts }
 
@@ -28,6 +28,8 @@ export type UseBadgeCountsApi = {
   counts: BadgeCounts
   /** Mark a chat as read up to its latest message. */
   markChatSeen: (ctx: ChatContext) => void
+  /** Stamp the active project's app tab as opened now — clears its unseen-results badge. */
+  markAppOpened: () => void
   /** Per-project breakdown for sidebar project rows. Filtering respects
    *  the same `badgesEnabled` toggles `counts` uses. Git + tests are scoped
    *  to the ACTIVE project (those contexts only track the active one), so
@@ -68,7 +70,13 @@ export function useBadgeCounts(): UseBadgeCountsApi {
     paused: activityPaused,
     liveForScope: activityLiveForScope,
     pausedForScope: activityPausedForScope,
+    unseenForScope: activityUnseenForScope,
   } = useProjectActivities(activeProjectId)
+  const {
+    lastOpenedIso: appLastOpenedIso,
+    markOpened: markAppOpened,
+    getLastOpenedForProject: appLastOpenedForProject,
+  } = useAppTabLastOpened(activeProjectId)
 
   // Subscribes to the singleton chats-seen store via useSyncExternalStore —
   // no per-hook state, no window-event listeners here. Multiple
@@ -141,7 +149,12 @@ export function useBadgeCounts(): UseBadgeCountsApi {
         }
       : undefined,
     failingTests: lastRun?.summary.failed,
-    activity: { runningCount: activityRunningCount, isWorking: activityWorking, isPaused: activityPaused },
+    activity: {
+      runningCount: activityRunningCount,
+      isWorking: activityWorking,
+      isPaused: activityPaused,
+      unseenCount: activityUnseenForScope(activeProjectId, appLastOpenedIso),
+    },
     enabled: {
       chat: resolveTriState(prefs.badgesEnabled.chat, projectOverride.chat),
       git: resolveTriState(prefs.badgesEnabled.git, projectOverride.git),
@@ -222,11 +235,20 @@ export function useBadgeCounts(): UseBadgeCountsApi {
       const testsEnabled = prefs.badgesEnabled.tests !== false
       const failingTests = isActive && testsEnabled ? (lastRun?.summary.failed ?? 0) : 0
 
+      const activityEnabled = prefs.badgesEnabled.activity !== false
+      const unseen = activityEnabled
+        ? activityUnseenForScope(projectId, appLastOpenedForProject(projectId))
+        : 0
+
       return {
         chat_messages: { unread: chat.unread, thinking: chat.thinking },
         git: { incoming, uncommitted },
         tests: { failing: failingTests },
-        activity: { running: activityLiveForScope(projectId), paused: activityPausedForScope(projectId) },
+        activity: {
+          running: activityLiveForScope(projectId),
+          paused: activityPausedForScope(projectId),
+          unseen,
+        },
       }
     },
     [
@@ -235,6 +257,8 @@ export function useBadgeCounts(): UseBadgeCountsApi {
       activeProjectId,
       activityLiveForScope,
       activityPausedForScope,
+      activityUnseenForScope,
+      appLastOpenedForProject,
       branches,
       status,
       lastRun,
@@ -257,5 +281,5 @@ export function useBadgeCounts(): UseBadgeCountsApi {
     [getProjectBadgeState, chatsByGroupId, chatBadgeFor],
   )
 
-  return { counts, markChatSeen, getProjectBadgeState, getGroupBadgeState }
+  return { counts, markChatSeen, markAppOpened, getProjectBadgeState, getGroupBadgeState }
 }

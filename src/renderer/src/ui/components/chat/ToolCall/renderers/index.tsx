@@ -9,6 +9,7 @@ import { useStories } from 'thefactory-ui/headless'
 import { useActiveProject } from 'thefactory-ui/headless'
 import { StoryAndFeatureCallout } from 'thefactory-ui/web'
 import FeatureCardConnected from '@ui/components/stories/FeatureCardConnected'
+import FeatureRequestWidgetConnected from '@ui/components/chat/FeatureRequestWidgetConnected'
 import { DependencyBullet } from 'thefactory-ui/web'
 import type { ToolCall } from '../types'
 
@@ -74,8 +75,14 @@ function ConnectedToolPreview(args: RenderToolPreviewArgs) {
     renderStoryAndFeatureCallout: ({ storyId, featureId }) => (
       <StoryAndFeatureCallout storyId={storyId} featureId={featureId} />
     ),
+    renderFeatureRequestWidget: ({ requestId, status, cycleDetected }) => (
+      <FeatureRequestWidgetConnected
+        requestId={requestId}
+        status={status}
+        cycleDetected={cycleDetected}
+      />
+    ),
   }
 
   return <>{renderToolPreview({ ...args, hooks })}</>
 }
-

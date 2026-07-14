@@ -5,14 +5,16 @@ import { CollapsibleSidebar } from 'thefactory-ui/web'
 import { VisualSettings } from 'thefactory-ui/web'
 import LLMSettings from '@ui/components/settings/LLMSettings'
 import { NotificationSettings } from 'thefactory-ui/web'
-import { GitHubSettings } from "thefactory-ui/web"
-import { WebSearchSettings } from "thefactory-ui/web"
-import { DatabaseSettings } from "thefactory-ui/web"
+import { CrossProjectSettings } from 'thefactory-ui/web'
+import { GitHubSettings } from 'thefactory-ui/web'
+import { WebSearchSettings } from 'thefactory-ui/web'
+import { DatabaseSettings } from 'thefactory-ui/web'
 import {
   IconBell,
   IconCpu,
   IconDatabase,
   IconGitHub,
+  IconList,
   IconPalette,
   IconRobot,
   IconSearch,
@@ -29,6 +31,12 @@ const CATEGORIES = [
     label: 'Notifications',
     icon: <IconBell className="h-4 w-4" />,
     accent: 'brand',
+  },
+  {
+    id: 'cross-project',
+    label: 'Cross-project',
+    icon: <IconList className="h-4 w-4" />,
+    accent: 'blue',
   },
   { id: 'github', label: 'GitHub', icon: <IconGitHub className="h-4 w-4" />, accent: 'gray' },
   {
@@ -96,6 +104,7 @@ export default function SettingsView() {
         <div className="h-full min-h-0 overflow-y-auto p-4">
           {activeCategory === 'visual' && <VisualSettings />}
           {activeCategory === 'notifications' && <NotificationSettings />}
+          {activeCategory === 'cross-project' && <CrossProjectSettings />}
           {activeCategory === 'github' && (
             // Electron renderer can't redirect cleanly (file:// host) — use
             // the device flow only. window.open is trapped by the main
