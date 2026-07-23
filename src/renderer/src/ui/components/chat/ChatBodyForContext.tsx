@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { useNavigateToResource } from '@ui/hooks/useNavigateToResource'
 import {
   ChatBody,
   CliRunArtifactPanel,
@@ -207,6 +208,7 @@ export default function ChatBodyForContext({
     }
     return map
   }, [files])
+  const navigateToResource = useNavigateToResource()
   const onResolveFile = useCallback(
     (token: string) => {
       const exact = filesByPath[token]
@@ -345,6 +347,7 @@ export default function ChatBodyForContext({
       getToolHeaderPath={getToolHeaderPath}
       onResolveFile={onResolveFile}
       renderDependency={renderDependency}
+      onResourceLink={navigateToResource}
       renderCliRunArtifact={
         context.projectId
           ? (runId) => (

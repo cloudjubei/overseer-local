@@ -1,4 +1,5 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import {
   useActiveProject,
   useProjectAppView,
@@ -7,6 +8,8 @@ import {
   useStories,
   formatChatTitle,
   bridgeMessageName,
+  persistAppDataCapabilities,
+  appDeepLinkFromParams,
   type BridgeRequest,
 } from 'thefactory-ui/headless'
 import type { ChatContext } from 'thefactory-ui/headless/api'
@@ -42,16 +45,36 @@ export default function ProjectAppTab() {
   const [chatTitle, setChatTitle] = useState<string>('Chat')
   const [collapsed, setCollapsed] = useState(true)
 
+  const [searchParams] = useSearchParams()
+  // Computed once — answers the boot `nav.current` PULL and drives the `nav.open` PUSH (via ProjectAppView).
+  const deepLink = useMemo(
+    () => appDeepLinkFromParams(Object.fromEntries(searchParams.entries())) ?? null,
+    [searchParams],
+  )
+
   const onBridgeMessage = useCallback(
     async (req: BridgeRequest) => {
       const name = bridgeMessageName(req.type)
+      // The embedded app asks for its deep-link on load (F.2 app link → `?view=<v>&…` on the App-tab
+      // route); return the resolved target so it can open that view instead of its default.
+      if (name === 'nav.current') {
+        return deepLink
+      }
       if (name === 'app.capabilities') {
-        const { activitiesApiOnly: apiOnly, cliActivities: cliActs } = (req.payload ?? {}) as {
+        const {
+          activitiesApiOnly: apiOnly,
+          cliActivities: cliActs,
+          data,
+        } = (req.payload ?? {}) as {
           activitiesApiOnly?: boolean
           cliActivities?: string[]
+          data?: unknown
         }
         setActivitiesApiOnly(!!apiOnly)
         setCliActivities(Array.isArray(cliActs) ? cliActs : undefined)
+        // Persist the app's declared data-capability manifest so the backend's generic project-data
+        // chat tools (F.1) can be advertised for this project. Best-effort — the chat works without it.
+        if (data !== undefined && projectId) void persistAppDataCapabilities(projectId, data)
         return { ok: true }
       }
       if (name === 'chat.requestSidebar') {
@@ -114,7 +137,7 @@ export default function ProjectAppTab() {
       }
       return dataBridge(req)
     },
-    [dataBridge, projectId, createProjectTopic, sendMessage, createStory, createFeature, stories],
+    [dataBridge, projectId, createProjectTopic, sendMessage, createStory, createFeature, stories, deepLink],
   )
 
   const effectiveTitle = chatContext
@@ -128,6 +151,7 @@ export default function ProjectAppTab() {
           url={url}
           remountKey={key}
           onBridgeMessage={onBridgeMessage}
+          deepLink={deepLink}
           topRightOverlay={
             <ModelChipConnected
               editable

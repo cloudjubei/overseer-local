@@ -10,6 +10,7 @@ import { useActiveProject } from 'thefactory-ui/headless'
 import { StoryAndFeatureCallout } from 'thefactory-ui/web'
 import FeatureCardConnected from '@ui/components/stories/FeatureCardConnected'
 import FeatureRequestWidgetConnected from '@ui/components/chat/FeatureRequestWidgetConnected'
+import { useNavigateToResource } from '@ui/hooks/useNavigateToResource'
 import { DependencyBullet } from 'thefactory-ui/web'
 import type { ToolCall } from '../types'
 
@@ -38,8 +39,10 @@ export function renderToolCall(props: {
 function ConnectedToolPreview(args: RenderToolPreviewArgs) {
   const { getStory, getFeature } = useStories()
   const { projectId } = useActiveProject()
+  const navigateToResource = useNavigateToResource()
 
   const hooks: ToolPreviewHooks = {
+    onResourceLink: navigateToResource,
     getStory: (id) => {
       const s = getStory(id)
       if (!s) return undefined
