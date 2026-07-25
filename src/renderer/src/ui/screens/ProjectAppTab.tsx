@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import {
   useActiveProject,
@@ -44,6 +44,16 @@ export default function ProjectAppTab() {
   const [chatContext, setChatContext] = useState<ChatContext | null>(null)
   const [chatTitle, setChatTitle] = useState<string>('Chat')
   const [collapsed, setCollapsed] = useState(true)
+
+  // A docked chat is opened for the ACTIVE project's app (via `chat.discuss`). Switching projects keeps this
+  // App tab mounted (the route tab stays `app`), so without this reset the sidebar would linger showing the
+  // previous project's topic — a chat rendered outside the screen it belongs to. Close it on any project change.
+  useEffect(() => {
+    setSidebarEnabled(false)
+    setChatContext(null)
+    setChatTitle('Chat')
+    setCollapsed(true)
+  }, [projectId])
 
   const [searchParams] = useSearchParams()
   // Computed once — answers the boot `nav.current` PULL and drives the `nav.open` PUSH (via ProjectAppView).
