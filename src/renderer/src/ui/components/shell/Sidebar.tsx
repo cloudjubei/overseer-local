@@ -23,7 +23,6 @@ import {
 } from 'thefactory-ui/headless'
 import { navIcon } from './navIcons'
 import ProjectManagerModal from '@ui/components/projects/ProjectManagerModal'
-import BackgroundTasksTrigger from '@ui/components/shell/BackgroundTasksTrigger'
 
 type Props = {
   projectId?: string
@@ -250,7 +249,6 @@ export default function Sidebar({ projectId, activeTab, activeGroupId, activeGro
           </button>
         )}
         <div className="flex items-center gap-1">
-          <BackgroundTasksTrigger />
           <button
             type="button"
             onClick={toggleCollapsed}

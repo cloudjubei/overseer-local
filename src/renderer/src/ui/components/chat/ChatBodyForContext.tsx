@@ -3,7 +3,7 @@ import { useNavigateToResource } from '@ui/hooks/useNavigateToResource'
 import {
   ChatBody,
   CliRunArtifactPanel,
-  CrossProjectWaitingBar,
+  FeatureRequestIntroPanel,
   interpolatePrompt,
   type ChatBodyProps,
   type PromptVariables,
@@ -110,8 +110,14 @@ export default function ChatBodyForContext({
   // send, so the canvas no longer jumps when the chat goes from empty to its
   // first message.
   const messagesWithSystem = useMemo(() => {
-    const original = chat?.messages ?? []
-    if (!effectivePrompt) return original
+    const isFR = context.type === 'FEATURE_REQUEST'
+    // A FEATURE_REQUEST chat renders its request as a centered panel (emptyStateContent), not a
+    // chat message — hide the seeded `user` intro (the only user-role message; the in-place run
+    // adds only assistant/tool) and skip the system-prompt bubble so the panel is the sole focus.
+    const original = isFR
+      ? (chat?.messages ?? []).filter((m) => m.role !== 'user')
+      : (chat?.messages ?? [])
+    if (!effectivePrompt || isFR) return original
     return [
       {
         role: 'system' as const,
@@ -122,15 +128,47 @@ export default function ChatBodyForContext({
       },
       ...original,
     ]
-  }, [chat?.messages, effectivePrompt])
+  }, [chat?.messages, effectivePrompt, context.type])
 
   const isAgentRunChat = context.type === 'AGENT_RUN_STORY' || context.type === 'AGENT_RUN_FEATURE'
-  const isRunningAgent = isAgentRunChat && (chat?.state === 'created' || chat?.state === 'running')
+  // A FEATURE_REQUEST chat hosts its accepted run in-place, so while that run is live it is
+  // read-only just like an agent-run chat.
+  const isFeatureRequestChat = context.type === 'FEATURE_REQUEST'
+  const isRunningAgent =
+    (isAgentRunChat || isFeatureRequestChat) &&
+    (chat?.state === 'created' || chat?.state === 'running')
 
-  // A → B cross-project block: while this chat has an open feature request out to another
-  // project, the composer is replaced by a read-only "Waiting on «B»…" bar (D.7).
-  const { waitingViewForChat } = useCrossProjectRequests()
-  const waitingView = waitingViewForChat(context)
+  // Receiver-side FEATURE_REQUEST chat: while the request is still pending, the composer is
+  // replaced by an Accept/Reject bar (the request itself is the transcript's opening message).
+  const { requestById, accept, reject } = useCrossProjectRequests()
+  const featureRequest =
+    context.type === 'FEATURE_REQUEST' && context.featureRequestId
+      ? requestById(context.featureRequestId)
+      : undefined
+  // A FEATURE_REQUEST chat with an empty transcript is awaiting the operator's accept/reject — show
+  // the centered request panel and hide the composer. Gated on the (synchronous) empty transcript
+  // rather than the async request record, so the composer never flashes before the record loads.
+  const awaitingFeatureRequest =
+    isFeatureRequestChat && !isRunningAgent && messagesWithSystem.length === 0
+  const [decisionBusy, setDecisionBusy] = useState(false)
+  const onAcceptRequest = useCallback(async () => {
+    if (!featureRequest) return
+    setDecisionBusy(true)
+    try {
+      await accept(featureRequest.id)
+    } finally {
+      setDecisionBusy(false)
+    }
+  }, [accept, featureRequest])
+  const onRejectRequest = useCallback(async () => {
+    if (!featureRequest) return
+    setDecisionBusy(true)
+    try {
+      await reject(featureRequest.id)
+    } finally {
+      setDecisionBusy(false)
+    }
+  }, [reject, featureRequest])
 
   // Suggested actions = the last assistant message's `suggestedActions` (chip
   // row above the input). Only shown when the chat isn't currently streaming
@@ -326,14 +364,26 @@ export default function ChatBodyForContext({
         />
         <span>Agent is running. Chat is read-only.</span>
       </div>
-      {chat ? (
+      {chat && isAgentRunChat ? (
         <Button size="sm" variant="ghost" onClick={() => void cancelRun(chat)}>
           Cancel run
         </Button>
       ) : null}
     </div>
-  ) : waitingView ? (
-    <CrossProjectWaitingBar view={waitingView} />
+  ) : undefined
+
+  // While pending, the Accept/Reject action lives in the centered intro panel (below), so the
+  // composer is disabled rather than replaced.
+  const featureRequestEmptyState = awaitingFeatureRequest ? (
+    <FeatureRequestIntroPanel
+      fromProjectId={featureRequest?.requestedBy.fromProjectId}
+      title={featureRequest?.title ?? chat?.title}
+      description={featureRequest?.description}
+      cycle={featureRequest?.cycleFlag?.detected}
+      onAccept={() => void onAcceptRequest()}
+      onReject={() => void onRejectRequest()}
+      busy={decisionBusy}
+    />
   ) : undefined
 
   return (
@@ -364,6 +414,8 @@ export default function ChatBodyForContext({
       }
       onDeleteLastMessage={onDeleteLastMessage}
       canSend={activeLLMConfig !== null}
+      hideInput={awaitingFeatureRequest}
+      emptyStateContent={featureRequestEmptyState}
       numberMessagesToSend={completionSettings?.numberMessagesToSend}
       lastReadIso={lastReadIso}
       onAtBottomChange={onAtBottomChange}

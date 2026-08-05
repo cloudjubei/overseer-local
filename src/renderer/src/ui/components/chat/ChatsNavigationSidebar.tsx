@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useChats } from 'thefactory-ui/headless'
 import { useStories } from 'thefactory-ui/headless'
+import { groupChats, type GroupedChats } from 'thefactory-ui/headless'
 import { useChatRowStatus } from '@core/notifications/useChatRowStatus'
 import { getChatContextKey } from '@core/chats/chatKey'
 import type { ChatContext, GetChatResponse, GetStoryResponse } from 'thefactory-ui/headless/api'
@@ -283,7 +284,7 @@ function CategoriesList({
   getFeature,
 }: {
   projectChat: GetChatResponse | null
-  grouped: GroupedChats
+  grouped: GroupedChats<GetChatResponse>
   open: Record<string, boolean>
   toggle: (key: string) => void
   activeKey: string
@@ -338,6 +339,32 @@ function CategoriesList({
           </div>
         )}
       </div>
+
+      {grouped.featureRequests.length > 0 && (
+        <div className="space-y-1">
+          <SectionHeader
+            title="Cross-project requests"
+            openKey="cat:feature-requests"
+            // Default open — an incoming request is actionable, so surface it without a click.
+            isOpen={open['cat:feature-requests'] !== false}
+            onToggle={toggle}
+          />
+          {open['cat:feature-requests'] !== false && (
+            <div id="cat:feature-requests-section" className="space-y-1">
+              {grouped.featureRequests.map((c) => (
+                <ChatRow
+                  key={getChatContextKey(c.context)}
+                  ctx={c.context}
+                  title={c.title ?? 'Feature request'}
+                  isActive={getChatContextKey(c.context) === activeKey}
+                  onSelect={() => onSelectContext(c.context)}
+                  messageCount={c.messages?.length ?? 0}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {grouped.byStory.length > 0 && (
         <div className="space-y-1">
@@ -584,6 +611,8 @@ function historyRowTitle(
     case 'AGENT_RUN_STORY':
     case 'AGENT_RUN_FEATURE':
       return agentRunTitle(chat)
+    case 'FEATURE_REQUEST':
+      return chat.title ?? 'Feature request'
     default:
       return chat.title ?? 'Chat'
   }
@@ -607,78 +636,16 @@ function computeKeysForContext(ctx: ChatContext): string[] {
     case 'AGENT_RUN_FEATURE':
       keys.push('cat:stories', `story:${ctx.storyId}`, `story:${ctx.storyId}:features`)
       break
+    case 'FEATURE_REQUEST':
+      keys.push('cat:feature-requests')
+      break
     default:
       break
   }
   return keys
 }
 
-type StoryGroupEntry = {
-  storyId: string
-  storyChats: GetChatResponse[]
-  featureGroups: { featureId: string; chats: GetChatResponse[] }[]
-  agentRuns: GetChatResponse[]
-}
-
-type GroupedChats = {
-  topics: GetChatResponse[]
-  byStory: StoryGroupEntry[]
-}
-
-function groupChats(chats: GetChatResponse[], stories: GetStoryResponse[]): GroupedChats {
-  const topics: GetChatResponse[] = []
-  const storyMap = new Map<string, StoryGroupEntry>()
-  const ensure = (storyId: string): StoryGroupEntry => {
-    let entry = storyMap.get(storyId)
-    if (!entry) {
-      entry = { storyId, storyChats: [], featureGroups: [], agentRuns: [] }
-      storyMap.set(storyId, entry)
-    }
-    return entry
-  }
-  const ensureFeatureGroup = (
-    entry: StoryGroupEntry,
-    featureId: string,
-  ): { featureId: string; chats: GetChatResponse[] } => {
-    let fg = entry.featureGroups.find((f) => f.featureId === featureId)
-    if (!fg) {
-      fg = { featureId, chats: [] }
-      entry.featureGroups.push(fg)
-    }
-    return fg
-  }
-
-  for (const chat of chats) {
-    const ctx = chat.context
-    switch (ctx.type) {
-      case 'PROJECT_TOPIC':
-        topics.push(chat)
-        break
-      case 'STORY':
-        if (ctx.storyId) ensure(ctx.storyId).storyChats.push(chat)
-        break
-      case 'FEATURE':
-        if (ctx.storyId && ctx.featureId)
-          ensureFeatureGroup(ensure(ctx.storyId), ctx.featureId).chats.push(chat)
-        break
-      case 'AGENT_RUN_STORY':
-      case 'AGENT_RUN_FEATURE':
-        if (ctx.storyId) ensure(ctx.storyId).agentRuns.push(chat)
-        break
-      default:
-        break
-    }
-  }
-
-  const storyIndex = new Map<string, number>()
-  stories.forEach((s, i) => storyIndex.set(s.id, i))
-  const byStory = Array.from(storyMap.values()).sort((a, b) => {
-    const ai = storyIndex.get(a.storyId) ?? Number.MAX_SAFE_INTEGER
-    const bi = storyIndex.get(b.storyId) ?? Number.MAX_SAFE_INTEGER
-    return ai - bi
-  })
-
-  topics.sort((a, b) => (b.updatedAt ?? '').localeCompare(a.updatedAt ?? ''))
-
-  return { topics, byStory }
-}
+// Grouping is the shared headless `groupChats` (imported) — a single source of truth for both
+// clients. `StoryGroupEntry` is derived from its return type so this file's local components
+// (StoryGroup) stay strongly typed without redeclaring the shape.
+type StoryGroupEntry = GroupedChats<GetChatResponse>['byStory'][number]
