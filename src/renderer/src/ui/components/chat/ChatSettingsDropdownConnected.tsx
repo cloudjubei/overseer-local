@@ -1,5 +1,14 @@
 import { useEffect, useMemo, useState, type RefObject } from 'react'
-import { useChats, useChatCliRunner } from 'thefactory-ui/headless'
+import {
+  applyChatToolApprovalMode,
+  applyChatToolToggle,
+  buildChatToolApprovalToggle,
+  buildChatToolToggles,
+  resetChatToolToggles,
+  useChats,
+  useChatCliRunner,
+  useChatToolCatalog,
+} from 'thefactory-ui/headless'
 import type { ChatContext } from 'thefactory-ui/headless/api'
 import {
   ChatSettingsDropdown,
@@ -16,15 +25,21 @@ export type ChatSettingsDropdownConnectedProps = {
   onDeleteChat: () => Promise<void> | void
 }
 
+const CLI_TOOLS_HINT =
+  'These are the factory tools this CLI agent can reach. Its own file and shell tools are bounded by the sandbox, not by this list.'
+
 /**
- * Web wrapper around the shared `ChatSettingsDropdown`. Reads + persists
+ * Desktop wrapper around the shared `ChatSettingsDropdown`. Reads + persists
  * settings via `ChatsContext.updateChatSettings`, holds the draft system
- * prompt locally so the user can edit before saving, surfaces the
- * project's tool list as `available` / `autoCall` toggles, and plugs the
+ * prompt locally so the user can edit before saving, and plugs the
  * History-summarization + Message-sanitization sub-controls into the
  * dropdown's `extraContent` slot.
  *
- * Mirrors `overseer-local`'s ChatSidebar settings wiring 1:1.
+ * The tool rows come from the backend catalogue for this chat's transport
+ * (`useChatToolCatalog`), not from the chat's own stored settings — deriving
+ * them from the settings made a tool the chat did not already carry impossible
+ * to switch on. All row/patch logic lives in `thefactory-ui/headless` so the
+ * three clients cannot drift.
  */
 export default function ChatSettingsDropdownConnected({
   context,
@@ -35,6 +50,8 @@ export default function ChatSettingsDropdownConnected({
 }: ChatSettingsDropdownConnectedProps) {
   const { getEffectiveChatSettings, updateChatSettings, settingsBlocked } = useChats()
   const { cliRunner } = useChatCliRunner(context)
+  const runner = cliRunner ? 'cli' : 'api'
+  const { catalog } = useChatToolCatalog(runner)
 
   const effective = getEffectiveChatSettings(context)
   const completion = effective.completionSettings
@@ -45,50 +62,10 @@ export default function ChatSettingsDropdownConnected({
     setDraftPrompt(persistedPrompt)
   }, [persistedPrompt, context.type, context.projectId, context.storyId, context.featureId])
 
-  const tools = useMemo<ToolToggle[]>(() => {
-    const available = new Set(completion?.availableTools ?? [])
-    const auto = new Set(completion?.autoCallTools ?? [])
-    const names = Array.from(
-      new Set([...(completion?.availableTools ?? []), ...(completion?.autoCallTools ?? [])]),
-    )
-    return names.map((name) => ({
-      name,
-      description: '',
-      available: available.has(name),
-      autoCall: auto.has(name),
-    }))
-  }, [completion])
-
-  const toggleAvailable = async (tool: ToolToggle) => {
-    const next = !tool.available
-    const avail = new Set(completion?.availableTools ?? [])
-    const auto = new Set(completion?.autoCallTools ?? [])
-    if (next) avail.add(tool.name)
-    else {
-      avail.delete(tool.name)
-      auto.delete(tool.name)
-    }
-    await updateChatSettings(context, {
-      completionSettings: {
-        ...(completion ?? ({} as never)),
-        availableTools: Array.from(avail),
-        autoCallTools: Array.from(auto),
-      },
-    })
-  }
-
-  const toggleAutoCall = async (tool: ToolToggle) => {
-    if (!tool.available) return
-    const auto = new Set(completion?.autoCallTools ?? [])
-    if (tool.autoCall) auto.delete(tool.name)
-    else auto.add(tool.name)
-    await updateChatSettings(context, {
-      completionSettings: {
-        ...(completion ?? ({} as never)),
-        autoCallTools: Array.from(auto),
-      },
-    })
-  }
+  const tools = useMemo<ToolToggle[]>(
+    () => buildChatToolToggles(catalog, completion, runner),
+    [catalog, completion, runner],
+  )
 
   const persistCompletion = async (patch: Record<string, unknown>) => {
     await updateChatSettings(context, {
@@ -97,6 +74,32 @@ export default function ChatSettingsDropdownConnected({
         ...(patch as Partial<typeof completion>),
       },
     })
+  }
+
+  const toggleAvailable = async (tool: ToolToggle) => {
+    const patch = applyChatToolToggle(
+      catalog,
+      completion,
+      runner,
+      tool.name,
+      'available',
+      !tool.available,
+    )
+    if (Object.keys(patch).length === 0) return
+    await persistCompletion(patch)
+  }
+
+  const toggleAutoCall = async (tool: ToolToggle) => {
+    const patch = applyChatToolToggle(
+      catalog,
+      completion,
+      runner,
+      tool.name,
+      'autoCall',
+      !tool.autoCall,
+    )
+    if (Object.keys(patch).length === 0) return
+    await persistCompletion(patch)
   }
 
   return (
@@ -119,6 +122,16 @@ export default function ChatSettingsDropdownConnected({
       tools={tools}
       toggleAvailable={toggleAvailable}
       toggleAutoCall={toggleAutoCall}
+      onResetTools={
+        runner === 'cli' ? () => persistCompletion(resetChatToolToggles(runner)) : undefined
+      }
+      toolsHint={runner === 'cli' ? CLI_TOOLS_HINT : undefined}
+      toolApproval={buildChatToolApprovalToggle(completion, runner)}
+      onToolApprovalChange={async (auto) => {
+        const patch = applyChatToolApprovalMode(runner, auto)
+        if (Object.keys(patch).length === 0) return
+        await persistCompletion(patch)
+      }}
       persistSettings={persistCompletion}
       onDeleteChat={onDeleteChat}
       extraContent={

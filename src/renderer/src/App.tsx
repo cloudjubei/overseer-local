@@ -16,6 +16,8 @@ import { AppSettingsProviderConnected, localStorageAdapter } from 'thefactory-ui
 import { useAppSettings } from 'thefactory-ui/headless'
 import { AuthProvider, useAuth } from '@core/contexts/AuthContext'
 import { ChatsProvider } from 'thefactory-ui/headless'
+import { GlobalChatProvider } from 'thefactory-ui/headless'
+import GlobalChatOverlayConnected from '@ui/components/chat/GlobalChatOverlayConnected'
 import { CostsProvider } from 'thefactory-ui/headless'
 import { EntitiesProvider } from 'thefactory-ui/headless'
 import { FilesProvider } from 'thefactory-ui/headless'
@@ -38,7 +40,7 @@ import { WebSearchKeysProvider } from 'thefactory-ui/headless'
 import { ShortcutsProviderConnected } from 'thefactory-ui/web'
 import { CommandMenu } from 'thefactory-ui/web'
 import { ShortcutsHelp } from 'thefactory-ui/web'
-import { DiagnosticsOverlay } from "thefactory-ui/web"
+import { DiagnosticsOverlay } from 'thefactory-ui/web'
 import DisconnectedBanner from '@ui/components/shell/DisconnectedBanner'
 import EventNotifier from '@ui/components/shell/EventNotifier'
 import { ScreenErrorBoundary } from 'thefactory-ui/web'
@@ -88,46 +90,49 @@ function BackendGate() {
   return (
     <LLMConfigsProviderConnected>
       <CliConfigsProvider>
-      <GitCredentialsProvider>
-        <WebSearchKeysProvider>
-          <OverseerProvider>
-            <ProjectsProvider>
-              <ProjectsGroupsProvider>
-                <TemplatesProvider>
-                <StoriesProvider>
-                  <FilesProvider>
-                    <GitProvider storage={localStorageAdapter}>
-                      <CostsProvider>
-                        <ChatsProvider>
-                          <AgentsProvider>
-                            <TestsProvider>
-                              <ToolsProvider>
-                                <EntitiesProvider>
-                                  <DataSourcesProvider>
-                                    <IngestionProvider>
-                                      <EventNotifier />
-                                      <DiagnosticsOverlay />
-                                      <ShortcutsHelp />
-                                      <CommandMenu />
-                                      <GitCredentialErrorModalMount />
-                                      <Outlet />
-                                    </IngestionProvider>
-                                  </DataSourcesProvider>
-                                </EntitiesProvider>
-                              </ToolsProvider>
-                            </TestsProvider>
-                          </AgentsProvider>
-                        </ChatsProvider>
-                      </CostsProvider>
-                    </GitProvider>
-                  </FilesProvider>
-                </StoriesProvider>
-                </TemplatesProvider>
-              </ProjectsGroupsProvider>
-            </ProjectsProvider>
-          </OverseerProvider>
-        </WebSearchKeysProvider>
-      </GitCredentialsProvider>
+        <GitCredentialsProvider>
+          <WebSearchKeysProvider>
+            <OverseerProvider>
+              <ProjectsProvider>
+                <ProjectsGroupsProvider>
+                  <TemplatesProvider>
+                    <StoriesProvider>
+                      <FilesProvider>
+                        <GitProvider storage={localStorageAdapter}>
+                          <CostsProvider>
+                            <ChatsProvider>
+                              <AgentsProvider>
+                                <TestsProvider>
+                                  <ToolsProvider>
+                                    <EntitiesProvider>
+                                      <DataSourcesProvider>
+                                        <IngestionProvider>
+                                          <GlobalChatProvider>
+                                            <EventNotifier />
+                                            <DiagnosticsOverlay />
+                                            <ShortcutsHelp />
+                                            <CommandMenu />
+                                            <GlobalChatOverlayConnected />
+                                            <GitCredentialErrorModalMount />
+                                            <Outlet />
+                                          </GlobalChatProvider>
+                                        </IngestionProvider>
+                                      </DataSourcesProvider>
+                                    </EntitiesProvider>
+                                  </ToolsProvider>
+                                </TestsProvider>
+                              </AgentsProvider>
+                            </ChatsProvider>
+                          </CostsProvider>
+                        </GitProvider>
+                      </FilesProvider>
+                    </StoriesProvider>
+                  </TemplatesProvider>
+                </ProjectsGroupsProvider>
+              </ProjectsProvider>
+            </OverseerProvider>
+          </WebSearchKeysProvider>
+        </GitCredentialsProvider>
       </CliConfigsProvider>
     </LLMConfigsProviderConnected>
   )
@@ -282,37 +287,43 @@ function CodeBlockThemeBridge({ children }: { children: ReactNode }) {
 export default function App() {
   return (
     <NativeDictationTriggerContext.Provider value={macOsDictationTrigger}>
-    <AppSettingsProviderConnected>
-      <ThemeApplier />
-      <CodeBlockThemeBridge>
-      <ShortcutsProviderConnected>
-        <AuthProvider>
-          <ApiProvider>
-            <div className="flex flex-col h-full w-full overflow-hidden">
-              <DisconnectedBanner />
-              <div className="flex flex-1 min-h-0 overflow-hidden">
-                <Routes>
-                  <Route path="/login" element={<LoginScreen />} />
-                  <Route element={<BackendGate />}>
-                    <Route path="/" element={<AuthedRoot />} />
-                    <Route path="/groups/:groupId/chat/:contextKey" element={<GroupShell />} />
-                    <Route path="/groups/:groupId/:tab" element={<GroupShell />} />
-                    <Route path="/groups/:groupId" element={<GroupShell />} />
-                    <Route path="/projects/:projectId/stories/:storyId" element={<MainShell />} />
-                    <Route path="/projects/:projectId/chat/:contextKey" element={<MainShell />} />
-                    <Route path="/projects/:projectId/files/*" element={<MainShell />} />
-                    <Route path="/projects/:projectId/:tab" element={<MainShell />} />
-                    <Route path="/projects/:projectId" element={<MainShell />} />
-                  </Route>
-                  <Route path="*" element={<Navigate to="/" replace />} />
-                </Routes>
-              </div>
-            </div>
-          </ApiProvider>
-        </AuthProvider>
-      </ShortcutsProviderConnected>
-      </CodeBlockThemeBridge>
-    </AppSettingsProviderConnected>
+      <AppSettingsProviderConnected>
+        <ThemeApplier />
+        <CodeBlockThemeBridge>
+          <ShortcutsProviderConnected>
+            <AuthProvider>
+              <ApiProvider>
+                <div className="flex flex-col h-full w-full overflow-hidden">
+                  <DisconnectedBanner />
+                  <div className="flex flex-1 min-h-0 overflow-hidden">
+                    <Routes>
+                      <Route path="/login" element={<LoginScreen />} />
+                      <Route element={<BackendGate />}>
+                        <Route path="/" element={<AuthedRoot />} />
+                        <Route path="/groups/:groupId/chat/:contextKey" element={<GroupShell />} />
+                        <Route path="/groups/:groupId/:tab" element={<GroupShell />} />
+                        <Route path="/groups/:groupId" element={<GroupShell />} />
+                        <Route
+                          path="/projects/:projectId/stories/:storyId"
+                          element={<MainShell />}
+                        />
+                        <Route
+                          path="/projects/:projectId/chat/:contextKey"
+                          element={<MainShell />}
+                        />
+                        <Route path="/projects/:projectId/files/*" element={<MainShell />} />
+                        <Route path="/projects/:projectId/:tab" element={<MainShell />} />
+                        <Route path="/projects/:projectId" element={<MainShell />} />
+                      </Route>
+                      <Route path="*" element={<Navigate to="/" replace />} />
+                    </Routes>
+                  </div>
+                </div>
+              </ApiProvider>
+            </AuthProvider>
+          </ShortcutsProviderConnected>
+        </CodeBlockThemeBridge>
+      </AppSettingsProviderConnected>
     </NativeDictationTriggerContext.Provider>
   )
 }

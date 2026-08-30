@@ -11,8 +11,10 @@ import {
 import type { ChatContext } from 'thefactory-ui/headless/api'
 import { useAgents } from 'thefactory-ui/headless'
 import { useChats } from 'thefactory-ui/headless'
+import { useCredentialCaptures } from 'thefactory-ui/headless'
 import { useCrossProjectRequests } from 'thefactory-ui/headless'
 import { useFiles } from 'thefactory-ui/headless'
+import { usePendingToolGrants } from 'thefactory-ui/headless'
 import { useTools } from 'thefactory-ui/headless'
 import { useStories } from 'thefactory-ui/headless'
 import { useActiveProject } from 'thefactory-ui/headless'
@@ -51,6 +53,7 @@ export default function ChatBodyForContext({
     setDraft,
     clearDraft,
     sendMessage,
+    restartLastTurn,
     confirmTools,
     cancelToolConfirmation,
     abortChat,
@@ -68,6 +71,20 @@ export default function ChatBodyForContext({
   const chat = getChat(context)
   const liveState = getChatLiveState(context)
   const contextKey = getChatContextKey(context)
+
+  // Gated-action approvals for a CLI-backed chat's active run. The unified
+  // grants drive the tool-confirmation modal (per-grant Allow / Deny / Allow
+  // permanently) and the inline agent-question cards. Only fed in for CLI
+  // chats so the API confirmation path is untouched. The gate reads the hook's
+  // resolved run, not our live state: a reload drops `liveState.cliRunId` while
+  // the agent stays blocked, and the hook falls back to resolving the chat's
+  // active run from the backend.
+  const { grants, cliRunId } = usePendingToolGrants(context, liveState.cliRunId ?? undefined)
+  const cliGrants = cliRunId ? grants : undefined
+
+  // In-chat credential capture: an agent that needs a secret opens a form here
+  // rather than asking for it in the transcript.
+  const { captures, submit: submitCapture, cancel: cancelCapture } = useCredentialCaptures(context)
 
   // ---- Effective system prompt (interpolated) -----------------------------
   const effectiveSettings = useMemo(
@@ -222,8 +239,8 @@ export default function ChatBodyForContext({
   )
   const onAbort = useCallback(() => {
     if (chat && isAgentRunChat) return cancelRun(chat)
-    return abortChat(context)
-  }, [abortChat, cancelRun, chat, context, isAgentRunChat])
+    return abortChat(context, cliRunId)
+  }, [abortChat, cancelRun, chat, cliRunId, context, isAgentRunChat])
   const onConfirmTools = useCallback(
     (ids: string[]) => confirmTools(context, ids),
     [confirmTools, context],
@@ -236,6 +253,10 @@ export default function ChatBodyForContext({
     () => deleteLastMessage(context),
     [deleteLastMessage, context],
   )
+  // Withheld on an agent-run / live feature-request chat: those transcripts are
+  // written by a run, not by chat sends, so re-triggering the chat agent on them
+  // is not the same action at all.
+  const onRestartTurn = useCallback(() => restartLastTurn(context), [restartLastTurn, context])
 
   // ---- Inline @ file mentions / # references in rendered messages -------
   const filesByPath = useMemo(() => {
@@ -401,18 +422,30 @@ export default function ChatBodyForContext({
       renderCliRunArtifact={
         context.projectId
           ? (runId) => (
-              <CliRunArtifactPanel key={runId} runId={runId} projectId={context.projectId!} />
+              <CliRunArtifactPanel
+                key={runId}
+                runId={runId}
+                projectId={context.projectId!}
+                onSendMessage={(text) => onSend(text, [])}
+              />
             )
           : undefined
       }
       onSend={onSend}
       onAbort={onAbort}
+      isBusy={liveState.isSending || cliRunId !== undefined}
+      activeCliRunId={cliRunId}
       onConfirmTools={onConfirmTools}
       onCancelToolConfirmation={onCancelToolConfirmation}
       previewTool={
         context.projectId ? (_id, toolName, args) => previewTool(toolName, args) : undefined
       }
+      grants={cliGrants}
+      credentialCaptures={captures}
+      onSubmitCredentialCapture={submitCapture}
+      onCancelCredentialCapture={cancelCapture}
       onDeleteLastMessage={onDeleteLastMessage}
+      onRestartTurn={isAgentRunChat || isRunningAgent ? undefined : onRestartTurn}
       canSend={activeLLMConfig !== null}
       hideInput={awaitingFeatureRequest}
       emptyStateContent={featureRequestEmptyState}

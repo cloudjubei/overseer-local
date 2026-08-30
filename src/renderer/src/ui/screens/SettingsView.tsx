@@ -1,12 +1,14 @@
 import { useSearchParams } from 'react-router-dom'
 import { CollapsibleSidebar } from 'thefactory-ui/web'
+import { useActiveProject } from 'thefactory-ui/headless'
 
 // Subviews
 import { VisualSettings } from 'thefactory-ui/web'
 import LLMSettings from '@ui/components/settings/LLMSettings'
 import { NotificationSettings } from 'thefactory-ui/web'
 import { CrossProjectSettings } from 'thefactory-ui/web'
-import { GitHubSettings } from 'thefactory-ui/web'
+import { ProjectNotesSettings } from 'thefactory-ui/web'
+import { GitCredentialsSettings } from 'thefactory-ui/web'
 import { WebSearchSettings } from 'thefactory-ui/web'
 import { DatabaseSettings } from 'thefactory-ui/web'
 import {
@@ -14,6 +16,7 @@ import {
   IconCpu,
   IconDatabase,
   IconGitHub,
+  IconKey,
   IconList,
   IconPalette,
   IconRobot,
@@ -38,7 +41,13 @@ const CATEGORIES = [
     icon: <IconList className="h-4 w-4" />,
     accent: 'blue',
   },
-  { id: 'github', label: 'GitHub', icon: <IconGitHub className="h-4 w-4" />, accent: 'gray' },
+  {
+    id: 'notes',
+    label: 'Notes & Secrets',
+    icon: <IconKey className="h-4 w-4" />,
+    accent: 'teal',
+  },
+  { id: 'github', label: 'Git', icon: <IconGitHub className="h-4 w-4" />, accent: 'gray' },
   {
     id: 'websearch',
     label: 'Web Search',
@@ -68,6 +77,7 @@ function isCategory(value: string | null): value is CategoryId {
 export default function SettingsView() {
   const [searchParams, setSearchParams] = useSearchParams()
   const queryTab = searchParams.get('tab')
+  const { projectId } = useActiveProject()
   // The URL is the single source of truth — no local state to avoid the brief
   // "wrong tab visible" flash that happens when local state and the URL update
   // on different ticks.
@@ -105,12 +115,15 @@ export default function SettingsView() {
           {activeCategory === 'visual' && <VisualSettings />}
           {activeCategory === 'notifications' && <NotificationSettings />}
           {activeCategory === 'cross-project' && <CrossProjectSettings />}
+          {activeCategory === 'notes' && <ProjectNotesSettings projectId={projectId} />}
           {activeCategory === 'github' && (
             // Electron renderer can't redirect cleanly (file:// host) — use
             // the device flow only. window.open is trapped by the main
             // process's setWindowOpenHandler, which routes to
             // shell.openExternal, so the default openExternalUrl works.
-            <GitHubSettings hostCapabilities={{ canRedirect: false, canOpenBrowser: true }} />
+            <GitCredentialsSettings
+              hostCapabilities={{ canRedirect: false, canOpenBrowser: true }}
+            />
           )}
           {activeCategory === 'websearch' && <WebSearchSettings />}
           {activeCategory === 'database' && <DatabaseSettings />}

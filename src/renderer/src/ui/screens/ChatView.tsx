@@ -11,7 +11,7 @@ import { Button, ChatHeader, DotBadge, SegmentedControl } from 'thefactory-ui/we
 import { IconPlus } from 'thefactory-ui/web/icons'
 import { useBadgeCounts } from '@core/notifications/useBadgeCounts'
 import ChatBodyForContext from '@ui/components/chat/ChatBodyForContext'
-import { ChatDynamicContextModal } from 'thefactory-ui/web'
+import { ChatDebugModal, ChatDynamicContextModal } from 'thefactory-ui/web'
 import ChatsNavigationSidebar from '@ui/components/chat/ChatsNavigationSidebar'
 import ChatSettingsDropdownConnected from '@ui/components/chat/ChatSettingsDropdownConnected'
 import { ChatTopicCreateModalConnected as ChatTopicCreateModal } from 'thefactory-ui/web'
@@ -160,6 +160,7 @@ export default function ChatView() {
   const [topicModalOpen, setTopicModalOpen] = useState(false)
   const [promptOpen, setPromptOpen] = useState(false)
   const [dynamicContextOpen, setDynamicContextOpen] = useState(false)
+  const [debugOpen, setDebugOpen] = useState(false)
   const settingsBtnRef = useRef<HTMLButtonElement | null>(null)
 
   if (!isLoaded) return <LoadingScreen label="Loading chat…" />
@@ -203,6 +204,7 @@ export default function ChatView() {
       onOpenPrompt={() => setPromptOpen(true)}
       onOpenCosts={() => setUsageOpen(true)}
       onOpenDynamicContext={() => setDynamicContextOpen(true)}
+      onOpenDebug={() => setDebugOpen(true)}
       onRefresh={() => {
         if (window.confirm('Clear all messages in this chat? This cannot be undone.')) {
           void clearChat(activeContext)
@@ -333,6 +335,12 @@ export default function ChatView() {
           context={activeContext}
         />
 
+        <ChatDebugModal
+          isOpen={debugOpen}
+          onClose={() => setDebugOpen(false)}
+          context={activeContext}
+        />
+
         <ChatTopicCreateModal
           isOpen={topicModalOpen}
           onClose={() => setTopicModalOpen(false)}
@@ -383,4 +391,3 @@ function AgentRunHeaderActions({
     </div>
   )
 }
-

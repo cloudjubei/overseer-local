@@ -10,14 +10,22 @@ import type { BadgeColor, NotificationCategory } from '@core/types/settings'
 import { isBadgeColorCategory } from '@core/types/settings'
 import { Button, NotificationBadge, renderProjectIcon, SpinnerWithDot } from 'thefactory-ui/web'
 import { IconPause } from 'thefactory-ui/web/icons'
-import { IconCollection, IconFolder, IconFolderOpen, IconMenu } from 'thefactory-ui/web/icons'
 import {
+  IconChat,
+  IconCollection,
+  IconFolder,
+  IconFolderOpen,
+  IconMenu,
+} from 'thefactory-ui/web/icons'
+import {
+  GLOBAL_CHAT_TITLE,
   GROUP_TAB_DEFS,
   SHELL_TAB_DEFS,
   formatBadgeCount,
   groupTabToProjectTab,
   projectTabToGroupTab,
   splitGroupsAndProjects,
+  useGlobalChat,
   type GroupTabKey,
   type ShellTabKey,
 } from 'thefactory-ui/headless'
@@ -483,12 +491,17 @@ export default function Sidebar({ projectId, activeTab, activeGroupId, activeGro
         </div>
       </div>
 
-      {projectId && (
-        <div className="shrink-0 border-t py-1" style={{ borderColor: 'var(--border-subtle)' }}>
-          {(() => {
-            const settingsTab = SHELL_TAB_DEFS.find((t) => t.key === 'settings')
-            if (!settingsTab) return null
-            return (
+      {/* The assistant is account-global, so the footer always renders;
+          only the Settings row needs a project to route to. */}
+      <div
+        className={`shrink-0 border-t py-1 ${collapsed ? 'flex flex-col' : 'flex items-center'}`}
+        style={{ borderColor: 'var(--border-subtle)' }}
+      >
+        {(() => {
+          const settingsTab = SHELL_TAB_DEFS.find((t) => t.key === 'settings')
+          if (!settingsTab || !projectId) return null
+          return (
+            <div className={collapsed ? undefined : 'min-w-0 flex-1'}>
               <NavRow
                 label={settingsTab.label}
                 icon={navIcon(settingsTab.icon)}
@@ -496,12 +509,36 @@ export default function Sidebar({ projectId, activeTab, activeGroupId, activeGro
                 onClick={() => onSelectTab('settings')}
                 collapsed={collapsed}
               />
-            )
-          })()}
-        </div>
-      )}
+            </div>
+          )
+        })()}
+        <GlobalChatRow collapsed={collapsed} />
+      </div>
       {manageOpen && <ProjectManagerModal onRequestClose={() => setManageOpen(false)} />}
     </aside>
+  )
+}
+
+/**
+ * Icon-only trigger for the app-level assistant chat, pinned to the right of
+ * the Settings row. Expanded it sits on that row; collapsed the rail has no
+ * room for two icons side by side, so it stacks beneath.
+ */
+function GlobalChatRow({ collapsed }: { collapsed: boolean }) {
+  const { open } = useGlobalChat()
+  return (
+    <button
+      type="button"
+      onClick={open}
+      data-sidebar-row
+      aria-label={GLOBAL_CHAT_TITLE}
+      title={GLOBAL_CHAT_TITLE}
+      className={`flex items-center justify-center shrink-0 py-2 text-(--text-muted) transition-colors hover:bg-black/5 hover:text-(--text-primary) focus:outline-none focus-visible:ring-2 dark:hover:bg-white/10 ${
+        collapsed ? 'w-full' : 'px-3'
+      }`}
+    >
+      <IconChat className="h-4.5 w-4.5" />
+    </button>
   )
 }
 

@@ -10,7 +10,7 @@ import { useChatRowStatus } from '@core/notifications/useChatRowStatus'
 import { useChatContextLastRead as useChatLastRead } from 'thefactory-ui/web'
 import { getChatContext, getChatContextKey } from '@core/chats/chatKey'
 import ChatBodyForContext from '@ui/components/chat/ChatBodyForContext'
-import { ChatDynamicContextModal } from 'thefactory-ui/web'
+import { ChatDebugModal, ChatDynamicContextModal } from 'thefactory-ui/web'
 import ChatSettingsDropdownConnected from '@ui/components/chat/ChatSettingsDropdownConnected'
 import { ChatTopicCreateModalConnected as ChatTopicCreateModal } from 'thefactory-ui/web'
 import { SystemPromptViewerConnected } from 'thefactory-ui/web'
@@ -139,6 +139,7 @@ export default function GroupChatView() {
   const [topicModalOpen, setTopicModalOpen] = useState(false)
   const [promptOpen, setPromptOpen] = useState(false)
   const [dynamicContextOpen, setDynamicContextOpen] = useState(false)
+  const [debugOpen, setDebugOpen] = useState(false)
   const settingsBtnRef = useRef<HTMLButtonElement | null>(null)
 
   useChatLastRead(activeContext ?? undefined)
@@ -176,6 +177,7 @@ export default function GroupChatView() {
       onOpenPrompt={() => setPromptOpen(true)}
       onOpenCosts={() => setUsageOpen(true)}
       onOpenDynamicContext={() => setDynamicContextOpen(true)}
+      onOpenDebug={() => setDebugOpen(true)}
       onRefresh={() => {
         if (window.confirm('Clear all messages in this chat? This cannot be undone.')) {
           void clearChat(activeContext)
@@ -245,7 +247,11 @@ export default function GroupChatView() {
       </aside>
 
       <div className="relative flex flex-col flex-1 min-w-0 overflow-hidden">
-        <ChatBodyForContext context={activeContext} header={header} inputProps={{ autoFocus: true }} />
+        <ChatBodyForContext
+          context={activeContext}
+          header={header}
+          inputProps={{ autoFocus: true }}
+        />
 
         <UsageModal
           isOpen={usageOpen}
@@ -263,6 +269,12 @@ export default function GroupChatView() {
         <ChatDynamicContextModal
           isOpen={dynamicContextOpen}
           onClose={() => setDynamicContextOpen(false)}
+          context={activeContext}
+        />
+
+        <ChatDebugModal
+          isOpen={debugOpen}
+          onClose={() => setDebugOpen(false)}
           context={activeContext}
         />
 
