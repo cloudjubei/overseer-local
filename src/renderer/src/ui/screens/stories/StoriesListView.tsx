@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useActiveProject } from 'thefactory-ui/headless'
+import { STATUS_ORDER as HEADLESS_STATUS_ORDER } from 'thefactory-ui/headless'
 import { useAppSettings } from 'thefactory-ui/headless'
 import { useStories } from 'thefactory-ui/headless'
 import { useAgents } from 'thefactory-ui/headless'
@@ -43,7 +44,7 @@ const STORIES_SORT_OPTIONS: { value: StoriesListSorting; label: string }[] = [
 function countFeatures(story: GetStoryResponse) {
   const features = Array.isArray(story.features) ? story.features : []
   const total = features.length
-  const done = features.filter((f) => f.status === '+').length
+  const done = features.filter((f) => f.status === 'done').length
   return { done, total }
 }
 
@@ -73,13 +74,13 @@ function filterStories(
       !status || status === 'all'
         ? true
         : status === 'not-done'
-          ? t.status !== '+' || hasRejectedFeatures
+          ? t.status !== 'done' || hasRejectedFeatures
           : t.status === (status as Status)
     return byStatus && matchesQuery(t, indexOf(t.id), query)
   })
 }
 
-const STATUS_ORDER = ['-', '~', '+', '=', '?']
+const STATUS_ORDER: string[] = [...HEADLESS_STATUS_ORDER]
 
 /**
  * Dense list of stories — visual & interaction parity with desktop's
@@ -232,7 +233,7 @@ export default function StoriesListView() {
     if (e.key.toLowerCase() === 's') {
       e.preventDefault()
       const current = stories.find((t) => t.id === storyId)?.status
-      const order: Status[] = ['-', '~', '+', '=', '?']
+      const order = HEADLESS_STATUS_ORDER
       const next = order[(Math.max(0, order.indexOf(current as Status)) + 1) % order.length]
       void handleStatusChange(storyId, next)
       return

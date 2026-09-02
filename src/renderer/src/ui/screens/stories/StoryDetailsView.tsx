@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useActiveProject } from 'thefactory-ui/headless'
+import { STATUS_ORDER as HEADLESS_STATUS_ORDER } from 'thefactory-ui/headless'
 import { useStories } from 'thefactory-ui/headless'
 import { useAgents } from 'thefactory-ui/headless'
 import type { Feature, GetStoryResponse } from 'thefactory-ui/headless/api'
@@ -26,7 +27,7 @@ import type { StoryModalRoute } from './storyModals'
 type Status = GetStoryResponse['status']
 type FeatureSort = 'index_asc' | 'index_desc' | 'status_asc' | 'status_desc'
 
-const STATUS_ORDER: Status[] = ['-', '~', '+', '=', '?']
+const STATUS_ORDER: Status[] = [...HEADLESS_STATUS_ORDER]
 
 const FEATURE_SORT_OPTIONS: { value: FeatureSort; label: string }[] = [
   { value: 'index_asc', label: 'Ascending ↓' },
@@ -125,7 +126,7 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
           statusFilter === 'all'
             ? true
             : statusFilter === 'not-done'
-              ? f.status !== '+' || !!(f as { rejection?: string }).rejection
+              ? f.status !== 'done' || !!(f as { rejection?: string }).rejection
               : f.status === statusFilter
         return byStatus && featureMatchesQuery(f, getFeatureIndex(story, f.id), query)
       }),

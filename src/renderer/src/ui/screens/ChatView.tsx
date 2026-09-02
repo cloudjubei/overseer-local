@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAgents } from 'thefactory-ui/headless'
 import { useChats } from 'thefactory-ui/headless'
+import { isGeneralProjectChat } from 'thefactory-ui/headless'
 import { useStories } from 'thefactory-ui/headless'
 import { formatChatTitle } from 'thefactory-ui/headless'
 import { useActiveProject } from 'thefactory-ui/headless'
@@ -222,7 +223,7 @@ export default function ChatView() {
           onClose={() => setSettingsOpen(false)}
           settingsBtnRef={settingsBtnRef}
           onDeleteChat={async () => {
-            if (activeContext.type === 'PROJECT') {
+            if (isGeneralProjectChat(activeContext)) {
               window.alert('The General chat cannot be deleted.')
               return
             }

@@ -79,7 +79,7 @@ export default function ChatBodyForContext({
   // resolved run, not our live state: a reload drops `liveState.cliRunId` while
   // the agent stays blocked, and the hook falls back to resolving the chat's
   // active run from the backend.
-  const { grants, cliRunId } = usePendingToolGrants(context, liveState.cliRunId ?? undefined)
+  const { grants, cliRunId, isRunActive } = usePendingToolGrants(context, liveState.cliRunId ?? undefined)
   const cliGrants = cliRunId ? grants : undefined
 
   // In-chat credential capture: an agent that needs a secret opens a form here
@@ -433,7 +433,7 @@ export default function ChatBodyForContext({
       }
       onSend={onSend}
       onAbort={onAbort}
-      isBusy={liveState.isSending || cliRunId !== undefined}
+      isBusy={liveState.isSending || isRunActive}
       activeCliRunId={cliRunId}
       onConfirmTools={onConfirmTools}
       onCancelToolConfirmation={onCancelToolConfirmation}

@@ -135,7 +135,7 @@ export default function ProjectAppTab() {
         const story =
           existing ?? (await createStory({ title: storyTitle!.trim(), description: storyDescription ?? '' }))
         const updated = await createFeature(story.id, {
-          status: '-',
+          status: 'pending',
           title: feature!.title!.trim(),
           description: feature!.description ?? '',
           context: [],

@@ -225,7 +225,7 @@ function TestsViewInner() {
       initialValues: {
         title: `Add tests for ${file}`,
         description,
-        status: '-',
+        status: 'pending',
         context: [file],
       },
     })

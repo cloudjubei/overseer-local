@@ -4,6 +4,7 @@ import type { ChatContext } from 'thefactory-ui/headless/api'
 import { ChatHeader } from 'thefactory-ui/web'
 import { getChatContextKey } from '@core/chats/chatKey'
 import { useChats } from 'thefactory-ui/headless'
+import { isGeneralProjectChat } from 'thefactory-ui/headless'
 import ChatBodyForContext from './ChatBodyForContext'
 import { ChatDebugModal, ChatDynamicContextModal } from 'thefactory-ui/web'
 import ChatSettingsDropdownConnected from './ChatSettingsDropdownConnected'
@@ -103,7 +104,7 @@ export default function ChatPanelBody({
                 onClose={() => setSettingsOpen(false)}
                 settingsBtnRef={settingsBtnRef}
                 onDeleteChat={async () => {
-                  if (context.type === 'PROJECT') {
+                  if (isGeneralProjectChat(context)) {
                     window.alert('The General chat cannot be deleted.')
                     return
                   }

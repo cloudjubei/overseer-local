@@ -4,6 +4,7 @@ import { ChatHeader, NotificationBadge, SpinnerWithDot } from 'thefactory-ui/web
 import { IconPlus } from 'thefactory-ui/web/icons'
 import type { ChatContext, ChatContextGroup, GetChatResponse } from 'thefactory-ui/headless/api'
 import { useChats } from 'thefactory-ui/headless'
+import { isGeneralGroupChat } from 'thefactory-ui/headless'
 import { useProjectsGroups } from 'thefactory-ui/headless'
 import { formatBadgeCount } from 'thefactory-ui/headless'
 import { useChatRowStatus } from '@core/notifications/useChatRowStatus'
@@ -194,7 +195,7 @@ export default function GroupChatView() {
           onClose={() => setSettingsOpen(false)}
           settingsBtnRef={settingsBtnRef}
           onDeleteChat={async () => {
-            if (activeContext.type === 'GROUP') {
+            if (isGeneralGroupChat(activeContext)) {
               window.alert('The group chat cannot be deleted.')
               return
             }
