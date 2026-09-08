@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAgents } from 'thefactory-ui/headless'
 import { useChats } from 'thefactory-ui/headless'
+import { chatClosure, chatCloseAction } from 'thefactory-ui/headless'
 import { isGeneralProjectChat } from 'thefactory-ui/headless'
 import { useStories } from 'thefactory-ui/headless'
 import { formatChatTitle } from 'thefactory-ui/headless'
@@ -90,7 +91,8 @@ export default function ChatView() {
   const params = useParams<{ projectId: string; contextKey?: string }>()
   const navigate = useNavigate()
   const { storyDisplayIndex, featureDisplayIndex } = useStories()
-  const { isLoaded, loadError, projectChat, chats, getChat, clearChat, deleteChat } = useChats()
+  const { isLoaded, loadError, projectChat, chats, getChat, clearChat, consolidateChat, deleteChat } =
+    useChats()
   const { counts } = useBadgeCounts()
   const { deleteRun, rateRun } = useAgents()
 
@@ -176,6 +178,7 @@ export default function ChatView() {
   }
 
   const chat = getChat(activeContext)
+  const closeAction = chatCloseAction(activeContext, chatClosure(chat))
   const messages = chat?.messages ?? []
   const isAgentRunChat =
     activeContext.type === 'AGENT_RUN_STORY' || activeContext.type === 'AGENT_RUN_FEATURE'
@@ -207,9 +210,18 @@ export default function ChatView() {
       onOpenDynamicContext={() => setDynamicContextOpen(true)}
       onOpenDebug={() => setDebugOpen(true)}
       onRefresh={() => {
-        if (window.confirm('Clear all messages in this chat? This cannot be undone.')) {
+        // An agent-run chat is closed down, not cleared: its messages are the
+        // record of how the work was implemented.
+        if (closeAction.done) return
+        if (!window.confirm(closeAction.confirm)) return
+        if (closeAction.kind !== 'consolidate') {
           void clearChat(activeContext)
+          return
         }
+        // Land the user in the successor rather than on a read-only dead end.
+        void consolidateChat(activeContext).then((successor) => {
+          if (successor) onSelectContext(successor)
+        })
       }}
       onOpenSettings={() => setSettingsOpen((v) => !v)}
       settingsBtnRef={settingsBtnRef}

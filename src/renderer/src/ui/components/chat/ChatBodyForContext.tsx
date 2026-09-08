@@ -11,6 +11,7 @@ import {
 import type { ChatContext } from 'thefactory-ui/headless/api'
 import { useAgents } from 'thefactory-ui/headless'
 import { useChats } from 'thefactory-ui/headless'
+import { chatClosure } from 'thefactory-ui/headless'
 import { useCredentialCaptures } from 'thefactory-ui/headless'
 import { useCrossProjectRequests } from 'thefactory-ui/headless'
 import { useFiles } from 'thefactory-ui/headless'
@@ -55,7 +56,6 @@ export default function ChatBodyForContext({
     sendMessage,
     restartLastTurn,
     confirmTools,
-    cancelToolConfirmation,
     abortChat,
     deleteLastMessage,
     getEffectiveChatSettings,
@@ -72,15 +72,22 @@ export default function ChatBodyForContext({
   const liveState = getChatLiveState(context)
   const contextKey = getChatContextKey(context)
 
-  // Gated-action approvals for a CLI-backed chat's active run. The unified
-  // grants drive the tool-confirmation modal (per-grant Allow / Deny / Allow
-  // permanently) and the inline agent-question cards. Only fed in for CLI
-  // chats so the API confirmation path is untouched. The gate reads the hook's
-  // resolved run, not our live state: a reload drops `liveState.cliRunId` while
-  // the agent stays blocked, and the hook falls back to resolving the chat's
-  // active run from the backend.
-  const { grants, cliRunId, isRunActive } = usePendingToolGrants(context, liveState.cliRunId ?? undefined)
-  const cliGrants = cliRunId ? grants : undefined
+  // Gated-action approvals for a CLI-backed chat. The unified grants drive the
+  // inline approval panel (and the several-at-once modal).
+  //
+  // Deliberately NOT gated on a run id. A gated call no longer holds its run
+  // open while it waits: the agent raises the ask, the call comes back pending
+  // and the turn ENDS, so the run goes terminal within seconds while the
+  // approval is still pending and decidable. Gating on `cliRunId` threw the
+  // grants away at exactly that moment and the approval banner vanished out
+  // from under the user. The hook already scopes these to THIS chat and returns
+  // only real pending tool grants, so there is nothing left to gate on.
+  // `cliRunId` is still used for abort + the transcript view; it just no longer
+  // gates the grants.
+  const { grants, cliRunId, isRunActive } = usePendingToolGrants(
+    context,
+    liveState.cliRunId ?? undefined,
+  )
 
   // In-chat credential capture: an agent that needs a secret opens a form here
   // rather than asking for it in the transcript.
@@ -245,10 +252,6 @@ export default function ChatBodyForContext({
     (ids: string[]) => confirmTools(context, ids),
     [confirmTools, context],
   )
-  const onCancelToolConfirmation = useCallback(
-    () => cancelToolConfirmation(context),
-    [cancelToolConfirmation, context],
-  )
   const onDeleteLastMessage = useCallback(
     () => deleteLastMessage(context),
     [deleteLastMessage, context],
@@ -410,6 +413,7 @@ export default function ChatBodyForContext({
   return (
     <ChatBody
       chatId={contextKey}
+      historyLocked={chatClosure(chat).locked}
       header={header}
       sendError={liveState.sendError ? { message: liveState.sendError.message } : null}
       messages={messagesWithSystem}
@@ -436,11 +440,10 @@ export default function ChatBodyForContext({
       isBusy={liveState.isSending || isRunActive}
       activeCliRunId={cliRunId}
       onConfirmTools={onConfirmTools}
-      onCancelToolConfirmation={onCancelToolConfirmation}
       previewTool={
         context.projectId ? (_id, toolName, args) => previewTool(toolName, args) : undefined
       }
-      grants={cliGrants}
+      grants={grants}
       credentialCaptures={captures}
       onSubmitCredentialCapture={submitCapture}
       onCancelCredentialCapture={cancelCapture}
