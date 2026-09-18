@@ -59,5 +59,4 @@ describe('useProjectSettings', () => {
     rerender({ id: 'p2' })
     expect(result.current.settings.notifications.categories.git).toBe(false)
   })
-
 })

@@ -92,9 +92,7 @@ export default function DependencySelector({
                           onChange={() => sel.toggle(f.featureDep)}
                           disabled={f.disabled}
                         />
-                        <span className="font-mono text-xs opacity-60">
-                          #{f.featureDisplay}
-                        </span>
+                        <span className="font-mono text-xs opacity-60">#{f.featureDisplay}</span>
                         <span className="truncate">{f.feature.title}</span>
                       </label>
                     </li>

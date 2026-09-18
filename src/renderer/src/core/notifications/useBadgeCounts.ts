@@ -6,6 +6,7 @@ import { useChats } from 'thefactory-ui/headless'
 import { useGit } from 'thefactory-ui/headless'
 import { useActiveProject } from 'thefactory-ui/headless'
 import { useProjectActivities } from 'thefactory-ui/headless'
+import { useProcessRuns, isProcessRunActive } from 'thefactory-ui/headless'
 import { useTests } from 'thefactory-ui/headless'
 import { useProjectSettingsConnected as useProjectSettings } from 'thefactory-ui/web'
 import {
@@ -64,6 +65,9 @@ export function useBadgeCounts(): UseBadgeCountsApi {
   const { chats, getChatLiveState } = useChats()
   const { status, branches } = useGit()
   const { lastRun } = useTests()
+  // Every project's live runs in one fetch, kept live over WS; bucketed by
+  // project below so each row (and the group rollup) counts only its own.
+  const { runs: processRuns } = useProcessRuns()
   const {
     runningCount: activityRunningCount,
     working: activityWorking,
@@ -129,12 +133,24 @@ export function useBadgeCounts(): UseBadgeCountsApi {
   // unread chats from every other project. Per-project breakdowns for the
   // sidebar project rows go through `getProjectBadgeState` below.
   const activeProjectChats = useMemo(
-    () =>
-      activeProjectId
-        ? annotatedChats.filter((c) => c.projectId === activeProjectId)
-        : [],
+    () => (activeProjectId ? annotatedChats.filter((c) => c.projectId === activeProjectId) : []),
     [annotatedChats, activeProjectId],
   )
+
+  // Live process runs per project — active = running + parked, parked = waiting
+  // on the user. Terminal runs (History) never badge. Declared before `counts`
+  // (which reads the active project's tally) and reused by `getProjectBadgeState`.
+  const processByProjectId = useMemo(() => {
+    const out = new Map<string, { active: number; parked: number }>()
+    for (const r of processRuns) {
+      if (!isProcessRunActive(r)) continue
+      const cur = out.get(r.projectId) ?? { active: 0, parked: 0 }
+      cur.active += 1
+      if (r.status === 'parked') cur.parked += 1
+      out.set(r.projectId, cur)
+    }
+    return out
+  }, [processRuns])
 
   const counts = useBadgeCountsCore({
     chats: activeProjectChats,
@@ -155,11 +171,18 @@ export function useBadgeCounts(): UseBadgeCountsApi {
       isPaused: activityPaused,
       unseenCount: activityUnseenForScope(activeProjectId, appLastOpenedIso),
     },
+    processes: {
+      activeCount: activeProjectId ? (processByProjectId.get(activeProjectId)?.active ?? 0) : 0,
+      isParked: activeProjectId
+        ? (processByProjectId.get(activeProjectId)?.parked ?? 0) > 0
+        : false,
+    },
     enabled: {
       chat: resolveTriState(prefs.badgesEnabled.chat, projectOverride.chat),
       git: resolveTriState(prefs.badgesEnabled.git, projectOverride.git),
       tests: resolveTriState(prefs.badgesEnabled.tests, projectOverride.tests),
       activity: resolveTriState(prefs.badgesEnabled.activity, projectOverride.activity),
+      processes: resolveTriState(prefs.badgesEnabled.processes, projectOverride.processes),
     },
     gitSubToggles: {
       incoming_commits: prefs.gitBadgeSubToggles.incoming_commits,
@@ -240,6 +263,13 @@ export function useBadgeCounts(): UseBadgeCountsApi {
         ? activityUnseenForScope(projectId, appLastOpenedForProject(projectId))
         : 0
 
+      // Process runs are tracked for EVERY project (one global fetch), so unlike
+      // git/tests a non-active project still reports its real counts.
+      const processEnabled = prefs.badgesEnabled.processes !== false
+      const proc = processEnabled
+        ? (processByProjectId.get(projectId) ?? { active: 0, parked: 0 })
+        : { active: 0, parked: 0 }
+
       return {
         chat_messages: { unread: chat.unread, thinking: chat.thinking },
         git: { incoming, uncommitted },
@@ -249,6 +279,7 @@ export function useBadgeCounts(): UseBadgeCountsApi {
           paused: activityPausedForScope(projectId),
           unseen,
         },
+        process: { active: proc.active, parked: proc.parked },
       }
     },
     [
@@ -264,6 +295,7 @@ export function useBadgeCounts(): UseBadgeCountsApi {
       lastRun,
       prefs.badgesEnabled,
       prefs.gitBadgeSubToggles,
+      processByProjectId,
     ],
   )
 

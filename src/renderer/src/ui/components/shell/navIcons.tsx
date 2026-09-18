@@ -3,6 +3,7 @@ import {
   IconAntenna,
   IconBranch,
   IconChat,
+  IconDocument,
   IconFiles,
   IconHome,
   IconMonitor,
@@ -10,6 +11,7 @@ import {
   IconTests,
   IconTimeline,
   IconToolbox,
+  IconWorkflow,
 } from 'thefactory-ui/web/icons'
 import type { NavIconKey } from 'thefactory-ui/headless'
 
@@ -22,12 +24,14 @@ const ICONS: Record<NavIconKey, ReactNode> = {
   home: <IconHome />,
   app: <IconMonitor />,
   files: <IconFiles />,
+  notes: <IconDocument />,
   chat: <IconChat />,
   git: <IconBranch />,
   tests: <IconTests />,
   'live-data': <IconAntenna />,
   timeline: <IconTimeline />,
   tools: <IconToolbox />,
+  processes: <IconWorkflow />,
   settings: <IconSettings />,
 }
 

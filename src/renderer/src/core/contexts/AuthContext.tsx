@@ -120,15 +120,12 @@ function DesktopAuthBridge({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  const setBoth = useCallback(
-    async (next: { baseUrl: string | null; token: string | null }) => {
-      const state = await persistAuthState(next)
-      setBaseUrlState(state.baseUrl)
-      // Token + `unauthorized=false` propagate via the headless provider's
-      // `subscribe` handler in `safeStorageTokenAdapter`.
-    },
-    [],
-  )
+  const setBoth = useCallback(async (next: { baseUrl: string | null; token: string | null }) => {
+    const state = await persistAuthState(next)
+    setBaseUrlState(state.baseUrl)
+    // Token + `unauthorized=false` propagate via the headless provider's
+    // `subscribe` handler in `safeStorageTokenAdapter`.
+  }, [])
 
   const setBaseUrl = useCallback(
     async (next: string | null) => {

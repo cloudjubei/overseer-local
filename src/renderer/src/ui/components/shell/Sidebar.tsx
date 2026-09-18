@@ -48,6 +48,7 @@ const EXPANDED_PX = 248
 const TAB_BADGE_CATEGORY: Partial<Record<ShellTabKey, NotificationCategory>> = {
   chat: 'chat',
   git: 'git',
+  processes: 'processes',
 }
 
 const FOCUSABLE_ROW_SELECTOR = '[data-sidebar-row]'

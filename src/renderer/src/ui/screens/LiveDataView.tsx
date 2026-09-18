@@ -23,7 +23,7 @@ import {
   Switch,
 } from 'thefactory-ui/web'
 import { IconDelete, IconEdit, IconPlus } from 'thefactory-ui/web/icons'
-import { parseLiteLLMPrices } from 'thefactory-tools/utils'
+import { parseLiteLLMPrices } from 'thefactory-ui/headless'
 
 function formatLastUpdated(ts: string | undefined): string {
   if (!ts) return 'never'
@@ -82,7 +82,11 @@ function RecordsPanel({ records }: { records: DataRecord[] }) {
 
   const filteredRecords = useMemo(() => {
     if (!q) return records
-    return records.filter((r) => String(r.key ?? '').toLowerCase().includes(q))
+    return records.filter((r) =>
+      String(r.key ?? '')
+        .toLowerCase()
+        .includes(q),
+    )
   }, [records, q])
 
   const grandTotal = view === 'prices' ? prices.length : records.length
@@ -119,7 +123,9 @@ function RecordsPanel({ records }: { records: DataRecord[] }) {
       </div>
 
       <div className="text-[11px] text-(--text-secondary)">
-        {q ? `${matched.toLocaleString()} of ${grandTotal.toLocaleString()}` : grandTotal.toLocaleString()}{' '}
+        {q
+          ? `${matched.toLocaleString()} of ${grandTotal.toLocaleString()}`
+          : grandTotal.toLocaleString()}{' '}
         {noun}
         {matched > RECORDS_RENDER_CAP ? ` · showing first ${RECORDS_RENDER_CAP}` : ''}
       </div>

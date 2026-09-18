@@ -55,7 +55,11 @@ export default function FeatureCardConnected({
       headerLeft={headerLeft}
       actions={
         showActions ? (
-          <RunAgentButtonConnected projectId={projectId} storyId={story.id} featureId={feature.id} />
+          <RunAgentButtonConnected
+            projectId={projectId}
+            storyId={story.id}
+            featureId={feature.id}
+          />
         ) : undefined
       }
       renderBlocker={(dep) => <DependencyBullet dependency={dep} interactive={false} />}

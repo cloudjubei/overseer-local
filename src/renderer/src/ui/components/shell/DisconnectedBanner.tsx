@@ -36,7 +36,11 @@ export default function DisconnectedBanner() {
         borderColor: 'var(--color-amber-200, #fde68a)',
       }}
     >
-      <span className="inline-block w-2 h-2 rounded-full" style={{ background: dotColor(wsState) }} aria-hidden />
+      <span
+        className="inline-block w-2 h-2 rounded-full"
+        style={{ background: dotColor(wsState) }}
+        aria-hidden
+      />
       <span className="font-medium">{label}</span>
       <span className="opacity-80">{sublabel}</span>
     </div>
@@ -46,9 +50,15 @@ export default function DisconnectedBanner() {
 function describe(state: string): { label: string; sublabel: string } {
   switch (state) {
     case 'connecting':
-      return { label: 'Connecting to backend…', sublabel: 'Live updates will resume once the connection is established.' }
+      return {
+        label: 'Connecting to backend…',
+        sublabel: 'Live updates will resume once the connection is established.',
+      }
     case 'closed':
-      return { label: 'Disconnected from backend.', sublabel: 'Reconnecting automatically; views show their last-known data.' }
+      return {
+        label: 'Disconnected from backend.',
+        sublabel: 'Reconnecting automatically; views show their last-known data.',
+      }
     case 'idle':
     default:
       return { label: 'Not connected.', sublabel: 'Live updates are paused.' }

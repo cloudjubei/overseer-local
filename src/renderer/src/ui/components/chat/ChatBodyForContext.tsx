@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useNavigateToResource } from '@ui/hooks/useNavigateToResource'
+import { useNavigate } from 'react-router-dom'
 import {
   ChatBody,
   CliRunArtifactPanel,
   FeatureRequestIntroPanel,
+  ProcessRunChip,
   interpolatePrompt,
   type ChatBodyProps,
   type PromptVariables,
@@ -271,6 +273,7 @@ export default function ChatBodyForContext({
     return map
   }, [files])
   const navigateToResource = useNavigateToResource()
+  const navigate = useNavigate()
   const onResolveFile = useCallback(
     (token: string) => {
       const exact = filesByPath[token]
@@ -413,6 +416,7 @@ export default function ChatBodyForContext({
   return (
     <ChatBody
       chatId={contextKey}
+      {...(context.projectId ? { projectId: context.projectId } : {})}
       historyLocked={chatClosure(chat).locked}
       header={header}
       sendError={liveState.sendError ? { message: liveState.sendError.message } : null}
@@ -431,6 +435,16 @@ export default function ChatBodyForContext({
                 runId={runId}
                 projectId={context.projectId!}
                 onSendMessage={(text) => onSend(text, [])}
+              />
+            )
+          : undefined
+      }
+      renderProcessRun={
+        context.projectId
+          ? (processRunId) => (
+              <ProcessRunChip
+                processRunId={processRunId}
+                onOpen={(id) => navigate(`/projects/${context.projectId}/process-runs/${id}`)}
               />
             )
           : undefined

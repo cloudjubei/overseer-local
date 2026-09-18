@@ -11,6 +11,7 @@ import { ProjectNotesSettings } from 'thefactory-ui/web'
 import { GitCredentialsSettings } from 'thefactory-ui/web'
 import { WebSearchSettings } from 'thefactory-ui/web'
 import { DatabaseSettings } from 'thefactory-ui/web'
+import { ProcessesView } from 'thefactory-ui/web'
 import {
   IconBell,
   IconCpu,
@@ -21,6 +22,7 @@ import {
   IconPalette,
   IconRobot,
   IconSearch,
+  IconWorkflow,
 } from 'thefactory-ui/web/icons'
 
 import DeveloperSettings from '@ui/components/settings/DeveloperSettings'
@@ -59,6 +61,12 @@ const CATEGORIES = [
     label: 'Database',
     icon: <IconDatabase className="h-4 w-4" />,
     accent: 'indigo',
+  },
+  {
+    id: 'processes',
+    label: 'Processes',
+    icon: <IconWorkflow className="h-4 w-4" />,
+    accent: 'green',
   },
   {
     id: 'developer',
@@ -109,6 +117,12 @@ export default function SettingsView() {
       ) : activeCategory === 'developer' ? (
         <div className="h-full w-full min-h-0 overflow-hidden">
           <DeveloperSettings />
+        </div>
+      ) : activeCategory === 'processes' ? (
+        // The blueprint library is its own two-pane master/detail, so it wants
+        // the full pane rather than the padded column the simple panels use.
+        <div className="h-full w-full min-h-0 overflow-hidden">
+          <ProcessesView />
         </div>
       ) : (
         <div className="h-full min-h-0 overflow-y-auto p-4">

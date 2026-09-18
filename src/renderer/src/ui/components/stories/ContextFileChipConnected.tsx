@@ -15,12 +15,14 @@ export type ContextFileChipConnectedProps = {
  * minimal `{name, relativePath, absolutePath}` triple when the file
  * isn't in the project's file list (deleted / not yet ingested).
  */
-export default function ContextFileChipConnected({ path, onRemove, warn }: ContextFileChipConnectedProps) {
+export default function ContextFileChipConnected({
+  path,
+  onRemove,
+  warn,
+}: ContextFileChipConnectedProps) {
   const { files } = useFiles()
   const file = useMemo<UikitFileMeta>(() => {
-    const exact = files.find(
-      (f) => f.relativePath === path || f.absolutePath === path,
-    )
+    const exact = files.find((f) => f.relativePath === path || f.absolutePath === path)
     if (exact) return exact
     const name = path.split('/').pop() || path
     return { name, absolutePath: path, relativePath: path }

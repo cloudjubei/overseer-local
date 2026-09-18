@@ -1,7 +1,11 @@
 import { useMemo, useState } from 'react'
 import { useTools } from 'thefactory-ui/headless'
 import { formatJson } from 'thefactory-ui/headless'
-import type { ToolDescriptor, ToolExecuteResult, ToolPreviewResult } from 'thefactory-ui/headless/api'
+import type {
+  ToolDescriptor,
+  ToolExecuteResult,
+  ToolPreviewResult,
+} from 'thefactory-ui/headless/api'
 import {
   Alert,
   Button,

@@ -68,7 +68,10 @@ export function createAuthStore(opts: { storeFile: string; cipher: Cipher }): Au
     if (token === null) return null
     if (!cipher.isEncryptionAvailable()) return { value: token, encrypted: false }
     const encrypted = cipher.encryptString(token)
-    return { value: Buffer.from(encrypted as unknown as ArrayBuffer).toString('base64'), encrypted: true }
+    return {
+      value: Buffer.from(encrypted as unknown as ArrayBuffer).toString('base64'),
+      encrypted: true,
+    }
   }
 
   return {

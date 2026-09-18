@@ -115,7 +115,10 @@ export default function ProjectAppTab() {
         return { context: chat.context }
       }
       if (name === 'story.create') {
-        const { title, description } = (req.payload ?? {}) as { title?: string; description?: string }
+        const { title, description } = (req.payload ?? {}) as {
+          title?: string
+          description?: string
+        }
         if (!(title ?? '').trim()) return { error: 'A story needs a title' }
         const story = await createStory({ title: title!.trim(), description: description ?? '' })
         return { storyId: story.id }
@@ -133,7 +136,8 @@ export default function ProjectAppTab() {
         const wanted = storyTitle!.trim().toLowerCase()
         const existing = stories.find((s) => (s.title ?? '').trim().toLowerCase() === wanted)
         const story =
-          existing ?? (await createStory({ title: storyTitle!.trim(), description: storyDescription ?? '' }))
+          existing ??
+          (await createStory({ title: storyTitle!.trim(), description: storyDescription ?? '' }))
         const updated = await createFeature(story.id, {
           status: 'pending',
           title: feature!.title!.trim(),
@@ -147,7 +151,16 @@ export default function ProjectAppTab() {
       }
       return dataBridge(req)
     },
-    [dataBridge, projectId, createProjectTopic, sendMessage, createStory, createFeature, stories, deepLink],
+    [
+      dataBridge,
+      projectId,
+      createProjectTopic,
+      sendMessage,
+      createStory,
+      createFeature,
+      stories,
+      deepLink,
+    ],
   )
 
   const effectiveTitle = chatContext

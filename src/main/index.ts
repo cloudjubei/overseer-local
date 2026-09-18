@@ -38,7 +38,7 @@ async function createWindow(): Promise<void> {
       defaultId: 1,
       cancelId: 1,
     })
-    
+
     if (response === 0) {
       mainWindow.reload()
     }

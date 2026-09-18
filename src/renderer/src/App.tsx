@@ -59,6 +59,7 @@ import GroupChatView from '@ui/screens/GroupChatView'
 import GroupHomeView from '@ui/screens/GroupHomeView'
 import GitView from '@ui/screens/GitView'
 import LiveDataView from '@ui/screens/LiveDataView'
+import ProcessesTab from '@ui/screens/ProcessesTab'
 import { LoadingScreen, ProjectTimelineView, WelcomeView } from 'thefactory-ui/web'
 import LoginScreen from '@ui/screens/LoginScreen'
 import SettingsView from '@ui/screens/SettingsView'
@@ -146,11 +147,13 @@ function MainShell() {
     tab: tabParam,
     storyId,
     contextKey,
+    processRunId,
   } = useParams<{
     projectId: string
     tab: string
     storyId: string
     contextKey: string
+    processRunId: string
   }>()
   const { projects, activeProjectId, setActiveProjectId } = useProjects()
 
@@ -162,13 +165,15 @@ function MainShell() {
     })()
   const tab: ShellTabKey = storyId
     ? 'stories'
-    : contextKey
-      ? 'chat'
-      : isFilesPath
-        ? 'files'
-        : isShellTabKey(tabParam)
-          ? tabParam
-          : 'stories'
+    : processRunId
+      ? 'processes'
+      : contextKey
+        ? 'chat'
+        : isFilesPath
+          ? 'files'
+          : isShellTabKey(tabParam)
+            ? tabParam
+            : 'stories'
 
   // Track the URL's projectId across renders. Only sync URL → state when
   // the URL itself just changed (e.g. browser back/forward or deep link),
@@ -209,6 +214,12 @@ function MainShell() {
             {tab === 'tests' && <TestsView />}
             {tab === 'tools' && <ToolsView />}
             {tab === 'live-data' && <LiveDataView />}
+            {tab === 'processes' && (
+              <ProcessesTab
+                projectId={projectId}
+                {...(processRunId ? { selectedRunId: processRunId } : {})}
+              />
+            )}
             {tab === 'timeline' && <ProjectTimelineView />}
             {tab === 'settings' && <SettingsView />}
           </ScreenErrorBoundary>
@@ -305,6 +316,10 @@ export default function App() {
                         <Route path="/groups/:groupId" element={<GroupShell />} />
                         <Route
                           path="/projects/:projectId/stories/:storyId"
+                          element={<MainShell />}
+                        />
+                        <Route
+                          path="/projects/:projectId/process-runs/:processRunId"
                           element={<MainShell />}
                         />
                         <Route

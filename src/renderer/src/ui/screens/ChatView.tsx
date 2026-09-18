@@ -91,8 +91,16 @@ export default function ChatView() {
   const params = useParams<{ projectId: string; contextKey?: string }>()
   const navigate = useNavigate()
   const { storyDisplayIndex, featureDisplayIndex } = useStories()
-  const { isLoaded, loadError, projectChat, chats, getChat, clearChat, consolidateChat, deleteChat } =
-    useChats()
+  const {
+    isLoaded,
+    loadError,
+    projectChat,
+    chats,
+    getChat,
+    clearChat,
+    consolidateChat,
+    deleteChat,
+  } = useChats()
   const { counts } = useBadgeCounts()
   const { deleteRun, rateRun } = useAgents()
 

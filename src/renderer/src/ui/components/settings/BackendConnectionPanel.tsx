@@ -3,10 +3,7 @@ import type { FormEvent } from 'react'
 import { useApi } from '@core/contexts/ApiContext'
 import { useAuth } from '@core/contexts/AuthContext'
 import { maskSecret } from 'thefactory-ui/headless'
-import {
-  health,
-  extractErrorMessage,
-} from 'thefactory-ui/headless/api'
+import { health, extractErrorMessage } from 'thefactory-ui/headless/api'
 import { Alert, Button, Field, Input, Spinner, Surface } from 'thefactory-ui/web'
 import { IconSave } from 'thefactory-ui/web/icons'
 
@@ -219,9 +216,16 @@ export default function BackendConnectionPanel() {
       <Surface className="flex items-center justify-between gap-3 p-4">
         <div className="flex flex-col gap-0.5">
           <h3 className="text-sm font-semibold">Reset connection</h3>
-          <p className="text-xs opacity-70">Clears both URL and token; returns you to the login screen.</p>
+          <p className="text-xs opacity-70">
+            Clears both URL and token; returns you to the login screen.
+          </p>
         </div>
-        <Button type="button" variant="ghost" onClick={() => void clear()} disabled={!baseUrl && !token}>
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={() => void clear()}
+          disabled={!baseUrl && !token}
+        >
           Reset all
         </Button>
       </Surface>

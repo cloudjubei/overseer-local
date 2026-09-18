@@ -11,7 +11,8 @@ import { StoryAndFeatureCallout } from 'thefactory-ui/web'
 import FeatureCardConnected from '@ui/components/stories/FeatureCardConnected'
 import FeatureRequestWidgetConnected from '@ui/components/chat/FeatureRequestWidgetConnected'
 import { useNavigateToResource } from '@ui/hooks/useNavigateToResource'
-import { DependencyBullet } from 'thefactory-ui/web'
+import { useNavigate } from 'react-router-dom'
+import { DependencyBullet, ProcessRunChip } from 'thefactory-ui/web'
 import type { ToolCall } from '../types'
 
 export { getToolHeaderPath }
@@ -40,6 +41,7 @@ function ConnectedToolPreview(args: RenderToolPreviewArgs) {
   const { getStory, getFeature } = useStories()
   const { projectId } = useActiveProject()
   const navigateToResource = useNavigateToResource()
+  const navigate = useNavigate()
 
   const hooks: ToolPreviewHooks = {
     onResourceLink: navigateToResource,
@@ -73,6 +75,17 @@ function ConnectedToolPreview(args: RenderToolPreviewArgs) {
       const f = s ? getFeature(s.id, feature.id) : undefined
       if (!s || !f || !projectId) return null
       return <FeatureCardConnected projectId={projectId} story={s} feature={f} />
+    },
+    // The card REPORTS and never decides: it shows the run's live state and its
+    // only action is to open the pipeline, where the decisions are made.
+    renderProcessRunLink: ({ processRunId }) => {
+      if (!projectId) return null
+      return (
+        <ProcessRunChip
+          processRunId={processRunId}
+          onOpen={(id) => navigate(`/projects/${projectId}/process-runs/${id}`)}
+        />
+      )
     },
     renderStoryBullet: (storyId) => <DependencyBullet dependency={storyId} />,
     renderStoryAndFeatureCallout: ({ storyId, featureId }) => (

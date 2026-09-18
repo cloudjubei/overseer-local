@@ -1,9 +1,6 @@
 import { useEffect, useMemo } from 'react'
 import { useAppSettings } from 'thefactory-ui/headless'
-import {
-  useResolvedTheme,
-  type SystemThemeSource,
-} from 'thefactory-ui/headless'
+import { useResolvedTheme, type SystemThemeSource } from 'thefactory-ui/headless'
 
 const DARK_QUERY = '(prefers-color-scheme: dark)'
 

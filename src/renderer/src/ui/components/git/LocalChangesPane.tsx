@@ -491,7 +491,9 @@ export default function LocalChangesPane({ onResolveConflict }: LocalChangesPane
           setConfirmReset(null)
           if (!pending) return
           await runOp(() =>
-            pending.area === 'staged' ? discardStaged(pending.paths) : discardUnstaged(pending.paths),
+            pending.area === 'staged'
+              ? discardStaged(pending.paths)
+              : discardUnstaged(pending.paths),
           )
         }}
         title={confirmReset?.area === 'staged' ? 'Discard staged changes' : 'Discard local changes'}
