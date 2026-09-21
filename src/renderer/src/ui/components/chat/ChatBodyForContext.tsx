@@ -435,6 +435,9 @@ export default function ChatBodyForContext({
                 runId={runId}
                 projectId={context.projectId!}
                 onSendMessage={(text) => onSend(text, [])}
+                onBackToPipeline={(id) =>
+                  navigate(`/projects/${context.projectId}/process-runs/${id}`)
+                }
               />
             )
           : undefined
