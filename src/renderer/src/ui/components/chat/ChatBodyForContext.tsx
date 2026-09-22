@@ -20,6 +20,7 @@ import { useFiles } from 'thefactory-ui/headless'
 import { usePendingToolGrants } from 'thefactory-ui/headless'
 import { useTools } from 'thefactory-ui/headless'
 import { useStories } from 'thefactory-ui/headless'
+import { useProcessRuns } from 'thefactory-ui/headless'
 import { useActiveProject } from 'thefactory-ui/headless'
 import { getChatContextKey } from '@core/chats/chatKey'
 import { useBadgeCounts } from '@core/notifications/useBadgeCounts'
@@ -163,6 +164,15 @@ export default function ChatBodyForContext({
   const isRunningAgent =
     (isAgentRunChat || isFeatureRequestChat) &&
     (chat?.state === 'created' || chat?.state === 'running')
+  // A one-shot agent run (implement / verify / report) takes NO user input — once
+  // it is terminal the composer must not appear. Its way onward is the pipeline,
+  // not a reply, so the composer slot carries a link back to the story's process.
+  const isTerminalAgentRun = isAgentRunChat && !isRunningAgent
+  const { runs: projectProcessRuns } = useProcessRuns(context.projectId)
+  const storyProcessRun =
+    isAgentRunChat && context.storyId
+      ? projectProcessRuns.find((r) => r.storyId === context.storyId)
+      : undefined
 
   // Receiver-side FEATURE_REQUEST chat: while the request is still pending, the composer is
   // replaced by an Accept/Reject bar (the request itself is the transcript's opening message).
@@ -396,6 +406,32 @@ export default function ChatBodyForContext({
           Cancel run
         </Button>
       ) : null}
+    </div>
+  ) : isTerminalAgentRun ? (
+    // A finished one-shot run takes no input. Use inputOverride (NOT hideInput):
+    // the approval-panel branch outranks inputOverride, so a still-pending
+    // tool-approval on a direct agent run is never hidden — hideInput would have
+    // suppressed it, stranding the run with no way to approve/deny.
+    <div
+      className="flex items-center justify-between gap-2 px-4 py-3 border-t text-xs shrink-0"
+      style={{ borderColor: 'var(--border-subtle)', background: 'var(--surface-muted)' }}
+    >
+      {storyProcessRun ? (
+        <>
+          <span>This is one step of a process. Its outcome is decided in the pipeline.</span>
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() =>
+              navigate(`/projects/${context.projectId}/process-runs/${storyProcessRun.id}`)
+            }
+          >
+            Back to pipeline →
+          </Button>
+        </>
+      ) : (
+        <span>This run is finished.</span>
+      )}
     </div>
   ) : undefined
 

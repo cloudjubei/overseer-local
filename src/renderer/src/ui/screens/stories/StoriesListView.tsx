@@ -5,6 +5,9 @@ import { STATUS_ORDER as HEADLESS_STATUS_ORDER } from 'thefactory-ui/headless'
 import { useAppSettings } from 'thefactory-ui/headless'
 import { useStories } from 'thefactory-ui/headless'
 import { useAgents } from 'thefactory-ui/headless'
+import { useProcessRuns } from 'thefactory-ui/headless'
+import { processStatusOverlay } from 'thefactory-ui/headless'
+import ProcessStatusChip from '@ui/components/stories/ProcessStatusChip'
 import type {
   StoriesListSorting,
   StoriesListStatusFilter,
@@ -111,6 +114,16 @@ export default function StoriesListView() {
     getBlockersOutbound,
   } = useStories()
   const { runsActive } = useAgents()
+  // Process runs fetched ONCE for the whole list and indexed by story, so a row's
+  // status→pipeline link costs no per-row subscription.
+  const { runs: processRuns } = useProcessRuns(projectId)
+  const processRunByStory = useMemo(() => {
+    // Newest-first, so the FIRST run per story is current — keep it (last-write
+    // would pin the OLDEST, linking the chip to a stale finished run).
+    const m = new Map<string, (typeof processRuns)[number]>()
+    for (const r of processRuns) if (r.storyId && !m.has(r.storyId)) m.set(r.storyId, r)
+    return m
+  }, [processRuns])
 
   const [query, setQuery] = useState('')
   const [modal, setModal] = useState<StoryModalRoute | null>(null)
@@ -506,6 +519,8 @@ export default function StoriesListView() {
                     (f) => !!(f as { rejection?: string }).rejection,
                   )
                   const storyRun = runsActive.find((r) => r.context.storyId === t.id)
+                  const procRun = processRunByStory.get(t.id)
+                  const procOverlay = processStatusOverlay(procRun)
                   const displayIdx = storyDisplayIndex(t.id)
 
                   return (
@@ -569,13 +584,17 @@ export default function StoriesListView() {
                             </div>
                           </div>
                           <div className="col col-actions">
-                            {!storyRun && projectId && (
+                            {projectId && (procOverlay || !storyRun) && (
                               <div
                                 className="no-drag flex items-center justify-end"
                                 onClick={(e) => e.stopPropagation()}
                                 onPointerDown={(e) => e.stopPropagation()}
                               >
-                                <RunAgentButtonConnected projectId={projectId} storyId={t.id} />
+                                {procOverlay ? (
+                                  <ProcessStatusChip run={procRun} projectId={projectId} />
+                                ) : (
+                                  <RunAgentButtonConnected projectId={projectId} storyId={t.id} />
+                                )}
                               </div>
                             )}
                           </div>

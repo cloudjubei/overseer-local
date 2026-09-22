@@ -4,6 +4,9 @@ import { useActiveProject } from 'thefactory-ui/headless'
 import { STATUS_ORDER as HEADLESS_STATUS_ORDER } from 'thefactory-ui/headless'
 import { useStories } from 'thefactory-ui/headless'
 import { useAgents } from 'thefactory-ui/headless'
+import { useProcessRuns } from 'thefactory-ui/headless'
+import { processStatusOverlay } from 'thefactory-ui/headless'
+import ProcessStatusChip from '@ui/components/stories/ProcessStatusChip'
 import type { Feature, GetStoryResponse } from 'thefactory-ui/headless/api'
 import {
   Button,
@@ -140,6 +143,13 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
         : undefined,
     [story, runsActive],
   )
+  // The story's PROCESS run (one per story), for the status→pipeline link.
+  const { runs: processRuns } = useProcessRuns(projectId)
+  const storyProcessRun = useMemo(
+    () => (story ? processRuns.find((r) => r.storyId === story.id) : undefined),
+    [story, processRuns],
+  )
+  const storyProcessOverlay = processStatusOverlay(storyProcessRun)
 
   const handleEditStory = () => {
     if (!story) return
@@ -288,7 +298,15 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
             </h1>
 
             <div className="flex items-center gap-3 order-3 basis-full justify-end sm:order-3 sm:basis-auto sm:ml-auto">
-              {!storyHasActiveRun && projectId && (
+              {projectId && storyProcessOverlay ? (
+                <div
+                  className="no-drag"
+                  onClick={(e) => e.stopPropagation()}
+                  onPointerDown={(e) => e.stopPropagation()}
+                >
+                  <ProcessStatusChip run={storyProcessRun} projectId={projectId} />
+                </div>
+              ) : !storyHasActiveRun && projectId ? (
                 <div
                   className="no-drag"
                   onClick={(e) => e.stopPropagation()}
@@ -296,7 +314,7 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
                 >
                   <RunAgentButtonConnected projectId={projectId} storyId={story.id} />
                 </div>
-              )}
+              ) : null}
               <ModelChipConnected editable mode="agentRun" />
               <button
                 type="button"

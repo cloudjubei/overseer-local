@@ -1,7 +1,9 @@
 import type { Feature, GetStoryResponse } from 'thefactory-ui/headless/api'
+import { processStatusOverlay, type ProcessRun } from 'thefactory-ui/headless'
 import { FeatureCard as FeatureCardBase, type StoryStatus as Status } from 'thefactory-ui/web'
 import { DependencyBullet } from 'thefactory-ui/web'
 import RunAgentButtonConnected from '@ui/components/agents/RunAgentButtonConnected'
+import ProcessStatusChip from '@ui/components/stories/ProcessStatusChip'
 
 export type FeatureCardConnectedProps = {
   projectId: string
@@ -13,6 +15,12 @@ export type FeatureCardConnectedProps = {
   showActions?: boolean
   isNew?: boolean
   onPillClick?: () => void
+  /**
+   * The story's process run (passed down so the card costs no subscription). When
+   * a process owns the story, the card links to that ONE pipeline — a feature is a
+   * node in it, not a place with its own separate sign-off.
+   */
+  processRun?: ProcessRun
 }
 
 export default function FeatureCardConnected({
@@ -25,7 +33,9 @@ export default function FeatureCardConnected({
   showActions = false,
   isNew = false,
   onPillClick,
+  processRun,
 }: FeatureCardConnectedProps) {
+  const processOverlay = processStatusOverlay(processRun)
   const dependency = `${story.id}.${feature.id}`
 
   const headerLeft = isNew ? (
@@ -54,7 +64,9 @@ export default function FeatureCardConnected({
       feature={feature}
       headerLeft={headerLeft}
       actions={
-        showActions ? (
+        processOverlay ? (
+          <ProcessStatusChip run={processRun} projectId={projectId} />
+        ) : showActions ? (
           <RunAgentButtonConnected
             projectId={projectId}
             storyId={story.id}
