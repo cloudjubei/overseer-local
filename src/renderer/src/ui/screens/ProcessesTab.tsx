@@ -1,7 +1,10 @@
 import { useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { ProcessNodeRunRef } from 'thefactory-ui/headless'
+import type { ChatContext } from 'thefactory-ui/headless/api'
+import { getChatContext } from '@core/chats/chatKey'
 import { ProcessRunsView } from 'thefactory-ui/web'
+import ChatBodyForContext from '@ui/components/chat/ChatBodyForContext'
 
 export type ProcessesTabProps = {
   projectId: string | undefined
@@ -31,6 +34,23 @@ export default function ProcessesTab({ projectId, selectedRunId }: ProcessesTabP
     navigate(`/projects/${projectId}/settings?tab=processes`)
   }, [navigate, projectId])
 
+  // A LEAF opens INSIDE the pipeline, not in the Chat tab: the pipeline draws
+  // the "‹ Pipeline" head (and, for a verify attempt, its small sign-off) and
+  // this renders the run's chat below it. `onBack` is handed to the chat so its
+  // own "Back to pipeline" buttons return to the spine too. `onOpenAgentRun`
+  // stays as the route fallback.
+  const renderAgentRun = useCallback((ref: ProcessNodeRunRef, onBack: () => void) => {
+    if (!ref.chatContextId) return null
+    let context: ChatContext | null = null
+    try {
+      context = getChatContext(ref.chatContextId) ?? null
+    } catch {
+      context = null
+    }
+    if (!context) return null
+    return <ChatBodyForContext context={context} onBackToPipeline={onBack} />
+  }, [])
+
   const onOpenAgentRun = useCallback(
     (ref: ProcessNodeRunRef) => {
       if (!projectId || !ref.chatContextId) return
@@ -48,6 +68,7 @@ export default function ProcessesTab({ projectId, selectedRunId }: ProcessesTabP
       onSelectRun={onSelectRun}
       onOpenSettings={onOpenSettings}
       onOpenAgentRun={onOpenAgentRun}
+      renderAgentRun={renderAgentRun}
     />
   )
 }

@@ -7,9 +7,9 @@ import { processStatusOverlay, type ProcessRun } from 'thefactory-ui/headless'
  *
  * A stored "Done" says nothing about whether the work's process has been signed
  * off, and nothing there is clickable. This surfaces the run's real state and a
- * way to act on it: Review → the sign-off gate, Crunching → the running pipeline,
- * Blocked → the stuck one. Renders nothing when there is no active/parked/failed
- * process run (the stored status and the normal Run affordance stand).
+ * way to act on it: Reviewable → the sign-off gate ("Go to Review"), Crunching →
+ * the running pipeline, Blocked → the stuck one. Renders nothing when there is no
+ * active/parked/failed process run (the stored status and Run affordance stand).
  */
 export default function ProcessStatusChip({
   run,
@@ -21,12 +21,12 @@ export default function ProcessStatusChip({
   const navigate = useNavigate()
   const overlay = processStatusOverlay(run)
   if (!overlay) return null
-  const title =
-    overlay.label === 'Review'
-      ? 'Ready for sign-off — open the pipeline to review and approve'
-      : overlay.label === 'Crunching'
-        ? 'The process is running — open the pipeline'
-        : 'The process is stuck — open the pipeline to unblock it'
+  const isReview = overlay.semantic === 'review'
+  const title = isReview
+    ? 'Ready for sign-off — open the pipeline to review and approve'
+    : overlay.label === 'Crunching'
+      ? 'The process is running — open the pipeline'
+      : 'The process is stuck — open the pipeline to unblock it'
   return (
     <button
       type="button"
@@ -37,7 +37,7 @@ export default function ProcessStatusChip({
         navigate(`/projects/${projectId}/process-runs/${overlay.runId}`)
       }}
     >
-      {overlay.label} →
+      {isReview ? 'Go to Review →' : `${overlay.label} →`}
     </button>
   )
 }

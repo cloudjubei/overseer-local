@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useChats } from 'thefactory-ui/headless'
 import { useStories } from 'thefactory-ui/headless'
-import { groupChats, type GroupedChats } from 'thefactory-ui/headless'
+import { groupChats, isAgentRunChatContext, type GroupedChats } from 'thefactory-ui/headless'
 import { useChatRowStatus } from '@core/notifications/useChatRowStatus'
 import { getChatContextKey } from '@core/chats/chatKey'
 import type { ChatContext, GetChatResponse, GetStoryResponse } from 'thefactory-ui/headless/api'
@@ -121,6 +121,8 @@ export default function ChatsNavigationSidebar({
     const seen = new Set<string>()
     const out: GetChatResponse[] = []
     for (const c of chats) {
+      // Agent-run chats belong to the pipeline — never listed in History either.
+      if (isAgentRunChatContext(c.context)) continue
       const k = getChatContextKey(c.context)
       if (seen.has(k)) continue
       seen.add(k)

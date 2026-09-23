@@ -5,6 +5,7 @@ import {
   ChatBody,
   CliRunArtifactPanel,
   FeatureRequestIntroPanel,
+  ModelChipConnected,
   ProcessRunChip,
   interpolatePrompt,
   type ChatBodyProps,
@@ -34,6 +35,13 @@ export type ChatBodyForContextProps = {
   header?: ReactNode
   /** Pass-through for placeholder + autoFocus. */
   inputProps?: Pick<NonNullable<ChatBodyProps['inputProps']>, 'autoFocus' | 'placeholder'>
+  /**
+   * The way back to the pipeline, when this chat is shown INSIDE it (a leaf
+   * drill). Every "Back to pipeline" here then returns to the spine; without it
+   * they navigate to the process run's route, which is right in the Chat tab but
+   * does nothing under a drill already showing that run.
+   */
+  onBackToPipeline?: () => void
 }
 
 /**
@@ -48,6 +56,7 @@ export default function ChatBodyForContext({
   context,
   header,
   inputProps,
+  onBackToPipeline,
 }: ChatBodyForContextProps) {
   const {
     activeLLMConfig,
@@ -423,7 +432,9 @@ export default function ChatBodyForContext({
             size="sm"
             variant="secondary"
             onClick={() =>
-              navigate(`/projects/${context.projectId}/process-runs/${storyProcessRun.id}`)
+              onBackToPipeline
+                ? onBackToPipeline()
+                : navigate(`/projects/${context.projectId}/process-runs/${storyProcessRun.id}`)
             }
           >
             Back to pipeline →
@@ -471,8 +482,11 @@ export default function ChatBodyForContext({
                 runId={runId}
                 projectId={context.projectId!}
                 onSendMessage={(text) => onSend(text, [])}
+                onOpenGit={() => navigate(`/projects/${context.projectId}/git`)}
                 onBackToPipeline={(id) =>
-                  navigate(`/projects/${context.projectId}/process-runs/${id}`)
+                  onBackToPipeline
+                    ? onBackToPipeline()
+                    : navigate(`/projects/${context.projectId}/process-runs/${id}`)
                 }
               />
             )
@@ -488,6 +502,16 @@ export default function ChatBodyForContext({
             )
           : undefined
       }
+      renderApprovalModelChip={({ model, onPick, cli, onPickCli }) => (
+        <ModelChipConnected
+          chatContext={context}
+          editable
+          overrideModel={model}
+          onOverrideModel={onPick}
+          overrideCli={cli}
+          onOverrideCli={onPickCli}
+        />
+      )}
       onSend={onSend}
       onAbort={onAbort}
       isBusy={liveState.isSending || isRunActive}
@@ -500,7 +524,7 @@ export default function ChatBodyForContext({
       credentialCaptures={captures}
       onSubmitCredentialCapture={submitCapture}
       onCancelCredentialCapture={cancelCapture}
-      onDeleteLastMessage={onDeleteLastMessage}
+      onDeleteLastMessage={isAgentRunChat || isRunningAgent ? undefined : onDeleteLastMessage}
       onRestartTurn={isAgentRunChat || isRunningAgent ? undefined : onRestartTurn}
       canSend={activeLLMConfig !== null}
       hideInput={awaitingFeatureRequest}

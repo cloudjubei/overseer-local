@@ -4,6 +4,7 @@ import { useAgents } from 'thefactory-ui/headless'
 import { useChats } from 'thefactory-ui/headless'
 import { chatClosure, chatCloseAction } from 'thefactory-ui/headless'
 import { isGeneralProjectChat } from 'thefactory-ui/headless'
+import { isAgentRunChatContext } from 'thefactory-ui/headless'
 import { useStories } from 'thefactory-ui/headless'
 import { formatChatTitle } from 'thefactory-ui/headless'
 import { useActiveProject } from 'thefactory-ui/headless'
@@ -102,7 +103,7 @@ export default function ChatView() {
     deleteChat,
   } = useChats()
   const { counts } = useBadgeCounts()
-  const { deleteRun, rateRun } = useAgents()
+  const { rateRun } = useAgents()
 
   /**
    * Active chat context. Order of preference:
@@ -129,6 +130,10 @@ export default function ChatView() {
     const stillExists = (ctx: ChatContext | undefined): ctx is ChatContext =>
       !!ctx &&
       ctx.projectId === projectId &&
+      // An agent-run chat is owned by its pipeline and is no longer listed, so it
+      // must never be AUTO-restored as the landing chat (a deep link to it still
+      // works — that path returns above).
+      !isAgentRunChatContext(ctx) &&
       (ctx.type === 'PROJECT' ||
         chats.some((c) => getChatContextKey(c.context) === getChatContextKey(ctx)))
     const lastSelected = readLastSelected()
@@ -326,13 +331,6 @@ export default function ChatView() {
             <AgentRunHeaderActions
               rating={chat.rating?.score ?? 0}
               onRate={(score) => void rateRun(chat, score)}
-              onDelete={() => {
-                if (window.confirm('Delete this agent run? Messages will be removed.')) {
-                  void deleteRun(chat).then(() => {
-                    if (projectId) navigate(`/projects/${projectId}/chat`)
-                  })
-                }
-              }}
             />
           </div>
         ) : null}
@@ -378,12 +376,12 @@ export default function ChatView() {
 function AgentRunHeaderActions({
   rating,
   onRate,
-  onDelete,
 }: {
   rating: number
   onRate: (score: number) => void
-  onDelete: () => void
 }) {
+  // No Delete here: an agent-run chat is deleted WITH its process from the
+  // pipeline head, never on its own from the chat surface. Rating stays.
   return (
     <div className="flex items-center gap-1">
       <button
@@ -406,9 +404,6 @@ function AgentRunHeaderActions({
       >
         👎
       </button>
-      <Button size="sm" variant="ghost" onClick={onDelete} aria-label="Delete agent run">
-        Delete
-      </Button>
     </div>
   )
 }

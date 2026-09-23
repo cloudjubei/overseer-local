@@ -1,6 +1,7 @@
 import { useCallback, useMemo } from 'react'
 import type { ChatContext } from 'thefactory-ui/headless/api'
 import { getChatContextKey } from '../chats/chatKey'
+import { isAgentRunChatContext } from 'thefactory-ui/headless'
 import { useAppSettings } from 'thefactory-ui/headless'
 import { useChats } from 'thefactory-ui/headless'
 import { useGit } from 'thefactory-ui/headless'
@@ -103,6 +104,16 @@ export function useBadgeCounts(): UseBadgeCountsApi {
 
   const annotatedChats: AnnotatedChat[] = useMemo(() => {
     return chats.map((chat) => {
+      // Agent-run chats are hidden from the Chats list and are read-only, so they
+      // must never light the unread badge — the list and the count finally agree.
+      if (isAgentRunChatContext(chat.context)) {
+        return {
+          unreadMessages: 0,
+          isThinking: false,
+          projectId: chat.context.projectId,
+          groupId: chat.context.groupId,
+        }
+      }
       const messages = chat.messages ?? []
       const at = latestMessageAt(messages)
       const key = getChatContextKey(chat.context)
