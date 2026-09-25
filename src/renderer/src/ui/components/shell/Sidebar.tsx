@@ -5,11 +5,9 @@ import { useAppSettings } from 'thefactory-ui/headless'
 import { useProjects } from 'thefactory-ui/headless'
 import { useProjectsGroups, type ProjectsGroup } from 'thefactory-ui/headless'
 import { useSeedActivities } from 'thefactory-ui/headless'
-import { useBadgeCounts, type BadgeCounts } from '@core/notifications/useBadgeCounts'
-import type { BadgeColor, NotificationCategory } from '@core/types/settings'
-import { isBadgeColorCategory } from '@core/types/settings'
-import { Button, NotificationBadge, renderProjectIcon, SpinnerWithDot } from 'thefactory-ui/web'
-import { IconPause } from 'thefactory-ui/web/icons'
+import { useBadgeCounts } from '@core/notifications/useBadgeCounts'
+import type { BadgeColor, BadgeColorCategory } from '@core/types/settings'
+import { Button, NavIndicator, renderProjectIcon } from 'thefactory-ui/web'
 import {
   IconChat,
   IconCollection,
@@ -21,12 +19,16 @@ import {
   GLOBAL_CHAT_TITLE,
   GROUP_TAB_DEFS,
   SHELL_TAB_DEFS,
-  formatBadgeCount,
+  groupTabIndicator,
   groupTabToProjectTab,
   projectTabToGroupTab,
+  scopeRowIndicator,
+  shellTabIndicator,
   splitGroupsAndProjects,
   useGlobalChat,
+  type BadgeState,
   type GroupTabKey,
+  type NavRowIndicator,
   type ShellTabKey,
 } from 'thefactory-ui/headless'
 import { navIcon } from './navIcons'
@@ -44,12 +46,7 @@ type Props = {
 const COLLAPSED_PX = 64
 const EXPANDED_PX = 248
 
-/** Maps each shell tab to the notification category whose count it should show. */
-const TAB_BADGE_CATEGORY: Partial<Record<ShellTabKey, NotificationCategory>> = {
-  chat: 'chat',
-  git: 'git',
-  processes: 'processes',
-}
+type BadgeColors = Readonly<Record<BadgeColorCategory, BadgeColor>>
 
 const FOCUSABLE_ROW_SELECTOR = '[data-sidebar-row]'
 
@@ -76,6 +73,9 @@ export default function Sidebar({ projectId, activeTab, activeGroupId, activeGro
   const { projects, activeProjectId, setActiveProjectId } = useProjects()
   const { groups, reorderProject } = useProjectsGroups()
   const { counts, markAppOpened, getProjectBadgeState, getGroupBadgeState } = useBadgeCounts()
+  const badgeColors = settings.notifications.badgeColors
+  const groupRollup = (g: ProjectsGroup, open: boolean): BadgeState =>
+    getGroupBadgeState(g.id, g.type === 'SCOPE' || open ? [] : g.projects)
 
   // Stamp the app tab "seen" while the user is on it (on open + when a run settles as they watch),
   // so the unseen-results badge clears + stays cleared.
@@ -285,45 +285,17 @@ export default function Sidebar({ projectId, activeTab, activeGroupId, activeGro
               }
               return true
             }).map((tab) => {
-              const cat = TAB_BADGE_CATEGORY[tab.key]
-              const countKey = cat ? badgeKeyForCategory(cat) : undefined
-              // The App tab carries the background-activity badge/spinner (the
-              // embedded app's detached runs) rather than a notification category.
-              const isApp = tab.key === 'app'
-              // Don't re-spin the App nav row while the user is viewing the app —
-              // they can see the work happening (matches the active chat).
-              const viewingApp = isApp && tab.key === activeTab && !activeGroupId
-              // The App tab's number badge = unseen RESULTS (runs finished since last opened); a
-              // live run shows via the spinner (activityWorking), not the number.
-              const badgeValue = isApp
-                ? viewingApp
-                  ? 0
-                  : counts.activityUnseen
-                : countKey
-                  ? (counts[countKey] as number)
-                  : 0
-              const badgeColor = isApp
-                ? settings.notifications.badgeColors.activity
-                : cat && isBadgeColorCategory(cat)
-                  ? settings.notifications.badgeColors[cat]
-                  : undefined
-              // Chat thinking + App activity both get the spinner-with-dot affordance.
-              const thinking =
-                (tab.key === 'chat' && counts.chatThinking) ||
-                (isApp && counts.activityWorking && !viewingApp)
-              const paused = isApp && counts.activityPaused && !viewingApp
+              const isActive = tab.key === activeTab && !activeGroupId
               return (
                 <NavRow
                   key={tab.key}
                   label={tab.label}
                   icon={navIcon(tab.icon)}
-                  isActive={tab.key === activeTab && !activeGroupId}
+                  isActive={isActive}
                   onClick={() => onSelectTab(tab.key)}
                   collapsed={collapsed}
-                  badge={badgeValue}
-                  badgeColor={badgeColor}
-                  thinking={thinking}
-                  paused={paused}
+                  indicator={shellTabIndicator(tab.key, counts, { viewing: isActive })}
+                  badgeColors={badgeColors}
                 />
               )
             })}
@@ -332,26 +304,18 @@ export default function Sidebar({ projectId, activeTab, activeGroupId, activeGro
 
         {activeGroupId && (
           <Section collapsed={collapsed}>
-            {GROUP_TAB_DEFS.map((tab) => {
-              // Chat tab gets the "thinking" spinner-with-dot affordance.
-              const thinking = tab.key === 'chat' && counts.chatThinking
-              const badgeValue = tab.key === 'chat' ? counts.chat : 0
-              const badgeColor =
-                tab.key === 'chat' ? settings.notifications.badgeColors.chat : undefined
-              return (
-                <NavRow
-                  key={tab.key}
-                  label={tab.label}
-                  icon={navIcon(tab.icon)}
-                  isActive={tab.key === activeGroupTab}
-                  onClick={() => onSelectGroupTab(tab.key)}
-                  collapsed={collapsed}
-                  badge={badgeValue}
-                  badgeColor={badgeColor}
-                  thinking={thinking}
-                />
-              )
-            })}
+            {GROUP_TAB_DEFS.map((tab) => (
+              <NavRow
+                key={tab.key}
+                label={tab.label}
+                icon={navIcon(tab.icon)}
+                isActive={tab.key === activeGroupTab}
+                onClick={() => onSelectGroupTab(tab.key)}
+                collapsed={collapsed}
+                indicator={groupTabIndicator(tab.key, counts)}
+                badgeColors={badgeColors}
+              />
+            ))}
           </Section>
         )}
       </div>
@@ -382,7 +346,17 @@ export default function Sidebar({ projectId, activeTab, activeGroupId, activeGro
             (() => {
               if (activeGroupId) {
                 const g = groups.find((gg) => gg.id === activeGroupId)
-                if (g) return <GroupRow group={g} isActive collapsed onClick={() => undefined} />
+                if (g)
+                  return (
+                    <GroupRow
+                      group={g}
+                      isActive
+                      collapsed
+                      onClick={() => undefined}
+                      indicator={scopeRowIndicator(groupRollup(g, false), { active: true })}
+                      badgeColors={badgeColors}
+                    />
+                  )
               }
               if (activeProject) {
                 return (
@@ -393,6 +367,10 @@ export default function Sidebar({ projectId, activeTab, activeGroupId, activeGro
                     onClick={() => onSelectProject(activeProject.id)}
                     collapsed
                     dataLocation={activeProject.dataLocation}
+                    indicator={scopeRowIndicator(getProjectBadgeState(activeProject.id), {
+                      active: true,
+                    })}
+                    badgeColors={badgeColors}
                   />
                 )
               }
@@ -402,13 +380,6 @@ export default function Sidebar({ projectId, activeTab, activeGroupId, activeGro
             <>
               {ungroupedProjects.map((p) => {
                 const isActive = p.id === activeProjectId && !activeGroupId
-                const st = getProjectBadgeState(p.id)
-                // Active project's badges are surfaced by the per-tab row
-                // above (Chat / Agents / Git / Tests) — skip them on the
-                // project row itself to avoid double-rendering. Matches
-                // desktop's ProjectNavItem behaviour.
-                const chatUnread = isActive ? 0 : st.chat_messages.unread
-                const chatThinking = isActive ? false : st.chat_messages.thinking
                 return (
                   <NavRow
                     key={p.id}
@@ -418,32 +389,20 @@ export default function Sidebar({ projectId, activeTab, activeGroupId, activeGro
                     onClick={() => onSelectProject(p.id)}
                     collapsed={collapsed}
                     dataLocation={p.dataLocation}
-                    badge={chatUnread}
-                    badgeColor={settings.notifications.badgeColors.chat}
-                    thinking={chatThinking || st.activity.running > 0}
-                    paused={st.activity.running === 0 && st.activity.paused > 0}
+                    indicator={scopeRowIndicator(getProjectBadgeState(p.id), {
+                      active: isActive,
+                    })}
+                    badgeColors={badgeColors}
                   />
                 )
               })}
               {allGroups.map((g) => {
-                // Group badges show CHAT unread only (no git/tests at group
-                // scope). A SCOPE group, and an OPEN folder, show just the
-                // group's OWN chats; a CLOSED folder shows the aggregate of
-                // the group + its member projects. The active group skips its
-                // row badge — surfaced on the per-group-tab nav row instead.
+                // A SCOPE group, and an OPEN folder, show just the group's OWN
+                // state; a CLOSED folder rolls its member projects up too.
                 const groupIsActive = g.id === activeGroupId
-                const groupOpen = openGroupIds.has(g.id)
-                const rolled =
-                  g.type === 'SCOPE' || groupOpen
-                    ? getGroupBadgeState(g.id, [])
-                    : getGroupBadgeState(g.id, g.projects)
-                const groupUnread = groupIsActive ? 0 : rolled.chat_messages.unread
-                const groupThinking = groupIsActive
-                  ? false
-                  : rolled.chat_messages.thinking || rolled.activity.running > 0
-                const groupPaused = groupIsActive
-                  ? false
-                  : rolled.activity.running === 0 && rolled.activity.paused > 0
+                const groupIndicator = scopeRowIndicator(groupRollup(g, openGroupIds.has(g.id)), {
+                  active: groupIsActive,
+                })
                 return g.type === 'SCOPE' ? (
                   <GroupRow
                     key={g.id}
@@ -451,10 +410,8 @@ export default function Sidebar({ projectId, activeTab, activeGroupId, activeGro
                     isActive={groupIsActive}
                     collapsed={collapsed}
                     onClick={() => onSelectGroup(g.id)}
-                    badge={groupUnread}
-                    badgeColor={settings.notifications.badgeColors.chat}
-                    thinking={groupThinking}
-                    paused={groupPaused}
+                    indicator={groupIndicator}
+                    badgeColors={badgeColors}
                   />
                 ) : (
                   <GroupBlock
@@ -480,10 +437,8 @@ export default function Sidebar({ projectId, activeTab, activeGroupId, activeGro
                     onDragOver={onProjectDragOver}
                     onDrop={onProjectDrop}
                     getProjectBadgeState={getProjectBadgeState}
-                    chatBadgeColor={settings.notifications.badgeColors.chat}
-                    headerBadge={groupUnread}
-                    headerThinking={groupThinking}
-                    headerPaused={groupPaused}
+                    badgeColors={badgeColors}
+                    headerIndicator={groupIndicator}
                   />
                 )
               })}
@@ -541,13 +496,6 @@ function GlobalChatRow({ collapsed }: { collapsed: boolean }) {
       <IconChat className="h-4.5 w-4.5" />
     </button>
   )
-}
-
-function badgeKeyForCategory(cat: NotificationCategory): keyof BadgeCounts | undefined {
-  // Most `BadgeCounts` keys mirror notification categories one-for-one; `cross-project` is the
-  // exception — it's an account-global badge (rendered on the inspector trigger), not a per-scope
-  // channel, so it maps to no key here.
-  return cat === 'cross-project' ? undefined : cat
 }
 
 function asIconKey(v: unknown): string | undefined {
@@ -634,10 +582,8 @@ function GroupBlock({
   onDragOver,
   onDrop,
   getProjectBadgeState,
-  chatBadgeColor,
-  headerBadge,
-  headerThinking = false,
-  headerPaused = false,
+  badgeColors,
+  headerIndicator,
 }: {
   group: ProjectsGroup
   projects: ReturnType<typeof useProjects>['projects']
@@ -657,17 +603,12 @@ function GroupBlock({
   onDragOver: (e: DragEvent<HTMLElement>) => void
   onDrop: (group: ProjectsGroup, targetIdx: number) => (e: DragEvent<HTMLElement>) => void
   /** Per-project badge resolver from the parent's `useBadgeCounts`. */
-  getProjectBadgeState: (projectId: string) => {
-    chat_messages: { unread: number; thinking: boolean }
-    activity: { running: number; paused: number }
-  }
-  chatBadgeColor?: BadgeColor
-  /** Group chat badge for the header row. The parent resolves it to the
-   *  group's OWN chats when the folder is open (members show their own rows)
-   *  and to the aggregate (group + members) when collapsed. */
-  headerBadge?: number
-  headerThinking?: boolean
-  headerPaused?: boolean
+  getProjectBadgeState: (projectId: string) => BadgeState
+  badgeColors: BadgeColors
+  /** The header row's indicator. The parent resolves it from the group's OWN
+   *  state when the folder is open (members show their own rows) and from the
+   *  rollup (group + members) when collapsed. */
+  headerIndicator: NavRowIndicator
 }) {
   // Auto-expand when the active project lives in this group. We don't ever
   // auto-collapse — once the user toggles a group closed, navigating away
@@ -709,30 +650,9 @@ function GroupBlock({
         >
           {group.title}
         </button>
-        {(headerThinking || headerPaused || (headerBadge ?? 0) > 0) && (
+        {headerIndicator.kind !== 'none' && (
           <span className="inline-flex items-center justify-center shrink-0 pr-2">
-            {headerThinking ? (
-              <SpinnerWithDot
-                size={14}
-                showDot={(headerBadge ?? 0) > 0}
-                dotColorClass={chatBadgeColor ? `bg-${chatBadgeColor}-500` : undefined}
-                dotTitle={
-                  (headerBadge ?? 0) > 0
-                    ? `${formatBadgeCount(headerBadge!)} unread chats`
-                    : undefined
-                }
-              />
-            ) : headerPaused ? (
-              <span className="text-blue-500" title="Paused activity — resumes when you open it">
-                <IconPause className="w-3.5 h-3.5" />
-              </span>
-            ) : (
-              <NotificationBadge
-                text={formatBadgeCount(headerBadge!)}
-                color={chatBadgeColor}
-                tooltipLabel={group.title}
-              />
-            )}
+            <NavIndicator indicator={headerIndicator} badgeColors={badgeColors} />
           </span>
         )}
       </div>
@@ -740,11 +660,6 @@ function GroupBlock({
         <div id={`group-${group.id}`} className="flex flex-col gap-0.5">
           {memberProjects.map((p, idx) => {
             const projectIsActive = p.id === activeProjectId && !activeGroupId
-            const st = getProjectBadgeState(p.id)
-            // Active project: skip badges on the project row — they're
-            // already surfaced on the per-tab nav row above.
-            const chatUnread = projectIsActive ? 0 : st.chat_messages.unread
-            const chatThinking = projectIsActive ? false : st.chat_messages.thinking
             return (
               <NavRow
                 key={p.id}
@@ -760,10 +675,10 @@ function GroupBlock({
                 onDragOver={onDragOver}
                 onDrop={onDrop(group, idx)}
                 dataLocation={p.dataLocation}
-                badge={chatUnread}
-                badgeColor={chatBadgeColor}
-                thinking={chatThinking || st.activity.running > 0}
-                paused={st.activity.running === 0 && st.activity.paused > 0}
+                indicator={scopeRowIndicator(getProjectBadgeState(p.id), {
+                  active: projectIsActive,
+                })}
+                badgeColors={badgeColors}
               />
             )
           })}
@@ -779,19 +694,15 @@ function GroupRow({
   isActive,
   collapsed,
   onClick,
-  badge,
-  badgeColor,
-  thinking = false,
-  paused = false,
+  indicator,
+  badgeColors,
 }: {
   group: ProjectsGroup
   isActive: boolean
   collapsed: boolean
   onClick: () => void
-  badge?: number
-  badgeColor?: BadgeColor
-  thinking?: boolean
-  paused?: boolean
+  indicator: NavRowIndicator
+  badgeColors: BadgeColors
 }) {
   const icon =
     group.type === 'SCOPE' ? (
@@ -806,10 +717,8 @@ function GroupRow({
       isActive={isActive}
       onClick={onClick}
       collapsed={collapsed}
-      badge={badge}
-      badgeColor={badgeColor}
-      thinking={thinking}
-      paused={paused}
+      indicator={indicator}
+      badgeColors={badgeColors}
     />
   )
 }
@@ -820,10 +729,8 @@ function NavRow({
   isActive,
   onClick,
   collapsed,
-  badge,
-  badgeColor,
-  thinking = false,
-  paused = false,
+  indicator,
+  badgeColors,
   indent = false,
   draggable = false,
   isDragging = false,
@@ -837,14 +744,9 @@ function NavRow({
   isActive: boolean
   onClick: () => void
   collapsed: boolean
-  badge?: number
-  badgeColor?: BadgeColor
-  /** When true, render a `SpinnerWithDot` instead of (or alongside) the
-   * numeric badge — used by the Chat row to surface "any chat thinking". */
-  thinking?: boolean
-  /** When true (and not thinking), render a paused icon — a resumable activity
-   * that isn't live in the server (e.g. orphaned after a restart). */
-  paused?: boolean
+  /** Trailing spinner / badge / paused icon, resolved by the headless `navRowIndicator` family. */
+  indicator?: NavRowIndicator
+  badgeColors?: BadgeColors
   indent?: boolean
   draggable?: boolean
   isDragging?: boolean
@@ -854,8 +756,6 @@ function NavRow({
   /** Project's data-location, when this row represents a project. */
   dataLocation?: 'central' | 'inProject'
 }) {
-  const hasBadge = badge !== undefined && badge > 0
-  const badgeColorClass = badgeColor ? `bg-${badgeColor}-500` : undefined
   return (
     <button
       type="button"
@@ -893,44 +793,9 @@ function NavRow({
           ◉
         </span>
       )}
-      {/* Badge / spinner — always rendered (collapsed mode shrinks them) so
-          unread/thinking state stays visible even on the narrow rail. */}
-      {thinking ? (
-        <span
-          className={
-            collapsed
-              ? 'absolute top-1 right-1 inline-flex items-center justify-center'
-              : 'inline-flex items-center justify-center'
-          }
-        >
-          <SpinnerWithDot
-            size={collapsed ? 12 : 14}
-            showDot={hasBadge}
-            dotColorClass={badgeColorClass}
-            dotTitle={hasBadge ? `${formatBadgeCount(badge!)} unread chats` : undefined}
-          />
-        </span>
-      ) : paused ? (
-        <span
-          className={
-            collapsed
-              ? 'absolute top-1 right-1 inline-flex items-center justify-center text-blue-500'
-              : 'inline-flex items-center justify-center text-blue-500'
-          }
-          title="Paused activity — resumes when you open it"
-        >
-          <IconPause className={collapsed ? 'w-3 h-3' : 'w-3.5 h-3.5'} />
-        </span>
-      ) : hasBadge ? (
-        <NotificationBadge
-          text={formatBadgeCount(badge!)}
-          color={badgeColor}
-          className={
-            collapsed ? 'absolute top-1 right-1 h-[14px] min-w-[14px] px-0.5 text-[8px]' : ''
-          }
-          tooltipLabel={label}
-        />
-      ) : null}
+      {indicator && badgeColors && (
+        <NavIndicator indicator={indicator} badgeColors={badgeColors} collapsed={collapsed} />
+      )}
     </button>
   )
 }

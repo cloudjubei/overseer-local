@@ -7,7 +7,7 @@ import { useChats } from 'thefactory-ui/headless'
 import { useGit } from 'thefactory-ui/headless'
 import { useActiveProject } from 'thefactory-ui/headless'
 import { useProjectActivities } from 'thefactory-ui/headless'
-import { useProcessRuns, isProcessRunActive } from 'thefactory-ui/headless'
+import { processTallyByProject, useProcessRuns } from 'thefactory-ui/headless'
 import { useTests } from 'thefactory-ui/headless'
 import { useProjectSettingsConnected as useProjectSettings } from 'thefactory-ui/web'
 import {
@@ -148,20 +148,7 @@ export function useBadgeCounts(): UseBadgeCountsApi {
     [annotatedChats, activeProjectId],
   )
 
-  // Live process runs per project — active = running + parked, parked = waiting
-  // on the user. Terminal runs (History) never badge. Declared before `counts`
-  // (which reads the active project's tally) and reused by `getProjectBadgeState`.
-  const processByProjectId = useMemo(() => {
-    const out = new Map<string, { active: number; parked: number }>()
-    for (const r of processRuns) {
-      if (!isProcessRunActive(r)) continue
-      const cur = out.get(r.projectId) ?? { active: 0, parked: 0 }
-      cur.active += 1
-      if (r.status === 'parked') cur.parked += 1
-      out.set(r.projectId, cur)
-    }
-    return out
-  }, [processRuns])
+  const processTallies = useMemo(() => processTallyByProject(processRuns), [processRuns])
 
   const counts = useBadgeCountsCore({
     chats: activeProjectChats,
@@ -182,12 +169,7 @@ export function useBadgeCounts(): UseBadgeCountsApi {
       isPaused: activityPaused,
       unseenCount: activityUnseenForScope(activeProjectId, appLastOpenedIso),
     },
-    processes: {
-      activeCount: activeProjectId ? (processByProjectId.get(activeProjectId)?.active ?? 0) : 0,
-      isParked: activeProjectId
-        ? (processByProjectId.get(activeProjectId)?.parked ?? 0) > 0
-        : false,
-    },
+    processes: activeProjectId ? processTallies.get(activeProjectId) : undefined,
     enabled: {
       chat: resolveTriState(prefs.badgesEnabled.chat, projectOverride.chat),
       git: resolveTriState(prefs.badgesEnabled.git, projectOverride.git),
@@ -277,9 +259,7 @@ export function useBadgeCounts(): UseBadgeCountsApi {
       // Process runs are tracked for EVERY project (one global fetch), so unlike
       // git/tests a non-active project still reports its real counts.
       const processEnabled = prefs.badgesEnabled.processes !== false
-      const proc = processEnabled
-        ? (processByProjectId.get(projectId) ?? { active: 0, parked: 0 })
-        : { active: 0, parked: 0 }
+      const proc = processEnabled ? processTallies.get(projectId) : undefined
 
       return {
         chat_messages: { unread: chat.unread, thinking: chat.thinking },
@@ -290,7 +270,7 @@ export function useBadgeCounts(): UseBadgeCountsApi {
           paused: activityPausedForScope(projectId),
           unseen,
         },
-        process: { active: proc.active, parked: proc.parked },
+        process: { running: proc?.running ?? 0, waiting: proc?.waiting ?? 0 },
       }
     },
     [
@@ -306,7 +286,7 @@ export function useBadgeCounts(): UseBadgeCountsApi {
       lastRun,
       prefs.badgesEnabled,
       prefs.gitBadgeSubToggles,
-      processByProjectId,
+      processTallies,
     ],
   )
 

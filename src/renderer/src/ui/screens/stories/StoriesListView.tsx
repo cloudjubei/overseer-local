@@ -7,6 +7,7 @@ import { useStories } from 'thefactory-ui/headless'
 import { useAgents } from 'thefactory-ui/headless'
 import { useProcessRuns } from 'thefactory-ui/headless'
 import { processStatusOverlay } from 'thefactory-ui/headless'
+import { storyFeatureCounts } from 'thefactory-ui/headless'
 import ProcessStatusChip from '@ui/components/stories/ProcessStatusChip'
 import type {
   StoriesListSorting,
@@ -43,13 +44,6 @@ const STORIES_SORT_OPTIONS: { value: StoriesListSorting; label: string }[] = [
   { value: 'status_asc', label: 'Status ↓' },
   { value: 'status_desc', label: 'Status ↑' },
 ]
-
-function countFeatures(story: GetStoryResponse) {
-  const features = Array.isArray(story.features) ? story.features : []
-  const total = features.length
-  const done = features.filter((f) => f.status === 'done').length
-  return { done, total }
-}
 
 /** Match a story against the search box. Searches by display index (e.g.
  *  `5`, since the uuid is never user-visible), title and description. */
@@ -509,7 +503,7 @@ export default function StoriesListView() {
                 onDragEnd={() => clearDndState()}
               >
                 {filtered.map((t, idx) => {
-                  const { done, total } = countFeatures(t)
+                  const counts = storyFeatureCounts(t.features)
                   const isDragSource = dragStoryId === t.id
                   const isDropBefore = dragging && dropIndex === idx && dropPosition === 'before'
                   const isDropAfter = dragging && dropIndex === idx && dropPosition === 'after'
@@ -550,7 +544,7 @@ export default function StoriesListView() {
                         }}
                         onClick={() => navigateStoryDetails(t.id)}
                         onKeyDown={(e) => onRowKeyDown(e, t.id)}
-                        aria-label={`Story ${t.id}: ${t.title}. Description: ${t.description}. Status ${STATUS_LABELS[t.status as Status] || t.status}. Features ${done} of ${total} done. ${blockers.length} items this story is blocked by, ${blockersOutbound.length} items this story is blocking. Press Enter to view details.`}
+                        aria-label={`Story ${t.id}: ${t.title}. Description: ${t.description}. Status ${STATUS_LABELS[t.status as Status] || t.status}. Features: ${counts.title}. ${blockers.length} items this story is blocked by, ${blockersOutbound.length} items this story is blocking. Press Enter to view details.`}
                       >
                         <div className="story-grid">
                           <div className="col col-id">
@@ -568,10 +562,18 @@ export default function StoriesListView() {
                                   tooltip="Has rejection reason"
                                 />
                               )}
-                              <span className="chips-sub__label" title="Features done / total">
-                                {done}/{total}
+                              <span className="chips-sub__label" title={counts.title}>
+                                {counts.doneText}
                               </span>
                             </div>
+                            {counts.reviewableText && (
+                              <span
+                                className="chips-sub__label"
+                                title="Verified, waiting for the story sign-off"
+                              >
+                                {counts.reviewableText}
+                              </span>
+                            )}
                           </div>
                           <div className="col col-title">
                             <div className="title-line">

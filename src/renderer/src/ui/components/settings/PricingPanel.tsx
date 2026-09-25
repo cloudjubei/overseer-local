@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
-import { formatDateTime } from 'thefactory-ui/headless'
+import { PRICE_RATE_LABELS, formatDateTime, priceListEntryView } from 'thefactory-ui/headless'
+import type { PriceRateKey } from 'thefactory-ui/headless'
 import {
   getCachedPricing,
   getPricingState,
@@ -11,14 +12,10 @@ import { useAuth } from '@core/contexts/AuthContext'
 import { Alert, Button, Input, Spinner, Surface } from 'thefactory-ui/web'
 import { IconRefresh } from 'thefactory-ui/web/icons'
 
-const FMT = new Intl.NumberFormat('en-US', {
-  style: 'currency',
-  currency: 'USD',
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 4,
-})
+/** The rate columns, in the order and words every client's price list uses. */
+const RATE_COLUMNS = Object.entries(PRICE_RATE_LABELS) as Array<[PriceRateKey, string]>
 
-export default function PricingPanel() {
+export default function PricingPanel(): React.JSX.Element {
   const { token } = useAuth()
   const [snapshot, setSnapshot] = useState<PricingSnapshot | null>(() => getCachedPricing())
   const [loading, setLoading] = useState(false)
@@ -26,7 +23,7 @@ export default function PricingPanel() {
   const [error, setError] = useState<string | null>(null)
   const [filter, setFilter] = useState('')
 
-  const load = async () => {
+  const load = async (): Promise<void> => {
     setLoading(true)
     setError(null)
     try {
@@ -39,7 +36,7 @@ export default function PricingPanel() {
     }
   }
 
-  const refresh = async () => {
+  const refresh = async (): Promise<void> => {
     setRefreshing(true)
     setError(null)
     try {
@@ -128,15 +125,21 @@ export default function PricingPanel() {
                 >
                   <Th>Provider</Th>
                   <Th>Model</Th>
-                  <Th className="text-right">Input / 1M</Th>
-                  <Th className="text-right">Output / 1M</Th>
-                  <Th className="text-right">Cache read / 1M</Th>
+                  {RATE_COLUMNS.map(([key, label]) => (
+                    <Th key={key} className="text-right">
+                      {label} / 1M
+                    </Th>
+                  ))}
+                  <Th>Source</Th>
                 </tr>
               </thead>
               <tbody>
                 {filtered.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-3 py-4 text-center opacity-60">
+                    <td
+                      colSpan={RATE_COLUMNS.length + 3}
+                      className="px-3 py-4 text-center opacity-60"
+                    >
                       No matches.
                     </td>
                   </tr>
@@ -165,7 +168,13 @@ export default function PricingPanel() {
   )
 }
 
-function Th({ children, className }: { children: React.ReactNode; className?: string }) {
+function Th({
+  children,
+  className,
+}: {
+  children: React.ReactNode
+  className?: string
+}): React.JSX.Element {
   return (
     <th
       className={`text-left text-xs font-semibold uppercase tracking-wide px-3 py-2 ${className ?? ''}`}
@@ -176,18 +185,25 @@ function Th({ children, className }: { children: React.ReactNode; className?: st
   )
 }
 
-function Row({ entry }: { entry: PricingEntry }) {
+/**
+ * One price: every rate it is billed at, cache writes included, and where the
+ * price came from — worded by the shared headless `priceListEntryView`, which
+ * also words a rate the catalogue leaves out as the one the ledger bills it at,
+ * so this table and the web and mobile lists read every rate alike.
+ */
+function Row({ entry }: { entry: PricingEntry }): React.JSX.Element {
+  const view = priceListEntryView(entry)
+  const rates = new Map(view.rates.map((rate) => [rate.key, rate.value]))
   return (
     <tr style={{ borderTop: '1px solid var(--border-subtle)' }}>
-      <td className="px-3 py-2">{entry.provider}</td>
-      <td className="px-3 py-2 font-mono text-xs">{entry.model}</td>
-      <td className="px-3 py-2 text-right tabular-nums">{FMT.format(entry.inputPerMTokensUSD)}</td>
-      <td className="px-3 py-2 text-right tabular-nums">{FMT.format(entry.outputPerMTokensUSD)}</td>
-      <td className="px-3 py-2 text-right tabular-nums">
-        {entry.cacheReadInputPerMTokensUSD === undefined
-          ? '—'
-          : FMT.format(entry.cacheReadInputPerMTokensUSD)}
-      </td>
+      <td className="px-3 py-2">{view.provider}</td>
+      <td className="px-3 py-2 font-mono text-xs">{view.model}</td>
+      {RATE_COLUMNS.map(([key]) => (
+        <td key={key} className="px-3 py-2 text-right tabular-nums">
+          {rates.get(key) ?? '—'}
+        </td>
+      ))}
+      <td className="px-3 py-2 text-xs">{view.source}</td>
     </tr>
   )
 }
