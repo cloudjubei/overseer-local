@@ -59,6 +59,7 @@ import GroupChatView from '@ui/screens/GroupChatView'
 import GroupHomeView from '@ui/screens/GroupHomeView'
 import GitView from '@ui/screens/GitView'
 import LiveDataView from '@ui/screens/LiveDataView'
+import NotesView from '@ui/screens/NotesView'
 import ProcessesTab from '@ui/screens/ProcessesTab'
 import { LoadingScreen, ProjectTimelineView, WelcomeView } from 'thefactory-ui/web'
 import LoginScreen from '@ui/screens/LoginScreen'
@@ -210,6 +211,7 @@ function MainShell() {
             {tab === 'app' && <ProjectAppTab />}
             {tab === 'chat' && <ChatView />}
             {tab === 'files' && <FilesView />}
+            {tab === 'notes' && <NotesView />}
             {tab === 'git' && <GitView />}
             {tab === 'tests' && <TestsView />}
             {tab === 'tools' && <ToolsView />}
