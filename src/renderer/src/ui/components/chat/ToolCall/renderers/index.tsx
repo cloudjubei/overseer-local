@@ -11,8 +11,9 @@ import { StoryAndFeatureCallout } from 'thefactory-ui/web'
 import FeatureCardConnected from '@ui/components/stories/FeatureCardConnected'
 import FeatureRequestWidgetConnected from '@ui/components/chat/FeatureRequestWidgetConnected'
 import { useNavigateToResource } from '@ui/hooks/useNavigateToResource'
+import { useNavigateToGroupRun } from '@ui/hooks/useNavigateToGroupRun'
 import { useNavigate } from 'react-router-dom'
-import { DependencyBullet, ProcessRunChip } from 'thefactory-ui/web'
+import { DependencyBullet, ProcessGroupRunChip, ProcessRunChip } from 'thefactory-ui/web'
 import type { ToolCall } from '../types'
 
 export { getToolHeaderPath }
@@ -41,6 +42,7 @@ function ConnectedToolPreview(args: RenderToolPreviewArgs) {
   const { getStory, getFeature } = useStories()
   const { projectId } = useActiveProject()
   const navigateToResource = useNavigateToResource()
+  const navigateToGroupRun = useNavigateToGroupRun()
   const navigate = useNavigate()
 
   const hooks: ToolPreviewHooks = {
@@ -87,6 +89,9 @@ function ConnectedToolPreview(args: RenderToolPreviewArgs) {
         />
       )
     },
+    renderProcessGroupRunLink: ({ groupRunId }) => (
+      <ProcessGroupRunChip groupRunId={groupRunId} onOpen={(id) => navigateToGroupRun(id)} />
+    ),
     renderStoryBullet: (storyId) => <DependencyBullet dependency={storyId} />,
     renderStoryAndFeatureCallout: ({ storyId, featureId }) => (
       <StoryAndFeatureCallout storyId={storyId} featureId={featureId} />

@@ -29,6 +29,7 @@ function entryToLocalFile(entry: LocalDiffEntry): GitLocalFileEntry {
     status: entry.status,
     patch: entry.patch,
     binary: entry.binary,
+    ...(entry.patchSuppressed ? { patchSuppressed: entry.patchSuppressed } : {}),
     isConflicted: entry.isConflicted,
   }
 }
@@ -464,6 +465,7 @@ export default function LocalChangesPane({ onResolveConflict }: LocalChangesPane
             isConflicted={selectedConflicted}
             selectionMode="drag"
             binary={selectedBinary}
+            suppressed={primarySelected?.file.patchSuppressed === 'size'}
             beforeSize={selectedBeforeSize}
             afterSize={selectedAfterSize}
             onRecoverText={handleRecoverText}

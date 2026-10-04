@@ -37,6 +37,7 @@ import { StoriesProvider } from 'thefactory-ui/headless'
 import { TestsProvider } from 'thefactory-ui/headless'
 import { ToolsProvider } from 'thefactory-ui/headless'
 import { WebSearchKeysProvider } from 'thefactory-ui/headless'
+import { ProviderConnectionsProvider } from 'thefactory-ui/headless'
 import { ShortcutsProviderConnected } from 'thefactory-ui/web'
 import { CommandMenu } from 'thefactory-ui/web'
 import { ShortcutsHelp } from 'thefactory-ui/web'
@@ -61,6 +62,7 @@ import GitView from '@ui/screens/GitView'
 import LiveDataView from '@ui/screens/LiveDataView'
 import NotesView from '@ui/screens/NotesView'
 import ProcessesTab from '@ui/screens/ProcessesTab'
+import GroupProcessesView from '@ui/screens/GroupProcessesView'
 import { LoadingScreen, ProjectTimelineView, WelcomeView } from 'thefactory-ui/web'
 import LoginScreen from '@ui/screens/LoginScreen'
 import SettingsView from '@ui/screens/SettingsView'
@@ -94,45 +96,47 @@ function BackendGate() {
       <CliConfigsProvider>
         <GitCredentialsProvider>
           <WebSearchKeysProvider>
-            <OverseerProvider>
-              <ProjectsProvider>
-                <ProjectsGroupsProvider>
-                  <TemplatesProvider>
-                    <StoriesProvider>
-                      <FilesProvider>
-                        <GitProvider storage={localStorageAdapter}>
-                          <CostsProvider>
-                            <ChatsProvider>
-                              <AgentsProvider>
-                                <TestsProvider>
-                                  <ToolsProvider>
-                                    <EntitiesProvider>
-                                      <DataSourcesProvider>
-                                        <IngestionProvider>
-                                          <GlobalChatProvider>
-                                            <EventNotifier />
-                                            <DiagnosticsOverlay />
-                                            <ShortcutsHelp />
-                                            <CommandMenu />
-                                            <GlobalChatOverlayConnected />
-                                            <GitCredentialErrorModalMount />
-                                            <Outlet />
-                                          </GlobalChatProvider>
-                                        </IngestionProvider>
-                                      </DataSourcesProvider>
-                                    </EntitiesProvider>
-                                  </ToolsProvider>
-                                </TestsProvider>
-                              </AgentsProvider>
-                            </ChatsProvider>
-                          </CostsProvider>
-                        </GitProvider>
-                      </FilesProvider>
-                    </StoriesProvider>
-                  </TemplatesProvider>
-                </ProjectsGroupsProvider>
-              </ProjectsProvider>
-            </OverseerProvider>
+            <ProviderConnectionsProvider>
+              <OverseerProvider>
+                <ProjectsProvider>
+                  <ProjectsGroupsProvider>
+                    <TemplatesProvider>
+                      <StoriesProvider>
+                        <FilesProvider>
+                          <GitProvider storage={localStorageAdapter}>
+                            <CostsProvider>
+                              <ChatsProvider>
+                                <AgentsProvider>
+                                  <TestsProvider>
+                                    <ToolsProvider>
+                                      <EntitiesProvider>
+                                        <DataSourcesProvider>
+                                          <IngestionProvider>
+                                            <GlobalChatProvider>
+                                              <EventNotifier />
+                                              <DiagnosticsOverlay />
+                                              <ShortcutsHelp />
+                                              <CommandMenu />
+                                              <GlobalChatOverlayConnected />
+                                              <GitCredentialErrorModalMount />
+                                              <Outlet />
+                                            </GlobalChatProvider>
+                                          </IngestionProvider>
+                                        </DataSourcesProvider>
+                                      </EntitiesProvider>
+                                    </ToolsProvider>
+                                  </TestsProvider>
+                                </AgentsProvider>
+                              </ChatsProvider>
+                            </CostsProvider>
+                          </GitProvider>
+                        </FilesProvider>
+                      </StoriesProvider>
+                    </TemplatesProvider>
+                  </ProjectsGroupsProvider>
+                </ProjectsProvider>
+              </OverseerProvider>
+            </ProviderConnectionsProvider>
           </WebSearchKeysProvider>
         </GitCredentialsProvider>
       </CliConfigsProvider>
@@ -236,10 +240,12 @@ function GroupShell() {
     groupId,
     tab: tabParam,
     contextKey,
+    groupRunId,
   } = useParams<{
     groupId: string
     tab: string
     contextKey: string
+    groupRunId: string
   }>()
   const { setActiveGroupId } = useProjectsGroups()
   const navigate = useNavigate()
@@ -248,12 +254,18 @@ function GroupShell() {
     if (groupId) setActiveGroupId(groupId)
   }, [groupId, setActiveGroupId])
 
-  const tab: GroupTabKey = contextKey ? 'chat' : isGroupTabKey(tabParam) ? tabParam : 'home'
+  const tab: GroupTabKey = contextKey
+    ? 'chat'
+    : groupRunId
+      ? 'processes'
+      : isGroupTabKey(tabParam)
+        ? tabParam
+        : 'home'
 
   useEffect(() => {
-    if (!groupId || contextKey) return
+    if (!groupId || contextKey || groupRunId) return
     if (!isGroupTabKey(tabParam)) navigate(`/groups/${groupId}/home`, { replace: true })
-  }, [groupId, tabParam, contextKey, navigate])
+  }, [groupId, tabParam, contextKey, groupRunId, navigate])
 
   return (
     <div className="flex flex-row w-full h-full overflow-hidden">
@@ -264,6 +276,7 @@ function GroupShell() {
             {tab === 'home' && <GroupHomeView />}
             {tab === 'chat' && <GroupChatView />}
             {tab === 'tools' && <ToolsView />}
+            {tab === 'processes' && <GroupProcessesView />}
           </ScreenErrorBoundary>
         </div>
       </div>
@@ -314,6 +327,10 @@ export default function App() {
                       <Route element={<BackendGate />}>
                         <Route path="/" element={<AuthedRoot />} />
                         <Route path="/groups/:groupId/chat/:contextKey" element={<GroupShell />} />
+                        <Route
+                          path="/groups/:groupId/processes/:groupRunId"
+                          element={<GroupShell />}
+                        />
                         <Route path="/groups/:groupId/:tab" element={<GroupShell />} />
                         <Route path="/groups/:groupId" element={<GroupShell />} />
                         <Route

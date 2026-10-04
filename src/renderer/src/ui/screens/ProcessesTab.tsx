@@ -2,9 +2,10 @@ import { useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { ProcessNodeRunRef } from 'thefactory-ui/headless'
 import type { ChatContext } from 'thefactory-ui/headless/api'
-import { getChatContext } from '@core/chats/chatKey'
+import { getChatContext, getChatContextKey } from '@core/chats/chatKey'
 import { ProcessRunsView } from 'thefactory-ui/web'
 import ChatBodyForContext from '@ui/components/chat/ChatBodyForContext'
+import { useNavigateToGroupRun } from '@ui/hooks/useNavigateToGroupRun'
 
 export type ProcessesTabProps = {
   projectId: string | undefined
@@ -20,6 +21,7 @@ export type ProcessesTabProps = {
  */
 export default function ProcessesTab({ projectId, selectedRunId }: ProcessesTabProps) {
   const navigate = useNavigate()
+  const navigateToGroupRun = useNavigateToGroupRun()
 
   const onSelectRun = useCallback(
     (runId: string) => {
@@ -59,6 +61,16 @@ export default function ProcessesTab({ projectId, selectedRunId }: ProcessesTabP
     [navigate, projectId],
   )
 
+  // Where a waiting agent's ask went when it was handed to another agent: the
+  // chat opens in the Chat tab, like any other chat.
+  const onOpenChat = useCallback(
+    (context: ChatContext) => {
+      if (!projectId) return
+      navigate(`/projects/${projectId}/chat/${encodeURIComponent(getChatContextKey(context))}`)
+    },
+    [navigate, projectId],
+  )
+
   if (!projectId) return null
 
   return (
@@ -69,6 +81,8 @@ export default function ProcessesTab({ projectId, selectedRunId }: ProcessesTabP
       onOpenSettings={onOpenSettings}
       onOpenAgentRun={onOpenAgentRun}
       renderAgentRun={renderAgentRun}
+      onOpenChat={onOpenChat}
+      onOpenGroupRun={navigateToGroupRun}
     />
   )
 }

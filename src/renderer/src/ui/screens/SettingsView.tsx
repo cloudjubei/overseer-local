@@ -9,9 +9,11 @@ import { CrossProjectSettings } from 'thefactory-ui/web'
 import { GitCredentialsSettings } from 'thefactory-ui/web'
 import { WebSearchSettings } from 'thefactory-ui/web'
 import { DatabaseSettings } from 'thefactory-ui/web'
+import { ProviderConnectionsSettings } from 'thefactory-ui/web'
 import { ProcessesView } from 'thefactory-ui/web'
 import {
   IconBell,
+  IconBoard,
   IconCpu,
   IconDatabase,
   IconGitHub,
@@ -41,6 +43,7 @@ const CATEGORIES = [
     accent: 'blue',
   },
   { id: 'github', label: 'Git', icon: <IconGitHub className="h-4 w-4" />, accent: 'gray' },
+  { id: 'tickets', label: 'Tickets', icon: <IconBoard className="h-4 w-4" />, accent: 'blue' },
   {
     id: 'websearch',
     label: 'Web Search',
@@ -128,6 +131,7 @@ export default function SettingsView() {
               hostCapabilities={{ canRedirect: false, canOpenBrowser: true }}
             />
           )}
+          {activeCategory === 'tickets' && <ProviderConnectionsSettings />}
           {activeCategory === 'websearch' && <WebSearchSettings />}
           {activeCategory === 'database' && <DatabaseSettings />}
         </div>

@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useNavigateToResource } from '@ui/hooks/useNavigateToResource'
+import { useNavigateToGroupRun } from '@ui/hooks/useNavigateToGroupRun'
 import { useNavigate } from 'react-router-dom'
 import {
   ChatBody,
   CliRunArtifactPanel,
   FeatureRequestIntroPanel,
   ModelChipConnected,
+  ProcessGroupRunChip,
   ProcessRunChip,
   interpolatePrompt,
   type ChatBodyProps,
@@ -292,6 +294,7 @@ export default function ChatBodyForContext({
     return map
   }, [files])
   const navigateToResource = useNavigateToResource()
+  const navigateToGroupRun = useNavigateToGroupRun()
   const navigate = useNavigate()
   const onResolveFile = useCallback(
     (token: string) => {
@@ -464,6 +467,7 @@ export default function ChatBodyForContext({
     <ChatBody
       chatId={contextKey}
       {...(context.projectId ? { projectId: context.projectId } : {})}
+      {...(context.groupId ? { groupId: context.groupId } : {})}
       historyLocked={chatClosure(chat).locked}
       header={header}
       sendError={liveState.sendError ? { message: liveState.sendError.message } : null}
@@ -492,6 +496,12 @@ export default function ChatBodyForContext({
             )
           : undefined
       }
+      renderProcessGroupRun={(groupRunId) => (
+        <ProcessGroupRunChip
+          groupRunId={groupRunId}
+          onOpen={(id) => navigateToGroupRun(id, context.groupId)}
+        />
+      )}
       renderProcessRun={
         context.projectId
           ? (processRunId) => (
