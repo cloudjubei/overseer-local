@@ -4,13 +4,14 @@ import {
   FileSelector,
   Modal,
   ProjectChip,
+  ProofPlanEditor,
   StatusControl,
   type StoryStatus as Status,
   type UikitFileMeta,
 } from 'thefactory-ui/web'
 import { IconPlus } from 'thefactory-ui/web/icons'
-import { useFeatureForm, type FeatureFormValues } from 'thefactory-ui/headless'
-import { useActiveProject, useProjects } from 'thefactory-ui/headless'
+import { useFeatureForm, type FeatureFormValues, type ProofPlan } from 'thefactory-ui/headless'
+import { useActiveProject, useProjects, useReferences } from 'thefactory-ui/headless'
 import { useStories } from 'thefactory-ui/headless'
 import { useFiles } from 'thefactory-ui/headless'
 import { DependencyBullet } from 'thefactory-ui/web'
@@ -21,7 +22,8 @@ import { FileMentionsTextareaConnected as FileMentionsTextarea } from 'thefactor
 /**
  * Feature form — visual parity with desktop's `FeatureForm`. Status pill +
  * project chip + parent-story dependency chip in the header, then title,
- * description, rejection reason, context-files chip list, blockers chip list.
+ * description, acceptance criteria, proof plan, rejection reason,
+ * context-files chip list, blockers chip list.
  * The host modal owns the action buttons; the form binds them via `formId`.
  *
  * State + dirty + validation come from the shared headless `useFeatureForm`
@@ -31,6 +33,8 @@ import { FileMentionsTextareaConnected as FileMentionsTextarea } from 'thefactor
 export type FeatureFormInitialValues = {
   title?: string
   description?: string
+  acceptance?: string
+  proofPlan?: ProofPlan
   rejection?: string
   status?: Status
   blockers?: string[]
@@ -68,18 +72,30 @@ export default function FeatureForm({
   const initialValues: FeatureFormInitialValues = {
     title: initial?.title ?? seed?.title ?? '',
     description: initial?.description ?? seed?.description ?? '',
+    acceptance: initial?.acceptance ?? seed?.acceptance ?? '',
+    ...((initial?.proofPlan ?? seed?.proofPlan)
+      ? { proofPlan: (initial?.proofPlan ?? seed?.proofPlan) as ProofPlan }
+      : {}),
     rejection: (initial as { rejection?: string } | null)?.rejection ?? seed?.rejection ?? '',
     status: (initial?.status as Status) ?? seed?.status ?? '-',
     blockers: initial?.blockers ?? seed?.blockers ?? [],
     context: initial?.context ?? seed?.context ?? [],
   }
 
-  const { normalizeDependency } = useStories()
+  const { normalizeDependency, getStory } = useStories()
+  const inheritedProofPlan = getStory(storyId)?.proofPlan as ProofPlan | undefined
+  const { projectId: activeProjectId } = useActiveProject()
+  // What was typed in the text — `#3.2`, `&qa-login` — is saved as what it points at now.
+  const { canonicalize, toTyped } = useReferences({
+    scope: activeProjectId ? { projectId: activeProjectId } : undefined,
+  })
 
   const form = useFeatureForm({
     initialValues,
     onDirty,
     normalizeDependency,
+    canonicalize,
+    toTyped,
     onSubmit: async (v: FeatureFormValues) => {
       const shared = {
         title: v.title,
@@ -90,11 +106,21 @@ export default function FeatureForm({
         // otherwise JSON.stringify drops the key and the backend treats it
         // as "leave unchanged" — the rejection would never get removed.
         rejection: v.rejection,
+        acceptance: v.acceptance,
       }
       if (mode.kind === 'create') {
-        await mode.onSubmit({ ...shared, context: v.context })
+        await mode.onSubmit({
+          ...shared,
+          context: v.context,
+          ...(v.proofPlan ? { proofPlan: v.proofPlan } : {}),
+        })
       } else {
-        await mode.onSubmit({ ...shared, context: v.context } as FeatureEditInput)
+        // An empty kinds list clears the plan; leaving the key out would keep it.
+        await mode.onSubmit({
+          ...shared,
+          context: v.context,
+          proofPlan: v.proofPlan ?? { kinds: [] },
+        } as FeatureEditInput)
       }
     },
   })
@@ -201,7 +227,7 @@ export default function FeatureForm({
           <FileMentionsTextarea
             id="feature-description"
             rows={4}
-            placeholder="Optional details or acceptance criteria. Tip: @ to reference files, # to reference stories/features"
+            placeholder="Optional details. Tip: @ to reference files, # to reference stories/features"
             value={form.values.description}
             onChange={form.setDescription}
             disabled={submitting}
@@ -216,6 +242,41 @@ export default function FeatureForm({
             onReferenceSelected={form.addBlocker}
           />
         </div>
+
+        <div className="flex flex-col gap-1">
+          <label
+            htmlFor="feature-acceptance"
+            className="text-xs"
+            style={{ color: 'var(--text-secondary)' }}
+          >
+            Acceptance Criteria
+          </label>
+          <FileMentionsTextarea
+            id="feature-acceptance"
+            rows={3}
+            placeholder="What done means — what a reviewer checks the change against"
+            value={form.values.acceptance}
+            onChange={form.setAcceptance}
+            disabled={submitting}
+            className="w-full rounded-md border px-3 py-2 text-sm disabled:opacity-60 resize-y max-h-64"
+            style={{
+              background: 'var(--surface-raised)',
+              borderColor: 'var(--border-default)',
+              color: 'var(--text-primary)',
+            }}
+            ariaLabel="Feature acceptance criteria"
+            onFileMentionSelected={form.addContextFile}
+            onReferenceSelected={form.addBlocker}
+          />
+        </div>
+
+        <ProofPlanEditor
+          draft={form.proofPlanDraft}
+          onToggleKind={form.toggleProofKind}
+          onNotesChange={form.setProofNotes}
+          {...(inheritedProofPlan ? { inherited: inheritedProofPlan } : {})}
+          disabled={submitting}
+        />
 
         <div className="flex flex-col gap-1">
           <label

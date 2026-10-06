@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useChats } from 'thefactory-ui/headless'
+import { byLastActivity, chatLastActivityAt, chatRowBadge, useChats } from 'thefactory-ui/headless'
 import { useStories } from 'thefactory-ui/headless'
 import { groupChats, isAgentRunChatContext, type GroupedChats } from 'thefactory-ui/headless'
 import { useChatRowStatus } from '@core/notifications/useChatRowStatus'
@@ -129,7 +129,7 @@ export default function ChatsNavigationSidebar({
       out.push(c)
     }
     if (projectChat && !seen.has(projectKey!)) out.unshift(projectChat)
-    return out.sort((a, b) => (b.updatedAt ?? '').localeCompare(a.updatedAt ?? ''))
+    return out.sort(byLastActivity)
   }, [chats, projectChat])
 
   return (
@@ -210,8 +210,9 @@ function ChatRow({
   updatedAt?: string
   messageCount?: number
 }) {
-  const { isThinking, isUnread, unreadCount, isAgentRunning } = useChatRowStatus(ctx)
-  const cap = (n: number) => (n > 99 ? '99+' : `${n}`)
+  const status = useChatRowStatus(ctx)
+  const { isThinking, isUnread, isAgentRunning } = status
+  const badge = chatRowBadge(status)
   return (
     <button
       type="button"
@@ -238,11 +239,11 @@ function ChatRow({
           ) : null}
           {isAgentRunning || isThinking ? (
             <SpinnerWithDot size={14} showDot={isUnread} />
-          ) : isUnread ? (
+          ) : badge ? (
             <NotificationBadge
               className="h-[16px] min-w-[16px] px-1 text-[10px]"
-              text={cap(unreadCount)}
-              tooltipLabel={`${unreadCount} unread messages`}
+              text={badge.text}
+              tooltipLabel={badge.label}
             />
           ) : null}
         </div>
@@ -573,7 +574,7 @@ function HistoryList({
           title={historyRowTitle(c, getStory, getFeature)}
           isActive={getChatContextKey(c.context) === activeKey}
           onSelect={() => onSelectContext(c.context)}
-          updatedAt={c.updatedAt || c.createdAt || ''}
+          updatedAt={chatLastActivityAt(c) ?? ''}
           messageCount={c.messages?.length ?? 0}
         />
       ))}

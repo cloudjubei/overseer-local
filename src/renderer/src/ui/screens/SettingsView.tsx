@@ -11,11 +11,14 @@ import { WebSearchSettings } from 'thefactory-ui/web'
 import { DatabaseSettings } from 'thefactory-ui/web'
 import { ProviderConnectionsSettings } from 'thefactory-ui/web'
 import { ProcessesView } from 'thefactory-ui/web'
+import { GroupTicketSettings, ProjectTicketSettings } from 'thefactory-ui/web'
 import {
   IconBell,
   IconBoard,
   IconCpu,
   IconDatabase,
+  IconFolder,
+  IconFolderOpen,
   IconGitHub,
   IconList,
   IconPalette,
@@ -70,19 +73,40 @@ const CATEGORIES = [
   },
 ] as const
 
-type CategoryId = (typeof CATEGORIES)[number]['id']
+/** Whose Settings these are: the project or group the user opened them from. */
+export type SettingsScope =
+  | { kind: 'project'; projectId: string }
+  | { kind: 'group'; groupId: string }
 
-function isCategory(value: string | null): value is CategoryId {
-  return value !== null && (CATEGORIES as ReadonlyArray<{ id: string }>).some((c) => c.id === value)
-}
+/** The scope's own section, listed first: what belongs to this project or group alone. */
+const SCOPE_CATEGORIES = {
+  project: {
+    id: 'project',
+    label: 'Project',
+    icon: <IconFolder className="h-4 w-4" />,
+    accent: 'brand',
+  },
+  group: {
+    id: 'group',
+    label: 'Group',
+    icon: <IconFolderOpen className="h-4 w-4" />,
+    accent: 'brand',
+  },
+} as const
 
-export default function SettingsView() {
+type CategoryId = (typeof CATEGORIES)[number]['id'] | 'project' | 'group'
+
+export default function SettingsView({ scope }: { scope: SettingsScope }) {
   const [searchParams, setSearchParams] = useSearchParams()
   const queryTab = searchParams.get('tab')
+  const scopeCategory = SCOPE_CATEGORIES[scope.kind]
+  const categories = [scopeCategory, ...CATEGORIES]
+  const isCategory = (value: string | null): value is CategoryId =>
+    value !== null && categories.some((c) => c.id === value)
   // The URL is the single source of truth — no local state to avoid the brief
   // "wrong tab visible" flash that happens when local state and the URL update
-  // on different ticks.
-  const activeCategory: CategoryId = isCategory(queryTab) ? queryTab : 'visual'
+  // on different ticks. Opens on the project's or group's own section.
+  const activeCategory: CategoryId = isCategory(queryTab) ? queryTab : scopeCategory.id
 
   const onSelect = (next: string) => {
     if (!isCategory(next) || next === activeCategory) return
@@ -93,7 +117,7 @@ export default function SettingsView() {
 
   return (
     <CollapsibleSidebar
-      items={CATEGORIES.slice()}
+      items={categories}
       activeId={activeCategory}
       onSelect={onSelect}
       storageKey="settings-panel-collapsed"
@@ -119,6 +143,12 @@ export default function SettingsView() {
         </div>
       ) : (
         <div className="h-full min-h-0 overflow-y-auto p-4">
+          {activeCategory === 'project' && scope.kind === 'project' && (
+            <ProjectTicketSettings projectId={scope.projectId} />
+          )}
+          {activeCategory === 'group' && scope.kind === 'group' && (
+            <GroupTicketSettings groupId={scope.groupId} />
+          )}
           {activeCategory === 'visual' && <VisualSettings />}
           {activeCategory === 'notifications' && <NotificationSettings />}
           {activeCategory === 'cross-project' && <CrossProjectSettings />}

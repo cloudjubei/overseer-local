@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import ProjectReferenceRendering from './ui/components/ProjectReferenceRendering'
 import {
   Navigate,
   Outlet,
@@ -57,6 +58,7 @@ import { useApplyTheme } from '@ui/hooks/useApplyTheme'
 import ChatView from '@ui/screens/ChatView'
 import FilesView from '@ui/screens/FilesView'
 import GroupChatView from '@ui/screens/GroupChatView'
+import GroupNotesView from '@ui/screens/GroupNotesView'
 import GroupHomeView from '@ui/screens/GroupHomeView'
 import GitView from '@ui/screens/GitView'
 import LiveDataView from '@ui/screens/LiveDataView'
@@ -103,33 +105,35 @@ function BackendGate() {
                     <TemplatesProvider>
                       <StoriesProvider>
                         <FilesProvider>
-                          <GitProvider storage={localStorageAdapter}>
-                            <CostsProvider>
-                              <ChatsProvider>
-                                <AgentsProvider>
-                                  <TestsProvider>
-                                    <ToolsProvider>
-                                      <EntitiesProvider>
-                                        <DataSourcesProvider>
-                                          <IngestionProvider>
-                                            <GlobalChatProvider>
-                                              <EventNotifier />
-                                              <DiagnosticsOverlay />
-                                              <ShortcutsHelp />
-                                              <CommandMenu />
-                                              <GlobalChatOverlayConnected />
-                                              <GitCredentialErrorModalMount />
-                                              <Outlet />
-                                            </GlobalChatProvider>
-                                          </IngestionProvider>
-                                        </DataSourcesProvider>
-                                      </EntitiesProvider>
-                                    </ToolsProvider>
-                                  </TestsProvider>
-                                </AgentsProvider>
-                              </ChatsProvider>
-                            </CostsProvider>
-                          </GitProvider>
+                          <ProjectReferenceRendering>
+                            <GitProvider storage={localStorageAdapter}>
+                              <CostsProvider>
+                                <ChatsProvider>
+                                  <AgentsProvider>
+                                    <TestsProvider>
+                                      <ToolsProvider>
+                                        <EntitiesProvider>
+                                          <DataSourcesProvider>
+                                            <IngestionProvider>
+                                              <GlobalChatProvider>
+                                                <EventNotifier />
+                                                <DiagnosticsOverlay />
+                                                <ShortcutsHelp />
+                                                <CommandMenu />
+                                                <GlobalChatOverlayConnected />
+                                                <GitCredentialErrorModalMount />
+                                                <Outlet />
+                                              </GlobalChatProvider>
+                                            </IngestionProvider>
+                                          </DataSourcesProvider>
+                                        </EntitiesProvider>
+                                      </ToolsProvider>
+                                    </TestsProvider>
+                                  </AgentsProvider>
+                                </ChatsProvider>
+                              </CostsProvider>
+                            </GitProvider>
+                          </ProjectReferenceRendering>
                         </FilesProvider>
                       </StoriesProvider>
                     </TemplatesProvider>
@@ -227,7 +231,9 @@ function MainShell() {
               />
             )}
             {tab === 'timeline' && <ProjectTimelineView />}
-            {tab === 'settings' && <SettingsView />}
+            {tab === 'settings' && projectId && (
+              <SettingsView scope={{ kind: 'project', projectId }} />
+            )}
           </ScreenErrorBoundary>
         </div>
       </div>
@@ -275,8 +281,10 @@ function GroupShell() {
           <ScreenErrorBoundary key={tab} screen={`Group · ${tab}`}>
             {tab === 'home' && <GroupHomeView />}
             {tab === 'chat' && <GroupChatView />}
+            {tab === 'notes' && <GroupNotesView />}
             {tab === 'tools' && <ToolsView />}
             {tab === 'processes' && <GroupProcessesView />}
+            {tab === 'settings' && groupId && <SettingsView scope={{ kind: 'group', groupId }} />}
           </ScreenErrorBoundary>
         </div>
       </div>

@@ -72,7 +72,8 @@ export default function Sidebar({ projectId, activeTab, activeGroupId, activeGro
   const collapsed = userCollapsed
   const { projects, activeProjectId, setActiveProjectId } = useProjects()
   const { groups, reorderProject } = useProjectsGroups()
-  const { counts, markAppOpened, getProjectBadgeState, getGroupBadgeState } = useBadgeCounts()
+  const { counts, markAppOpened, getProjectBadgeState, getGroupBadgeState, getGroupChatBadge } =
+    useBadgeCounts()
   const badgeColors = settings.notifications.badgeColors
   const groupRollup = (g: ProjectsGroup, open: boolean): BadgeState =>
     getGroupBadgeState(g.id, g.type === 'SCOPE' || open ? [] : g.projects)
@@ -304,7 +305,7 @@ export default function Sidebar({ projectId, activeTab, activeGroupId, activeGro
 
         {activeGroupId && (
           <Section collapsed={collapsed}>
-            {GROUP_TAB_DEFS.map((tab) => (
+            {GROUP_TAB_DEFS.filter((tab) => !tab.hiddenInSidebar).map((tab) => (
               <NavRow
                 key={tab.key}
                 label={tab.label}
@@ -312,7 +313,7 @@ export default function Sidebar({ projectId, activeTab, activeGroupId, activeGro
                 isActive={tab.key === activeGroupTab}
                 onClick={() => onSelectGroupTab(tab.key)}
                 collapsed={collapsed}
-                indicator={groupTabIndicator(tab.key, counts)}
+                indicator={groupTabIndicator(tab.key, getGroupChatBadge(activeGroupId))}
                 badgeColors={badgeColors}
               />
             ))}
@@ -448,21 +449,23 @@ export default function Sidebar({ projectId, activeTab, activeGroupId, activeGro
       </div>
 
       {/* The assistant is account-global, so the footer always renders;
-          only the Settings row needs a project to route to. */}
+          only the Settings row needs a project or group to route to. */}
       <div
         className={`shrink-0 border-t py-1 ${collapsed ? 'flex flex-col' : 'flex items-center'}`}
         style={{ borderColor: 'var(--border-subtle)' }}
       >
         {(() => {
           const settingsTab = SHELL_TAB_DEFS.find((t) => t.key === 'settings')
-          if (!settingsTab || !projectId) return null
+          if (!settingsTab || !(projectId || activeGroupId)) return null
           return (
             <div className={collapsed ? undefined : 'min-w-0 flex-1'}>
               <NavRow
                 label={settingsTab.label}
                 icon={navIcon(settingsTab.icon)}
-                isActive={activeTab === 'settings' && !activeGroupId}
-                onClick={() => onSelectTab('settings')}
+                isActive={activeGroupId ? activeGroupTab === 'settings' : activeTab === 'settings'}
+                onClick={() =>
+                  activeGroupId ? onSelectGroupTab('settings') : onSelectTab('settings')
+                }
                 collapsed={collapsed}
               />
             </div>

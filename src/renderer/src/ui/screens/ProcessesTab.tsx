@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import type { ProcessNodeRunRef } from 'thefactory-ui/headless'
+import { RUN_CHAT_PLACEHOLDER, type ProcessNodeRunRef } from 'thefactory-ui/headless'
 import type { ChatContext } from 'thefactory-ui/headless/api'
 import { getChatContext, getChatContextKey } from '@core/chats/chatKey'
 import { ProcessRunsView } from 'thefactory-ui/web'
@@ -61,6 +61,17 @@ export default function ProcessesTab({ projectId, selectedRunId }: ProcessesTabP
     [navigate, projectId],
   )
 
+  // The run's own chat, in the pipeline's chat drawer.
+  const renderChat = useCallback(
+    (context: ChatContext) => (
+      <ChatBodyForContext
+        context={context}
+        inputProps={{ autoFocus: true, placeholder: RUN_CHAT_PLACEHOLDER }}
+      />
+    ),
+    [],
+  )
+
   // Where a waiting agent's ask went when it was handed to another agent: the
   // chat opens in the Chat tab, like any other chat.
   const onOpenChat = useCallback(
@@ -82,6 +93,7 @@ export default function ProcessesTab({ projectId, selectedRunId }: ProcessesTabP
       onOpenAgentRun={onOpenAgentRun}
       renderAgentRun={renderAgentRun}
       onOpenChat={onOpenChat}
+      renderChat={renderChat}
       onOpenGroupRun={navigateToGroupRun}
     />
   )

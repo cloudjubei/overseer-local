@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { useActiveProject } from 'thefactory-ui/headless'
+import { useActiveProject, useReferences } from 'thefactory-ui/headless'
 import { STATUS_ORDER as HEADLESS_STATUS_ORDER } from 'thefactory-ui/headless'
 import { useStories } from 'thefactory-ui/headless'
 import { useAgents } from 'thefactory-ui/headless'
@@ -18,7 +18,7 @@ import {
 } from 'thefactory-ui/web'
 import { IconBack, IconCalculator, IconChevron, IconEdit, IconPlus } from 'thefactory-ui/web/icons'
 import { DependencyBullet } from 'thefactory-ui/web'
-import { ExclamationChip } from 'thefactory-ui/web'
+import { ExclamationChip, RichText } from 'thefactory-ui/web'
 import RunAgentButtonConnected from '@ui/components/agents/RunAgentButtonConnected'
 import { ModelChipConnected } from 'thefactory-ui/web'
 import { UsageModalConnected as UsageModal } from 'thefactory-ui/web'
@@ -68,6 +68,7 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
   const navigate = useNavigate()
   const { projectId: urlProjectId } = useParams<{ projectId: string }>()
   const { projectId } = useActiveProject()
+  const { asText } = useReferences({ scope: projectId ? { projectId } : undefined })
   const {
     stories,
     storyDisplayIndex,
@@ -484,7 +485,13 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
               id="overview-content"
               className={`overview-content ${isOverviewExpanded ? 'expanded' : 'collapsed'}`}
             >
-              <p className="story-desc">{story.description || 'No description provided.'}</p>
+              <p className="story-desc">
+                {story.description ? (
+                  <RichText text={story.description} typedReferences />
+                ) : (
+                  'No description provided.'
+                )}
+              </p>
             </div>
           </section>
 
@@ -543,15 +550,18 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
                             }
                           />
                           {rejection && (
-                            <ExclamationChip title={rejection} tooltip="Has rejection reason" />
+                            <ExclamationChip
+                              title={asText(rejection)}
+                              tooltip="Has rejection reason"
+                            />
                           )}
                         </div>
 
                         <div className="col col-title">
                           <span className="title-text">{f.title || ''}</span>
                         </div>
-                        <div className="col col-description" title={f.description || ''}>
-                          {f.description || ''}
+                        <div className="col col-description" title={asText(f.description || '')}>
+                          <RichText text={f.description || ''} typedReferences />
                         </div>
                         <div
                           className={`col col-actions ${featureHasActiveRun ? 'is-sticky-visible' : ''}`}

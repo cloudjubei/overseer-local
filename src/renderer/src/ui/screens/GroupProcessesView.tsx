@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import type { ProcessNodeRunRef } from 'thefactory-ui/headless'
+import { RUN_CHAT_PLACEHOLDER, type ProcessNodeRunRef } from 'thefactory-ui/headless'
 import type { ChatContext } from 'thefactory-ui/headless/api'
 import { ProcessGroupRunsView } from 'thefactory-ui/web'
 import { getChatContext, getChatContextKey } from '@core/chats/chatKey'
@@ -27,6 +27,16 @@ export default function GroupProcessesView() {
     return context ? <ChatBodyForContext context={context} onBackToPipeline={onBack} /> : null
   }, [])
 
+  const renderChat = useCallback(
+    (context: ChatContext) => (
+      <ChatBodyForContext
+        context={context}
+        inputProps={{ autoFocus: true, placeholder: RUN_CHAT_PLACEHOLDER }}
+      />
+    ),
+    [],
+  )
+
   const onOpenChat = useCallback(
     (context: ChatContext) => {
       const key = encodeURIComponent(getChatContextKey(context))
@@ -52,6 +62,7 @@ export default function GroupProcessesView() {
       onOpenAgentRun={onOpenAgentRun}
       renderAgentRun={renderAgentRun}
       onOpenChat={onOpenChat}
+      renderChat={renderChat}
     />
   )
 }

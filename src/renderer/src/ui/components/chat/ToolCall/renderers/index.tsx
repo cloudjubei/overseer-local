@@ -7,7 +7,7 @@ import {
 import { getToolHeaderPath } from 'thefactory-ui/headless'
 import { useStories } from 'thefactory-ui/headless'
 import { useActiveProject } from 'thefactory-ui/headless'
-import { StoryAndFeatureCallout } from 'thefactory-ui/web'
+import { StoryAndFeatureCallout, StoryCard, type StoryCardData } from 'thefactory-ui/web'
 import FeatureCardConnected from '@ui/components/stories/FeatureCardConnected'
 import FeatureRequestWidgetConnected from '@ui/components/chat/FeatureRequestWidgetConnected'
 import { useNavigateToResource } from '@ui/hooks/useNavigateToResource'
@@ -71,6 +71,32 @@ function ConnectedToolPreview(args: RenderToolPreviewArgs) {
         description: f.description,
         status: f.status as string | undefined,
       }
+    },
+    // The rich card for a completed `addStory` / `updateStory`. Without it the
+    // preview renders the field diff alone — the story it belongs to is left
+    // unidentified.
+    renderStoryCard: (story) => {
+      const stored = getStory(story.id)
+      const card: StoryCardData = {
+        id: story.id,
+        title: story.title ?? stored?.title ?? story.id,
+        ...((story.description ?? stored?.description)
+          ? { description: story.description ?? stored?.description }
+          : {}),
+        status: (story.status ?? stored?.status ?? 'pending') as StoryCardData['status'],
+        ...(stored?.blockers ? { blockers: stored.blockers } : {}),
+      }
+      return (
+        <StoryCard
+          story={card}
+          renderBlocker={(dep) => <DependencyBullet dependency={dep} />}
+          {...(projectId
+            ? {
+                onClick: () => navigateToResource({ kind: 'story', projectId, storyId: story.id }),
+              }
+            : {})}
+        />
+      )
     },
     renderFeatureCard: (story, feature) => {
       const s = getStory(story.id)

@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { useActiveProject } from 'thefactory-ui/headless'
+import { useActiveProject, useReferences } from 'thefactory-ui/headless'
 import { STATUS_ORDER as HEADLESS_STATUS_ORDER } from 'thefactory-ui/headless'
 import { useAppSettings } from 'thefactory-ui/headless'
 import { useStories } from 'thefactory-ui/headless'
@@ -26,7 +26,7 @@ import {
 } from 'thefactory-ui/web'
 import { IconBoard, IconCalculator, IconList, IconPlus } from 'thefactory-ui/web/icons'
 import { DependencyBullet } from 'thefactory-ui/web'
-import { ExclamationChip } from 'thefactory-ui/web'
+import { ExclamationChip, RichText } from 'thefactory-ui/web'
 import RunAgentButtonConnected from '@ui/components/agents/RunAgentButtonConnected'
 import { ModelChipConnected } from 'thefactory-ui/web'
 import { UsageModalConnected as UsageModal } from 'thefactory-ui/web'
@@ -86,6 +86,10 @@ const STATUS_ORDER: string[] = [...HEADLESS_STATUS_ORDER]
  * routes are pushed through the existing modal host.
  */
 export default function StoriesListView() {
+  const { projectId: referencesProjectId } = useActiveProject()
+  const { asText } = useReferences({
+    scope: referencesProjectId ? { projectId: referencesProjectId } : undefined,
+  })
   const navigate = useNavigate()
   const { projectId: urlProjectId } = useParams<{ projectId: string }>()
   const { project, projectId } = useActiveProject()
@@ -544,7 +548,7 @@ export default function StoriesListView() {
                         }}
                         onClick={() => navigateStoryDetails(t.id)}
                         onKeyDown={(e) => onRowKeyDown(e, t.id)}
-                        aria-label={`Story ${t.id}: ${t.title}. Description: ${t.description}. Status ${STATUS_LABELS[t.status as Status] || t.status}. Features: ${counts.title}. ${blockers.length} items this story is blocked by, ${blockersOutbound.length} items this story is blocking. Press Enter to view details.`}
+                        aria-label={`Story ${t.id}: ${t.title}. Description: ${asText(t.description || '')}. Status ${STATUS_LABELS[t.status as Status] || t.status}. Features: ${counts.title}. ${blockers.length} items this story is blocked by, ${blockersOutbound.length} items this story is blocking. Press Enter to view details.`}
                       >
                         <div className="story-grid">
                           <div className="col col-id">
@@ -581,8 +585,8 @@ export default function StoriesListView() {
                             </div>
                           </div>
                           <div className="col col-description">
-                            <div className="desc-line" title={t.description || ''}>
-                              {t.description || ''}
+                            <div className="desc-line" title={asText(t.description || '')}>
+                              <RichText text={t.description || ''} typedReferences />
                             </div>
                           </div>
                           <div className="col col-actions">

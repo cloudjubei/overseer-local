@@ -12,6 +12,8 @@ import {
   interpolatePrompt,
   type ChatBodyProps,
   type PromptVariables,
+  arrayBufferToBase64,
+  useReferenceRenderer,
 } from 'thefactory-ui/web'
 import type { ChatContext } from 'thefactory-ui/headless/api'
 import { useAgents } from 'thefactory-ui/headless'
@@ -22,7 +24,12 @@ import { useCrossProjectRequests } from 'thefactory-ui/headless'
 import { useFiles } from 'thefactory-ui/headless'
 import { usePendingToolGrants } from 'thefactory-ui/headless'
 import { useTools } from 'thefactory-ui/headless'
-import { useStories } from 'thefactory-ui/headless'
+import {
+  buildChatPromptVariables,
+  useProjectsGroups,
+  useReferences,
+  useStories,
+} from 'thefactory-ui/headless'
 import { useProcessRuns } from 'thefactory-ui/headless'
 import { useActiveProject } from 'thefactory-ui/headless'
 import { getChatContextKey } from '@core/chats/chatKey'
@@ -72,13 +79,14 @@ export default function ChatBodyForContext({
     confirmTools,
     abortChat,
     deleteLastMessage,
+    uploadAttachment,
     getEffectiveChatSettings,
   } = useChats()
   const { cancelRun } = useAgents()
-  const { paths, files, uploadFile } = useFiles()
+  const { paths, files } = useFiles()
   const { previewTool } = useTools()
   const { project } = useActiveProject()
-  const { stories, getStory, getFeature, storyDisplayIndex, featureDisplayIndex } = useStories()
+  const { getStory, getFeature } = useStories()
   const { markChatSeen } = useBadgeCounts()
   const { lastReadIso, markReadByContext } = useChatLastRead(context)
 
@@ -114,29 +122,22 @@ export default function ChatBodyForContext({
   )
   const template = effectiveSettings.systemPrompt ?? ''
   const completionSettings = effectiveSettings.completionSettings
-  const promptVariables = useMemo<PromptVariables>(() => {
-    const story = context.storyId ? getStory(context.storyId) : undefined
-    const feature =
-      context.storyId && context.featureId
-        ? getFeature(context.storyId, context.featureId)
-        : undefined
-    return {
-      project: project
-        ? { id: project.id, title: project.title, description: project.description }
-        : undefined,
-      story: story
-        ? {
-            id: story.id,
-            title: story.title,
-            description: story.description,
-            features: story.features,
-          }
-        : undefined,
-      feature: feature
-        ? { id: feature.id, title: feature.title, description: feature.description }
-        : undefined,
-    }
-  }, [context.storyId, context.featureId, project, getStory, getFeature])
+  // The same variables a sent turn is given, so the bubble shows the prompt the agent reads.
+  const { getGroupById } = useProjectsGroups()
+  const promptVariables = useMemo<PromptVariables>(
+    () =>
+      buildChatPromptVariables(context, {
+        ...(project
+          ? {
+              project: { id: project.id, title: project.title, description: project.description },
+            }
+          : {}),
+        getStory,
+        getFeature,
+        getGroupById,
+      }),
+    [context, project, getStory, getFeature, getGroupById],
+  )
   const effectivePrompt = useMemo(
     () => (template ? interpolatePrompt(template, promptVariables) : ''),
     [template, promptVariables],
@@ -254,6 +255,7 @@ export default function ChatBodyForContext({
 
   // ---- Send / abort / confirm --------------------------------------------
   const [scrollSignal, setScrollSignal] = useState(0)
+  const canonicalizeRef = useRef<(text: string) => string>((text) => text)
   const onSend = useCallback(
     async (content: string, sentAttachments?: string[]) => {
       // Optimistic clear — the textarea blanks immediately so the user sees
@@ -263,7 +265,7 @@ export default function ChatBodyForContext({
       setDraftState('')
       setAttachments([])
       setScrollSignal((s) => s + 1)
-      await sendMessage(context, content, sentAttachments)
+      await sendMessage(context, canonicalizeRef.current(content), sentAttachments)
     },
     [clearDraft, context, sendMessage],
   )
@@ -306,73 +308,32 @@ export default function ChatBodyForContext({
     },
     [filesByPath],
   )
-  const renderDependency = useCallback(
-    (dep: string) => {
-      // dep is "#3" or "#3.2" or "#storyId" — strip the leading hash.
-      const raw = dep.startsWith('#') ? dep.slice(1) : dep
-      const [s, f] = raw.split('.')
-      const story = getStory(s)
-      const feature = f && story ? getFeature(story.id, f) : undefined
-      const label = feature ? `${story?.title ?? s} / ${feature.title}` : (story?.title ?? raw)
-      return (
-        <span
-          className="inline rounded-sm px-1 py-px border border-(--border-subtle) bg-(--surface-overlay) text-(--text-secondary) text-[12px]"
-          title={label}
-        >
-          #{raw}
-        </span>
-      )
-    },
-    [getStory, getFeature],
+  // ---- References: chips in messages, `#` / `&` in the input ------------
+  const chatAttachmentPaths = useMemo(
+    () => [
+      ...new Set([
+        ...(chat?.messages ?? []).flatMap((m) =>
+          m.role === 'user' ? ((m as { files?: string[] }).files ?? []) : [],
+        ),
+        ...attachments,
+      ]),
+    ],
+    [chat?.messages, attachments],
   )
-
-  // ---- # references (stories + features) for the input ------------------
-  const onSearchReferences = useCallback(
-    (token: string) => {
-      const t = token.trim().toLowerCase()
-      const out: { value: string; label: string; description?: string }[] = []
-      for (const s of stories) {
-        const sIdx = storyDisplayIndex(s.id)
-        const sLabel = sIdx != null ? `${sIdx} · ${s.title}` : s.title
-        if (
-          !t ||
-          s.title.toLowerCase().includes(t) ||
-          (sIdx != null && String(sIdx).startsWith(t))
-        ) {
-          out.push({
-            value: sIdx != null ? String(sIdx) : s.id,
-            label: sLabel,
-            description: 'Story',
-          })
-        }
-        for (const f of s.features ?? []) {
-          const fIdx = featureDisplayIndex(s.id, f.id)
-          const refValue = sIdx != null && fIdx != null ? `${sIdx}.${fIdx}` : `${s.id}.${f.id}`
-          const fLabel = `${refValue} · ${f.title}`
-          if (!t || f.title.toLowerCase().includes(t) || refValue.toLowerCase().startsWith(t)) {
-            out.push({ value: refValue, label: fLabel, description: `Feature in ${s.title}` })
-          }
-        }
-        if (out.length >= 50) break
-      }
-      return out.slice(0, 8)
-    },
-    [stories, storyDisplayIndex, featureDisplayIndex],
-  )
+  const references = useReferences({ scope: context, attachments: chatAttachmentPaths })
+  // What was typed — `#3.2`, `&qa-login` — is sent as what it points at now.
+  canonicalizeRef.current = references.canonicalize
+  const renderReference = useReferenceRenderer({
+    references,
+    onResolveFile,
+    onOpen: navigateToResource,
+  })
 
   // ---- File attachment ---------------------------------------------------
   const onUploadAttachment = useCallback(
-    async (file: File): Promise<string | undefined> => {
-      const reader = new FileReader()
-      const text: string = await new Promise((resolve, reject) => {
-        reader.onerror = () => reject(reader.error ?? new Error('Failed to read file'))
-        reader.onload = () => resolve((reader.result as string) ?? '')
-        reader.readAsText(file)
-      })
-      const path = await uploadFile(file.name, { content: text })
-      return path ?? undefined
-    },
-    [uploadFile],
+    async (file: File): Promise<string | undefined> =>
+      uploadAttachment(context, file.name, arrayBufferToBase64(await file.arrayBuffer())),
+    [uploadAttachment, context],
   )
 
   // ---- Read receipts -----------------------------------------------------
@@ -476,7 +437,7 @@ export default function ChatBodyForContext({
       renderToolResult={renderToolCall}
       getToolHeaderPath={getToolHeaderPath}
       onResolveFile={onResolveFile}
-      renderDependency={renderDependency}
+      renderReference={renderReference}
       onResourceLink={navigateToResource}
       renderCliRunArtifact={
         context.projectId
@@ -486,6 +447,7 @@ export default function ChatBodyForContext({
                 runId={runId}
                 projectId={context.projectId!}
                 onSendMessage={(text) => onSend(text, [])}
+                onDraftMessage={onInputChange}
                 onOpenGit={() => navigate(`/projects/${context.projectId}/git`)}
                 onBackToPipeline={(id) =>
                   onBackToPipeline
@@ -549,10 +511,13 @@ export default function ChatBodyForContext({
       onInputChange={onInputChange}
       inputProps={{
         filePaths: paths,
+        ...(references.searchFiles ? { searchFiles: references.searchFiles } : {}),
+        describeFile: references.describeFile,
         attachments,
         onChangeAttachments: setAttachments,
-        onSearchReferences,
-        onUploadAttachment,
+        onSearchReferences: references.searchWork,
+        onSearchHandles: references.searchHandles,
+        ...(context.projectId ? { onUploadAttachment } : {}),
         suggestedActions,
         placeholder: inputProps?.placeholder,
         autoFocus: inputProps?.autoFocus,

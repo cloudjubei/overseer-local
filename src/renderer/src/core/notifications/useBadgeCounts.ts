@@ -40,6 +40,8 @@ export type UseBadgeCountsApi = {
   /** Group badge state — member projects rolled up via the shared
    *  `aggregateGroupBadgeState`, plus the group's own chat unread. */
   getGroupBadgeState: (groupId: string, memberProjectIds: ReadonlyArray<string>) => BadgeState
+  /** The group's OWN chats — what its Chat tab counts, so reading them clears it. */
+  getGroupChatBadge: (groupId: string) => BadgeState['chat_messages']
 }
 
 function latestMessageAt(
@@ -304,5 +306,18 @@ export function useBadgeCounts(): UseBadgeCountsApi {
     [getProjectBadgeState, chatsByGroupId, chatBadgeFor],
   )
 
-  return { counts, markChatSeen, markAppOpened, getProjectBadgeState, getGroupBadgeState }
+  const getGroupChatBadge = useCallback(
+    (groupId: string): BadgeState['chat_messages'] =>
+      chatBadgeFor(chatsByGroupId.get(groupId) ?? []),
+    [chatsByGroupId, chatBadgeFor],
+  )
+
+  return {
+    counts,
+    markChatSeen,
+    markAppOpened,
+    getProjectBadgeState,
+    getGroupBadgeState,
+    getGroupChatBadge,
+  }
 }
