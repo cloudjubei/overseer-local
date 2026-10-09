@@ -1,13 +1,30 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { PointerEvent } from 'react'
-import { useActiveProject } from 'thefactory-ui/headless'
-import { useGit } from 'thefactory-ui/headless'
-import { extractServerError, getGitBranchDiffSummary } from 'thefactory-ui/headless/api'
-import { getPRUrl } from 'thefactory-ui/headless'
+import { useSearchParams } from 'react-router-dom'
+import {
+  branchMenuItems,
+  commitLinkNotice,
+  getPRUrl,
+  mergeOutcomeLine,
+  mergeSourceRef,
+  useActiveProject,
+  useGit,
+  useGitCommitLink,
+  type GitBranchMenuAction,
+  type GitBranchSection,
+  type GitMergeOutcomeLine,
+} from 'thefactory-ui/headless'
+import {
+  extractServerError,
+  getGitBranchDiffSummary,
+  type GitUnifiedBranch,
+} from 'thefactory-ui/headless/api'
 import {
   Alert,
   Button,
+  CommitChip,
   ConfirmDialog,
+  ContextMenu,
   GitSidebar,
   ICON_RAIL_DEFAULT_WIDTH,
   IconRail,
@@ -15,6 +32,7 @@ import {
   ResizeHandle,
   useLocalStorageBool,
   useLocalStorageNumber,
+  type GitLogRefLike,
 } from 'thefactory-ui/web'
 import {
   IconArchive,
@@ -34,8 +52,11 @@ import {
   CheckoutDialog,
   CreateBranchDialog,
   LoadingScreen,
+  MergeBranchSheet,
   MergeConflictResolver,
   MergeDialog,
+  MergeInProgressBanner,
+  MergeOutcomeNotice,
   StashDialog,
 } from 'thefactory-ui/web'
 import { CommitDiffViewer, type CommitDiffFetcher } from 'thefactory-ui/web'
@@ -71,6 +92,8 @@ export default function GitView() {
     applyStash,
     dropStash,
     deleteBranch,
+    stage,
+    abortMerge,
   } = useGit()
   const commitDiffFetcher = useCallback<CommitDiffFetcher>(
     async ({ baseRef, headRef, includePatch }, signal) => {
@@ -96,7 +119,34 @@ export default function GitView() {
     'local' | 'remote' | undefined
   >()
   const [selectedStashRef, setSelectedStashRef] = useState<string | undefined>()
-  const [selectedCommitSha, setSelectedCommitSha] = useState<string | undefined>()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const linkedCommitSha = searchParams.get('commit') ?? undefined
+  const commitLink = useGitCommitLink(linkedCommitSha)
+  const linkedCommitNotice = commitLinkNotice(commitLink)
+  const [selectedCommitSha, setSelectedCommitSha] = useState<string | undefined>(linkedCommitSha)
+  const selectCommit = useCallback(
+    (sha: string | undefined) => {
+      setSelectedCommitSha(sha)
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev)
+          if (sha && sha !== 'UNCOMMITTED') next.set('commit', sha)
+          else next.delete('commit')
+          return next
+        },
+        { replace: true },
+      )
+    },
+    [setSearchParams],
+  )
+  const [mergeSheet, setMergeSheet] = useState<{ source?: string } | null>(null)
+  const [mergeLine, setMergeLine] = useState<GitMergeOutcomeLine | null>(null)
+  const [branchMenu, setBranchMenu] = useState<{
+    branch: GitUnifiedBranch
+    section: GitBranchSection
+    at: { x: number; y: number }
+  } | null>(null)
+  const closeBranchMenu = useCallback(() => setBranchMenu(null), [])
   const [confirmDeleteName, setConfirmDeleteName] = useState<string | null>(null)
   const [forceDelete, setForceDelete] = useState(false)
   const [conflictResolverFile, setConflictResolverFile] = useState<string | null>(null)
@@ -152,7 +202,35 @@ export default function GitView() {
     setSelectedStashRef(undefined)
     setSelectedCommitSha(undefined)
     setOpError(null)
+    setMergeLine(null)
+    setMergeSheet(null)
+    setBranchMenu(null)
   }, [projectId])
+
+  useEffect(() => {
+    if (linkedCommitSha) setSelectedCommitSha(linkedCommitSha)
+  }, [linkedCommitSha, projectId])
+
+  // A short or differently-cased sha in the link resolves to the commit's full
+  // sha — written back so the row highlights and the link is canonical.
+  const resolvedLinkSha = commitLink.state === 'found' ? commitLink.sha : undefined
+  // A link that matches no commit (or several) shows its notice, not a diff error.
+  const linkUnresolvable =
+    commitLink.state === 'too-short' ||
+    commitLink.state === 'ambiguous' ||
+    (commitLink.state === 'not-found' && commitLink.exhausted)
+  const diffCommitSha = linkUnresolvable ? undefined : selectedCommitSha
+  useEffect(() => {
+    if (!resolvedLinkSha || resolvedLinkSha === linkedCommitSha) return
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev)
+        next.set('commit', resolvedLinkSha)
+        return next
+      },
+      { replace: true },
+    )
+  }, [resolvedLinkSha, linkedCommitSha, setSearchParams])
 
   // Default the rail selection to the current branch on mount so the full
   // set of rail actions (Commit, Pull, Push, …) is visible immediately —
@@ -297,12 +375,70 @@ export default function GitView() {
     void runOp('refresh', () => checkout(selectedBranch.name))
   }
 
-  const onCreatePR = () => {
-    if (!project?.repo_url || !selectedBranch) return
-    const url = getPRUrl(project.repo_url, selectedBranch.name, 'main')
+  const openPullRequest = (branchName: string) => {
+    if (!project?.repo_url) return
+    const url = getPRUrl(project.repo_url, branchName, 'main')
     if (url) window.open(url, '_blank', 'noopener,noreferrer')
     else setOpError(`Could not build PR URL for ${project.repo_url}`)
   }
+  const onCreatePR = () => {
+    if (selectedBranch) openPullRequest(selectedBranch.name)
+  }
+  const canOpenPullRequestFor = (branchName: string) =>
+    branchName !== 'main' && branchName !== 'master' && !!project?.repo_url
+
+  const merging = status?.merging
+  const openMergeSheet = (source?: string) => {
+    setMergeLine(null)
+    setMergeSheet({ source })
+  }
+  const openBranchMenu = (
+    name: string,
+    section: GitBranchSection,
+    at: { x: number; y: number },
+  ) => {
+    const branch = branches.find(
+      (b) => b.name === name && (section === 'local' ? b.isLocal : b.isRemote),
+    )
+    if (branch) setBranchMenu({ branch, section, at })
+  }
+  // A label in the graph names a local branch, or a remote one as `origin/x`.
+  const onContextMenuRef = (ref: GitLogRefLike, at: { x: number; y: number }) => {
+    if (ref.type === 'branch') return openBranchMenu(ref.name, 'local', at)
+    const remote = branches.find((b) => b.isRemote && mergeSourceRef(b, 'remote') === ref.name)
+    if (remote) setBranchMenu({ branch: remote, section: 'remote', at })
+  }
+  const onBranchMenuAction = (
+    action: GitBranchMenuAction,
+    branch: GitUnifiedBranch,
+    section: GitBranchSection,
+  ) => {
+    if (action === 'merge') openMergeSheet(mergeSourceRef(branch, section))
+    else if (action === 'checkout') void runOp('refresh', () => checkout(branch.name))
+    else if (action === 'pull-request') openPullRequest(branch.name)
+    else {
+      setForceDelete(false)
+      setConfirmDeleteName(branch.name)
+    }
+  }
+  const branchMenuEntries = branchMenu
+    ? branchMenuItems({
+        branch: branchMenu.branch,
+        section: branchMenu.section,
+        current: currentBranchName,
+        merging: !!merging,
+        isDirty,
+        canCreatePullRequest: canOpenPullRequestFor(branchMenu.branch.name),
+      }).map((item) => ({
+        key: item.action,
+        label: item.label,
+        ...(item.disabledReason ? { disabledReason: item.disabledReason } : {}),
+        ...(item.destructive ? { destructive: true } : {}),
+        onSelect: () => onBranchMenuAction(item.action, branchMenu.branch, branchMenu.section),
+      }))
+    : []
+  const renderCommitRef = (sha: string) =>
+    projectId ? <CommitChip projectId={projectId} sha={sha} /> : null
 
   // Desktop's stash flow does "apply, then optionally drop". Web keeps the
   // explicit Apply/Drop buttons separate so the user picks intentionally.
@@ -390,14 +526,15 @@ export default function GitView() {
               setSelectedBranchName(b.name)
               setSelectedBranchSection(section)
               setSelectedStashRef(undefined)
-              setSelectedCommitSha(undefined)
+              selectCommit(undefined)
             }}
             onDoubleClickBranch={(b) => onDoubleClickBranch(b.name)}
+            onContextMenuBranch={(b, section, at) => openBranchMenu(b.name, section, at)}
             onSelectStash={(ref) => {
               setSelectedStashRef(ref)
               setSelectedBranchName(undefined)
               setSelectedBranchSection(undefined)
-              setSelectedCommitSha(undefined)
+              selectCommit(undefined)
             }}
           />
         )}
@@ -408,6 +545,42 @@ export default function GitView() {
         {opError && (
           <div className="px-4 pt-3 shrink-0">
             <Alert>{opError}</Alert>
+          </div>
+        )}
+        {merging && (
+          <MergeInProgressBanner
+            merging={merging}
+            current={currentBranchName}
+            onResolveFile={(path) => setConflictResolverFile(path)}
+            onMarkResolved={async (path) => {
+              try {
+                await stage([path])
+              } catch (err) {
+                setOpError(extractServerError(err, 'Failed to stage the file').message)
+              }
+            }}
+            onCommit={() => setModal('commit')}
+            onAbort={async () => {
+              setOpError(null)
+              try {
+                await abortMerge()
+                setMergeLine(null)
+              } catch (err) {
+                setOpError(extractServerError(err, 'Failed to abort the merge').message)
+              }
+            }}
+          />
+        )}
+        {mergeLine && (
+          <MergeOutcomeNotice
+            line={mergeLine}
+            renderCommitRef={renderCommitRef}
+            onDismiss={() => setMergeLine(null)}
+          />
+        )}
+        {linkedCommitNotice && (
+          <div className="px-4 pt-3 shrink-0">
+            <Alert variant="info">{linkedCommitNotice}</Alert>
           </div>
         )}
 
@@ -426,9 +599,11 @@ export default function GitView() {
               style={{ height: topHeightPx, borderColor: 'var(--border-subtle)' }}
             >
               <LogPanel
+                renderCommitRef={renderCommitRef}
                 selectedCommitSha={selectedCommitSha}
-                scrollToSha={branchTipSha}
-                onSelectCommit={setSelectedCommitSha}
+                scrollToSha={resolvedLinkSha ?? (linkedCommitSha ? undefined : branchTipSha)}
+                onContextMenuRef={onContextMenuRef}
+                onSelectCommit={selectCommit}
                 onSelectBranchBySha={onSelectBranchBySha}
               />
             </section>
@@ -438,11 +613,12 @@ export default function GitView() {
             {/* Bottom: commit diff / local changes (no chrome label; the
                 parent navigation already indicates which view this is). */}
             <section className="flex flex-col flex-1 min-h-0">
-              {selectedCommitSha && selectedCommitSha !== 'UNCOMMITTED' ? (
+              {diffCommitSha && diffCommitSha !== 'UNCOMMITTED' ? (
                 <CommitDiffViewer
-                  commitSha={selectedCommitSha}
+                  commitSha={diffCommitSha}
                   log={log}
                   fetcher={commitDiffFetcher}
+                  renderCommitRef={renderCommitRef}
                 />
               ) : (
                 <LocalChangesPane onResolveConflict={(file) => setConflictResolverFile(file)} />
@@ -533,6 +709,26 @@ export default function GitView() {
               }
             />
 
+            <IconRailButton
+              icon={<IconFastMerge className="w-5 h-5" />}
+              label="Merge…"
+              onClick={() =>
+                openMergeSheet(
+                  selectedBranch.current
+                    ? undefined
+                    : mergeSourceRef(selectedBranch, selectedBranchSection ?? 'local'),
+                )
+              }
+              disabled={railBusy || !currentBranchName || !!merging}
+              tooltip={
+                merging
+                  ? 'A merge is in progress. Commit it or abort it first.'
+                  : currentBranchName
+                    ? `Merge a branch into ${currentBranchName}`
+                    : 'Check out a branch to merge into'
+              }
+            />
+
             {!selectedBranch.current && (
               <>
                 <IconRailButton
@@ -550,7 +746,7 @@ export default function GitView() {
                   <>
                     <IconRailButton
                       icon={<IconFastMerge className="w-5 h-5" />}
-                      label="Merge"
+                      label="Review"
                       onClick={() => {
                         if (!currentBranchName) return
                         setMergeArgs({
@@ -562,7 +758,7 @@ export default function GitView() {
                       disabled={!canMerge}
                       tooltip={
                         currentBranchName
-                          ? `Merge ${selectedBranch.name} → ${currentBranchName}`
+                          ? `Review merging ${selectedBranch.name} → ${currentBranchName} (changes, compilation, tests)`
                           : 'Current branch unknown'
                       }
                     />
@@ -643,12 +839,33 @@ export default function GitView() {
       <CreateBranchDialog isOpen={modal === 'create-branch'} onClose={() => setModal(null)} />
       <MergeDialog
         isOpen={modal === 'merge'}
+        renderCommitRef={renderCommitRef}
         onClose={() => {
           setModal(null)
           setMergeArgs(null)
         }}
         baseRef={mergeArgs?.baseRef}
         branch={mergeArgs?.branch}
+      />
+      <MergeBranchSheet
+        isOpen={mergeSheet !== null}
+        onClose={() => setMergeSheet(null)}
+        projectId={projectId}
+        initialSource={mergeSheet?.source}
+        onMerged={(outcome) => {
+          setMergeLine(mergeOutcomeLine(outcome))
+          // Show what the merge left: its commit, or the working tree with the
+          // conflicts (or the staged merge) to resolve and commit.
+          if (outcome.mergedSha) selectCommit(outcome.mergedSha)
+          else if (outcome.status === 'conflicts' || outcome.status === 'staged')
+            selectCommit('UNCOMMITTED')
+        }}
+      />
+      <ContextMenu
+        at={branchMenu?.at ?? null}
+        items={branchMenuEntries}
+        onClose={closeBranchMenu}
+        label={branchMenu ? `Branch ${branchMenu.branch.name}` : undefined}
       />
       <StashDialog isOpen={modal === 'stash'} onClose={() => setModal(null)} />
       <ConfirmDialog
@@ -705,8 +922,11 @@ export default function GitView() {
           isOpen={conflictResolverFile !== null}
           onClose={() => setConflictResolverFile(null)}
           baseRef="HEAD"
-          branch={current.name}
-          conflicts={(localDiff?.conflicts ?? []).map((path) => ({
+          branch={merging ? 'MERGE_HEAD' : current.name}
+          initialPath={conflictResolverFile}
+          conflicts={Array.from(
+            new Set([...(localDiff?.conflicts ?? []), ...(merging?.conflictedFiles ?? [])]),
+          ).map((path) => ({
             path,
             type: 'modify' as never,
           }))}

@@ -1,7 +1,7 @@
 import { useCallback } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
-import { useFiles } from 'thefactory-ui/headless'
+import { FILE_LINE_PARAM, fileLineParam, useFiles } from 'thefactory-ui/headless'
 import { useAuth } from '@core/contexts/AuthContext'
 import { FilePane as FilePaneBase } from 'thefactory-ui/web'
 
@@ -34,6 +34,8 @@ export default function FilePaneConnected() {
   const { token, baseUrl } = useAuth()
   const { projectId } = useParams<{ projectId: string }>()
   const navigate = useNavigate()
+  const [params] = useSearchParams()
+  const focusLine = fileLineParam(params.get(FILE_LINE_PARAM))
 
   const meta = files.find((f) => f.relativePath === selectedPath)
 
@@ -73,6 +75,7 @@ export default function FilePaneConnected() {
       onRename={renameFile}
       onDelete={onDelete}
       getBinaryUrl={getBinaryUrl}
+      {...(focusLine !== undefined ? { focusLine } : {})}
       revokeBinaryUrl={(url) => URL.revokeObjectURL(url)}
       fileInfo={
         meta

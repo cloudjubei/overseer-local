@@ -10,6 +10,7 @@ import {
   useChatToolCatalog,
 } from 'thefactory-ui/headless'
 import type { ChatContext } from 'thefactory-ui/headless/api'
+import { getChatContextKey } from '@core/chats/chatKey'
 import {
   ChatSettingsDropdown,
   HistorySummarizationSettings,
@@ -24,9 +25,6 @@ export type ChatSettingsDropdownConnectedProps = {
   settingsBtnRef: RefObject<HTMLButtonElement | null>
   onDeleteChat: () => Promise<void> | void
 }
-
-const CLI_TOOLS_HINT =
-  'These are the factory tools this CLI agent can reach. Its own file and shell tools are bounded by the sandbox, not by this list.'
 
 /**
  * Desktop wrapper around the shared `ChatSettingsDropdown`. Reads + persists
@@ -48,7 +46,8 @@ export default function ChatSettingsDropdownConnected({
   settingsBtnRef,
   onDeleteChat,
 }: ChatSettingsDropdownConnectedProps) {
-  const { getEffectiveChatSettings, updateChatSettings, settingsBlocked } = useChats()
+  const { getEffectiveChatSettings, getChatTypeSettings, updateChatSettings, settingsBlocked } =
+    useChats()
   const { cliRunner } = useChatCliRunner(context)
   const runner = cliRunner ? 'cli' : 'api'
   const { catalog } = useChatToolCatalog(runner)
@@ -77,27 +76,7 @@ export default function ChatSettingsDropdownConnected({
   }
 
   const toggleAvailable = async (tool: ToolToggle) => {
-    const patch = applyChatToolToggle(
-      catalog,
-      completion,
-      runner,
-      tool.name,
-      'available',
-      !tool.available,
-    )
-    if (Object.keys(patch).length === 0) return
-    await persistCompletion(patch)
-  }
-
-  const toggleAutoCall = async (tool: ToolToggle) => {
-    const patch = applyChatToolToggle(
-      catalog,
-      completion,
-      runner,
-      tool.name,
-      'autoCall',
-      !tool.autoCall,
-    )
+    const patch = applyChatToolToggle(catalog, completion, runner, tool.name, !tool.available)
     if (Object.keys(patch).length === 0) return
     await persistCompletion(patch)
   }
@@ -108,7 +87,6 @@ export default function ChatSettingsDropdownConnected({
       onClose={onClose}
       settingsBtnRef={settingsBtnRef}
       blocked={settingsBlocked}
-      cliBacked={!!cliRunner}
       completion={completion}
       draftPrompt={draftPrompt}
       setDraftPrompt={setDraftPrompt}
@@ -121,17 +99,14 @@ export default function ChatSettingsDropdownConnected({
       }}
       tools={tools}
       toggleAvailable={toggleAvailable}
-      toggleAutoCall={toggleAutoCall}
-      onResetTools={
-        runner === 'cli' ? () => persistCompletion(resetChatToolToggles(runner)) : undefined
+      onResetTools={() =>
+        persistCompletion(resetChatToolToggles(getChatTypeSettings(context).completionSettings))
       }
-      toolsHint={runner === 'cli' ? CLI_TOOLS_HINT : undefined}
-      toolApproval={buildChatToolApprovalToggle(completion, runner)}
+      toolApproval={buildChatToolApprovalToggle(completion)}
       onToolApprovalChange={async (auto) => {
-        const patch = applyChatToolApprovalMode(runner, auto)
-        if (Object.keys(patch).length === 0) return
-        await persistCompletion(patch)
+        await persistCompletion(applyChatToolApprovalMode(auto))
       }}
+      rulesChatContextId={getChatContextKey(context)}
       persistSettings={persistCompletion}
       onDeleteChat={onDeleteChat}
       extraContent={

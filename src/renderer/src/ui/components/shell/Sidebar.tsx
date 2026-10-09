@@ -19,6 +19,9 @@ import {
   GLOBAL_CHAT_TITLE,
   GROUP_TAB_DEFS,
   SHELL_TAB_DEFS,
+  projectShowsShellTab,
+  shellTabForProject,
+  type ShellTabProjectFlags,
   groupTabIndicator,
   groupTabToProjectTab,
   projectTabToGroupTab,
@@ -145,13 +148,10 @@ export default function Sidebar({ projectId, activeTab, activeGroupId, activeGro
 
   const onSelectProject = (id: string) => {
     setActiveProjectId(id)
-    // The `app` tab only exists for projects that have one — carrying it to a
-    // non-app project would land on an empty App view, so fall back to home.
-    const targetMeta = projects.find((p) => p.id === id)?.metadata as
-      | { hasApp?: unknown }
-      | undefined
-    const tab =
-      targetProjectTab === 'app' && targetMeta?.hasApp !== true ? 'stories' : targetProjectTab
+    // App and Design only exist for some projects — carrying one to a project
+    // without it would land on an empty view, so fall back to home.
+    const targetMeta = projects.find((p) => p.id === id)?.metadata as ShellTabProjectFlags
+    const tab = shellTabForProject(targetProjectTab, targetMeta)
     // Switching projects while inside Settings should keep the user on
     // their current sub-tab (`?tab=llms`, `?tab=github`, …). Settings is
     // mostly global; only `NotificationSettings` reads per-project state
@@ -278,12 +278,7 @@ export default function Sidebar({ projectId, activeTab, activeGroupId, activeGro
             {SHELL_TAB_DEFS.filter((t) => {
               if (t.key === 'settings') return false
               if ('hiddenInSidebar' in t && t.hiddenInSidebar) return false
-              if (t.key === 'app') {
-                const meta = projects.find((p) => p.id === projectId)?.metadata as
-                  | { hasApp?: unknown }
-                  | undefined
-                return meta?.hasApp === true
-              }
+              if (!projectShowsShellTab(t.key, projects.find((p) => p.id === projectId)?.metadata as ShellTabProjectFlags)) return false
               return true
             }).map((tab) => {
               const isActive = tab.key === activeTab && !activeGroupId

@@ -12,7 +12,7 @@ export { useApi, type ApiContextValue } from 'thefactory-ui/headless'
 export function ApiProvider({ children }: { children: ReactNode }) {
   const { baseUrl } = useAuth()
   return (
-    <HeadlessApiProvider apiBaseUrl={baseUrl} wsBaseUrl={baseUrl}>
+    <HeadlessApiProvider apiBaseUrl={baseUrl} wsBaseUrl={baseUrl} client="desktop">
       {children}
     </HeadlessApiProvider>
   )

@@ -1,4 +1,5 @@
-import { GitCommitGraph } from 'thefactory-ui/web'
+import type { ReactNode } from 'react'
+import { GitCommitGraph, type GitLogRefLike } from 'thefactory-ui/web'
 import { useGit } from 'thefactory-ui/headless'
 
 export type LogPanelProps = {
@@ -11,6 +12,10 @@ export type LogPanelProps = {
    * matching branch (matches desktop's `onSelectBranchBySha` flow).
    */
   onSelectBranchBySha?: (sha: string) => void
+  /** Right-click on a branch label in the graph: that branch's context menu. */
+  onContextMenuRef?: (ref: GitLogRefLike, at: { x: number; y: number }) => void
+  /** Each commit's sha as a chip in the graph. */
+  renderCommitRef?: (sha: string) => ReactNode
 }
 
 // Renders the project's commit log as a visual branch-topology graph.
@@ -21,6 +26,8 @@ export default function LogPanel({
   scrollToSha,
   onSelectCommit,
   onSelectBranchBySha,
+  onContextMenuRef,
+  renderCommitRef,
 }: LogPanelProps = {}) {
   const { log, status, hasMoreLog, isLogLoading, loadMoreLog } = useGit()
   const uncommitted =
@@ -36,6 +43,8 @@ export default function LogPanel({
       scrollToSha={scrollToSha}
       onSelectCommit={onSelectCommit}
       onSelectBranchBySha={onSelectBranchBySha}
+      onContextMenuRef={onContextMenuRef}
+      renderCommitRef={renderCommitRef}
       onLoadMore={loadMoreLog}
       loadingMore={isLogLoading}
       hasMore={hasMoreLog}

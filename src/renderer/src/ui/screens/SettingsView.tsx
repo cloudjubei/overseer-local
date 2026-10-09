@@ -1,11 +1,12 @@
-import { useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { CollapsibleSidebar } from 'thefactory-ui/web'
 
 // Subviews
 import { VisualSettings } from 'thefactory-ui/web'
 import LLMSettings from '@ui/components/settings/LLMSettings'
-import { NotificationSettings } from 'thefactory-ui/web'
+import { NotificationSettings, StorageUsageSettings } from 'thefactory-ui/web'
 import { CrossProjectSettings } from 'thefactory-ui/web'
+import { SavedRulesSettings } from 'thefactory-ui/web'
 import { GitCredentialsSettings } from 'thefactory-ui/web'
 import { WebSearchSettings } from 'thefactory-ui/web'
 import { DatabaseSettings } from 'thefactory-ui/web'
@@ -24,10 +25,12 @@ import {
   IconPalette,
   IconRobot,
   IconSearch,
+  IconShield,
   IconWorkflow,
 } from 'thefactory-ui/web/icons'
 
 import DeveloperSettings from '@ui/components/settings/DeveloperSettings'
+import { getChatContext, getChatContextKey } from '@core/chats/chatKey'
 
 // Settings Categories
 const CATEGORIES = [
@@ -44,6 +47,12 @@ const CATEGORIES = [
     label: 'Cross-project',
     icon: <IconList className="h-4 w-4" />,
     accent: 'blue',
+  },
+  {
+    id: 'rules',
+    label: 'Saved rules',
+    icon: <IconShield className="h-4 w-4" />,
+    accent: 'green',
   },
   { id: 'github', label: 'Git', icon: <IconGitHub className="h-4 w-4" />, accent: 'gray' },
   { id: 'tickets', label: 'Tickets', icon: <IconBoard className="h-4 w-4" />, accent: 'blue' },
@@ -99,6 +108,17 @@ type CategoryId = (typeof CATEGORIES)[number]['id'] | 'project' | 'group'
 export default function SettingsView({ scope }: { scope: SettingsScope }) {
   const [searchParams, setSearchParams] = useSearchParams()
   const queryTab = searchParams.get('tab')
+  const navigate = useNavigate()
+  const openChat = (chatContextId: string) => {
+    const context = getChatContext(chatContextId)
+    if (!context) return
+    const key = encodeURIComponent(getChatContextKey(context))
+    if ('projectId' in context && context.projectId) {
+      navigate(`/projects/${context.projectId}/chat/${key}`)
+    } else if ('groupId' in context && context.groupId) {
+      navigate(`/groups/${context.groupId}/chat/${key}`)
+    }
+  }
   const scopeCategory = SCOPE_CATEGORIES[scope.kind]
   const categories = [scopeCategory, ...CATEGORIES]
   const isCategory = (value: string | null): value is CategoryId =>
@@ -150,8 +170,14 @@ export default function SettingsView({ scope }: { scope: SettingsScope }) {
             <GroupTicketSettings groupId={scope.groupId} />
           )}
           {activeCategory === 'visual' && <VisualSettings />}
-          {activeCategory === 'notifications' && <NotificationSettings />}
+          {activeCategory === 'notifications' && (
+          <div className="flex flex-col gap-8">
+            <NotificationSettings />
+            <StorageUsageSettings />
+          </div>
+        )}
           {activeCategory === 'cross-project' && <CrossProjectSettings />}
+          {activeCategory === 'rules' && <SavedRulesSettings onOpenChat={openChat} />}
           {activeCategory === 'github' && (
             // Electron renderer can't redirect cleanly (file:// host) — use
             // the device flow only. window.open is trapped by the main

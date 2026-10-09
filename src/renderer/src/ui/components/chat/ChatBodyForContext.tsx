@@ -16,7 +16,7 @@ import {
   useReferenceRenderer,
 } from 'thefactory-ui/web'
 import type { ChatContext } from 'thefactory-ui/headless/api'
-import { useAgents } from 'thefactory-ui/headless'
+import { useAgents, useChatComposer } from 'thefactory-ui/headless'
 import { useChats } from 'thefactory-ui/headless'
 import { chatClosure } from 'thefactory-ui/headless'
 import { useCredentialCaptures } from 'thefactory-ui/headless'
@@ -26,6 +26,7 @@ import { usePendingToolGrants } from 'thefactory-ui/headless'
 import { useTools } from 'thefactory-ui/headless'
 import {
   buildChatPromptVariables,
+  formatChatTitle,
   useProjectsGroups,
   useReferences,
   useStories,
@@ -33,6 +34,8 @@ import {
 import { useProcessRuns } from 'thefactory-ui/headless'
 import { useActiveProject } from 'thefactory-ui/headless'
 import { getChatContextKey } from '@core/chats/chatKey'
+import { fetchAttachmentPreviewUrl } from '@core/chats/attachmentPreviewUrl'
+import { useAuth } from '@core/contexts/AuthContext'
 import { useBadgeCounts } from '@core/notifications/useBadgeCounts'
 import { useChatContextLastRead as useChatLastRead } from 'thefactory-ui/web'
 import { Button } from 'thefactory-ui/web'
@@ -71,12 +74,7 @@ export default function ChatBodyForContext({
     activeLLMConfig,
     getChat,
     getChatLiveState,
-    getDraft,
-    setDraft,
-    clearDraft,
-    sendMessage,
     restartLastTurn,
-    confirmTools,
     abortChat,
     deleteLastMessage,
     uploadAttachment,
@@ -86,7 +84,7 @@ export default function ChatBodyForContext({
   const { paths, files } = useFiles()
   const { previewTool } = useTools()
   const { project } = useActiveProject()
-  const { getStory, getFeature } = useStories()
+  const { getStory, getFeature, storyDisplayIndex, featureDisplayIndex } = useStories()
   const { markChatSeen } = useBadgeCounts()
   const { lastReadIso, markReadByContext } = useChatLastRead(context)
 
@@ -234,49 +232,22 @@ export default function ChatBodyForContext({
     return undefined
   }, [chat?.messages, liveState.isSending])
 
-  // ---- Draft (controlled input value mirrored from the ChatsContext ref) --
-  const [draft, setDraftState] = useState<string>(() => getDraft(context))
-  // Pending attachment paths — ephemeral, reset alongside the draft when the
-  // active chat changes.
-  const [attachments, setAttachments] = useState<string[]>([])
-  const lastKeyRef = useRef<string>(contextKey)
-  if (lastKeyRef.current !== contextKey) {
-    lastKeyRef.current = contextKey
-    setDraftState(getDraft(context))
-    setAttachments([])
-  }
-  const onInputChange = useCallback(
-    (next: string) => {
-      setDraftState(next)
-      setDraft(context, next)
-    },
-    [context, setDraft],
-  )
-
   // ---- Send / abort / confirm --------------------------------------------
   const [scrollSignal, setScrollSignal] = useState(0)
   const canonicalizeRef = useRef<(text: string) => string>((text) => text)
-  const onSend = useCallback(
-    async (content: string, sentAttachments?: string[]) => {
-      // Optimistic clear — the textarea blanks immediately so the user sees
-      // the send go through. If `sendMessage` rejects, the live state's
-      // sendError banner surfaces the error.
-      clearDraft(context)
-      setDraftState('')
-      setAttachments([])
-      setScrollSignal((s) => s + 1)
-      await sendMessage(context, canonicalizeRef.current(content), sentAttachments)
-    },
-    [clearDraft, context, sendMessage],
-  )
+  // The chat's persisted draft — text, attachment chips, pending queue. A send
+  // clears it at once and puts it back if the message does not reach the server.
+  const composer = useChatComposer(context, {
+    canonicalize: (text) => canonicalizeRef.current(text),
+    onSent: () => setScrollSignal((s) => s + 1),
+  })
+  const attachments = composer.attachments
+  const onInputChange = composer.setText
+  const onSend = composer.send
   const onAbort = useCallback(() => {
     if (chat && isAgentRunChat) return cancelRun(chat)
     return abortChat(context, cliRunId)
   }, [abortChat, cancelRun, chat, cliRunId, context, isAgentRunChat])
-  const onConfirmTools = useCallback(
-    (ids: string[]) => confirmTools(context, ids),
-    [confirmTools, context],
-  )
   const onDeleteLastMessage = useCallback(
     () => deleteLastMessage(context),
     [deleteLastMessage, context],
@@ -335,6 +306,25 @@ export default function ChatBodyForContext({
       uploadAttachment(context, file.name, arrayBufferToBase64(await file.arrayBuffer())),
     [uploadAttachment, context],
   )
+  const { token, baseUrl } = useAuth()
+  // A restored draft's image chips load their thumbnails from the project's
+  // files; a group or general chat's attachments have no file route, so they
+  // show the plain chip.
+  const getAttachmentPreviewUrl = useCallback(
+    (path: string) =>
+      context.projectId && baseUrl
+        ? fetchAttachmentPreviewUrl(baseUrl, context.projectId, path, token)
+        : Promise.reject(new Error('No preview')),
+    [baseUrl, context.projectId, token],
+  )
+  const dropTargetTitle = formatChatTitle({
+    context,
+    chatTitle: chat?.title,
+    projectName: project?.title,
+    groupName: context.groupId ? getGroupById(context.groupId)?.title : undefined,
+    storyDisplayIndex,
+    featureDisplayIndex,
+  })
 
   // ---- Read receipts -----------------------------------------------------
   const onAtBottomChange = useCallback(
@@ -488,7 +478,6 @@ export default function ChatBodyForContext({
       onAbort={onAbort}
       isBusy={liveState.isSending || isRunActive}
       activeCliRunId={cliRunId}
-      onConfirmTools={onConfirmTools}
       previewTool={
         context.projectId ? (_id, toolName, args) => previewTool(toolName, args) : undefined
       }
@@ -507,17 +496,21 @@ export default function ChatBodyForContext({
       onReadLatest={onReadLatest}
       scrollToBottomSignal={scrollSignal}
       inputOverride={inputOverride}
-      inputValue={draft}
+      inputValue={composer.text}
       onInputChange={onInputChange}
+      pendingQueue={composer.queue}
       inputProps={{
         filePaths: paths,
         ...(references.searchFiles ? { searchFiles: references.searchFiles } : {}),
         describeFile: references.describeFile,
         attachments,
-        onChangeAttachments: setAttachments,
+        onChangeAttachments: composer.setAttachments,
         onSearchReferences: references.searchWork,
         onSearchHandles: references.searchHandles,
-        ...(context.projectId ? { onUploadAttachment } : {}),
+        onUploadAttachment,
+        onAddAttachment: composer.addAttachment,
+        getAttachmentPreviewUrl,
+        dropTargetTitle,
         suggestedActions,
         placeholder: inputProps?.placeholder,
         autoFocus: inputProps?.autoFocus,

@@ -3,6 +3,7 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { registerAuthIpc } from './registerAuthIpc'
 import { registerSystemDictationIpc } from './registerSystemDictationIpc'
+import { isStrayFileNavigation } from './navigationGuard'
 
 const getAppIcon = () => {
   // In dev (electron-forge start + vite), __dirname points to .vite/build, so use process.cwd()
@@ -47,6 +48,10 @@ async function createWindow(): Promise<void> {
   mainWindow.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
     return { action: 'deny' }
+  })
+
+  mainWindow.webContents.on('will-navigate', (event, url) => {
+    if (isStrayFileNavigation(url, mainWindow.webContents.getURL())) event.preventDefault()
   })
 
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {

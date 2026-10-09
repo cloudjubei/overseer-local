@@ -7,6 +7,8 @@ import {
   IconFiles,
   IconHome,
   IconMonitor,
+  IconPalette,
+  IconSearch,
   IconSettings,
   IconTests,
   IconTimeline,
@@ -22,8 +24,10 @@ import type { NavIconKey } from 'thefactory-ui/headless'
  */
 const ICONS: Record<NavIconKey, ReactNode> = {
   home: <IconHome />,
+  search: <IconSearch />,
   app: <IconMonitor />,
   files: <IconFiles />,
+  design: <IconPalette />,
   notes: <IconDocument />,
   chat: <IconChat />,
   git: <IconBranch />,

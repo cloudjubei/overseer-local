@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useApi } from '@core/contexts/ApiContext'
 import { useWebNotifications } from 'thefactory-ui/web'
-import { crossProjectNotification } from 'thefactory-ui/headless'
+import { crossProjectNotification, storageWarningNotification } from 'thefactory-ui/headless'
 
 /**
  * Bridges WS broadcast events to OS-level notifications. Renders nothing.
@@ -40,6 +40,14 @@ export default function EventNotifier() {
         const n = crossProjectNotification(fr)
         if (n) notify('cross-project', n)
       }),
+    [ws, notify],
+  )
+
+  useEffect(
+    () =>
+      ws.on<Parameters<typeof storageWarningNotification>[0]>('storage:usage-warning', (warning) =>
+        notify('storage', storageWarningNotification(warning)),
+      ),
     [ws, notify],
   )
 

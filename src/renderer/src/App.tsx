@@ -13,7 +13,12 @@ import type { ReactNode } from 'react'
 import { CodeBlockThemeProvider } from 'thefactory-ui/headless'
 import { AgentsProvider } from 'thefactory-ui/headless'
 import { ApiProvider } from '@core/contexts/ApiContext'
-import { AppSettingsProviderConnected, localStorageAdapter } from 'thefactory-ui/web'
+import {
+  AppSettingsProviderConnected,
+  ChatDropController,
+  localStorageAdapter,
+  subscribePageHidden,
+} from 'thefactory-ui/web'
 import { useAppSettings } from 'thefactory-ui/headless'
 import { AuthProvider, useAuth } from '@core/contexts/AuthContext'
 import { ChatsProvider } from 'thefactory-ui/headless'
@@ -57,15 +62,22 @@ import {
 import { useApplyTheme } from '@ui/hooks/useApplyTheme'
 import ChatView from '@ui/screens/ChatView'
 import FilesView from '@ui/screens/FilesView'
+import DesignView from '@ui/screens/DesignView'
 import GroupChatView from '@ui/screens/GroupChatView'
 import GroupNotesView from '@ui/screens/GroupNotesView'
 import GroupHomeView from '@ui/screens/GroupHomeView'
 import GitView from '@ui/screens/GitView'
 import LiveDataView from '@ui/screens/LiveDataView'
 import NotesView from '@ui/screens/NotesView'
+import SearchView from '@ui/screens/SearchView'
 import ProcessesTab from '@ui/screens/ProcessesTab'
 import GroupProcessesView from '@ui/screens/GroupProcessesView'
-import { LoadingScreen, ProjectTimelineView, WelcomeView } from 'thefactory-ui/web'
+import {
+  BackendStartupGate,
+  LoadingScreen,
+  ProjectTimelineView,
+  WelcomeView,
+} from 'thefactory-ui/web'
 import LoginScreen from '@ui/screens/LoginScreen'
 import SettingsView from '@ui/screens/SettingsView'
 import StoriesView from '@ui/screens/StoriesView'
@@ -94,57 +106,63 @@ function BackendGate() {
   if (!ready) return <LoadingScreen label="Initializing…" />
   if (!baseUrl || !token) return <Navigate to="/login" replace />
   return (
-    <LLMConfigsProviderConnected>
-      <CliConfigsProvider>
-        <GitCredentialsProvider>
-          <WebSearchKeysProvider>
-            <ProviderConnectionsProvider>
-              <OverseerProvider>
-                <ProjectsProvider>
-                  <ProjectsGroupsProvider>
-                    <TemplatesProvider>
-                      <StoriesProvider>
-                        <FilesProvider>
-                          <ProjectReferenceRendering>
-                            <GitProvider storage={localStorageAdapter}>
-                              <CostsProvider>
-                                <ChatsProvider>
-                                  <AgentsProvider>
-                                    <TestsProvider>
-                                      <ToolsProvider>
-                                        <EntitiesProvider>
-                                          <DataSourcesProvider>
-                                            <IngestionProvider>
-                                              <GlobalChatProvider>
-                                                <EventNotifier />
-                                                <DiagnosticsOverlay />
-                                                <ShortcutsHelp />
-                                                <CommandMenu />
-                                                <GlobalChatOverlayConnected />
-                                                <GitCredentialErrorModalMount />
-                                                <Outlet />
-                                              </GlobalChatProvider>
-                                            </IngestionProvider>
-                                          </DataSourcesProvider>
-                                        </EntitiesProvider>
-                                      </ToolsProvider>
-                                    </TestsProvider>
-                                  </AgentsProvider>
-                                </ChatsProvider>
-                              </CostsProvider>
-                            </GitProvider>
-                          </ProjectReferenceRendering>
-                        </FilesProvider>
-                      </StoriesProvider>
-                    </TemplatesProvider>
-                  </ProjectsGroupsProvider>
-                </ProjectsProvider>
-              </OverseerProvider>
-            </ProviderConnectionsProvider>
-          </WebSearchKeysProvider>
-        </GitCredentialsProvider>
-      </CliConfigsProvider>
-    </LLMConfigsProviderConnected>
+    <BackendStartupGate>
+      <LLMConfigsProviderConnected>
+        <CliConfigsProvider>
+          <GitCredentialsProvider>
+            <WebSearchKeysProvider>
+              <ProviderConnectionsProvider>
+                <OverseerProvider>
+                  <ProjectsProvider>
+                    <ProjectsGroupsProvider>
+                      <TemplatesProvider>
+                        <StoriesProvider>
+                          <FilesProvider>
+                            <ProjectReferenceRendering>
+                              <GitProvider storage={localStorageAdapter}>
+                                <CostsProvider>
+                                  <ChatsProvider
+                                    draftStorage={localStorageAdapter}
+                                    subscribeAppHidden={subscribePageHidden}
+                                  >
+                                    <AgentsProvider>
+                                      <TestsProvider>
+                                        <ToolsProvider>
+                                          <EntitiesProvider>
+                                            <DataSourcesProvider>
+                                              <IngestionProvider>
+                                                <GlobalChatProvider>
+                                                  <EventNotifier />
+                                                  <DiagnosticsOverlay />
+                                                  <ShortcutsHelp />
+                                                  <CommandMenu />
+                                                  <GlobalChatOverlayConnected />
+                                                  <ChatDropController />
+                                                  <GitCredentialErrorModalMount />
+                                                  <Outlet />
+                                                </GlobalChatProvider>
+                                              </IngestionProvider>
+                                            </DataSourcesProvider>
+                                          </EntitiesProvider>
+                                        </ToolsProvider>
+                                      </TestsProvider>
+                                    </AgentsProvider>
+                                  </ChatsProvider>
+                                </CostsProvider>
+                              </GitProvider>
+                            </ProjectReferenceRendering>
+                          </FilesProvider>
+                        </StoriesProvider>
+                      </TemplatesProvider>
+                    </ProjectsGroupsProvider>
+                  </ProjectsProvider>
+                </OverseerProvider>
+              </ProviderConnectionsProvider>
+            </WebSearchKeysProvider>
+          </GitCredentialsProvider>
+        </CliConfigsProvider>
+      </LLMConfigsProviderConnected>
+    </BackendStartupGate>
   )
 }
 
@@ -191,15 +209,20 @@ function MainShell() {
   // takes an extra render to reflect the new path. Without this guard the
   // URL-sync effect fires on that intermediate render with the OLD URL,
   // reverting `activeProjectId` back to the previous project and locking
-  // every project-dependent context into an oscillation.
+  // every project-dependent context into an oscillation. The URL the app
+  // opens on is a change too, and a change waits until its project has loaded.
   const lastUrlProjectIdRef = useRef(projectId)
+  const pendingUrlProjectIdRef = useRef(projectId)
   useEffect(() => {
-    const urlChanged = lastUrlProjectIdRef.current !== projectId
-    lastUrlProjectIdRef.current = projectId
-    if (!projectId) return
-    if (!urlChanged) return
-    if (!projects.some((p) => p.id === projectId)) return
-    if (projectId !== activeProjectId) setActiveProjectId(projectId)
+    if (lastUrlProjectIdRef.current !== projectId) {
+      lastUrlProjectIdRef.current = projectId
+      pendingUrlProjectIdRef.current = projectId
+    }
+    const target = pendingUrlProjectIdRef.current
+    if (!target) return
+    if (!projects.some((p) => p.id === target)) return
+    pendingUrlProjectIdRef.current = undefined
+    if (target !== activeProjectId) setActiveProjectId(target)
   }, [projectId, projects, activeProjectId, setActiveProjectId])
 
   useEffect(() => {
@@ -218,7 +241,9 @@ function MainShell() {
             {tab === 'stories' && <StoriesView />}
             {tab === 'app' && <ProjectAppTab />}
             {tab === 'chat' && <ChatView />}
+            {tab === 'search' && <SearchView />}
             {tab === 'files' && <FilesView />}
+            {tab === 'design' && <DesignView />}
             {tab === 'notes' && <NotesView />}
             {tab === 'git' && <GitView />}
             {tab === 'tests' && <TestsView />}

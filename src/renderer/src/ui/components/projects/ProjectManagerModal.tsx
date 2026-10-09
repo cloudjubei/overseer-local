@@ -558,14 +558,14 @@ export default function ProjectManagerModal({ onRequestClose }: { onRequestClose
               <div className="flex flex-col gap-1">
                 <label className="text-sm font-medium">Group (optional)</label>
                 <Select
-                  value={templateMainGroupId ?? ''}
-                  onValueChange={(v) => setTemplateMainGroupId(v === '' ? null : v)}
+                  value={templateMainGroupId ?? '__none__'}
+                  onValueChange={(v) => setTemplateMainGroupId(v === '__none__' ? null : v)}
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="No group" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">No group</SelectItem>
+                    <SelectItem value="__none__">No group</SelectItem>
                     {groups
                       .filter((g) => g.type === 'MAIN')
                       .map((g) => (
