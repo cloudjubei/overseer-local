@@ -2,21 +2,15 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import type { DragEvent, KeyboardEvent, ReactNode } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useAppSettings } from 'thefactory-ui/headless'
-import { useProjects } from 'thefactory-ui/headless'
+import { prefetchProjectStories, useProjects, useRequestLeave } from 'thefactory-ui/headless'
 import { useProjectsGroups, type ProjectsGroup } from 'thefactory-ui/headless'
 import { useSeedActivities } from 'thefactory-ui/headless'
 import { useBadgeCounts } from '@core/notifications/useBadgeCounts'
 import type { BadgeColor, BadgeColorCategory } from '@core/types/settings'
-import { Button, NavIndicator, renderProjectIcon } from 'thefactory-ui/web'
+import { Button, NavIndicator, renderProjectIcon, useChatsSeen } from 'thefactory-ui/web'
+import { IconCollection, IconFolder, IconFolderOpen, IconMenu } from 'thefactory-ui/web/icons'
 import {
-  IconChat,
-  IconCollection,
-  IconFolder,
-  IconFolderOpen,
-  IconMenu,
-} from 'thefactory-ui/web/icons'
-import {
-  GLOBAL_CHAT_TITLE,
+  ASSISTANT_NAV_DEF,
   GROUP_TAB_DEFS,
   SHELL_TAB_DEFS,
   projectShowsShellTab,
@@ -24,18 +18,24 @@ import {
   type ShellTabProjectFlags,
   groupTabIndicator,
   groupTabToProjectTab,
+  inkBadgeLook,
+  navRowTitle,
   projectTabToGroupTab,
   scopeRowIndicator,
+  settingsNavIndicator,
   shellTabIndicator,
   splitGroupsAndProjects,
-  useGlobalChat,
+  useAssistantConversations,
+  useStoredSignInsExpired,
   type BadgeState,
   type GroupTabKey,
+  type InkBadgeLook,
   type NavRowIndicator,
   type ShellTabKey,
 } from 'thefactory-ui/headless'
 import { navIcon } from './navIcons'
 import ProjectManagerModal from '@ui/components/projects/ProjectManagerModal'
+import { assistantPath } from '@core/chats/assistantPath'
 
 type Props = {
   projectId?: string
@@ -44,6 +44,8 @@ type Props = {
   activeGroupId?: string
   /** Active per-group tab. Only used when `activeGroupId` is set. */
   activeGroupTab?: GroupTabKey
+  /** The Assistant page is on screen. */
+  assistantActive?: boolean
 }
 
 const COLLAPSED_PX = 64
@@ -67,17 +69,33 @@ const DND_PROJECT_MIME = 'application/x-thefactory-sidebar-project'
  * project (or active group) — every other row is hidden so the rail stays
  * scannable at a glance.
  */
-export default function Sidebar({ projectId, activeTab, activeGroupId, activeGroupTab }: Props) {
+export default function Sidebar({
+  projectId,
+  activeTab,
+  activeGroupId,
+  activeGroupTab,
+  assistantActive = false,
+}: Props) {
   const navigate = useNavigate()
   const location = useLocation()
   const { settings, setUserPreferences } = useAppSettings()
   const userCollapsed = settings.userPreferences.sidebarCollapsed === true
   const collapsed = userCollapsed
   const { projects, activeProjectId, setActiveProjectId } = useProjects()
+  const requestLeave = useRequestLeave()
   const { groups, reorderProject } = useProjectsGroups()
   const { counts, markAppOpened, getProjectBadgeState, getGroupBadgeState, getGroupChatBadge } =
     useBadgeCounts()
   const badgeColors = settings.notifications.badgeColors
+  const { badgeMode, badgeStyle, badgeMotion } = settings.userPreferences
+  const badgeLook = useMemo(
+    () => inkBadgeLook({ badgeMode, badgeStyle, badgeMotion }),
+    [badgeMode, badgeStyle, badgeMotion],
+  )
+  const { indicator: assistantIndicator } = useAssistantConversations(useChatsSeen())
+  const expiredSignIns = useStoredSignInsExpired()
+  const settingsIndicator = settingsNavIndicator(expiredSignIns)
+  const settingsSearch = expiredSignIns.length > 0 ? '?tab=llms' : ''
   const groupRollup = (g: ProjectsGroup, open: boolean): BadgeState =>
     getGroupBadgeState(g.id, g.type === 'SCOPE' || open ? [] : g.projects)
 
@@ -146,7 +164,7 @@ export default function Sidebar({ projectId, activeTab, activeGroupId, activeGro
     ? (activeGroupTab ?? 'home')
     : projectTabToGroupTab(activeTab)
 
-  const onSelectProject = (id: string) => {
+  const selectProject = (id: string) => {
     setActiveProjectId(id)
     // App and Design only exist for some projects — carrying one to a project
     // without it would land on an empty view, so fall back to home.
@@ -161,8 +179,13 @@ export default function Sidebar({ projectId, activeTab, activeGroupId, activeGro
     const search = tab === 'settings' ? location.search : ''
     navigate(`/projects/${id}/${tab}${search}`)
   }
+  const onSelectProject = (id: string) =>
+    id === activeProjectId ? selectProject(id) : requestLeave(() => selectProject(id))
   const onSelectGroup = (id: string) => {
     navigate(`/groups/${id}/${targetGroupTab}`)
+  }
+  const onSelectAssistant = () => {
+    navigate(assistantPath())
   }
   const onSelectTab = (next: ShellTabKey) => {
     if (!projectId) return
@@ -273,12 +296,30 @@ export default function Sidebar({ projectId, activeTab, activeGroupId, activeGro
       </header>
 
       <div className="shrink-0">
+        <div className="mt-2 flex flex-col">
+          <NavRow
+            label={ASSISTANT_NAV_DEF.label}
+            icon={navIcon(ASSISTANT_NAV_DEF.icon)}
+            isActive={assistantActive}
+            onClick={onSelectAssistant}
+            collapsed={collapsed}
+            indicator={assistantIndicator}
+            badgeColors={badgeColors}
+            look={badgeLook}
+          />
+        </div>
         {projectId && (
-          <Section collapsed={collapsed}>
+          <Section collapsed={collapsed} divider>
             {SHELL_TAB_DEFS.filter((t) => {
               if (t.key === 'settings') return false
               if ('hiddenInSidebar' in t && t.hiddenInSidebar) return false
-              if (!projectShowsShellTab(t.key, projects.find((p) => p.id === projectId)?.metadata as ShellTabProjectFlags)) return false
+              if (
+                !projectShowsShellTab(
+                  t.key,
+                  projects.find((p) => p.id === projectId)?.metadata as ShellTabProjectFlags,
+                )
+              )
+                return false
               return true
             }).map((tab) => {
               const isActive = tab.key === activeTab && !activeGroupId
@@ -292,6 +333,7 @@ export default function Sidebar({ projectId, activeTab, activeGroupId, activeGro
                   collapsed={collapsed}
                   indicator={shellTabIndicator(tab.key, counts, { viewing: isActive })}
                   badgeColors={badgeColors}
+                  look={badgeLook}
                 />
               )
             })}
@@ -299,7 +341,7 @@ export default function Sidebar({ projectId, activeTab, activeGroupId, activeGro
         )}
 
         {activeGroupId && (
-          <Section collapsed={collapsed}>
+          <Section collapsed={collapsed} divider>
             {GROUP_TAB_DEFS.filter((tab) => !tab.hiddenInSidebar).map((tab) => (
               <NavRow
                 key={tab.key}
@@ -308,8 +350,13 @@ export default function Sidebar({ projectId, activeTab, activeGroupId, activeGro
                 isActive={tab.key === activeGroupTab}
                 onClick={() => onSelectGroupTab(tab.key)}
                 collapsed={collapsed}
-                indicator={groupTabIndicator(tab.key, getGroupChatBadge(activeGroupId))}
+                indicator={groupTabIndicator(
+                  tab.key,
+                  getGroupChatBadge(activeGroupId),
+                  getGroupBadgeState(activeGroupId, []).signIn.expired,
+                )}
                 badgeColors={badgeColors}
+                look={badgeLook}
               />
             ))}
           </Section>
@@ -349,8 +396,9 @@ export default function Sidebar({ projectId, activeTab, activeGroupId, activeGro
                       isActive
                       collapsed
                       onClick={() => undefined}
-                      indicator={scopeRowIndicator(groupRollup(g, false), { active: true })}
+                      indicator={scopeRowIndicator(groupRollup(g, false))}
                       badgeColors={badgeColors}
+                      look={badgeLook}
                     />
                   )
               }
@@ -363,10 +411,9 @@ export default function Sidebar({ projectId, activeTab, activeGroupId, activeGro
                     onClick={() => onSelectProject(activeProject.id)}
                     collapsed
                     dataLocation={activeProject.dataLocation}
-                    indicator={scopeRowIndicator(getProjectBadgeState(activeProject.id), {
-                      active: true,
-                    })}
+                    indicator={scopeRowIndicator(getProjectBadgeState(activeProject.id))}
                     badgeColors={badgeColors}
+                    look={badgeLook}
                   />
                 )
               }
@@ -383,12 +430,12 @@ export default function Sidebar({ projectId, activeTab, activeGroupId, activeGro
                     icon={renderProjectIcon(asIconKey(p.metadata?.icon))}
                     isActive={isActive}
                     onClick={() => onSelectProject(p.id)}
+                    onIntent={() => void prefetchProjectStories(p.id)}
                     collapsed={collapsed}
                     dataLocation={p.dataLocation}
-                    indicator={scopeRowIndicator(getProjectBadgeState(p.id), {
-                      active: isActive,
-                    })}
+                    indicator={scopeRowIndicator(getProjectBadgeState(p.id))}
                     badgeColors={badgeColors}
+                    look={badgeLook}
                   />
                 )
               })}
@@ -396,9 +443,7 @@ export default function Sidebar({ projectId, activeTab, activeGroupId, activeGro
                 // A SCOPE group, and an OPEN folder, show just the group's OWN
                 // state; a CLOSED folder rolls its member projects up too.
                 const groupIsActive = g.id === activeGroupId
-                const groupIndicator = scopeRowIndicator(groupRollup(g, openGroupIds.has(g.id)), {
-                  active: groupIsActive,
-                })
+                const groupIndicator = scopeRowIndicator(groupRollup(g, openGroupIds.has(g.id)))
                 return g.type === 'SCOPE' ? (
                   <GroupRow
                     key={g.id}
@@ -408,6 +453,7 @@ export default function Sidebar({ projectId, activeTab, activeGroupId, activeGro
                     onClick={() => onSelectGroup(g.id)}
                     indicator={groupIndicator}
                     badgeColors={badgeColors}
+                    look={badgeLook}
                   />
                 ) : (
                   <GroupBlock
@@ -434,6 +480,7 @@ export default function Sidebar({ projectId, activeTab, activeGroupId, activeGro
                     onDrop={onProjectDrop}
                     getProjectBadgeState={getProjectBadgeState}
                     badgeColors={badgeColors}
+                    look={badgeLook}
                     headerIndicator={groupIndicator}
                   />
                 )
@@ -443,56 +490,30 @@ export default function Sidebar({ projectId, activeTab, activeGroupId, activeGro
         </div>
       </div>
 
-      {/* The assistant is account-global, so the footer always renders;
-          only the Settings row needs a project or group to route to. */}
-      <div
-        className={`shrink-0 border-t py-1 ${collapsed ? 'flex flex-col' : 'flex items-center'}`}
-        style={{ borderColor: 'var(--border-subtle)' }}
-      >
-        {(() => {
-          const settingsTab = SHELL_TAB_DEFS.find((t) => t.key === 'settings')
-          if (!settingsTab || !(projectId || activeGroupId)) return null
-          return (
-            <div className={collapsed ? undefined : 'min-w-0 flex-1'}>
-              <NavRow
-                label={settingsTab.label}
-                icon={navIcon(settingsTab.icon)}
-                isActive={activeGroupId ? activeGroupTab === 'settings' : activeTab === 'settings'}
-                onClick={() =>
-                  activeGroupId ? onSelectGroupTab('settings') : onSelectTab('settings')
-                }
-                collapsed={collapsed}
-              />
-            </div>
-          )
-        })()}
-        <GlobalChatRow collapsed={collapsed} />
-      </div>
+      {(() => {
+        const settingsTab = SHELL_TAB_DEFS.find((t) => t.key === 'settings')
+        if (!settingsTab || !(projectId || activeGroupId)) return null
+        return (
+          <div className="shrink-0 border-t py-1" style={{ borderColor: 'var(--border-subtle)' }}>
+            <NavRow
+              label={settingsTab.label}
+              icon={navIcon(settingsTab.icon)}
+              isActive={activeGroupId ? activeGroupTab === 'settings' : activeTab === 'settings'}
+              onClick={() =>
+                activeGroupId
+                  ? navigate(`/groups/${activeGroupId}/settings${settingsSearch}`)
+                  : projectId && navigate(`/projects/${projectId}/settings${settingsSearch}`)
+              }
+              collapsed={collapsed}
+              indicator={settingsIndicator}
+              badgeColors={badgeColors}
+              look={badgeLook}
+            />
+          </div>
+        )
+      })()}
       {manageOpen && <ProjectManagerModal onRequestClose={() => setManageOpen(false)} />}
     </aside>
-  )
-}
-
-/**
- * Icon-only trigger for the app-level assistant chat, pinned to the right of
- * the Settings row. Expanded it sits on that row; collapsed the rail has no
- * room for two icons side by side, so it stacks beneath.
- */
-function GlobalChatRow({ collapsed }: { collapsed: boolean }) {
-  const { open } = useGlobalChat()
-  return (
-    <button
-      type="button"
-      onClick={open}
-      data-sidebar-row
-      aria-label={GLOBAL_CHAT_TITLE}
-      title={GLOBAL_CHAT_TITLE}
-      className={`flex items-center justify-center shrink-0 py-2 text-(--text-muted) transition-colors hover:bg-black/5 hover:text-(--text-primary) focus:outline-none focus-visible:ring-2 dark:hover:bg-white/10 ${
-        collapsed ? 'w-full' : 'px-3'
-      }`}
-    >
-      <IconChat className="h-4.5 w-4.5" />
-    </button>
   )
 }
 
@@ -581,6 +602,7 @@ function GroupBlock({
   onDrop,
   getProjectBadgeState,
   badgeColors,
+  look,
   headerIndicator,
 }: {
   group: ProjectsGroup
@@ -603,6 +625,7 @@ function GroupBlock({
   /** Per-project badge resolver from the parent's `useBadgeCounts`. */
   getProjectBadgeState: (projectId: string) => BadgeState
   badgeColors: BadgeColors
+  look: InkBadgeLook
   /** The header row's indicator. The parent resolves it from the group's OWN
    *  state when the folder is open (members show their own rows) and from the
    *  rollup (group + members) when collapsed. */
@@ -644,13 +667,14 @@ function GroupBlock({
         <button
           type="button"
           onClick={onSelectGroup}
+          title={navRowTitle(group.title, headerIndicator)}
           className="flex-1 text-left text-sm py-2 pr-3 font-medium truncate"
         >
           {group.title}
         </button>
         {headerIndicator.kind !== 'none' && (
           <span className="inline-flex items-center justify-center shrink-0 pr-2">
-            <NavIndicator indicator={headerIndicator} badgeColors={badgeColors} />
+            <NavIndicator indicator={headerIndicator} badgeColors={badgeColors} look={look} />
           </span>
         )}
       </div>
@@ -665,6 +689,7 @@ function GroupBlock({
                 icon={renderProjectIcon(asIconKey(p.metadata?.icon))}
                 isActive={projectIsActive}
                 onClick={() => onSelectProject(p.id)}
+                onIntent={() => void prefetchProjectStories(p.id)}
                 collapsed={collapsed}
                 indent
                 draggable
@@ -673,10 +698,9 @@ function GroupBlock({
                 onDragOver={onDragOver}
                 onDrop={onDrop(group, idx)}
                 dataLocation={p.dataLocation}
-                indicator={scopeRowIndicator(getProjectBadgeState(p.id), {
-                  active: projectIsActive,
-                })}
+                indicator={scopeRowIndicator(getProjectBadgeState(p.id))}
                 badgeColors={badgeColors}
+                look={look}
               />
             )
           })}
@@ -694,6 +718,7 @@ function GroupRow({
   onClick,
   indicator,
   badgeColors,
+  look,
 }: {
   group: ProjectsGroup
   isActive: boolean
@@ -701,6 +726,7 @@ function GroupRow({
   onClick: () => void
   indicator: NavRowIndicator
   badgeColors: BadgeColors
+  look: InkBadgeLook
 }) {
   const icon =
     group.type === 'SCOPE' ? (
@@ -717,6 +743,7 @@ function GroupRow({
       collapsed={collapsed}
       indicator={indicator}
       badgeColors={badgeColors}
+      look={look}
     />
   )
 }
@@ -726,9 +753,11 @@ function NavRow({
   icon,
   isActive,
   onClick,
+  onIntent,
   collapsed,
   indicator,
   badgeColors,
+  look,
   indent = false,
   draggable = false,
   isDragging = false,
@@ -741,10 +770,13 @@ function NavRow({
   icon: ReactNode
   isActive: boolean
   onClick: () => void
+  /** The row is about to be opened — a pointer rests on it, or it has focus. */
+  onIntent?: () => void
   collapsed: boolean
-  /** Trailing spinner / badge / paused icon, resolved by the headless `navRowIndicator` family. */
+  /** Trailing ink badge / paused icon / news dot, resolved by the headless `navRowIndicator` family. */
   indicator?: NavRowIndicator
   badgeColors?: BadgeColors
+  look?: InkBadgeLook
   indent?: boolean
   draggable?: boolean
   isDragging?: boolean
@@ -758,9 +790,11 @@ function NavRow({
     <button
       type="button"
       onClick={onClick}
+      onMouseEnter={onIntent}
+      onFocus={onIntent}
       data-sidebar-row
       aria-current={isActive ? 'true' : undefined}
-      title={collapsed ? label : undefined}
+      title={navRowTitle(label, indicator ?? { kind: 'none' })}
       draggable={draggable}
       onDragStart={onDragStart}
       onDragOver={onDragOver}
@@ -791,8 +825,13 @@ function NavRow({
           ◉
         </span>
       )}
-      {indicator && badgeColors && (
-        <NavIndicator indicator={indicator} badgeColors={badgeColors} collapsed={collapsed} />
+      {indicator && badgeColors && look && (
+        <NavIndicator
+          indicator={indicator}
+          badgeColors={badgeColors}
+          look={look}
+          collapsed={collapsed}
+        />
       )}
     </button>
   )

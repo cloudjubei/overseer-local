@@ -2,10 +2,12 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useActiveProject } from 'thefactory-ui/headless'
 import { useStories } from 'thefactory-ui/headless'
 import { useAgents } from 'thefactory-ui/headless'
+import { isFeatureInLiveRun, useProcessRuns } from 'thefactory-ui/headless'
 import type { ChatContext } from 'thefactory-ui/headless/api'
 import { Button, ConfirmDialog, Modal, type StoryFormValues } from 'thefactory-ui/web'
 import { IconDelete, IconSave } from 'thefactory-ui/web/icons'
 import { StoryFormConnected as StoryForm } from 'thefactory-ui/web'
+import { StoryNotesSection } from 'thefactory-ui/web'
 import FeatureForm from '@ui/components/stories/FeatureForm'
 import RunAgentButtonConnected from '@ui/components/agents/RunAgentButtonConnected'
 import ChatSidebarPanelConnected from '@ui/components/chat/ChatSidebarPanelConnected'
@@ -529,6 +531,7 @@ function EditFeatureModal({
   const { projectId } = useActiveProject()
   const { stories, updateFeature, deleteFeature } = useStories()
   const { runsActive } = useAgents()
+  const { runs: processRuns } = useProcessRuns(projectId)
   const story = stories.find((s) => s.id === storyId)
   const feature = story?.features.find((f) => f.id === featureId)
   const [submitting, setSubmitting] = useState(false)
@@ -556,6 +559,10 @@ function EditFeatureModal({
     (r) => r.context.storyId === storyId && !r.context.featureId,
   )
   const featureHasActiveRun = runsActive.some((r) => r.context.featureId === featureId)
+  const featureInLiveRun = isFeatureInLiveRun(
+    processRuns.find((r) => r.storyId === storyId),
+    featureId,
+  )
 
   const handleDelete = async () => {
     setShowDeleteConfirm(false)
@@ -602,7 +609,7 @@ function EditFeatureModal({
               </Button>
             </div>
             <div className="justify-self-center">
-              {projectId && !storyHasActiveRun && !featureHasActiveRun && (
+              {projectId && !storyHasActiveRun && !featureHasActiveRun && !featureInLiveRun && (
                 <RunAgentButtonConnected
                   projectId={projectId}
                   storyId={storyId}
@@ -652,6 +659,15 @@ function EditFeatureModal({
           onDirty={setHasChanges}
           formId={formId}
         />
+        {feature ? (
+          <div className="mt-4 border-t border-[var(--border-subtle)] pt-3">
+            <StoryNotesSection
+              storyId={storyId}
+              featureId={featureId}
+              notes={feature.notes ?? []}
+            />
+          </div>
+        ) : null}
       </Modal>
 
       <ConfirmDialog

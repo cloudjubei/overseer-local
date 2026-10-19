@@ -16,15 +16,15 @@ Principles
 Token taxonomy
 
 - Core palette tokens (raw brand/neutral scales):
-  - color.{brand|gray|blue|green|yellow|orange|red|pink|purple|teal}.{50..900}
+  - color.{brand|gray|blue|sky|gold|green|yellow|orange|red|pink|purple|teal}.{50..900}
 - Semantic role tokens (map to core):
   - surface.{base,raised,overlay}
   - text.{primary,secondary,muted,inverted}
   - border.{subtle,default,strong,focus}
-  - accent.{primary,hover,active}
+  - accent.{primary,hover,active} (+ accent.soft.{bg,fg,border}: selections, notes, hand-offs — never a status)
   - focus.ring
 - Status tokens (Monday-style): pairs of background/foreground and soft/bold usage:
-  - status.{done,working,stuck,on_hold,review,queued,blocked}.{bg,fg}
+  - status.{done,running,working,stuck,on_hold,review,queued,blocked}.{bg,fg}
   - status.{name}.soft.{bg,fg}
 
 Monday-inspired palette reference (approximated)
@@ -32,10 +32,11 @@ See docs/design/MONDAY_PALETTE_REFERENCE.md for the raw list and notes. Key anch
 
 - Primary brand (Monday Blue): #0073EA (approx.)
 - Done (Green): #00C875
+- Running (Sky): #0369A1 bold / #0284C7 tint — agent work in progress; its own hue so it never reads as done or sign-off
 - Working (Orange): #FDAB3D
 - Stuck (Red/Pink): #E2445C
 - On Hold (Purple): #A25DDC
-- Review (Blue): #579BFC
+- Sign-off / Review (Gold): #E6B800 — a decision waiting on the person; yellower than Working orange (hue ~48° against ~34°)
 - Queued (Grey): #C4C4C4
 - Teal Accent: #00D1D1
 - Pink Accent: #FF158A
@@ -129,10 +130,32 @@ Code (light theme)
 --color-blue-400: #60A5FA;
 --color-blue-500: #3B82F6;
 --color-blue-600: #2563EB;
---color-blue-650: #579BFC; /_ Review (anchor) _/
+--color-blue-650: #579BFC; /_ Priority P2 _/
 --color-blue-700: #1D4ED8;
 --color-blue-800: #1E40AF;
 --color-blue-900: #1E3A8A;
+
+--color-sky-50: #F0F9FF;
+--color-sky-100: #E0F2FE;
+--color-sky-200: #BAE6FD;
+--color-sky-300: #7DD3FC;
+--color-sky-400: #38BDF8;
+--color-sky-500: #0EA5E9;
+--color-sky-600: #0284C7; /_ Running tint _/
+--color-sky-700: #0369A1; /_ Running (anchor) _/
+--color-sky-800: #075985;
+--color-sky-900: #0C4A6E;
+
+--color-gold-50: #FFFBE6;
+--color-gold-100: #FFF4BF;
+--color-gold-200: #FFE98A;
+--color-gold-300: #FBDC52;
+--color-gold-400: #F5CC1F;
+--color-gold-500: #E6B800; /_ Sign-off (anchor) _/
+--color-gold-600: #BF9900;
+--color-gold-700: #957700;
+--color-gold-800: #6E5800;
+--color-gold-900: #4D3D00;
 
 --color-teal-50: #E6FBFC;
 --color-teal-100: #CCF7F8;
@@ -174,12 +197,18 @@ Code (light theme)
 --accent-primary: var(--color-brand-600);
 --accent-primary-hover: var(--color-brand-700);
 --accent-primary-active: var(--color-brand-800);
+--accent-soft-bg: color-mix(in srgb, var(--color-brand-600) 10%, transparent);
+--accent-soft-fg: var(--color-brand-700);
+--accent-soft-border: var(--color-brand-300);
 
 --focus-ring: var(--color-brand-400);
 
 /_ Status: bold (solid) _/
 --status-done-bg: var(--color-green-600);
 --status-done-fg: #053B2E; /_ dark text for improved AA _/
+
+--status-running-bg: var(--color-sky-700);
+--status-running-fg: #FFFFFF; /_ 5.9:1 _/
 
 --status-working-bg: var(--color-orange-650);
 --status-working-fg: #231200; /_ dark text for orange/yellow _/
@@ -190,8 +219,8 @@ Code (light theme)
 --status-on_hold-bg: var(--color-purple-650);
 --status-on_hold-fg: #FFFFFF;
 
---status-review-bg: var(--color-blue-650);
---status-review-fg: #FFFFFF;
+--status-review-bg: var(--color-gold-500);
+--status-review-fg: #2B2200; /_ dark text on gold _/
 
 --status-queued-bg: #EAEAEA; /_ light grey _/
 --status-queued-fg: var(--color-gray-800);
@@ -203,6 +232,10 @@ Code (light theme)
 --status-done-soft-bg: color-mix(in srgb, var(--color-green-600) 15%, transparent);
 --status-done-soft-fg: var(--color-green-800);
 --status-done-soft-border: var(--color-green-400);
+
+--status-running-soft-bg: color-mix(in srgb, var(--color-sky-600) 14%, transparent);
+--status-running-soft-fg: var(--color-sky-700);
+--status-running-soft-border: var(--color-sky-400);
 
 --status-working-soft-bg: color-mix(in srgb, var(--color-orange-650) 18%, transparent);
 --status-working-soft-fg: var(--color-orange-800);
@@ -216,9 +249,9 @@ Code (light theme)
 --status-on_hold-soft-fg: var(--color-purple-700);
 --status-on_hold-soft-border: var(--color-purple-400);
 
---status-review-soft-bg: color-mix(in srgb, var(--color-blue-650) 12%, transparent);
---status-review-soft-fg: var(--color-blue-700);
---status-review-soft-border: var(--color-blue-400);
+--status-review-soft-bg: color-mix(in srgb, var(--color-gold-500) 18%, transparent);
+--status-review-soft-fg: var(--color-gold-800);
+--status-review-soft-border: var(--color-gold-400);
 
 --status-queued-soft-bg: color-mix(in srgb, var(--status-queued-bg) 30%, transparent);
 --status-queued-soft-fg: var(--status-queued-fg);
@@ -244,12 +277,18 @@ Code (light theme)
 --accent-primary: var(--color-brand-500);
 --accent-primary-hover: var(--color-brand-400);
 --accent-primary-active: var(--color-brand-600);
+--accent-soft-bg: color-mix(in srgb, var(--color-brand-500) 18%, transparent);
+--accent-soft-fg: var(--color-brand-200);
+--accent-soft-border: color-mix(in srgb, var(--color-brand-500) 55%, transparent);
 
 --focus-ring: var(--color-brand-400);
 
 /_ Dark: bold statuses slightly dim to reduce glare; keep FG for AA _/
 --status-done-bg: color-mix(in srgb, var(--color-green-600) 85%, #0B0F14);
 --status-done-fg: #E9FFF6;
+
+--status-running-bg: color-mix(in srgb, var(--color-sky-500) 90%, #0B0F14);
+--status-running-fg: #04202E;
 
 --status-working-bg: color-mix(in srgb, var(--color-orange-650) 80%, #0B0F14);
 --status-working-fg: #1B1200;
@@ -260,8 +299,8 @@ Code (light theme)
 --status-on_hold-bg: color-mix(in srgb, var(--color-purple-650) 85%, #0B0F14);
 --status-on_hold-fg: #F7F1FF;
 
---status-review-bg: color-mix(in srgb, var(--color-blue-650) 85%, #0B0F14);
---status-review-fg: #F2F7FF;
+--status-review-bg: color-mix(in srgb, var(--color-gold-500) 85%, #0B0F14);
+--status-review-fg: #1F1800;
 
 --status-queued-bg: #313843;
 --status-queued-fg: #E5E7EB;
@@ -270,6 +309,10 @@ Code (light theme)
 --status-done-soft-bg: color-mix(in srgb, var(--color-green-600) 18%, transparent);
 --status-done-soft-fg: #BBF7E1;
 --status-done-soft-border: color-mix(in srgb, var(--color-green-600) 60%, transparent);
+
+--status-running-soft-bg: color-mix(in srgb, var(--color-sky-500) 18%, transparent);
+--status-running-soft-fg: #BAE6FD;
+--status-running-soft-border: color-mix(in srgb, var(--color-sky-500) 60%, transparent);
 
 --status-working-soft-bg: color-mix(in srgb, var(--color-orange-650) 20%, transparent);
 --status-working-soft-fg: #FFE6C7;
@@ -283,9 +326,9 @@ Code (light theme)
 --status-on_hold-soft-fg: #E7D8FF;
 --status-on_hold-soft-border: color-mix(in srgb, var(--color-purple-650) 60%, transparent);
 
---status-review-soft-bg: color-mix(in srgb, var(--color-blue-650) 16%, transparent);
---status-review-soft-fg: #D9E7FF;
---status-review-soft-border: color-mix(in srgb, var(--color-blue-650) 60%, transparent);
+--status-review-soft-bg: color-mix(in srgb, var(--color-gold-500) 18%, transparent);
+--status-review-soft-fg: var(--color-gold-200);
+--status-review-soft-border: color-mix(in srgb, var(--color-gold-500) 60%, transparent);
 
 --status-queued-soft-bg: color-mix(in srgb, var(--status-queued-bg) 40%, transparent);
 --status-queued-soft-fg: var(--status-queued-fg);
@@ -318,6 +361,7 @@ subtle: 'var(--border-subtle)', DEFAULT: 'var(--border-default)', strong: 'var(-
 },
 status: {
 done: { bg: 'var(--status-done-bg)', fg: 'var(--status-done-fg)' },
+running: { bg: 'var(--status-running-bg)', fg: 'var(--status-running-fg)' },
 working: { bg: 'var(--status-working-bg)', fg: 'var(--status-working-fg)' },
 stuck: { bg: 'var(--status-stuck-bg)', fg: 'var(--status-stuck-fg)' },
 on_hold: { bg: 'var(--status-on_hold-bg)', fg: 'var(--status-on_hold-fg)' },

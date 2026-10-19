@@ -4,16 +4,22 @@ import {
   useActiveProject,
   useProjectAppView,
   useProjectDataBridge,
+  useAppDirtyGuard,
+  useAppWorkStart,
+  useAppBridgePushes,
   useChats,
   useStories,
   formatChatTitle,
   bridgeMessageName,
   persistAppDataCapabilities,
   appDeepLinkFromParams,
+  appDeepLinkQuery,
+  navCurrentReply,
+  type AppDeepLink,
   type BridgeRequest,
 } from 'thefactory-ui/headless'
 import type { ChatContext } from 'thefactory-ui/headless/api'
-import { ModelChipConnected, ProjectAppView } from 'thefactory-ui/web'
+import { AppWorkStartDialog, ModelChipConnected, ProjectAppView } from 'thefactory-ui/web'
 import ChatSidebarPanelConnected from '@ui/components/chat/ChatSidebarPanelConnected'
 
 /**
@@ -37,6 +43,12 @@ export default function ProjectAppTab() {
   // the CLI model for just those launches.
   const [cliActivities, setCliActivities] = useState<string[] | undefined>(undefined)
   const dataBridge = useProjectDataBridge(projectId, { activitiesApiOnly, cliActivities })
+  const mountKey = `${projectId ?? ''}|${url ?? ''}|${key}`
+  const { handleBridgeMessage: handleAppDirty } = useAppDirtyGuard(mountKey)
+  // `overseer:work.start` waits for the person's Start / Cancel over the App view — never on a timer.
+  const workStart = useAppWorkStart(projectId, mountKey)
+  const handleWorkStart = workStart.handleBridgeMessage
+  const pushes = useAppBridgePushes(projectId)
   const { createProjectTopic, sendMessage } = useChats()
   const { createStory, createFeature, stories } = useStories()
 
@@ -55,20 +67,31 @@ export default function ProjectAppTab() {
     setCollapsed(true)
   }, [projectId])
 
-  const [searchParams] = useSearchParams()
+  const [searchParams, setSearchParams] = useSearchParams()
   // Computed once — answers the boot `nav.current` PULL and drives the `nav.open` PUSH (via ProjectAppView).
   const deepLink = useMemo(
     () => appDeepLinkFromParams(Object.fromEntries(searchParams.entries())) ?? null,
     [searchParams],
   )
 
+  // The app reported where it is: mirror it in this route's query (a replace, so no history entry and
+  // no leave-guard ask; ProjectAppView does not push it back as nav.open).
+  const onNavChanged = useCallback(
+    (reported: AppDeepLink) => setSearchParams(appDeepLinkQuery(reported), { replace: true }),
+    [setSearchParams],
+  )
+
   const onBridgeMessage = useCallback(
     async (req: BridgeRequest) => {
+      if (handleAppDirty(req)) return { ok: true }
+      const workStartReply = handleWorkStart(req)
+      if (workStartReply) return workStartReply
       const name = bridgeMessageName(req.type)
       // The embedded app asks for its deep-link on load (F.2 app link → `?view=<v>&…` on the App-tab
-      // route); return the resolved target so it can open that view instead of its default.
+      // route); return the resolved target so it can open that view instead of its default, with the
+      // absolute Overseer URL of this route (`appUrl`) so the app can link back to where it is.
       if (name === 'nav.current') {
-        return deepLink
+        return navCurrentReply(deepLink, window.location.href)
       }
       if (name === 'app.capabilities') {
         const {
@@ -152,6 +175,8 @@ export default function ProjectAppTab() {
       return dataBridge(req)
     },
     [
+      handleAppDirty,
+      handleWorkStart,
       dataBridge,
       projectId,
       createProjectTopic,
@@ -175,6 +200,8 @@ export default function ProjectAppTab() {
           remountKey={key}
           onBridgeMessage={onBridgeMessage}
           deepLink={deepLink}
+          pushes={pushes}
+          onNavChanged={onNavChanged}
           topRightOverlay={
             <ModelChipConnected
               editable
@@ -197,6 +224,12 @@ export default function ProjectAppTab() {
             </div>
           }
           style={{ width: '100%', height: '100%' }}
+        />
+        <AppWorkStartDialog
+          ask={workStart.ask}
+          onEdit={workStart.edit}
+          onStart={workStart.start}
+          onCancel={workStart.cancel}
         />
       </div>
       {sidebarEnabled && chatContext && (

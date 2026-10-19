@@ -6,7 +6,7 @@ import { useAppSettings } from 'thefactory-ui/headless'
 import { useStories } from 'thefactory-ui/headless'
 import { useAgents } from 'thefactory-ui/headless'
 import { useProcessRuns } from 'thefactory-ui/headless'
-import { processStatusOverlay } from 'thefactory-ui/headless'
+import { processStatusOverlay, useProcessStopClock } from 'thefactory-ui/headless'
 import { storyFeatureCounts } from 'thefactory-ui/headless'
 import ProcessStatusChip from '@ui/components/stories/ProcessStatusChip'
 import type {
@@ -115,6 +115,7 @@ export default function StoriesListView() {
   // Process runs fetched ONCE for the whole list and indexed by story, so a row's
   // status→pipeline link costs no per-row subscription.
   const { runs: processRuns } = useProcessRuns(projectId)
+  const stopNow = useProcessStopClock()
   const processRunByStory = useMemo(() => {
     // Newest-first, so the FIRST run per story is current — keep it (last-write
     // would pin the OLDEST, linking the chip to a stale finished run).
@@ -518,7 +519,7 @@ export default function StoriesListView() {
                   )
                   const storyRun = runsActive.find((r) => r.context.storyId === t.id)
                   const procRun = processRunByStory.get(t.id)
-                  const procOverlay = processStatusOverlay(procRun)
+                  const procOverlay = processStatusOverlay(procRun, stopNow)
                   const displayIdx = storyDisplayIndex(t.id)
 
                   return (

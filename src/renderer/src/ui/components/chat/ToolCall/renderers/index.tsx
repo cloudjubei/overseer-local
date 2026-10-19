@@ -106,15 +106,12 @@ function ConnectedToolPreview(args: RenderToolPreviewArgs) {
     },
     // The card REPORTS and never decides: it shows the run's live state and its
     // only action is to open the pipeline, where the decisions are made.
-    renderProcessRunLink: ({ processRunId }) => {
-      if (!projectId) return null
-      return (
-        <ProcessRunChip
-          processRunId={processRunId}
-          onOpen={(id) => navigate(`/projects/${projectId}/process-runs/${id}`)}
-        />
-      )
-    },
+    renderProcessRunLink: ({ processRunId }) => (
+      <ProcessRunChip
+        processRunId={processRunId}
+        onOpen={(id, runProjectId) => navigate(`/projects/${runProjectId}/process-runs/${id}`)}
+      />
+    ),
     renderProcessGroupRunLink: ({ groupRunId }) => (
       <ProcessGroupRunChip groupRunId={groupRunId} onOpen={(id) => navigateToGroupRun(id)} />
     ),

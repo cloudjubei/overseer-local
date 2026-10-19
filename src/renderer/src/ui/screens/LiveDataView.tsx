@@ -5,18 +5,20 @@ import {
   emptySourceForm,
   sourceToForm,
   formToSourceInput,
+  formToSourcePatch,
   validateSourceForm,
   humanizeMs,
   isSourceFresh,
   type LiveDataSourceForm,
 } from 'thefactory-ui/headless'
-import type { DataSource, DataRecord } from 'thefactory-ui/headless/api'
+import type { DataSource, DataSourcePatch, DataRecord } from 'thefactory-ui/headless/api'
 import {
   Alert,
   Button,
   ConfirmDialog,
   Field,
   Input,
+  LiveDataTaskSourceFields,
   Modal,
   NativeSelect as Select,
   Surface,
@@ -420,7 +422,7 @@ function SourceFormModal({
   route: { mode: 'create' } | { mode: 'edit'; source: DataSource }
   onClose: () => void
   onCreate: (input: ReturnType<typeof formToSourceInput>) => Promise<unknown>
-  onUpdate: (id: string, patch: ReturnType<typeof formToSourceInput>) => Promise<unknown>
+  onUpdate: (id: string, patch: DataSourcePatch) => Promise<unknown>
 }) {
   const [form, setForm] = useState<LiveDataSourceForm>(
     route.mode === 'edit' ? sourceToForm(route.source) : emptySourceForm(),
@@ -431,6 +433,8 @@ function SourceFormModal({
   // A system provider's wiring is managed by the platform; tunables (name,
   // freshness, auto-update) stay editable, but the fetch/mapping is read-only.
   const lockWiring = route.mode === 'edit' && route.source.system === true
+  // A source the project declares accepts only its schedule; its wiring is the project's package.json.
+  const taskSource = form.adapterKind === 'task'
   const set = <K extends keyof LiveDataSourceForm>(key: K, value: LiveDataSourceForm[K]) =>
     setForm((f) => ({ ...f, [key]: value }))
 
@@ -442,9 +446,8 @@ function SourceFormModal({
     }
     setSaving(true)
     try {
-      const input = formToSourceInput(form)
-      if (route.mode === 'edit') await onUpdate(route.source.id, input)
-      else await onCreate(input)
+      if (route.mode === 'edit') await onUpdate(route.source.id, formToSourcePatch(form))
+      else await onCreate(formToSourceInput(form))
       onClose()
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err))
@@ -462,154 +465,160 @@ function SourceFormModal({
     >
       <div className="flex flex-col gap-3">
         {error && <Alert variant="error">{error}</Alert>}
-        {lockWiring && (
-          <Alert variant="info">
-            System provider — its fetch + data wiring is managed by the platform and locked. You can
-            still rename it and adjust its refresh schedule.
-          </Alert>
-        )}
-        <Field label="Name">
-          <Input
-            value={form.name}
-            onChange={(e) => set('name', e.target.value)}
-            placeholder="US stock prices"
-          />
-        </Field>
-        <Field label="Record type">
-          <Input
-            value={form.recordType}
-            onChange={(e) => set('recordType', e.target.value)}
-            placeholder="stock-quote"
-            disabled={lockWiring}
-          />
-        </Field>
-        <div className="grid grid-cols-2 items-end gap-2">
-          <Field label="Freshness">
-            <Input
-              type="number"
-              min="1"
-              value={form.freshnessValue}
-              onChange={(e) => set('freshnessValue', e.target.value)}
-            />
-          </Field>
-          <Field label="Unit">
-            <Select
-              value={form.freshnessUnit}
-              onChange={(e) =>
-                set('freshnessUnit', e.target.value as LiveDataSourceForm['freshnessUnit'])
-              }
-            >
-              <option value="minutes">minutes</option>
-              <option value="hours">hours</option>
-              <option value="days">days</option>
-            </Select>
-          </Field>
-        </div>
-        <Switch
-          checked={form.autoUpdate}
-          onCheckedChange={(v) => set('autoUpdate', v)}
-          label="Auto-update on a schedule"
-        />
-        <Field label="Fetch URL">
-          <Input
-            value={form.url}
-            onChange={(e) => set('url', e.target.value)}
-            placeholder="https://api.example.com/prices"
-            disabled={lockWiring}
-          />
-        </Field>
-
-        <div className="rounded border border-(--border-subtle)">
-          <button
-            type="button"
-            className="flex w-full items-center justify-between px-3 py-2 text-sm font-medium"
-            onClick={() => setShowAdvanced((s) => !s)}
-          >
-            <span>Advanced — how to read the response</span>
-            <span className="text-(--text-secondary)">{showAdvanced ? '▾' : '▸'}</span>
-          </button>
-          {showAdvanced && (
-            <div className="flex flex-col gap-3 border-t border-(--border-subtle) p-3">
-              <p className="text-xs text-(--text-secondary)">
-                Tells the platform how to read the fetched JSON. You only need these when building a
-                custom source from a new URL.
-              </p>
-              <Field
-                label="Items path"
-                hint="Where the list of items sits in the response — e.g. products. Leave blank for the whole response."
-              >
+        {taskSource ? (
+          <LiveDataTaskSourceFields form={form} onChange={set} />
+        ) : (
+          <>
+            {lockWiring && (
+              <Alert variant="info">
+                System provider — its fetch + data wiring is managed by the platform and locked. You
+                can still rename it and adjust its refresh schedule.
+              </Alert>
+            )}
+            <Field label="Name">
+              <Input
+                value={form.name}
+                onChange={(e) => set('name', e.target.value)}
+                placeholder="US stock prices"
+              />
+            </Field>
+            <Field label="Record type">
+              <Input
+                value={form.recordType}
+                onChange={(e) => set('recordType', e.target.value)}
+                placeholder="stock-quote"
+                disabled={lockWiring}
+              />
+            </Field>
+            <div className="grid grid-cols-2 items-end gap-2">
+              <Field label="Freshness">
                 <Input
-                  value={form.itemsPath}
-                  onChange={(e) => set('itemsPath', e.target.value)}
-                  placeholder="data"
-                  disabled={lockWiring}
+                  type="number"
+                  min="1"
+                  value={form.freshnessValue}
+                  onChange={(e) => set('freshnessValue', e.target.value)}
                 />
               </Field>
-              <Field
-                label="Kind"
-                hint="sample = a number to track over time (builds history); snapshot = store each item as-is."
-              >
+              <Field label="Unit">
                 <Select
-                  value={form.kind}
-                  onChange={(e) => set('kind', e.target.value as LiveDataSourceForm['kind'])}
-                  disabled={lockWiring}
+                  value={form.freshnessUnit}
+                  onChange={(e) =>
+                    set('freshnessUnit', e.target.value as LiveDataSourceForm['freshnessUnit'])
+                  }
                 >
-                  <option value="sample">sample (numeric → history)</option>
-                  <option value="snapshot">snapshot (object stored as-is)</option>
+                  <option value="minutes">minutes</option>
+                  <option value="hours">hours</option>
+                  <option value="days">days</option>
                 </Select>
               </Field>
-              <Field
-                label="Map: key"
-                hint="The field that uniquely identifies each item, so a refresh updates the right row — e.g. symbol."
+            </div>
+            <Switch
+              checked={form.autoUpdate}
+              onCheckedChange={(v) => set('autoUpdate', v)}
+              label="Auto-update on a schedule"
+            />
+            <Field label="Fetch URL">
+              <Input
+                value={form.url}
+                onChange={(e) => set('url', e.target.value)}
+                placeholder="https://api.example.com/prices"
+                disabled={lockWiring}
+              />
+            </Field>
+
+            <div className="rounded border border-(--border-subtle)">
+              <button
+                type="button"
+                className="flex w-full items-center justify-between px-3 py-2 text-sm font-medium"
+                onClick={() => setShowAdvanced((s) => !s)}
               >
-                <Input
-                  value={form.mapKey}
-                  onChange={(e) => set('mapKey', e.target.value)}
-                  placeholder="symbol"
-                  disabled={lockWiring}
-                />
-              </Field>
-              {form.kind === 'sample' && (
-                <>
+                <span>Advanced — how to read the response</span>
+                <span className="text-(--text-secondary)">{showAdvanced ? '▾' : '▸'}</span>
+              </button>
+              {showAdvanced && (
+                <div className="flex flex-col gap-3 border-t border-(--border-subtle) p-3">
+                  <p className="text-xs text-(--text-secondary)">
+                    Tells the platform how to read the fetched JSON. You only need these when
+                    building a custom source from a new URL.
+                  </p>
                   <Field
-                    label="Map: value"
-                    hint="The field holding the number to track — e.g. price."
+                    label="Items path"
+                    hint="Where the list of items sits in the response — e.g. products. Leave blank for the whole response."
                   >
                     <Input
-                      value={form.mapValue}
-                      onChange={(e) => set('mapValue', e.target.value)}
-                      placeholder="price"
+                      value={form.itemsPath}
+                      onChange={(e) => set('itemsPath', e.target.value)}
+                      placeholder="data"
                       disabled={lockWiring}
                     />
                   </Field>
                   <Field
-                    label="Map: time (optional)"
-                    hint="The field holding each point's timestamp; defaults to the refresh time."
+                    label="Kind"
+                    hint="sample = a number to track over time (builds history); snapshot = store each item as-is."
                   >
-                    <Input
-                      value={form.mapTime}
-                      onChange={(e) => set('mapTime', e.target.value)}
-                      placeholder="asOf"
+                    <Select
+                      value={form.kind}
+                      onChange={(e) => set('kind', e.target.value as LiveDataSourceForm['kind'])}
                       disabled={lockWiring}
-                    />
+                    >
+                      <option value="sample">sample (numeric → history)</option>
+                      <option value="snapshot">snapshot (object stored as-is)</option>
+                    </Select>
                   </Field>
                   <Field
-                    label="History cap (optional)"
-                    hint="Keep only the most recent N points per item."
+                    label="Map: key"
+                    hint="The field that uniquely identifies each item, so a refresh updates the right row — e.g. symbol."
                   >
                     <Input
-                      type="number"
-                      min="1"
-                      value={form.historyCap}
-                      onChange={(e) => set('historyCap', e.target.value)}
+                      value={form.mapKey}
+                      onChange={(e) => set('mapKey', e.target.value)}
+                      placeholder="symbol"
                       disabled={lockWiring}
                     />
                   </Field>
-                </>
+                  {form.kind === 'sample' && (
+                    <>
+                      <Field
+                        label="Map: value"
+                        hint="The field holding the number to track — e.g. price."
+                      >
+                        <Input
+                          value={form.mapValue}
+                          onChange={(e) => set('mapValue', e.target.value)}
+                          placeholder="price"
+                          disabled={lockWiring}
+                        />
+                      </Field>
+                      <Field
+                        label="Map: time (optional)"
+                        hint="The field holding each point's timestamp; defaults to the refresh time."
+                      >
+                        <Input
+                          value={form.mapTime}
+                          onChange={(e) => set('mapTime', e.target.value)}
+                          placeholder="asOf"
+                          disabled={lockWiring}
+                        />
+                      </Field>
+                      <Field
+                        label="History cap (optional)"
+                        hint="Keep only the most recent N points per item."
+                      >
+                        <Input
+                          type="number"
+                          min="1"
+                          value={form.historyCap}
+                          onChange={(e) => set('historyCap', e.target.value)}
+                          disabled={lockWiring}
+                        />
+                      </Field>
+                    </>
+                  )}
+                </div>
               )}
             </div>
-          )}
-        </div>
+          </>
+        )}
 
         <div className="mt-2 flex justify-end gap-2">
           <Button variant="secondary" onClick={onClose}>

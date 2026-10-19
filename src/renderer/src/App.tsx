@@ -22,8 +22,6 @@ import {
 import { useAppSettings } from 'thefactory-ui/headless'
 import { AuthProvider, useAuth } from '@core/contexts/AuthContext'
 import { ChatsProvider } from 'thefactory-ui/headless'
-import { GlobalChatProvider } from 'thefactory-ui/headless'
-import GlobalChatOverlayConnected from '@ui/components/chat/GlobalChatOverlayConnected'
 import { CostsProvider } from 'thefactory-ui/headless'
 import { EntitiesProvider } from 'thefactory-ui/headless'
 import { FilesProvider } from 'thefactory-ui/headless'
@@ -53,6 +51,7 @@ import EventNotifier from '@ui/components/shell/EventNotifier'
 import { ScreenErrorBoundary } from 'thefactory-ui/web'
 import Sidebar from '@ui/components/shell/Sidebar'
 import {
+  ASSISTANT_NAV_DEF,
   isGroupTabKey,
   isShellTabKey,
   SHELL_TAB_DEFS,
@@ -60,6 +59,7 @@ import {
   type ShellTabKey,
 } from 'thefactory-ui/headless'
 import { useApplyTheme } from '@ui/hooks/useApplyTheme'
+import AssistantView from '@ui/screens/AssistantView'
 import ChatView from '@ui/screens/ChatView'
 import FilesView from '@ui/screens/FilesView'
 import DesignView from '@ui/screens/DesignView'
@@ -131,16 +131,13 @@ function BackendGate() {
                                           <EntitiesProvider>
                                             <DataSourcesProvider>
                                               <IngestionProvider>
-                                                <GlobalChatProvider>
-                                                  <EventNotifier />
-                                                  <DiagnosticsOverlay />
-                                                  <ShortcutsHelp />
-                                                  <CommandMenu />
-                                                  <GlobalChatOverlayConnected />
-                                                  <ChatDropController />
-                                                  <GitCredentialErrorModalMount />
-                                                  <Outlet />
-                                                </GlobalChatProvider>
+                                                <EventNotifier />
+                                                <DiagnosticsOverlay />
+                                                <ShortcutsHelp />
+                                                <CommandMenu />
+                                                <ChatDropController />
+                                                <GitCredentialErrorModalMount />
+                                                <Outlet />
                                               </IngestionProvider>
                                             </DataSourcesProvider>
                                           </EntitiesProvider>
@@ -317,6 +314,27 @@ function GroupShell() {
   )
 }
 
+/**
+ * The Assistant page, under the same rail as a project or group. Its
+ * conversations belong to no project; the rail keeps the active project's tabs
+ * below the Assistant item.
+ */
+function AssistantShell() {
+  const { activeProjectId } = useProjects()
+  return (
+    <div className="flex flex-row w-full h-full overflow-hidden">
+      <Sidebar projectId={activeProjectId ?? undefined} assistantActive />
+      <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
+        <div className="flex-1 min-h-0">
+          <ScreenErrorBoundary screen={ASSISTANT_NAV_DEF.label}>
+            <AssistantView />
+          </ScreenErrorBoundary>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function AuthedRoot() {
   const { isLoaded, loadError, projects, activeProjectId } = useProjects()
 
@@ -359,6 +377,8 @@ export default function App() {
                       <Route path="/login" element={<LoginScreen />} />
                       <Route element={<BackendGate />}>
                         <Route path="/" element={<AuthedRoot />} />
+                        <Route path="/assistant/:contextKey" element={<AssistantShell />} />
+                        <Route path="/assistant" element={<AssistantShell />} />
                         <Route path="/groups/:groupId/chat/:contextKey" element={<GroupShell />} />
                         <Route
                           path="/groups/:groupId/processes/:groupRunId"

@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from 'react'
 import type { ChatContext } from 'thefactory-ui/headless/api'
 import { getChatContextKey } from '../chats/chatKey'
-import { isAgentRunChatContext } from 'thefactory-ui/headless'
+import { isAgentRunChatContext, usePendingAsksByChat } from 'thefactory-ui/headless'
 import { useAppSettings } from 'thefactory-ui/headless'
 import { useChats } from 'thefactory-ui/headless'
 import { useGit } from 'thefactory-ui/headless'
@@ -12,14 +12,24 @@ import { useTests } from 'thefactory-ui/headless'
 import { useProjectSettingsConnected as useProjectSettings } from 'thefactory-ui/web'
 import {
   aggregateGroupBadgeState,
+  chatBadgeTally,
+  chatNotifyCountsOf,
+  chatNotifyLevel,
+  chatNotifyNews,
   EMPTY_BADGE_STATE,
-  isChatUnread,
   markSeen,
   resolveTriState,
   useBadgeCountsCore,
   type BadgeChatInput,
   type BadgeCounts,
   type BadgeState,
+  type SignInChatRunner,
+} from 'thefactory-ui/headless'
+import { scopeSignInNames, useExpiredSignIns } from 'thefactory-ui/headless'
+import {
+  chatBadgeInputOf,
+  useProcessRunChatNews,
+  useProcessStopClock,
 } from 'thefactory-ui/headless'
 import { readChatsSeen, useAppTabLastOpened, useChatsSeen, writeChatsSeen } from 'thefactory-ui/web'
 
@@ -28,8 +38,6 @@ export type { BadgeCounts }
 export type UseBadgeCountsApi = {
   /** Active-project / global counts (single source for sidebar header + favicon). */
   counts: BadgeCounts
-  /** Mark a chat as read up to its latest message. */
-  markChatSeen: (ctx: ChatContext) => void
   /** Stamp the active project's app tab as opened now — clears its unseen-results badge. */
   markAppOpened: () => void
   /** Per-project breakdown for sidebar project rows. Filtering respects
@@ -44,12 +52,13 @@ export type UseBadgeCountsApi = {
   getGroupChatBadge: (groupId: string) => BadgeState['chat_messages']
 }
 
-function latestMessageAt(
-  messages: { completedAt?: string; startedAt?: string }[],
-): string | undefined {
-  if (messages.length === 0) return undefined
-  const last = messages[messages.length - 1]
-  return last.completedAt ?? last.startedAt
+/**
+ * Mark a chat as read up to now. A plain write to the shared chats-seen store,
+ * so a chat view marks itself read without mounting the badge counts — and
+ * every list and fetch they hold.
+ */
+export function markChatSeen(ctx: ChatContext): void {
+  writeChatsSeen(markSeen(readChatsSeen(), getChatContextKey(ctx), new Date().toISOString()))
 }
 
 /**
@@ -91,18 +100,18 @@ export function useBadgeCounts(): UseBadgeCountsApi {
   // in lockstep when any consumer marks a chat seen, without ever firing
   // setState during another component's render.
   const seen = useChatsSeen()
+  const pendingAsksByChat = usePendingAsksByChat()
 
-  const markChatSeen = useCallback((ctx: ChatContext) => {
-    const key = getChatContextKey(ctx)
-    const ts = new Date().toISOString()
-    const next = markSeen(readChatsSeen(), key, ts)
-    writeChatsSeen(next)
-  }, [])
 
   // Annotate every chat with its derived unread + thinking state. Used twice:
   // once for the global `counts` (across all chats), and once filtered by
   // project for `getProjectBadgeState`.
-  type AnnotatedChat = BadgeChatInput & { projectId?: string; groupId?: string }
+  type AnnotatedChat = BadgeChatInput & {
+    projectId?: string
+    groupId?: string
+    cliRunner?: SignInChatRunner | null
+    contextKey: string
+  }
 
   const annotatedChats: AnnotatedChat[] = useMemo(() => {
     return chats.map((chat) => {
@@ -114,31 +123,29 @@ export function useBadgeCounts(): UseBadgeCountsApi {
           isThinking: false,
           projectId: chat.context.projectId,
           groupId: chat.context.groupId,
+          cliRunner: chat.cliRunner,
+          contextKey: getChatContextKey(chat.context),
         }
       }
-      const messages = chat.messages ?? []
-      const at = latestMessageAt(messages)
       const key = getChatContextKey(chat.context)
-      let unreadMessages = 0
-      if (isChatUnread(seen, key, at)) {
-        const since = seen[key]
-        if (since) {
-          for (const m of messages) {
-            const ts = m.completedAt ?? m.startedAt
-            if (ts && ts > since) unreadMessages += 1
-          }
-        } else {
-          unreadMessages = messages.length
-        }
-      }
+      // What reaches the person of the chat at its notification level.
+      const news = chatNotifyNews(
+        chatNotifyCountsOf(chat, seen[key], pendingAsksByChat.get(key) ?? 0),
+        chatNotifyLevel(chat, prefs.chatNotifyLevels),
+      )
       return {
-        unreadMessages,
-        isThinking: getChatLiveState(chat.context).isSending,
+        ...chatBadgeInputOf(chat.context, {
+          unreadMessages: news.unreadMessages,
+          pendingAsks: news.pendingAsks,
+          isThinking: getChatLiveState(chat.context).isSending,
+        }),
         projectId: chat.context.projectId,
         groupId: chat.context.groupId,
+        cliRunner: chat.cliRunner,
+        contextKey: key,
       }
     })
-  }, [chats, seen, getChatLiveState])
+  }, [chats, seen, getChatLiveState, pendingAsksByChat, prefs.chatNotifyLevels])
 
   // The top-level `counts` represents the ACTIVE project's badge state
   // (drives the per-tab nav badges and the favicon). Use only the active
@@ -150,7 +157,13 @@ export function useBadgeCounts(): UseBadgeCountsApi {
     [annotatedChats, activeProjectId],
   )
 
-  const processTallies = useMemo(() => processTallyByProject(processRuns), [processRuns])
+  const stopNow = useProcessStopClock()
+  const runChatNews = useProcessRunChatNews(seen)
+  const processTallies = useMemo(
+    () => processTallyByProject(processRuns, stopNow, runChatNews),
+    [processRuns, stopNow, runChatNews],
+  )
+  const signIns = useExpiredSignIns(annotatedChats, processRuns)
 
   const counts = useBadgeCountsCore({
     chats: activeProjectChats,
@@ -172,6 +185,7 @@ export function useBadgeCounts(): UseBadgeCountsApi {
       unseenCount: activityUnseenForScope(activeProjectId, appLastOpenedIso),
     },
     processes: activeProjectId ? processTallies.get(activeProjectId) : undefined,
+    signIn: activeProjectId ? signIns.byProject.get(activeProjectId) : undefined,
     enabled: {
       chat: resolveTriState(prefs.badgesEnabled.chat, projectOverride.chat),
       git: resolveTriState(prefs.badgesEnabled.git, projectOverride.git),
@@ -212,20 +226,9 @@ export function useBadgeCounts(): UseBadgeCountsApi {
 
   const chatEnabled = prefs.badgesEnabled.chat !== false
   const chatBadgeFor = useCallback(
-    (list: AnnotatedChat[]): { unread: number; thinking: boolean } => {
-      if (!chatEnabled) return { unread: 0, thinking: false }
-      let chatsWithUnread = 0
-      let totalUnread = 0
-      let anyThinking = false
-      for (const c of list) {
-        if (c.unreadMessages > 0) {
-          chatsWithUnread += 1
-          totalUnread += c.unreadMessages
-        }
-        if (c.isThinking) anyThinking = true
-      }
-      const unread = prefs.chatBadgeCountMode === 'total_messages' ? totalUnread : chatsWithUnread
-      return { unread, thinking: anyThinking }
+    (list: AnnotatedChat[]): BadgeState['chat_messages'] => {
+      if (!chatEnabled) return { unread: 0, waiting: 0, thinking: false }
+      return chatBadgeTally(list, prefs.chatBadgeCountMode)
     },
     [chatEnabled, prefs.chatBadgeCountMode],
   )
@@ -264,7 +267,7 @@ export function useBadgeCounts(): UseBadgeCountsApi {
       const proc = processEnabled ? processTallies.get(projectId) : undefined
 
       return {
-        chat_messages: { unread: chat.unread, thinking: chat.thinking },
+        chat_messages: chat,
         git: { incoming, uncommitted },
         tests: { failing: failingTests },
         activity: {
@@ -272,10 +275,22 @@ export function useBadgeCounts(): UseBadgeCountsApi {
           paused: activityPausedForScope(projectId),
           unseen,
         },
-        process: { running: proc?.running ?? 0, waiting: proc?.waiting ?? 0 },
+        process: {
+          running: proc?.running ?? 0,
+          waiting: proc?.waiting ?? 0,
+          failed: proc?.failed ?? 0,
+          unread: proc?.unread ?? 0,
+        },
+        signIn: {
+          expired: scopeSignInNames(signIns.byProject.get(projectId), {
+            chat: prefs.badgesEnabled.chat,
+            processes: prefs.badgesEnabled.processes,
+          }),
+        },
       }
     },
     [
+      signIns,
       chatBadgeFor,
       chatsByProjectId,
       activeProjectId,
@@ -300,10 +315,13 @@ export function useBadgeCounts(): UseBadgeCountsApi {
       // Fold in the group's own GROUP / GROUP_TOPIC chats.
       const groupChat = chatBadgeFor(chatsByGroupId.get(groupId) ?? [])
       agg.chat_messages.unread += groupChat.unread
+      agg.chat_messages.waiting += groupChat.waiting
       agg.chat_messages.thinking = agg.chat_messages.thinking || groupChat.thinking
+      const groupSignIns = chatEnabled ? (signIns.byGroup.get(groupId) ?? []) : []
+      agg.signIn = { expired: [...new Set([...agg.signIn.expired, ...groupSignIns])] }
       return agg
     },
-    [getProjectBadgeState, chatsByGroupId, chatBadgeFor],
+    [getProjectBadgeState, chatsByGroupId, chatBadgeFor, chatEnabled, signIns],
   )
 
   const getGroupChatBadge = useCallback(
@@ -314,7 +332,6 @@ export function useBadgeCounts(): UseBadgeCountsApi {
 
   return {
     counts,
-    markChatSeen,
     markAppOpened,
     getProjectBadgeState,
     getGroupBadgeState,

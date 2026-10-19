@@ -1,10 +1,25 @@
 import { useState } from 'react'
-import { useCrossProjectRequests } from 'thefactory-ui/headless'
+import {
+  featureRequestChatContext,
+  featureRequestCountsLine,
+  featureRequestSettledLine,
+  featureRequestSummary,
+  featureRequestTakenOverLinks,
+  featureRequestWaitCycleWarning,
+  useCrossProjectRequests,
+  useFeatureRequestDecision,
+  useFeatureRequestStart,
+  useProjectWorkLaunch,
+} from 'thefactory-ui/headless'
+import { useNavigate } from 'react-router-dom'
+import { useNavigateToResource } from '@ui/hooks/useNavigateToResource'
 import {
   FeatureRequestCard,
   type FeatureRequestCardData,
   type FeatureRequestCardStatus,
+  StartWorkDialog,
 } from 'thefactory-ui/web'
+import FeatureRequestFullModal from './FeatureRequestFullModal'
 
 /**
  * Desktop connector for the cross-project request widget rendered inline in A's chat from a
@@ -21,8 +36,27 @@ export default function FeatureRequestWidgetConnected({
   status?: string
   cycleDetected?: boolean
 }) {
-  const { requestById, accept, reject } = useCrossProjectRequests()
+  const { requestById, reject, markDelivered, handOver } = useCrossProjectRequests()
+  const decision = useFeatureRequestDecision(requestId)
+  const navigate = useNavigate()
+  const launch = useProjectWorkLaunch(decision.request?.targetProjectId)
+  const requestStart = useFeatureRequestStart(
+    decision.request,
+    decision,
+    (outcome) => {
+      const projectId = decision.request?.targetProjectId
+      if (!projectId) return
+      if (outcome.mode === 'process' && outcome.processRunId) {
+        navigate(`/projects/${projectId}/process-runs/${outcome.processRunId}`)
+      } else if (outcome.chatContextId) {
+        navigate(`/projects/${projectId}/chat/${encodeURIComponent(outcome.chatContextId)}`)
+      }
+    },
+    launch.chatAgent,
+  )
+  const navigateToResource = useNavigateToResource()
   const [busy, setBusy] = useState(false)
+  const [showFull, setShowFull] = useState(false)
   const live = requestById(requestId)
 
   if (!live) {
@@ -40,7 +74,19 @@ export default function FeatureRequestWidgetConnected({
     fromProjectId: live.requestedBy.fromProjectId,
     status: live.status as FeatureRequestCardStatus,
     cycleDetected: live.cycleFlag?.detected ?? cycleDetected,
+    waitCycleWarning: featureRequestWaitCycleWarning(live),
     reviewBranch: live.result?.reviewBranch,
+    summary: featureRequestSummary(live),
+    countsLine: featureRequestCountsLine(live),
+    rejectionReason: live.rejectionReason,
+    statusReason: live.statusReason,
+    settled: featureRequestSettledLine(live, (id) => requestById(id)?.title),
+    takenOver: featureRequestTakenOverLinks(live, (id) => requestById(id)?.title),
+  }
+
+  const openRequest = (id: string) => {
+    const other = requestById(id)
+    if (other) navigateToResource({ kind: 'chat', context: featureRequestChatContext(other) })
   }
 
   const decide = (fn: (id: string) => Promise<unknown>) => async () => {
@@ -53,11 +99,28 @@ export default function FeatureRequestWidgetConnected({
   }
 
   return (
-    <FeatureRequestCard
-      request={data}
-      busy={busy}
-      onAccept={decide(accept)}
-      onReject={decide(reject)}
-    />
+    <>
+      <FeatureRequestCard
+        request={data}
+        busy={busy}
+        defaultMode={launch.defaultMode}
+        onAccept={requestStart.onAccept}
+        onStartAgain={requestStart.onStartAgain}
+        onReject={decide(reject)}
+        onOpenFull={() => setShowFull(true)}
+        onMarkDelivered={(input) => void decide((id) => markDelivered(id, input))()}
+        onHandOver={(input) => void decide((id) => handOver(id, input))()}
+        onOpenRequest={openRequest}
+      />
+      <StartWorkDialog
+        start={requestStart.start}
+        defaultMode={launch.defaultMode}
+        chatRunner={launch.chatRunner}
+      />
+      <FeatureRequestFullModal
+        requestId={showFull ? requestId : undefined}
+        onClose={() => setShowFull(false)}
+      />
+    </>
   )
 }

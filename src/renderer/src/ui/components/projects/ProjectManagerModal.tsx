@@ -34,6 +34,7 @@ import { useProjects } from 'thefactory-ui/headless'
 import { useProjectsGroups } from 'thefactory-ui/headless'
 import { useTemplates, type Template } from 'thefactory-ui/headless'
 import { useProjectGithubRepo } from 'thefactory-ui/headless'
+import { projectStableBranchError } from 'thefactory-ui/headless'
 import {
   ProjectEditorForm,
   blankProjectForm,
@@ -215,6 +216,8 @@ export default function ProjectManagerModal({ onRequestClose }: { onRequestClose
     }
     if (!form.title.trim()) errors.push('Title is required.')
     if (!form.description.trim()) errors.push('Description is required.')
+    const stableBranchError = projectStableBranchError(form.metadata.stableBranch)
+    if (stableBranchError) errors.push(stableBranchError)
     if (errors.length > 0) {
       setFormErrors(errors)
       return

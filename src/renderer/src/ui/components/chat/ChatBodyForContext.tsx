@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import {
   ChatBody,
   CliRunArtifactPanel,
-  FeatureRequestIntroPanel,
+  IncomingFeatureRequestCard,
   ModelChipConnected,
   ProcessGroupRunChip,
   ProcessRunChip,
@@ -16,11 +16,21 @@ import {
   useReferenceRenderer,
 } from 'thefactory-ui/web'
 import type { ChatContext } from 'thefactory-ui/headless/api'
-import { useAgents, useChatComposer } from 'thefactory-ui/headless'
+import {
+  featureRequestChatContext,
+  useAgents,
+  useChatComposer,
+  useCrossProjectRequests,
+  useOpenChat,
+} from 'thefactory-ui/headless'
 import { useChats } from 'thefactory-ui/headless'
 import { chatClosure } from 'thefactory-ui/headless'
 import { useCredentialCaptures } from 'thefactory-ui/headless'
-import { useCrossProjectRequests } from 'thefactory-ui/headless'
+import {
+  FEATURE_REQUEST_COMPOSER_HINT,
+  hiddenFeatureRequestIntro,
+  useIncomingFeatureRequest,
+} from 'thefactory-ui/headless'
 import { useFiles } from 'thefactory-ui/headless'
 import { usePendingToolGrants } from 'thefactory-ui/headless'
 import { useTools } from 'thefactory-ui/headless'
@@ -36,10 +46,12 @@ import { useActiveProject } from 'thefactory-ui/headless'
 import { getChatContextKey } from '@core/chats/chatKey'
 import { fetchAttachmentPreviewUrl } from '@core/chats/attachmentPreviewUrl'
 import { useAuth } from '@core/contexts/AuthContext'
-import { useBadgeCounts } from '@core/notifications/useBadgeCounts'
+import { markChatSeen } from '@core/notifications/useBadgeCounts'
 import { useChatContextLastRead as useChatLastRead } from 'thefactory-ui/web'
-import { Button } from 'thefactory-ui/web'
+import { Button, StartWorkDialog } from 'thefactory-ui/web'
+import { useFeatureRequestStart, useProjectWorkLaunch } from 'thefactory-ui/headless'
 import { getToolHeaderPath, renderToolCall } from './ToolCall/renderers'
+import FeatureRequestFullModal from './FeatureRequestFullModal'
 
 export type ChatBodyForContextProps = {
   context: ChatContext
@@ -72,7 +84,6 @@ export default function ChatBodyForContext({
 }: ChatBodyForContextProps) {
   const {
     activeLLMConfig,
-    getChat,
     getChatLiveState,
     restartLastTurn,
     abortChat,
@@ -85,10 +96,10 @@ export default function ChatBodyForContext({
   const { previewTool } = useTools()
   const { project } = useActiveProject()
   const { getStory, getFeature, storyDisplayIndex, featureDisplayIndex } = useStories()
-  const { markChatSeen } = useBadgeCounts()
   const { lastReadIso, markReadByContext } = useChatLastRead(context)
 
-  const chat = getChat(context)
+  // The chat with its messages — the chats list holds only its summary.
+  const { chat, loading: messagesLoading } = useOpenChat(context)
   const liveState = getChatLiveState(context)
   const contextKey = getChatContextKey(context)
 
@@ -148,12 +159,9 @@ export default function ChatBodyForContext({
   // first message.
   const messagesWithSystem = useMemo(() => {
     const isFR = context.type === 'FEATURE_REQUEST'
-    // A FEATURE_REQUEST chat renders its request as a centered panel (emptyStateContent), not a
-    // chat message — hide the seeded `user` intro (the only user-role message; the in-place run
-    // adds only assistant/tool) and skip the system-prompt bubble so the panel is the sole focus.
-    const original = isFR
-      ? (chat?.messages ?? []).filter((m) => m.role !== 'user')
-      : (chat?.messages ?? [])
+    // A FEATURE_REQUEST chat opens with its request as a card above the conversation, not as a
+    // chat message — hide the seeded intro and skip the system-prompt bubble so the card leads.
+    const original = hiddenFeatureRequestIntro(chat?.messages ?? [], isFR)
     if (!effectivePrompt || isFR) return original
     return [
       {
@@ -184,37 +192,18 @@ export default function ChatBodyForContext({
       ? projectProcessRuns.find((r) => r.storyId === context.storyId)
       : undefined
 
-  // Receiver-side FEATURE_REQUEST chat: while the request is still pending, the composer is
-  // replaced by an Accept/Reject bar (the request itself is the transcript's opening message).
-  const { requestById, accept, reject } = useCrossProjectRequests()
-  const featureRequest =
-    context.type === 'FEATURE_REQUEST' && context.featureRequestId
-      ? requestById(context.featureRequestId)
-      : undefined
-  // A FEATURE_REQUEST chat with an empty transcript is awaiting the operator's accept/reject — show
-  // the centered request panel and hide the composer. Gated on the (synchronous) empty transcript
-  // rather than the async request record, so the composer never flashes before the record loads.
+  // Receiver-side FEATURE_REQUEST chat: the request is the conversation's opening card, and while
+  // it waits for a decision the composer only says so. Until the record loads, an empty transcript
+  // stands for "still waiting", so the composer never flashes open first.
+  const incomingRequest = useIncomingFeatureRequest(
+    context.type === 'FEATURE_REQUEST' ? context.featureRequestId : undefined,
+  )
+  const featureRequest = incomingRequest.request
+  const crossProjectRequests = useCrossProjectRequests()
   const awaitingFeatureRequest =
-    isFeatureRequestChat && !isRunningAgent && messagesWithSystem.length === 0
-  const [decisionBusy, setDecisionBusy] = useState(false)
-  const onAcceptRequest = useCallback(async () => {
-    if (!featureRequest) return
-    setDecisionBusy(true)
-    try {
-      await accept(featureRequest.id)
-    } finally {
-      setDecisionBusy(false)
-    }
-  }, [accept, featureRequest])
-  const onRejectRequest = useCallback(async () => {
-    if (!featureRequest) return
-    setDecisionBusy(true)
-    try {
-      await reject(featureRequest.id)
-    } finally {
-      setDecisionBusy(false)
-    }
-  }, [reject, featureRequest])
+    isFeatureRequestChat &&
+    (featureRequest ? featureRequest.status === 'pending' : messagesWithSystem.length === 0)
+  const [fullRequestId, setFullRequestId] = useState<string>()
 
   // Suggested actions = the last assistant message's `suggestedActions` (chip
   // row above the input). Only shown when the chat isn't currently streaming
@@ -269,6 +258,21 @@ export default function ChatBodyForContext({
   const navigateToResource = useNavigateToResource()
   const navigateToGroupRun = useNavigateToGroupRun()
   const navigate = useNavigate()
+  const requestLaunch = useProjectWorkLaunch(featureRequest?.targetProjectId)
+  const requestStart = useFeatureRequestStart(
+    featureRequest,
+    incomingRequest,
+    (outcome) => {
+      const targetProjectId = featureRequest?.targetProjectId
+      if (!targetProjectId) return
+      if (outcome.mode === 'process' && outcome.processRunId) {
+        navigate(`/projects/${targetProjectId}/process-runs/${outcome.processRunId}`)
+      } else if (outcome.chatContextId) {
+        navigate(`/projects/${targetProjectId}/chat/${encodeURIComponent(outcome.chatContextId)}`)
+      }
+    },
+    requestLaunch.chatAgent,
+  )
   const onResolveFile = useCallback(
     (token: string) => {
       const exact = filesByPath[token]
@@ -333,7 +337,7 @@ export default function ChatBodyForContext({
       markChatSeen(context)
       markReadByContext(context)
     },
-    [context, markChatSeen, markReadByContext],
+    [context, markReadByContext],
   )
   const onReadLatest = useCallback(
     (iso?: string) => {
@@ -341,7 +345,7 @@ export default function ChatBodyForContext({
       markChatSeen(context)
       markReadByContext(context, iso)
     },
-    [context, markChatSeen, markReadByContext],
+    [context, markReadByContext],
   )
 
   // Clear notifications when landing on this chat (matches desktop's
@@ -371,10 +375,9 @@ export default function ChatBodyForContext({
       ) : null}
     </div>
   ) : isTerminalAgentRun ? (
-    // A finished one-shot run takes no input. Use inputOverride (NOT hideInput):
-    // the approval-panel branch outranks inputOverride, so a still-pending
-    // tool-approval on a direct agent run is never hidden — hideInput would have
-    // suppressed it, stranding the run with no way to approve/deny.
+    // A finished one-shot run takes no input. The approval-panel branch outranks
+    // inputOverride, so a still-pending tool-approval on a direct agent run is
+    // never hidden behind it.
     <div
       className="flex items-center justify-between gap-2 px-4 py-3 border-t text-xs shrink-0"
       style={{ borderColor: 'var(--border-subtle)', background: 'var(--surface-muted)' }}
@@ -400,122 +403,171 @@ export default function ChatBodyForContext({
     </div>
   ) : undefined
 
-  // While pending, the Accept/Reject action lives in the centered intro panel (below), so the
-  // composer is disabled rather than replaced.
-  const featureRequestEmptyState = awaitingFeatureRequest ? (
-    <FeatureRequestIntroPanel
-      fromProjectId={featureRequest?.requestedBy.fromProjectId}
-      title={featureRequest?.title ?? chat?.title}
-      description={featureRequest?.description}
-      cycle={featureRequest?.cycleFlag?.detected}
-      onAccept={() => void onAcceptRequest()}
-      onReject={() => void onRejectRequest()}
-      busy={decisionBusy}
-    />
+  const placedStoryId = featureRequest?.handling?.storyId
+  const featureRequestCard = featureRequest ? (
+    <>
+      <IncomingFeatureRequestCard
+        request={featureRequest}
+        fromLabel={incomingRequest.fromLabel}
+        adopterLabels={incomingRequest.adopterLabels}
+        defaultMode={requestLaunch.defaultMode}
+        onAccept={requestStart.onAccept}
+        onStartWork={requestStart.onStartWork}
+        onStartAgain={requestStart.onStartAgain}
+        onReject={(reason) => void incomingRequest.reject(reason)}
+        onMarkDelivered={(input) => void incomingRequest.markDelivered(input)}
+        onHandOver={(input) => void incomingRequest.handOver(input)}
+        requestTitle={(id) => crossProjectRequests.requestById(id)?.title}
+        onOpenRequest={(id) => {
+          const other = crossProjectRequests.requestById(id)
+          if (other) navigateToResource({ kind: 'chat', context: featureRequestChatContext(other) })
+        }}
+        busy={incomingRequest.busy}
+        error={incomingRequest.error}
+        placedOn={
+          incomingRequest.placedOnLabel && placedStoryId
+            ? {
+                label: incomingRequest.placedOnLabel,
+                onOpen: () =>
+                  navigateToResource({
+                    kind: 'story',
+                    projectId: featureRequest.targetProjectId,
+                    storyId: placedStoryId,
+                  }),
+              }
+            : undefined
+        }
+        onOpenFull={() => setFullRequestId(featureRequest.id)}
+      />
+      <StartWorkDialog
+        start={requestStart.start}
+        defaultMode={requestLaunch.defaultMode}
+        chatRunner={requestLaunch.chatRunner}
+      />
+    </>
   ) : undefined
 
   return (
-    <ChatBody
-      chatId={contextKey}
-      {...(context.projectId ? { projectId: context.projectId } : {})}
-      {...(context.groupId ? { groupId: context.groupId } : {})}
-      historyLocked={chatClosure(chat).locked}
-      header={header}
-      sendError={liveState.sendError ? { message: liveState.sendError.message } : null}
-      messages={messagesWithSystem}
-      liveState={liveState}
-      renderToolResult={renderToolCall}
-      getToolHeaderPath={getToolHeaderPath}
-      onResolveFile={onResolveFile}
-      renderReference={renderReference}
-      onResourceLink={navigateToResource}
-      renderCliRunArtifact={
-        context.projectId
-          ? (runId) => (
-              <CliRunArtifactPanel
-                key={runId}
-                runId={runId}
-                projectId={context.projectId!}
-                onSendMessage={(text) => onSend(text, [])}
-                onDraftMessage={onInputChange}
-                onOpenGit={() => navigate(`/projects/${context.projectId}/git`)}
-                onBackToPipeline={(id) =>
-                  onBackToPipeline
-                    ? onBackToPipeline()
-                    : navigate(`/projects/${context.projectId}/process-runs/${id}`)
-                }
-              />
-            )
-          : undefined
-      }
-      renderProcessGroupRun={(groupRunId) => (
-        <ProcessGroupRunChip
-          groupRunId={groupRunId}
-          onOpen={(id) => navigateToGroupRun(id, context.groupId)}
-        />
-      )}
-      renderProcessRun={
-        context.projectId
-          ? (processRunId) => (
-              <ProcessRunChip
-                processRunId={processRunId}
-                onOpen={(id) => navigate(`/projects/${context.projectId}/process-runs/${id}`)}
-              />
-            )
-          : undefined
-      }
-      renderApprovalModelChip={({ model, onPick, cli, onPickCli }) => (
-        <ModelChipConnected
-          chatContext={context}
-          editable
-          overrideModel={model}
-          onOverrideModel={onPick}
-          overrideCli={cli}
-          onOverrideCli={onPickCli}
-        />
-      )}
-      onSend={onSend}
-      onAbort={onAbort}
-      isBusy={liveState.isSending || isRunActive}
-      activeCliRunId={cliRunId}
-      previewTool={
-        context.projectId ? (_id, toolName, args) => previewTool(toolName, args) : undefined
-      }
-      grants={grants}
-      credentialCaptures={captures}
-      onSubmitCredentialCapture={submitCapture}
-      onCancelCredentialCapture={cancelCapture}
-      onDeleteLastMessage={isAgentRunChat || isRunningAgent ? undefined : onDeleteLastMessage}
-      onRestartTurn={isAgentRunChat || isRunningAgent ? undefined : onRestartTurn}
-      canSend={activeLLMConfig !== null}
-      hideInput={awaitingFeatureRequest}
-      emptyStateContent={featureRequestEmptyState}
-      numberMessagesToSend={completionSettings?.numberMessagesToSend}
-      lastReadIso={lastReadIso}
-      onAtBottomChange={onAtBottomChange}
-      onReadLatest={onReadLatest}
-      scrollToBottomSignal={scrollSignal}
-      inputOverride={inputOverride}
-      inputValue={composer.text}
-      onInputChange={onInputChange}
-      pendingQueue={composer.queue}
-      inputProps={{
-        filePaths: paths,
-        ...(references.searchFiles ? { searchFiles: references.searchFiles } : {}),
-        describeFile: references.describeFile,
-        attachments,
-        onChangeAttachments: composer.setAttachments,
-        onSearchReferences: references.searchWork,
-        onSearchHandles: references.searchHandles,
-        onUploadAttachment,
-        onAddAttachment: composer.addAttachment,
-        getAttachmentPreviewUrl,
-        dropTargetTitle,
-        suggestedActions,
-        placeholder: inputProps?.placeholder,
-        autoFocus: inputProps?.autoFocus,
-        restoreKey: contextKey,
-      }}
-    />
+    <>
+      <ChatBody
+        chatId={contextKey}
+        {...(context.projectId ? { projectId: context.projectId } : {})}
+        {...(context.groupId ? { groupId: context.groupId } : {})}
+        historyLocked={chatClosure(chat).locked}
+        header={header}
+        sendError={liveState.sendError ? { message: liveState.sendError.message } : null}
+        messages={messagesWithSystem}
+        messagesLoading={messagesLoading}
+        {...(chat?.metadata ? { chatMetadata: chat.metadata } : {})}
+        liveState={liveState}
+        renderToolResult={renderToolCall}
+        getToolHeaderPath={getToolHeaderPath}
+        onResolveFile={onResolveFile}
+        renderReference={renderReference}
+        onResourceLink={navigateToResource}
+        renderCliRunReview={
+          context.projectId
+            ? (runId, review) => (
+                <CliRunArtifactPanel
+                  key={runId}
+                  framed={false}
+                  runId={runId}
+                  projectId={context.projectId!}
+                  onSendMessage={(text) => onSend(text, [])}
+                  onDraftMessage={review.draftMessage}
+                  onOpenGit={() => navigate(`/projects/${context.projectId}/git`)}
+                  onBackToPipeline={(id) =>
+                    onBackToPipeline
+                      ? onBackToPipeline()
+                      : navigate(`/projects/${context.projectId}/process-runs/${id}`)
+                  }
+                />
+              )
+            : undefined
+        }
+        renderProcessGroupRun={(groupRunId) => (
+          <ProcessGroupRunChip
+            groupRunId={groupRunId}
+            onOpen={(id) => navigateToGroupRun(id, context.groupId)}
+          />
+        )}
+        renderProcessRun={(processRunId) => (
+          <ProcessRunChip
+            processRunId={processRunId}
+            onOpen={(id, runProjectId) => navigate(`/projects/${runProjectId}/process-runs/${id}`)}
+          />
+        )}
+        renderApprovalModelChip={({
+          model,
+          onPick,
+          cli,
+          onPickCli,
+          api,
+          onPickApi,
+          effort,
+          onPickEffort,
+        }) => (
+          <ModelChipConnected
+            chatContext={context}
+            editable
+            overrideModel={model}
+            onOverrideModel={onPick}
+            overrideCli={cli}
+            onOverrideCli={onPickCli}
+            overrideApi={api}
+            onOverrideApi={onPickApi}
+            overrideEffort={effort}
+            onOverrideEffort={onPickEffort}
+          />
+        )}
+        onSend={onSend}
+        onAbort={onAbort}
+        isBusy={liveState.isSending || isRunActive}
+        activeCliRunId={cliRunId}
+        previewTool={
+          context.projectId ? (_id, toolName, args) => previewTool(toolName, args) : undefined
+        }
+        grants={grants}
+        credentialCaptures={captures}
+        onSubmitCredentialCapture={submitCapture}
+        onCancelCredentialCapture={cancelCapture}
+        onDeleteLastMessage={isAgentRunChat || isRunningAgent ? undefined : onDeleteLastMessage}
+        onRestartTurn={isAgentRunChat || isRunningAgent ? undefined : onRestartTurn}
+        canSend={activeLLMConfig !== null && !awaitingFeatureRequest}
+        leadingContent={featureRequestCard}
+        numberMessagesToSend={completionSettings?.numberMessagesToSend}
+        lastReadIso={lastReadIso}
+        onAtBottomChange={onAtBottomChange}
+        onReadLatest={onReadLatest}
+        scrollToBottomSignal={scrollSignal}
+        inputOverride={inputOverride}
+        inputValue={composer.text}
+        onInputChange={onInputChange}
+        pendingQueue={composer.queue}
+        inputProps={{
+          filePaths: paths,
+          ...(references.searchFiles ? { searchFiles: references.searchFiles } : {}),
+          describeFile: references.describeFile,
+          attachments,
+          onChangeAttachments: composer.setAttachments,
+          onSearchReferences: references.searchWork,
+          onSearchHandles: references.searchHandles,
+          onUploadAttachment,
+          onAddAttachment: composer.addAttachment,
+          getAttachmentPreviewUrl,
+          dropTargetTitle,
+          suggestedActions,
+          placeholder: awaitingFeatureRequest
+            ? FEATURE_REQUEST_COMPOSER_HINT
+            : inputProps?.placeholder,
+          autoFocus: inputProps?.autoFocus,
+          restoreKey: contextKey,
+        }}
+      />
+      <FeatureRequestFullModal
+        requestId={fullRequestId}
+        onClose={() => setFullRequestId(undefined)}
+      />
+    </>
   )
 }

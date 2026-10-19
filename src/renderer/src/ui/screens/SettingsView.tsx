@@ -6,14 +6,17 @@ import { VisualSettings } from 'thefactory-ui/web'
 import LLMSettings from '@ui/components/settings/LLMSettings'
 import { NotificationSettings, StorageUsageSettings } from 'thefactory-ui/web'
 import { CrossProjectSettings } from 'thefactory-ui/web'
+import { UsageSettings } from 'thefactory-ui/web'
 import { SavedRulesSettings } from 'thefactory-ui/web'
 import { GitCredentialsSettings } from 'thefactory-ui/web'
 import { WebSearchSettings } from 'thefactory-ui/web'
 import { DatabaseSettings } from 'thefactory-ui/web'
 import { ProviderConnectionsSettings } from 'thefactory-ui/web'
 import { ProcessesView } from 'thefactory-ui/web'
+import { PROCESS_LINK_PARAM } from 'thefactory-ui/headless'
 import { GroupTicketSettings, ProjectTicketSettings } from 'thefactory-ui/web'
 import {
+  IconBarChart,
   IconBell,
   IconBoard,
   IconCpu,
@@ -36,6 +39,7 @@ import { getChatContext, getChatContextKey } from '@core/chats/chatKey'
 const CATEGORIES = [
   { id: 'visual', label: 'Visual', icon: <IconPalette className="h-4 w-4" />, accent: 'purple' },
   { id: 'llms', label: 'LLMs', icon: <IconRobot className="h-4 w-4" />, accent: 'teal' },
+  { id: 'usage', label: 'Usage', icon: <IconBarChart className="h-4 w-4" />, accent: 'teal' },
   {
     id: 'notifications',
     label: 'Notifications',
@@ -108,6 +112,7 @@ type CategoryId = (typeof CATEGORIES)[number]['id'] | 'project' | 'group'
 export default function SettingsView({ scope }: { scope: SettingsScope }) {
   const [searchParams, setSearchParams] = useSearchParams()
   const queryTab = searchParams.get('tab')
+  const linkedProcessId = searchParams.get(PROCESS_LINK_PARAM)
   const navigate = useNavigate()
   const openChat = (chatContextId: string) => {
     const context = getChatContext(chatContextId)
@@ -159,7 +164,7 @@ export default function SettingsView({ scope }: { scope: SettingsScope }) {
         // The blueprint library is its own two-pane master/detail, so it wants
         // the full pane rather than the padded column the simple panels use.
         <div className="h-full w-full min-h-0 overflow-hidden">
-          <ProcessesView />
+          <ProcessesView {...(linkedProcessId ? { selectedProcessId: linkedProcessId } : {})} />
         </div>
       ) : (
         <div className="h-full min-h-0 overflow-y-auto p-4">
@@ -169,13 +174,16 @@ export default function SettingsView({ scope }: { scope: SettingsScope }) {
           {activeCategory === 'group' && scope.kind === 'group' && (
             <GroupTicketSettings groupId={scope.groupId} />
           )}
-          {activeCategory === 'visual' && <VisualSettings />}
+          {activeCategory === 'visual' && (
+            <VisualSettings onOpenNotifications={() => onSelect('notifications')} />
+          )}
           {activeCategory === 'notifications' && (
           <div className="flex flex-col gap-8">
             <NotificationSettings />
             <StorageUsageSettings />
           </div>
         )}
+          {activeCategory === 'usage' && <UsageSettings />}
           {activeCategory === 'cross-project' && <CrossProjectSettings />}
           {activeCategory === 'rules' && <SavedRulesSettings onOpenChat={openChat} />}
           {activeCategory === 'github' && (

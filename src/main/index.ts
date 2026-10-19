@@ -50,6 +50,18 @@ async function createWindow(): Promise<void> {
     return { action: 'deny' }
   })
 
+  mainWindow.webContents.on('will-prevent-unload', (event) => {
+    const response = dialog.showMessageBoxSync(mainWindow, {
+      type: 'warning',
+      title: 'Unsaved changes',
+      message: 'This app has unsaved changes. Leave anyway?',
+      buttons: ['Leave', 'Stay'],
+      defaultId: 1,
+      cancelId: 1,
+    })
+    if (response === 0) event.preventDefault()
+  })
+
   mainWindow.webContents.on('will-navigate', (event, url) => {
     if (isStrayFileNavigation(url, mainWindow.webContents.getURL())) event.preventDefault()
   })

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 
-import { useTests } from 'thefactory-ui/headless'
+import { useTestsDetail } from 'thefactory-ui/headless'
 import type { TestsRunningJob } from 'thefactory-ui/headless'
 import { useActiveProject } from 'thefactory-ui/headless'
 import { useStories } from 'thefactory-ui/headless'
@@ -68,7 +68,7 @@ function TestsViewInner() {
     runAllTests,
     runCoverageAll,
     abort,
-  } = useTests()
+  } = useTestsDetail()
   const { stories, createStory } = useStories()
 
   const [tab, setTab] = useState<TestTab>('results')

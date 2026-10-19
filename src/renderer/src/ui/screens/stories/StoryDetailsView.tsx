@@ -1,15 +1,27 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
-import { useActiveProject, useReferences } from 'thefactory-ui/headless'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import {
+  FEATURE_LINK_PARAM,
+  linkedFeatureStep,
+  featureShownStatus,
+  useActiveProject,
+  useReferences,
+} from 'thefactory-ui/headless'
 import { STATUS_ORDER as HEADLESS_STATUS_ORDER } from 'thefactory-ui/headless'
 import { useStories } from 'thefactory-ui/headless'
 import { useAgents } from 'thefactory-ui/headless'
 import { useProcessRuns } from 'thefactory-ui/headless'
-import { processStatusOverlay } from 'thefactory-ui/headless'
+import {
+  featureProcessOverlay,
+  isFeatureInLiveRun,
+  processStatusOverlay,
+  useProcessStopClock,
+} from 'thefactory-ui/headless'
 import ProcessStatusChip from '@ui/components/stories/ProcessStatusChip'
 import type { Feature, GetStoryResponse } from 'thefactory-ui/headless/api'
 import {
   Button,
+  useDragReorder,
   OptionPicker,
   StatusControl,
   StatusPicker,
@@ -18,7 +30,7 @@ import {
 } from 'thefactory-ui/web'
 import { IconBack, IconCalculator, IconChevron, IconEdit, IconPlus } from 'thefactory-ui/web/icons'
 import { DependencyBullet } from 'thefactory-ui/web'
-import { ExclamationChip, RichText } from 'thefactory-ui/web'
+import { ExclamationChip, FeatureKindChip, RichText, StoryNotesSection } from 'thefactory-ui/web'
 import RunAgentButtonConnected from '@ui/components/agents/RunAgentButtonConnected'
 import { ModelChipConnected } from 'thefactory-ui/web'
 import { UsageModalConnected as UsageModal } from 'thefactory-ui/web'
@@ -76,6 +88,7 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
     updateFeature,
     getBlockers,
     getBlockersOutbound,
+    reorderFeature,
   } = useStories()
   const { runsActive } = useAgents()
 
@@ -84,7 +97,6 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
     [stories, storyId],
   )
 
-  const [saving] = useState(false)
   const [modal, setModal] = useState<StoryModalRoute | null>(null)
   const [usageOpen, setUsageOpen] = useState(false)
   const [isOverviewExpanded, setIsOverviewExpanded] = useState(false)
@@ -137,6 +149,31 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
     [featuresSorted, statusFilter, query, story],
   )
 
+  // Dragging a row moves it in the story's real order — beside the row it is
+  // dropped on, though a status filter hides rows between. Off while searching
+  // or sorted by status, where the shown order is not the story's.
+  const featureIds = useMemo(() => (story ? story.features.map((f) => f.id) : []), [story])
+  const featureDrag = useDragReorder({
+    ids: featureIds,
+    enabled: !!story && (sortBy === 'index_asc' || sortBy === 'index_desc') && !query.trim(),
+    reversed: sortBy === 'index_desc',
+    onMove: async (featureId, toIndex) => {
+      if (story) await reorderFeature(story.id, featureId, toIndex)
+    },
+  })
+  const featureRowDragClass = (featureId: string) =>
+    [
+      featureDrag.rowProps(featureId).draggable ? 'draggable' : '',
+      featureDrag.draggingId === featureId ? 'is-dragging' : '',
+      featureDrag.target?.id === featureId ? 'is-drop-target' : '',
+    ]
+      .filter(Boolean)
+      .join(' ')
+  const dropIndicator = (featureId: string, side: 'before' | 'after') =>
+    featureDrag.target?.id === featureId && featureDrag.target.side === side ? (
+      <div className="drop-indicator" aria-hidden="true" />
+    ) : null
+
   const storyRun = useMemo(
     () =>
       story
@@ -146,11 +183,12 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
   )
   // The story's PROCESS run (one per story), for the status→pipeline link.
   const { runs: processRuns } = useProcessRuns(projectId)
+  const stopNow = useProcessStopClock()
   const storyProcessRun = useMemo(
     () => (story ? processRuns.find((r) => r.storyId === story.id) : undefined),
     [story, processRuns],
   )
-  const storyProcessOverlay = processStatusOverlay(storyProcessRun)
+  const storyProcessOverlay = processStatusOverlay(storyProcessRun, stopNow)
 
   const handleEditStory = () => {
     if (!story) return
@@ -163,6 +201,34 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
   const handleEditFeature = (feature: Feature) => {
     if (!story) return
     setModal({ kind: 'edit-feature', storyId: story.id, feature })
+  }
+
+  const [searchParams, setSearchParams] = useSearchParams()
+  const linkedFeatureId = searchParams.get(FEATURE_LINK_PARAM)
+  const openedFeatureLink = useRef<string | undefined>(undefined)
+  const clearFeatureLink = useCallback(() => {
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev)
+        next.delete(FEATURE_LINK_PARAM)
+        return next
+      },
+      { replace: true },
+    )
+  }, [setSearchParams])
+
+  useEffect(() => {
+    if (!linkedFeatureId) openedFeatureLink.current = undefined
+    const step = linkedFeatureStep(story, linkedFeatureId, openedFeatureLink.current)
+    if (step.type === 'open' && story) {
+      openedFeatureLink.current = step.feature.id
+      setModal({ kind: 'edit-feature', storyId: story.id, feature: step.feature })
+    } else if (step.type === 'missing') clearFeatureLink()
+  }, [story, linkedFeatureId, clearFeatureLink])
+
+  const closeModal = () => {
+    setModal(null)
+    if (linkedFeatureId) clearFeatureLink()
   }
 
   const handleStoryStatusChange = async (status: Status) => {
@@ -492,6 +558,9 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
                   'No description provided.'
                 )}
               </p>
+              <div className="mt-3">
+                <StoryNotesSection storyId={story.id} notes={story.notes ?? []} compact />
+              </div>
             </div>
           </section>
 
@@ -525,11 +594,16 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
                   const featureHasActiveRun = !!featureRun
                   const fIdx = getFeatureIndex(story, f.id)
                   const rejection = (f as { rejection?: string }).rejection
+                  const featureOverlay = featureProcessOverlay(storyProcessRun, f.id, stopNow)
 
                   return (
                     <li key={f.id} className="feature-item" role="listitem">
+                      {dropIndicator(f.id, 'before')}
                       <div
-                        className="feature-row"
+                        {...featureDrag.rowProps(f.id)}
+                        className={['feature-row', featureRowDragClass(f.id)]
+                          .filter(Boolean)
+                          .join(' ')}
                         role="button"
                         tabIndex={0}
                         data-feature-id={f.id}
@@ -544,7 +618,7 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
                         <div className="col col-id">
                           <span className="id-chip">{fIdx}</span>
                           <StatusControl
-                            status={f.status}
+                            status={featureShownStatus(f.status as Status, blockers, storyBlockers)}
                             onChange={(next) =>
                               void handleFeatureStatusChange(story.id, f.id, next as Status)
                             }
@@ -559,25 +633,43 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
 
                         <div className="col col-title">
                           <span className="title-text">{f.title || ''}</span>
+                          <FeatureKindChip feature={f} />
                         </div>
                         <div className="col col-description" title={asText(f.description || '')}>
                           <RichText text={f.description || ''} typedReferences />
                         </div>
                         <div
-                          className={`col col-actions ${featureHasActiveRun ? 'is-sticky-visible' : ''}`}
+                          className={`col col-actions ${featureHasActiveRun || featureOverlay ? 'is-sticky-visible' : ''}`}
                         >
-                          {!storyHasActiveRun && !featureHasActiveRun && projectId && (
+                          {projectId && featureOverlay ? (
                             <div
                               className="no-drag"
                               onClick={(e) => e.stopPropagation()}
                               onPointerDown={(e) => e.stopPropagation()}
                             >
-                              <RunAgentButtonConnected
+                              <ProcessStatusChip
+                                run={storyProcessRun}
                                 projectId={projectId}
-                                storyId={story.id}
                                 featureId={f.id}
                               />
                             </div>
+                          ) : (
+                            !storyHasActiveRun &&
+                            !featureHasActiveRun &&
+                            !isFeatureInLiveRun(storyProcessRun, f.id) &&
+                            projectId && (
+                              <div
+                                className="no-drag"
+                                onClick={(e) => e.stopPropagation()}
+                                onPointerDown={(e) => e.stopPropagation()}
+                              >
+                                <RunAgentButtonConnected
+                                  projectId={projectId}
+                                  storyId={story.id}
+                                  featureId={f.id}
+                                />
+                              </div>
+                            )
                           )}
                         </div>
 
@@ -608,6 +700,7 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
                           </div>
                         )}
                       </div>
+                      {dropIndicator(f.id, 'after')}
                     </li>
                   )
                 })}
@@ -616,7 +709,7 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
           </section>
         </main>
 
-        {saving && (
+        {featureDrag.saving && (
           <div
             className="saving-indicator"
             aria-live="polite"
@@ -634,7 +727,7 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
         />
       )}
 
-      <StoriesModalHost route={modal} onClose={() => setModal(null)} />
+      <StoriesModalHost route={modal} onClose={closeModal} />
     </div>
   )
 }

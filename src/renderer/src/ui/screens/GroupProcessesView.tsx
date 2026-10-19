@@ -1,10 +1,16 @@
 import { useCallback } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { RUN_CHAT_PLACEHOLDER, type ProcessNodeRunRef } from 'thefactory-ui/headless'
+import {
+  RUN_CHAT_PLACEHOLDER,
+  RUN_CHAT_TITLE,
+  type ProcessNodeRunRef,
+} from 'thefactory-ui/headless'
 import type { ChatContext } from 'thefactory-ui/headless/api'
 import { ProcessGroupRunsView } from 'thefactory-ui/web'
 import { getChatContext, getChatContextKey } from '@core/chats/chatKey'
 import ChatBodyForContext from '@ui/components/chat/ChatBodyForContext'
+import ChatPanelBody from '@ui/components/chat/ChatPanelBody'
+import { renderRunModelChip } from '@ui/components/agents/RunModelChipConnected'
 
 /**
  * A group's Processes tab: its group runs, each one piece of work carried
@@ -28,9 +34,11 @@ export default function GroupProcessesView() {
   }, [])
 
   const renderChat = useCallback(
-    (context: ChatContext) => (
-      <ChatBodyForContext
+    (context: ChatContext, onClose: () => void) => (
+      <ChatPanelBody
         context={context}
+        onCollapse={onClose}
+        dockedLabel={RUN_CHAT_TITLE}
         inputProps={{ autoFocus: true, placeholder: RUN_CHAT_PLACEHOLDER }}
       />
     ),
@@ -63,6 +71,7 @@ export default function GroupProcessesView() {
       renderAgentRun={renderAgentRun}
       onOpenChat={onOpenChat}
       renderChat={renderChat}
+      renderModelChip={renderRunModelChip}
     />
   )
 }

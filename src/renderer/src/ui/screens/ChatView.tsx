@@ -1,37 +1,19 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAgents } from 'thefactory-ui/headless'
 import { useChats } from 'thefactory-ui/headless'
-import { chatClosure, chatCloseAction } from 'thefactory-ui/headless'
-import { isGeneralProjectChat } from 'thefactory-ui/headless'
 import { isAgentRunChatContext } from 'thefactory-ui/headless'
-import { useStories } from 'thefactory-ui/headless'
-import { formatChatTitle } from 'thefactory-ui/headless'
 import { useActiveProject } from 'thefactory-ui/headless'
 import type { ChatContext } from 'thefactory-ui/headless/api'
 import { getChatContext, getChatContextKey } from '@core/chats/chatKey'
-import { Button, ChatHeader, DotBadge, SegmentedControl } from 'thefactory-ui/web'
-import { IconPlus } from 'thefactory-ui/web/icons'
-import { useBadgeCounts } from '@core/notifications/useBadgeCounts'
+import { ChatList } from 'thefactory-ui/web'
 import ChatBodyForContext from '@ui/components/chat/ChatBodyForContext'
-import { ChatDebugModal, ChatDynamicContextModal } from 'thefactory-ui/web'
-import ChatsNavigationSidebar from '@ui/components/chat/ChatsNavigationSidebar'
-import ChatSettingsDropdownConnected from '@ui/components/chat/ChatSettingsDropdownConnected'
+import ChatHeaderConnected from '@ui/components/chat/ChatHeaderConnected'
 import { ChatTopicCreateModalConnected as ChatTopicCreateModal } from 'thefactory-ui/web'
-import { SystemPromptViewerConnected } from 'thefactory-ui/web'
-import { UsageModalConnected as UsageModal } from 'thefactory-ui/web'
-import { ContextInfoButton } from 'thefactory-ui/web'
-import { ModelChipConnected } from 'thefactory-ui/web'
 import { LoadingScreen } from 'thefactory-ui/web'
 
-const SIDEBAR_MODE_KEY = 'chat-sidebar-mode'
 const LAST_SELECTED_KEY = 'chat-last-selected-context'
 const LAST_OPENED_PREFIX = 'chat-last-opened'
-
-function readSidebarMode(): 'categories' | 'history' {
-  if (typeof window === 'undefined') return 'categories'
-  return window.localStorage.getItem(SIDEBAR_MODE_KEY) === 'history' ? 'history' : 'categories'
-}
 
 function readLastSelected(): ChatContext | undefined {
   try {
@@ -88,21 +70,10 @@ function lastOpenedFor(
 }
 
 export default function ChatView() {
-  const { project, projectId } = useActiveProject()
+  const { projectId } = useActiveProject()
   const params = useParams<{ projectId: string; contextKey?: string }>()
   const navigate = useNavigate()
-  const { storyDisplayIndex, featureDisplayIndex } = useStories()
-  const {
-    isLoaded,
-    loadError,
-    projectChat,
-    chats,
-    getChat,
-    clearChat,
-    consolidateChat,
-    deleteChat,
-  } = useChats()
-  const { counts } = useBadgeCounts()
+  const { isLoaded, loadError, projectChat, chats, getChat } = useChats()
   const { rateRun } = useAgents()
 
   /**
@@ -153,6 +124,18 @@ export default function ChatView() {
     [navigate, projectId],
   )
 
+  // A bare /chat opens the chat it lands on, so the address names it too — a
+  // reload, a copied link and Back then agree with what is open.
+  useEffect(() => {
+    if (params.contextKey || !isLoaded || !activeContext || !projectId) return
+    navigate(
+      `/projects/${projectId}/chat/${encodeURIComponent(getChatContextKey(activeContext))}`,
+      {
+        replace: true,
+      },
+    )
+  }, [params.contextKey, isLoaded, activeContext, projectId, navigate])
+
   // Persist last-selected + last-opened whenever the active chat changes.
   useEffect(() => {
     if (!activeContext) return
@@ -161,26 +144,16 @@ export default function ChatView() {
     if (pid) writeLastOpened(pid, getChatContextKey(activeContext))
   }, [activeContext])
 
-  const [sidebarMode, setSidebarMode] = useState<'categories' | 'history'>(() => readSidebarMode())
-  const onChangeSidebarMode = (next: 'categories' | 'history') => {
-    setSidebarMode(next)
-    try {
-      window.localStorage.setItem(SIDEBAR_MODE_KEY, next)
-    } catch {
-      /* localStorage unavailable */
-    }
-  }
+  const listScope = useMemo(
+    () => (projectId ? { kind: 'project' as const, projectId } : undefined),
+    [projectId],
+  )
 
-  const [usageOpen, setUsageOpen] = useState(false)
-  const [settingsOpen, setSettingsOpen] = useState(false)
   const [topicModalOpen, setTopicModalOpen] = useState(false)
-  const [promptOpen, setPromptOpen] = useState(false)
-  const [dynamicContextOpen, setDynamicContextOpen] = useState(false)
-  const [debugOpen, setDebugOpen] = useState(false)
-  const settingsBtnRef = useRef<HTMLButtonElement | null>(null)
 
-  if (!isLoaded) return <LoadingScreen label="Loading chat…" />
-  if (loadError) return <LoadingScreen label="Could not load chat" error={loadError.message} />
+  if (!params.contextKey && !isLoaded) return <LoadingScreen label="Loading chat…" />
+  if (!params.contextKey && loadError)
+    return <LoadingScreen label="Could not load chat" error={loadError.message} />
 
   if (!activeContext) {
     return (
@@ -191,129 +164,34 @@ export default function ChatView() {
   }
 
   const chat = getChat(activeContext)
-  const closeAction = chatCloseAction(activeContext, chatClosure(chat))
-  const messages = chat?.messages ?? []
   const isAgentRunChat =
     activeContext.type === 'AGENT_RUN_STORY' || activeContext.type === 'AGENT_RUN_FEATURE'
   const isRunningAgent = isAgentRunChat && (chat?.state === 'created' || chat?.state === 'running')
 
-  const totalCost = messages.reduce((sum, m) => sum + (m.usage?.cost ?? 0), 0)
-  const titleHint = formatChatTitle({
-    context: activeContext,
-    chatTitle: chat?.title,
-    projectName: project?.title,
-    storyDisplayIndex,
-    featureDisplayIndex,
-  })
-
   const header = (
-    <ChatHeader
-      isCollapsible={false}
-      totalCostUSD={totalCost}
-      title={titleHint}
-      contextInfoSlot={
-        <ContextInfoButton
-          storyId={activeContext.storyId}
-          featureId={activeContext.featureId}
-          label={titleHint}
-        />
-      }
-      onOpenPrompt={() => setPromptOpen(true)}
-      onOpenCosts={() => setUsageOpen(true)}
-      onOpenDynamicContext={() => setDynamicContextOpen(true)}
-      onOpenDebug={() => setDebugOpen(true)}
-      onRefresh={() => {
-        // An agent-run chat is closed down, not cleared: its messages are the
-        // record of how the work was implemented.
-        if (closeAction.done) return
-        if (!window.confirm(closeAction.confirm)) return
-        if (closeAction.kind !== 'consolidate') {
-          void clearChat(activeContext)
-          return
-        }
-        // Land the user in the successor rather than on a read-only dead end.
-        void consolidateChat(activeContext).then((successor) => {
-          if (successor) onSelectContext(successor)
-        })
+    <ChatHeaderConnected
+      context={activeContext}
+      onOpenChat={onSelectContext}
+      onDeleted={() => {
+        if (projectId) navigate(`/projects/${projectId}/chat`)
       }}
-      onOpenSettings={() => setSettingsOpen((v) => !v)}
-      settingsBtnRef={settingsBtnRef}
-      isSettingsOpen={settingsOpen}
-      isRunningAgent={isRunningAgent}
-      modelChip={<ModelChipConnected editable className="border-blue-500" mode="chat" />}
-      settingsDropdown={
-        <ChatSettingsDropdownConnected
-          context={activeContext}
-          isOpen={settingsOpen}
-          onClose={() => setSettingsOpen(false)}
-          settingsBtnRef={settingsBtnRef}
-          onDeleteChat={async () => {
-            if (isGeneralProjectChat(activeContext)) {
-              window.alert('The General chat cannot be deleted.')
-              return
-            }
-            const confirmed = window.confirm('Delete this chat? This action cannot be undone.')
-            if (!confirmed) return
-            setSettingsOpen(false)
-            try {
-              await deleteChat(activeContext)
-            } catch (e) {
-              console.error('Failed to delete chat', e)
-              window.alert('Failed to delete chat. Please try again.')
-              return
-            }
-            // Navigate back to the canonical project chat.
-            if (projectId) navigate(`/projects/${projectId}/chat`)
-          }}
-        />
-      }
     />
   )
 
   return (
     <div className="flex flex-row w-full h-full overflow-hidden">
       <aside
-        className="hidden md:flex w-64 shrink-0 flex-col overflow-hidden border-r"
+        className="hidden md:flex w-72 shrink-0 flex-col overflow-hidden border-r"
         style={{ borderColor: 'var(--border-subtle)', background: 'var(--surface-base)' }}
       >
-        <div
-          className="px-2 py-2 border-b shrink-0 flex items-center gap-2"
-          style={{ borderColor: 'var(--border-subtle)' }}
-        >
-          <div className="flex-1 min-w-0 relative">
-            <SegmentedControl
-              size="sm"
-              ariaLabel="Chats sidebar mode"
-              value={sidebarMode}
-              onChange={(v) => onChangeSidebarMode(v as 'categories' | 'history')}
-              options={[
-                { value: 'categories', label: 'Categories' },
-                { value: 'history', label: 'History' },
-              ]}
-            />
-            {counts.chat > 0 ? (
-              <DotBadge
-                title={`${counts.chat} unread chat${counts.chat === 1 ? '' : 's'}`}
-                colorClass="bg-red-500"
-                className="absolute -top-1 -right-1 w-[6px] h-[6px]"
-              />
-            ) : null}
-          </div>
-          <button
-            type="button"
-            onClick={() => setTopicModalOpen(true)}
-            className="inline-flex items-center justify-center w-8 h-8 rounded-md text-(--text-secondary) hover:bg-(--surface-hover) hover:text-(--text-primary) transition-colors focus:outline-none focus:ring-2 focus:ring-(--accent-primary)"
-            aria-label="Create custom chat topic"
-            title="Create custom chat topic"
-          >
-            <IconPlus className="w-5 h-5" />
-          </button>
-        </div>
-        <ChatsNavigationSidebar
-          activeContext={activeContext}
-          onSelectContext={onSelectContext}
-          mode={sidebarMode}
-        />
+        {listScope ? (
+          <ChatList
+            scope={listScope}
+            activeKey={getChatContextKey(activeContext)}
+            onOpen={onSelectContext}
+            onNewChat={() => setTopicModalOpen(true)}
+          />
+        ) : null}
       </aside>
 
       <div className="relative flex flex-col flex-1 min-w-0 overflow-hidden">
@@ -334,31 +212,6 @@ export default function ChatView() {
             />
           </div>
         ) : null}
-
-        <UsageModal
-          isOpen={usageOpen}
-          onClose={() => setUsageOpen(false)}
-          messages={messages}
-          chatKey={getChatContextKey(activeContext)}
-        />
-
-        <SystemPromptViewerConnected
-          isOpen={promptOpen}
-          onClose={() => setPromptOpen(false)}
-          context={activeContext}
-        />
-
-        <ChatDynamicContextModal
-          isOpen={dynamicContextOpen}
-          onClose={() => setDynamicContextOpen(false)}
-          context={activeContext}
-        />
-
-        <ChatDebugModal
-          isOpen={debugOpen}
-          onClose={() => setDebugOpen(false)}
-          context={activeContext}
-        />
 
         <ChatTopicCreateModal
           isOpen={topicModalOpen}

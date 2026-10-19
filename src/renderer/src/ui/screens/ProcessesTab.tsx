@@ -1,10 +1,16 @@
 import { useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { RUN_CHAT_PLACEHOLDER, type ProcessNodeRunRef } from 'thefactory-ui/headless'
+import {
+  RUN_CHAT_PLACEHOLDER,
+  RUN_CHAT_TITLE,
+  type ProcessNodeRunRef,
+} from 'thefactory-ui/headless'
 import type { ChatContext } from 'thefactory-ui/headless/api'
 import { getChatContext, getChatContextKey } from '@core/chats/chatKey'
 import { ProcessRunsView } from 'thefactory-ui/web'
 import ChatBodyForContext from '@ui/components/chat/ChatBodyForContext'
+import ChatPanelBody from '@ui/components/chat/ChatPanelBody'
+import { renderRunModelChip } from '@ui/components/agents/RunModelChipConnected'
 import { useNavigateToGroupRun } from '@ui/hooks/useNavigateToGroupRun'
 
 export type ProcessesTabProps = {
@@ -61,11 +67,13 @@ export default function ProcessesTab({ projectId, selectedRunId }: ProcessesTabP
     [navigate, projectId],
   )
 
-  // The run's own chat, in the pipeline's chat drawer.
+  // The run's own chat, docked beside the run like a story's chat (a sheet on small screens).
   const renderChat = useCallback(
-    (context: ChatContext) => (
-      <ChatBodyForContext
+    (context: ChatContext, onClose: () => void) => (
+      <ChatPanelBody
         context={context}
+        onCollapse={onClose}
+        dockedLabel={RUN_CHAT_TITLE}
         inputProps={{ autoFocus: true, placeholder: RUN_CHAT_PLACEHOLDER }}
       />
     ),
@@ -94,6 +102,7 @@ export default function ProcessesTab({ projectId, selectedRunId }: ProcessesTabP
       renderAgentRun={renderAgentRun}
       onOpenChat={onOpenChat}
       renderChat={renderChat}
+      renderModelChip={renderRunModelChip}
       onOpenGroupRun={navigateToGroupRun}
     />
   )

@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState, type RefObject } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   applyChatToolApprovalMode,
   applyChatToolToggle,
   buildChatToolApprovalToggle,
   buildChatToolToggles,
+  chatOffersFinishTurnOnErrors,
   resetChatToolToggles,
   useChats,
   useChatCliRunner,
@@ -22,8 +23,6 @@ export type ChatSettingsDropdownConnectedProps = {
   context: ChatContext
   isOpen: boolean
   onClose: () => void
-  settingsBtnRef: RefObject<HTMLButtonElement | null>
-  onDeleteChat: () => Promise<void> | void
 }
 
 /**
@@ -43,8 +42,6 @@ export default function ChatSettingsDropdownConnected({
   context,
   isOpen,
   onClose,
-  settingsBtnRef,
-  onDeleteChat,
 }: ChatSettingsDropdownConnectedProps) {
   const { getEffectiveChatSettings, getChatTypeSettings, updateChatSettings, settingsBlocked } =
     useChats()
@@ -85,7 +82,6 @@ export default function ChatSettingsDropdownConnected({
     <ChatSettingsDropdown
       isOpen={isOpen}
       onClose={onClose}
-      settingsBtnRef={settingsBtnRef}
       blocked={settingsBlocked}
       completion={completion}
       draftPrompt={draftPrompt}
@@ -107,8 +103,8 @@ export default function ChatSettingsDropdownConnected({
         await persistCompletion(applyChatToolApprovalMode(auto))
       }}
       rulesChatContextId={getChatContextKey(context)}
+      offersFinishTurnOnErrors={chatOffersFinishTurnOnErrors(context, runner)}
       persistSettings={persistCompletion}
-      onDeleteChat={onDeleteChat}
       extraContent={
         <>
           <HistorySummarizationSettings

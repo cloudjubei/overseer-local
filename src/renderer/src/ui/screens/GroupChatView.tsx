@@ -1,22 +1,14 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ChatHeader, NotificationBadge, SpinnerWithDot } from 'thefactory-ui/web'
-import { IconPlus } from 'thefactory-ui/web/icons'
-import type { ChatContext, ChatContextGroup, GetChatResponse } from 'thefactory-ui/headless/api'
+import { ChatList } from 'thefactory-ui/web'
+import type { ChatContext, ChatContextGroup } from 'thefactory-ui/headless/api'
 import { useChats } from 'thefactory-ui/headless'
-import { isGeneralGroupChat } from 'thefactory-ui/headless'
 import { useProjectsGroups } from 'thefactory-ui/headless'
-import { chatRowBadge } from 'thefactory-ui/headless'
-import { useChatRowStatus } from '@core/notifications/useChatRowStatus'
 import { useChatContextLastRead as useChatLastRead } from 'thefactory-ui/web'
 import { getChatContext, getChatContextKey } from '@core/chats/chatKey'
 import ChatBodyForContext from '@ui/components/chat/ChatBodyForContext'
-import { ChatDebugModal, ChatDynamicContextModal } from 'thefactory-ui/web'
-import ChatSettingsDropdownConnected from '@ui/components/chat/ChatSettingsDropdownConnected'
+import ChatHeaderConnected from '@ui/components/chat/ChatHeaderConnected'
 import { ChatTopicCreateModalConnected as ChatTopicCreateModal } from 'thefactory-ui/web'
-import { SystemPromptViewerConnected } from 'thefactory-ui/web'
-import { UsageModalConnected as UsageModal } from 'thefactory-ui/web'
-import { ModelChipConnected } from 'thefactory-ui/web'
 import { LoadingScreen } from 'thefactory-ui/web'
 
 const LAST_SELECTED_PREFIX = 'group-chat-last-selected-context'
@@ -92,7 +84,7 @@ export default function GroupChatView() {
   const { groupId, contextKey } = useParams<{ groupId: string; contextKey?: string }>()
   const navigate = useNavigate()
   const { groups } = useProjectsGroups()
-  const { isLoaded, loadError, chats, getChat, clearChat, deleteChat } = useChats()
+  const { isLoaded, loadError, chats } = useChats()
 
   const group = useMemo(
     () => (groupId ? groups.find((g) => g.id === groupId) : undefined),
@@ -135,18 +127,29 @@ export default function GroupChatView() {
     writeLastOpened(groupId, getChatContextKey(activeContext))
   }, [activeContext, groupId])
 
-  const [usageOpen, setUsageOpen] = useState(false)
-  const [settingsOpen, setSettingsOpen] = useState(false)
   const [topicModalOpen, setTopicModalOpen] = useState(false)
-  const [promptOpen, setPromptOpen] = useState(false)
-  const [dynamicContextOpen, setDynamicContextOpen] = useState(false)
-  const [debugOpen, setDebugOpen] = useState(false)
-  const settingsBtnRef = useRef<HTMLButtonElement | null>(null)
+
+  const listScope = useMemo(
+    () =>
+      group ? { kind: 'group' as const, groupId: group.id, projectIds: group.projects } : undefined,
+    [group],
+  )
+  const onOpenListed = useCallback(
+    (ctx: ChatContext) => {
+      if (ctx.projectId && !ctx.groupId) {
+        navigate(`/projects/${ctx.projectId}/chat/${encodeURIComponent(getChatContextKey(ctx))}`)
+        return
+      }
+      onSelectContext(ctx)
+    },
+    [navigate, onSelectContext],
+  )
 
   useChatLastRead(activeContext ?? undefined)
 
-  if (!isLoaded) return <LoadingScreen label="Loading chat…" />
-  if (loadError) return <LoadingScreen label="Could not load chat" error={loadError.message} />
+  if (!contextKey && !isLoaded) return <LoadingScreen label="Loading chat…" />
+  if (!contextKey && loadError)
+    return <LoadingScreen label="Could not load chat" error={loadError.message} />
 
   if (!group) {
     return (
@@ -163,88 +166,31 @@ export default function GroupChatView() {
     )
   }
 
-  const chat = getChat(activeContext)
-  const messages = chat?.messages ?? []
-  const totalCost = messages.reduce((sum, m) => sum + (m.usage?.cost ?? 0), 0)
-
-  const groupChats = chats
-    .filter((c) => (c.context as { groupId?: string }).groupId === groupId)
-    .sort((a, b) => (b.updatedAt ?? '').localeCompare(a.updatedAt ?? ''))
-
   const header = (
-    <ChatHeader
-      isCollapsible={false}
-      totalCostUSD={totalCost}
-      onOpenPrompt={() => setPromptOpen(true)}
-      onOpenCosts={() => setUsageOpen(true)}
-      onOpenDynamicContext={() => setDynamicContextOpen(true)}
-      onOpenDebug={() => setDebugOpen(true)}
-      onRefresh={() => {
-        if (window.confirm('Clear all messages in this chat? This cannot be undone.')) {
-          void clearChat(activeContext)
-        }
+    <ChatHeaderConnected
+      context={activeContext}
+      onOpenChat={onSelectContext}
+      onDeleted={() => {
+        if (groupId) navigate(`/groups/${groupId}/chat`)
       }}
-      onOpenSettings={() => setSettingsOpen((v) => !v)}
-      settingsBtnRef={settingsBtnRef}
-      isSettingsOpen={settingsOpen}
-      modelChip={<ModelChipConnected editable className="border-blue-500" mode="chat" />}
-      settingsDropdown={
-        <ChatSettingsDropdownConnected
-          context={activeContext}
-          isOpen={settingsOpen}
-          onClose={() => setSettingsOpen(false)}
-          settingsBtnRef={settingsBtnRef}
-          onDeleteChat={async () => {
-            if (isGeneralGroupChat(activeContext)) {
-              window.alert('The group chat cannot be deleted.')
-              return
-            }
-            const confirmed = window.confirm('Delete this chat? This action cannot be undone.')
-            if (!confirmed) return
-            setSettingsOpen(false)
-            try {
-              await deleteChat(activeContext)
-            } catch (e) {
-              console.error('Failed to delete chat', e)
-              window.alert('Failed to delete chat. Please try again.')
-              return
-            }
-            if (groupId) navigate(`/groups/${groupId}/chat`)
-          }}
-        />
-      }
     />
   )
 
   return (
     <div className="flex flex-row w-full h-full overflow-hidden">
       <aside
-        className="hidden md:flex w-64 shrink-0 flex-col overflow-hidden border-r"
+        className="hidden md:flex w-72 shrink-0 flex-col overflow-hidden border-r"
         style={{ borderColor: 'var(--border-subtle)', background: 'var(--surface-base)' }}
       >
-        <div
-          className="px-3 py-2 border-b shrink-0 flex items-center gap-2"
-          style={{ borderColor: 'var(--border-subtle)' }}
-        >
-          <span className="flex-1 text-xs uppercase tracking-wide opacity-60 truncate">
-            Group chats
-          </span>
-          <button
-            type="button"
-            onClick={() => setTopicModalOpen(true)}
-            className="inline-flex items-center justify-center w-8 h-8 rounded-md text-(--text-secondary) hover:bg-(--surface-hover) hover:text-(--text-primary) transition-colors focus:outline-none focus:ring-2 focus:ring-(--accent-primary)"
-            aria-label="Create custom group topic"
-            title="Create custom group topic"
-          >
-            <IconPlus className="w-5 h-5" />
-          </button>
-        </div>
-        <GroupChatsList
-          chats={groupChats}
-          groupId={groupId!}
-          activeContext={activeContext}
-          onSelectContext={onSelectContext}
-        />
+        {listScope ? (
+          <ChatList
+            scope={listScope}
+            groupName={group.title}
+            activeKey={getChatContextKey(activeContext)}
+            onOpen={onOpenListed}
+            onNewChat={() => setTopicModalOpen(true)}
+          />
+        ) : null}
       </aside>
 
       <div className="relative flex flex-col flex-1 min-w-0 overflow-hidden">
@@ -252,31 +198,6 @@ export default function GroupChatView() {
           context={activeContext}
           header={header}
           inputProps={{ autoFocus: true }}
-        />
-
-        <UsageModal
-          isOpen={usageOpen}
-          onClose={() => setUsageOpen(false)}
-          messages={messages}
-          chatKey={getChatContextKey(activeContext)}
-        />
-
-        <SystemPromptViewerConnected
-          isOpen={promptOpen}
-          onClose={() => setPromptOpen(false)}
-          context={activeContext}
-        />
-
-        <ChatDynamicContextModal
-          isOpen={dynamicContextOpen}
-          onClose={() => setDynamicContextOpen(false)}
-          context={activeContext}
-        />
-
-        <ChatDebugModal
-          isOpen={debugOpen}
-          onClose={() => setDebugOpen(false)}
-          context={activeContext}
         />
 
         <ChatTopicCreateModal
@@ -290,92 +211,5 @@ export default function GroupChatView() {
         />
       </div>
     </div>
-  )
-}
-
-function GroupChatsList({
-  chats,
-  groupId,
-  activeContext,
-  onSelectContext,
-}: {
-  chats: GetChatResponse[]
-  groupId: string
-  activeContext: ChatContext
-  onSelectContext: (ctx: ChatContext) => void
-}) {
-  const activeKey = getChatContextKey(activeContext)
-  const groupChatContext: ChatContextGroup = { type: 'GROUP', groupId }
-  const groupKey = getChatContextKey(groupChatContext)
-  const hasGroupRow = chats.some((c) => getChatContextKey(c.context) === groupKey)
-
-  return (
-    <div className="flex-1 overflow-auto px-2 py-2 space-y-1">
-      {!hasGroupRow && (
-        <ChatRow
-          label="General"
-          ctx={groupChatContext}
-          isActive={activeKey === groupKey}
-          onSelectContext={onSelectContext}
-        />
-      )}
-      {chats.length === 0 && hasGroupRow === false ? (
-        <p className="text-xs opacity-60 px-2 py-3">No chats yet.</p>
-      ) : (
-        chats.map((c) => {
-          const k = getChatContextKey(c.context)
-          const isGroupCtx = c.context.type === 'GROUP'
-          const label = isGroupCtx ? 'General' : (c.title ?? 'Topic')
-          return (
-            <ChatRow
-              key={k}
-              label={label}
-              ctx={c.context}
-              isActive={activeKey === k}
-              onSelectContext={onSelectContext}
-            />
-          )
-        })
-      )}
-    </div>
-  )
-}
-
-function ChatRow({
-  label,
-  ctx,
-  isActive,
-  onSelectContext,
-}: {
-  label: string
-  ctx: ChatContext
-  isActive: boolean
-  onSelectContext: (ctx: ChatContext) => void
-}) {
-  const status = useChatRowStatus(ctx)
-  const { isThinking, isUnread } = status
-  const badge = chatRowBadge(status)
-  return (
-    <button
-      type="button"
-      onClick={() => onSelectContext(ctx)}
-      aria-current={isActive ? 'true' : undefined}
-      className="w-full flex items-center gap-2 text-left px-2 py-1.5 rounded text-sm"
-      style={{
-        background: isActive ? 'var(--color-brand-50)' : 'transparent',
-        color: isActive ? 'var(--color-brand-700)' : 'inherit',
-      }}
-    >
-      <span className="flex-1 truncate">{label}</span>
-      {isThinking ? (
-        <SpinnerWithDot size={14} showDot={isUnread} />
-      ) : badge ? (
-        <NotificationBadge
-          className="h-4 min-w-4 px-1 text-[10px]"
-          text={badge.text}
-          tooltipLabel={badge.label}
-        />
-      ) : null}
-    </button>
   )
 }

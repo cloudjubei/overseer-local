@@ -1,5 +1,10 @@
 import type { Feature, GetStoryResponse } from 'thefactory-ui/headless/api'
-import { processStatusOverlay, type ProcessRun } from 'thefactory-ui/headless'
+import {
+  featureProcessOverlay,
+  isFeatureInLiveRun,
+  useProcessRuns,
+  useProcessStopClock,
+} from 'thefactory-ui/headless'
 import { FeatureCard as FeatureCardBase, type StoryStatus as Status } from 'thefactory-ui/web'
 import { DependencyBullet } from 'thefactory-ui/web'
 import RunAgentButtonConnected from '@ui/components/agents/RunAgentButtonConnected'
@@ -15,14 +20,17 @@ export type FeatureCardConnectedProps = {
   showActions?: boolean
   isNew?: boolean
   onPillClick?: () => void
-  /**
-   * The story's process run (passed down so the card costs no subscription). When
-   * a process owns the story, the card links to that ONE pipeline — a feature is a
-   * node in it, not a place with its own separate sign-off.
-   */
-  processRun?: ProcessRun
 }
 
+/**
+ * A feature as a card, wherever one is shown (a chat's tool results). When the
+ * story's process run is acting on this feature, the card carries the feature's
+ * chip linking to that ONE pipeline (`featureProcessOverlay`) in place of Run —
+ * a feature is a node in it, not a place with its own sign-off. A feature the
+ * live run carries but has not reached offers no Run either (`isFeatureInLiveRun`). The run is read
+ * from `useProcessRuns(projectId)`, the project's one shared list, so a chat
+ * full of cards still makes a single read and keeps a single subscription.
+ */
 export default function FeatureCardConnected({
   projectId,
   story,
@@ -33,9 +41,11 @@ export default function FeatureCardConnected({
   showActions = false,
   isNew = false,
   onPillClick,
-  processRun,
 }: FeatureCardConnectedProps) {
-  const processOverlay = processStatusOverlay(processRun)
+  const stopNow = useProcessStopClock()
+  const { runs } = useProcessRuns(projectId)
+  const processRun = runs.find((r) => r.storyId === story.id)
+  const processOverlay = featureProcessOverlay(processRun, feature.id, stopNow)
   const dependency = `${story.id}.${feature.id}`
 
   const headerLeft = isNew ? (
@@ -65,8 +75,8 @@ export default function FeatureCardConnected({
       headerLeft={headerLeft}
       actions={
         processOverlay ? (
-          <ProcessStatusChip run={processRun} projectId={projectId} />
-        ) : showActions ? (
+          <ProcessStatusChip run={processRun} projectId={projectId} featureId={feature.id} />
+        ) : showActions && !isFeatureInLiveRun(processRun, feature.id) ? (
           <RunAgentButtonConnected
             projectId={projectId}
             storyId={story.id}
@@ -74,6 +84,7 @@ export default function FeatureCardConnected({
           />
         ) : undefined
       }
+      pinActions={processOverlay !== undefined}
       renderBlocker={(dep) => <DependencyBullet dependency={dep} interactive={false} />}
       showStatus={!isNew && showStatus}
       onStatusChange={onStatusChange}

@@ -1,6 +1,10 @@
 import { useSearchParams } from 'react-router-dom'
 import { OverseerGitPanel, OverseerGitView, OverseerPanel, Switch } from 'thefactory-ui/web'
-import { OverseerGitProvider, useAppSettings } from 'thefactory-ui/headless'
+import {
+  OverseerGitProvider,
+  SHOW_DEVELOPER_TOOLS_COPY,
+  useAppSettings,
+} from 'thefactory-ui/headless'
 import BackendConnectionPanel from './BackendConnectionPanel'
 import LinkRepoPanel from './LinkRepoPanel'
 
@@ -26,6 +30,27 @@ function DebugModePanel() {
         Adds a per-run “flight recorder” to the process pipeline — the pre-launch checks, launch
         summary and the reason behind a stuck or errored step. Runs always record it; this only
         shows it.
+      </p>
+    </section>
+  )
+}
+
+/** Adds the Developer section — system prompt, costs, dynamic context, debug — to every chat's settings menu. */
+function DeveloperToolsPanel() {
+  const { settings, setUserPreferences } = useAppSettings()
+  const on = settings.userPreferences.showDeveloperTools === true
+  return (
+    <section className="flex flex-col gap-2">
+      <h3 className="text-sm font-semibold text-(--text-primary)">
+        {SHOW_DEVELOPER_TOOLS_COPY.title}
+      </h3>
+      <Switch
+        checked={on}
+        onCheckedChange={(v) => setUserPreferences({ showDeveloperTools: v })}
+        label={SHOW_DEVELOPER_TOOLS_COPY.label}
+      />
+      <p className="max-w-[60ch] text-xs text-(--text-secondary)">
+        {SHOW_DEVELOPER_TOOLS_COPY.hint}
       </p>
     </section>
   )
@@ -66,6 +91,7 @@ export default function DeveloperSettings() {
         <OverseerGitPanel onOpen={openGit} />
         <LinkRepoPanel />
         <DebugModePanel />
+        <DeveloperToolsPanel />
       </div>
     </div>
   )

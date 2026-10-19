@@ -18,13 +18,13 @@ Foundational Tokens
 
 - Location: src/styles/design-tokens.css
 - Token families:
-  - color.{brand|gray|blue|green|orange|red|purple|teal|pink}.{50..900}
+  - color.{brand|gray|blue|sky|gold|green|orange|red|purple|teal|pink}.{50..900}
   - surface.{base|raised|overlay}
   - text.{primary|secondary|muted|inverted}
   - border.{subtle|default|strong|focus}
-  - accent.primary{, -hover, -active}
+  - accent.primary{, -hover, -active}, accent.soft.{bg|fg|border}
   - focus-ring
-  - status.{done|working|stuck|on_hold|review|queued|blocked}.{bg|fg} (+ .soft.{bg|fg|border})
+  - status.{done|running|working|stuck|on_hold|review|queued|blocked}.{bg|fg} (+ .soft.{bg|fg|border})
   - typography: font.{sans|mono}, fs.{xxs..3xl}, lh.{tight..relaxed}, fw.{regular|medium|semibold|bold}
   - spacing: space-{0,1,2,3,4,5,6,7,8,10,12,16,20,24,32}
   - radii: radius-{1..5, round}
@@ -76,7 +76,8 @@ Z-index
 
 Color: Monday-inspired, improved
 
-- Anchors: brand #0073EA; done #00C875; working #FDAB3D; stuck #E2445C; on-hold #A25DDC; review #579BFC; queued gray; teal #00D1D1; pink #FF158A.
+- Anchors: brand #0073EA; done #00C875; running #0369A1 (sky); working #FDAB3D; sign-off #E6B800 (gold); stuck #E2445C; on-hold #A25DDC; queued gray; teal #00D1D1; pink #FF158A.
+- One hue per meaning, so neighbours never blur: **running = sky blue** (sky-700 bold, sky-600 tint) — work an agent is doing right now: a run's "Running" / "Manager on it" pill, the current step's chip and node in the steps strip and pipeline (a manager-held stop included), the Processes list's Running heading, dots and spinners, run reference chips, a running group leg, an agent resolving a merge conflict, an agent run's status chip, "Still capturing". **Sign-off = gold** (`review`, gold-500, soft text gold-800 / gold-200) — a decision waiting on the person: "Sign off", Reviewable, a run parked at its gate, the sign-off page's undecided verdicts ("Partly", "Not proven", "Verifying…"), open proof questions, run-proposal kind chips. Gold is yellow-leaning (hue ~48°) so it never reads as the working orange (~34°) beside it in the Processes list, chat list and group runs. **Done = green** — only finished, passed or merged work, never a live chip. **Working / merging = orange** — the story status "Working" (stored `in_progress` and the overlay of a live run, so one word keeps one colour) and work the host does without an agent: Merging, Bringing in, Merged · building. **Needs you = purple** (`on_hold`). **Broke = red** (`stuck`, `blocked`). Selections, notes and hand-offs that are not a status (a picked option, an agent hand-off bubble, an info notice, the settings active pill, a dependency that is met, a branch that was updated) take `accent.soft` in the brand blue, never a status tone. Ink-badge channel colours (processes, chat, git, broke) are a separate system and do not follow these tones.
 - Improvements over Monday: explicit FG pairs for orange/yellow use dark text for AA; dark mode tints reduce glare; soft variants standardize borders.
 
 Interaction Patterns: Linear-grade

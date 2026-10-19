@@ -8,7 +8,7 @@ import {
   mergeOutcomeLine,
   mergeSourceRef,
   useActiveProject,
-  useGit,
+  useGitWithLog,
   useGitCommitLink,
   type GitBranchMenuAction,
   type GitBranchSection,
@@ -94,7 +94,7 @@ export default function GitView() {
     deleteBranch,
     stage,
     abortMerge,
-  } = useGit()
+  } = useGitWithLog()
   const commitDiffFetcher = useCallback<CommitDiffFetcher>(
     async ({ baseRef, headRef, includePatch }, signal) => {
       const { data } = await getGitBranchDiffSummary({

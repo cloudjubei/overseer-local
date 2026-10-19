@@ -5,12 +5,21 @@ import {
   Modal,
   ProjectChip,
   ProofPlanEditor,
+  SegmentedControl,
   StatusControl,
   type StoryStatus as Status,
   type UikitFileMeta,
 } from 'thefactory-ui/web'
 import { IconPlus } from 'thefactory-ui/web/icons'
-import { useFeatureForm, type FeatureFormValues, type ProofPlan } from 'thefactory-ui/headless'
+import {
+  FEATURE_KIND_HINTS,
+  FEATURE_KIND_OPTIONS,
+  featureKindPatch,
+  useFeatureForm,
+  type FeatureFormValues,
+  type FeatureKind,
+  type ProofPlan,
+} from 'thefactory-ui/headless'
 import { useActiveProject, useProjects, useReferences } from 'thefactory-ui/headless'
 import { useStories } from 'thefactory-ui/headless'
 import { useFiles } from 'thefactory-ui/headless'
@@ -22,7 +31,7 @@ import { FileMentionsTextareaConnected as FileMentionsTextarea } from 'thefactor
 /**
  * Feature form — visual parity with desktop's `FeatureForm`. Status pill +
  * project chip + parent-story dependency chip in the header, then title,
- * description, acceptance criteria, proof plan, rejection reason,
+ * kind (code or design), description, acceptance criteria, proof plan, rejection reason,
  * context-files chip list, blockers chip list.
  * The host modal owns the action buttons; the form binds them via `formId`.
  *
@@ -33,6 +42,7 @@ import { FileMentionsTextareaConnected as FileMentionsTextarea } from 'thefactor
 export type FeatureFormInitialValues = {
   title?: string
   description?: string
+  kind?: FeatureKind
   acceptance?: string
   proofPlan?: ProofPlan
   rejection?: string
@@ -72,6 +82,7 @@ export default function FeatureForm({
   const initialValues: FeatureFormInitialValues = {
     title: initial?.title ?? seed?.title ?? '',
     description: initial?.description ?? seed?.description ?? '',
+    kind: initial?.kind ?? seed?.kind ?? 'code',
     acceptance: initial?.acceptance ?? seed?.acceptance ?? '',
     ...((initial?.proofPlan ?? seed?.proofPlan)
       ? { proofPlan: (initial?.proofPlan ?? seed?.proofPlan) as ProofPlan }
@@ -107,6 +118,7 @@ export default function FeatureForm({
         // as "leave unchanged" — the rejection would never get removed.
         rejection: v.rejection,
         acceptance: v.acceptance,
+        ...featureKindPatch(v.kind, mode.kind),
       }
       if (mode.kind === 'create') {
         await mode.onSubmit({
@@ -214,6 +226,23 @@ export default function FeatureForm({
               {form.error}
             </div>
           ) : null}
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+            Kind
+          </span>
+          <SegmentedControl
+            options={[...FEATURE_KIND_OPTIONS]}
+            value={form.values.kind}
+            onChange={(v) => form.setKind(v as FeatureKind)}
+            size="sm"
+            ariaLabel="Feature kind"
+            className="self-start"
+          />
+          <div className="text-xs" style={{ color: 'var(--text-muted)' }}>
+            {FEATURE_KIND_HINTS[form.values.kind]}
+          </div>
         </div>
 
         <div className="flex flex-col gap-1">

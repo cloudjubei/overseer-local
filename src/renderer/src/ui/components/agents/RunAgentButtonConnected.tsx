@@ -1,8 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useAgents, type AgentType } from 'thefactory-ui/headless'
-import { getChatContextKey } from '@core/chats/chatKey'
-import { RunAgentButton as RunAgentButtonUI } from 'thefactory-ui/web'
+import { useProjectWorkLaunch, useStartWork, type StartWorkOutcome } from 'thefactory-ui/headless'
+import { RunAgentButton as RunAgentButtonUI, StartWorkDialog } from 'thefactory-ui/web'
 
 type Props = {
   projectId: string
@@ -12,11 +11,8 @@ type Props = {
 }
 
 /**
- * Thin app-side wrapper around `thefactory-ui`'s `RunAgentButton`. The
- * visual / interaction layer (long-press, picker, drag-protection, sticky
- * actions column) lives in the package; the wrapper here owns the
- * web-specific concerns: which agent context to start, where to navigate
- * the chat to, and the transient error display.
+ * The Run button of a story or a feature: the one start-work choice — a process run (its launch
+ * card) or in this chat — then where the work went is opened: the run's pipeline, or the chat.
  */
 export default function RunAgentButtonConnected({
   projectId,
@@ -24,30 +20,30 @@ export default function RunAgentButtonConnected({
   featureId,
   className,
 }: Props) {
-  const { startAgent } = useAgents()
   const navigate = useNavigate()
-  const [err, setErr] = useState<string | null>(null)
-
-  useEffect(() => {
-    if (!err) return
-    const t = window.setTimeout(() => setErr(null), 4000)
-    return () => window.clearTimeout(t)
-  }, [err])
-
-  const handle = async (agentType: AgentType) => {
-    try {
-      const { chatContext } = await startAgent({ agentType, projectId, storyId, featureId })
-      const key = getChatContextKey(chatContext)
-      navigate(`/projects/${projectId}/chat/${encodeURIComponent(key)}`)
-    } catch (e) {
-      setErr(e instanceof Error ? e.message : String(e))
-    }
-  }
+  const { defaultMode, chatRunner, chatAgent } = useProjectWorkLaunch(projectId)
+  const onStarted = useCallback(
+    (outcome: StartWorkOutcome) => {
+      if (outcome.mode === 'process' && outcome.processRunId) {
+        navigate(`/projects/${projectId}/process-runs/${outcome.processRunId}`)
+        return
+      }
+      if (outcome.chatContextId) {
+        navigate(`/projects/${projectId}/chat/${encodeURIComponent(outcome.chatContextId)}`)
+      }
+    },
+    [navigate, projectId],
+  )
+  const start = useStartWork(onStarted, chatAgent)
 
   return (
     <div className={`relative inline-flex items-center gap-1 ${className ?? ''}`}>
-      <RunAgentButtonUI onClick={(t) => void handle(t as AgentType)} />
-      {err && <span className="text-xs text-red-500">{err}</span>}
+      <RunAgentButtonUI
+        onClick={() =>
+          start.open({ projectId, storyId, ...(featureId ? { featureIds: [featureId] } : {}) })
+        }
+      />
+      <StartWorkDialog start={start} defaultMode={defaultMode} chatRunner={chatRunner} />
     </div>
   )
 }
