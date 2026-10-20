@@ -260,7 +260,7 @@ export default function FeatureForm({
             value={form.values.description}
             onChange={form.setDescription}
             disabled={submitting}
-            className="w-full rounded-md border px-3 py-2 text-sm disabled:opacity-60 resize-y max-h-64"
+            className="w-full rounded-md border px-3 py-2 text-sm disabled:opacity-60 resize-y overflow-y-auto max-h-[30vh] md:max-h-64"
             style={{
               background: 'var(--surface-raised)',
               borderColor: 'var(--border-default)',
@@ -287,7 +287,7 @@ export default function FeatureForm({
             value={form.values.acceptance}
             onChange={form.setAcceptance}
             disabled={submitting}
-            className="w-full rounded-md border px-3 py-2 text-sm disabled:opacity-60 resize-y max-h-64"
+            className="w-full rounded-md border px-3 py-2 text-sm disabled:opacity-60 resize-y overflow-y-auto max-h-[30vh] md:max-h-64"
             style={{
               background: 'var(--surface-raised)',
               borderColor: 'var(--border-default)',
@@ -322,7 +322,7 @@ export default function FeatureForm({
             value={form.values.rejection}
             onChange={form.setRejection}
             disabled={submitting}
-            className="w-full rounded-md border px-3 py-2 text-sm disabled:opacity-60 resize-y max-h-64"
+            className="w-full rounded-md border px-3 py-2 text-sm disabled:opacity-60 resize-y overflow-y-auto max-h-[30vh] md:max-h-64"
             style={{
               background: 'var(--surface-raised)',
               borderColor: 'var(--border-default)',
@@ -350,7 +350,7 @@ export default function FeatureForm({
             </button>
           </div>
           <div
-            className="flex flex-wrap items-start gap-2 border rounded-md min-h-12 p-2"
+            className="flex flex-wrap items-start gap-2 border rounded-md min-h-12 p-2.5 overflow-y-auto max-h-[30vh] md:max-h-64"
             style={{ borderColor: 'var(--border-default)', background: 'var(--surface-raised)' }}
           >
             {form.values.context.map((p, idx) => (
@@ -384,7 +384,7 @@ export default function FeatureForm({
             </button>
           </div>
           <div
-            className="chips-list border rounded-md min-h-12 p-2"
+            className="chips-list border rounded-md min-h-12 p-2 overflow-y-auto max-h-[30vh] md:max-h-64"
             style={{ borderColor: 'var(--border-default)', background: 'var(--surface-raised)' }}
           >
             {form.values.blockers.map((dep, idx) => (

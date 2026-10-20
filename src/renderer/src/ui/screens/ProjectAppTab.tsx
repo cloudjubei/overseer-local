@@ -6,6 +6,10 @@ import {
   useProjectDataBridge,
   useAppDirtyGuard,
   useAppWorkStart,
+  useProjectWorkLaunch,
+  useAppFeatureRequest,
+  useProjects,
+  parseAppChatSidebar,
   useAppBridgePushes,
   useChats,
   useStories,
@@ -18,9 +22,16 @@ import {
   type AppDeepLink,
   type BridgeRequest,
 } from 'thefactory-ui/headless'
-import type { ChatContext } from 'thefactory-ui/headless/api'
-import { AppWorkStartDialog, ModelChipConnected, ProjectAppView } from 'thefactory-ui/web'
+import { openAppRunChat, type ChatContext } from 'thefactory-ui/headless/api'
+import {
+  AppFeatureRequestDialog,
+  AppWorkStartDialog,
+  ModelChipConnected,
+  ProjectAppView,
+  StartWorkDialog,
+} from 'thefactory-ui/web'
 import ChatSidebarPanelConnected from '@ui/components/chat/ChatSidebarPanelConnected'
+import { renderLaunchModelChip } from '@ui/components/agents/RunModelChipConnected'
 
 /**
  * Desktop peer of the App tab. Mirrors web's `ProjectAppTab` — the Electron renderer is Chromium,
@@ -46,8 +57,16 @@ export default function ProjectAppTab() {
   const mountKey = `${projectId ?? ''}|${url ?? ''}|${key}`
   const { handleBridgeMessage: handleAppDirty } = useAppDirtyGuard(mountKey)
   // `overseer:work.start` waits for the person's Start / Cancel over the App view — never on a timer.
-  const workStart = useAppWorkStart(projectId, mountKey)
+  const workLaunch = useProjectWorkLaunch(projectId)
+  const workStart = useAppWorkStart(projectId, mountKey, workLaunch.chatAgent)
   const handleWorkStart = workStart.handleBridgeMessage
+  // `overseer:feature.request` waits for the person's Send / Cancel over the App view.
+  const featureRequest = useAppFeatureRequest(projectId, mountKey)
+  const handleFeatureRequest = featureRequest.handleBridgeMessage
+  const { projects } = useProjects()
+  const featureRequestTarget = projects.find(
+    (p) => p.id === featureRequest.ask?.draft.targetProjectId,
+  )
   const pushes = useAppBridgePushes(projectId)
   const { createProjectTopic, sendMessage } = useChats()
   const { createStory, createFeature, stories } = useStories()
@@ -86,6 +105,8 @@ export default function ProjectAppTab() {
       if (handleAppDirty(req)) return { ok: true }
       const workStartReply = handleWorkStart(req)
       if (workStartReply) return workStartReply
+      const featureRequestReply = handleFeatureRequest(req)
+      if (featureRequestReply) return featureRequestReply
       const name = bridgeMessageName(req.type)
       // The embedded app asks for its deep-link on load (F.2 app link → `?view=<v>&…` on the App-tab
       // route); return the resolved target so it can open that view instead of its default, with the
@@ -111,6 +132,16 @@ export default function ProjectAppTab() {
         return { ok: true }
       }
       if (name === 'chat.requestSidebar') {
+        const { runId, message } = parseAppChatSidebar(req.payload)
+        if (runId) {
+          const context = await openAppRunChat(runId)
+          setSidebarEnabled(true)
+          setChatContext(context)
+          setCollapsed(false)
+          // Fire-and-forget, as `chat.discuss` sends its seed: the answer means "the chat is open".
+          if (message) void sendMessage(context, message).catch(() => {})
+          return { context }
+        }
         setSidebarEnabled(true)
         setChatContext((c) => c ?? (projectId ? { type: 'PROJECT', projectId } : null))
         return { ok: true }
@@ -177,6 +208,7 @@ export default function ProjectAppTab() {
     [
       handleAppDirty,
       handleWorkStart,
+      handleFeatureRequest,
       dataBridge,
       projectId,
       createProjectTopic,
@@ -230,6 +262,19 @@ export default function ProjectAppTab() {
           onEdit={workStart.edit}
           onStart={workStart.start}
           onCancel={workStart.cancel}
+        />
+        <AppFeatureRequestDialog
+          ask={featureRequest.ask}
+          targetName={featureRequestTarget?.title}
+          onEdit={featureRequest.edit}
+          onSend={featureRequest.send}
+          onCancel={featureRequest.cancel}
+        />
+        <StartWorkDialog
+          start={workStart.startWork}
+          defaultMode={workLaunch.defaultMode}
+          chatRunner={workLaunch.chatRunner}
+          renderModelChip={renderLaunchModelChip}
         />
       </div>
       {sidebarEnabled && chatContext && (

@@ -197,21 +197,18 @@ export default function LiveDataView() {
 
   if (!projectId) {
     return (
-      <div className="flex items-center justify-center h-full opacity-60">
-        <p className="text-sm">No project selected.</p>
+      <div className="flex h-full items-center justify-center p-8 text-(--text-secondary)">
+        No project selected.
       </div>
     )
   }
 
   return (
-    <div className="flex flex-col w-full h-full overflow-hidden">
-      <header
-        className="flex items-baseline justify-between gap-3 px-4 sm:px-8 py-5 border-b flex-wrap"
-        style={{ borderColor: 'var(--border-subtle)' }}
-      >
-        <div className="min-w-0">
-          <h1 className="text-2xl font-semibold">Live data</h1>
-          <p className="text-xs opacity-60 mt-1">
+    <div className="mx-auto flex h-full w-full max-w-4xl flex-col gap-4 overflow-y-auto p-4">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-lg font-semibold">Live data</h1>
+          <p className="text-sm text-(--text-secondary)">
             Shared data sources. Subscribe {project?.title ?? 'this project'} to the ones its agents
             should see.
           </p>
@@ -220,22 +217,21 @@ export default function LiveDataView() {
           variant="secondary"
           size="icon"
           onClick={() => setFormRoute({ mode: 'create' })}
-          aria-label="Add data source"
           title="Add data source"
         >
-          <IconPlus className="w-4 h-4" />
+          <IconPlus className="h-4 w-4" />
         </Button>
-      </header>
+      </div>
 
-      <div className="flex-1 overflow-auto px-4 sm:px-8 py-6 flex flex-col gap-4">
-        {loadError && <Alert variant="error">{loadError.message}</Alert>}
+      {loadError && <Alert variant="error">{loadError.message}</Alert>}
 
-        {!isLoaded ? (
-          <p className="text-sm opacity-60">Loading data sources…</p>
-        ) : sources.length === 0 ? (
-          <p className="text-sm opacity-60">No data sources yet.</p>
-        ) : (
-          sources.map((source) => (
+      {!isLoaded ? (
+        <p className="text-sm text-(--text-secondary)">Loading data sources…</p>
+      ) : sources.length === 0 ? (
+        <p className="text-sm text-(--text-secondary)">No data sources yet.</p>
+      ) : (
+        <div className="flex flex-col gap-3">
+          {sources.map((source) => (
             <SourceCard
               key={source.id}
               source={source}
@@ -248,9 +244,9 @@ export default function LiveDataView() {
               onDelete={() => setDeleting(source)}
               readRecords={() => readSourceRecords(source.id)}
             />
-          ))
-        )}
-      </div>
+          ))}
+        </div>
+      )}
 
       {formRoute && (
         <SourceFormModal

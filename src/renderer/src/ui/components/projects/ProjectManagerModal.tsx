@@ -260,7 +260,7 @@ export default function ProjectManagerModal({ onRequestClose }: { onRequestClose
             repo_url: form.repo_url.trim() || undefined,
             active: form.active,
             metadata: { ...form.metadata },
-            codeInfo: form.codeInfo,
+            codeInfo: form.codeInfo ?? null,
             // Pass the user's choice through verbatim — including `null`,
             // which the backend treats as an explicit clear.
             mainGroupId: form.mainGroupId,
@@ -413,7 +413,7 @@ export default function ProjectManagerModal({ onRequestClose }: { onRequestClose
       isOpen
       onClose={onModalClose}
       title={TITLE_BY_MODE[mode]}
-      size="lg"
+      size="xl"
       headerActions={headerActions || undefined}
       footer={footer}
     >

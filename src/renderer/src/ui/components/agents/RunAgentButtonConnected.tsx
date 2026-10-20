@@ -2,6 +2,7 @@ import { useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useProjectWorkLaunch, useStartWork, type StartWorkOutcome } from 'thefactory-ui/headless'
 import { RunAgentButton as RunAgentButtonUI, StartWorkDialog } from 'thefactory-ui/web'
+import { renderLaunchModelChip } from './RunModelChipConnected'
 
 type Props = {
   projectId: string
@@ -43,7 +44,12 @@ export default function RunAgentButtonConnected({
           start.open({ projectId, storyId, ...(featureId ? { featureIds: [featureId] } : {}) })
         }
       />
-      <StartWorkDialog start={start} defaultMode={defaultMode} chatRunner={chatRunner} />
+      <StartWorkDialog
+        start={start}
+        defaultMode={defaultMode}
+        chatRunner={chatRunner}
+        renderModelChip={renderLaunchModelChip}
+      />
     </div>
   )
 }

@@ -17,11 +17,13 @@ export default defineConfig({
         '@services': resolve('src/renderer/src/services'),
         '@ui': resolve('src/renderer/src/ui'),
       },
-      // `thefactory-ui` is linked via `file:` and has its own `node_modules/react`.
-      // Without dedupe, Vite resolves bare `react` imports from the symlinked
-      // package's tree, so the renderer ends up with two React copies and hooks
-      // (e.g. `ToastProvider`'s `useState`) fail with "Cannot read properties of null".
-      dedupe: ['react', 'react-dom'],
+      // `thefactory-ui` is linked via `file:` and has its own `node_modules/react`
+      // and `node_modules/react-router-dom` (v6, for its own tests). Without dedupe,
+      // a production build resolves those bare imports from the symlinked package's
+      // tree, so the renderer ends up with two React copies (hooks fail with "Cannot
+      // read properties of null") and two router contexts (`RouterLeaveGuard` finds
+      // no navigator and the window stays blank).
+      dedupe: ['react', 'react-dom', 'react-router', 'react-router-dom'],
     },
     plugins: [react()],
   },

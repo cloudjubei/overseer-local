@@ -52,6 +52,7 @@ import { Button, StartWorkDialog } from 'thefactory-ui/web'
 import { useFeatureRequestStart, useProjectWorkLaunch } from 'thefactory-ui/headless'
 import { getToolHeaderPath, renderToolCall } from './ToolCall/renderers'
 import FeatureRequestFullModal from './FeatureRequestFullModal'
+import { renderLaunchModelChip } from '@ui/components/agents/RunModelChipConnected'
 
 export type ChatBodyForContextProps = {
   context: ChatContext
@@ -443,6 +444,7 @@ export default function ChatBodyForContext({
         start={requestStart.start}
         defaultMode={requestLaunch.defaultMode}
         chatRunner={requestLaunch.chatRunner}
+        renderModelChip={renderLaunchModelChip}
       />
     </>
   ) : undefined

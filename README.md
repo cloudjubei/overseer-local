@@ -34,11 +34,22 @@ This is an Electron desktop application built with React and TypeScript using th
 
 ## Building the App
 
-- To build the app for production:
+- To build the sources (typecheck + electron-vite) into `out/`:
   ```bash
   npm run build
   ```
-  The built artifacts will be in the `dist` directory.
+
+### Build a local app (macOS)
+
+`thefactory-tools` and `thefactory-ui` are `file:` links to the sibling folders, the same way thefactory-backend uses them, so build them first:
+
+```bash
+(cd ../thefactory-tools && npm run build)
+(cd ../thefactory-ui && npm run build)
+npm run build:mac
+```
+
+This gives an unsigned `dist/Overseer-<version>-arm64.dmg` and `dist/mac-arm64/Overseer.app`. `npm run build:unpack` builds only the `.app`, faster. Signing turns on only when signing env vars are set. See [docs/APP_RELEASE.md](docs/APP_RELEASE.md#build-locally) and [docs/BUILD_SIGNING.md](docs/BUILD_SIGNING.md).
 
 ## Project Structure
 

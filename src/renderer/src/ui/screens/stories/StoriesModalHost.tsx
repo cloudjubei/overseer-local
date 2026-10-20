@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { formatChatTitle } from 'thefactory-ui/headless'
 import { useActiveProject } from 'thefactory-ui/headless'
 import { useStories } from 'thefactory-ui/headless'
+import { storyChangeErrorText } from 'thefactory-ui/headless'
 import { useAgents } from 'thefactory-ui/headless'
 import { isFeatureInLiveRun, useProcessRuns } from 'thefactory-ui/headless'
 import type { ChatContext } from 'thefactory-ui/headless/api'
-import { Button, ConfirmDialog, Modal, type StoryFormValues } from 'thefactory-ui/web'
+import { Alert, Button, ConfirmDialog, Modal, type StoryFormValues } from 'thefactory-ui/web'
 import { IconDelete, IconSave } from 'thefactory-ui/web/icons'
 import { StoryFormConnected as StoryForm } from 'thefactory-ui/web'
 import { StoryNotesSection } from 'thefactory-ui/web'
@@ -60,15 +62,14 @@ export default function StoriesModalHost({ route, onClose }: StoriesModalHostPro
 }
 
 /** Shared "discard unsaved changes?" prompt — used by every modal that
- *  wraps a form, mirroring desktop's confirm-on-close behaviour. */
+ *  wraps a form, mirroring desktop's confirm-on-close behaviour. Only for
+ *  leaving with unsaved edits: a failed save shows on the form itself. */
 function useDirtyGuard(onClose: () => void) {
   const [showAlert, setShowAlert] = useState(false)
-  const [alertMessage, setAlertMessage] = useState('')
   const [hasChanges, setHasChanges] = useState(false)
 
   const attemptClose = () => {
     if (hasChanges) {
-      setAlertMessage('You have unsaved changes. Do you really want to discard all changes?')
       setShowAlert(true)
       return
     }
@@ -83,7 +84,7 @@ function useDirtyGuard(onClose: () => void) {
       isOpen={showAlert}
       onClose={() => setShowAlert(false)}
       title="Discard changes?"
-      description={alertMessage}
+      description="You have unsaved changes. Do you really want to discard all changes?"
       confirmLabel="Discard"
       destructive
       hideCancel
@@ -95,7 +96,7 @@ function useDirtyGuard(onClose: () => void) {
     />
   )
 
-  return { setHasChanges, setAlertMessage, setShowAlert, attemptClose, dialog }
+  return { setHasChanges, attemptClose, dialog }
 }
 
 function CreateStoryModal({ onClose }: { onClose: () => void }) {
@@ -103,13 +104,14 @@ function CreateStoryModal({ onClose }: { onClose: () => void }) {
   const { createStory } = useStories()
   const [submitting, setSubmitting] = useState(false)
   const titleRef = useRef<HTMLInputElement>(null)
-  const { setHasChanges, setAlertMessage, setShowAlert, attemptClose, dialog } =
-    useDirtyGuard(onClose)
+  const { setHasChanges, attemptClose, dialog } = useDirtyGuard(onClose)
+  const [saveError, setSaveError] = useState<string | null>(null)
 
   const formId = 'story-create-form'
 
   const handleSubmit = async (values: StoryFormValues) => {
     setSubmitting(true)
+    setSaveError(null)
     try {
       await createStory({
         title: values.title,
@@ -117,8 +119,7 @@ function CreateStoryModal({ onClose }: { onClose: () => void }) {
       })
       onClose()
     } catch (e) {
-      setAlertMessage(`Failed to create story: ${e instanceof Error ? e.message : String(e)}`)
-      setShowAlert(true)
+      setSaveError(storyChangeErrorText(e))
     } finally {
       setSubmitting(false)
     }
@@ -147,6 +148,11 @@ function CreateStoryModal({ onClose }: { onClose: () => void }) {
           </div>
         }
       >
+        {saveError ? (
+          <Alert variant="error" className="mb-3">
+            {saveError}
+          </Alert>
+        ) : null}
         <StoryForm
           onSubmit={handleSubmit}
           submitting={submitting}
@@ -171,8 +177,8 @@ function EditStoryModal({ storyId, onClose }: { storyId: string; onClose: () => 
   const [submitting, setSubmitting] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-  const { setHasChanges, setAlertMessage, setShowAlert, attemptClose, dialog } =
-    useDirtyGuard(onClose)
+  const { setHasChanges, attemptClose, dialog } = useDirtyGuard(onClose)
+  const [saveError, setSaveError] = useState<string | null>(null)
 
   const formId = 'story-edit-form'
 
@@ -182,6 +188,7 @@ function EditStoryModal({ storyId, onClose }: { storyId: string; onClose: () => 
 
   const handleSubmit = async (values: StoryFormValues) => {
     setSubmitting(true)
+    setSaveError(null)
     try {
       await updateStory(storyId, {
         title: values.title,
@@ -190,8 +197,7 @@ function EditStoryModal({ storyId, onClose }: { storyId: string; onClose: () => 
       })
       onClose()
     } catch (e) {
-      setAlertMessage(`Failed to update story: ${e instanceof Error ? e.message : String(e)}`)
-      setShowAlert(true)
+      setSaveError(storyChangeErrorText(e))
     } finally {
       setSubmitting(false)
     }
@@ -200,12 +206,12 @@ function EditStoryModal({ storyId, onClose }: { storyId: string; onClose: () => 
   const handleDelete = async () => {
     setShowDeleteConfirm(false)
     setDeleting(true)
+    setSaveError(null)
     try {
       await deleteStory(storyId)
       onClose()
     } catch (e) {
-      setAlertMessage(`Failed to delete story: ${e instanceof Error ? e.message : String(e)}`)
-      setShowAlert(true)
+      setSaveError(storyChangeErrorText(e))
     } finally {
       setDeleting(false)
     }
@@ -256,6 +262,11 @@ function EditStoryModal({ storyId, onClose }: { storyId: string; onClose: () => 
           </div>
         }
       >
+        {saveError ? (
+          <Alert variant="error" className="mb-3">
+            {saveError}
+          </Alert>
+        ) : null}
         {story ? (
           <StoryForm
             initialValues={{
@@ -323,8 +334,8 @@ function CreateFeatureModal({
 }) {
   const { stories, createFeature } = useStories()
   const [submitting, setSubmitting] = useState(false)
-  const { setHasChanges, setAlertMessage, setShowAlert, attemptClose, dialog } =
-    useDirtyGuard(onClose)
+  const { setHasChanges, attemptClose, dialog } = useDirtyGuard(onClose)
+  const [saveError, setSaveError] = useState<string | null>(null)
   const titleRef = useRef<HTMLInputElement>(null)
 
   // Story selection state — mirrors desktop's `FeatureCreateView`. If
@@ -388,6 +399,7 @@ function CreateFeatureModal({
         }
       >
         <div className="flex flex-col gap-3">
+          {saveError ? <Alert variant="error">{saveError}</Alert> : null}
           {/* Story selector — combobox with type-to-filter. */}
           <div className="flex flex-col gap-1" ref={storySelectorRef}>
             <label
@@ -489,14 +501,12 @@ function CreateFeatureModal({
                 initialValues,
                 onSubmit: async (input) => {
                   setSubmitting(true)
+                  setSaveError(null)
                   try {
                     await createFeature(selectedStoryId, input)
                     onClose()
                   } catch (e) {
-                    setAlertMessage(
-                      `Failed to create feature: ${e instanceof Error ? e.message : String(e)}`,
-                    )
-                    setShowAlert(true)
+                    setSaveError(storyChangeErrorText(e))
                   } finally {
                     setSubmitting(false)
                   }
@@ -529,7 +539,8 @@ function EditFeatureModal({
   onClose: () => void
 }) {
   const { projectId } = useActiveProject()
-  const { stories, updateFeature, deleteFeature } = useStories()
+  const { stories, updateFeature, deleteFeature, storyDisplayIndex, featureDisplayIndex } =
+    useStories()
   const { runsActive } = useAgents()
   const { runs: processRuns } = useProcessRuns(projectId)
   const story = stories.find((s) => s.id === storyId)
@@ -537,8 +548,8 @@ function EditFeatureModal({
   const [submitting, setSubmitting] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-  const { setHasChanges, setAlertMessage, setShowAlert, attemptClose, dialog } =
-    useDirtyGuard(onClose)
+  const { setHasChanges, attemptClose, dialog } = useDirtyGuard(onClose)
+  const [saveError, setSaveError] = useState<string | null>(null)
 
   if (!feature) {
     return (
@@ -553,7 +564,9 @@ function EditFeatureModal({
   const featureChatContext: ChatContext | null = projectId
     ? { type: 'FEATURE', projectId, storyId, featureId }
     : null
-  const featureChatTitle = feature.title || 'Feature'
+  const featureChatTitle = featureChatContext
+    ? formatChatTitle({ context: featureChatContext, storyDisplayIndex, featureDisplayIndex })
+    : 'Feature'
 
   const storyHasActiveRun = runsActive.some(
     (r) => r.context.storyId === storyId && !r.context.featureId,
@@ -567,12 +580,12 @@ function EditFeatureModal({
   const handleDelete = async () => {
     setShowDeleteConfirm(false)
     setDeleting(true)
+    setSaveError(null)
     try {
       await deleteFeature(storyId, featureId)
       onClose()
     } catch (e) {
-      setAlertMessage(`Failed to delete feature: ${e instanceof Error ? e.message : String(e)}`)
-      setShowAlert(true)
+      setSaveError(storyChangeErrorText(e))
     } finally {
       setDeleting(false)
     }
@@ -635,20 +648,23 @@ function EditFeatureModal({
           </div>
         }
       >
+        {saveError ? (
+          <Alert variant="error" className="mb-3">
+            {saveError}
+          </Alert>
+        ) : null}
         <FeatureForm
           mode={{
             kind: 'edit',
             feature,
             onSubmit: async (patch) => {
               setSubmitting(true)
+              setSaveError(null)
               try {
                 await updateFeature(storyId, featureId, patch)
                 onClose()
               } catch (e) {
-                setAlertMessage(
-                  `Failed to update feature: ${e instanceof Error ? e.message : String(e)}`,
-                )
-                setShowAlert(true)
+                setSaveError(storyChangeErrorText(e))
               } finally {
                 setSubmitting(false)
               }

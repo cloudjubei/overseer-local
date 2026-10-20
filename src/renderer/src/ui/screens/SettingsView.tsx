@@ -14,7 +14,7 @@ import { DatabaseSettings } from 'thefactory-ui/web'
 import { ProviderConnectionsSettings } from 'thefactory-ui/web'
 import { ProcessesView } from 'thefactory-ui/web'
 import { PROCESS_LINK_PARAM } from 'thefactory-ui/headless'
-import { GroupTicketSettings, ProjectTicketSettings } from 'thefactory-ui/web'
+import { AgentTypeSettings, GroupTicketSettings, ProjectTicketSettings } from 'thefactory-ui/web'
 import {
   IconBarChart,
   IconBell,
@@ -169,10 +169,16 @@ export default function SettingsView({ scope }: { scope: SettingsScope }) {
       ) : (
         <div className="h-full min-h-0 overflow-y-auto p-4">
           {activeCategory === 'project' && scope.kind === 'project' && (
-            <ProjectTicketSettings projectId={scope.projectId} />
+            <div className="flex flex-col gap-8">
+              <ProjectTicketSettings projectId={scope.projectId} />
+              <AgentTypeSettings owner={{ kind: 'project', projectId: scope.projectId }} />
+            </div>
           )}
           {activeCategory === 'group' && scope.kind === 'group' && (
-            <GroupTicketSettings groupId={scope.groupId} />
+            <div className="flex flex-col gap-8">
+              <GroupTicketSettings groupId={scope.groupId} />
+              <AgentTypeSettings owner={{ kind: 'group', groupId: scope.groupId }} />
+            </div>
           )}
           {activeCategory === 'visual' && (
             <VisualSettings onOpenNotifications={() => onSelect('notifications')} />

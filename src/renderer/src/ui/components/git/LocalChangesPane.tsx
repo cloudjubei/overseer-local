@@ -110,14 +110,46 @@ export default function LocalChangesPane({ onResolveConflict }: LocalChangesPane
     }
   }, [stagedHeight])
   const leftPaneRef = useRef<HTMLDivElement | null>(null)
+  const unstagedHeaderRef = useRef<HTMLDivElement | null>(null)
+  const unstagedRowsRef = useRef<HTMLDivElement | null>(null)
+  const stagedHeaderRef = useRef<HTMLDivElement | null>(null)
+  const stagedRowsRef = useRef<HTMLDivElement | null>(null)
+
+  // Both sections must always keep their header plus one file row in view, so
+  // the drag floor is measured from the rendered header and first row.
+  function measureMinSectionPx(
+    headerRef: React.RefObject<HTMLDivElement | null>,
+    rowsRef: React.RefObject<HTMLDivElement | null>,
+    includeHandle: boolean,
+  ): number {
+    const headerH = headerRef.current?.offsetHeight ?? 28
+    const firstChild = rowsRef.current?.firstElementChild as HTMLElement | null
+    const rowH = firstChild?.offsetHeight ?? 28
+    const handleH = includeHandle ? 4 : 0
+    const SAFETY = 8
+    return Math.max(80, headerH + rowH + handleH + SAFETY)
+  }
+
+  function computeUnstagedMinReservedPx(): number {
+    return measureMinSectionPx(unstagedHeaderRef, unstagedRowsRef, true)
+  }
+
+  function computeStagedMinHeightPx(): number {
+    return measureMinSectionPx(stagedHeaderRef, stagedRowsRef, false)
+  }
+
   const onStagedResizeStart = (e: globalThis.PointerEvent | React.PointerEvent) => {
     e.preventDefault()
     const startY = (e as React.PointerEvent).clientY
     const startH = stagedHeight
     const onMove = (ev: globalThis.PointerEvent) => {
-      const containerH = leftPaneRef.current?.clientHeight ?? window.innerHeight
-      const min = 100
-      const max = Math.max(min, containerH - 100)
+      const container = leftPaneRef.current
+      if (!container) return
+      const containerH = container.clientHeight
+      if (containerH <= 0) return
+      const reserved = computeUnstagedMinReservedPx()
+      const min = computeStagedMinHeightPx()
+      const max = Math.max(min, containerH - reserved)
       setStagedHeight(Math.max(min, Math.min(max, startH + ev.clientY - startY)))
     }
     const onUp = () => {
@@ -127,6 +159,23 @@ export default function LocalChangesPane({ onResolveConflict }: LocalChangesPane
     window.addEventListener('pointermove', onMove)
     window.addEventListener('pointerup', onUp)
   }
+
+  // A window shrink re-clamps the staged height so the unstaged header and
+  // first row never fall out of view.
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const ro = new ResizeObserver(() => {
+      const containerH = leftPaneRef.current?.clientHeight ?? 0
+      if (!containerH) return
+      const reserved = computeUnstagedMinReservedPx()
+      const min = computeStagedMinHeightPx()
+      const max = Math.max(min, containerH - reserved)
+      setStagedHeight((cur) => Math.max(min, Math.min(max, cur)))
+    })
+    if (leftPaneRef.current) ro.observe(leftPaneRef.current)
+    return () => ro.disconnect()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const [dragOverArea, setDragOverArea] = useState<Area | null>(null)
 
@@ -284,12 +333,19 @@ export default function LocalChangesPane({ onResolveConflict }: LocalChangesPane
 
   // Section header — checkbox bulk-stages/unstages the whole section, label
   // shows count, dropdown chrome matches desktop's compact uppercase style.
-  const renderSectionHeader = (area: Area, entries: LocalDiffEntry[]) => {
+  const renderSectionHeader = (
+    area: Area,
+    entries: LocalDiffEntry[],
+    headerRef?: React.Ref<HTMLDivElement>,
+  ) => {
     const label = area === 'staged' ? 'Staged' : 'Unstaged'
     const action = area === 'staged' ? 'Unstage all' : 'Stage all'
     const allChecked = entries.length > 0 && area === 'staged'
     return (
-      <div className="px-2 py-1 text-[11px] uppercase tracking-wide text-(--text-muted) border-b border-(--border-subtle) flex items-center justify-between shrink-0 bg-(--surface-muted)">
+      <div
+        ref={headerRef}
+        className="px-2 py-1 text-[11px] uppercase tracking-wide text-(--text-muted) border-b border-(--border-subtle) flex items-center justify-between shrink-0 bg-(--surface-muted)"
+      >
         <span>
           {label} <span className="opacity-60">({entries.length})</span>
         </span>
@@ -400,7 +456,7 @@ export default function LocalChangesPane({ onResolveConflict }: LocalChangesPane
               className={`flex flex-col shrink-0 overflow-hidden ${
                 dragOverArea === 'staged' ? 'bg-sky-50/40 dark:bg-sky-900/10' : ''
               }`}
-              style={{ height: stagedHeight }}
+              style={{ height: stagedHeight, maxHeight: 'calc(100% - 80px)' }}
               onDragOver={(e) => {
                 e.preventDefault()
                 setDragOverArea('staged')
@@ -408,8 +464,8 @@ export default function LocalChangesPane({ onResolveConflict }: LocalChangesPane
               onDragLeave={() => setDragOverArea((cur) => (cur === 'staged' ? null : cur))}
               onDrop={onDropTo('staged')}
             >
-              {renderSectionHeader('staged', stagedEntries)}
-              <div className="flex-1 min-h-0 overflow-auto">
+              {renderSectionHeader('staged', stagedEntries, stagedHeaderRef)}
+              <div ref={stagedRowsRef} className="flex-1 min-h-0 overflow-auto">
                 {renderRows('staged', stagedEntries)}
               </div>
             </div>
@@ -432,8 +488,8 @@ export default function LocalChangesPane({ onResolveConflict }: LocalChangesPane
               onDragLeave={() => setDragOverArea((cur) => (cur === 'unstaged' ? null : cur))}
               onDrop={onDropTo('unstaged')}
             >
-              {renderSectionHeader('unstaged', unstagedEntries)}
-              <div className="flex-1 min-h-0 overflow-auto">
+              {renderSectionHeader('unstaged', unstagedEntries, unstagedHeaderRef)}
+              <div ref={unstagedRowsRef} className="flex-1 min-h-0 overflow-auto">
                 {renderRows('unstaged', unstagedEntries)}
               </div>
             </div>
@@ -451,38 +507,40 @@ export default function LocalChangesPane({ onResolveConflict }: LocalChangesPane
       {/* Right: inline diff for the selected file. `onApplyPatch` /
         `onDiscardPatch` wire partial-hunk staging end-to-end. */}
       <div className="flex flex-col flex-1 min-w-0">
-        {selectedPath ? (
-          <DiffViewer
-            path={selectedPath}
-            patch={selectedPatch}
-            wrap={diffOpts.wrap}
-            ignoreWS={diffOpts.ignoreWS}
-            intra={diffOpts.intra}
-            onWrapChange={(wrap) => setDiffOpts((p) => ({ ...p, wrap }))}
-            onIgnoreWSChange={(ignoreWS) => setDiffOpts((p) => ({ ...p, ignoreWS }))}
-            onIntraChange={(intra) => setDiffOpts((p) => ({ ...p, intra }))}
-            isStaged={selectedArea === 'staged'}
-            isConflicted={selectedConflicted}
-            selectionMode="drag"
-            binary={selectedBinary}
-            suppressed={primarySelected?.file.patchSuppressed === 'size'}
-            beforeSize={selectedBeforeSize}
-            afterSize={selectedAfterSize}
-            onRecoverText={handleRecoverText}
-            onApplyTextRecovery={selectedPath ? () => applyTextRecovery(selectedPath) : undefined}
-            onApplyPatch={handleApplyPatch}
-            onDiscardPatch={handleDiscardPatch}
-            onResolveConflict={
-              selectedConflicted && onResolveConflict && selectedPath
-                ? () => onResolveConflict(selectedPath)
-                : undefined
-            }
-          />
-        ) : (
-          <div className="flex-1 flex items-center justify-center text-xs text-(--text-muted)">
-            Select a file to see its diff.
-          </div>
-        )}
+        <div className="flex flex-col flex-1 min-h-0">
+          {selectedPath ? (
+            <DiffViewer
+              path={selectedPath}
+              patch={selectedPatch}
+              wrap={diffOpts.wrap}
+              ignoreWS={diffOpts.ignoreWS}
+              intra={diffOpts.intra}
+              onWrapChange={(wrap) => setDiffOpts((p) => ({ ...p, wrap }))}
+              onIgnoreWSChange={(ignoreWS) => setDiffOpts((p) => ({ ...p, ignoreWS }))}
+              onIntraChange={(intra) => setDiffOpts((p) => ({ ...p, intra }))}
+              isStaged={selectedArea === 'staged'}
+              isConflicted={selectedConflicted}
+              selectionMode="drag"
+              binary={selectedBinary}
+              suppressed={primarySelected?.file.patchSuppressed === 'size'}
+              beforeSize={selectedBeforeSize}
+              afterSize={selectedAfterSize}
+              onRecoverText={handleRecoverText}
+              onApplyTextRecovery={selectedPath ? () => applyTextRecovery(selectedPath) : undefined}
+              onApplyPatch={handleApplyPatch}
+              onDiscardPatch={handleDiscardPatch}
+              onResolveConflict={
+                selectedConflicted && onResolveConflict && selectedPath
+                  ? () => onResolveConflict(selectedPath)
+                  : undefined
+              }
+            />
+          ) : (
+            <div className="flex-1 flex items-center justify-center text-xs text-(--text-muted)">
+              Select a file to see its diff.
+            </div>
+          )}
+        </div>
       </div>
 
       <ConfirmDialog

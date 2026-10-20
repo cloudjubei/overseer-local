@@ -181,7 +181,7 @@ export default function ChatView() {
   return (
     <div className="flex flex-row w-full h-full overflow-hidden">
       <aside
-        className="hidden md:flex w-72 shrink-0 flex-col overflow-hidden border-r"
+        className="flex w-72 shrink-0 flex-col overflow-hidden border-r"
         style={{ borderColor: 'var(--border-subtle)', background: 'var(--surface-base)' }}
       >
         {listScope ? (

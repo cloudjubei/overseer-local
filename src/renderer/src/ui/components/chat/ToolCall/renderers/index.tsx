@@ -9,6 +9,7 @@ import { useStories } from 'thefactory-ui/headless'
 import { useActiveProject } from 'thefactory-ui/headless'
 import { StoryAndFeatureCallout, StoryCard, type StoryCardData } from 'thefactory-ui/web'
 import FeatureCardConnected from '@ui/components/stories/FeatureCardConnected'
+import EvidenceImageThumb from '@ui/components/chat/EvidenceImageThumb'
 import FeatureRequestWidgetConnected from '@ui/components/chat/FeatureRequestWidgetConnected'
 import { useNavigateToResource } from '@ui/hooks/useNavigateToResource'
 import { useNavigateToGroupRun } from '@ui/hooks/useNavigateToGroupRun'
@@ -59,6 +60,7 @@ function ConnectedToolPreview(args: RenderToolPreviewArgs) {
           id: f.id,
           title: f.title,
           description: f.description,
+          status: f.status as string | undefined,
         })),
       }
     },
@@ -103,6 +105,30 @@ function ConnectedToolPreview(args: RenderToolPreviewArgs) {
       const f = s ? getFeature(s.id, feature.id) : undefined
       if (!s || !f || !projectId) return null
       return <FeatureCardConnected projectId={projectId} story={s} feature={f} />
+    },
+    renderEvidenceImage: ({ evidenceId, label }) => (
+      <EvidenceImageThumb
+        projectId={projectId}
+        evidenceId={evidenceId}
+        {...(label ? { label } : {})}
+      />
+    ),
+    renderAgentRunLink: ({ storyId, agentRunId }) => {
+      if (!projectId || !storyId || !agentRunId) return null
+      return (
+        <button
+          type="button"
+          className="text-[11px] underline text-(--text-secondary) hover:text-(--text-primary)"
+          onClick={() =>
+            navigateToResource({
+              kind: 'chat',
+              context: { type: 'AGENT_RUN_STORY', projectId, storyId, agentRunId },
+            })
+          }
+        >
+          Open the agent run →
+        </button>
+      )
     },
     // The card REPORTS and never decides: it shows the run's live state and its
     // only action is to open the pipeline, where the decisions are made.

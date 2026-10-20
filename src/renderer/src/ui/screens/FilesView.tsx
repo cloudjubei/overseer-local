@@ -13,7 +13,7 @@ import {
   detectUploadEncoding,
   type FileTreeEntry,
 } from 'thefactory-ui/web'
-import { IconArrowLeftMini, IconChevron, IconUpload } from 'thefactory-ui/web/icons'
+import { IconChevron, IconUpload } from 'thefactory-ui/web/icons'
 
 import FilePaneConnected from '@ui/components/files/FilePaneConnected'
 import { LoadingScreen } from 'thefactory-ui/web'
@@ -39,6 +39,7 @@ export default function FilesView() {
   const [filter, setFilter] = useState('')
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
+  const [visibleCount, setVisibleCount] = useState(0)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [paneCollapsed, setPaneCollapsed] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false
@@ -182,7 +183,7 @@ export default function FilesView() {
               style={{ borderColor: 'var(--border-subtle)' }}
             >
               <span className="text-xs text-(--text-muted)">
-                {paths.length} file{paths.length === 1 ? '' : 's'}
+                {visibleCount} file{visibleCount === 1 ? '' : 's'}
               </span>
               <Tooltip content="Upload file">
                 <Button
@@ -210,6 +211,7 @@ export default function FilesView() {
                 onSelectFile={onSelect}
                 onRenameFolder={renameFolder}
                 onDeleteFolder={deleteFolder}
+                onVisibleCountChange={setVisibleCount}
               />
             </div>
           </>
@@ -217,16 +219,6 @@ export default function FilesView() {
       </aside>
 
       <main className="flex flex-col flex-1 min-w-0">
-        {selectedPath && (
-          <button
-            type="button"
-            onClick={() => onSelect(null)}
-            className="md:hidden flex items-center gap-1 px-3 py-2 text-xs border-b shrink-0"
-            style={{ borderColor: 'var(--border-subtle)' }}
-          >
-            <IconArrowLeftMini className="w-3 h-3" /> Back to files
-          </button>
-        )}
         <div className="flex-1 min-h-0 overflow-hidden">
           <FilePaneConnected />
         </div>

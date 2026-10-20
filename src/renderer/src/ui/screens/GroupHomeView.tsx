@@ -22,8 +22,8 @@ export default function GroupHomeView() {
     .filter((p): p is (typeof projects)[number] => Boolean(p))
     .map((p) => ({
       id: p.id,
-      title: p.title,
-      description: p.description,
+      title: p.overrides?.title ?? p.title,
+      description: p.overrides?.description ?? p.description,
       iconKey: (p.metadata as { icon?: string } | undefined)?.icon,
     }))
 

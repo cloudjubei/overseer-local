@@ -137,7 +137,12 @@ function BackendGate() {
                                                 <CommandMenu />
                                                 <ChatDropController />
                                                 <GitCredentialErrorModalMount />
-                                                <Outlet />
+                                                <div className="flex h-full w-full flex-col">
+                                                  <DisconnectedBanner />
+                                                  <div className="min-h-0 flex-1">
+                                                    <Outlet />
+                                                  </div>
+                                                </div>
                                               </IngestionProvider>
                                             </DataSourcesProvider>
                                           </EntitiesProvider>
@@ -223,9 +228,9 @@ function MainShell() {
   }, [projectId, projects, activeProjectId, setActiveProjectId])
 
   useEffect(() => {
-    if (!projectId || storyId || contextKey || isFilesPath) return
+    if (!projectId || storyId || contextKey || isFilesPath || processRunId) return
     if (!isShellTabKey(tabParam)) navigate(`/projects/${projectId}/stories`, { replace: true })
-  }, [projectId, tabParam, storyId, contextKey, isFilesPath, navigate])
+  }, [projectId, tabParam, storyId, contextKey, isFilesPath, processRunId, navigate])
 
   const screenLabel = SHELL_TAB_DEFS.find((t) => t.key === tab)?.label ?? tab
 
@@ -371,7 +376,6 @@ export default function App() {
             <AuthProvider>
               <ApiProvider>
                 <div className="flex flex-col h-full w-full overflow-hidden">
-                  <DisconnectedBanner />
                   <div className="flex flex-1 min-h-0 overflow-hidden">
                     <Routes>
                       <Route path="/login" element={<LoginScreen />} />

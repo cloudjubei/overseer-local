@@ -43,14 +43,14 @@ Other helpful toggles:
 
 ## How this repo is configured
 
-The electron-builder configuration lives under the "build" key in package.json. For macOS, hardened runtime and entitlements are already set. We also include notarization placeholders so you can provide credentials via environment variables at build time.
+The electron-builder configuration lives in [electron-builder.cjs](../electron-builder.cjs). Signing and notarisation are switched on by env alone:
 
-Relevant package.json excerpt:
-
-- mac.hardenedRuntime: true
-- mac.entitlements: build/entitlements.mac.plist
-- mac.entitlementsInherit: build/entitlements.mac.inherit.plist
-- mac.notarize: uses APPLE_ID, APPLE_APP_SPECIFIC_PASSWORD, APPLE_TEAM_ID
+- **macOS signing** runs only when `CSC_LINK` or `CSC_NAME` is set. Otherwise the config sets `mac.identity: null` and the build is unsigned (`skipped macOS code signing` in the log).
+  - Why not leave it to electron-builder's auto-discovery: when it finds no "Developer ID Application" certificate, it falls back to any other certificate in the login keychain, including "Apple Development" and "Apple Distribution" certificates from other teams. On this Mac that signed a local build with an unrelated team's certificate.
+  - `mac.type: distribution` also stops the "Mac Developer" fallback when signing is on.
+- **macOS notarisation** runs only when the `APPLE_*` variables below are set and the app is signed. With none set, electron-builder skips it.
+- **Windows signing** runs only when `WIN_CSC_LINK` or `CSC_LINK` is set.
+- Hardened runtime is on, and `build/entitlements.mac.plist` is used for the app and its helpers. It allows JIT, microphone input and Apple Events (the Dictation shortcut sends them to System Events). Matching usage strings are in `mac.extendInfo`.
 
 Note: You don't commit any certificates or Apple credentials. Provide them via environment variables when running the build.
 
@@ -75,7 +75,7 @@ Windows or macOS Developer ID certificate in a .p12/.pfx file:
 
 ## Local development builds
 
-For local unsigned builds (common during development), do nothing; electron-builder will produce unsigned artifacts (or you can build via Forge dev tools). To sign locally, export credentials before running a build:
+For local unsigned builds, set nothing and run `npm run build:mac` (see "Build locally" in docs/APP_RELEASE.md). To sign locally, export credentials before running a build. If the Developer ID Application certificate is already in your keychain, `export CSC_NAME="Your Name (TEAMID)"` is enough in place of `CSC_LINK`:
 
 macOS example:
 
@@ -84,7 +84,7 @@ macOS example:
 - export APPLE_ID="me@example.com"
 - export APPLE_APP_SPECIFIC_PASSWORD="abcd-efgh-ijkl-mnop"
 - export APPLE_TEAM_ID="ABCDE12345"
-- npx electron-builder -mwl
+- npm run build:mac
 
 Windows example (PowerShell):
 

@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { PRICE_RATE_LABELS, formatDateTime, priceListEntryView } from 'thefactory-ui/headless'
-import type { PriceRateKey } from 'thefactory-ui/headless'
+import { formatDateTime, priceListEntryView } from 'thefactory-ui/headless'
 import {
   getCachedPricing,
   getPricingState,
@@ -9,11 +8,8 @@ import {
 } from 'thefactory-ui/headless/api'
 import type { PricingEntry, PricingSnapshot } from 'thefactory-ui/headless/api'
 import { useAuth } from '@core/contexts/AuthContext'
-import { Alert, Button, Input, Spinner, Surface } from 'thefactory-ui/web'
+import { Alert, Button, Input, LLMProviderIcon, Spinner } from 'thefactory-ui/web'
 import { IconRefresh } from 'thefactory-ui/web/icons'
-
-/** The rate columns, in the order and words every client's price list uses. */
-const RATE_COLUMNS = Object.entries(PRICE_RATE_LABELS) as Array<[PriceRateKey, string]>
 
 export default function PricingPanel(): React.JSX.Element {
   const { token } = useAuth()
@@ -71,9 +67,17 @@ export default function PricingPanel(): React.JSX.Element {
   }, [snapshot, filter])
 
   return (
-    <section className="flex flex-col gap-3 h-full min-h-0">
-      <div className="shrink-0 flex items-center justify-between gap-3">
-        <p className="text-sm opacity-70">USD per 1M tokens.</p>
+    <section className="flex flex-col gap-2 h-full min-h-0">
+      <p className="shrink-0 text-xs opacity-70">USD per 1M tokens.</p>
+
+      <div className="shrink-0 flex items-center gap-2">
+        <Input
+          size="sm"
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+          placeholder="Filter by provider or model…"
+          className="flex-1"
+        />
         <Button
           size="icon"
           variant="outline"
@@ -86,6 +90,12 @@ export default function PricingPanel(): React.JSX.Element {
         </Button>
       </div>
 
+      {snapshot && (
+        <span className="shrink-0 text-[10px] opacity-60">
+          Updated {formatDateTime(snapshot.updatedAt)} · {snapshot.prices.length} entries
+        </span>
+      )}
+
       {error && (
         <div className="shrink-0">
           <Alert>{error}</Alert>
@@ -93,65 +103,28 @@ export default function PricingPanel(): React.JSX.Element {
       )}
 
       {snapshot ? (
-        <>
-          <div className="shrink-0 flex items-center justify-between gap-3">
-            <Input
-              size="sm"
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
-              placeholder="Filter by provider or model…"
-              className="max-w-xs"
-            />
-            <span className="text-xs opacity-60">
-              Updated {formatDateTime(snapshot.updatedAt)} · {snapshot.prices.length} entries
-            </span>
-          </div>
-
-          <Surface className="flex-1 min-h-0 p-0 overflow-auto">
-            {refreshing && (
-              <div
-                className="sticky top-0 z-20 flex items-center justify-center gap-2 py-2 text-xs text-(--text-secondary) border-b border-(--border-subtle)"
-                style={{ background: 'var(--surface-base)' }}
-              >
-                <Spinner />
-                Refreshing pricing…
-              </div>
-            )}
-            <table className="w-full text-sm">
-              <thead>
-                <tr
-                  className="sticky z-10"
-                  style={{ background: 'var(--surface-base)', top: refreshing ? '2rem' : 0 }}
-                >
-                  <Th>Provider</Th>
-                  <Th>Model</Th>
-                  {RATE_COLUMNS.map(([key, label]) => (
-                    <Th key={key} className="text-right">
-                      {label} / 1M
-                    </Th>
-                  ))}
-                  <Th>Source</Th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={RATE_COLUMNS.length + 3}
-                      className="px-3 py-4 text-center opacity-60"
-                    >
-                      No matches.
-                    </td>
-                  </tr>
-                ) : (
-                  filtered.map((p) => <Row key={`${p.provider}/${p.model}`} entry={p} />)
-                )}
-              </tbody>
-            </table>
-          </Surface>
-        </>
+        <div className="flex-1 min-h-0 overflow-auto no-scrollbar">
+          {refreshing && (
+            <div
+              className="sticky top-0 z-20 flex items-center justify-center gap-2 py-2 text-xs text-(--text-secondary) border-b border-(--border-subtle)"
+              style={{ background: 'var(--surface-base)' }}
+            >
+              <Spinner />
+              Refreshing pricing…
+            </div>
+          )}
+          {filtered.length === 0 ? (
+            <div className="px-3 py-4 text-center text-sm opacity-60">No matches.</div>
+          ) : (
+            <ul className="flex flex-col gap-1">
+              {filtered.map((p) => (
+                <PriceItem key={`${p.provider}/${p.model}`} entry={p} />
+              ))}
+            </ul>
+          )}
+        </div>
       ) : (
-        <Surface className="flex-1 min-h-0 p-0 overflow-hidden">
+        <div className="flex-1 min-h-0 overflow-hidden">
           <div className="flex items-center justify-center gap-2 py-10 text-sm text-(--text-secondary)">
             {loading ? (
               <>
@@ -162,48 +135,35 @@ export default function PricingPanel(): React.JSX.Element {
               'No pricing data yet.'
             )}
           </div>
-        </Surface>
+        </div>
       )}
     </section>
   )
 }
 
-function Th({
-  children,
-  className,
-}: {
-  children: React.ReactNode
-  className?: string
-}): React.JSX.Element {
-  return (
-    <th
-      className={`text-left text-xs font-semibold uppercase tracking-wide px-3 py-2 ${className ?? ''}`}
-      style={{ borderBottom: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}
-    >
-      {children}
-    </th>
-  )
-}
-
 /**
- * One price: every rate it is billed at, cache writes included, and where the
- * price came from — worded by the shared headless `priceListEntryView`, which
- * also words a rate the catalogue leaves out as the one the ledger bills it at,
- * so this table and the web and mobile lists read every rate alike.
+ * One price: the model, where its price came from (LiteLLM, or Cursor's own
+ * published prices), and every rate it is billed at — cache writes included,
+ * worded by the shared headless `priceListEntryView` so all clients agree.
  */
-function Row({ entry }: { entry: PricingEntry }): React.JSX.Element {
+function PriceItem({ entry }: { entry: PricingEntry }): React.JSX.Element {
   const view = priceListEntryView(entry)
-  const rates = new Map(view.rates.map((rate) => [rate.key, rate.value]))
   return (
-    <tr style={{ borderTop: '1px solid var(--border-subtle)' }}>
-      <td className="px-3 py-2">{view.provider}</td>
-      <td className="px-3 py-2 font-mono text-xs">{view.model}</td>
-      {RATE_COLUMNS.map(([key]) => (
-        <td key={key} className="px-3 py-2 text-right tabular-nums">
-          {rates.get(key) ?? '—'}
-        </td>
-      ))}
-      <td className="px-3 py-2 text-xs">{view.source}</td>
-    </tr>
+    <li
+      className="flex items-center gap-2 rounded-md border px-3 py-2"
+      style={{ borderColor: 'var(--border-subtle)', background: 'var(--surface-raised)' }}
+    >
+      <LLMProviderIcon provider={view.provider} size={20} />
+      <div className="min-w-0 flex-1">
+        <div className="flex items-baseline justify-between gap-2">
+          <span className="truncate text-xs text-(--text-secondary)">{view.provider}</span>
+          <span className="shrink-0 text-[10px] text-(--text-muted)">Source: {view.source}</span>
+        </div>
+        <div className="truncate text-sm font-semibold font-mono">{view.model}</div>
+        <div className="mt-0.5 text-xs text-(--text-muted) tabular-nums">
+          {view.rates.map((rate) => `${rate.label}: ${rate.value}`).join(' · ')}
+        </div>
+      </div>
+    </li>
   )
 }

@@ -6,6 +6,7 @@ import {
   featureShownStatus,
   useActiveProject,
   useReferences,
+  useStoryChangeError,
 } from 'thefactory-ui/headless'
 import { STATUS_ORDER as HEADLESS_STATUS_ORDER } from 'thefactory-ui/headless'
 import { useStories } from 'thefactory-ui/headless'
@@ -18,8 +19,9 @@ import {
   useProcessStopClock,
 } from 'thefactory-ui/headless'
 import ProcessStatusChip from '@ui/components/stories/ProcessStatusChip'
-import type { Feature, GetStoryResponse } from 'thefactory-ui/headless/api'
+import type { ChatContext, Feature, GetStoryResponse } from 'thefactory-ui/headless/api'
 import {
+  Alert,
   Button,
   useDragReorder,
   OptionPicker,
@@ -28,6 +30,10 @@ import {
   STATUS_LABELS,
   statusKey,
 } from 'thefactory-ui/web'
+import {
+  FEATURE_SORT_OPTIONS as HEADLESS_FEATURE_SORT_OPTIONS,
+  formatChatTitle,
+} from 'thefactory-ui/headless'
 import { IconBack, IconCalculator, IconChevron, IconEdit, IconPlus } from 'thefactory-ui/web/icons'
 import { DependencyBullet } from 'thefactory-ui/web'
 import { ExclamationChip, FeatureKindChip, RichText, StoryNotesSection } from 'thefactory-ui/web'
@@ -44,12 +50,11 @@ type FeatureSort = 'index_asc' | 'index_desc' | 'status_asc' | 'status_desc'
 
 const STATUS_ORDER: Status[] = [...HEADLESS_STATUS_ORDER]
 
-const FEATURE_SORT_OPTIONS: { value: FeatureSort; label: string }[] = [
-  { value: 'index_asc', label: 'Ascending ↓' },
-  { value: 'index_desc', label: 'Descending ↑' },
-  { value: 'status_asc', label: 'Status ↓' },
-  { value: 'status_desc', label: 'Status ↑' },
-]
+const FEATURE_SORT_OPTIONS: { value: FeatureSort; label: string }[] =
+  HEADLESS_FEATURE_SORT_OPTIONS.map((o) => ({
+    value: o.value as FeatureSort,
+    label: `${o.value.endsWith('_asc') ? '↑' : '↓'} ${o.label}`,
+  }))
 
 /** Match a feature against the search box. Searches by display index
  *  (e.g. `2`, the user-visible position; the uuid is never shown), title
@@ -84,6 +89,7 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
   const {
     stories,
     storyDisplayIndex,
+    featureDisplayIndex,
     updateStory,
     updateFeature,
     getBlockers,
@@ -231,13 +237,11 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
     if (linkedFeatureId) clearFeatureLink()
   }
 
+  const statusChange = useStoryChangeError()
+
   const handleStoryStatusChange = async (status: Status) => {
     if (!story) return
-    try {
-      await updateStory(story.id, { status })
-    } catch (e) {
-      console.error('Failed to update status', e)
-    }
+    await statusChange.attempt(() => updateStory(story.id, { status }))
   }
 
   const handleFeatureStatusChange = async (
@@ -245,11 +249,7 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
     featureId: string,
     status: Status,
   ) => {
-    try {
-      await updateFeature(storyIdLocal, featureId, { status })
-    } catch (e) {
-      console.error('Failed to update status', e)
-    }
+    await statusChange.attempt(() => updateFeature(storyIdLocal, featureId, { status }))
   }
 
   const onRowKeyDown = (e: React.KeyboardEvent<HTMLDivElement>, feature: Feature) => {
@@ -306,6 +306,16 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
   }
 
   const sIndex = storyDisplayIndex(story.id) ?? '?'
+  const storyChatContext: ChatContext | null = projectId
+    ? { type: 'STORY', projectId, storyId: story.id }
+    : null
+  const storyChatTitle = storyChatContext
+    ? formatChatTitle({
+        context: storyChatContext,
+        storyDisplayIndex,
+        featureDisplayIndex,
+      })
+    : `Story ${sIndex}`
   const storyBlockers = getBlockers(story.id)
   const storyBlockersOutbound = getBlockersOutbound(story.id)
   const storyHasActiveRun = !!storyRun
@@ -358,6 +368,11 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
                 status={story.status}
                 onChange={(next) => void handleStoryStatusChange(next as Status)}
               />
+              {projectId && storyProcessOverlay ? (
+                <div onClick={(e) => e.stopPropagation()}>
+                  <ProcessStatusChip run={storyProcessRun} projectId={projectId} />
+                </div>
+              ) : null}
             </div>
 
             <h1 id="story-details-heading" className="details-title flex-1 min-w-0 order-2">
@@ -365,15 +380,7 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
             </h1>
 
             <div className="flex items-center gap-3 order-3 basis-full justify-end sm:order-3 sm:basis-auto sm:ml-auto">
-              {projectId && storyProcessOverlay ? (
-                <div
-                  className="no-drag"
-                  onClick={(e) => e.stopPropagation()}
-                  onPointerDown={(e) => e.stopPropagation()}
-                >
-                  <ProcessStatusChip run={storyProcessRun} projectId={projectId} />
-                </div>
-              ) : !storyHasActiveRun && projectId ? (
+              {!storyProcessOverlay && !storyHasActiveRun && projectId ? (
                 <div
                   className="no-drag"
                   onClick={(e) => e.stopPropagation()}
@@ -398,6 +405,11 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
             </div>
           </div>
         </header>
+        {statusChange.error ? (
+          <Alert variant="error" onDismiss={statusChange.dismiss} className="shrink-0 mx-3 mt-2">
+            {statusChange.error}
+          </Alert>
+        ) : null}
         <UsageModal
           isOpen={usageOpen}
           onClose={() => setUsageOpen(false)}
@@ -639,11 +651,11 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
                           <RichText text={f.description || ''} typedReferences />
                         </div>
                         <div
-                          className={`col col-actions ${featureHasActiveRun || featureOverlay ? 'is-sticky-visible' : ''}`}
+                          className={`col col-actions ${featureOverlay ? 'is-sticky-visible' : ''}`}
                         >
                           {projectId && featureOverlay ? (
                             <div
-                              className="no-drag"
+                              className="no-drag flex items-center justify-end"
                               onClick={(e) => e.stopPropagation()}
                               onPointerDown={(e) => e.stopPropagation()}
                             >
@@ -659,7 +671,7 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
                             !isFeatureInLiveRun(storyProcessRun, f.id) &&
                             projectId && (
                               <div
-                                className="no-drag"
+                                className="no-drag flex items-center justify-end"
                                 onClick={(e) => e.stopPropagation()}
                                 onPointerDown={(e) => e.stopPropagation()}
                               >
@@ -720,11 +732,8 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
         )}
       </div>
 
-      {projectId && (
-        <ChatSidebarPanelConnected
-          context={{ type: 'STORY', projectId, storyId: story.id }}
-          chatContextTitle={story.title || `Story ${sIndex}`}
-        />
+      {storyChatContext && (
+        <ChatSidebarPanelConnected context={storyChatContext} chatContextTitle={storyChatTitle} />
       )}
 
       <StoriesModalHost route={modal} onClose={closeModal} />

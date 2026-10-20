@@ -8,6 +8,7 @@ import {
   useProjectWorkLaunch,
 } from 'thefactory-ui/headless'
 import { useNavigateToResource } from '@ui/hooks/useNavigateToResource'
+import { renderLaunchModelChip } from '@ui/components/agents/RunModelChipConnected'
 
 /**
  * The whole of a cross-project request, opened from its card ("Open the full request") on either
@@ -44,6 +45,7 @@ export default function FeatureRequestFullModal({
         start={requestStart.start}
         defaultMode={launch.defaultMode}
         chatRunner={launch.chatRunner}
+        renderModelChip={renderLaunchModelChip}
       />
       <Modal isOpen={!!request} onClose={onClose} title="Feature request" size="xl">
         {request ? (

@@ -12,13 +12,47 @@ If you have not yet configured signing credentials, also see: docs/BUILD_SIGNING
   - Windows: .exe (NSIS) + supporting files (latest.yml, blockmap)
   - Linux: .AppImage + supporting files (latest-linux.yml)
 - Resources in this repo:
-  - build/icons/
-    - icon.icns (macOS)
-    - icon.ico (Windows)
-    - icon.png (Linux, typically 512x512)
-  - build/entitlements.mac.plist (macOS hardened runtime entitlements)
-  - build/entitlements.mac.inherit.plist (macOS helper entitlements)
-- electron-builder config: Typically defined under the "build" key in package.json. If your project uses electron-builder.config.\* or electron-builder.yml, follow those instead.
+  - build/icon.icns (macOS), build/icon.ico (Windows), build/icon.png (Linux, 512x512), all generated from resources/icon.png
+  - build/entitlements.mac.plist (hardened-runtime entitlements, used for the app and its helpers)
+- electron-builder config: [electron-builder.cjs](../electron-builder.cjs). It is JavaScript rather than YAML so signing can depend on env (see docs/BUILD_SIGNING.md).
+
+## Build locally
+
+One command builds an unsigned macOS app on this Mac:
+
+```bash
+npm run build:mac
+```
+
+It typechecks, runs `electron-vite build`, then `electron-builder --mac`, and writes:
+
+- `dist/Overseer-<version>-arm64.dmg` and `dist/Overseer-<version>-arm64-mac.zip`
+- `dist/mac-arm64/Overseer.app` (open it directly; `npm run build:unpack` builds only this, faster)
+
+Before the first build, have the sibling repos next to this one and built, exactly as for thefactory-backend:
+
+```bash
+(cd ../thefactory-tools && npm run build)
+(cd ../thefactory-ui && npm run build)
+npm install
+```
+
+How the `file:` siblings get into the app:
+
+- `thefactory-tools` and `thefactory-ui` are `file:` devDependencies, so `node_modules/thefactory-*` are symlinks to the sibling folders. The renderer imports them and Vite bundles their built `dist/` into `out/renderer`. A stale sibling `dist/` means a stale app, so rebuild a sibling after changing it.
+- `electron.vite.config.ts` dedupes `react`, `react-dom`, `react-router` and `react-router-dom`. thefactory-ui has its own copies of these in its `node_modules`, and without the dedupe a production build bundles a second router and the window stays blank.
+- electron-builder ships only `out/`, `package.json`, `resources/` and the two `@electron-toolkit` runtime packages. No symlink or sibling `node_modules` ends up in `app.asar`, so nothing has to be vendored or copied first.
+- Code reached through `thefactory-tools/utils` must not compile code at import time (`new Function`, Ajv `compile`), because the renderer's CSP is `script-src 'self'`.
+
+Notes:
+
+- With no `CSC_LINK` or `CSC_NAME` set, the build is unsigned and the log says `skipped macOS code signing`. It never picks a certificate from your keychain on its own (see docs/BUILD_SIGNING.md).
+- The packaged app is named `Overseer` and keeps its data in `~/Library/Application Support/Overseer`. That is separate from `npm run dev`, which uses `~/Library/Application Support/electron`, so you sign in to the packaged app once.
+- A locally built app is not quarantined and opens normally. A copy downloaded from elsewhere needs right-click, Open (or `xattr -dr com.apple.quarantine Overseer.app`) until builds are signed and notarised.
+- From the same Mac, `npm run build:win` builds the NSIS installer (`dist/Overseer-<version>-setup.exe`; the first run downloads Wine and NSIS) and `npx electron-builder --linux AppImage deb` builds `dist/Overseer-<version>-x86_64.AppImage` and `dist/Overseer-<version>-amd64.deb`. The `snap` target needs Linux with snapcraft, so `npm run build:linux` only works on Linux.
+- To regenerate the icons after changing `resources/icon.png`: build an iconset with `sips` and run `iconutil -c icns` for `build/icon.icns`, save `build/icon.ico` with Pillow (sizes 16 to 256), and copy the PNG to `build/icon.png`.
+
+Automated CI builds and releases belong to the deployment story in thefactory-backend ("Phase 3: Production Deployment").
 
 ## Prerequisites
 
@@ -68,9 +102,7 @@ Environment variables (one of the two notarization methods):
 
 Notes:
 
-- Hardened runtime must be enabled and entitlements configured. This repo provides:
-  - build/entitlements.mac.plist
-  - build/entitlements.mac.inherit.plist
+- Hardened runtime is on and build/entitlements.mac.plist is used for the app and its helpers.
 - electron-builder will handle codesign + notarization if the above environment variables are set.
 
 ### Windows (Authenticode Code Signing)
@@ -112,17 +144,14 @@ Set as needed in your shell, .env, or CI secrets.
   - GH_TOKEN (a GitHub personal access token with repo scope)
 - Misc helpful:
   - DEBUG=electron-builder (verbose logs)
-  - CSC_IDENTITY_AUTO_DISCOVERY=false (to prevent auto-picking wrong identity locally)
+  - CSC_NAME (sign with a Developer ID Application identity already in your keychain; without CSC_LINK or CSC_NAME the build is unsigned)
 
 Store sensitive values in your CI as encrypted secrets.
 
 ## Icons and Metadata
 
-- Replace placeholder icons under build/icons/ with your real app icons:
-  - macOS: build/icons/icon.icns
-  - Windows: build/icons/icon.ico
-  - Linux: build/icons/icon.png (512x512 recommended)
-- Ensure your electron-builder config references these icons (default naming is already conventional).
+- Icons live in build/ (icon.icns, icon.ico, icon.png), generated from resources/icon.png and referenced from electron-builder.cjs. See "Build locally" for how to regenerate them.
+- The packaged app is `Overseer` with appId `com.thefactory.overseer.desktop`.
 
 ## Local Build: Step-by-step
 
@@ -131,20 +160,14 @@ Store sensitive values in your CI as encrypted secrets.
 2. Build the app (renderer, preload, main) with electron-vite:
    - npm run build
 3. Prepare environment variables for signing/notarization as above (optional locally if only testing unsigned builds).
-4. Package per platform:
-   - macOS: npm run dist:mac (or npx electron-builder --mac)
-   - Windows: npm run dist:win (or npx electron-builder --win)
-   - Linux: npm run dist:linux (or npx electron-builder --linux)
-   - All (on their respective OS or with cross-building prerequisites): npm run dist:all (or npx electron-builder -mwl)
+4. Package per platform (each script runs step 2 first):
+   - macOS: npm run build:mac
+   - Windows: npm run build:win
+   - Linux: npm run build:linux (on Linux; the snap target needs snapcraft)
 
 Notes:
 
-- If your package.json does not yet define dist:mac/dist:win/dist:linux scripts, you can use the npx commands shown above. Common script definitions are:
-  - "dist:mac": "electron-builder --mac"
-  - "dist:win": "electron-builder --win"
-  - "dist:linux": "electron-builder --linux"
-  - "dist:all": "electron-builder -mwl"
-- Output artifacts are written to the dist/ directory (e.g., dist/mac/_.dmg, dist/win-unpacked and dist/_.exe, dist/\*.AppImage).
+- Output artifacts are written to dist/ (gitignored): dist/Overseer-<version>-arm64.dmg, dist/Overseer-<version>-setup.exe, dist/Overseer-<version>-x86_64.AppImage and the unpacked apps.
 
 ## CI: GitHub Actions Example (Build and Release)
 
@@ -209,7 +232,7 @@ Notes:
 
 ## Configuring electron-builder
 
-Most projects keep the electron-builder configuration under the "build" key in package.json. Common fields include:
+This repo keeps the electron-builder configuration in [electron-builder.cjs](../electron-builder.cjs). Common fields include:
 
 - appId: Reverse-DNS identifier, e.g., com.example.myapp
 - productName: Human-friendly app name
@@ -220,12 +243,11 @@ Most projects keep the electron-builder configuration under the "build" key in p
 - linux: target (AppImage), icon, category
 - publish: Provider configuration (e.g., { provider: "github" })
 
-If your configuration is in electron-builder.yml or electron-builder.config.js, confirm paths to icons and entitlements match:
+Paths this repo uses:
 
-- mac.entitlements: build/entitlements.mac.plist
-- mac.entitlementsInherit: build/entitlements.mac.inherit.plist
+- mac.entitlements and mac.entitlementsInherit: build/entitlements.mac.plist
 - mac.hardenedRuntime: true
-- mac.gatekeeperAssess: false (usually fine), sign/notarize handled by env vars
+- Signing and notarisation are handled by env vars (docs/BUILD_SIGNING.md)
 
 ## Troubleshooting
 
@@ -252,8 +274,8 @@ If your configuration is in electron-builder.yml or electron-builder.config.js, 
 
 ## Quick Recipes
 
-- Unsigned local test build (current platform):
-  - npm run build && npx electron-builder --publish never
+- Unsigned local macOS build:
+  - npm run build:mac
 - macOS signed + notarized build locally:
   - Export cert to .p12, set CSC*LINK/CSC_KEY_PASSWORD, APPLE*\* env vars
   - npm run build && npx electron-builder --mac --publish never

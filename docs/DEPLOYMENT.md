@@ -61,15 +61,7 @@ Per-platform credentials live in GitHub Actions repo secrets. Full setup is in [
 - **Windows** — `WIN_CSC_LINK` (base64-encoded `.pfx`), `WIN_CSC_KEY_PASSWORD`. Standard OV cert is sufficient; EV certs require a hardware token and are not CI-friendly.
 - **Linux** — no signing required.
 
-[electron-builder.yml](../electron-builder.yml) needs the unsigned/notarize-disabled placeholders flipped to live values:
-
-```yaml
-mac:
-  identity: null            # → leave null; electron-builder picks up CSC_LINK
-  hardenedRuntime: true     # → add (currently missing)
-  gatekeeperAssess: false   # → add
-  notarize: true            # currently false
-```
+[electron-builder.cjs](../electron-builder.cjs) needs no change for signing. macOS signing switches on when `CSC_LINK` (or `CSC_NAME`) is set, and notarisation when the `APPLE_*` variables are set. Hardened runtime and entitlements are already configured. Without them the build is unsigned, which is how local builds run (see [BUILD_SIGNING.md](./BUILD_SIGNING.md)).
 
 ---
 
@@ -112,7 +104,7 @@ The `latest/` aliases let the download page link to stable URLs (`/stable/latest
 
 ## How upload happens
 
-electron-builder has built-in S3 publishing — no separate `aws s3 cp` step needed. Add to [electron-builder.yml](../electron-builder.yml):
+electron-builder has built-in S3 publishing — no separate `aws s3 cp` step needed. Add to [electron-builder.cjs](../electron-builder.cjs) (shown as YAML for brevity):
 
 ```yaml
 publish:
@@ -187,7 +179,7 @@ These need real-world decisions before the pipeline can ship:
 1. **Get the Apple Developer ID + Windows OV cert.** Everything else can be stubbed; these have lead times.
 2. **Provision the S3 bucket + IAM role + OIDC trust** under the chosen AWS account.
 3. **Land `.github/workflows/release.yml`** with the matrix, signing env wiring, and `--publish always`. Verify against a `v0.0.1-test` tag to a private/staging bucket.
-4. **Add the `publish` block to [electron-builder.yml](../electron-builder.yml)** and flip the mac signing toggles (`hardenedRuntime`, `notarize`).
+4. **Add the `publish` block to [electron-builder.cjs](../electron-builder.cjs)** (signing and notarisation already switch on from the CI secrets).
 5. **Cut `v1.0.0`** once a clean end-to-end run produces signed artifacts in the bucket.
 6. **(Later) Add `electron-updater`** and the feed URL once we have users to update.
 

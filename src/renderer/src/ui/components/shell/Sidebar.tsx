@@ -8,7 +8,14 @@ import { useSeedActivities } from 'thefactory-ui/headless'
 import { useBadgeCounts } from '@core/notifications/useBadgeCounts'
 import type { BadgeColor, BadgeColorCategory } from '@core/types/settings'
 import { Button, NavIndicator, renderProjectIcon, useChatsSeen } from 'thefactory-ui/web'
-import { IconCollection, IconFolder, IconFolderOpen, IconMenu } from 'thefactory-ui/web/icons'
+import {
+  IconChevronDown,
+  IconChevronRight,
+  IconCollection,
+  IconFolder,
+  IconFolderOpen,
+  IconMenu,
+} from 'thefactory-ui/web/icons'
 import {
   ASSISTANT_NAV_DEF,
   GROUP_TAB_DEFS,
@@ -426,7 +433,7 @@ export default function Sidebar({
                 return (
                   <NavRow
                     key={p.id}
-                    label={p.title}
+                    label={p.overrides?.title ?? p.title}
                     icon={renderProjectIcon(asIconKey(p.metadata?.icon))}
                     isActive={isActive}
                     onClick={() => onSelectProject(p.id)}
@@ -668,15 +675,29 @@ function GroupBlock({
           type="button"
           onClick={onSelectGroup}
           title={navRowTitle(group.title, headerIndicator)}
-          className="flex-1 text-left text-sm py-2 pr-3 font-medium truncate"
+          className="flex-1 text-left text-sm py-2 pr-1 font-medium truncate"
         >
           {group.title}
         </button>
         {headerIndicator.kind !== 'none' && (
-          <span className="inline-flex items-center justify-center shrink-0 pr-2">
+          <span className="inline-flex items-center justify-center shrink-0 pr-1">
             <NavIndicator indicator={headerIndicator} badgeColors={badgeColors} look={look} />
           </span>
         )}
+        <button
+          type="button"
+          onClick={onToggleOpen}
+          aria-expanded={isOpen}
+          aria-controls={`group-${group.id}`}
+          aria-label={isOpen ? `Collapse ${group.title}` : `Expand ${group.title}`}
+          className="inline-flex h-9 w-8 items-center justify-center text-(--text-muted) hover:bg-black/5 dark:hover:bg-white/10 shrink-0"
+        >
+          {isOpen ? (
+            <IconChevronDown className="w-4 h-4" />
+          ) : (
+            <IconChevronRight className="w-4 h-4" />
+          )}
+        </button>
       </div>
       {isOpen && (
         <div id={`group-${group.id}`} className="flex flex-col gap-0.5">
@@ -685,7 +706,7 @@ function GroupBlock({
             return (
               <NavRow
                 key={p.id}
-                label={p.title}
+                label={p.overrides?.title ?? p.title}
                 icon={renderProjectIcon(asIconKey(p.metadata?.icon))}
                 isActive={projectIsActive}
                 onClick={() => onSelectProject(p.id)}

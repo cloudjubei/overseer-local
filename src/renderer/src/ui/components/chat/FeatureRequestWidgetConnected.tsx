@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import {
+  canStartFeatureRequestWork,
   featureRequestChatContext,
   featureRequestCountsLine,
   featureRequestSettledLine,
@@ -20,6 +21,7 @@ import {
   StartWorkDialog,
 } from 'thefactory-ui/web'
 import FeatureRequestFullModal from './FeatureRequestFullModal'
+import { renderLaunchModelChip } from '@ui/components/agents/RunModelChipConnected'
 
 /**
  * Desktop connector for the cross-project request widget rendered inline in A's chat from a
@@ -82,6 +84,7 @@ export default function FeatureRequestWidgetConnected({
     statusReason: live.statusReason,
     settled: featureRequestSettledLine(live, (id) => requestById(id)?.title),
     takenOver: featureRequestTakenOverLinks(live, (id) => requestById(id)?.title),
+    workNotStarted: canStartFeatureRequestWork(live),
   }
 
   const openRequest = (id: string) => {
@@ -105,6 +108,7 @@ export default function FeatureRequestWidgetConnected({
         busy={busy}
         defaultMode={launch.defaultMode}
         onAccept={requestStart.onAccept}
+        onStartWork={requestStart.onStartWork}
         onStartAgain={requestStart.onStartAgain}
         onReject={decide(reject)}
         onOpenFull={() => setShowFull(true)}
@@ -116,6 +120,7 @@ export default function FeatureRequestWidgetConnected({
         start={requestStart.start}
         defaultMode={launch.defaultMode}
         chatRunner={launch.chatRunner}
+        renderModelChip={renderLaunchModelChip}
       />
       <FeatureRequestFullModal
         requestId={showFull ? requestId : undefined}

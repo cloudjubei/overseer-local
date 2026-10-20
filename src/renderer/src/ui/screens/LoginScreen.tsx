@@ -1,9 +1,19 @@
 import { useState } from 'react'
+import type { FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Spinner } from 'thefactory-ui/web'
 import { useAuth } from '@core/contexts/AuthContext'
-import { health, extractErrorMessage } from 'thefactory-ui/headless/api'
+import { Alert, Button, Input, Spinner } from 'thefactory-ui/web'
+import { extractErrorMessage, health } from 'thefactory-ui/headless/api'
+
 const DEFAULT_URL = 'http://localhost:7001'
+
+/**
+ * First-run gate. Desktop's twin of [web's same-named screen](../../../../../../thefactory-overseer-web/src/ui/screens/LoginScreen.tsx) —
+ * captures the backend URL + bearer credential, lets the user verify the
+ * combination against `/health`, then persists both via `setBoth`
+ * (`authService`, Electron `safeStorage`). No OAuth / callback path — desktop
+ * is paste-and-store only.
+ */
 
 type TestState =
   | { kind: 'idle' }
@@ -11,25 +21,21 @@ type TestState =
   | { kind: 'ok'; version: string; uptime: number }
   | { kind: 'error'; message: string }
 
-/**
- * First-run gate. Desktop's replacement for [web's same-named screen](../../../../../../thefactory-overseer-web/src/ui/screens/LoginScreen.tsx) —
- * captures the backend URL + bearer credential, lets the user verify the
- * combination against `/health`, then persists via `authService` (Electron
- * `safeStorage`). No OAuth / callback path — desktop is paste-and-store only.
- */
 export default function LoginScreen() {
+  const { baseUrl, token, setBoth, unauthorized } = useAuth()
   const navigate = useNavigate()
-  const { setBoth } = useAuth()
-  const [baseUrl, setBaseUrl] = useState(DEFAULT_URL)
-  const [token, setToken] = useState('')
+  const [urlValue, setUrlValue] = useState(baseUrl ?? DEFAULT_URL)
+  const [tokenValue, setTokenValue] = useState(token ?? '')
   const [testState, setTestState] = useState<TestState>({ kind: 'idle' })
   const [saving, setSaving] = useState(false)
+  const trimmedUrl = urlValue.trim().replace(/\/+$/, '')
+  const trimmedToken = tokenValue.trim()
+  const canSave = trimmedUrl.length > 0
 
-  async function handleTest() {
+  async function onTest() {
+    if (!canSave) return
     setTestState({ kind: 'testing' })
     try {
-      const trimmedUrl = baseUrl.trim().replace(/\/+$/, '')
-      const trimmedToken = token.trim()
       const res = await health({
         throwOnError: true,
         baseURL: trimmedUrl,
@@ -48,64 +54,67 @@ export default function LoginScreen() {
     }
   }
 
-  async function handleSave() {
+  async function onSubmit(e: FormEvent) {
+    e.preventDefault()
+    if (!canSave || saving) return
     setSaving(true)
     try {
-      await setBoth({
-        baseUrl: baseUrl.trim().replace(/\/+$/, ''),
-        token: token.trim() || null,
-      })
+      await setBoth({ baseUrl: trimmedUrl, token: trimmedToken.length > 0 ? trimmedToken : null })
       navigate('/', { replace: true })
     } finally {
       setSaving(false)
     }
   }
 
-  const canSave = baseUrl.trim().length > 0
-
   return (
-    <div className="w-full h-full flex items-center justify-center bg-black/5 dark:bg-black/20 p-6">
-      <div className="w-full max-w-md flex flex-col gap-4 bg-white dark:bg-zinc-900 rounded-md p-6 shadow">
+    <div className="flex items-center justify-center h-full w-full p-6">
+      <form
+        onSubmit={(e) => void onSubmit(e)}
+        className="w-full max-w-md flex flex-col gap-4 p-6 rounded-lg border"
+        style={{ background: 'var(--surface-base)', borderColor: 'var(--border-subtle)' }}
+      >
         <div>
-          <h1 className="text-lg font-semibold">Connect to thefactory-backend</h1>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            Paste your backend URL and bearer credential. The credential is encrypted at rest via
-            your OS keychain.
+          <h1 className="text-xl font-semibold">Connect to thefactory-backend</h1>
+          <p className="text-sm opacity-70 mt-1">
+            Enter the backend URL and your bearer credential. The credential is encrypted at rest
+            via your OS keychain.
           </p>
         </div>
 
-        <label className="flex flex-col gap-1 text-sm">
-          <span className="font-medium">Backend URL</span>
-          <input
+        {unauthorized && (
+          <Alert>The saved token was rejected by the backend. Enter a new one.</Alert>
+        )}
+
+        <label className="flex flex-col gap-1">
+          <span className="text-sm font-medium">Backend URL</span>
+          <Input
             type="url"
-            value={baseUrl}
-            onChange={(e) => setBaseUrl(e.target.value)}
+            value={urlValue}
+            onChange={(e) => setUrlValue(e.target.value)}
             placeholder="http://localhost:7001"
-            className="w-full rounded border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-2 py-1.5"
-            spellCheck={false}
             autoComplete="off"
+            spellCheck={false}
           />
         </label>
 
-        <label className="flex flex-col gap-1 text-sm">
-          <span className="font-medium">Bearer credential</span>
-          <input
+        <label className="flex flex-col gap-1">
+          <span className="text-sm font-medium">Bearer credential</span>
+          <Input
             type="password"
-            value={token}
-            onChange={(e) => setToken(e.target.value)}
-            placeholder="paste credential"
-            className="w-full rounded border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-2 py-1.5"
-            spellCheck={false}
+            value={tokenValue}
+            onChange={(e) => setTokenValue(e.target.value)}
+            autoFocus
             autoComplete="off"
+            spellCheck={false}
           />
         </label>
 
         <div className="flex items-center gap-2">
-          <button
+          <Button
             type="button"
-            onClick={handleTest}
-            disabled={testState.kind === 'testing' || baseUrl.trim().length === 0}
-            className="rounded border border-gray-300 dark:border-zinc-700 px-3 py-1.5 text-sm disabled:opacity-50"
+            variant="secondary"
+            onClick={onTest}
+            disabled={!canSave || testState.kind === 'testing'}
           >
             {testState.kind === 'testing' ? (
               <span className="inline-flex items-center gap-2">
@@ -114,15 +123,10 @@ export default function LoginScreen() {
             ) : (
               'Test connection'
             )}
-          </button>
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={!canSave || saving}
-            className="rounded bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-3 py-1.5 text-sm"
-          >
+          </Button>
+          <Button type="submit" disabled={!canSave || saving}>
             {saving ? 'Saving…' : 'Save & continue'}
-          </button>
+          </Button>
         </div>
 
         {testState.kind === 'ok' && (
@@ -133,7 +137,7 @@ export default function LoginScreen() {
         {testState.kind === 'error' && (
           <p className="text-sm text-red-700 dark:text-red-400">{testState.message}</p>
         )}
-      </div>
+      </form>
     </div>
   )
 }

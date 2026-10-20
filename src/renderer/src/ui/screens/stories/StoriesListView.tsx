@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useActiveProject, useReferences } from 'thefactory-ui/headless'
 import { STATUS_ORDER as HEADLESS_STATUS_ORDER } from 'thefactory-ui/headless'
 import { useAppSettings } from 'thefactory-ui/headless'
-import { useStories } from 'thefactory-ui/headless'
+import { useStories, useStoryChangeError } from 'thefactory-ui/headless'
 import { useAgents } from 'thefactory-ui/headless'
 import { useProcessRuns } from 'thefactory-ui/headless'
 import { processStatusOverlay, useProcessStopClock } from 'thefactory-ui/headless'
@@ -14,8 +14,9 @@ import type {
   StoriesListStatusFilter,
   StoriesViewMode,
 } from '@core/types/settings'
-import type { GetStoryResponse } from 'thefactory-ui/headless/api'
+import type { ChatContext, GetStoryResponse } from 'thefactory-ui/headless/api'
 import {
+  Alert,
   OptionPicker,
   SegmentedControl,
   Spinner,
@@ -24,6 +25,7 @@ import {
   STATUS_LABELS,
   statusKey,
 } from 'thefactory-ui/web'
+import { formatChatTitle, STORY_SORT_OPTIONS } from 'thefactory-ui/headless'
 import { IconBoard, IconCalculator, IconList, IconPlus } from 'thefactory-ui/web/icons'
 import { DependencyBullet } from 'thefactory-ui/web'
 import { ExclamationChip, RichText } from 'thefactory-ui/web'
@@ -38,12 +40,12 @@ import type { StoryModalRoute } from './storyModals'
 
 type Status = GetStoryResponse['status']
 
-const STORIES_SORT_OPTIONS: { value: StoriesListSorting; label: string }[] = [
-  { value: 'index_asc', label: 'Ascending ↓' },
-  { value: 'index_desc', label: 'Descending ↑' },
-  { value: 'status_asc', label: 'Status ↓' },
-  { value: 'status_desc', label: 'Status ↑' },
-]
+const STORIES_SORT_OPTIONS: { value: StoriesListSorting; label: string }[] = STORY_SORT_OPTIONS.map(
+  (o) => ({
+    value: o.value as StoriesListSorting,
+    label: `${o.value.endsWith('_asc') ? '↑' : '↓'} ${o.label}`,
+  }),
+)
 
 /** Match a story against the search box. Searches by display index (e.g.
  *  `5`, since the uuid is never user-visible), title and description. */
@@ -106,6 +108,7 @@ export default function StoriesListView() {
     isLoaded,
     stories,
     storyDisplayIndex,
+    featureDisplayIndex,
     updateStory,
     moveStory,
     getBlockers,
@@ -189,12 +192,10 @@ export default function StoriesListView() {
 
   const isSearchFiltered = query !== ''
 
+  const statusChange = useStoryChangeError()
+
   const handleStatusChange = async (storyId: string, status: Status) => {
-    try {
-      await updateStory(storyId, { status })
-    } catch (e) {
-      console.error('Failed to update status', e)
-    }
+    await statusChange.attempt(() => updateStory(storyId, { status }))
   }
 
   const handleEditStory = (story: GetStoryResponse) => setModal({ kind: 'edit-story', story })
@@ -312,6 +313,16 @@ export default function StoriesListView() {
         : statusKey(statusFilter as Status)
   const currentSortLabel = STORIES_SORT_OPTIONS.find((o) => o.value === sortBy)?.label ?? ''
 
+  const projectChatContext: ChatContext | null = projectId ? { type: 'PROJECT', projectId } : null
+  const projectChatTitle = projectChatContext
+    ? formatChatTitle({
+        context: projectChatContext,
+        projectName: project?.title,
+        storyDisplayIndex,
+        featureDisplayIndex,
+      })
+    : 'Project Chat'
+
   return (
     <div className="flex flex-row flex-1 min-h-0 w-full overflow-hidden">
       <section
@@ -360,6 +371,12 @@ export default function StoriesListView() {
               : undefined
           }
         />
+
+        {statusChange.error ? (
+          <Alert variant="error" onDismiss={statusChange.dismiss} className="shrink-0 mx-3 mt-2">
+            {statusChange.error}
+          </Alert>
+        ) : null}
 
         <div className="stories-toolbar stories-searchbar shrink-0">
           <div className="left flex flex-wrap items-center gap-2 w-full">
@@ -650,10 +667,10 @@ export default function StoriesListView() {
         )}
       </section>
 
-      {projectId && (
+      {projectChatContext && (
         <ChatSidebarPanelConnected
-          context={{ type: 'PROJECT', projectId }}
-          chatContextTitle={project ? `Project Chat — ${project.title}` : 'Project Chat'}
+          context={projectChatContext}
+          chatContextTitle={projectChatTitle}
         />
       )}
 

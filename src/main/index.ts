@@ -1,16 +1,12 @@
-import { app, shell, BrowserWindow, nativeImage, dialog, session } from 'electron'
+import { app, shell, BrowserWindow, nativeImage, dialog, session, type NativeImage } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { registerAuthIpc } from './registerAuthIpc'
 import { registerSystemDictationIpc } from './registerSystemDictationIpc'
 import { isStrayFileNavigation } from './navigationGuard'
+import appIconPath from '../../resources/icon.png?asset'
 
-const getAppIcon = () => {
-  // In dev (electron-forge start + vite), __dirname points to .vite/build, so use process.cwd()
-  const iconPath = join(process.cwd(), 'resources/icon.png')
-  const image = nativeImage.createFromPath(iconPath)
-  return image
-}
+const getAppIcon = (): NativeImage => nativeImage.createFromPath(appIconPath)
 
 async function createWindow(): Promise<void> {
   const mainWindow = new BrowserWindow({
@@ -77,7 +73,7 @@ async function createWindow(): Promise<void> {
 }
 
 app.whenReady().then(async () => {
-  electronApp.setAppUserModelId('com.electron')
+  electronApp.setAppUserModelId('com.thefactory.overseer.desktop')
 
   registerAuthIpc()
   // Bridge for the chat composer's mic button: triggers macOS native
