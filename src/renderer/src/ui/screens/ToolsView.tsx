@@ -36,7 +36,7 @@ const STATUS_COLOR: Record<ToolExecuteResult['type'], string> = {
 
 const PANEL_COLLAPSED_LS_KEY = 'thefactory-overseer-web:tools.panelCollapsed'
 
-export default function ToolsView() {
+export default function ToolsView(): React.JSX.Element {
   const { isLoaded, loadError, tools, executeTool, previewTool } = useTools()
   const [selectedName, setSelectedName] = useState<string | null>(null)
   const [args, setArgs] = useState<Record<string, unknown>>({})
@@ -51,7 +51,7 @@ export default function ToolsView() {
   const selectedProps = getProperties(selected?.parameters)
   const selectedRequired = getRequired(selected?.parameters)
 
-  const togglePanelCollapsed = () => {
+  const togglePanelCollapsed = (): void => {
     setPanelCollapsed((prev) => {
       const next = !prev
       try {
@@ -63,18 +63,18 @@ export default function ToolsView() {
     })
   }
 
-  const onSelect = (name: string) => {
+  const onSelect = (name: string): void => {
     setSelectedName(name)
     setArgs({})
     setOpError(null)
     setResult(null)
   }
 
-  const onArgChange = (key: string, value: unknown, schema: unknown) => {
+  const onArgChange = (key: string, value: unknown, schema: unknown): void => {
     setArgs((prev) => ({ ...prev, [key]: coerceValue(schema, value) }))
   }
 
-  const onPreview = async () => {
+  const onPreview = async (): Promise<void> => {
     if (!selected) return
     setBusy('preview')
     setOpError(null)
@@ -90,7 +90,7 @@ export default function ToolsView() {
     }
   }
 
-  const onExecute = async () => {
+  const onExecute = async (): Promise<void> => {
     if (!selected) return
     setBusy('execute')
     setOpError(null)
@@ -209,7 +209,7 @@ function ToolListCard({
   tool: ToolDescriptor
   isActive: boolean
   onClick: () => void
-}) {
+}): React.JSX.Element {
   return (
     <button
       type="button"
@@ -252,7 +252,7 @@ function ToolPanel({
   onExecute: () => void
   busy: 'preview' | 'execute' | null
   result: ResultView
-}) {
+}): React.JSX.Element {
   const propEntries = Object.entries(properties)
 
   return (
@@ -299,7 +299,7 @@ function ToolPanel({
   )
 }
 
-function ResultPanel({ view }: { view: NonNullable<ResultView> }) {
+function ResultPanel({ view }: { view: NonNullable<ResultView> }): React.JSX.Element {
   let statusLabel: string
   let statusColor: string
   let durationMs: number | undefined
@@ -343,7 +343,7 @@ function ResultPanel({ view }: { view: NonNullable<ResultView> }) {
   )
 }
 
-function JsonBlock({ value }: { value: unknown }) {
+function JsonBlock({ value }: { value: unknown }): React.JSX.Element {
   const text = useMemo(() => formatJson(value), [value])
   return (
     <div className="group relative">
@@ -379,7 +379,7 @@ function ArgInput({
   required: boolean
   value: unknown
   onChange: (value: unknown) => void
-}) {
+}): React.JSX.Element {
   const s = (schema && typeof schema === 'object' ? schema : {}) as Record<string, unknown>
   const type = (s.type as string | undefined) ?? 'string'
   const description = (s.description as string | undefined) ?? name

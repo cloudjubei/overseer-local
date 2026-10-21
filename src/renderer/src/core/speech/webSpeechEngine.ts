@@ -107,7 +107,7 @@ export const webSpeechEngine: SpeechToTextEngine = {
       }
     }, STARTUP_WATCHDOG_MS)
 
-    const markStarted = () => {
+    const markStarted = (): void => {
       started = true
       clearTimeout(watchdog)
     }

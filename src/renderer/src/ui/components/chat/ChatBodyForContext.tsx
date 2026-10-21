@@ -82,7 +82,7 @@ export default function ChatBodyForContext({
   header,
   inputProps,
   onBackToPipeline,
-}: ChatBodyForContextProps) {
+}: ChatBodyForContextProps): React.JSX.Element {
   const {
     activeLLMConfig,
     getChatLiveState,

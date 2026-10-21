@@ -10,7 +10,11 @@ import { useNavigateToResource } from '../hooks/useNavigateToResource'
  * files. Resolved in the project in view, or across a group on its pages; a
  * chat's own renderer wins inside it.
  */
-export default function ProjectReferenceRendering({ children }: { children: ReactNode }) {
+export default function ProjectReferenceRendering({
+  children,
+}: {
+  children: ReactNode
+}): React.JSX.Element {
   const { projectId } = useActiveProject()
   const navigateToResource = useNavigateToResource()
   // On a group's page no project is in view: references resolve across the group.

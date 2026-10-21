@@ -5,7 +5,7 @@ import { useAppSettings } from 'thefactory-ui/headless'
 import type { Theme } from '@core/types/settings'
 import { useApplyTheme } from './useApplyTheme'
 
-function Probe({ onReady }: { onReady: (setTheme: (t: Theme) => void) => void }) {
+function Probe({ onReady }: { onReady: (setTheme: (t: Theme) => void) => void }): null {
   useApplyTheme()
   const { setTheme } = useAppSettings()
   onReady(setTheme)

@@ -74,7 +74,7 @@ const SIDEBAR_COLLAPSED_KEY = 'GitView.sidebarCollapsed'
 const TOP_HEIGHT_KEY = 'GitView.commitGraphHeightPx'
 const DEFAULT_TOP_HEIGHT = 280
 
-export default function GitView() {
+export default function GitView(): React.JSX.Element {
   const { projectId, project } = useActiveProject()
   const {
     isLoaded,
@@ -162,18 +162,18 @@ export default function GitView() {
 
   // Vertical split between commit graph (top) and changes/diff (bottom).
   const [topHeightPx, setTopHeightPx] = useLocalStorageNumber(TOP_HEIGHT_KEY, DEFAULT_TOP_HEIGHT)
-  const onTopResizeStart = (e: PointerEvent<HTMLDivElement>) => {
+  const onTopResizeStart = (e: PointerEvent<HTMLDivElement>): void => {
     e.preventDefault()
     const startY = e.clientY
     const startH = topHeightPx
     const container = (e.currentTarget as HTMLElement).parentElement
     const containerH = container?.clientHeight ?? window.innerHeight
-    const onMove = (ev: globalThis.PointerEvent) => {
+    const onMove = (ev: globalThis.PointerEvent): void => {
       const minTop = 80
       const maxTop = Math.max(minTop, Math.floor(containerH * 0.85))
       setTopHeightPx(Math.max(minTop, Math.min(maxTop, startH + ev.clientY - startY)))
     }
-    const onUp = () => {
+    const onUp = (): void => {
       window.removeEventListener('pointermove', onMove)
       window.removeEventListener('pointerup', onUp)
     }
@@ -300,7 +300,7 @@ export default function GitView() {
   const isDirty = dirtyFileCount > 0
   const isClean = !isDirty
 
-  const runOp = async (kind: BusyOp, op: () => Promise<unknown>) => {
+  const runOp = async (kind: BusyOp, op: () => Promise<unknown>): Promise<void> => {
     if (!kind) return
     setBusy(kind)
     setOpError(null)
@@ -313,7 +313,7 @@ export default function GitView() {
     }
   }
 
-  const onDoubleClickBranch = (name: string) => {
+  const onDoubleClickBranch = (name: string): void => {
     if (isDirty) {
       setOpError(DIRTY_TREE_MESSAGE)
       return
@@ -324,7 +324,7 @@ export default function GitView() {
   // Mirror desktop: when the user picks a commit in the graph that's the tip
   // of a branch, also select that branch in the sidebar. Falls back to the
   // remote tracking ref so picking an unpulled-remote commit still works.
-  const onSelectBranchBySha = (sha: string) => {
+  const onSelectBranchBySha = (sha: string): void => {
     // UNCOMMITTED always belongs to the local current branch — the working
     // tree lives on it. (`sectionMatches` lights up the remote row too
     // when local/remote SHAs are equivalent for that branch.)
@@ -366,7 +366,7 @@ export default function GitView() {
     setSelectedStashRef(undefined)
   }
 
-  const onSwitchToSelected = () => {
+  const onSwitchToSelected = (): void => {
     if (!selectedBranch || selectedBranch.current) return
     if (isDirty) {
       setOpError(DIRTY_TREE_MESSAGE)
@@ -375,20 +375,20 @@ export default function GitView() {
     void runOp('refresh', () => checkout(selectedBranch.name))
   }
 
-  const openPullRequest = (branchName: string) => {
+  const openPullRequest = (branchName: string): void => {
     if (!project?.repo_url) return
     const url = getPRUrl(project.repo_url, branchName, 'main')
     if (url) window.open(url, '_blank', 'noopener,noreferrer')
     else setOpError(`Could not build PR URL for ${project.repo_url}`)
   }
-  const onCreatePR = () => {
+  const onCreatePR = (): void => {
     if (selectedBranch) openPullRequest(selectedBranch.name)
   }
-  const canOpenPullRequestFor = (branchName: string) =>
+  const canOpenPullRequestFor = (branchName: string): boolean =>
     branchName !== 'main' && branchName !== 'master' && !!project?.repo_url
 
   const merging = status?.merging
-  const openMergeSheet = (source?: string) => {
+  const openMergeSheet = (source?: string): void => {
     setMergeLine(null)
     setMergeSheet({ source })
   }
@@ -396,14 +396,14 @@ export default function GitView() {
     name: string,
     section: GitBranchSection,
     at: { x: number; y: number },
-  ) => {
+  ): void => {
     const branch = branches.find(
       (b) => b.name === name && (section === 'local' ? b.isLocal : b.isRemote),
     )
     if (branch) setBranchMenu({ branch, section, at })
   }
   // A label in the graph names a local branch, or a remote one as `origin/x`.
-  const onContextMenuRef = (ref: GitLogRefLike, at: { x: number; y: number }) => {
+  const onContextMenuRef = (ref: GitLogRefLike, at: { x: number; y: number }): void => {
     if (ref.type === 'branch') return openBranchMenu(ref.name, 'local', at)
     const remote = branches.find((b) => b.isRemote && mergeSourceRef(b, 'remote') === ref.name)
     if (remote) setBranchMenu({ branch: remote, section: 'remote', at })
@@ -412,7 +412,7 @@ export default function GitView() {
     action: GitBranchMenuAction,
     branch: GitUnifiedBranch,
     section: GitBranchSection,
-  ) => {
+  ): void => {
     if (action === 'merge') openMergeSheet(mergeSourceRef(branch, section))
     else if (action === 'checkout') void runOp('refresh', () => checkout(branch.name))
     else if (action === 'pull-request') openPullRequest(branch.name)
@@ -437,15 +437,15 @@ export default function GitView() {
         onSelect: () => onBranchMenuAction(item.action, branchMenu.branch, branchMenu.section),
       }))
     : []
-  const renderCommitRef = (sha: string) =>
+  const renderCommitRef = (sha: string): React.JSX.Element | null =>
     projectId ? <CommitChip projectId={projectId} sha={sha} /> : null
 
   // Desktop's stash flow does "apply, then optionally drop". Web keeps the
   // explicit Apply/Drop buttons separate so the user picks intentionally.
-  const onStashApply = () => void onStashOp('apply')
-  const onStashDrop = () => void onStashOp('drop')
+  const onStashApply = (): void => void onStashOp('apply')
+  const onStashDrop = (): void => void onStashOp('drop')
 
-  async function onStashOp(op: 'apply' | 'pop' | 'drop') {
+  async function onStashOp(op: 'apply' | 'pop' | 'drop'): Promise<void> {
     if (!selectedStashRef) return
     setOpError(null)
     try {

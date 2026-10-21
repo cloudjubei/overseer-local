@@ -7,7 +7,7 @@ import { GroupHome, type GroupHomeProjectCard } from 'thefactory-ui/web'
  * Landing page for a project group. Wraps the shared `GroupHome` primitive
  * with web-specific data resolution + react-router navigation.
  */
-export default function GroupHomeView() {
+export default function GroupHomeView(): React.JSX.Element {
   const { groups, activeGroupId } = useProjectsGroups()
   const { projects } = useProjects()
   const navigate = useNavigate()

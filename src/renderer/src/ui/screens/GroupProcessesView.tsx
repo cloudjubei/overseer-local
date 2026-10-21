@@ -17,7 +17,7 @@ import { renderRunModelChip } from '@ui/components/agents/RunModelChipConnected'
  * across several of its projects. Thin by design — the screen lives in
  * `thefactory-ui`; this supplies the group and the host navigations. A project's own pipeline opens inside it, its leaf chats too.
  */
-export default function GroupProcessesView() {
+export default function GroupProcessesView(): React.JSX.Element | null {
   const { groupId, groupRunId } = useParams<{ groupId: string; groupRunId: string }>()
   const navigate = useNavigate()
 

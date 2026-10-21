@@ -82,7 +82,7 @@ export default function Sidebar({
   activeGroupId,
   activeGroupTab,
   assistantActive = false,
-}: Props) {
+}: Props): React.JSX.Element {
   const navigate = useNavigate()
   const location = useLocation()
   const { settings, setUserPreferences } = useAppSettings()
@@ -120,11 +120,11 @@ export default function Sidebar({
   const [manageOpen, setManageOpen] = useState(false)
   const [openGroupIds, setOpenGroupIds] = useState<Set<string>>(() => readOpenGroupIds())
 
-  const persistOpenGroupIds = (next: Set<string>) => {
+  const persistOpenGroupIds = (next: Set<string>): void => {
     setOpenGroupIds(next)
     writeOpenGroupIds(next)
   }
-  const toggleGroupOpen = (id: string) => {
+  const toggleGroupOpen = (id: string): void => {
     persistOpenGroupIds(
       ((current: Set<string>) => {
         const next = new Set(current)
@@ -134,7 +134,7 @@ export default function Sidebar({
       })(openGroupIds),
     )
   }
-  const setGroupOpen = (id: string, open: boolean) => {
+  const setGroupOpen = (id: string, open: boolean): void => {
     if (open === openGroupIds.has(id)) return
     persistOpenGroupIds(
       ((current: Set<string>) => {
@@ -171,7 +171,7 @@ export default function Sidebar({
     ? (activeGroupTab ?? 'home')
     : projectTabToGroupTab(activeTab)
 
-  const selectProject = (id: string) => {
+  const selectProject = (id: string): void => {
     setActiveProjectId(id)
     // App and Design only exist for some projects — carrying one to a project
     // without it would land on an empty view, so fall back to home.
@@ -186,23 +186,23 @@ export default function Sidebar({
     const search = tab === 'settings' ? location.search : ''
     navigate(`/projects/${id}/${tab}${search}`)
   }
-  const onSelectProject = (id: string) =>
+  const onSelectProject = (id: string): void =>
     id === activeProjectId ? selectProject(id) : requestLeave(() => selectProject(id))
-  const onSelectGroup = (id: string) => {
+  const onSelectGroup = (id: string): void => {
     navigate(`/groups/${id}/${targetGroupTab}`)
   }
-  const onSelectAssistant = () => {
+  const onSelectAssistant = (): void => {
     navigate(assistantPath())
   }
-  const onSelectTab = (next: ShellTabKey) => {
+  const onSelectTab = (next: ShellTabKey): void => {
     if (!projectId) return
     navigate(`/projects/${projectId}/${next}`)
   }
-  const onSelectGroupTab = (next: GroupTabKey) => {
+  const onSelectGroupTab = (next: GroupTabKey): void => {
     if (!activeGroupId) return
     navigate(`/groups/${activeGroupId}/${next}`)
   }
-  const toggleCollapsed = () => {
+  const toggleCollapsed = (): void => {
     setUserPreferences({ sidebarCollapsed: !userCollapsed })
   }
 
@@ -210,7 +210,7 @@ export default function Sidebar({
    * Roving focus across all rows in the sidebar, regardless of section.
    * `[data-sidebar-row]` is set on each focusable row.
    */
-  const onAsideKeyDown = (e: KeyboardEvent<HTMLElement>) => {
+  const onAsideKeyDown = (e: KeyboardEvent<HTMLElement>): void => {
     if (!asideRef.current) return
     if (!['ArrowUp', 'ArrowDown', 'Home', 'End'].includes(e.key)) return
     const rows = Array.from(asideRef.current.querySelectorAll<HTMLElement>(FOCUSABLE_ROW_SELECTOR))
@@ -235,7 +235,7 @@ export default function Sidebar({
     setDraggingProject({ id, groupId })
   }
 
-  const onProjectDragOver = (e: DragEvent<HTMLElement>) => {
+  const onProjectDragOver = (e: DragEvent<HTMLElement>): void => {
     if (!e.dataTransfer.types.includes(DND_PROJECT_MIME) && draggingProject === null) return
     e.preventDefault()
     e.dataTransfer.dropEffect = 'move'
@@ -548,7 +548,7 @@ function readOpenGroupIds(): Set<string> {
   return new Set()
 }
 
-function writeOpenGroupIds(ids: Set<string>) {
+function writeOpenGroupIds(ids: Set<string>): void {
   if (typeof window === 'undefined') return
   try {
     window.localStorage.setItem(OPEN_GROUPS_LS_KEY, JSON.stringify(Array.from(ids)))
@@ -570,7 +570,7 @@ function Section({
   headerActions?: ReactNode
   /** Draw a horizontal divider above this section. Stays visible in collapsed mode. */
   divider?: boolean
-}) {
+}): React.JSX.Element {
   return (
     <div
       className={`flex flex-col mb-3 ${divider ? 'mt-2 pt-2 border-t' : 'mt-2'}`}
@@ -637,7 +637,7 @@ function GroupBlock({
    *  state when the folder is open (members show their own rows) and from the
    *  rollup (group + members) when collapsed. */
   headerIndicator: NavRowIndicator
-}) {
+}): React.JSX.Element {
   // Auto-expand when the active project lives in this group. We don't ever
   // auto-collapse — once the user toggles a group closed, navigating away
   // and back should leave it closed.
@@ -748,7 +748,7 @@ function GroupRow({
   indicator: NavRowIndicator
   badgeColors: BadgeColors
   look: InkBadgeLook
-}) {
+}): React.JSX.Element {
   const icon =
     group.type === 'SCOPE' ? (
       <IconCollection className="w-4.5 h-4.5" />
@@ -806,7 +806,7 @@ function NavRow({
   onDrop?: (e: DragEvent<HTMLElement>) => void
   /** Project's data-location, when this row represents a project. */
   dataLocation?: 'central' | 'inProject'
-}) {
+}): React.JSX.Element {
   return (
     <button
       type="button"

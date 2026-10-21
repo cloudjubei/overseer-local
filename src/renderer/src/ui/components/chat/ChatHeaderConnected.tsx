@@ -61,7 +61,7 @@ export default function ChatHeaderConnected({
   onOpenChat,
   onDeleted,
   dockedLabel,
-}: ChatHeaderConnectedProps) {
+}: ChatHeaderConnectedProps): React.JSX.Element {
   const navigate = useNavigate()
   const { getChat, clearChat, consolidateChat, deleteChat, hideChatFromList, showChatInList } =
     useChats()
@@ -91,7 +91,7 @@ export default function ChatHeaderConnected({
     assistant: isAssistant,
   })
 
-  const closeChat = () => {
+  const closeChat = (): void => {
     if (!window.confirm(closeAction.confirm)) return
     if (closeAction.kind !== 'consolidate') {
       void clearChat(context)
@@ -102,7 +102,7 @@ export default function ChatHeaderConnected({
     })
   }
 
-  const removeChat = async () => {
+  const removeChat = async (): Promise<void> => {
     const noun = isAssistant ? 'conversation' : 'chat'
     if (!window.confirm(`Delete this ${noun}? This action cannot be undone.`)) return
     try {
@@ -115,7 +115,7 @@ export default function ChatHeaderConnected({
     onDeleted?.()
   }
 
-  const onSelect = (key: ChatSettingsMenuKey) => {
+  const onSelect = (key: ChatSettingsMenuKey): void => {
     switch (key) {
       case 'notify':
         setNotifyOpen(true)

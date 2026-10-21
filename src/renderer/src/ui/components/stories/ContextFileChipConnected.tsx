@@ -19,7 +19,7 @@ export default function ContextFileChipConnected({
   path,
   onRemove,
   warn,
-}: ContextFileChipConnectedProps) {
+}: ContextFileChipConnectedProps): React.JSX.Element {
   const { files } = useFiles()
   const file = useMemo<UikitFileMeta>(() => {
     const exact = files.find((f) => f.relativePath === path || f.absolutePath === path)

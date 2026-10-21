@@ -20,7 +20,7 @@ import { LoadingScreen } from 'thefactory-ui/web'
 
 const FILES_PANE_COLLAPSED_KEY = 'files-pane-collapsed'
 
-export default function FilesView() {
+export default function FilesView(): React.JSX.Element {
   const {
     isLoaded,
     loadError,
@@ -89,7 +89,7 @@ export default function FilesView() {
     }
   }, [isLoaded, projectId, urlFilePath, paths, navigate])
 
-  const onSelect = (path: string | null) => {
+  const onSelect = (path: string | null): void => {
     selectFile(path)
     if (!projectId) return
     if (path === null) {
@@ -113,9 +113,9 @@ export default function FilesView() {
   if (!isLoaded) return <LoadingScreen label="Loading files…" />
   if (loadError) return <LoadingScreen label="Could not load files" error={loadError.message} />
 
-  const onUploadClick = () => fileInputRef.current?.click()
+  const onUploadClick = (): void => fileInputRef.current?.click()
 
-  const onFilePicked = async (e: ChangeEvent<HTMLInputElement>) => {
+  const onFilePicked = async (e: ChangeEvent<HTMLInputElement>): Promise<void> => {
     const file = e.target.files?.[0]
     e.target.value = ''
     if (!file) return

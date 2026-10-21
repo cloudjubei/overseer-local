@@ -10,7 +10,7 @@ import { ProjectNotesSettings } from 'thefactory-ui/web'
  * working material alongside Files, not a preference buried in Settings.
  * A `?note=` link opens it on that note, selected and scrolled to.
  */
-export default function NotesView() {
+export default function NotesView(): React.JSX.Element {
   const { projectId } = useActiveProject()
   const [params] = useSearchParams()
   const selectedNoteId = params.get(NOTE_LINK_PARAM) ?? undefined

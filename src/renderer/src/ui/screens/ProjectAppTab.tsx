@@ -42,19 +42,22 @@ import { renderLaunchModelChip } from '@ui/components/agents/RunModelChipConnect
  * finding to the standard story flow. All other `overseer:*` requests pass through to
  * `useProjectDataBridge`. Desktop is big-screen only — no bottom sheet.
  */
-export default function ProjectAppTab() {
+export default function ProjectAppTab(): React.JSX.Element {
   const { projectId, project } = useActiveProject()
   const { url, key, error } = useProjectAppView(projectId)
   // The embedded app declares (via `overseer:app.capabilities`) whether its background activities are
   // API-only (a `requiresApi` activity, e.g. knowledge-analyze). When so, the activity chip disables CLI
   // and the bridge never sends a CLI model for this app.
   const [activitiesApiOnly, setActivitiesApiOnly] = useState(false)
+  // An app with no background activities declares `activities: false`; it then shows no activity chip.
+  const [activitiesUsed, setActivitiesUsed] = useState(true)
   // Activity types the app allows on a CLI agent even when it's otherwise API-only (e.g. the trainer's
   // deep-research `research-training-papers`). When any exist, the chip offers CLI and the bridge sends
   // the CLI model for just those launches.
   const [cliActivities, setCliActivities] = useState<string[] | undefined>(undefined)
   const dataBridge = useProjectDataBridge(projectId, { activitiesApiOnly, cliActivities })
   const mountKey = `${projectId ?? ''}|${url ?? ''}|${key}`
+  useEffect(() => setActivitiesUsed(true), [mountKey])
   const { handleBridgeMessage: handleAppDirty } = useAppDirtyGuard(mountKey)
   // `overseer:work.start` waits for the person's Start / Cancel over the App view — never on a timer.
   const workLaunch = useProjectWorkLaunch(projectId)
@@ -116,14 +119,17 @@ export default function ProjectAppTab() {
       }
       if (name === 'app.capabilities') {
         const {
+          activities,
           activitiesApiOnly: apiOnly,
           cliActivities: cliActs,
           data,
         } = (req.payload ?? {}) as {
+          activities?: boolean
           activitiesApiOnly?: boolean
           cliActivities?: string[]
           data?: unknown
         }
+        setActivitiesUsed(activities !== false)
         setActivitiesApiOnly(!!apiOnly)
         setCliActivities(Array.isArray(cliActs) ? cliActs : undefined)
         // Persist the app's declared data-capability manifest so the backend's generic project-data
@@ -235,11 +241,13 @@ export default function ProjectAppTab() {
           pushes={pushes}
           onNavChanged={onNavChanged}
           topRightOverlay={
-            <ModelChipConnected
-              editable
-              mode="activity"
-              apiOnly={activitiesApiOnly && !cliActivities?.length}
-            />
+            activitiesUsed ? (
+              <ModelChipConnected
+                editable
+                mode="activity"
+                apiOnly={activitiesApiOnly && !cliActivities?.length}
+              />
+            ) : undefined
           }
           fallback={
             <div className="flex h-full items-center justify-center p-8 text-center text-(--text-secondary)">

@@ -30,11 +30,11 @@ export default function ChatPanelBody({
   onCollapse,
   inputProps,
   dockedLabel,
-}: ChatPanelBodyProps) {
+}: ChatPanelBodyProps): React.JSX.Element {
   const navigate = useNavigate()
   const { projectId: urlProjectId } = useParams<{ projectId: string }>()
 
-  const openChat = (target: ChatContext) => {
+  const openChat = (target: ChatContext): void => {
     const projectId = target.projectId ?? urlProjectId
     if (!projectId) return
     navigate(`/projects/${projectId}/chat/${encodeURIComponent(getChatContextKey(target))}`)

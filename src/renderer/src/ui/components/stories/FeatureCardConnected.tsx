@@ -41,7 +41,7 @@ export default function FeatureCardConnected({
   showActions = false,
   isNew = false,
   onPillClick,
-}: FeatureCardConnectedProps) {
+}: FeatureCardConnectedProps): React.JSX.Element {
   const stopNow = useProcessStopClock()
   const { runs } = useProcessRuns(projectId)
   const processRun = runs.find((r) => r.storyId === story.id)

@@ -20,7 +20,7 @@ async function fetchFileBlobUrl(
   return URL.createObjectURL(blob)
 }
 
-export default function FilePaneConnected() {
+export default function FilePaneConnected(): React.JSX.Element {
   const {
     selectedPath,
     files,

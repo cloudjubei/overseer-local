@@ -102,7 +102,6 @@ export function useBadgeCounts(): UseBadgeCountsApi {
   const seen = useChatsSeen()
   const pendingAsksByChat = usePendingAsksByChat()
 
-
   // Annotate every chat with its derived unread + thinking state. Used twice:
   // once for the global `counts` (across all chats), and once filtered by
   // project for `getProjectBadgeState`.

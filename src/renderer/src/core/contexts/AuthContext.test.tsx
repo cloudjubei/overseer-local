@@ -24,7 +24,9 @@ vi.mock('../../services/authService', () => {
   }
 })
 
-const wrapper = ({ children }: { children: ReactNode }) => <AuthProvider>{children}</AuthProvider>
+const wrapper = ({ children }: { children: ReactNode }): React.JSX.Element => (
+  <AuthProvider>{children}</AuthProvider>
+)
 
 describe('AuthContext', () => {
   beforeEach(async () => {

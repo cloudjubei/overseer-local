@@ -92,7 +92,7 @@ const safeStorageTokenAdapter: TokenStorage = {
 
 const DesktopAuthContext = createContext<AuthContextValue | null>(null)
 
-export function AuthProvider({ children }: { children: ReactNode }) {
+export function AuthProvider({ children }: { children: ReactNode }): React.JSX.Element {
   return (
     <HeadlessAuthProvider storage={safeStorageTokenAdapter}>
       <DesktopAuthBridge>{children}</DesktopAuthBridge>
@@ -100,7 +100,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   )
 }
 
-function DesktopAuthBridge({ children }: { children: ReactNode }) {
+function DesktopAuthBridge({ children }: { children: ReactNode }): React.JSX.Element {
   const { token, unauthorized, markUnauthorized, clearUnauthorized } = useHeadlessAuth()
   const [baseUrl, setBaseUrlState] = useState<string | null>(cachedBaseUrl)
   const [ready, setReady] = useState(false)

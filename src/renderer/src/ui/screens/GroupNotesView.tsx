@@ -8,7 +8,7 @@ import { GroupNotesSettings } from 'thefactory-ui/web'
  * working in one of its projects reach for (`listGroupNotes` → `readGroupNote`).
  * A `?note=` link opens it on that note, selected and scrolled to.
  */
-export default function GroupNotesView() {
+export default function GroupNotesView(): React.JSX.Element {
   const { groupId } = useParams<{ groupId: string }>()
   const [params] = useSearchParams()
   const selectedNoteId = params.get(NOTE_LINK_PARAM) ?? undefined

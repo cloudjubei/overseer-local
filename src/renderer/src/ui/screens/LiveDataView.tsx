@@ -61,7 +61,7 @@ const RECORDS_RENDER_CAP = 200
  * records. Both views are searchable and report the full count so the catalogue
  * size is never hidden behind a fixed-size slice.
  */
-function RecordsPanel({ records }: { records: DataRecord[] }) {
+function RecordsPanel({ records }: { records: DataRecord[] }): React.JSX.Element {
   const [query, setQuery] = useState('')
   const [mode, setMode] = useState<'prices' | 'raw'>('prices')
 
@@ -175,7 +175,7 @@ function RecordsPanel({ records }: { records: DataRecord[] }) {
 
 type FormRoute = { mode: 'create' } | { mode: 'edit'; source: DataSource } | null
 
-export default function LiveDataView() {
+export default function LiveDataView(): React.JSX.Element {
   const { projectId, project } = useActiveProject()
   const {
     isLoaded,
@@ -297,13 +297,13 @@ function SourceCard({
   onEdit: () => void
   onDelete: () => void
   readRecords: () => Promise<DataRecord[]>
-}) {
+}): React.JSX.Element {
   const [expanded, setExpanded] = useState(false)
   const [records, setRecords] = useState<DataRecord[] | null>(null)
   const [error, setError] = useState<string | null>(null)
   const fresh = isSourceFresh(source)
 
-  const toggleRecords = async () => {
+  const toggleRecords = async (): Promise<void> => {
     const next = !expanded
     setExpanded(next)
     if (next && records === null) {
@@ -315,7 +315,7 @@ function SourceCard({
     }
   }
 
-  const onRefreshClick = async () => {
+  const onRefreshClick = async (): Promise<void> => {
     setError(null)
     try {
       await onRefresh()
@@ -419,7 +419,7 @@ function SourceFormModal({
   onClose: () => void
   onCreate: (input: ReturnType<typeof formToSourceInput>) => Promise<unknown>
   onUpdate: (id: string, patch: DataSourcePatch) => Promise<unknown>
-}) {
+}): React.JSX.Element {
   const [form, setForm] = useState<LiveDataSourceForm>(
     route.mode === 'edit' ? sourceToForm(route.source) : emptySourceForm(),
   )
@@ -431,10 +431,10 @@ function SourceFormModal({
   const lockWiring = route.mode === 'edit' && route.source.system === true
   // A source the project declares accepts only its schedule; its wiring is the project's package.json.
   const taskSource = form.adapterKind === 'task'
-  const set = <K extends keyof LiveDataSourceForm>(key: K, value: LiveDataSourceForm[K]) =>
+  const set = <K extends keyof LiveDataSourceForm>(key: K, value: LiveDataSourceForm[K]): void =>
     setForm((f) => ({ ...f, [key]: value }))
 
-  const submit = async () => {
+  const submit = async (): Promise<void> => {
     const validation = validateSourceForm(form)
     if (validation) {
       setError(validation)

@@ -9,4 +9,4 @@ export type AuthService = {
   clear: () => Promise<AuthState>
 }
 
-export const authService: AuthService = { ...(window as any).authService }
+export const authService: AuthService = { ...window.authService }

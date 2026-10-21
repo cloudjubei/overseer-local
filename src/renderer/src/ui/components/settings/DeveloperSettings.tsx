@@ -15,7 +15,7 @@ const GIT_SUBTAB = 'git'
  * pipeline and run surfaces. Capture is always on server-side; this only
  * controls whether this viewer sees the Debug surfaces.
  */
-function DebugModePanel() {
+function DebugModePanel(): React.JSX.Element {
   const { settings, setUserPreferences } = useAppSettings()
   const on = settings.userPreferences.showRunDiagnostics === true
   return (
@@ -36,7 +36,7 @@ function DebugModePanel() {
 }
 
 /** Adds the Developer section — system prompt, costs, dynamic context, debug — to every chat's settings menu. */
-function DeveloperToolsPanel() {
+function DeveloperToolsPanel(): React.JSX.Element {
   const { settings, setUserPreferences } = useAppSettings()
   const on = settings.userPreferences.showDeveloperTools === true
   return (
@@ -56,17 +56,17 @@ function DeveloperToolsPanel() {
   )
 }
 
-export default function DeveloperSettings() {
+export default function DeveloperSettings(): React.JSX.Element {
   const [searchParams, setSearchParams] = useSearchParams()
   const subtab = searchParams.get('subtab')
 
-  const openGit = () => {
+  const openGit = (): void => {
     const next = new URLSearchParams(searchParams)
     next.set('subtab', GIT_SUBTAB)
     setSearchParams(next)
   }
 
-  const backToList = () => {
+  const backToList = (): void => {
     const next = new URLSearchParams(searchParams)
     next.delete('subtab')
     setSearchParams(next)

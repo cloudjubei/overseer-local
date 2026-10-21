@@ -59,7 +59,7 @@ const FEATURE_SORT_OPTIONS: { value: FeatureSort; label: string }[] =
 /** Match a feature against the search box. Searches by display index
  *  (e.g. `2`, the user-visible position; the uuid is never shown), title
  *  and description. */
-function featureMatchesQuery(f: Feature, displayIndex: number, q: string) {
+function featureMatchesQuery(f: Feature, displayIndex: number, q: string): boolean {
   if (!q) return true
   const s = q.trim().toLowerCase()
   if (!s) return true
@@ -81,7 +81,7 @@ function getFeatureIndex(story: GetStoryResponse | null, featureId: string): num
  * `StoryDetailsView`. Renders the same `.feature-row` / `.col-*` recipe
  * from `thefactory-ui` so both apps render identically.
  */
-export default function StoryDetailsView({ storyId }: { storyId: string }) {
+export default function StoryDetailsView({ storyId }: { storyId: string }): React.JSX.Element {
   const navigate = useNavigate()
   const { projectId: urlProjectId } = useParams<{ projectId: string }>()
   const { projectId } = useActiveProject()
@@ -123,7 +123,7 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
     if (sortBy === 'index_asc') return arr
     if (sortBy === 'index_desc') return arr.slice().reverse()
     if (sortBy === 'status_asc') {
-      const sVal = (f: Feature) => STATUS_ORDER.indexOf(f.status as Status)
+      const sVal = (f: Feature): number => STATUS_ORDER.indexOf(f.status as Status)
       return arr.sort(
         (a, b) =>
           sVal(a) - sVal(b) ||
@@ -131,7 +131,7 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
       )
     }
     if (sortBy === 'status_desc') {
-      const sVal = (f: Feature) => STATUS_ORDER.indexOf(f.status as Status)
+      const sVal = (f: Feature): number => STATUS_ORDER.indexOf(f.status as Status)
       return arr.sort(
         (a, b) =>
           sVal(b) - sVal(a) ||
@@ -167,7 +167,7 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
       if (story) await reorderFeature(story.id, featureId, toIndex)
     },
   })
-  const featureRowDragClass = (featureId: string) =>
+  const featureRowDragClass = (featureId: string): string =>
     [
       featureDrag.rowProps(featureId).draggable ? 'draggable' : '',
       featureDrag.draggingId === featureId ? 'is-dragging' : '',
@@ -175,7 +175,7 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
     ]
       .filter(Boolean)
       .join(' ')
-  const dropIndicator = (featureId: string, side: 'before' | 'after') =>
+  const dropIndicator = (featureId: string, side: 'before' | 'after'): React.JSX.Element | null =>
     featureDrag.target?.id === featureId && featureDrag.target.side === side ? (
       <div className="drop-indicator" aria-hidden="true" />
     ) : null
@@ -196,15 +196,15 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
   )
   const storyProcessOverlay = processStatusOverlay(storyProcessRun, stopNow)
 
-  const handleEditStory = () => {
+  const handleEditStory = (): void => {
     if (!story) return
     setModal({ kind: 'edit-story', story })
   }
-  const handleAddFeature = () => {
+  const handleAddFeature = (): void => {
     if (!story) return
     setModal({ kind: 'create-feature', storyId: story.id })
   }
-  const handleEditFeature = (feature: Feature) => {
+  const handleEditFeature = (feature: Feature): void => {
     if (!story) return
     setModal({ kind: 'edit-feature', storyId: story.id, feature })
   }
@@ -232,14 +232,14 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
     } else if (step.type === 'missing') clearFeatureLink()
   }, [story, linkedFeatureId, clearFeatureLink])
 
-  const closeModal = () => {
+  const closeModal = (): void => {
     setModal(null)
     if (linkedFeatureId) clearFeatureLink()
   }
 
   const statusChange = useStoryChangeError()
 
-  const handleStoryStatusChange = async (status: Status) => {
+  const handleStoryStatusChange = async (status: Status): Promise<void> => {
     if (!story) return
     await statusChange.attempt(() => updateStory(story.id, { status }))
   }
@@ -248,11 +248,11 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
     storyIdLocal: string,
     featureId: string,
     status: Status,
-  ) => {
+  ): Promise<void> => {
     await statusChange.attempt(() => updateFeature(storyIdLocal, featureId, { status }))
   }
 
-  const onRowKeyDown = (e: React.KeyboardEvent<HTMLDivElement>, feature: Feature) => {
+  const onRowKeyDown = (e: React.KeyboardEvent<HTMLDivElement>, feature: Feature): void => {
     if (e.key === 'Enter') {
       e.preventDefault()
       handleEditFeature(feature)
@@ -273,7 +273,7 @@ export default function StoryDetailsView({ storyId }: { storyId: string }) {
   }
 
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
+    const onKey = (e: KeyboardEvent): void => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'n') {
         e.preventDefault()
         if (story) setModal({ kind: 'create-feature', storyId: story.id })

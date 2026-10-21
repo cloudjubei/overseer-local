@@ -31,7 +31,7 @@ function SectionHeader({
   open: boolean
   onToggle: () => void
   onAdd?: () => void
-}) {
+}): React.JSX.Element {
   return (
     <div className="px-4 py-3 bg-(--surface-base) border-y border-(--border-subtle) flex items-center justify-between shrink-0">
       <h2 className="text-xl font-semibold">{title}</h2>
@@ -61,7 +61,7 @@ function SectionHeader({
   )
 }
 
-export default function LLMSettings() {
+export default function LLMSettings(): React.JSX.Element {
   const {
     isLoaded,
     loadError,
@@ -193,7 +193,7 @@ export default function LLMSettings() {
 
             <div className="text-[12px] text-(--text-secondary) mt-2">
               Tip: Local providers must expose an OpenAI-compatible API. Use the Local preset to
-              fill the default URL (http://localhost:1234/v1) and click "Load Available Models" to
+              fill the default URL (http://localhost:1234/v1) and click “Load Available Models” to
               discover models.
             </div>
           </div>

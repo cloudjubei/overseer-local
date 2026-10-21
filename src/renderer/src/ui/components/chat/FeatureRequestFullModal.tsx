@@ -21,7 +21,7 @@ export default function FeatureRequestFullModal({
 }: {
   requestId: string | undefined
   onClose: () => void
-}) {
+}): React.JSX.Element {
   const navigateToResource = useNavigateToResource()
   const incoming = useIncomingFeatureRequest(requestId)
   const { requestById } = useCrossProjectRequests()
@@ -29,16 +29,21 @@ export default function FeatureRequestFullModal({
   const storyId = request?.handling?.storyId
   const navigate = useNavigate()
   const launch = useProjectWorkLaunch(request?.targetProjectId)
-  const requestStart = useFeatureRequestStart(request, incoming, (outcome) => {
-    const projectId = request?.targetProjectId
-    if (!projectId) return
-    onClose()
-    if (outcome.mode === 'process' && outcome.processRunId) {
-      navigate(`/projects/${projectId}/process-runs/${outcome.processRunId}`)
-    } else if (outcome.chatContextId) {
-      navigate(`/projects/${projectId}/chat/${encodeURIComponent(outcome.chatContextId)}`)
-    }
-  }, launch.chatAgent)
+  const requestStart = useFeatureRequestStart(
+    request,
+    incoming,
+    (outcome) => {
+      const projectId = request?.targetProjectId
+      if (!projectId) return
+      onClose()
+      if (outcome.mode === 'process' && outcome.processRunId) {
+        navigate(`/projects/${projectId}/process-runs/${outcome.processRunId}`)
+      } else if (outcome.chatContextId) {
+        navigate(`/projects/${projectId}/chat/${encodeURIComponent(outcome.chatContextId)}`)
+      }
+    },
+    launch.chatAgent,
+  )
   return (
     <>
       <StartWorkDialog

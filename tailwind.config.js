@@ -221,14 +221,14 @@ module.exports = {
       borderColor: {
         DEFAULT: 'var(--border-default)',
       },
-      textColor: (theme) => ({
+      textColor: () => ({
         // convenience aliases
         primary: 'var(--text-primary)',
         secondary: 'var(--text-secondary)',
         muted: 'var(--text-muted)',
         inverted: 'var(--text-inverted)',
       }),
-      backgroundColor: (theme) => ({
+      backgroundColor: () => ({
         base: 'var(--surface-base)',
         raised: 'var(--surface-raised)',
         overlay: 'var(--surface-overlay)',

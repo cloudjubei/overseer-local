@@ -9,7 +9,7 @@ import { useAuth } from './AuthContext'
 
 export { useApi, type ApiContextValue } from 'thefactory-ui/headless'
 
-export function ApiProvider({ children }: { children: ReactNode }) {
+export function ApiProvider({ children }: { children: ReactNode }): React.JSX.Element {
   const { baseUrl } = useAuth()
   return (
     <HeadlessApiProvider apiBaseUrl={baseUrl} wsBaseUrl={baseUrl} client="desktop">

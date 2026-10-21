@@ -25,7 +25,10 @@ export type ProcessesTabProps = {
  * selecting a run, opening a leaf's chat, and the cog to the process blueprints
  * (Settings → Processes).
  */
-export default function ProcessesTab({ projectId, selectedRunId }: ProcessesTabProps) {
+export default function ProcessesTab({
+  projectId,
+  selectedRunId,
+}: ProcessesTabProps): React.JSX.Element | null {
   const navigate = useNavigate()
   const navigateToGroupRun = useNavigateToGroupRun()
 

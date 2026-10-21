@@ -37,7 +37,7 @@ export default function FeatureRequestWidgetConnected({
   requestId: string
   status?: string
   cycleDetected?: boolean
-}) {
+}): React.JSX.Element {
   const { requestById, reject, markDelivered, handOver } = useCrossProjectRequests()
   const decision = useFeatureRequestDecision(requestId)
   const navigate = useNavigate()
@@ -87,7 +87,7 @@ export default function FeatureRequestWidgetConnected({
     workNotStarted: canStartFeatureRequestWork(live),
   }
 
-  const openRequest = (id: string) => {
+  const openRequest = (id: string): void => {
     const other = requestById(id)
     if (other) navigateToResource({ kind: 'chat', context: featureRequestChatContext(other) })
   }

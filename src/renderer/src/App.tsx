@@ -101,7 +101,7 @@ import ToolsView from '@ui/screens/ToolsView'
  *   (safeStorage IPC), so the gate enforces the invariant that no data
  *   provider mounts (and so no HTTP call fires) before the SDK is configured.
  */
-function BackendGate() {
+function BackendGate(): React.JSX.Element {
   const { ready, baseUrl, token } = useAuth()
   if (!ready) return <LoadingScreen label="Initializing…" />
   if (!baseUrl || !token) return <Navigate to="/login" replace />
@@ -168,7 +168,7 @@ function BackendGate() {
   )
 }
 
-function MainShell() {
+function MainShell(): React.JSX.Element {
   const navigate = useNavigate()
   const location = useLocation()
   const {
@@ -268,7 +268,7 @@ function MainShell() {
   )
 }
 
-function GroupShell() {
+function GroupShell(): React.JSX.Element {
   const {
     groupId,
     tab: tabParam,
@@ -324,7 +324,7 @@ function GroupShell() {
  * conversations belong to no project; the rail keeps the active project's tabs
  * below the Assistant item.
  */
-function AssistantShell() {
+function AssistantShell(): React.JSX.Element {
   const { activeProjectId } = useProjects()
   return (
     <div className="flex flex-row w-full h-full overflow-hidden">
@@ -340,7 +340,7 @@ function AssistantShell() {
   )
 }
 
-function AuthedRoot() {
+function AuthedRoot(): React.JSX.Element {
   const { isLoaded, loadError, projects, activeProjectId } = useProjects()
 
   if (!isLoaded) return <LoadingScreen label="Loading your projects…" />
@@ -352,12 +352,12 @@ function AuthedRoot() {
   return <Navigate to={`/projects/${target}/stories`} replace />
 }
 
-function ThemeApplier() {
+function ThemeApplier(): null {
   useApplyTheme()
   return null
 }
 
-function CodeBlockThemeBridge({ children }: { children: ReactNode }) {
+function CodeBlockThemeBridge({ children }: { children: ReactNode }): React.JSX.Element {
   const { settings } = useAppSettings()
   return (
     <CodeBlockThemeProvider value={settings.userPreferences.codeBlockTheme}>
@@ -366,7 +366,7 @@ function CodeBlockThemeBridge({ children }: { children: ReactNode }) {
   )
 }
 
-export default function App() {
+export default function App(): React.JSX.Element {
   return (
     <NativeDictationTriggerContext.Provider value={macOsDictationTrigger}>
       <AppSettingsProviderConnected>
@@ -419,7 +419,7 @@ export default function App() {
   )
 }
 
-function GitCredentialErrorModalMount() {
+function GitCredentialErrorModalMount(): React.JSX.Element {
   const navigate = useNavigate()
   const { activeProjectId } = useProjects()
   const { credentialError, clearCredentialError } = useGit()

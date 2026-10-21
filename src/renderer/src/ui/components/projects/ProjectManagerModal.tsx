@@ -64,7 +64,11 @@ const TITLE_BY_MODE: Record<ViewMode, string> = {
  * save) — kept structurally identical so a reader can switch between the
  * two files and follow the parity rule.
  */
-export default function ProjectManagerModal({ onRequestClose }: { onRequestClose: () => void }) {
+export default function ProjectManagerModal({
+  onRequestClose,
+}: {
+  onRequestClose: () => void
+}): React.JSX.Element {
   const { projects, refresh: refreshProjects } = useProjects()
   const { groups, reorderProject, refresh: refreshGroups } = useProjectsGroups()
   const { createFromTemplate } = useTemplates()
@@ -118,14 +122,14 @@ export default function ProjectManagerModal({ onRequestClose }: { onRequestClose
     return group.projects.map((id) => byId.get(id)).filter(Boolean) as GetProjectResponse[]
   }, [currentGroupId, projects, groups, uncategorized])
 
-  const resetForm = () => {
+  const resetForm = (): void => {
     setForm(blankProjectForm())
     setFormErrors([])
     setEditingId(null)
     formDirtyRef.current = false
   }
 
-  const startCreate = () => {
+  const startCreate = (): void => {
     const next = blankProjectForm()
     // Default the MAIN group to whichever group is currently filtered to
     // (when it's an actual MAIN group, not All / uncategorized).
@@ -140,7 +144,7 @@ export default function ProjectManagerModal({ onRequestClose }: { onRequestClose
     setMode('create')
   }
 
-  const startFromTemplate = () => {
+  const startFromTemplate = (): void => {
     setTemplatePick(null)
     setTemplateProjectId('')
     let nextMainGroupId: string | null = null
@@ -153,7 +157,7 @@ export default function ProjectManagerModal({ onRequestClose }: { onRequestClose
     setMode('from-template')
   }
 
-  const handleSubmitFromTemplate = async (e: FormEvent) => {
+  const handleSubmitFromTemplate = async (e: FormEvent): Promise<void> => {
     e.preventDefault()
     setTemplateErrors([])
     const errors: string[] = []
@@ -181,7 +185,7 @@ export default function ProjectManagerModal({ onRequestClose }: { onRequestClose
     }
   }
 
-  const startEdit = (p: GetProjectResponse) => {
+  const startEdit = (p: GetProjectResponse): void => {
     const next = projectToFormState(p)
     setForm(next)
     setFormErrors([])
@@ -195,7 +199,7 @@ export default function ProjectManagerModal({ onRequestClose }: { onRequestClose
    * the modal's X / overlay click). If unsaved changes exist, shows a
    * confirm-discard dialog; otherwise drops back to the list.
    */
-  const attemptExitForm = () => {
+  const attemptExitForm = (): void => {
     if (formDirtyRef.current) setDiscardOpen(true)
     else {
       resetForm()
@@ -203,7 +207,7 @@ export default function ProjectManagerModal({ onRequestClose }: { onRequestClose
     }
   }
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent): Promise<void> => {
     e.preventDefault()
     setFormErrors([])
 
@@ -283,7 +287,7 @@ export default function ProjectManagerModal({ onRequestClose }: { onRequestClose
     }
   }
 
-  const onMoveProjectInGroup = async (index: number, dir: -1 | 1) => {
+  const onMoveProjectInGroup = async (index: number, dir: -1 | 1): Promise<void> => {
     if (currentGroupId === ALL_GROUP_ID || currentGroupId === UNCATEGORIZED_ID) return
     const group = groups.find((g) => g.id === currentGroupId)
     if (!group) return
@@ -396,7 +400,7 @@ export default function ProjectManagerModal({ onRequestClose }: { onRequestClose
     </div>
   )
 
-  const onModalClose = () => {
+  const onModalClose = (): void => {
     // When inside the create/edit form, route through the dirty-check so the
     // user gets the discard-changes warning before losing edits.
     if (mode === 'create' || mode === 'edit') {

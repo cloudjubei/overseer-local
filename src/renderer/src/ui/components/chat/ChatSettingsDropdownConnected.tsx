@@ -42,7 +42,7 @@ export default function ChatSettingsDropdownConnected({
   context,
   isOpen,
   onClose,
-}: ChatSettingsDropdownConnectedProps) {
+}: ChatSettingsDropdownConnectedProps): React.JSX.Element {
   const { getEffectiveChatSettings, getChatTypeSettings, updateChatSettings, settingsBlocked } =
     useChats()
   const { cliRunner } = useChatCliRunner(context)
@@ -63,7 +63,7 @@ export default function ChatSettingsDropdownConnected({
     [catalog, completion, runner],
   )
 
-  const persistCompletion = async (patch: Record<string, unknown>) => {
+  const persistCompletion = async (patch: Record<string, unknown>): Promise<void> => {
     await updateChatSettings(context, {
       completionSettings: {
         ...(completion ?? ({} as never)),
@@ -72,7 +72,7 @@ export default function ChatSettingsDropdownConnected({
     })
   }
 
-  const toggleAvailable = async (tool: ToolToggle) => {
+  const toggleAvailable = async (tool: ToolToggle): Promise<void> => {
     const patch = applyChatToolToggle(catalog, completion, runner, tool.name, !tool.available)
     if (Object.keys(patch).length === 0) return
     await persistCompletion(patch)

@@ -22,7 +22,7 @@ export default function DependencySelector({
   currentStoryId,
   currentFeatureId,
   existingDeps = [],
-}: DependencySelectorProps) {
+}: DependencySelectorProps): React.JSX.Element {
   const { project } = useActiveProject()
   const { stories, storyDisplayIndex, featureDisplayIndex } = useStories()
 

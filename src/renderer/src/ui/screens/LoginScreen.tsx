@@ -21,7 +21,7 @@ type TestState =
   | { kind: 'ok'; version: string; uptime: number }
   | { kind: 'error'; message: string }
 
-export default function LoginScreen() {
+export default function LoginScreen(): React.JSX.Element {
   const { baseUrl, token, setBoth, unauthorized } = useAuth()
   const navigate = useNavigate()
   const [urlValue, setUrlValue] = useState(baseUrl ?? DEFAULT_URL)
@@ -32,7 +32,7 @@ export default function LoginScreen() {
   const trimmedToken = tokenValue.trim()
   const canSave = trimmedUrl.length > 0
 
-  async function onTest() {
+  async function onTest(): Promise<void> {
     if (!canSave) return
     setTestState({ kind: 'testing' })
     try {
@@ -54,7 +54,7 @@ export default function LoginScreen() {
     }
   }
 
-  async function onSubmit(e: FormEvent) {
+  async function onSubmit(e: FormEvent): Promise<void> {
     e.preventDefault()
     if (!canSave || saving) return
     setSaving(true)

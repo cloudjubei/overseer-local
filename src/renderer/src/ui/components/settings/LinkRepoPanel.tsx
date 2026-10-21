@@ -17,7 +17,7 @@ import { Surface } from 'thefactory-ui/web'
  * Once a repo is linked, the panel collapses to a read-only display of the
  * URL — no "remove" / "swap" action lives here (destructive, out of scope).
  */
-export default function LinkRepoPanel() {
+export default function LinkRepoPanel(): React.JSX.Element {
   const { projectId, project } = useActiveProject()
 
   if (!projectId || !project) {
@@ -40,7 +40,7 @@ export default function LinkRepoPanel() {
   )
 }
 
-function Header() {
+function Header(): React.JSX.Element {
   return (
     <header>
       <h2 className="text-xl font-semibold">Repository</h2>
@@ -52,7 +52,7 @@ function Header() {
   )
 }
 
-function LinkedRepo({ url }: { url: string }) {
+function LinkedRepo({ url }: { url: string }): React.JSX.Element {
   return (
     <Surface className="flex flex-col gap-3 p-4">
       <Field label="Linked repository URL">
@@ -62,13 +62,13 @@ function LinkedRepo({ url }: { url: string }) {
   )
 }
 
-function UnlinkedActions({ projectId }: { projectId: string }) {
+function UnlinkedActions({ projectId }: { projectId: string }): React.JSX.Element {
   const [error, setError] = useState<string | null>(null)
   const [busyKind, setBusyKind] = useState<'init' | 'clone' | null>(null)
   const [confirmInit, setConfirmInit] = useState(false)
   const [cloneUrl, setCloneUrl] = useState('')
 
-  const initEmpty = async () => {
+  const initEmpty = async (): Promise<void> => {
     setBusyKind('init')
     setError(null)
     try {
@@ -87,7 +87,7 @@ function UnlinkedActions({ projectId }: { projectId: string }) {
     }
   }
 
-  const submitClone = async (e: FormEvent) => {
+  const submitClone = async (e: FormEvent): Promise<void> => {
     e.preventDefault()
     const trimmed = cloneUrl.trim()
     if (!trimmed || busyKind) return

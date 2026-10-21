@@ -25,7 +25,10 @@ export type StoriesModalHostProps = {
   onClose: () => void
 }
 
-export default function StoriesModalHost({ route, onClose }: StoriesModalHostProps) {
+export default function StoriesModalHost({
+  route,
+  onClose,
+}: StoriesModalHostProps): React.JSX.Element | null {
   if (!route) return null
 
   switch (route.kind) {
@@ -64,11 +67,15 @@ export default function StoriesModalHost({ route, onClose }: StoriesModalHostPro
 /** Shared "discard unsaved changes?" prompt — used by every modal that
  *  wraps a form, mirroring desktop's confirm-on-close behaviour. Only for
  *  leaving with unsaved edits: a failed save shows on the form itself. */
-function useDirtyGuard(onClose: () => void) {
+function useDirtyGuard(onClose: () => void): {
+  setHasChanges: React.Dispatch<React.SetStateAction<boolean>>
+  attemptClose: () => void
+  dialog: React.JSX.Element
+} {
   const [showAlert, setShowAlert] = useState(false)
   const [hasChanges, setHasChanges] = useState(false)
 
-  const attemptClose = () => {
+  const attemptClose = (): void => {
     if (hasChanges) {
       setShowAlert(true)
       return
@@ -99,7 +106,7 @@ function useDirtyGuard(onClose: () => void) {
   return { setHasChanges, attemptClose, dialog }
 }
 
-function CreateStoryModal({ onClose }: { onClose: () => void }) {
+function CreateStoryModal({ onClose }: { onClose: () => void }): React.JSX.Element {
   const { projectId } = useActiveProject()
   const { createStory } = useStories()
   const [submitting, setSubmitting] = useState(false)
@@ -109,7 +116,7 @@ function CreateStoryModal({ onClose }: { onClose: () => void }) {
 
   const formId = 'story-create-form'
 
-  const handleSubmit = async (values: StoryFormValues) => {
+  const handleSubmit = async (values: StoryFormValues): Promise<void> => {
     setSubmitting(true)
     setSaveError(null)
     try {
@@ -168,7 +175,13 @@ function CreateStoryModal({ onClose }: { onClose: () => void }) {
   )
 }
 
-function EditStoryModal({ storyId, onClose }: { storyId: string; onClose: () => void }) {
+function EditStoryModal({
+  storyId,
+  onClose,
+}: {
+  storyId: string
+  onClose: () => void
+}): React.JSX.Element {
   const { projectId } = useActiveProject()
   const { stories, updateStory, deleteStory } = useStories()
   const { runsActive } = useAgents()
@@ -186,7 +199,7 @@ function EditStoryModal({ storyId, onClose }: { storyId: string; onClose: () => 
     (r) => r.context.storyId === storyId && !r.context.featureId,
   )
 
-  const handleSubmit = async (values: StoryFormValues) => {
+  const handleSubmit = async (values: StoryFormValues): Promise<void> => {
     setSubmitting(true)
     setSaveError(null)
     try {
@@ -203,7 +216,7 @@ function EditStoryModal({ storyId, onClose }: { storyId: string; onClose: () => 
     }
   }
 
-  const handleDelete = async () => {
+  const handleDelete = async (): Promise<void> => {
     setShowDeleteConfirm(false)
     setDeleting(true)
     setSaveError(null)
@@ -308,7 +321,7 @@ function DeleteStoryModal({
   storyId: string
   title: string
   onClose: () => void
-}) {
+}): React.JSX.Element {
   const { deleteStory } = useStories()
   return (
     <ConfirmDialog
@@ -331,7 +344,7 @@ function CreateFeatureModal({
   storyId?: string
   initialValues?: import('@ui/components/stories/FeatureForm').FeatureFormInitialValues
   onClose: () => void
-}) {
+}): React.JSX.Element {
   const { stories, createFeature } = useStories()
   const [submitting, setSubmitting] = useState(false)
   const { setHasChanges, attemptClose, dialog } = useDirtyGuard(onClose)
@@ -351,7 +364,7 @@ function CreateFeatureModal({
   const storyInputRef = useRef<HTMLInputElement | null>(null)
 
   useEffect(() => {
-    const onDocMouseDown = (e: MouseEvent) => {
+    const onDocMouseDown = (e: MouseEvent): void => {
       if (!storySelectorRef.current) return
       if (!storySelectorRef.current.contains(e.target as Node)) {
         setOpenStoryList(false)
@@ -537,7 +550,7 @@ function EditFeatureModal({
   storyId: string
   featureId: string
   onClose: () => void
-}) {
+}): React.JSX.Element {
   const { projectId } = useActiveProject()
   const { stories, updateFeature, deleteFeature, storyDisplayIndex, featureDisplayIndex } =
     useStories()
@@ -577,7 +590,7 @@ function EditFeatureModal({
     featureId,
   )
 
-  const handleDelete = async () => {
+  const handleDelete = async (): Promise<void> => {
     setShowDeleteConfirm(false)
     setDeleting(true)
     setSaveError(null)
@@ -710,7 +723,7 @@ function DeleteFeatureModal({
   featureId: string
   title: string
   onClose: () => void
-}) {
+}): React.JSX.Element {
   const { deleteFeature } = useStories()
   return (
     <ConfirmDialog

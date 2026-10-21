@@ -10,7 +10,8 @@ export function useNavigateToGroupRun(): (groupRunId: string, groupId?: string) 
   const navigate = useNavigate()
   return useCallback(
     (groupRunId: string, groupId?: string) => {
-      const open = (id: string) => navigate(`/groups/${id}/processes/${groupRunId}`)
+      const open = (id: string): void | Promise<void> =>
+        navigate(`/groups/${id}/processes/${groupRunId}`)
       if (groupId) {
         open(groupId)
         return

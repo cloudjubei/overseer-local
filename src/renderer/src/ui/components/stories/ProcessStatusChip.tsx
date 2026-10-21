@@ -29,7 +29,7 @@ export default function ProcessStatusChip({
   run: ProcessRun | undefined
   projectId: string
   featureId?: string
-}) {
+}): React.JSX.Element | null {
   const stopNow = useProcessStopClock()
   const navigate = useNavigate()
   const overlay =

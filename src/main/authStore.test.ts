@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { mkdtempSync, rmSync, existsSync } from 'node:fs'
+import { mkdtempSync, rmSync, existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { createAuthStore, type Cipher } from './authStore'
@@ -50,8 +50,7 @@ describe('authStore', () => {
     const store = createAuthStore({ storeFile: file, cipher: fakeCipher })
     store.write({ baseUrl: null, token: 'sk-live-abc' })
     // Re-open and ensure the on-disk blob is not the plaintext token.
-    const fs = require('node:fs') as typeof import('node:fs')
-    const onDisk = JSON.parse(fs.readFileSync(file, 'utf8'))
+    const onDisk = JSON.parse(readFileSync(file, 'utf8'))
     expect(onDisk.token).not.toBe('sk-live-abc')
     expect(store.read().token).toBe('sk-live-abc')
   })
@@ -76,8 +75,7 @@ describe('authStore', () => {
   })
 
   it('ignores a corrupted store file and returns empty state', () => {
-    const fs = require('node:fs') as typeof import('node:fs')
-    fs.writeFileSync(file, '{not-json')
+    writeFileSync(file, '{not-json')
     const store = createAuthStore({ storeFile: file, cipher: fakeCipher })
     expect(store.read()).toEqual({ baseUrl: null, token: null })
   })

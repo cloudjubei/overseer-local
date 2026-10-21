@@ -3,6 +3,7 @@ import type { DragEvent, MouseEvent } from 'react'
 import { useGit } from 'thefactory-ui/headless'
 import type { LocalDiffEntry, ChangesArea } from 'thefactory-ui/headless'
 import { extractServerError } from 'thefactory-ui/headless/api'
+import type { GitTextRecovery } from 'thefactory-ui/headless/api'
 import { mergeUnstagedWithUntracked, useLocalChangesSelection } from 'thefactory-ui/headless'
 import {
   Alert,
@@ -45,7 +46,9 @@ const STAGED_HEIGHT_KEY = 'LocalChangesPane.stagedHeightPx'
  * unstaged, and partial-patch staging via the diff viewer's apply/discard
  * callbacks.
  */
-export default function LocalChangesPane({ onResolveConflict }: LocalChangesPaneProps) {
+export default function LocalChangesPane({
+  onResolveConflict,
+}: LocalChangesPaneProps): React.JSX.Element {
   const {
     status,
     localDiff,
@@ -79,15 +82,15 @@ export default function LocalChangesPane({ onResolveConflict }: LocalChangesPane
       // best-effort
     }
   }, [leftWidth])
-  const onLeftResizeStart = (e: globalThis.PointerEvent | React.PointerEvent) => {
+  const onLeftResizeStart = (e: globalThis.PointerEvent | React.PointerEvent): void => {
     e.preventDefault()
     const startX = (e as React.PointerEvent).clientX
     const startW = leftWidth
-    const onMove = (ev: globalThis.PointerEvent) => {
+    const onMove = (ev: globalThis.PointerEvent): void => {
       const dx = ev.clientX - startX
       setLeftWidth(Math.max(180, Math.min(800, startW + dx)))
     }
-    const onUp = () => {
+    const onUp = (): void => {
       window.removeEventListener('pointermove', onMove)
       window.removeEventListener('pointerup', onUp)
     }
@@ -138,11 +141,11 @@ export default function LocalChangesPane({ onResolveConflict }: LocalChangesPane
     return measureMinSectionPx(stagedHeaderRef, stagedRowsRef, false)
   }
 
-  const onStagedResizeStart = (e: globalThis.PointerEvent | React.PointerEvent) => {
+  const onStagedResizeStart = (e: globalThis.PointerEvent | React.PointerEvent): void => {
     e.preventDefault()
     const startY = (e as React.PointerEvent).clientY
     const startH = stagedHeight
-    const onMove = (ev: globalThis.PointerEvent) => {
+    const onMove = (ev: globalThis.PointerEvent): void => {
       const container = leftPaneRef.current
       if (!container) return
       const containerH = container.clientHeight
@@ -152,7 +155,7 @@ export default function LocalChangesPane({ onResolveConflict }: LocalChangesPane
       const max = Math.max(min, containerH - reserved)
       setStagedHeight(Math.max(min, Math.min(max, startH + ev.clientY - startY)))
     }
-    const onUp = () => {
+    const onUp = (): void => {
       window.removeEventListener('pointermove', onMove)
       window.removeEventListener('pointerup', onUp)
     }
@@ -221,7 +224,7 @@ export default function LocalChangesPane({ onResolveConflict }: LocalChangesPane
     return file ? { area: primary.area, file } : null
   }, [primary, stagedEntries, unstagedEntries])
 
-  const runOp = async (op: () => Promise<unknown>) => {
+  const runOp = async (op: () => Promise<unknown>): Promise<void> => {
     setBusy(true)
     setError(null)
     try {
@@ -237,19 +240,19 @@ export default function LocalChangesPane({ onResolveConflict }: LocalChangesPane
     }
   }
 
-  const doStage = (paths: string[]) => {
+  const doStage = (paths: string[]): void => {
     if (paths.length === 0) return
     void runOp(() => stage(paths))
   }
-  const doUnstage = (paths: string[]) => {
+  const doUnstage = (paths: string[]): void => {
     if (paths.length === 0) return
     void runOp(() => unstage(paths))
   }
-  const doReset = (paths: string[], area: Area) => {
+  const doReset = (paths: string[], area: Area): void => {
     if (paths.length === 0) return
     setConfirmReset({ paths, area })
   }
-  const doRemove = (paths: string[]) => {
+  const doRemove = (paths: string[]): void => {
     if (paths.length === 0) return
     setConfirmRemove(paths)
   }
@@ -267,7 +270,7 @@ export default function LocalChangesPane({ onResolveConflict }: LocalChangesPane
   // Checkbox toggling on a row stages/unstages that single file. Matches
   // desktop's `GitFileRow` behaviour — the checkbox column doubles as the
   // staging primary action so the toolbar isn't needed for the common case.
-  const toggleChecked = (area: Area, path: string) => {
+  const toggleChecked = (area: Area, path: string): void => {
     if (area === 'staged') doUnstage([path])
     else doStage([path])
   }
@@ -299,7 +302,7 @@ export default function LocalChangesPane({ onResolveConflict }: LocalChangesPane
       } catch {
         // setDragImage isn't universal; safe to ignore.
       }
-      const cleanup = () => {
+      const cleanup = (): void => {
         try {
           document.body.removeChild(ghost)
         } catch {
@@ -337,7 +340,7 @@ export default function LocalChangesPane({ onResolveConflict }: LocalChangesPane
     area: Area,
     entries: LocalDiffEntry[],
     headerRef?: React.Ref<HTMLDivElement>,
-  ) => {
+  ): React.JSX.Element => {
     const label = area === 'staged' ? 'Staged' : 'Unstaged'
     const action = area === 'staged' ? 'Unstage all' : 'Stage all'
     const allChecked = entries.length > 0 && area === 'staged'
@@ -366,7 +369,10 @@ export default function LocalChangesPane({ onResolveConflict }: LocalChangesPane
     )
   }
 
-  const renderRows = (area: Area, entries: LocalDiffEntry[]) => {
+  const renderRows = (
+    area: Area,
+    entries: LocalDiffEntry[],
+  ): React.JSX.Element | React.JSX.Element[] => {
     if (entries.length === 0) {
       return (
         <div className="px-3 py-2 text-xs text-(--text-muted) italic">
@@ -417,18 +423,18 @@ export default function LocalChangesPane({ onResolveConflict }: LocalChangesPane
 
   // Wire partial-patch staging — `cached: true` writes to the index only;
   // `reverse: true` unstages already-cached hunks. Desktop's flow exactly.
-  const handleApplyPatch = async (patch: string, reverse: boolean) => {
+  const handleApplyPatch = async (patch: string, reverse: boolean): Promise<void> => {
     if (!selectedPath) return
     await runOp(() => applyPatch({ patch, cached: true, reverse }))
   }
-  const handleDiscardPatch = async (patch: string) => {
+  const handleDiscardPatch = async (patch: string): Promise<void> => {
     if (!selectedPath) return
     setConfirmReset(null)
     await runOp(() => applyPatch({ patch, cached: false, reverse: true }))
   }
 
   // Quick-fix recovery: preview is in-memory; applying rewrites the file.
-  const handleRecoverText = () => {
+  const handleRecoverText = (): Promise<GitTextRecovery> => {
     if (!selectedPath) throw new Error('No file selected')
     return recoverTextDiff(selectedPath, selectedArea === 'staged')
   }

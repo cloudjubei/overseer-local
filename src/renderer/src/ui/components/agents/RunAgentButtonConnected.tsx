@@ -20,7 +20,7 @@ export default function RunAgentButtonConnected({
   storyId,
   featureId,
   className,
-}: Props) {
+}: Props): React.JSX.Element {
   const navigate = useNavigate()
   const { defaultMode, chatRunner, chatAgent } = useProjectWorkLaunch(projectId)
   const onStarted = useCallback(

@@ -6,7 +6,7 @@ import { VisualSettings } from 'thefactory-ui/web'
 
 const STORAGE_KEY = 'thefactory.appSettings'
 
-function ThemeSetter() {
+function ThemeSetter(): React.JSX.Element {
   const { setTheme } = useAppSettings()
   return (
     <button data-testid="set-dark" onClick={() => setTheme('dark')}>
@@ -15,7 +15,7 @@ function ThemeSetter() {
   )
 }
 
-function renderPanel() {
+function renderPanel(): ReturnType<typeof render> {
   return render(
     <AppSettingsProviderConnected>
       <VisualSettings />

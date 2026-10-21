@@ -6,7 +6,7 @@ import { BackendConnectionPanel as SharedBackendConnectionPanel } from 'thefacto
  * Developer settings' backend connection: the shared panel over desktop's
  * `safeStorage`-backed `AuthContext`, which keeps both URL and token.
  */
-export default function BackendConnectionPanel() {
+export default function BackendConnectionPanel(): React.JSX.Element {
   const { baseUrl, token, unauthorized, setToken, clearToken, setBaseUrl, clear } = useAuth()
   const { wsState } = useApi()
   return (

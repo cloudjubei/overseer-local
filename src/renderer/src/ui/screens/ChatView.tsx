@@ -24,7 +24,7 @@ function readLastSelected(): ChatContext | undefined {
   }
 }
 
-function writeLastSelected(ctx: ChatContext) {
+function writeLastSelected(ctx: ChatContext): void {
   try {
     window.localStorage.setItem(LAST_SELECTED_KEY, JSON.stringify(ctx))
   } catch {
@@ -41,7 +41,7 @@ function readLastOpened(projectId: string): Record<string, string> {
   }
 }
 
-function writeLastOpened(projectId: string, key: string) {
+function writeLastOpened(projectId: string, key: string): void {
   try {
     const map = readLastOpened(projectId)
     map[key] = new Date().toISOString()
@@ -69,7 +69,7 @@ function lastOpenedFor(
   return bestCtx
 }
 
-export default function ChatView() {
+export default function ChatView(): React.JSX.Element {
   const { projectId } = useActiveProject()
   const params = useParams<{ projectId: string; contextKey?: string }>()
   const navigate = useNavigate()
@@ -232,7 +232,7 @@ function AgentRunHeaderActions({
 }: {
   rating: number
   onRate: (score: number) => void
-}) {
+}): React.JSX.Element {
   // No Delete here: an agent-run chat is deleted WITH its process from the
   // pipeline head, never on its own from the chat surface. Rating stays.
   return (

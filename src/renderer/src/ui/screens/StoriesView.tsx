@@ -8,7 +8,7 @@ import StoryDetailsView from './stories/StoryDetailsView'
  * actual chrome (toolbar, menubar, dense rows, feature panel) lives in the
  * sub-screens.
  */
-export default function StoriesView() {
+export default function StoriesView(): React.JSX.Element {
   const { storyId } = useParams<{ storyId: string }>()
 
   return (

@@ -49,7 +49,11 @@ const STORIES_SORT_OPTIONS: { value: StoriesListSorting; label: string }[] = STO
 
 /** Match a story against the search box. Searches by display index (e.g.
  *  `5`, since the uuid is never user-visible), title and description. */
-function matchesQuery(story: GetStoryResponse, displayIndex: number | undefined, q: string) {
+function matchesQuery(
+  story: GetStoryResponse,
+  displayIndex: number | undefined,
+  q: string,
+): boolean {
   if (!q) return true
   const s = q.trim().toLowerCase()
   if (!s) return true
@@ -65,7 +69,7 @@ function filterStories(
   stories: GetStoryResponse[],
   indexOf: (id: string) => number | undefined,
   { query, status }: { query: string; status: string },
-) {
+): GetStoryResponse[] {
   return stories.filter((t) => {
     const hasRejectedFeatures =
       Array.isArray(t.features) && t.features.some((f) => !!(f as { rejection?: string }).rejection)
@@ -87,7 +91,7 @@ const STATUS_ORDER: string[] = [...HEADLESS_STATUS_ORDER]
  * `thefactory-ui` so both apps render identically. Open / Edit / Create
  * routes are pushed through the existing modal host.
  */
-export default function StoriesListView() {
+export default function StoriesListView(): React.JSX.Element {
   const { projectId: referencesProjectId } = useActiveProject()
   const { asText } = useReferences({
     scope: referencesProjectId ? { projectId: referencesProjectId } : undefined,
@@ -97,11 +101,12 @@ export default function StoriesListView() {
   const { project, projectId } = useActiveProject()
   const { settings, setUserPreferences } = useAppSettings()
   const view = settings.userPreferences.storiesViewMode
-  const setView = (v: StoriesViewMode) => setUserPreferences({ storiesViewMode: v })
+  const setView = (v: StoriesViewMode): void => setUserPreferences({ storiesViewMode: v })
   const sortBy = settings.userPreferences.storiesListViewSorting
-  const setSortBy = (v: StoriesListSorting) => setUserPreferences({ storiesListViewSorting: v })
+  const setSortBy = (v: StoriesListSorting): void =>
+    setUserPreferences({ storiesListViewSorting: v })
   const statusFilter = settings.userPreferences.storiesListViewStatusFilter
-  const setStatusFilter = (v: StoriesListStatusFilter) =>
+  const setStatusFilter = (v: StoriesListStatusFilter): void =>
     setUserPreferences({ storiesListViewStatusFilter: v })
 
   const {
@@ -144,7 +149,7 @@ export default function StoriesListView() {
   const sortRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
+    const onKey = (e: KeyboardEvent): void => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'n') {
         e.preventDefault()
         setModal({ kind: 'create-story' })
@@ -170,13 +175,13 @@ export default function StoriesListView() {
     } else if (sortBy === 'index_desc') {
       out.sort((a, b) => (storyDisplayIndex(b.id) || 0) - (storyDisplayIndex(a.id) || 0))
     } else if (sortBy === 'status_asc') {
-      const sVal = (t: GetStoryResponse) => STATUS_ORDER.indexOf(t.status)
+      const sVal = (t: GetStoryResponse): number => STATUS_ORDER.indexOf(t.status)
       out.sort(
         (a, b) =>
           sVal(a) - sVal(b) || (storyDisplayIndex(a.id) || 0) - (storyDisplayIndex(b.id) || 0),
       )
     } else if (sortBy === 'status_desc') {
-      const sVal = (t: GetStoryResponse) => STATUS_ORDER.indexOf(t.status)
+      const sVal = (t: GetStoryResponse): number => STATUS_ORDER.indexOf(t.status)
       out.sort(
         (a, b) =>
           sVal(b) - sVal(a) || (storyDisplayIndex(b.id) || 0) - (storyDisplayIndex(a.id) || 0),
@@ -194,14 +199,14 @@ export default function StoriesListView() {
 
   const statusChange = useStoryChangeError()
 
-  const handleStatusChange = async (storyId: string, status: Status) => {
+  const handleStatusChange = async (storyId: string, status: Status): Promise<void> => {
     await statusChange.attempt(() => updateStory(storyId, { status }))
   }
 
-  const handleEditStory = (story: GetStoryResponse) => setModal({ kind: 'edit-story', story })
-  const handleAddStory = () => setModal({ kind: 'create-story' })
+  const handleEditStory = (story: GetStoryResponse): void => setModal({ kind: 'edit-story', story })
+  const handleAddStory = (): void => setModal({ kind: 'create-story' })
 
-  const navigateStoryDetails = (storyId: string) => {
+  const navigateStoryDetails = (storyId: string): void => {
     const pId = projectId ?? urlProjectId
     if (!pId) return
     navigate(`/projects/${pId}/stories/${storyId}`)
@@ -213,7 +218,7 @@ export default function StoriesListView() {
     !saving &&
     view === 'list'
 
-  const computeDropForRow = (e: React.DragEvent<HTMLElement>, idx: number) => {
+  const computeDropForRow = (e: React.DragEvent<HTMLElement>, idx: number): void => {
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
     const offsetY = e.clientY - rect.top
     let pos: 'before' | 'after' | null = offsetY < rect.height / 2 ? 'before' : 'after'
@@ -229,7 +234,7 @@ export default function StoriesListView() {
     setDropPosition(pos)
   }
 
-  const clearDndState = () => {
+  const clearDndState = (): void => {
     setDragStoryId(null)
     setDragging(false)
     setDraggingIndex(null)
@@ -237,7 +242,7 @@ export default function StoriesListView() {
     setDropPosition(null)
   }
 
-  const onRowKeyDown = (e: React.KeyboardEvent<HTMLDivElement>, storyId: string) => {
+  const onRowKeyDown = (e: React.KeyboardEvent<HTMLDivElement>, storyId: string): void => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault()
       navigateStoryDetails(storyId)
@@ -265,7 +270,7 @@ export default function StoriesListView() {
     ;(rows[nextIndex] as HTMLElement).focus()
   }
 
-  const onListDrop = async () => {
+  const onListDrop = async (): Promise<void> => {
     if (!project || !dragStoryId || dropIndex == null || dropPosition == null) {
       clearDndState()
       return

@@ -23,7 +23,7 @@ function readLastSelected(groupId: string): ChatContext | undefined {
   }
 }
 
-function writeLastSelected(groupId: string, ctx: ChatContext) {
+function writeLastSelected(groupId: string, ctx: ChatContext): void {
   try {
     window.localStorage.setItem(`${LAST_SELECTED_PREFIX}:${groupId}`, JSON.stringify(ctx))
   } catch {
@@ -40,7 +40,7 @@ function readLastOpened(groupId: string): Record<string, string> {
   }
 }
 
-function writeLastOpened(groupId: string, key: string) {
+function writeLastOpened(groupId: string, key: string): void {
   try {
     const map = readLastOpened(groupId)
     map[key] = new Date().toISOString()
@@ -80,7 +80,7 @@ function lastOpenedFor(
  * machinery (story/feature resolution, project chat picker, project-back
  * navigation) doesn't apply at group scope.
  */
-export default function GroupChatView() {
+export default function GroupChatView(): React.JSX.Element {
   const { groupId, contextKey } = useParams<{ groupId: string; contextKey?: string }>()
   const navigate = useNavigate()
   const { groups } = useProjectsGroups()

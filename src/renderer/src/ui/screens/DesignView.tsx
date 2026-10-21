@@ -7,7 +7,7 @@ import { useNavigateToResource } from '@ui/hooks/useNavigateToResource'
  * (one approved) and the versions runs built. Discuss opens the project chat
  * with the reference in its draft.
  */
-export default function DesignView() {
+export default function DesignView(): React.JSX.Element {
   const { projectId } = useActiveProject()
   const navigateToResource = useNavigateToResource()
   return <SharedDesignView projectId={projectId} onOpenResource={navigateToResource} />

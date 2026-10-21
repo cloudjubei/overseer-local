@@ -75,7 +75,7 @@ export default function FeatureForm({
   submitting = false,
   onDirty,
   formId,
-}: FeatureFormProps) {
+}: FeatureFormProps): React.JSX.Element {
   const initial = mode.kind === 'edit' ? mode.feature : null
   const seed: FeatureFormInitialValues | null =
     mode.kind === 'create' ? (mode.initialValues ?? null) : null

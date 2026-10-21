@@ -19,14 +19,8 @@ export default defineConfig({
       '@ui': resolve(__dirname, 'src/renderer/src/ui'),
       react: resolve(__dirname, 'node_modules/react'),
       'react-dom': resolve(__dirname, 'node_modules/react-dom'),
-      '@radix-ui/react-select': resolve(
-        __dirname,
-        'node_modules/@radix-ui/react-select',
-      ),
-      '@radix-ui/react-context': resolve(
-        __dirname,
-        'node_modules/@radix-ui/react-context',
-      ),
+      '@radix-ui/react-select': resolve(__dirname, 'node_modules/@radix-ui/react-select'),
+      '@radix-ui/react-context': resolve(__dirname, 'node_modules/@radix-ui/react-context'),
       '@radix-ui/react-slot': resolve(__dirname, 'node_modules/@radix-ui/react-slot'),
     },
   },

@@ -44,7 +44,7 @@ function isTestsJob(job: TestsRunningJob | null): boolean {
   return job?.kind === 'unit' || job?.kind === 'unit-all'
 }
 
-export default function TestsView() {
+export default function TestsView(): React.JSX.Element {
   // Hard-remount on project switch so every piece of local UI state
   // (selected tab, custom config path, modal route, candidates) clears
   // along with the context's `lastRun` / `lastCoverage`.
@@ -53,7 +53,7 @@ export default function TestsView() {
   return <TestsViewInner key={projectId ?? urlProjectId ?? 'no-project'} />
 }
 
-function TestsViewInner() {
+function TestsViewInner(): React.JSX.Element {
   const { projectId, project } = useActiveProject()
   const { projectId: urlProjectId } = useParams<{ projectId: string }>()
   const {
@@ -121,7 +121,7 @@ function TestsViewInner() {
   }, [projectId, urlProjectId])
 
   const customEnvValues = envByConfig[customConfigPath] ?? {}
-  const setCustomEnvValues = (next: Record<string, string>) => {
+  const setCustomEnvValues = (next: Record<string, string>): void => {
     setEnvByConfig((prev) => ({ ...prev, [customConfigPath]: next }))
   }
 
@@ -149,7 +149,7 @@ function TestsViewInner() {
   if (!isLoaded) return <LoadingScreen label="Loading tests…" />
   if (loadError) return <LoadingScreen label="Could not load tests" error={loadError.message} />
 
-  const runOp = async (op: () => Promise<unknown>) => {
+  const runOp = async (op: () => Promise<unknown>): Promise<void> => {
     setOpError(null)
     try {
       await op()
@@ -158,7 +158,7 @@ function TestsViewInner() {
     }
   }
 
-  const onAbort = async () => {
+  const onAbort = async (): Promise<void> => {
     try {
       await abort()
     } catch (err) {
@@ -166,7 +166,7 @@ function TestsViewInner() {
     }
   }
 
-  const onRun = () => {
+  const onRun = (): void => {
     if (tab === 'results') {
       void runOp(() => runAllTests())
     } else if (tab === 'coverage') {
@@ -195,7 +195,7 @@ function TestsViewInner() {
   // Coverage "Improve tests" action: ensure a TESTING story exists, then
   // open the create-feature modal pre-filled with the file/uncovered lines.
   // Mirrors desktop's `onImproveTestsClick`.
-  const onImproveTests = async (file: string, uncovered: number[]) => {
+  const onImproveTests = async (file: string, uncovered: number[]): Promise<void> => {
     const existing = stories.find(
       (s) => typeof s.title === 'string' && s.title.trim().toUpperCase() === 'TESTING',
     )
@@ -323,7 +323,7 @@ function ResultsPane({
 }: {
   lastRun: Parameters<typeof TestResultsList>[0]['results'] | null
   readFile?: (relPath: string) => Promise<string | undefined>
-}) {
+}): React.JSX.Element {
   if (!lastRun) return <p className="text-sm opacity-70">Run tests to see results.</p>
   return <TestResultsList results={lastRun} readFile={readFile} />
 }
@@ -336,7 +336,7 @@ function CoveragePane({
   lastCoverage: Parameters<typeof CoverageTable>[0]['data'] | null
   isRunningCoverage: boolean
   onImproveTests: (file: string, uncovered: number[]) => void | Promise<void>
-}) {
+}): React.JSX.Element | null {
   if (!lastCoverage && !isRunningCoverage)
     return <p className="text-sm opacity-70">Run coverage to see the report.</p>
   if (!lastCoverage) return null
@@ -376,7 +376,7 @@ function CustomPane({
   isRunning: boolean
   lastRun: Parameters<typeof TestResultsList>[0]['results'] | null
   readFile?: (relPath: string) => Promise<string | undefined>
-}) {
+}): React.JSX.Element {
   return (
     <div className="flex flex-col gap-3">
       <TestCustomConfigInput

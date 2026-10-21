@@ -109,12 +109,12 @@ const SCOPE_CATEGORIES = {
 
 type CategoryId = (typeof CATEGORIES)[number]['id'] | 'project' | 'group'
 
-export default function SettingsView({ scope }: { scope: SettingsScope }) {
+export default function SettingsView({ scope }: { scope: SettingsScope }): React.JSX.Element {
   const [searchParams, setSearchParams] = useSearchParams()
   const queryTab = searchParams.get('tab')
   const linkedProcessId = searchParams.get(PROCESS_LINK_PARAM)
   const navigate = useNavigate()
-  const openChat = (chatContextId: string) => {
+  const openChat = (chatContextId: string): void => {
     const context = getChatContext(chatContextId)
     if (!context) return
     const key = encodeURIComponent(getChatContextKey(context))
@@ -133,7 +133,7 @@ export default function SettingsView({ scope }: { scope: SettingsScope }) {
   // on different ticks. Opens on the project's or group's own section.
   const activeCategory: CategoryId = isCategory(queryTab) ? queryTab : scopeCategory.id
 
-  const onSelect = (next: string) => {
+  const onSelect = (next: string): void => {
     if (!isCategory(next) || next === activeCategory) return
     const params = new URLSearchParams(searchParams)
     params.set('tab', next)
@@ -184,11 +184,11 @@ export default function SettingsView({ scope }: { scope: SettingsScope }) {
             <VisualSettings onOpenNotifications={() => onSelect('notifications')} />
           )}
           {activeCategory === 'notifications' && (
-          <div className="flex flex-col gap-8">
-            <NotificationSettings />
-            <StorageUsageSettings />
-          </div>
-        )}
+            <div className="flex flex-col gap-8">
+              <NotificationSettings />
+              <StorageUsageSettings />
+            </div>
+          )}
           {activeCategory === 'usage' && <UsageSettings />}
           {activeCategory === 'cross-project' && <CrossProjectSettings />}
           {activeCategory === 'rules' && <SavedRulesSettings onOpenChat={openChat} />}

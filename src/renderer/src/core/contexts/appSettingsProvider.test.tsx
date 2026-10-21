@@ -5,7 +5,7 @@ import { useAppSettings } from 'thefactory-ui/headless'
 
 const STORAGE_KEY = 'thefactory.appSettings'
 
-function wrapper({ children }: { children: React.ReactNode }) {
+function wrapper({ children }: { children: React.ReactNode }): React.JSX.Element {
   return <AppSettingsProviderConnected>{children}</AppSettingsProviderConnected>
 }
 

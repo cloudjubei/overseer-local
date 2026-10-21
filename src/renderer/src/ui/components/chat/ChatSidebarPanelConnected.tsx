@@ -27,7 +27,7 @@ export default function ChatSidebarPanelConnected({
   collapsed,
   onCollapsedChange,
   attached,
-}: ChatSidebarPanelConnectedProps) {
+}: ChatSidebarPanelConnectedProps): React.JSX.Element {
   return (
     <ChatSidebarPanelBase
       initialWidth={initialWidth}

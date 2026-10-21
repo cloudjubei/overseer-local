@@ -28,7 +28,7 @@ export default function LogPanel({
   onSelectBranchBySha,
   onContextMenuRef,
   renderCommitRef,
-}: LogPanelProps = {}) {
+}: LogPanelProps = {}): React.JSX.Element {
   const { log, status, hasMoreLog, isLogLoading, loadMoreLog } = useGit()
   const uncommitted =
     (status?.staged.length ?? 0) +
