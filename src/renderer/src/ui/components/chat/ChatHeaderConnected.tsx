@@ -7,6 +7,7 @@ import {
   chatSettingsMenuItems,
   isGeneralGroupChat,
   isGeneralProjectChat,
+  isChatArchivedFromList,
   isGlobalChat,
   processRunIdOfChatContext,
   useAppSettings,
@@ -81,10 +82,11 @@ export default function ChatHeaderConnected({
   const isRunningAgent = isAgentRunChat && (chat?.state === 'created' || chat?.state === 'running')
   const closeAction = chatCloseAction(context, chatClosure(chat))
   const isAssistant = isGlobalChat({ context })
+  const listHidden = chat ? isChatArchivedFromList(chat) : false
   const items = chatSettingsMenuItems({
     notifyLevel: CHAT_NOTIFY_LEVEL_LABELS[notifyLevel],
     canTune: !isRunningAgent,
-    listHidden: !!chat?.listHiddenAt,
+    listHidden,
     showDeveloperTools: settings.userPreferences.showDeveloperTools === true,
     ...(!isRunningAgent && !closeAction.done ? { clearLabel: closeAction.label } : {}),
     canDelete: !isAgentRunChat && !isGeneralProjectChat(context) && !isGeneralGroupChat(context),
@@ -124,7 +126,7 @@ export default function ChatHeaderConnected({
         setSettingsOpen(true)
         return
       case 'archive':
-        void (chat?.listHiddenAt ? showChatInList(context) : hideChatFromList(context))
+        void (listHidden ? showChatInList(context) : hideChatFromList(context))
         return
       case 'prompt':
         setPromptOpen(true)
