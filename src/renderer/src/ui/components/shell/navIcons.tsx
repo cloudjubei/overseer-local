@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import {
   IconAntenna,
+  IconBrain,
   IconBranch,
   IconChat,
   IconDocument,
@@ -29,6 +30,7 @@ const ICONS: Record<NavIconKey, ReactNode> = {
   files: <IconFiles />,
   design: <IconPalette />,
   notes: <IconDocument />,
+  knowledge: <IconBrain />,
   chat: <IconChat />,
   git: <IconBranch />,
   tests: <IconTests />,

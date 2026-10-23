@@ -630,7 +630,12 @@ export default function StoryDetailsView({ storyId }: { storyId: string }): Reac
                         <div className="col col-id">
                           <span className="id-chip">{fIdx}</span>
                           <StatusControl
-                            status={featureShownStatus(f.status as Status, blockers, storyBlockers)}
+                            status={featureShownStatus(
+                              f.status as Status,
+                              blockers,
+                              storyBlockers,
+                              story.id,
+                            )}
                             onChange={(next) =>
                               void handleFeatureStatusChange(story.id, f.id, next as Status)
                             }

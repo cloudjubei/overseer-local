@@ -69,6 +69,7 @@ import GroupHomeView from '@ui/screens/GroupHomeView'
 import GitView from '@ui/screens/GitView'
 import LiveDataView from '@ui/screens/LiveDataView'
 import NotesView from '@ui/screens/NotesView'
+import KnowledgeView from '@ui/screens/KnowledgeView'
 import SearchView from '@ui/screens/SearchView'
 import ProcessesTab from '@ui/screens/ProcessesTab'
 import GroupProcessesView from '@ui/screens/GroupProcessesView'
@@ -247,6 +248,7 @@ function MainShell(): React.JSX.Element {
             {tab === 'files' && <FilesView />}
             {tab === 'design' && <DesignView />}
             {tab === 'notes' && <NotesView />}
+            {tab === 'knowledge' && <KnowledgeView />}
             {tab === 'git' && <GitView />}
             {tab === 'tests' && <TestsView />}
             {tab === 'tools' && <ToolsView />}
