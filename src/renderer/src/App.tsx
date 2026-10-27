@@ -65,6 +65,8 @@ import FilesView from '@ui/screens/FilesView'
 import DesignView from '@ui/screens/DesignView'
 import GroupChatView from '@ui/screens/GroupChatView'
 import GroupNotesView from '@ui/screens/GroupNotesView'
+import GroupStoriesView from '@ui/screens/GroupStoriesView'
+import GroupStoryView from '@ui/screens/GroupStoryView'
 import GroupHomeView from '@ui/screens/GroupHomeView'
 import GitView from '@ui/screens/GitView'
 import LiveDataView from '@ui/screens/LiveDataView'
@@ -276,11 +278,13 @@ function GroupShell(): React.JSX.Element {
     tab: tabParam,
     contextKey,
     groupRunId,
+    groupStoryId,
   } = useParams<{
     groupId: string
     tab: string
     contextKey: string
     groupRunId: string
+    groupStoryId: string
   }>()
   const { setActiveGroupId } = useProjectsGroups()
   const navigate = useNavigate()
@@ -293,14 +297,16 @@ function GroupShell(): React.JSX.Element {
     ? 'chat'
     : groupRunId
       ? 'processes'
-      : isGroupTabKey(tabParam)
-        ? tabParam
-        : 'home'
+      : groupStoryId
+        ? 'stories'
+        : isGroupTabKey(tabParam)
+          ? tabParam
+          : 'home'
 
   useEffect(() => {
-    if (!groupId || contextKey || groupRunId) return
+    if (!groupId || contextKey || groupRunId || groupStoryId) return
     if (!isGroupTabKey(tabParam)) navigate(`/groups/${groupId}/home`, { replace: true })
-  }, [groupId, tabParam, contextKey, groupRunId, navigate])
+  }, [groupId, tabParam, contextKey, groupRunId, groupStoryId, navigate])
 
   return (
     <div className="flex flex-row w-full h-full overflow-hidden">
@@ -310,6 +316,7 @@ function GroupShell(): React.JSX.Element {
           <ScreenErrorBoundary key={tab} screen={`Group · ${tab}`}>
             {tab === 'home' && <GroupHomeView />}
             {tab === 'chat' && <GroupChatView />}
+            {tab === 'stories' && (groupStoryId ? <GroupStoryView /> : <GroupStoriesView />)}
             {tab === 'notes' && <GroupNotesView />}
             {tab === 'tools' && <ToolsView />}
             {tab === 'processes' && <GroupProcessesView />}
@@ -386,6 +393,10 @@ export default function App(): React.JSX.Element {
                         <Route path="/assistant/:contextKey" element={<AssistantShell />} />
                         <Route path="/assistant" element={<AssistantShell />} />
                         <Route path="/groups/:groupId/chat/:contextKey" element={<GroupShell />} />
+                        <Route
+                          path="/groups/:groupId/stories/:groupStoryId"
+                          element={<GroupShell />}
+                        />
                         <Route
                           path="/groups/:groupId/processes/:groupRunId"
                           element={<GroupShell />}

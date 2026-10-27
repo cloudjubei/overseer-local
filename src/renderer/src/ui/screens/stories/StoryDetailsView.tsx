@@ -7,6 +7,7 @@ import {
   useActiveProject,
   useReferences,
   useStoryChangeError,
+  useStoryGroupStories,
 } from 'thefactory-ui/headless'
 import { STATUS_ORDER as HEADLESS_STATUS_ORDER } from 'thefactory-ui/headless'
 import { useStories } from 'thefactory-ui/headless'
@@ -25,6 +26,7 @@ import {
   Button,
   useDragReorder,
   OptionPicker,
+  PartOfGroupStoryChip,
   StatusControl,
   StatusPicker,
   STATUS_LABELS,
@@ -283,6 +285,8 @@ export default function StoryDetailsView({ storyId }: { storyId: string }): Reac
     return () => window.removeEventListener('keydown', onKey)
   }, [story])
 
+  const groupStories = useStoryGroupStories(projectId ?? urlProjectId, story?.id)
+
   if (!story) {
     return (
       <div className="story-details flex flex-col flex-1 min-h-0 w-full overflow-hidden">
@@ -375,9 +379,17 @@ export default function StoryDetailsView({ storyId }: { storyId: string }): Reac
               ) : null}
             </div>
 
-            <h1 id="story-details-heading" className="details-title flex-1 min-w-0 order-2">
-              {story.title || `Story ${sIndex}`}
-            </h1>
+            <div className="flex-1 min-w-0 order-2 flex flex-col items-start gap-1">
+              <h1 id="story-details-heading" className="details-title">
+                {story.title || `Story ${sIndex}`}
+              </h1>
+              <PartOfGroupStoryChip
+                memberships={groupStories}
+                onOpen={(groupId, groupStoryId) =>
+                  navigate(`/groups/${groupId}/stories/${groupStoryId}`)
+                }
+              />
+            </div>
 
             <div className="flex items-center gap-3 order-3 basis-full justify-end sm:order-3 sm:basis-auto sm:ml-auto">
               {!storyProcessOverlay && !storyHasActiveRun && projectId ? (

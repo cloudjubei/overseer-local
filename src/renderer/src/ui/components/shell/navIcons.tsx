@@ -4,6 +4,7 @@ import {
   IconBrain,
   IconBranch,
   IconChat,
+  IconChecklist,
   IconDocument,
   IconFiles,
   IconHome,
@@ -38,6 +39,7 @@ const ICONS: Record<NavIconKey, ReactNode> = {
   timeline: <IconTimeline />,
   tools: <IconToolbox />,
   processes: <IconWorkflow />,
+  stories: <IconChecklist />,
   settings: <IconSettings />,
 }
 

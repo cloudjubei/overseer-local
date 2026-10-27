@@ -9,7 +9,7 @@ For the architectural ground rules every change must follow, see [ARCHITECTURE.m
 Things genuinely blocked on a third-party decision or external trigger, not on engineering work.
 
 1. **Production deployment.** End-to-end plan in [DEPLOYMENT.md](./DEPLOYMENT.md). Blocked on Apple Developer ID cert, Windows code-signing cert, and an AWS account / bucket. No engineering work to start until at least one of those lands.
-2. **OS-level push notifications via the backend.** The in-process `Notification` API already covers in-app notifications; the cross-device "you have a chat reply" story (consistent across web / desktop / mobile) lives in [thefactory-backend/docs/implementation-plan.md](../../thefactory-backend/docs/implementation-plan.md). Land it there, surface it here.
+2. **OS-level push notifications via the backend.** The in-process `Notification` API already covers in-app notifications; the cross-device "you have a chat reply" story (consistent across web / desktop / mobile) is the "Notifications and device pairing" story on TheFactory Backend. Build it there, surface it here.
 3. **Multi-user real-time collaboration on the same project.** Backend supports it; no client surfaces presence / multi-cursor / live-edit UX. Single-user-multiple-clients (same user, web + desktop + mobile) is the supported model.
 4. **Offline writes with later sync.** Real sync engines (CRDTs, OT, git-merge orchestration in UI) are months of work; revisit only if real usage shows the always-online assumption is untenable.
 

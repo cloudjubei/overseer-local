@@ -49,6 +49,7 @@ export default function GroupProcessesView(): React.JSX.Element | null {
     (context: ChatContext) => {
       const key = encodeURIComponent(getChatContextKey(context))
       if (context.projectId) navigate(`/projects/${context.projectId}/chat/${key}`)
+      else if (context.groupId) navigate(`/groups/${context.groupId}/chat/${key}`)
     },
     [navigate],
   )
