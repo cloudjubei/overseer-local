@@ -27,6 +27,7 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     globals: true,
+    globalSetup: ['./vitest.globalSetup.ts'],
     setupFiles: ['./src/renderer/src/test/setup.ts'],
     server: {
       // Force vite to transform `thefactory-ui` + its bundled `@radix-ui`

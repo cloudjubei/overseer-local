@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { PointerEvent } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
   branchMenuItems,
   commitLinkNotice,
@@ -14,6 +14,8 @@ import {
   type GitBranchSection,
   type GitMergeOutcomeLine,
 } from 'thefactory-ui/headless'
+import type { ChatContext } from 'thefactory-ui/headless/api'
+import { getChatContextKey } from '@core/chats/chatKey'
 import {
   extractServerError,
   getGitBranchDiffSummary,
@@ -76,6 +78,14 @@ const DEFAULT_TOP_HEIGHT = 280
 
 export default function GitView(): React.JSX.Element {
   const { projectId, project } = useActiveProject()
+  const navigate = useNavigate()
+  const openChat = useCallback(
+    (context: ChatContext) => {
+      if (!projectId) return
+      navigate(`/projects/${projectId}/chat/${encodeURIComponent(getChatContextKey(context))}`)
+    },
+    [navigate, projectId],
+  )
   const {
     isLoaded,
     loadError,
@@ -834,7 +844,11 @@ export default function GitView(): React.JSX.Element {
         )}
       </IconRail>
 
-      <CommitDialog isOpen={modal === 'commit'} onClose={() => setModal(null)} />
+      <CommitDialog
+        isOpen={modal === 'commit'}
+        onClose={() => setModal(null)}
+        onOpenChat={openChat}
+      />
       <CheckoutDialog isOpen={modal === 'checkout'} onClose={() => setModal(null)} />
       <CreateBranchDialog isOpen={modal === 'create-branch'} onClose={() => setModal(null)} />
       <MergeDialog

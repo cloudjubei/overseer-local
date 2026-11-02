@@ -32,11 +32,11 @@ export type ChatSettingsDropdownConnectedProps = {
  * History-summarization + Message-sanitization sub-controls into the
  * dropdown's `extraContent` slot.
  *
- * The tool rows come from the backend catalogue for this chat's transport
- * (`useChatToolCatalog`), not from the chat's own stored settings — deriving
- * them from the settings made a tool the chat did not already carry impossible
- * to switch on. All row/patch logic lives in `thefactory-ui/headless` so the
- * three clients cannot drift.
+ * The tool rows come from the backend catalogue for this chat's context and
+ * transport (`useChatToolCatalog`), not from the chat's own stored settings —
+ * deriving them from the settings made a tool the chat did not already carry
+ * impossible to switch on. All row/patch logic lives in `thefactory-ui/headless`
+ * so the three clients cannot drift.
  */
 export default function ChatSettingsDropdownConnected({
   context,
@@ -47,7 +47,7 @@ export default function ChatSettingsDropdownConnected({
     useChats()
   const { cliRunner } = useChatCliRunner(context)
   const runner = cliRunner ? 'cli' : 'api'
-  const { catalog } = useChatToolCatalog(runner)
+  const { catalog } = useChatToolCatalog(context, runner)
 
   const effective = getEffectiveChatSettings(context)
   const completion = effective.completionSettings
