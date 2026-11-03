@@ -9,7 +9,7 @@ import {
   isGeneralProjectChat,
   isChatArchivedFromList,
   isGlobalChat,
-  processRunIdOfChatContext,
+  chatProcessRunId,
   useAppSettings,
   useChatHeaderView,
   useChatNotifyLevel,
@@ -153,7 +153,10 @@ export default function ChatHeaderConnected({
     <ContextInfoButton
       storyId={context.storyId}
       featureId={context.featureId}
-      processRunId={processRunIdOfChatContext(context)}
+      processRunId={chatProcessRunId({
+        context,
+        ...(chat?.aboutRun ? { aboutRun: chat.aboutRun } : {}),
+      })}
       onOpenProcessRun={(id) => navigate(`/projects/${context.projectId}/process-runs/${id}`)}
       label={view.title}
     />

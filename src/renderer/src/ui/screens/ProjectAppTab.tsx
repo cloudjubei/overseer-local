@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
   useActiveProject,
   useProjectAppView,
@@ -90,6 +90,7 @@ export default function ProjectAppTab(): React.JSX.Element {
   }, [projectId])
 
   const [searchParams, setSearchParams] = useSearchParams()
+  const navigate = useNavigate()
   // Computed once — answers the boot `nav.current` PULL and drives the `nav.open` PUSH (via ProjectAppView).
   const deepLink = useMemo(
     () => appDeepLinkFromParams(Object.fromEntries(searchParams.entries())) ?? null,
@@ -150,6 +151,13 @@ export default function ProjectAppTab(): React.JSX.Element {
         }
         setSidebarEnabled(true)
         setChatContext((c) => c ?? (projectId ? { type: 'PROJECT', projectId } : null))
+        return { ok: true }
+      }
+      if (name === 'run.open') {
+        const { runId } = (req.payload ?? {}) as { runId?: unknown }
+        if (!projectId) return { error: 'No active project' }
+        if (typeof runId !== 'string' || !runId) return { error: 'run.open needs a runId' }
+        navigate(`/projects/${projectId}/process-runs/${runId}`)
         return { ok: true }
       }
       if (name === 'chat.discuss') {
@@ -223,6 +231,7 @@ export default function ProjectAppTab(): React.JSX.Element {
       createFeature,
       stories,
       deepLink,
+      navigate,
     ],
   )
 

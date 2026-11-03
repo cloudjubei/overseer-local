@@ -5,6 +5,8 @@ import { useGit } from 'thefactory-ui/headless'
 export type LogPanelProps = {
   selectedCommitSha?: string
   scrollToSha?: string
+  /** A new value scrolls to `scrollToSha` again, even when it is unchanged. */
+  scrollKey?: number
   onSelectCommit?: (sha: string) => void
   /**
    * Fired when the selected commit happens to be the tip of a branch — lets
@@ -24,6 +26,7 @@ export type LogPanelProps = {
 export default function LogPanel({
   selectedCommitSha,
   scrollToSha,
+  scrollKey,
   onSelectCommit,
   onSelectBranchBySha,
   onContextMenuRef,
@@ -41,6 +44,7 @@ export default function LogPanel({
       uncommittedChanges={uncommitted}
       selectedCommitSha={selectedCommitSha}
       scrollToSha={scrollToSha}
+      {...(scrollKey !== undefined ? { scrollKey } : {})}
       onSelectCommit={onSelectCommit}
       onSelectBranchBySha={onSelectBranchBySha}
       onContextMenuRef={onContextMenuRef}

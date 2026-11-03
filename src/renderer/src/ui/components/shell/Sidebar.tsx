@@ -88,7 +88,8 @@ export default function Sidebar({
   const { settings, setUserPreferences } = useAppSettings()
   const userCollapsed = settings.userPreferences.sidebarCollapsed === true
   const collapsed = userCollapsed
-  const { projects, activeProjectId, setActiveProjectId } = useProjects()
+  const { projects, activeProjectId: chosenProjectId } = useProjects()
+  const activeProjectId = projectId ?? chosenProjectId
   const requestLeave = useRequestLeave()
   const { groups, reorderProject } = useProjectsGroups()
   const { counts, markAppOpened, getProjectBadgeState, getGroupBadgeState, getGroupChatBadge } =
@@ -172,7 +173,6 @@ export default function Sidebar({
     : projectTabToGroupTab(activeTab)
 
   const selectProject = (id: string): void => {
-    setActiveProjectId(id)
     // App and Design only exist for some projects — carrying one to a project
     // without it would land on an empty view, so fall back to home.
     const targetMeta = projects.find((p) => p.id === id)?.metadata as ShellTabProjectFlags

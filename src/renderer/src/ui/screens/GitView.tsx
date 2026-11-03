@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { PointerEvent } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
   branchMenuItems,
   commitLinkNotice,
   getPRUrl,
+  gitBranchTipSha,
   mergeOutcomeLine,
   mergeSourceRef,
   useActiveProject,
@@ -134,8 +135,15 @@ export default function GitView(): React.JSX.Element {
   const commitLink = useGitCommitLink(linkedCommitSha)
   const linkedCommitNotice = commitLinkNotice(commitLink)
   const [selectedCommitSha, setSelectedCommitSha] = useState<string | undefined>(linkedCommitSha)
+  // The commit link this view last wrote itself — a different one came from
+  // outside (a commit chip elsewhere) and takes the graph there.
+  const ownCommitLinkRef = useRef<string | undefined>(linkedCommitSha)
+  // The last branch the person picked: the graph scrolls to its tip, again on
+  // each pick (`key`), whatever the commit link in the URL says meanwhile.
+  const [branchFocus, setBranchFocus] = useState<{ sha: string | undefined; key: number }>()
   const selectCommit = useCallback(
     (sha: string | undefined) => {
+      ownCommitLinkRef.current = sha && sha !== 'UNCOMMITTED' ? sha : undefined
       setSelectedCommitSha(sha)
       setSearchParams(
         (prev) => {
@@ -211,6 +219,7 @@ export default function GitView(): React.JSX.Element {
     setSelectedBranchSection(undefined)
     setSelectedStashRef(undefined)
     setSelectedCommitSha(undefined)
+    setBranchFocus(undefined)
     setOpError(null)
     setMergeLine(null)
     setMergeSheet(null)
@@ -218,7 +227,9 @@ export default function GitView(): React.JSX.Element {
   }, [projectId])
 
   useEffect(() => {
-    if (linkedCommitSha) setSelectedCommitSha(linkedCommitSha)
+    if (!linkedCommitSha) return
+    setSelectedCommitSha(linkedCommitSha)
+    if (linkedCommitSha !== ownCommitLinkRef.current) setBranchFocus(undefined)
   }, [linkedCommitSha, projectId])
 
   // A short or differently-cased sha in the link resolves to the commit's full
@@ -296,11 +307,7 @@ export default function GitView(): React.JSX.Element {
   // branch with a dirty tree). If only one side exists, fall back to the
   // available SHA in either order.
   const branchTipSha = selectedBranch
-    ? selectedBranch.current && hasUncommittedChanges && selectedBranchSection !== 'remote'
-      ? 'UNCOMMITTED'
-      : selectedBranchSection === 'remote'
-        ? (selectedBranch.remoteSha ?? selectedBranch.localSha ?? undefined)
-        : (selectedBranch.localSha ?? selectedBranch.remoteSha ?? undefined)
+    ? gitBranchTipSha(selectedBranch, selectedBranchSection, hasUncommittedChanges)
     : undefined
 
   // Mirror desktop's pre-checkout guard — a dirty tree blocks branch switching
@@ -533,10 +540,12 @@ export default function GitView(): React.JSX.Element {
             selectedStashRef={selectedStashRef}
             dirtyCount={dirtyFileCount}
             onSelectBranch={(b, section) => {
+              const tip = gitBranchTipSha(b, section, hasUncommittedChanges)
               setSelectedBranchName(b.name)
               setSelectedBranchSection(section)
               setSelectedStashRef(undefined)
-              selectCommit(undefined)
+              selectCommit(tip)
+              setBranchFocus((prev) => ({ sha: tip, key: (prev?.key ?? 0) + 1 }))
             }}
             onDoubleClickBranch={(b) => onDoubleClickBranch(b.name)}
             onContextMenuBranch={(b, section, at) => openBranchMenu(b.name, section, at)}
@@ -544,6 +553,7 @@ export default function GitView(): React.JSX.Element {
               setSelectedStashRef(ref)
               setSelectedBranchName(undefined)
               setSelectedBranchSection(undefined)
+              setBranchFocus(undefined)
               selectCommit(undefined)
             }}
           />
@@ -611,7 +621,12 @@ export default function GitView(): React.JSX.Element {
               <LogPanel
                 renderCommitRef={renderCommitRef}
                 selectedCommitSha={selectedCommitSha}
-                scrollToSha={resolvedLinkSha ?? (linkedCommitSha ? undefined : branchTipSha)}
+                scrollToSha={
+                  branchFocus
+                    ? branchFocus.sha
+                    : (resolvedLinkSha ?? (linkedCommitSha ? undefined : branchTipSha))
+                }
+                {...(branchFocus ? { scrollKey: branchFocus.key } : {})}
                 onContextMenuRef={onContextMenuRef}
                 onSelectCommit={selectCommit}
                 onSelectBranchBySha={onSelectBranchBySha}

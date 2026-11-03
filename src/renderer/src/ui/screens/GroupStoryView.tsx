@@ -2,9 +2,9 @@ import { useCallback } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { GroupStoryScreen } from 'thefactory-ui/web'
 import { renderLaunchModelChip } from '@ui/components/agents/RunModelChipConnected'
-import { useGroupMembers } from './GroupStoriesView'
+import { useGroupMembers } from './useGroupMembers'
 
-/** One group story's page: its parts by step, Edit, Delete and Run. */
+/** One group story's page: its parts by step, Edit, Delete and Run, and back to the group's Stories. */
 export default function GroupStoryView(): React.JSX.Element | null {
   const { groupId, groupStoryId } = useParams<{ groupId: string; groupStoryId: string }>()
   const navigate = useNavigate()
@@ -21,6 +21,7 @@ export default function GroupStoryView(): React.JSX.Element | null {
     () => navigate(`/groups/${groupId}/stories`, { replace: true }),
     [navigate, groupId],
   )
+  const onBack = useCallback(() => navigate(`/groups/${groupId}/stories`), [navigate, groupId])
   if (!groupId || !groupStoryId) return null
   return (
     <div className="h-full min-h-0 overflow-auto">
@@ -31,6 +32,7 @@ export default function GroupStoryView(): React.JSX.Element | null {
         onOpenPartStory={onOpenPartStory}
         onOpenRun={onOpenRun}
         onDeleted={onDeleted}
+        onBack={onBack}
         renderModelChip={(slot) => renderLaunchModelChip(slot, { type: 'GROUP', groupId })}
       />
     </div>

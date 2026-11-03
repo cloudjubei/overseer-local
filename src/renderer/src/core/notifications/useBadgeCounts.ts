@@ -2,7 +2,7 @@ import { useCallback, useMemo } from 'react'
 import type { ChatContext } from 'thefactory-ui/headless/api'
 import { getChatContextKey } from '../chats/chatKey'
 import { isAgentRunChatContext, usePendingAsksByChat } from 'thefactory-ui/headless'
-import { useAppSettings } from 'thefactory-ui/headless'
+import { useAppSettings, useAppUnreadCounts } from 'thefactory-ui/headless'
 import { useChats } from 'thefactory-ui/headless'
 import { useGit } from 'thefactory-ui/headless'
 import { useActiveProject } from 'thefactory-ui/headless'
@@ -102,6 +102,8 @@ export function useBadgeCounts(): UseBadgeCountsApi {
   const seen = useChatsSeen()
   const pendingAsksByChat = usePendingAsksByChat()
 
+  const appUnreadFor = useAppUnreadCounts()
+
   // Annotate every chat with its derived unread + thinking state. Used twice:
   // once for the global `counts` (across all chats), and once filtered by
   // project for `getProjectBadgeState`.
@@ -182,6 +184,7 @@ export function useBadgeCounts(): UseBadgeCountsApi {
       isWorking: activityWorking,
       isPaused: activityPaused,
       unseenCount: activityUnseenForScope(activeProjectId, appLastOpenedIso),
+      unreadCount: appUnreadFor(activeProjectId),
     },
     processes: activeProjectId ? processTallies.get(activeProjectId) : undefined,
     signIn: activeProjectId ? signIns.byProject.get(activeProjectId) : undefined,
@@ -262,6 +265,7 @@ export function useBadgeCounts(): UseBadgeCountsApi {
 
       // Process runs are tracked for EVERY project (one global fetch), so unlike
       // git/tests a non-active project still reports its real counts.
+      const unread = activityEnabled ? appUnreadFor(projectId) : 0
       const processEnabled = prefs.badgesEnabled.processes !== false
       const proc = processEnabled ? processTallies.get(projectId) : undefined
 
@@ -273,6 +277,7 @@ export function useBadgeCounts(): UseBadgeCountsApi {
           running: activityLiveForScope(projectId),
           paused: activityPausedForScope(projectId),
           unseen,
+          unread,
         },
         process: {
           running: proc?.running ?? 0,
@@ -297,6 +302,7 @@ export function useBadgeCounts(): UseBadgeCountsApi {
       activityPausedForScope,
       activityUnseenForScope,
       appLastOpenedForProject,
+      appUnreadFor,
       branches,
       status,
       lastRun,

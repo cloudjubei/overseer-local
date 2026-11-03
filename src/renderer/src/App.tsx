@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect } from 'react'
 import ProjectReferenceRendering from './ui/components/ProjectReferenceRendering'
 import {
   Navigate,
@@ -207,27 +207,9 @@ function MainShell(): React.JSX.Element {
             ? tabParam
             : 'stories'
 
-  // Track the URL's projectId across renders. Only sync URL → state when
-  // the URL itself just changed (e.g. browser back/forward or deep link),
-  // NOT when `activeProjectId` changed via a sidebar click — in that case
-  // the click already updated state and called `navigate()`, and the URL
-  // takes an extra render to reflect the new path. Without this guard the
-  // URL-sync effect fires on that intermediate render with the OLD URL,
-  // reverting `activeProjectId` back to the previous project and locking
-  // every project-dependent context into an oscillation. The URL the app
-  // opens on is a change too, and a change waits until its project has loaded.
-  const lastUrlProjectIdRef = useRef(projectId)
-  const pendingUrlProjectIdRef = useRef(projectId)
   useEffect(() => {
-    if (lastUrlProjectIdRef.current !== projectId) {
-      lastUrlProjectIdRef.current = projectId
-      pendingUrlProjectIdRef.current = projectId
-    }
-    const target = pendingUrlProjectIdRef.current
-    if (!target) return
-    if (!projects.some((p) => p.id === target)) return
-    pendingUrlProjectIdRef.current = undefined
-    if (target !== activeProjectId) setActiveProjectId(target)
+    if (!projectId || projectId === activeProjectId) return
+    if (projects.some((p) => p.id === projectId)) setActiveProjectId(projectId)
   }, [projectId, projects, activeProjectId, setActiveProjectId])
 
   useEffect(() => {
