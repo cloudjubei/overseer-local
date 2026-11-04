@@ -361,6 +361,7 @@ export default function Sidebar({
                   tab.key,
                   getGroupChatBadge(activeGroupId),
                   getGroupBadgeState(activeGroupId, []).signIn.expired,
+                  getGroupBadgeState(activeGroupId, []).process.waiting,
                 )}
                 badgeColors={badgeColors}
                 look={badgeLook}

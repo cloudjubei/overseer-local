@@ -10,11 +10,17 @@ import { UsageSettings } from 'thefactory-ui/web'
 import { SavedRulesSettings } from 'thefactory-ui/web'
 import { GitCredentialsSettings } from 'thefactory-ui/web'
 import { WebSearchSettings } from 'thefactory-ui/web'
+import { VideoSettings } from 'thefactory-ui/web'
 import { DatabaseSettings } from 'thefactory-ui/web'
 import { ProviderConnectionsSettings } from 'thefactory-ui/web'
 import { ProcessesView } from 'thefactory-ui/web'
 import { PROCESS_LINK_PARAM } from 'thefactory-ui/headless'
-import { AgentTypeSettings, GroupTicketSettings, ProjectTicketSettings } from 'thefactory-ui/web'
+import {
+  AgentTypeSettings,
+  GroupTicketSettings,
+  McpServerSettings,
+  ProjectTicketSettings,
+} from 'thefactory-ui/web'
 import {
   IconBarChart,
   IconBell,
@@ -29,10 +35,12 @@ import {
   IconRobot,
   IconSearch,
   IconShield,
+  IconVideo,
   IconWorkflow,
 } from 'thefactory-ui/web/icons'
 
 import DeveloperSettings from '@ui/components/settings/DeveloperSettings'
+import { useNavigateToResource } from '@ui/hooks/useNavigateToResource'
 import { getChatContext, getChatContextKey } from '@core/chats/chatKey'
 
 // Settings Categories
@@ -66,6 +74,7 @@ const CATEGORIES = [
     icon: <IconSearch className="h-4 w-4" />,
     accent: 'orange',
   },
+  { id: 'video', label: 'Video', icon: <IconVideo className="h-4 w-4" />, accent: 'teal' },
   {
     id: 'database',
     label: 'Database',
@@ -114,6 +123,7 @@ export default function SettingsView({ scope }: { scope: SettingsScope }): React
   const queryTab = searchParams.get('tab')
   const linkedProcessId = searchParams.get(PROCESS_LINK_PARAM)
   const navigate = useNavigate()
+  const navigateToResource = useNavigateToResource()
   const openChat = (chatContextId: string): void => {
     const context = getChatContext(chatContextId)
     if (!context) return
@@ -171,12 +181,14 @@ export default function SettingsView({ scope }: { scope: SettingsScope }): React
           {activeCategory === 'project' && scope.kind === 'project' && (
             <div className="flex flex-col gap-8">
               <ProjectTicketSettings projectId={scope.projectId} />
+              <McpServerSettings owner={{ kind: 'project', projectId: scope.projectId }} />
               <AgentTypeSettings owner={{ kind: 'project', projectId: scope.projectId }} />
             </div>
           )}
           {activeCategory === 'group' && scope.kind === 'group' && (
             <div className="flex flex-col gap-8">
               <GroupTicketSettings groupId={scope.groupId} />
+              <McpServerSettings owner={{ kind: 'group', groupId: scope.groupId }} />
               <AgentTypeSettings owner={{ kind: 'group', groupId: scope.groupId }} />
             </div>
           )}
@@ -203,6 +215,11 @@ export default function SettingsView({ scope }: { scope: SettingsScope }): React
           )}
           {activeCategory === 'tickets' && <ProviderConnectionsSettings />}
           {activeCategory === 'websearch' && <WebSearchSettings />}
+          {activeCategory === 'video' && (
+            <VideoSettings
+              onOpenChat={(context) => navigateToResource({ kind: 'chat', context })}
+            />
+          )}
           {activeCategory === 'database' && <DatabaseSettings />}
         </div>
       )}

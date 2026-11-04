@@ -28,6 +28,7 @@ import {
 import { scopeSignInNames, useExpiredSignIns } from 'thefactory-ui/headless'
 import {
   chatBadgeInputOf,
+  useGroupSignOffCounts,
   useProcessRunChatNews,
   useProcessStopClock,
 } from 'thefactory-ui/headless'
@@ -165,6 +166,7 @@ export function useBadgeCounts(): UseBadgeCountsApi {
     [processRuns, stopNow, runChatNews],
   )
   const signIns = useExpiredSignIns(annotatedChats, processRuns)
+  const groupSignOffs = useGroupSignOffCounts()
 
   const counts = useBadgeCountsCore({
     chats: activeProjectChats,
@@ -316,7 +318,8 @@ export function useBadgeCounts(): UseBadgeCountsApi {
     (groupId: string, memberProjectIds: ReadonlyArray<string>): BadgeState => {
       const byProject: Record<string, BadgeState> = {}
       for (const pid of memberProjectIds) byProject[pid] = getProjectBadgeState(pid)
-      const agg = aggregateGroupBadgeState(memberProjectIds, byProject)
+      const signOffs = prefs.badgesEnabled.processes !== false ? groupSignOffs.get(groupId) : 0
+      const agg = aggregateGroupBadgeState(memberProjectIds, byProject, signOffs)
       // Fold in the group's own GROUP / GROUP_TOPIC chats.
       const groupChat = chatBadgeFor(chatsByGroupId.get(groupId) ?? [])
       agg.chat_messages.unread += groupChat.unread
@@ -326,7 +329,15 @@ export function useBadgeCounts(): UseBadgeCountsApi {
       agg.signIn = { expired: [...new Set([...agg.signIn.expired, ...groupSignIns])] }
       return agg
     },
-    [getProjectBadgeState, chatsByGroupId, chatBadgeFor, chatEnabled, signIns],
+    [
+      getProjectBadgeState,
+      chatsByGroupId,
+      chatBadgeFor,
+      chatEnabled,
+      signIns,
+      groupSignOffs,
+      prefs.badgesEnabled.processes,
+    ],
   )
 
   const getGroupChatBadge = useCallback(

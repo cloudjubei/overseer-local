@@ -12,7 +12,6 @@ import {
   interpolatePrompt,
   type ChatBodyProps,
   type PromptVariables,
-  arrayBufferToBase64,
   useReferenceRenderer,
 } from 'thefactory-ui/web'
 import type { ChatContext } from 'thefactory-ui/headless/api'
@@ -89,7 +88,6 @@ export default function ChatBodyForContext({
     restartLastTurn,
     abortChat,
     deleteLastMessage,
-    uploadAttachment,
     getEffectiveChatSettings,
   } = useChats()
   const { cancelRun } = useAgents()
@@ -306,10 +304,19 @@ export default function ChatBodyForContext({
   })
 
   // ---- File attachment ---------------------------------------------------
-  const onUploadAttachment = useCallback(
-    async (file: File): Promise<string | undefined> =>
-      uploadAttachment(context, file.name, arrayBufferToBase64(await file.arrayBuffer())),
-    [uploadAttachment, context],
+  const settingsOwnerPath = context.projectId
+    ? `/projects/${context.projectId}`
+    : context.groupId
+      ? `/groups/${context.groupId}`
+      : project && `/projects/${project.id}`
+  const videoAttachments = useMemo(
+    () => ({
+      context,
+      ...(settingsOwnerPath
+        ? { onOpenSetup: () => navigate(`${settingsOwnerPath}/settings?tab=video`) }
+        : {}),
+    }),
+    [context, settingsOwnerPath, navigate],
   )
   const { token, baseUrl } = useAuth()
   // A restored draft's image chips load their thumbnails from the project's
@@ -535,7 +542,7 @@ export default function ChatBodyForContext({
         onCancelCredentialCapture={cancelCapture}
         onDeleteLastMessage={isAgentRunChat || isRunningAgent ? undefined : onDeleteLastMessage}
         onRestartTurn={isAgentRunChat || isRunningAgent ? undefined : onRestartTurn}
-        canSend={activeLLMConfig !== null && !awaitingFeatureRequest}
+        canSend={(activeLLMConfig !== null || !!chat?.cliRunner) && !awaitingFeatureRequest}
         leadingContent={featureRequestCard}
         numberMessagesToSend={completionSettings?.numberMessagesToSend}
         lastReadIso={lastReadIso}
@@ -554,8 +561,8 @@ export default function ChatBodyForContext({
           onChangeAttachments: composer.setAttachments,
           onSearchReferences: references.searchWork,
           onSearchHandles: references.searchHandles,
-          onUploadAttachment,
-          onAddAttachment: composer.addAttachment,
+          attachmentUploads: composer.uploads,
+          videoAttachments,
           getAttachmentPreviewUrl,
           dropTargetTitle,
           suggestedActions,

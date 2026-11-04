@@ -32,6 +32,7 @@ Top-Level Layout
     - components/ui: Local-only UI pieces — wrappers (`FileMentionsTextarea`, `FileSelector`, `RichText`) and project-specific composites (`CommandMenu`, `ContextInfoButton`, `ErrorBubble`, `DiagnosticsOverlay`, `ShortcutsHelp`). The icon set, the project-icon picker registry, primitive components and screen CSS all live in `thefactory-ui` — see [thefactory-ui/docs/ARCHITECTURE.md](../../thefactory-ui/docs/ARCHITECTURE.md).
       - Directive: When adding an icon, add it to `thefactory-ui/src/web/icons/` and the `PROJECT_ICON_REGISTRY` in `thefactory-ui/src/web/compound/projectIcons.tsx`, then `npm run build` in the package. Never re-introduce a local icon barrel in this repo.
     - screens/git/: Git workflows UI (Git view tabs, merge modal, and future conflict resolution).
+    - served/: What the browser build on the fake backend swaps in for Electron's bridge (see `vite.config.ts`); never part of the desktop app.
     - assets/: Renderer-local static assets (e.g., icons, sounds); new sounds for notifications live under `src/renderer/src/assets/sounds/`.
   - tools/: Developer and agent tooling (preview analyzer, factory integration, helpers).
   - git-monitor/: Main process git monitoring manager (fetch/poll branches) with renderer service (gitMonitorService).

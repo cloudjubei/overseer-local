@@ -103,6 +103,21 @@ The exception is deliberately narrow — only pure functions whose result must m
 - **Tests.** `npm run test` (vitest). Covers main-process `authStore`, the API layer (`WsClient`), and the lifted core/UI headless pieces (chat key, badge math, file utilities, shortcuts, hook tests). Per [memory `no_frontend_unit_tests`](../../../.claude/projects/-Users-cloud-Documents-Work-thefactory-tools/memory/feedback_no_frontend_unit_tests.md): UI components in `src/renderer/src/ui/` are not unit-tested; logical pieces under `core/` and `api/` are.
 - **Packaging.** `electron-builder` produces signed installers (mac/win/linux). Outstanding cleanup items live in [docs/implementation-plan.md](./implementation-plan.md) (build + packaging cleanup task).
 
+## Verifying on the fake backend
+
+`factory.webApp` in `package.json` tells verify how to serve the renderer in a plain browser on the fake backend, so a run proves desktop's screens on fake data and never touches a real backend, token or anyone's data. It is the same declaration web has: tools runs `fake:backend`, then `vite build` and `vite preview`, passing a throwaway `VITE_API_BASE_URL` and `VITE_BEARER_TOKEN`.
+
+`vite.config.ts` is that served build and nothing else; the desktop app is only ever built by `electron.vite.config.ts`. The served build swaps four modules for what is in [`src/renderer/src/served/`](../src/renderer/src/served/), by alias, so the desktop app's code holds no env path at all. [`servedBuild.test.ts`](../servedBuild.test.ts) keeps it that way, and `readServedAuth` refuses to run beside an Electron bridge, or on a token or URL no serve would make.
+
+What needs Electron is not faked. It stays with the person's final run in the real app:
+
+| Needs Electron                                   | In the served build                            |
+| ------------------------------------------------ | ---------------------------------------------- |
+| `LoginScreen` (saves to `safeStorage`)           | Says it needs the desktop app                  |
+| Developer → backend connection (`safeStorage`)   | Says it needs the desktop app                  |
+| Chat mic (macOS Dictation over `systemDictation`) | Button shows; pressing it says the same        |
+| Window chrome: links opened through `shell`, dock icon, unsaved-changes dialog, file-drop guard | Not there: the browser's own behaviour stands |
+
 ## Conceptual diagram
 
 ```
