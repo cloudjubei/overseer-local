@@ -1,11 +1,11 @@
 import { useNavigate } from 'react-router-dom'
 import { useProjectsGroups } from 'thefactory-ui/headless'
 import { useProjects } from 'thefactory-ui/headless'
-import { GroupHome, type GroupHomeProjectCard } from 'thefactory-ui/web'
+import { GroupHome, GroupHomeConnected, type GroupHomeProjectCard } from 'thefactory-ui/web'
 
 /**
- * Landing page for a project group. Wraps the shared `GroupHome` primitive
- * with web-specific data resolution + react-router navigation.
+ * A project group's home. Wraps the shared `GroupHomeConnected` with web-specific
+ * data resolution + react-router navigation.
  */
 export default function GroupHomeView(): React.JSX.Element {
   const { groups, activeGroupId } = useProjectsGroups()
@@ -28,11 +28,14 @@ export default function GroupHomeView(): React.JSX.Element {
     }))
 
   return (
-    <GroupHome
+    <GroupHomeConnected
+      groupId={group.id}
       title={group.title}
       typeTag={`${group.type} group`}
       projects={memberProjects}
       onSelectProject={(p) => navigate(`/projects/${p.id}/stories`)}
+      onSelectRun={(runId, projectId) => navigate(`/projects/${projectId}/process-runs/${runId}`)}
+      onSelectGroupRun={(id) => navigate(`/groups/${group.id}/processes/${id}`)}
     />
   )
 }

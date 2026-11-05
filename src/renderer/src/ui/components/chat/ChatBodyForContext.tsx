@@ -545,6 +545,7 @@ export default function ChatBodyForContext({
         canSend={(activeLLMConfig !== null || !!chat?.cliRunner) && !awaitingFeatureRequest}
         leadingContent={featureRequestCard}
         numberMessagesToSend={completionSettings?.numberMessagesToSend}
+        contextBoundary={chat?.contextBoundary}
         lastReadIso={lastReadIso}
         onAtBottomChange={onAtBottomChange}
         onReadLatest={onReadLatest}

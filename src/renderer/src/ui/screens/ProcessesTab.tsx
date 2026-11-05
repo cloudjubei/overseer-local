@@ -33,11 +33,10 @@ export default function ProcessesTab({
   const navigateToGroupRun = useNavigateToGroupRun()
 
   const onSelectRun = useCallback(
-    (runId: string) => {
-      if (!projectId) return
-      navigate(`/projects/${projectId}/process-runs/${runId}`)
+    (runId: string, runProjectId: string) => {
+      navigate(`/projects/${runProjectId}/process-runs/${runId}`)
     },
-    [navigate, projectId],
+    [navigate],
   )
 
   const onOpenSettings = useCallback(() => {

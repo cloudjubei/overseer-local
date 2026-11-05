@@ -9,13 +9,15 @@
       via LoginScreen / BackendConnectionPanel — could be localhost or any
       remote host). `frame-src` permits HTTP(S) so the project "App" tab can
       frame the backend's `/projects/:id/view/*` surface (same user-configured
-      host as `connect-src`). Scripts and styles stay scoped to 'self' /
+      host as `connect-src`). `img-src` and `media-src` permit HTTP(S) so a
+      chat's poster and video load from that host by signed URL. Scripts and
+      styles stay scoped to 'self' /
       'unsafe-inline' to match what Vite + thefactory-ui emit.
       https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP
     -->
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' http: https: ws: wss:; frame-src 'self' http: https:"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: http: https:; media-src 'self' blob: http: https:; font-src 'self' data:; connect-src 'self' http: https: ws: wss:; frame-src 'self' http: https:"
     />
   </head>
 

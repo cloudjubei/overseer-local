@@ -19,6 +19,7 @@ import {
   AgentTypeSettings,
   GroupTicketSettings,
   McpServerSettings,
+  ProjectDeviceSettings,
   ProjectTicketSettings,
 } from 'thefactory-ui/web'
 import {
@@ -181,6 +182,7 @@ export default function SettingsView({ scope }: { scope: SettingsScope }): React
           {activeCategory === 'project' && scope.kind === 'project' && (
             <div className="flex flex-col gap-8">
               <ProjectTicketSettings projectId={scope.projectId} />
+              <ProjectDeviceSettings projectId={scope.projectId} />
               <McpServerSettings owner={{ kind: 'project', projectId: scope.projectId }} />
               <AgentTypeSettings owner={{ kind: 'project', projectId: scope.projectId }} />
             </div>
