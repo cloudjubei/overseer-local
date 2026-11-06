@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import ProjectReferenceRendering from './ui/components/ProjectReferenceRendering'
 import {
   Navigate,
@@ -87,6 +87,8 @@ import StoriesView from '@ui/screens/StoriesView'
 import ProjectAppTab from '@ui/screens/ProjectAppTab'
 import TestsView from '@ui/screens/TestsView'
 import ToolsView from '@ui/screens/ToolsView'
+
+const GroupTicketsView = lazy(() => import('@ui/screens/GroupTicketsView'))
 
 /**
  * Desktop's `App.tsx`. Mirrors [web's same-named file](../../../../thefactory-overseer-web/src/App.tsx)
@@ -299,6 +301,11 @@ function GroupShell(): React.JSX.Element {
             {tab === 'home' && <GroupHomeView />}
             {tab === 'chat' && <GroupChatView />}
             {tab === 'stories' && (groupStoryId ? <GroupStoryView /> : <GroupStoriesView />)}
+            {tab === 'tickets' && (
+              <Suspense fallback={null}>
+                <GroupTicketsView />
+              </Suspense>
+            )}
             {tab === 'notes' && <GroupNotesView />}
             {tab === 'tools' && <ToolsView />}
             {tab === 'processes' && <GroupProcessesView />}

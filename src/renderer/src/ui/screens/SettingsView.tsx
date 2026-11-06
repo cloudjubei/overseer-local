@@ -21,6 +21,7 @@ import {
   McpServerSettings,
   ProjectDeviceSettings,
   ProjectTicketSettings,
+  SignOffOutputSettings,
 } from 'thefactory-ui/web'
 import {
   IconBarChart,
@@ -184,6 +185,7 @@ export default function SettingsView({ scope }: { scope: SettingsScope }): React
               <ProjectTicketSettings projectId={scope.projectId} />
               <ProjectDeviceSettings projectId={scope.projectId} />
               <McpServerSettings owner={{ kind: 'project', projectId: scope.projectId }} />
+              <SignOffOutputSettings owner={{ kind: 'project', projectId: scope.projectId }} />
               <AgentTypeSettings owner={{ kind: 'project', projectId: scope.projectId }} />
             </div>
           )}
@@ -191,6 +193,7 @@ export default function SettingsView({ scope }: { scope: SettingsScope }): React
             <div className="flex flex-col gap-8">
               <GroupTicketSettings groupId={scope.groupId} />
               <McpServerSettings owner={{ kind: 'group', groupId: scope.groupId }} />
+              <SignOffOutputSettings owner={{ kind: 'group', groupId: scope.groupId }} />
               <AgentTypeSettings owner={{ kind: 'group', groupId: scope.groupId }} />
             </div>
           )}
