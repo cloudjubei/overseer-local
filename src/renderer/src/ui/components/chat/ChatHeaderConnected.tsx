@@ -11,6 +11,7 @@ import {
   isGlobalChat,
   chatProcessRunId,
   useAppSettings,
+  useChatContextTickets,
   useChatHeaderView,
   useChatNotifyLevel,
   useChats,
@@ -149,6 +150,7 @@ export default function ChatHeaderConnected({
     }
   }
 
+  const tickets = useChatContextTickets(context, chat)
   const contextInfo = (
     <ContextInfoButton
       storyId={context.storyId}
@@ -158,6 +160,7 @@ export default function ChatHeaderConnected({
         ...(chat?.aboutRun ? { aboutRun: chat.aboutRun } : {}),
       })}
       onOpenProcessRun={(id) => navigate(`/projects/${context.projectId}/process-runs/${id}`)}
+      tickets={tickets}
       label={view.title}
     />
   )
