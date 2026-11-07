@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import {
   RUN_CHAT_PLACEHOLDER,
   RUN_CHAT_TITLE,
+  useProjectWorkLaunch,
   type ProcessNodeRunRef,
 } from 'thefactory-ui/headless'
 import type { ChatContext } from 'thefactory-ui/headless/api'
@@ -10,7 +11,10 @@ import { getChatContext, getChatContextKey } from '@core/chats/chatKey'
 import { ProcessRunsView } from 'thefactory-ui/web'
 import ChatBodyForContext from '@ui/components/chat/ChatBodyForContext'
 import ChatPanelBody from '@ui/components/chat/ChatPanelBody'
-import { renderRunModelChip } from '@ui/components/agents/RunModelChipConnected'
+import {
+  renderLaunchModelChip,
+  renderRunModelChip,
+} from '@ui/components/agents/RunModelChipConnected'
 import { useNavigateToGroupRun } from '@ui/hooks/useNavigateToGroupRun'
 
 export type ProcessesTabProps = {
@@ -92,6 +96,8 @@ export default function ProcessesTab({
     [navigate, projectId],
   )
 
+  const workLaunch = useProjectWorkLaunch(projectId)
+
   if (!projectId) return null
 
   return (
@@ -105,6 +111,11 @@ export default function ProcessesTab({
       onOpenChat={onOpenChat}
       renderChat={renderChat}
       renderModelChip={renderRunModelChip}
+      launch={{
+        chatRunner: workLaunch.chatRunner,
+        agent: workLaunch.chatAgent,
+        renderModelChip: (slot) => renderLaunchModelChip(slot, { type: 'PROJECT', projectId }),
+      }}
       onOpenGroupRun={navigateToGroupRun}
     />
   )
