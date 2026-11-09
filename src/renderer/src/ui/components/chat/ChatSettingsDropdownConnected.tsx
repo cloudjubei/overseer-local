@@ -47,7 +47,7 @@ export default function ChatSettingsDropdownConnected({
     useChats()
   const { cliRunner } = useChatCliRunner(context)
   const runner = cliRunner ? 'cli' : 'api'
-  const { catalog } = useChatToolCatalog(context, runner)
+  const { catalog, loadError, refresh } = useChatToolCatalog(context, runner)
 
   const effective = getEffectiveChatSettings(context)
   const completion = effective.completionSettings
@@ -98,6 +98,8 @@ export default function ChatSettingsDropdownConnected({
       onResetTools={() =>
         persistCompletion(resetChatToolToggles(getChatTypeSettings(context).completionSettings))
       }
+      loadError={loadError}
+      onRetry={() => void refresh()}
       toolApproval={buildChatToolApprovalToggle(completion)}
       onToolApprovalChange={async (auto) => {
         await persistCompletion(applyChatToolApprovalMode(auto))
