@@ -474,6 +474,9 @@ export default function ChatBodyForContext({
         onResolveFile={onResolveFile}
         renderReference={renderReference}
         onResourceLink={navigateToResource}
+        onOpenGroupStory={(groupId, groupStoryId) =>
+          navigate(`/groups/${groupId}/stories/${groupStoryId}`)
+        }
         renderCliRunReview={
           context.projectId
             ? (runId, review) => (

@@ -19,6 +19,7 @@ import {
 import {
   ASSISTANT_NAV_DEF,
   GROUP_TAB_DEFS,
+  groupShowsTab,
   SHELL_TAB_DEFS,
   projectShowsShellTab,
   shellTabForProject,
@@ -349,7 +350,14 @@ export default function Sidebar({
 
         {activeGroupId && (
           <Section collapsed={collapsed} divider>
-            {GROUP_TAB_DEFS.filter((tab) => !tab.hiddenInSidebar).map((tab) => (
+            {GROUP_TAB_DEFS.filter(
+              (tab) =>
+                !tab.hiddenInSidebar &&
+                groupShowsTab(
+                  tab.key,
+                  groups.find((g) => g.id === activeGroupId),
+                ),
+            ).map((tab) => (
               <NavRow
                 key={tab.key}
                 label={tab.label}
