@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect } from 'react'
+import { lazy, Suspense, useCallback, useEffect } from 'react'
 import ProjectReferenceRendering from './ui/components/ProjectReferenceRendering'
 import {
   Navigate,
@@ -25,8 +25,7 @@ import { ChatsProvider } from 'thefactory-ui/headless'
 import { CostsProvider } from 'thefactory-ui/headless'
 import { EntitiesProvider } from 'thefactory-ui/headless'
 import { FilesProvider } from 'thefactory-ui/headless'
-import { GitProvider, useGit } from 'thefactory-ui/headless'
-import { GitCredentialErrorModal } from 'thefactory-ui/web'
+import { GitProvider } from 'thefactory-ui/headless'
 import { GitCredentialsProvider } from 'thefactory-ui/headless'
 import { IngestionProvider } from 'thefactory-ui/headless'
 import { DataSourcesProvider } from 'thefactory-ui/headless'
@@ -108,6 +107,11 @@ const GroupTicketsView = lazy(() => import('@ui/screens/GroupTicketsView'))
  */
 function BackendGate(): React.JSX.Element {
   const { ready, baseUrl, token } = useAuth()
+  const navigate = useNavigate()
+  const openCredentialSettings = useCallback(
+    (projectId: string) => navigate(`/projects/${projectId}/settings?tab=github`),
+    [navigate],
+  )
   if (!ready) return <LoadingScreen label="Initializing…" />
   if (!baseUrl || !token) return <Navigate to="/login" replace />
   return (
@@ -124,7 +128,10 @@ function BackendGate(): React.JSX.Element {
                         <StoriesProvider>
                           <FilesProvider>
                             <ProjectReferenceRendering>
-                              <GitProvider storage={localStorageAdapter}>
+                              <GitProvider
+                                storage={localStorageAdapter}
+                                onOpenCredentialSettings={openCredentialSettings}
+                              >
                                 <CostsProvider>
                                   <ChatsProvider
                                     draftStorage={localStorageAdapter}
@@ -141,7 +148,6 @@ function BackendGate(): React.JSX.Element {
                                                 <ShortcutsHelp />
                                                 <CommandMenu />
                                                 <ChatDropController />
-                                                <GitCredentialErrorModalMount />
                                                 <div className="flex h-full w-full flex-col">
                                                   <DisconnectedBanner />
                                                   <div className="min-h-0 flex-1">
@@ -418,26 +424,5 @@ export default function App(): React.JSX.Element {
         </CodeBlockThemeBridge>
       </AppSettingsProviderConnected>
     </NativeDictationTriggerContext.Provider>
-  )
-}
-
-function GitCredentialErrorModalMount(): React.JSX.Element {
-  const navigate = useNavigate()
-  const { activeProjectId } = useProjects()
-  const { credentialError, clearCredentialError } = useGit()
-  return (
-    <GitCredentialErrorModal
-      isOpen={credentialError !== null}
-      onClose={clearCredentialError}
-      onOpenSettings={() => {
-        clearCredentialError()
-        if (activeProjectId) {
-          navigate(`/projects/${activeProjectId}/settings?tab=github`)
-        }
-      }}
-      op={credentialError?.op}
-      message={credentialError?.message}
-      repoUrl={credentialError?.repoUrl}
-    />
   )
 }

@@ -286,9 +286,7 @@ export default function ChatBodyForContext({
   const chatAttachmentPaths = useMemo(
     () => [
       ...new Set([
-        ...(chat?.messages ?? []).flatMap((m) =>
-          m.role === 'user' ? ((m as { files?: string[] }).files ?? []) : [],
-        ),
+        ...(chat?.messages ?? []).flatMap((m) => (m as { files?: string[] }).files ?? []),
         ...attachments,
       ]),
     ],

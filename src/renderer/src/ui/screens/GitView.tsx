@@ -9,11 +9,13 @@ import {
   mergeOutcomeLine,
   mergeSourceRef,
   useActiveProject,
+  remoteGitOpError,
   useGitWithLog,
   useGitCommitLink,
   type GitBranchMenuAction,
   type GitBranchSection,
   type GitMergeOutcomeLine,
+  type GitOpError,
 } from 'thefactory-ui/headless'
 import type { ChatContext } from 'thefactory-ui/headless/api'
 import { getChatContextKey } from '@core/chats/chatKey'
@@ -52,6 +54,7 @@ import {
 } from 'thefactory-ui/web/icons'
 import {
   CommitDialog,
+  GitErrorAlert,
   CheckoutDialog,
   CreateBranchDialog,
   LoadingScreen,
@@ -105,6 +108,7 @@ export default function GitView(): React.JSX.Element {
     deleteBranch,
     stage,
     abortMerge,
+    openCredentialSettings,
   } = useGitWithLog()
   const commitDiffFetcher = useCallback<CommitDiffFetcher>(
     async ({ baseRef, headRef, includePatch }, signal) => {
@@ -120,7 +124,7 @@ export default function GitView(): React.JSX.Element {
   )
   const [modal, setModal] = useState<Modal>(null)
   const [busy, setBusy] = useState<BusyOp>(null)
-  const [opError, setOpError] = useState<string | null>(null)
+  const [opError, setOpError] = useState<GitOpError | null>(null)
   const [selectedBranchName, setSelectedBranchName] = useState<string | undefined>()
   // Which side of a same-named branch the user picked. A branch can appear
   // in both Branches and Remotes when its local and remote SHAs differ —
@@ -324,7 +328,7 @@ export default function GitView(): React.JSX.Element {
     try {
       await op()
     } catch (err) {
-      setOpError(extractServerError(err, `Failed to ${kind}`).message)
+      setOpError(remoteGitOpError(kind, err, extractServerError(err, `Failed to ${kind}`).message))
     } finally {
       setBusy(null)
     }
@@ -332,7 +336,7 @@ export default function GitView(): React.JSX.Element {
 
   const onDoubleClickBranch = (name: string): void => {
     if (isDirty) {
-      setOpError(DIRTY_TREE_MESSAGE)
+      setOpError({ message: DIRTY_TREE_MESSAGE, credential: false })
       return
     }
     void checkout(name)
@@ -386,7 +390,7 @@ export default function GitView(): React.JSX.Element {
   const onSwitchToSelected = (): void => {
     if (!selectedBranch || selectedBranch.current) return
     if (isDirty) {
-      setOpError(DIRTY_TREE_MESSAGE)
+      setOpError({ message: DIRTY_TREE_MESSAGE, credential: false })
       return
     }
     void runOp('refresh', () => checkout(selectedBranch.name))
@@ -396,7 +400,8 @@ export default function GitView(): React.JSX.Element {
     if (!project?.repo_url) return
     const url = getPRUrl(project.repo_url, branchName, 'main')
     if (url) window.open(url, '_blank', 'noopener,noreferrer')
-    else setOpError(`Could not build PR URL for ${project.repo_url}`)
+    else
+      setOpError({ message: `Could not build PR URL for ${project.repo_url}`, credential: false })
   }
   const onCreatePR = (): void => {
     if (selectedBranch) openPullRequest(selectedBranch.name)
@@ -474,7 +479,10 @@ export default function GitView(): React.JSX.Element {
         if (op === 'pop') setSelectedStashRef(undefined)
       }
     } catch (err) {
-      setOpError(extractServerError(err, `Failed to ${op} stash`).message)
+      setOpError({
+        message: extractServerError(err, `Failed to ${op} stash`).message,
+        credential: false,
+      })
     }
   }
 
@@ -564,7 +572,10 @@ export default function GitView(): React.JSX.Element {
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
         {opError && (
           <div className="px-4 pt-3 shrink-0">
-            <Alert>{opError}</Alert>
+            <GitErrorAlert
+              error={opError}
+              {...(openCredentialSettings ? { onUpdateCredentials: openCredentialSettings } : {})}
+            />
           </div>
         )}
         {merging && (
@@ -576,7 +587,10 @@ export default function GitView(): React.JSX.Element {
               try {
                 await stage([path])
               } catch (err) {
-                setOpError(extractServerError(err, 'Failed to stage the file').message)
+                setOpError({
+                  message: extractServerError(err, 'Failed to stage the file').message,
+                  credential: false,
+                })
               }
             }}
             onCommit={() => setModal('commit')}
@@ -586,7 +600,10 @@ export default function GitView(): React.JSX.Element {
                 await abortMerge()
                 setMergeLine(null)
               } catch (err) {
-                setOpError(extractServerError(err, 'Failed to abort the merge').message)
+                setOpError({
+                  message: extractServerError(err, 'Failed to abort the merge').message,
+                  credential: false,
+                })
               }
             }}
           />
@@ -907,7 +924,13 @@ export default function GitView(): React.JSX.Element {
             await deleteBranch(confirmDeleteName, { force: forceDelete })
             if (selectedBranchName === confirmDeleteName) setSelectedBranchName(undefined)
           } catch (err) {
-            setOpError(extractServerError(err, 'Failed to delete branch').message)
+            setOpError(
+              remoteGitOpError(
+                'delete branch',
+                err,
+                extractServerError(err, 'Failed to delete branch').message,
+              ),
+            )
           } finally {
             setConfirmDeleteName(null)
           }
