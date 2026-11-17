@@ -18,6 +18,7 @@ import { PROCESS_LINK_PARAM } from 'thefactory-ui/headless'
 import {
   AgentTypeSettings,
   CapabilitySettings,
+  DeliverySettings,
   GroupTicketSettings,
   McpServerSettings,
   ProjectDeviceSettings,
@@ -187,6 +188,7 @@ export default function SettingsView({ scope }: { scope: SettingsScope }): React
               <ProjectDeviceSettings projectId={scope.projectId} />
               <McpServerSettings owner={{ kind: 'project', projectId: scope.projectId }} />
               <SignOffOutputSettings owner={{ kind: 'project', projectId: scope.projectId }} />
+              <DeliverySettings owner={{ kind: 'project', projectId: scope.projectId }} />
               <AgentTypeSettings owner={{ kind: 'project', projectId: scope.projectId }} />
               <CapabilitySettings owner={{ kind: 'project', projectId: scope.projectId }} />
             </div>
@@ -196,6 +198,7 @@ export default function SettingsView({ scope }: { scope: SettingsScope }): React
               <GroupTicketSettings groupId={scope.groupId} />
               <McpServerSettings owner={{ kind: 'group', groupId: scope.groupId }} />
               <SignOffOutputSettings owner={{ kind: 'group', groupId: scope.groupId }} />
+              <DeliverySettings owner={{ kind: 'group', groupId: scope.groupId }} />
               <AgentTypeSettings owner={{ kind: 'group', groupId: scope.groupId }} />
               <CapabilitySettings owner={{ kind: 'group', groupId: scope.groupId }} />
             </div>

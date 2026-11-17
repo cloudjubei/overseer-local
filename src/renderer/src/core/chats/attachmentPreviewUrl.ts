@@ -1,16 +1,19 @@
+import { chatFileRawUrl } from 'thefactory-ui/headless'
+import type { ChatContext } from 'thefactory-ui/headless/api'
+
 /**
- * A blob URL for a project file — a chat attachment's thumbnail — through the
- * same raw-bytes route the Files view uses. `null` when the file is gone (the
- * attachment was swept or its chat deleted).
+ * A blob URL for a chat's file — an attachment's thumbnail, a shown file's
+ * preview — read from wherever the chat keeps it: a project chat's through
+ * its project's files, a group or general chat's from its own store. `null`
+ * when the file is gone (the attachment was swept or its chat deleted).
  */
 export async function fetchAttachmentPreviewUrl(
   baseUrl: string,
-  projectId: string,
+  context: ChatContext,
   path: string,
   token: string | null,
 ): Promise<string | null> {
-  const url = `${baseUrl.replace(/\/+$/, '')}/api/v1/projects/${encodeURIComponent(projectId)}/files/raw?path=${encodeURIComponent(path)}`
-  const r = await fetch(url, {
+  const r = await fetch(chatFileRawUrl(baseUrl, context, path), {
     headers: token ? { Authorization: `Bearer ${token}` } : undefined,
   })
   if (r.status === 404) return null

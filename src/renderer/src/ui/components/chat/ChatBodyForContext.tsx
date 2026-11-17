@@ -317,15 +317,12 @@ export default function ChatBodyForContext({
     [context, settingsOwnerPath, navigate],
   )
   const { token, baseUrl } = useAuth()
-  // A restored draft's image chips load their thumbnails from the project's
-  // files; a group or general chat's attachments have no file route, so they
-  // show the plain chip.
   const getAttachmentPreviewUrl = useCallback(
     (path: string) =>
-      context.projectId && baseUrl
-        ? fetchAttachmentPreviewUrl(baseUrl, context.projectId, path, token)
+      baseUrl
+        ? fetchAttachmentPreviewUrl(baseUrl, context, path, token)
         : Promise.reject(new Error('No preview')),
-    [baseUrl, context.projectId, token],
+    [baseUrl, context, token],
   )
   const dropTargetTitle = formatChatTitle({
     context,
