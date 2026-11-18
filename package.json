@@ -68,6 +68,37 @@
     "vitest": "^3.2.4"
   },
   "factory": {
+    "verification": {
+      "policy": "require",
+      "checks": [
+        {
+          "id": "build",
+          "label": "Build and type check",
+          "kind": "command",
+          "command": "npm run build",
+          "tier": "compile"
+        },
+        {
+          "id": "unit",
+          "label": "Unit tests",
+          "kind": "command",
+          "command": "npm run test",
+          "tier": "unit"
+        },
+        {
+          "id": "lint",
+          "label": "Lint",
+          "kind": "command",
+          "command": "npm run lint"
+        },
+        {
+          "id": "format",
+          "label": "Formatting",
+          "kind": "command",
+          "command": "npx --no-install prettier --check ."
+        }
+      ]
+    },
     "webApp": {
       "framework": "vite",
       "fakeBackend": {
