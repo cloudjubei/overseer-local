@@ -5,20 +5,7 @@ import { FILE_LINE_PARAM, fileLineParam, useFiles } from 'thefactory-ui/headless
 import { useAuth } from '@core/contexts/AuthContext'
 import { FilePane as FilePaneBase } from 'thefactory-ui/web'
 
-async function fetchFileBlobUrl(
-  baseUrl: string,
-  projectId: string,
-  path: string,
-  token: string | null,
-): Promise<string> {
-  const url = `${baseUrl.replace(/\/+$/, '')}/api/v1/projects/${encodeURIComponent(projectId)}/files/raw?path=${encodeURIComponent(path)}`
-  const r = await fetch(url, {
-    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-  })
-  if (!r.ok) throw new Error(`Failed to load file (${r.status})`)
-  const blob = await r.blob()
-  return URL.createObjectURL(blob)
-}
+import { fetchFileBinaryUrl, revokeFileBinaryUrl } from '@services/fileBinaryService'
 
 export default function FilePaneConnected(): React.JSX.Element {
   const {
@@ -43,7 +30,7 @@ export default function FilePaneConnected(): React.JSX.Element {
     async (path: string) => {
       if (!projectId) throw new Error('No active project')
       if (!baseUrl) throw new Error('No backend URL configured')
-      return fetchFileBlobUrl(baseUrl, projectId, path, token)
+      return fetchFileBinaryUrl(baseUrl, projectId, path, token)
     },
     [baseUrl, projectId, token],
   )
@@ -76,7 +63,7 @@ export default function FilePaneConnected(): React.JSX.Element {
       onDelete={onDelete}
       getBinaryUrl={getBinaryUrl}
       {...(focusLine !== undefined ? { focusLine } : {})}
-      revokeBinaryUrl={(url) => URL.revokeObjectURL(url)}
+      revokeBinaryUrl={revokeFileBinaryUrl}
       fileInfo={
         meta
           ? {
