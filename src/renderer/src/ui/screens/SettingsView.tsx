@@ -22,6 +22,7 @@ import {
   GroupTicketSettings,
   McpServerSettings,
   ProjectDeviceSettings,
+  ProjectServeSettings,
   ProjectTicketSettings,
   SignOffOutputSettings,
 } from 'thefactory-ui/web'
@@ -200,6 +201,7 @@ export default function SettingsView({ scope }: { scope: SettingsScope }): React
             <div className="flex flex-col gap-8">
               <ProjectTicketSettings projectId={scope.projectId} />
               <ProjectDeviceSettings projectId={scope.projectId} />
+              <ProjectServeSettings projectId={scope.projectId} />
               <McpServerSettings owner={{ kind: 'project', projectId: scope.projectId }} />
               <SignOffOutputSettings owner={{ kind: 'project', projectId: scope.projectId }} />
               <DeliverySettings owner={{ kind: 'project', projectId: scope.projectId }} />
