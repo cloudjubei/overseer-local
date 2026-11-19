@@ -231,7 +231,9 @@ export default function SettingsView({ scope }: { scope: SettingsScope }): React
               onOpenChat={(context) => navigateToResource({ kind: 'chat', context })}
             />
           )}
-          {activeCategory === 'database' && <DatabaseSettings />}
+          {activeCategory === 'database' && (
+            <DatabaseSettings projectId={scope.kind === 'project' ? scope.projectId : undefined} />
+          )}
         </div>
       )}
     </CollapsibleSidebar>
