@@ -44,13 +44,21 @@ import {
 } from 'thefactory-ui/web/icons'
 
 import DeveloperSettings from '@ui/components/settings/DeveloperSettings'
+import GlobalCrossProjectSettings from '@ui/components/settings/GlobalCrossProjectSettings'
+import GlobalNotificationSettings from '@ui/components/settings/GlobalNotificationSettings'
 import { useNavigateToResource } from '@ui/hooks/useNavigateToResource'
 import { getChatContext, getChatContextKey } from '@core/chats/chatKey'
 
-// Settings Categories
+const LLM_CATEGORY = {
+  id: 'llms',
+  label: 'LLMs',
+  icon: <IconRobot className="h-4 w-4" />,
+  accent: 'teal',
+} as const
+
 const CATEGORIES = [
   { id: 'visual', label: 'Visual', icon: <IconPalette className="h-4 w-4" />, accent: 'purple' },
-  { id: 'llms', label: 'LLMs', icon: <IconRobot className="h-4 w-4" />, accent: 'teal' },
+  LLM_CATEGORY,
   { id: 'usage', label: 'Usage', icon: <IconBarChart className="h-4 w-4" />, accent: 'teal' },
   {
     id: 'notifications',
@@ -99,8 +107,9 @@ const CATEGORIES = [
   },
 ] as const
 
-/** Whose Settings these are: the project or group the user opened them from. */
+/** App-wide settings, or settings opened for a project or group. */
 export type SettingsScope =
+  | { kind: 'global' }
   | { kind: 'project'; projectId: string }
   | { kind: 'group'; groupId: string }
 
@@ -120,6 +129,11 @@ const SCOPE_CATEGORIES = {
   },
 } as const
 
+// The blueprint library edits the active project's definitions; keep it in scoped Settings.
+const GLOBAL_CATEGORIES = [
+  LLM_CATEGORY,
+  ...CATEGORIES.filter(({ id }) => id !== 'llms' && id !== 'processes'),
+]
 type CategoryId = (typeof CATEGORIES)[number]['id'] | 'project' | 'group'
 
 export default function SettingsView({ scope }: { scope: SettingsScope }): React.JSX.Element {
@@ -138,14 +152,14 @@ export default function SettingsView({ scope }: { scope: SettingsScope }): React
       navigate(`/groups/${context.groupId}/chat/${key}`)
     }
   }
-  const scopeCategory = SCOPE_CATEGORIES[scope.kind]
-  const categories = [scopeCategory, ...CATEGORIES]
+  const categories =
+    scope.kind === 'global' ? GLOBAL_CATEGORIES : [SCOPE_CATEGORIES[scope.kind], ...CATEGORIES]
   const isCategory = (value: string | null): value is CategoryId =>
     value !== null && categories.some((c) => c.id === value)
   // The URL is the single source of truth — no local state to avoid the brief
   // "wrong tab visible" flash that happens when local state and the URL update
-  // on different ticks. Opens on the project's or group's own section.
-  const activeCategory: CategoryId = isCategory(queryTab) ? queryTab : scopeCategory.id
+  // on different ticks. Without a matching tab, open the first category.
+  const activeCategory: CategoryId = isCategory(queryTab) ? queryTab : categories[0].id
 
   const onSelect = (next: string): void => {
     if (!isCategory(next) || next === activeCategory) return
@@ -172,7 +186,7 @@ export default function SettingsView({ scope }: { scope: SettingsScope }): React
         </div>
       ) : activeCategory === 'developer' ? (
         <div className="h-full w-full min-h-0 overflow-hidden">
-          <DeveloperSettings />
+          <DeveloperSettings global={scope.kind === 'global'} />
         </div>
       ) : activeCategory === 'processes' ? (
         // The blueprint library is its own two-pane master/detail, so it wants
@@ -208,12 +222,13 @@ export default function SettingsView({ scope }: { scope: SettingsScope }): React
           )}
           {activeCategory === 'notifications' && (
             <div className="flex flex-col gap-8">
-              <NotificationSettings />
+              {scope.kind === 'global' ? <GlobalNotificationSettings /> : <NotificationSettings />}
               <StorageUsageSettings />
             </div>
           )}
           {activeCategory === 'usage' && <UsageSettings />}
-          {activeCategory === 'cross-project' && <CrossProjectSettings />}
+          {activeCategory === 'cross-project' &&
+            (scope.kind === 'global' ? <GlobalCrossProjectSettings /> : <CrossProjectSettings />)}
           {activeCategory === 'rules' && <SavedRulesSettings onOpenChat={openChat} />}
           {activeCategory === 'github' && (
             // Electron renderer can't redirect cleanly (file:// host) — use

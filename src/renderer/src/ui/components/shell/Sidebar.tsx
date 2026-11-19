@@ -54,6 +54,8 @@ type Props = {
   activeGroupTab?: GroupTabKey
   /** The Assistant page is on screen. */
   assistantActive?: boolean
+  /** The app-wide Settings page is on screen. */
+  globalSettingsActive?: boolean
 }
 
 const COLLAPSED_PX = 64
@@ -83,6 +85,7 @@ export default function Sidebar({
   activeGroupId,
   activeGroupTab,
   assistantActive = false,
+  globalSettingsActive = false,
 }: Props): React.JSX.Element {
   const navigate = useNavigate()
   const location = useLocation()
@@ -508,18 +511,29 @@ export default function Sidebar({
 
       {(() => {
         const settingsTab = SHELL_TAB_DEFS.find((t) => t.key === 'settings')
-        if (!settingsTab || !(projectId || activeGroupId)) return null
+        if (!settingsTab) return null
+        const global = assistantActive || globalSettingsActive || (!projectId && !activeGroupId)
         return (
           <div className="shrink-0 border-t py-1" style={{ borderColor: 'var(--border-subtle)' }}>
             <NavRow
               label={settingsTab.label}
               icon={navIcon(settingsTab.icon)}
-              isActive={activeGroupId ? activeGroupTab === 'settings' : activeTab === 'settings'}
-              onClick={() =>
-                activeGroupId
-                  ? navigate(`/groups/${activeGroupId}/settings${settingsSearch}`)
-                  : projectId && navigate(`/projects/${projectId}/settings${settingsSearch}`)
+              isActive={
+                global
+                  ? globalSettingsActive
+                  : activeGroupId
+                    ? activeGroupTab === 'settings'
+                    : activeTab === 'settings'
               }
+              onClick={() => {
+                if (globalSettingsActive) return
+                const path = global
+                  ? '/settings'
+                  : activeGroupId
+                    ? `/groups/${activeGroupId}/settings`
+                    : `/projects/${projectId}/settings`
+                navigate(`${path}${settingsSearch}`)
+              }}
               collapsed={collapsed}
               indicator={settingsIndicator}
               badgeColors={badgeColors}

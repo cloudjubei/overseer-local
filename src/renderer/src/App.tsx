@@ -58,6 +58,7 @@ import {
   type ShellTabKey,
 } from 'thefactory-ui/headless'
 import { useApplyTheme } from '@ui/hooks/useApplyTheme'
+import GlobalSettingsShell from '@ui/components/shell/GlobalSettingsShell'
 import AssistantView from '@ui/screens/AssistantView'
 import ChatView from '@ui/screens/ChatView'
 import FilesView from '@ui/screens/FilesView'
@@ -387,6 +388,7 @@ export default function App(): React.JSX.Element {
                         <Route path="/" element={<AuthedRoot />} />
                         <Route path="/assistant/:contextKey" element={<AssistantShell />} />
                         <Route path="/assistant" element={<AssistantShell />} />
+                        <Route path="/settings" element={<GlobalSettingsShell />} />
                         <Route path="/groups/:groupId/chat/:contextKey" element={<GroupShell />} />
                         <Route
                           path="/groups/:groupId/stories/:groupStoryId"

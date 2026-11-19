@@ -7,8 +7,7 @@ import {
 } from 'thefactory-ui/headless'
 import BackendConnectionPanel from './BackendConnectionPanel'
 import LinkRepoPanel from './LinkRepoPanel'
-
-const GIT_SUBTAB = 'git'
+import { isOverseerGitSettings, OVERSEER_GIT_SUBTAB } from './developerSettingsRoute'
 
 /**
  * Debug mode: reveal the per-run DIAGNOSTICS (flight recorder) on the process
@@ -56,23 +55,22 @@ function DeveloperToolsPanel(): React.JSX.Element {
   )
 }
 
-export default function DeveloperSettings(): React.JSX.Element {
+export default function DeveloperSettings({ global }: { global: boolean }): React.JSX.Element {
   const [searchParams, setSearchParams] = useSearchParams()
-  const subtab = searchParams.get('subtab')
 
   const openGit = (): void => {
     const next = new URLSearchParams(searchParams)
-    next.set('subtab', GIT_SUBTAB)
-    setSearchParams(next)
+    next.set('subtab', OVERSEER_GIT_SUBTAB)
+    setSearchParams(next, { replace: global })
   }
 
   const backToList = (): void => {
     const next = new URLSearchParams(searchParams)
     next.delete('subtab')
-    setSearchParams(next)
+    setSearchParams(next, { replace: global })
   }
 
-  if (subtab === GIT_SUBTAB) {
+  if (isOverseerGitSettings(searchParams)) {
     return (
       <OverseerGitProvider>
         <OverseerGitView onBack={backToList} />
@@ -89,7 +87,7 @@ export default function DeveloperSettings(): React.JSX.Element {
         <BackendConnectionPanel />
         <OverseerPanel />
         <OverseerGitPanel onOpen={openGit} />
-        <LinkRepoPanel />
+        {!global && <LinkRepoPanel />}
         <DebugModePanel />
         <DeveloperToolsPanel />
       </div>
