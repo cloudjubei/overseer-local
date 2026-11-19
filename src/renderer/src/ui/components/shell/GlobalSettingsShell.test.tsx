@@ -10,6 +10,23 @@ vi.mock('@ui/components/settings/BackendConnectionPanel', () => ({ default: () =
 vi.mock('thefactory-ui/web', async (importOriginal) => ({
   ...(await importOriginal<typeof import('thefactory-ui/web')>()),
   OverseerPanel: () => null,
+  OverseerGitPanel: ({ onOpen }: { onOpen: () => void }) => (
+    <button type="button" onClick={onOpen}>
+      Open Git
+    </button>
+  ),
+  OverseerGitView: ({ onBack }: { onBack: () => void }) => (
+    <>
+      <h2>Overseer Git</h2>
+      <button type="button" onClick={onBack}>
+        Back
+      </button>
+    </>
+  ),
+}))
+vi.mock('thefactory-ui/headless', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('thefactory-ui/headless')>()),
+  OverseerGitProvider: ({ children }: { children: React.ReactNode }) => children,
 }))
 
 function renderSettings(path: string, fromAssistant: boolean): void {
