@@ -89,6 +89,7 @@ import TestsView from '@ui/screens/TestsView'
 import ToolsView from '@ui/screens/ToolsView'
 
 const GroupTicketsView = lazy(() => import('@ui/screens/GroupTicketsView'))
+const GroupTicketView = lazy(() => import('@ui/screens/GroupTicketView'))
 
 /**
  * Desktop's `App.tsx`. Mirrors [web's same-named file](../../../../thefactory-overseer-web/src/App.tsx)
@@ -270,12 +271,14 @@ function GroupShell(): React.JSX.Element {
     contextKey,
     groupRunId,
     groupStoryId,
+    ticketKey,
   } = useParams<{
     groupId: string
     tab: string
     contextKey: string
     groupRunId: string
     groupStoryId: string
+    ticketKey: string
   }>()
   const { setActiveGroupId } = useProjectsGroups()
   const navigate = useNavigate()
@@ -290,14 +293,16 @@ function GroupShell(): React.JSX.Element {
       ? 'processes'
       : groupStoryId
         ? 'stories'
-        : isGroupTabKey(tabParam)
-          ? tabParam
-          : 'home'
+        : ticketKey
+          ? 'tickets'
+          : isGroupTabKey(tabParam)
+            ? tabParam
+            : 'home'
 
   useEffect(() => {
-    if (!groupId || contextKey || groupRunId || groupStoryId) return
+    if (!groupId || contextKey || groupRunId || groupStoryId || ticketKey) return
     if (!isGroupTabKey(tabParam)) navigate(`/groups/${groupId}/home`, { replace: true })
-  }, [groupId, tabParam, contextKey, groupRunId, groupStoryId, navigate])
+  }, [groupId, tabParam, contextKey, groupRunId, groupStoryId, ticketKey, navigate])
 
   return (
     <div className="flex flex-row w-full h-full overflow-hidden">
@@ -310,7 +315,7 @@ function GroupShell(): React.JSX.Element {
             {tab === 'stories' && (groupStoryId ? <GroupStoryView /> : <GroupStoriesView />)}
             {tab === 'tickets' && (
               <Suspense fallback={null}>
-                <GroupTicketsView />
+                {ticketKey ? <GroupTicketView /> : <GroupTicketsView />}
               </Suspense>
             )}
             {tab === 'notes' && <GroupNotesView />}
@@ -396,6 +401,10 @@ export default function App(): React.JSX.Element {
                         />
                         <Route
                           path="/groups/:groupId/processes/:groupRunId"
+                          element={<GroupShell />}
+                        />
+                        <Route
+                          path="/groups/:groupId/tickets/:ticketKey"
                           element={<GroupShell />}
                         />
                         <Route path="/groups/:groupId/:tab" element={<GroupShell />} />
