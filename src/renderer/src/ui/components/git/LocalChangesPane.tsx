@@ -30,6 +30,8 @@ function entryToLocalFile(entry: LocalDiffEntry): GitLocalFileEntry {
     status: entry.status,
     ...(entry.oldPath ? { oldPath: entry.oldPath } : {}),
     ...(entry.renameFrom ? { renameFrom: entry.renameFrom } : {}),
+    ...(entry.additions !== undefined ? { additions: entry.additions } : {}),
+    ...(entry.deletions !== undefined ? { deletions: entry.deletions } : {}),
     patch: entry.patch,
     binary: entry.binary,
     ...(entry.patchSuppressed ? { patchSuppressed: entry.patchSuppressed } : {}),
