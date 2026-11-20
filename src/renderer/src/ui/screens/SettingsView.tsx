@@ -21,6 +21,7 @@ import {
   DeliverySettings,
   GroupTicketSettings,
   McpServerSettings,
+  ProjectCheckHostConsentSettings,
   ProjectDeviceSettings,
   ProjectServeSettings,
   ProjectTicketSettings,
@@ -202,6 +203,7 @@ export default function SettingsView({ scope }: { scope: SettingsScope }): React
               <ProjectTicketSettings projectId={scope.projectId} />
               <ProjectDeviceSettings projectId={scope.projectId} />
               <ProjectServeSettings projectId={scope.projectId} />
+              <ProjectCheckHostConsentSettings projectId={scope.projectId} />
               <McpServerSettings owner={{ kind: 'project', projectId: scope.projectId }} />
               <SignOffOutputSettings owner={{ kind: 'project', projectId: scope.projectId }} />
               <DeliverySettings owner={{ kind: 'project', projectId: scope.projectId }} />
