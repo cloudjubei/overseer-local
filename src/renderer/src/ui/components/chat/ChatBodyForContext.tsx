@@ -367,11 +367,12 @@ export default function ChatBodyForContext({
   const videoAttachments = useMemo(
     () => ({
       context,
+      marks: composer.videoMarks,
       ...(settingsOwnerPath
         ? { onOpenSetup: () => navigate(`${settingsOwnerPath}/settings?tab=video`) }
         : {}),
     }),
-    [context, settingsOwnerPath, navigate],
+    [context, composer.videoMarks, settingsOwnerPath, navigate],
   )
   const { token, baseUrl } = useAuth()
   const getAttachmentPreviewUrl = useCallback(
