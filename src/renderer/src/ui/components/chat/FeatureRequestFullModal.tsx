@@ -4,10 +4,10 @@ import {
   featureRequestChatContext,
   useCrossProjectRequests,
   useFeatureRequestStart,
-  useIncomingFeatureRequest,
   useProjectWorkLaunch,
 } from 'thefactory-ui/headless'
 import { useNavigateToResource } from '@ui/hooks/useNavigateToResource'
+import { useReconciledIncomingFeatureRequest } from '@ui/hooks/useReconciledIncomingFeatureRequest'
 import { renderLaunchModelChip } from '@ui/components/agents/RunModelChipConnected'
 
 /**
@@ -23,7 +23,7 @@ export default function FeatureRequestFullModal({
   onClose: () => void
 }): React.JSX.Element {
   const navigateToResource = useNavigateToResource()
-  const incoming = useIncomingFeatureRequest(requestId)
+  const incoming = useReconciledIncomingFeatureRequest(requestId)
   const { requestById } = useCrossProjectRequests()
   const { request } = incoming
   const storyId = request?.handling?.storyId

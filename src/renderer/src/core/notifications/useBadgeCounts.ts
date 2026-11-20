@@ -19,6 +19,7 @@ import {
   EMPTY_BADGE_STATE,
   markSeen,
   resolveTriState,
+  scopeRowIndicator,
   useBadgeCountsCore,
   type BadgeChatInput,
   type BadgeCounts,
@@ -34,7 +35,17 @@ import {
 } from 'thefactory-ui/headless'
 import { readChatsSeen, useAppTabLastOpened, useChatsSeen, writeChatsSeen } from 'thefactory-ui/web'
 
+import { useRequestBadgeCounts } from './useRequestBadgeCounts'
+
 export type { BadgeCounts }
+
+export type ScopeBadgeState = BadgeState & { inFlightRequests: number }
+
+const EMPTY_SCOPE_BADGE_STATE: ScopeBadgeState = { ...EMPTY_BADGE_STATE, inFlightRequests: 0 }
+
+export function scopeBadgeIndicator(state: ScopeBadgeState): ReturnType<typeof scopeRowIndicator> {
+  return scopeRowIndicator(state, state.inFlightRequests)
+}
 
 export type UseBadgeCountsApi = {
   /** Active-project / global counts (single source for sidebar header + favicon). */
@@ -45,10 +56,10 @@ export type UseBadgeCountsApi = {
    *  the same `badgesEnabled` toggles `counts` uses. Git + tests are scoped
    *  to the ACTIVE project (those contexts only track the active one), so
    *  non-active projects report zero on those channels. */
-  getProjectBadgeState: (projectId: string) => BadgeState
+  getProjectBadgeState: (projectId: string) => ScopeBadgeState
   /** Group badge state — member projects rolled up via the shared
    *  `aggregateGroupBadgeState`, plus the group's own chat unread. */
-  getGroupBadgeState: (groupId: string, memberProjectIds: ReadonlyArray<string>) => BadgeState
+  getGroupBadgeState: (groupId: string, memberProjectIds: ReadonlyArray<string>) => ScopeBadgeState
   /** The group's OWN chats — what its Chat tab counts, so reading them clears it. */
   getGroupChatBadge: (groupId: string) => BadgeState['chat_messages']
 }
@@ -81,6 +92,7 @@ export function useBadgeCounts(): UseBadgeCountsApi {
   // Every project's live runs in one fetch, kept live over WS; bucketed by
   // project below so each row (and the group rollup) counts only its own.
   const { runs: processRuns } = useProcessRuns()
+  const inFlightRequestsByProject = useRequestBadgeCounts()
   const {
     runningCount: activityRunningCount,
     working: activityWorking,
@@ -238,8 +250,8 @@ export function useBadgeCounts(): UseBadgeCountsApi {
   )
 
   const getProjectBadgeState = useCallback(
-    (projectId: string): BadgeState => {
-      if (!projectId) return EMPTY_BADGE_STATE
+    (projectId: string): ScopeBadgeState => {
+      if (!projectId) return EMPTY_SCOPE_BADGE_STATE
 
       const chat = chatBadgeFor(chatsByProjectId.get(projectId) ?? [])
 
@@ -272,6 +284,7 @@ export function useBadgeCounts(): UseBadgeCountsApi {
       const proc = processEnabled ? processTallies.get(projectId) : undefined
 
       return {
+        inFlightRequests: inFlightRequestsByProject.get(projectId) ?? 0,
         chat_messages: chat,
         git: { incoming, uncommitted },
         tests: { failing: failingTests },
@@ -311,13 +324,19 @@ export function useBadgeCounts(): UseBadgeCountsApi {
       prefs.badgesEnabled,
       prefs.gitBadgeSubToggles,
       processTallies,
+      inFlightRequestsByProject,
     ],
   )
 
   const getGroupBadgeState = useCallback(
-    (groupId: string, memberProjectIds: ReadonlyArray<string>): BadgeState => {
+    (groupId: string, memberProjectIds: ReadonlyArray<string>): ScopeBadgeState => {
       const byProject: Record<string, BadgeState> = {}
-      for (const pid of memberProjectIds) byProject[pid] = getProjectBadgeState(pid)
+      let inFlightRequests = 0
+      for (const pid of memberProjectIds) {
+        const state = getProjectBadgeState(pid)
+        byProject[pid] = state
+        inFlightRequests += state.inFlightRequests
+      }
       const signOffs = prefs.badgesEnabled.processes !== false ? groupSignOffs.get(groupId) : 0
       const agg = aggregateGroupBadgeState(memberProjectIds, byProject, signOffs)
       // Fold in the group's own GROUP / GROUP_TOPIC chats.
@@ -327,7 +346,7 @@ export function useBadgeCounts(): UseBadgeCountsApi {
       agg.chat_messages.thinking = agg.chat_messages.thinking || groupChat.thinking
       const groupSignIns = chatEnabled ? (signIns.byGroup.get(groupId) ?? []) : []
       agg.signIn = { expired: [...new Set([...agg.signIn.expired, ...groupSignIns])] }
-      return agg
+      return { ...agg, inFlightRequests }
     },
     [
       getProjectBadgeState,

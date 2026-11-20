@@ -5,7 +5,11 @@ import { useAppSettings } from 'thefactory-ui/headless'
 import { prefetchProjectStories, useProjects, useRequestLeave } from 'thefactory-ui/headless'
 import { useProjectsGroups, type ProjectsGroup } from 'thefactory-ui/headless'
 import { useSeedActivities } from 'thefactory-ui/headless'
-import { useBadgeCounts } from '@core/notifications/useBadgeCounts'
+import {
+  scopeBadgeIndicator,
+  useBadgeCounts,
+  type ScopeBadgeState,
+} from '@core/notifications/useBadgeCounts'
 import type { BadgeColor, BadgeColorCategory } from '@core/types/settings'
 import { Button, NavIndicator, renderProjectIcon, useChatsSeen } from 'thefactory-ui/web'
 import {
@@ -29,13 +33,11 @@ import {
   inkBadgeLook,
   navRowTitle,
   projectTabToGroupTab,
-  scopeRowIndicator,
   settingsNavIndicator,
   shellTabIndicator,
   splitGroupsAndProjects,
   useAssistantConversations,
   useStoredSignInsExpired,
-  type BadgeState,
   type GroupTabKey,
   type InkBadgeLook,
   type NavRowIndicator,
@@ -108,7 +110,7 @@ export default function Sidebar({
   const expiredSignIns = useStoredSignInsExpired()
   const settingsIndicator = settingsNavIndicator(expiredSignIns)
   const settingsSearch = expiredSignIns.length > 0 ? '?tab=llms' : ''
-  const groupRollup = (g: ProjectsGroup, open: boolean): BadgeState =>
+  const groupRollup = (g: ProjectsGroup, open: boolean): ScopeBadgeState =>
     getGroupBadgeState(g.id, g.type === 'SCOPE' || open ? [] : g.projects)
 
   // Stamp the app tab "seen" while the user is on it (on open + when a run settles as they watch),
@@ -415,7 +417,7 @@ export default function Sidebar({
                       isActive
                       collapsed
                       onClick={() => undefined}
-                      indicator={scopeRowIndicator(groupRollup(g, false))}
+                      indicator={scopeBadgeIndicator(groupRollup(g, false))}
                       badgeColors={badgeColors}
                       look={badgeLook}
                     />
@@ -430,7 +432,7 @@ export default function Sidebar({
                     onClick={() => onSelectProject(activeProject.id)}
                     collapsed
                     dataLocation={activeProject.dataLocation}
-                    indicator={scopeRowIndicator(getProjectBadgeState(activeProject.id))}
+                    indicator={scopeBadgeIndicator(getProjectBadgeState(activeProject.id))}
                     badgeColors={badgeColors}
                     look={badgeLook}
                   />
@@ -452,7 +454,7 @@ export default function Sidebar({
                     onIntent={() => void prefetchProjectStories(p.id)}
                     collapsed={collapsed}
                     dataLocation={p.dataLocation}
-                    indicator={scopeRowIndicator(getProjectBadgeState(p.id))}
+                    indicator={scopeBadgeIndicator(getProjectBadgeState(p.id))}
                     badgeColors={badgeColors}
                     look={badgeLook}
                   />
@@ -462,7 +464,7 @@ export default function Sidebar({
                 // A SCOPE group, and an OPEN folder, show just the group's OWN
                 // state; a CLOSED folder rolls its member projects up too.
                 const groupIsActive = g.id === activeGroupId
-                const groupIndicator = scopeRowIndicator(groupRollup(g, openGroupIds.has(g.id)))
+                const groupIndicator = scopeBadgeIndicator(groupRollup(g, openGroupIds.has(g.id)))
                 return g.type === 'SCOPE' ? (
                   <GroupRow
                     key={g.id}
@@ -653,7 +655,7 @@ function GroupBlock({
   onDragOver: (e: DragEvent<HTMLElement>) => void
   onDrop: (group: ProjectsGroup, targetIdx: number) => (e: DragEvent<HTMLElement>) => void
   /** Per-project badge resolver from the parent's `useBadgeCounts`. */
-  getProjectBadgeState: (projectId: string) => BadgeState
+  getProjectBadgeState: (projectId: string) => ScopeBadgeState
   badgeColors: BadgeColors
   look: InkBadgeLook
   /** The header row's indicator. The parent resolves it from the group's OWN
@@ -742,7 +744,7 @@ function GroupBlock({
                 onDragOver={onDragOver}
                 onDrop={onDrop(group, idx)}
                 dataLocation={p.dataLocation}
-                indicator={scopeRowIndicator(getProjectBadgeState(p.id))}
+                indicator={scopeBadgeIndicator(getProjectBadgeState(p.id))}
                 badgeColors={badgeColors}
                 look={look}
               />

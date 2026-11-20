@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useNavigateToResource } from '@ui/hooks/useNavigateToResource'
 import { useNavigateToGroupRun } from '@ui/hooks/useNavigateToGroupRun'
+import { useLinkedChatActivity } from '@ui/hooks/useLinkedChatActivity'
+import { useReconciledIncomingFeatureRequest } from '@ui/hooks/useReconciledIncomingFeatureRequest'
 import { useNavigate } from 'react-router-dom'
 import {
   ChatBody,
@@ -14,7 +16,11 @@ import {
   type PromptVariables,
   useReferenceRenderer,
 } from 'thefactory-ui/web'
-import type { ChatContext } from 'thefactory-ui/headless/api'
+import {
+  abortChatCompletion,
+  extractErrorMessage,
+  type ChatContext,
+} from 'thefactory-ui/headless/api'
 import {
   featureRequestChatContext,
   useAgents,
@@ -27,8 +33,9 @@ import { chatClosure } from 'thefactory-ui/headless'
 import { useCredentialCaptures } from 'thefactory-ui/headless'
 import {
   FEATURE_REQUEST_COMPOSER_HINT,
+  FEATURE_REQUEST_OPEN_FULL_LABEL,
+  canStartFeatureRequestAgain,
   hiddenFeatureRequestIntro,
-  useIncomingFeatureRequest,
 } from 'thefactory-ui/headless'
 import { useFiles } from 'thefactory-ui/headless'
 import { usePendingToolGrants } from 'thefactory-ui/headless'
@@ -40,9 +47,9 @@ import {
   useReferences,
   useStories,
 } from 'thefactory-ui/headless'
-import { useProcessRuns } from 'thefactory-ui/headless'
+import { useProcessRun, useProcessRuns } from 'thefactory-ui/headless'
 import { useActiveProject } from 'thefactory-ui/headless'
-import { getChatContextKey } from '@core/chats/chatKey'
+import { getChatContext, getChatContextKey } from '@core/chats/chatKey'
 import { fetchAttachmentPreviewUrl } from '@core/chats/attachmentPreviewUrl'
 import { useAuth } from '@core/contexts/AuthContext'
 import { markChatSeen } from '@core/notifications/useBadgeCounts'
@@ -175,12 +182,8 @@ export default function ChatBodyForContext({
   }, [chat?.messages, effectivePrompt, context.type])
 
   const isAgentRunChat = context.type === 'AGENT_RUN_STORY' || context.type === 'AGENT_RUN_FEATURE'
-  // A FEATURE_REQUEST chat hosts its accepted run in-place, so while that run is live it is
-  // read-only just like an agent-run chat.
   const isFeatureRequestChat = context.type === 'FEATURE_REQUEST'
-  const isRunningAgent =
-    (isAgentRunChat || isFeatureRequestChat) &&
-    (chat?.state === 'created' || chat?.state === 'running')
+  const isRunningAgent = isAgentRunChat && (chat?.state === 'created' || chat?.state === 'running')
   // A one-shot agent run (implement / verify / report) takes NO user input — once
   // it is terminal the composer must not appear. Its way onward is the pipeline,
   // not a reply, so the composer slot carries a link back to the story's process.
@@ -194,10 +197,57 @@ export default function ChatBodyForContext({
   // Receiver-side FEATURE_REQUEST chat: the request is the conversation's opening card, and while
   // it waits for a decision the composer only says so. Until the record loads, an empty transcript
   // stands for "still waiting", so the composer never flashes open first.
-  const incomingRequest = useIncomingFeatureRequest(
+  const incomingRequest = useReconciledIncomingFeatureRequest(
     context.type === 'FEATURE_REQUEST' ? context.featureRequestId : undefined,
   )
   const featureRequest = incomingRequest.request
+  // The request's outcome is authoritative even if linked activity has not caught up yet.
+  const finishedRequest =
+    featureRequest?.status === 'completed' ||
+    featureRequest?.status === 'failed' ||
+    featureRequest?.status === 'rejected'
+      ? featureRequest
+      : undefined
+  const requestWork = featureRequest?.handling?.work
+  const {
+    run: requestRun,
+    cancel: cancelRequestRun,
+    actionError,
+  } = useProcessRun(requestWork?.mode === 'process' ? requestWork.processRunId : undefined)
+  const workChat =
+    requestWork?.mode === 'chat' && requestWork.chatContextId
+      ? getChatContext(requestWork.chatContextId)
+      : undefined
+  const workChatKey = workChat ? getChatContextKey(workChat) : undefined
+  const workChatIsHere = workChatKey === contextKey
+  const linkedChatActive = useLinkedChatActivity(workChatKey)
+  const requestProcessActive =
+    requestRun?.status === 'pending' ||
+    requestRun?.status === 'running' ||
+    requestRun?.status === 'parked'
+  const requestChatActive = linkedChatActive || (workChatIsHere && liveState.isSending)
+  const workKey = `${contextKey}:${requestWork?.startedAt}:${requestWork?.chatContextId ?? requestWork?.processRunId}`
+  const [cancelState, setCancelState] = useState<{
+    key: string
+    busy?: boolean
+    error?: string
+  }>()
+  const currentCancel = cancelState?.key === workKey ? cancelState : undefined
+  const cancelRequestWork = async (): Promise<void> => {
+    setCancelState({ key: workKey, busy: true })
+    try {
+      if (requestProcessActive) {
+        await cancelRequestRun()
+      } else if (workChat && requestChatActive) {
+        await abortChatCompletion({ body: { context: workChat }, throwOnError: true })
+      }
+      setCancelState({ key: workKey })
+    } catch (err) {
+      setCancelState({ key: workKey, error: extractErrorMessage(err, 'Could not cancel work.') })
+    }
+  }
+  const isRunningRequest = !finishedRequest && (requestProcessActive || requestChatActive)
+  const requestReadOnly = isRunningRequest || !!finishedRequest
   const crossProjectRequests = useCrossProjectRequests()
   const awaitingFeatureRequest =
     isFeatureRequestChat &&
@@ -231,7 +281,14 @@ export default function ChatBodyForContext({
   })
   const attachments = composer.attachments
   const onInputChange = composer.setText
-  const onSend = composer.send
+  // Sends can also come from the transcript's review panel, not just the composer.
+  const send = composer.send
+  const onSend = useCallback<typeof send>(
+    async (text, attachments) => {
+      if (!requestReadOnly) await send(text, attachments)
+    },
+    [requestReadOnly, send],
+  )
   const onAbort = useCallback(() => {
     if (chat && isAgentRunChat) return cancelRun(chat)
     return abortChat(context, cliRunId)
@@ -240,7 +297,7 @@ export default function ChatBodyForContext({
     () => deleteLastMessage(context),
     [deleteLastMessage, context],
   )
-  // Withheld on an agent-run / live feature-request chat: those transcripts are
+  // Withheld on an agent-run / read-only feature-request chat: those transcripts are
   // written by a run, not by chat sends, so re-triggering the chat agent on them
   // is not the same action at all.
   const onRestartTurn = useCallback(() => restartLastTurn(context), [restartLastTurn, context])
@@ -358,53 +415,89 @@ export default function ChatBodyForContext({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contextKey])
 
-  const inputOverride = isRunningAgent ? (
-    <div
-      className="flex items-center justify-between gap-2 px-4 py-3 border-t text-xs shrink-0"
-      style={{ borderColor: 'var(--border-subtle)', background: 'var(--surface-muted)' }}
-    >
-      <div className="flex items-center gap-2">
-        <span
-          aria-hidden
-          className="inline-block h-2 w-2 rounded-full animate-ping"
-          style={{ background: 'var(--accent-primary)' }}
-        />
-        <span>Agent is running. Chat is read-only.</span>
-      </div>
-      {chat && isAgentRunChat ? (
-        <Button size="sm" variant="ghost" onClick={() => void cancelRun(chat)}>
-          Cancel run
-        </Button>
-      ) : null}
-    </div>
-  ) : isTerminalAgentRun ? (
-    // A finished one-shot run takes no input. The approval-panel branch outranks
-    // inputOverride, so a still-pending tool-approval on a direct agent run is
-    // never hidden behind it.
-    <div
-      className="flex items-center justify-between gap-2 px-4 py-3 border-t text-xs shrink-0"
-      style={{ borderColor: 'var(--border-subtle)', background: 'var(--surface-muted)' }}
-    >
-      {storyProcessRun ? (
-        <>
-          <span>This is one step of a process. Its outcome is decided in the pipeline.</span>
+  const finishedOutcome = finishedRequest ? `Feature request ${finishedRequest.status}.` : ''
+  const finishedNextStep = !finishedRequest
+    ? ''
+    : finishedRequest.status === 'completed'
+      ? 'Review the outcome in the full request.'
+      : finishedRequest.status === 'rejected'
+        ? 'Review the decision in the full request.'
+        : canStartFeatureRequestAgain(finishedRequest)
+          ? 'Use Start again in the full request to retry the work.'
+          : 'Review what happened in the full request.'
+
+  const inputOverride =
+    isRunningAgent || isRunningRequest ? (
+      <div
+        className="flex items-center justify-between gap-2 px-4 py-3 border-t text-xs shrink-0"
+        style={{ borderColor: 'var(--border-subtle)', background: 'var(--surface-muted)' }}
+      >
+        <div className="flex items-center gap-2">
+          <span
+            aria-hidden
+            className="inline-block h-2 w-2 rounded-full animate-ping"
+            style={{ background: 'var(--accent-primary)' }}
+          />
+          <div>
+            <span>Agent is running. Chat is read-only.</span>
+            {isRunningRequest && (currentCancel?.error || actionError) ? (
+              <div role="alert">{currentCancel?.error || actionError}</div>
+            ) : null}
+          </div>
+        </div>
+        {chat && isAgentRunChat ? (
+          <Button size="sm" variant="ghost" onClick={() => void cancelRun(chat)}>
+            Cancel run
+          </Button>
+        ) : isRunningRequest ? (
           <Button
             size="sm"
-            variant="secondary"
-            onClick={() =>
-              onBackToPipeline
-                ? onBackToPipeline()
-                : navigate(`/projects/${context.projectId}/process-runs/${storyProcessRun.id}`)
-            }
+            variant="ghost"
+            disabled={currentCancel?.busy}
+            onClick={() => void cancelRequestWork()}
           >
-            Back to pipeline →
+            Cancel run
           </Button>
-        </>
-      ) : (
-        <span>This run is finished.</span>
-      )}
-    </div>
-  ) : undefined
+        ) : null}
+      </div>
+    ) : isTerminalAgentRun ? (
+      // A finished one-shot run takes no input. The approval-panel branch outranks
+      // inputOverride, so a still-pending tool-approval on a direct agent run is
+      // never hidden behind it.
+      <div
+        className="flex items-center justify-between gap-2 px-4 py-3 border-t text-xs shrink-0"
+        style={{ borderColor: 'var(--border-subtle)', background: 'var(--surface-muted)' }}
+      >
+        {storyProcessRun ? (
+          <>
+            <span>This is one step of a process. Its outcome is decided in the pipeline.</span>
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() =>
+                onBackToPipeline
+                  ? onBackToPipeline()
+                  : navigate(`/projects/${context.projectId}/process-runs/${storyProcessRun.id}`)
+              }
+            >
+              Back to pipeline →
+            </Button>
+          </>
+        ) : (
+          <span>This run is finished.</span>
+        )}
+      </div>
+    ) : finishedRequest ? (
+      <div className="flex items-center justify-between gap-2 px-4 py-3 border-t border-(--border-subtle) bg-(--surface-muted) text-xs shrink-0">
+        <div>
+          <div className="font-semibold">{finishedOutcome}</div>
+          <div>{finishedNextStep}</div>
+        </div>
+        <Button size="sm" variant="secondary" onClick={() => setFullRequestId(finishedRequest.id)}>
+          {FEATURE_REQUEST_OPEN_FULL_LABEL}
+        </Button>
+      </div>
+    ) : undefined
 
   const placedStoryId = featureRequest?.handling?.storyId
   const featureRequestCard = featureRequest ? (
@@ -453,6 +546,12 @@ export default function ChatBodyForContext({
 
   return (
     <>
+      {/* Keep the live region mounted before the outcome arrives, independent of the composer slot. */}
+      {isFeatureRequestChat && (
+        <div className="sr-only" role="status" aria-atomic="true">
+          {finishedOutcome ? `${finishedOutcome} ${finishedNextStep}` : null}
+        </div>
+      )}
       <ChatBody
         chatId={contextKey}
         {...(context.projectId ? { projectId: context.projectId } : {})}
@@ -480,7 +579,7 @@ export default function ChatBodyForContext({
                   framed={false}
                   runId={runId}
                   projectId={context.projectId!}
-                  onSendMessage={(text) => onSend(text, [])}
+                  onSendMessage={requestReadOnly ? undefined : (text) => onSend(text, [])}
                   onDraftMessage={review.draftMessage}
                   onOpenGit={() => navigate(`/projects/${context.projectId}/git`)}
                   onBackToPipeline={(id) =>
@@ -529,7 +628,7 @@ export default function ChatBodyForContext({
         )}
         onSend={onSend}
         onAbort={onAbort}
-        isBusy={liveState.isSending || isRunActive}
+        isBusy={liveState.isSending || (workChatIsHere ? linkedChatActive : isRunActive)}
         activeCliRunId={cliRunId}
         previewTool={
           context.projectId ? (_id, toolName, args) => previewTool(toolName, args) : undefined
@@ -538,9 +637,13 @@ export default function ChatBodyForContext({
         credentialCaptures={captures}
         onSubmitCredentialCapture={submitCapture}
         onCancelCredentialCapture={cancelCapture}
-        onDeleteLastMessage={isAgentRunChat || isRunningAgent ? undefined : onDeleteLastMessage}
-        onRestartTurn={isAgentRunChat || isRunningAgent ? undefined : onRestartTurn}
-        canSend={(activeLLMConfig !== null || !!chat?.cliRunner) && !awaitingFeatureRequest}
+        onDeleteLastMessage={isAgentRunChat || requestReadOnly ? undefined : onDeleteLastMessage}
+        onRestartTurn={isAgentRunChat || requestReadOnly ? undefined : onRestartTurn}
+        canSend={
+          (activeLLMConfig !== null || !!chat?.cliRunner) &&
+          !awaitingFeatureRequest &&
+          !requestReadOnly
+        }
         leadingContent={featureRequestCard}
         numberMessagesToSend={completionSettings?.numberMessagesToSend}
         contextBoundary={chat?.contextBoundary}
@@ -551,7 +654,7 @@ export default function ChatBodyForContext({
         inputOverride={inputOverride}
         inputValue={composer.text}
         onInputChange={onInputChange}
-        pendingQueue={composer.queue}
+        pendingQueue={requestReadOnly ? undefined : composer.queue}
         inputProps={{
           filePaths: paths,
           ...(references.searchFiles ? { searchFiles: references.searchFiles } : {}),
