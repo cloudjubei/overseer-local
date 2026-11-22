@@ -11,7 +11,7 @@ import { getChatContextKey } from '@core/chats/chatKey'
 
 /**
  * Route an in-app `overseer://…` resource link (F.2) to its screen. Aligned targets (project / story /
- * feature / app tab / process run) navigate to the shared path; a process opens in the project's
+ * feature / app tab / process run / evidence) navigate to the shared path; a process opens in the project's
  * Settings › Processes on it; a chat target is encoded into this client's chat URL
  * (`:contextKey` = the URL-encoded full chat key) — an Assistant conversation's on the Assistant page. Handed to `<ChatBody onResourceLink={…}>` so links
  * the assistant emits open in-app instead of a new browser tab. Desktop peer of overseer-web.

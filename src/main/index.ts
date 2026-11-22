@@ -1,12 +1,37 @@
-import { app, shell, BrowserWindow, nativeImage, dialog, session, type NativeImage } from 'electron'
-import { join } from 'path'
+import {
+  app,
+  shell,
+  BrowserWindow,
+  ipcMain,
+  nativeImage,
+  dialog,
+  session,
+  type NativeImage,
+} from 'electron'
+import { join, resolve } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { registerAuthIpc } from './registerAuthIpc'
 import { registerSystemDictationIpc } from './registerSystemDictationIpc'
 import { isStrayFileNavigation } from './navigationGuard'
+import { registerDeepLinks } from './registerDeepLinks'
 import appIconPath from '../../resources/icon.png?asset'
 
 const getAppIcon = (): NativeImage => nativeImage.createFromPath(appIconPath)
+
+let appWindow: BrowserWindow | null = null
+
+const deepLinks = registerDeepLinks({
+  app,
+  ipcMain,
+  environment: {
+    argv: process.argv,
+    defaultApp: process.defaultApp === true,
+    execPath: process.execPath,
+    resolvePath: (path) => resolve(path),
+  },
+  getWindow: () => appWindow,
+  openWindow: () => void createWindow(),
+})
 
 async function createWindow(): Promise<void> {
   const mainWindow = new BrowserWindow({
@@ -19,6 +44,11 @@ async function createWindow(): Promise<void> {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false,
     },
+  })
+  appWindow = mainWindow
+  deepLinks?.watchWindow(mainWindow)
+  mainWindow.on('closed', () => {
+    if (appWindow === mainWindow) appWindow = null
   })
 
   mainWindow.on('ready-to-show', () => {
@@ -72,7 +102,7 @@ async function createWindow(): Promise<void> {
   }
 }
 
-app.whenReady().then(async () => {
+async function startApp(): Promise<void> {
   electronApp.setAppUserModelId('com.thefactory.overseer.desktop')
 
   registerAuthIpc()
@@ -107,7 +137,9 @@ app.whenReady().then(async () => {
   app.on('activate', function () {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
-})
+}
+
+if (deepLinks) app.whenReady().then(startApp)
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {

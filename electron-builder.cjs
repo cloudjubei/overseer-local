@@ -15,6 +15,7 @@ module.exports = {
   files: ['out/**/*', 'package.json', 'resources/**'],
   asar: true,
   asarUnpack: ['resources/**'],
+  protocols: [{ name: 'Overseer link', schemes: ['overseer'], role: 'Viewer' }],
   win: {
     executableName: 'Overseer',
     icon: 'build/icon.ico',

@@ -1,6 +1,7 @@
 import { createRequire } from 'node:module'
 import { resolve } from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
+import { DEEP_LINK_PROTOCOL } from './src/main/deepLinkConstants'
 
 const configPath = resolve(__dirname, 'electron-builder.cjs')
 const require = createRequire(configPath)
@@ -12,6 +13,7 @@ type BuilderConfig = {
   productName: string
   extraMetadata: { name: string; productName: string }
   files: string[]
+  protocols: { name: string; schemes: string[]; role: string }[]
   mac: Record<string, unknown>
   win: Record<string, unknown>
   linux: Record<string, unknown>
@@ -73,5 +75,12 @@ describe('electron-builder config', () => {
     expect(config.mac.icon).toBe('build/icon.icns')
     expect(config.win.icon).toBe('build/icon.ico')
     expect(config.linux.icon).toBe('build/icon.png')
+  })
+
+  it('declares the overseer scheme so the installed app opens overseer:// links', () => {
+    const config = loadConfig({})
+    expect(config.protocols).toEqual([
+      { name: 'Overseer link', schemes: [DEEP_LINK_PROTOCOL], role: 'Viewer' },
+    ])
   })
 })

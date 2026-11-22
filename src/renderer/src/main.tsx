@@ -10,7 +10,7 @@ import './styles/app.css'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { HashRouter } from 'react-router-dom'
-import { RouterLeaveGuard } from 'thefactory-ui/web'
+import { RouterLeaveGuard, ToastProvider } from 'thefactory-ui/web'
 import App from './App'
 
 // `HashRouter` (vs web's `BrowserRouter`) because the renderer loads from
@@ -20,7 +20,9 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <HashRouter>
       <RouterLeaveGuard>
-        <App />
+        <ToastProvider>
+          <App />
+        </ToastProvider>
       </RouterLeaveGuard>
     </HashRouter>
   </StrictMode>,

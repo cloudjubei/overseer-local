@@ -47,10 +47,12 @@ import { ShortcutsHelp } from 'thefactory-ui/web'
 import { DiagnosticsOverlay } from 'thefactory-ui/web'
 import DisconnectedBanner from '@ui/components/shell/DisconnectedBanner'
 import EventNotifier from '@ui/components/shell/EventNotifier'
+import DeepLinkOpener from '@ui/components/shell/DeepLinkOpener'
 import { ScreenErrorBoundary } from 'thefactory-ui/web'
 import Sidebar from '@ui/components/shell/Sidebar'
 import {
   ASSISTANT_NAV_DEF,
+  EVIDENCE_REFERENCE_COPY,
   isGroupTabKey,
   isShellTabKey,
   SHELL_TAB_DEFS,
@@ -74,6 +76,7 @@ import NotesView from '@ui/screens/NotesView'
 import KnowledgeView from '@ui/screens/KnowledgeView'
 import SearchView from '@ui/screens/SearchView'
 import ProcessesTab from '@ui/screens/ProcessesTab'
+import EvidenceScreen from '@ui/screens/EvidenceScreen'
 import GroupProcessesView from '@ui/screens/GroupProcessesView'
 import {
   BackendStartupGate,
@@ -146,6 +149,7 @@ function BackendGate(): React.JSX.Element {
                                             <DataSourcesProvider>
                                               <IngestionProvider>
                                                 <EventNotifier />
+                                                <DeepLinkOpener />
                                                 <DiagnosticsOverlay />
                                                 <ShortcutsHelp />
                                                 <CommandMenu />
@@ -190,12 +194,14 @@ function MainShell(): React.JSX.Element {
     storyId,
     contextKey,
     processRunId,
+    evidenceId,
   } = useParams<{
     projectId: string
     tab: string
     storyId: string
     contextKey: string
     processRunId: string
+    evidenceId: string
   }>()
   const { projects, activeProjectId, setActiveProjectId } = useProjects()
 
@@ -216,6 +222,7 @@ function MainShell(): React.JSX.Element {
           : isShellTabKey(tabParam)
             ? tabParam
             : 'stories'
+  const view: ShellTabKey | 'evidence' = evidenceId ? 'evidence' : tab
 
   useEffect(() => {
     if (!projectId || projectId === activeProjectId) return
@@ -223,38 +230,42 @@ function MainShell(): React.JSX.Element {
   }, [projectId, projects, activeProjectId, setActiveProjectId])
 
   useEffect(() => {
-    if (!projectId || storyId || contextKey || isFilesPath || processRunId) return
+    if (!projectId || storyId || contextKey || isFilesPath || processRunId || evidenceId) return
     if (!isShellTabKey(tabParam)) navigate(`/projects/${projectId}/stories`, { replace: true })
-  }, [projectId, tabParam, storyId, contextKey, isFilesPath, processRunId, navigate])
+  }, [projectId, tabParam, storyId, contextKey, isFilesPath, processRunId, evidenceId, navigate])
 
-  const screenLabel = SHELL_TAB_DEFS.find((t) => t.key === tab)?.label ?? tab
+  const screenLabel =
+    view === 'evidence'
+      ? EVIDENCE_REFERENCE_COPY.evidence
+      : (SHELL_TAB_DEFS.find((t) => t.key === view)?.label ?? view)
 
   return (
     <div className="flex flex-row w-full h-full overflow-hidden">
-      <Sidebar projectId={projectId} activeTab={tab} />
+      <Sidebar projectId={projectId} {...(view === 'evidence' ? {} : { activeTab: view })} />
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
         <div className="flex-1 min-h-0">
-          <ScreenErrorBoundary key={tab} screen={screenLabel}>
-            {tab === 'stories' && <StoriesView />}
-            {tab === 'app' && <ProjectAppTab />}
-            {tab === 'chat' && <ChatView />}
-            {tab === 'search' && <SearchView />}
-            {tab === 'files' && <FilesView />}
-            {tab === 'design' && <DesignView />}
-            {tab === 'notes' && <NotesView />}
-            {tab === 'knowledge' && <KnowledgeView />}
-            {tab === 'git' && <GitView />}
-            {tab === 'tests' && <TestsView />}
-            {tab === 'tools' && <ToolsView />}
-            {tab === 'live-data' && <LiveDataView />}
-            {tab === 'processes' && (
+          <ScreenErrorBoundary key={view} screen={screenLabel}>
+            {view === 'evidence' && <EvidenceScreen />}
+            {view === 'stories' && <StoriesView />}
+            {view === 'app' && <ProjectAppTab />}
+            {view === 'chat' && <ChatView />}
+            {view === 'search' && <SearchView />}
+            {view === 'files' && <FilesView />}
+            {view === 'design' && <DesignView />}
+            {view === 'notes' && <NotesView />}
+            {view === 'knowledge' && <KnowledgeView />}
+            {view === 'git' && <GitView />}
+            {view === 'tests' && <TestsView />}
+            {view === 'tools' && <ToolsView />}
+            {view === 'live-data' && <LiveDataView />}
+            {view === 'processes' && (
               <ProcessesTab
                 projectId={projectId}
                 {...(processRunId ? { selectedRunId: processRunId } : {})}
               />
             )}
-            {tab === 'timeline' && <ProjectTimelineView />}
-            {tab === 'settings' && projectId && (
+            {view === 'timeline' && <ProjectTimelineView />}
+            {view === 'settings' && projectId && (
               <SettingsView scope={{ kind: 'project', projectId }} />
             )}
           </ScreenErrorBoundary>
@@ -415,6 +426,10 @@ export default function App(): React.JSX.Element {
                         />
                         <Route
                           path="/projects/:projectId/process-runs/:processRunId"
+                          element={<MainShell />}
+                        />
+                        <Route
+                          path="/projects/:projectId/evidence/:evidenceId"
                           element={<MainShell />}
                         />
                         <Route
