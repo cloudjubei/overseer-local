@@ -284,9 +284,7 @@ export default function ChatBodyForContext({
   // Sends can also come from the transcript's review panel, not just the composer.
   const send = composer.send
   const onSend = useCallback<typeof send>(
-    async (text, attachments) => {
-      if (!requestReadOnly) await send(text, attachments)
-    },
+    async (text, attachments, meta) => (requestReadOnly ? false : send(text, attachments, meta)),
     [requestReadOnly, send],
   )
   const onAbort = useCallback(() => {
@@ -580,7 +578,13 @@ export default function ChatBodyForContext({
                   framed={false}
                   runId={runId}
                   projectId={context.projectId!}
-                  onSendMessage={requestReadOnly ? undefined : (text) => onSend(text, [])}
+                  onSendMessage={
+                    requestReadOnly
+                      ? undefined
+                      : async (text) => {
+                          await onSend(text, [])
+                        }
+                  }
                   onDraftMessage={review.draftMessage}
                   onOpenGit={() => navigate(`/projects/${context.projectId}/git`)}
                   onBackToPipeline={(id) =>
