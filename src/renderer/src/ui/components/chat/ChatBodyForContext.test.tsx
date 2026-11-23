@@ -230,7 +230,7 @@ describe('Feature-request chat read-only cancellation', () => {
     expect(screen.getByRole('button', { name: 'Restart turn' })).toBeVisible()
     expect(screen.getByRole('button', { name: 'Send' })).toBeVisible()
     fireEvent.click(screen.getByRole('button', { name: 'Invoke send callback' }))
-    expect(work.send).toHaveBeenCalledWith('Follow up', [])
+    expect(work.send).toHaveBeenCalledWith('Follow up', [], undefined)
   })
 
   it.each([contextKey, linkedChatKey])(
