@@ -21,7 +21,7 @@
     "build:linux": "npm run build && electron-builder --linux",
     "test": "vitest run",
     "test:watch": "vitest",
-    "fake:backend": "node node_modules/thefactory-ui/dist/fake-backend/cli.js --token-env VITE_BEARER_TOKEN"
+    "fake:backend": "node fixtures/fake-backend.mjs"
   },
   "keywords": [],
   "author": {

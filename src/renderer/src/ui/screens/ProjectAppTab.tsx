@@ -5,6 +5,7 @@ import {
   useProjectAppView,
   useProjectDataBridge,
   useAppDirtyGuard,
+  useRequestLeave,
   useAppWorkStart,
   useProjectWorkLaunch,
   useAppFeatureRequest,
@@ -44,7 +45,11 @@ import { renderLaunchModelChip } from '@ui/components/agents/RunModelChipConnect
  */
 export default function ProjectAppTab(): React.JSX.Element {
   const { projectId, project } = useActiveProject()
-  const { url, key, error } = useProjectAppView(projectId)
+  const [chatAppOpen, setChatAppOpen] = useState(false)
+  const requestLeave = useRequestLeave()
+  // The native capture boundary requires a single direct child. Unmount the
+  // regular App (with its leave guard) rather than hide a second live frame.
+  const { url, key, error } = useProjectAppView(chatAppOpen ? undefined : projectId)
   // The embedded app declares (via `overseer:app.capabilities`) whether its background activities are
   // API-only (a `requiresApi` activity, e.g. knowledge-analyze). When so, the activity chip disables CLI
   // and the bridge never sends a CLI model for this app.
@@ -56,7 +61,7 @@ export default function ProjectAppTab(): React.JSX.Element {
   // the CLI model for just those launches.
   const [cliActivities, setCliActivities] = useState<string[] | undefined>(undefined)
   const dataBridge = useProjectDataBridge(projectId, { activitiesApiOnly, cliActivities })
-  const mountKey = `${projectId ?? ''}|${url ?? ''}|${key}`
+  const mountKey = chatAppOpen ? 'chat-app-open' : `${projectId ?? ''}|${url ?? ''}|${key}`
   useEffect(() => setActivitiesUsed(true), [mountKey])
   const { handleBridgeMessage: handleAppDirty } = useAppDirtyGuard(mountKey)
   // `overseer:work.start` waits for the person's Start / Cancel over the App view — never on a timer.
@@ -243,7 +248,7 @@ export default function ProjectAppTab(): React.JSX.Element {
     <div className="flex w-full h-full bg-(--bg-surface)">
       <div className="flex-1 min-h-0">
         <ProjectAppView
-          url={url}
+          url={chatAppOpen ? undefined : url}
           remountKey={key}
           onBridgeMessage={onBridgeMessage}
           deepLink={deepLink}
@@ -299,6 +304,7 @@ export default function ProjectAppTab(): React.JSX.Element {
           context={chatContext}
           chatContextTitle={effectiveTitle}
           collapsed={collapsed}
+          appHost={{ requestOpen: requestLeave, setOpen: setChatAppOpen }}
           onCollapsedChange={setCollapsed}
         />
       )}

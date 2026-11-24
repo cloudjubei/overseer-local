@@ -5,6 +5,7 @@ import { getChatContextKey } from '@core/chats/chatKey'
 import { useRequestBadgeCounts } from '@core/notifications/useRequestBadgeCounts'
 import type { ChatContext } from 'thefactory-ui/headless/api'
 import type { ChatBodyProps } from 'thefactory-ui/web'
+import type { AppNote } from 'thefactory-ui/headless'
 import ChatBodyForContext from './ChatBodyForContext'
 
 const work = vi.hoisted(() => ({
@@ -22,7 +23,24 @@ const work = vi.hoisted(() => ({
   cancelProcess: vi.fn(),
   send: vi.fn(),
   abort: vi.fn(),
+  appAuth: undefined as string | undefined,
+  drafts: new Map<string, { appNotes?: AppNote[] }>(),
+  addNote: undefined as ((note: AppNote) => void) | undefined,
+  messageRoute: 'send',
+  sendResult: vi.fn(),
 }))
+const snapshotNote: AppNote = {
+  id: 'snapshot-note',
+  projectId: 'receiver',
+  comment: 'Unsaved marker',
+  targets: [
+    {
+      kind: 'area',
+      rect: { x: 0, y: 0, width: 10, height: 10, space: 'app-viewport' },
+    },
+  ],
+  screenshotFile: '.factory/attachments/app-snapshot.png',
+}
 const context: ChatContext = {
   type: 'FEATURE_REQUEST',
   projectId: 'receiver',
@@ -52,7 +70,18 @@ function emitTurn(chatContextId: string, active: boolean): void {
 vi.mock('react-router-dom', () => ({ useNavigate: () => vi.fn() }))
 vi.mock('@ui/hooks/useNavigateToResource', () => ({ useNavigateToResource: () => vi.fn() }))
 vi.mock('@ui/hooks/useNavigateToGroupRun', () => ({ useNavigateToGroupRun: () => vi.fn() }))
-vi.mock('@core/contexts/AuthContext', () => ({ useAuth: () => ({}) }))
+vi.mock('@core/contexts/AuthContext', () => ({ useAuth: () => ({ token: work.appAuth }) }))
+vi.mock('./ChatAppSnapshotDialog', () => ({
+  default: ({ context, addNote }: { context: ChatContext; addNote: (note: AppNote) => void }) => {
+    work.addNote = addNote
+    return (
+      <div aria-label="App for this chat" role="dialog">
+        <span>{getChatContextKey(context)}</span>
+        <button onClick={() => addNote(snapshotNote)}>Confirm snapshot</button>
+      </div>
+    )
+  },
+}))
 vi.mock('@core/notifications/useBadgeCounts', () => ({ markChatSeen: vi.fn() }))
 vi.mock('./ToolCall/renderers', () => ({ getToolHeaderPath: vi.fn(), renderToolCall: vi.fn() }))
 vi.mock('./FeatureRequestFullModal', () => ({
@@ -70,14 +99,34 @@ vi.mock('thefactory-ui/headless/api', () => ({
 }))
 vi.mock('thefactory-ui/headless', () => ({
   featureRequestChatContext: vi.fn(),
+  composerMessageRoute: () => ({ kind: work.messageRoute }),
+  useReviewChatSlot: () => ({}),
   useAgents: () => ({}),
-  useChatComposer: () => ({ attachments: [], send: work.send, queue: {} }),
+  useChatComposer: (owner: ChatContext) => ({
+    attachments: [],
+    send: work.send,
+    queue: {},
+    appNotes: work.drafts.get(getChatContextKey(owner))?.appNotes,
+    setAppNotes: (appNotes: AppNote[]) => work.drafts.set(getChatContextKey(owner), { appNotes }),
+  }),
+  setDraftAppNotes: (draft: { appNotes?: AppNote[] }, appNotes: AppNote[]) => ({
+    ...draft,
+    appNotes,
+  }),
   useCrossProjectRequests: () => ({}),
   useOpenChat: () => ({ chat: { messages: [{ role: 'assistant', content: lastMessage }] } }),
   useChats: () => ({
     activeLLMConfig: {},
     getChatLiveState: () => ({ isSending: false }),
     getEffectiveChatSettings: () => ({}),
+    getDraftState: (owner: ChatContext) => work.drafts.get(getChatContextKey(owner)) ?? {},
+    updateDraftState: (
+      owner: ChatContext,
+      update: (draft: { appNotes?: AppNote[] }) => { appNotes?: AppNote[] },
+    ) => {
+      const key = getChatContextKey(owner)
+      work.drafts.set(key, update(work.drafts.get(key) ?? {}))
+    },
   }),
   chatClosure: () => ({ locked: false }),
   useCredentialCaptures: () => ({}),
@@ -145,7 +194,8 @@ vi.mock('thefactory-ui/headless', () => ({
     cancel: work.cancelProcess,
   }),
   useProcessRuns: () => ({ runs: [] }),
-  useActiveProject: () => ({}),
+  useActiveProject: () =>
+    work.appAuth ? { project: { id: 'receiver', metadata: { hasApp: true } } } : {},
   useFeatureRequestStart: (_request: unknown, decision: { startAgain: () => Promise<void> }) => ({
     onStartAgain: decision.startAgain,
   }),
@@ -165,6 +215,31 @@ vi.mock('thefactory-ui/web', () => ({
       {props.canSend && <button>Send</button>}
       {props.pendingQueue && <button>Send queued messages</button>}
       <button onClick={() => void props.onSend('Follow up', [])}>Invoke send callback</button>
+      {props.inputProps?.onShowApp && (
+        <button onClick={props.inputProps.onShowApp}>Show app</button>
+      )}
+      {props.inputProps?.appNotes?.length ? (
+        <button
+          onClick={() =>
+            void props.onSend('Review this', [], { appNotes: props.inputProps?.appNotes })
+          }
+        >
+          Send with snapshot
+        </button>
+      ) : null}
+      {props.inputProps?.appNotes?.length ? (
+        <button
+          onClick={async () => {
+            const sent = await props.onSend('', [], { appNotes: props.inputProps?.appNotes })
+            work.sendResult(sent)
+            if (sent !== false && props.inputProps?.clearOnSend) {
+              props.inputProps?.onChangeAppNotes?.([])
+            }
+          }}
+        >
+          Send notes only
+        </button>
+      ) : null}
       {props.inputOverride}
       {props.leadingContent}
     </>
@@ -196,6 +271,11 @@ function ReceiverRunningBadge(): React.JSX.Element | null {
 describe('Feature-request chat read-only cancellation', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    work.drafts.clear()
+    work.addNote = undefined
+    work.messageRoute = 'send'
+    work.send.mockReset()
+    work.appAuth = undefined
     work.listRequests.mockReset().mockResolvedValue({ data: [] })
     work.processStatus = 'running'
     work.requestStatus = 'in_progress'
@@ -203,6 +283,88 @@ describe('Feature-request chat read-only cancellation', () => {
     work.chatContextId = undefined
     work.readTurn.mockReset().mockResolvedValue({ data: { active: false } })
     work.readCliRuns.mockReset().mockResolvedValue({ data: [] })
+  })
+
+  it('retains a confirmed app note only in the launching chat and forwards it on explicit send', () => {
+    work.appAuth = 'first-test-session'
+    work.processStatus = 'idle'
+    const first: ChatContext = { type: 'PROJECT_TOPIC', projectId: 'receiver', topicId: 'first' }
+    const second: ChatContext = { ...first, topicId: 'second' }
+    const { rerender } = render(<ChatBodyForContext context={first} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Show app' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm snapshot' }))
+    expect(work.send).not.toHaveBeenCalled()
+    expect(work.drafts.get(getChatContextKey(first))?.appNotes).toEqual([snapshotNote])
+
+    rerender(<ChatBodyForContext context={second} />)
+    expect(screen.queryByRole('dialog', { name: 'App for this chat' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Send with snapshot' })).not.toBeInTheDocument()
+    rerender(<ChatBodyForContext context={first} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Send with snapshot' }))
+    expect(work.send).toHaveBeenCalledExactlyOnceWith('Review this', [], {
+      appNotes: [snapshotNote],
+    })
+  })
+
+  it('rejects a stale launch and does not clear new picks on a later send result', async () => {
+    work.appAuth = 'test-session'
+    work.processStatus = 'idle'
+    const first: ChatContext = { type: 'PROJECT_TOPIC', projectId: 'receiver', topicId: 'first' }
+    const second: ChatContext = { ...first, topicId: 'second' }
+    const firstKey = getChatContextKey(first)
+    const picked: AppNote = {
+      id: 'element-note',
+      projectId: 'receiver',
+      targets: [{ kind: 'element', selector: '#status', outerHtml: '<p id="status">Ready</p>' }],
+      comment: 'Check this status',
+    }
+    const { rerender } = render(<ChatBodyForContext context={first} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Show app' }))
+    const stalePick = work.addNote!
+    act(() => stalePick(picked))
+    rerender(<ChatBodyForContext context={second} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Show app' }))
+    act(() => stalePick({ ...picked, id: 'stale' }))
+    expect(work.drafts.get(firstKey)?.appNotes).toEqual([picked])
+    expect(work.drafts.has(getChatContextKey(second))).toBe(false)
+
+    rerender(<ChatBodyForContext context={first} />)
+    work.send.mockResolvedValueOnce(false)
+    fireEvent.click(screen.getByRole('button', { name: 'Send notes only' }))
+    await waitFor(() => expect(work.sendResult).toHaveBeenCalledWith(false))
+    expect(work.send).toHaveBeenCalledWith('', [], { appNotes: [picked] })
+    expect(work.drafts.get(firstKey)?.appNotes).toEqual([picked])
+
+    let complete!: (sent: boolean) => void
+    work.send.mockImplementationOnce(() => new Promise<boolean>((resolve) => (complete = resolve)))
+    fireEvent.click(screen.getByRole('button', { name: 'Send notes only' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Show app' }))
+    const later = { ...picked, id: 'later' }
+    act(() => work.addNote?.(later))
+    rerender(<ChatBodyForContext context={second} />)
+    await act(async () => complete(true))
+    expect(work.sendResult).toHaveBeenLastCalledWith(true)
+    expect(work.drafts.get(firstKey)?.appNotes).toContainEqual(later)
+    expect(work.drafts.has(getChatContextKey(second))).toBe(false)
+
+    work.messageRoute = 'decision-note'
+    rerender(<ChatBodyForContext context={first} />)
+    expect(screen.queryByRole('button', { name: 'Show app' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Send notes only' })).not.toBeInTheDocument()
+    expect(work.drafts.get(firstKey)?.appNotes).toContainEqual(later)
+  })
+
+  it('closes the launched app on an authenticated session change', () => {
+    work.appAuth = 'first-test-session'
+    work.processStatus = 'idle'
+    const owner: ChatContext = { type: 'PROJECT_TOPIC', projectId: 'receiver', topicId: 'first' }
+    const { rerender } = render(<ChatBodyForContext context={owner} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Show app' }))
+    expect(screen.getByRole('dialog', { name: 'App for this chat' })).toBeVisible()
+    work.appAuth = 'second-test-session'
+    rerender(<ChatBodyForContext context={owner} />)
+    expect(screen.queryByRole('dialog', { name: 'App for this chat' })).not.toBeInTheDocument()
+    expect(work.send).not.toHaveBeenCalled()
   })
 
   it('preserves the idle request transcript until its linked process stops', async () => {

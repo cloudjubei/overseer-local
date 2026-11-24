@@ -9,23 +9,27 @@ import { createAuthStore, type AuthState, type AuthStore } from './authStore'
  * `<userData>/auth.bin`. The IPC contract is the minimum needed to back
  * the renderer's `AuthContext`.
  */
-export function registerAuthIpc(opts?: { store?: AuthStore }): () => void {
-  const store: AuthStore =
-    opts?.store ??
-    createAuthStore({
-      storeFile: join(app.getPath('userData'), 'auth.bin'),
-      cipher: safeStorage,
-    })
+export function desktopAuthStore(): AuthStore {
+  return createAuthStore({
+    storeFile: join(app.getPath('userData'), 'auth.bin'),
+    cipher: safeStorage,
+  })
+}
+
+export function registerAuthIpc(opts?: { store?: AuthStore; onChange?: () => void }): () => void {
+  const store = opts?.store ?? desktopAuthStore()
 
   const handlers: Record<string, (args: unknown) => unknown> = {
     [IPC_HANDLER_KEYS.AUTH_GET]: () => store.read(),
     [IPC_HANDLER_KEYS.AUTH_SET]: (args) => {
       const next = (args ?? {}) as Partial<AuthState>
       store.write({ baseUrl: next.baseUrl ?? null, token: next.token ?? null })
+      opts?.onChange?.()
       return store.read()
     },
     [IPC_HANDLER_KEYS.AUTH_CLEAR]: () => {
       store.clear()
+      opts?.onChange?.()
       return store.read()
     },
   }

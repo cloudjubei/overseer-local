@@ -17,6 +17,7 @@ export type ChatPanelBodyProps = {
   inputProps?: ChatBodyForContextProps['inputProps']
   /** Docked beside what the chat is about (a run's chat beside its run): the slim header with this label. */
   dockedLabel?: string
+  appHost?: ChatBodyForContextProps['appHost']
 }
 
 /**
@@ -30,6 +31,7 @@ export default function ChatPanelBody({
   onCollapse,
   inputProps,
   dockedLabel,
+  appHost,
 }: ChatPanelBodyProps): React.JSX.Element {
   const navigate = useNavigate()
   const { projectId: urlProjectId } = useParams<{ projectId: string }>()
@@ -44,6 +46,7 @@ export default function ChatPanelBody({
     <div className="relative h-full flex flex-col bg-(--surface-base)">
       <ChatBodyForContext
         context={context}
+        appHost={appHost}
         {...(inputProps ? { inputProps } : {})}
         header={
           <ChatHeaderConnected

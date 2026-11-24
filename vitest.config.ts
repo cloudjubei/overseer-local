@@ -9,9 +9,10 @@ export default defineConfig({
     // own `node_modules`. Without forcing every dependency to the host's
     // copy, vite resolves them from inside the symlinked package and ends
     // up with two React instances at render time → "Invalid hook call".
+    // Share the router instance for the same reason: its contexts cross the package boundary.
     // `dedupe` covers ESM; the explicit aliases force CJS resolutions
     // (Radix's `require('react')`) to the host's copies too.
-    dedupe: ['react', 'react-dom'],
+    dedupe: ['react', 'react-dom', 'react-router', 'react-router-dom'],
     alias: {
       '@renderer': resolve(__dirname, 'src/renderer/src'),
       '@core': resolve(__dirname, 'src/renderer/src/core'),
@@ -19,6 +20,8 @@ export default defineConfig({
       '@ui': resolve(__dirname, 'src/renderer/src/ui'),
       react: resolve(__dirname, 'node_modules/react'),
       'react-dom': resolve(__dirname, 'node_modules/react-dom'),
+      'react-router': resolve(__dirname, 'node_modules/react-router'),
+      'react-router-dom': resolve(__dirname, 'node_modules/react-router-dom'),
       '@radix-ui/react-select': resolve(__dirname, 'node_modules/@radix-ui/react-select'),
       '@radix-ui/react-context': resolve(__dirname, 'node_modules/@radix-ui/react-context'),
       '@radix-ui/react-slot': resolve(__dirname, 'node_modules/@radix-ui/react-slot'),

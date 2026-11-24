@@ -10,7 +10,9 @@ import {
 } from 'electron'
 import { join, resolve } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
-import { registerAuthIpc } from './registerAuthIpc'
+import { pathToFileURL } from 'node:url'
+import { desktopAuthStore, registerAuthIpc } from './registerAuthIpc'
+import { registerAppSnapshotIpc } from './registerAppSnapshotIpc'
 import { registerSystemDictationIpc } from './registerSystemDictationIpc'
 import { isStrayFileNavigation } from './navigationGuard'
 import { registerDeepLinks } from './registerDeepLinks'
@@ -19,6 +21,7 @@ import appIconPath from '../../resources/icon.png?asset'
 const getAppIcon = (): NativeImage => nativeImage.createFromPath(appIconPath)
 
 let appWindow: BrowserWindow | null = null
+let appSnapshot: ReturnType<typeof registerAppSnapshotIpc> | undefined
 
 const deepLinks = registerDeepLinks({
   app,
@@ -92,10 +95,13 @@ async function createWindow(): Promise<void> {
     if (isStrayFileNavigation(url, mainWindow.webContents.getURL())) event.preventDefault()
   })
 
-  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-    await mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
+  const rendererPath = join(__dirname, '../renderer/index.html')
+  const devUrl = is.dev ? process.env['ELECTRON_RENDERER_URL'] : undefined
+  appSnapshot?.watch(mainWindow, devUrl ? new URL(devUrl).href : pathToFileURL(rendererPath).href)
+  if (devUrl) {
+    await mainWindow.loadURL(devUrl)
   } else {
-    await mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
+    await mainWindow.loadFile(rendererPath)
   }
   if (is.dev) {
     mainWindow.webContents.openDevTools()
@@ -105,7 +111,9 @@ async function createWindow(): Promise<void> {
 async function startApp(): Promise<void> {
   electronApp.setAppUserModelId('com.thefactory.overseer.desktop')
 
-  registerAuthIpc()
+  const authStore = desktopAuthStore()
+  appSnapshot = registerAppSnapshotIpc(authStore)
+  registerAuthIpc({ store: authStore, onChange: appSnapshot?.revokeAuth })
   // Bridge for the chat composer's mic button: triggers macOS native
   // Dictation via `osascript`. See `registerSystemDictationIpc` for
   // the full rationale and the Accessibility-permission gating.

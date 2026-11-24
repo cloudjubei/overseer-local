@@ -1,6 +1,7 @@
-import { electronAPI } from '@electron-toolkit/preload'
 import { contextBridge, ipcRenderer, type IpcRendererEvent } from 'electron'
 import IPC_HANDLER_KEYS from './ipcHandlersKeys'
+import { APP_SNAPSHOT_ENABLED } from './appSnapshotAvailability'
+import type { AppSnapshotService } from './appSnapshotTypes'
 
 const AUTH_API = {
   get: () => ipcRenderer.invoke(IPC_HANDLER_KEYS.AUTH_GET),
@@ -37,18 +38,49 @@ const DEEP_LINKS_API = {
   },
 }
 
-if (process.contextIsolated) {
+// Keep the native click in the isolated world. A synthetic .click(), a
+// different control, or a later call with transient activation cannot arm it.
+let captureClick: MouseEvent | undefined
+if (APP_SNAPSHOT_ENABLED && process.contextIsolated && process.isMainFrame) {
+  window.addEventListener(
+    'click',
+    (event) => {
+      const button = event.target instanceof Element ? event.target.closest('button') : null
+      captureClick =
+        event.isTrusted &&
+        button &&
+        !button.disabled &&
+        button.closest('dialog[data-chat-app-snapshot]:modal [data-app-capture-ready]')
+          ? event
+          : undefined
+    },
+    { capture: true },
+  )
+}
+
+const APP_SNAPSHOT_API: AppSnapshotService = {
+  capture: async (id) => {
+    const click = captureClick
+    captureClick = undefined
+    if (!click || click.eventPhase === Event.NONE || !navigator.userActivation.isActive) {
+      throw new Error('Press Capture to take an app snapshot.')
+    }
+    const permit = await ipcRenderer.invoke(IPC_HANDLER_KEYS.APP_SNAPSHOT_AUTHORIZE, id)
+    return ipcRenderer.invoke(IPC_HANDLER_KEYS.APP_SNAPSHOT, id, permit)
+  },
+  cancel: (id) => ipcRenderer.invoke(IPC_HANDLER_KEYS.APP_SNAPSHOT_CANCEL, id),
+}
+
+if (process.contextIsolated && process.isMainFrame) {
   try {
-    contextBridge.exposeInMainWorld('electron', electronAPI)
     contextBridge.exposeInMainWorld('authService', AUTH_API)
     contextBridge.exposeInMainWorld('systemDictation', SYSTEM_DICTATION_API)
     contextBridge.exposeInMainWorld('deepLinks', DEEP_LINKS_API)
+    if (APP_SNAPSHOT_ENABLED) contextBridge.exposeInMainWorld('appSnapshot', APP_SNAPSHOT_API)
   } catch (error) {
     console.error(error)
   }
-} else {
-  // @ts-ignore (define in dts)
-  window.electron = electronAPI
+} else if (process.isMainFrame) {
   // @ts-ignore (define in dts)
   window.authService = AUTH_API
   // @ts-ignore (define in dts)

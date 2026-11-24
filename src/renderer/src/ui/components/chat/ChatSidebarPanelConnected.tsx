@@ -1,6 +1,6 @@
 import type { ChatContext } from 'thefactory-ui/headless/api'
 import { ChatSidebarPanel as ChatSidebarPanelBase } from 'thefactory-ui/web'
-import ChatPanelBody from './ChatPanelBody'
+import ChatPanelBody, { type ChatPanelBodyProps } from './ChatPanelBody'
 
 export type ChatSidebarPanelConnectedProps = {
   context: ChatContext
@@ -12,6 +12,7 @@ export type ChatSidebarPanelConnectedProps = {
   onCollapsedChange?: (next: boolean) => void
   /** Render attached to a dialog (rounded outer corners + single collapsed button). */
   attached?: boolean
+  appHost?: ChatPanelBodyProps['appHost']
 }
 
 /**
@@ -27,6 +28,7 @@ export default function ChatSidebarPanelConnected({
   collapsed,
   onCollapsedChange,
   attached,
+  appHost,
 }: ChatSidebarPanelConnectedProps): React.JSX.Element {
   return (
     <ChatSidebarPanelBase
@@ -42,6 +44,7 @@ export default function ChatSidebarPanelConnected({
       {({ setCollapsed }) => (
         <ChatPanelBody
           context={context}
+          appHost={appHost}
           chatContextTitle={chatContextTitle}
           onCollapse={() => setCollapsed(true)}
         />

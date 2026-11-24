@@ -1,4 +1,12 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react'
 import { useNavigateToResource } from '@ui/hooks/useNavigateToResource'
 import { useNavigateToGroupRun } from '@ui/hooks/useNavigateToGroupRun'
 import { useLinkedChatActivity } from '@ui/hooks/useLinkedChatActivity'
@@ -22,7 +30,9 @@ import {
   type ChatContext,
 } from 'thefactory-ui/headless/api'
 import {
+  composerMessageRoute,
   featureRequestChatContext,
+  useReviewChatSlot,
   useAgents,
   useChatComposer,
   useCrossProjectRequests,
@@ -58,6 +68,8 @@ import { Button, StartWorkDialog } from 'thefactory-ui/web'
 import { useFeatureRequestStart, useProjectWorkLaunch } from 'thefactory-ui/headless'
 import { getToolHeaderPath, renderToolCall } from './ToolCall/renderers'
 import FeatureRequestFullModal from './FeatureRequestFullModal'
+import ChatAppSnapshotDialog from './ChatAppSnapshotDialog'
+import { setDraftAppNotes, type AppNote } from 'thefactory-ui/headless'
 import { renderLaunchModelChip } from '@ui/components/agents/RunModelChipConnected'
 
 export type ChatBodyForContextProps = {
@@ -73,6 +85,11 @@ export type ChatBodyForContextProps = {
    * does nothing under a drill already showing that run.
    */
   onBackToPipeline?: () => void
+  /** The App tab must guard and suspend its own iframe while the chat App is open. */
+  appHost?: {
+    requestOpen: (open: () => void) => void
+    setOpen: (open: boolean) => void
+  }
 }
 
 /**
@@ -88,6 +105,7 @@ export default function ChatBodyForContext({
   header,
   inputProps,
   onBackToPipeline,
+  appHost,
 }: ChatBodyForContextProps): React.JSX.Element {
   const {
     activeLLMConfig,
@@ -96,6 +114,8 @@ export default function ChatBodyForContext({
     abortChat,
     deleteLastMessage,
     getEffectiveChatSettings,
+    getDraftState,
+    updateDraftState,
   } = useChats()
   const { cancelRun } = useAgents()
   const { paths, files } = useFiles()
@@ -372,7 +392,80 @@ export default function ChatBodyForContext({
     }),
     [context, composer.videoMarks, settingsOwnerPath, navigate],
   )
-  const { token, baseUrl } = useAuth()
+  const { token, baseUrl, unauthorized } = useAuth()
+  const [appLaunch, setAppLaunch] = useState<{
+    owner: typeof context
+    token: typeof token
+    baseUrl: typeof baseUrl
+  } | null>(null)
+  const reviewSlot = useReviewChatSlot(contextKey)
+  const plainComposer =
+    !reviewSlot.kind && composerMessageRoute(grants, reviewSlot.liveRun).kind === 'send'
+  const appOwner = appLaunch?.owner
+  const offerApp =
+    !!context.projectId &&
+    project?.id === context.projectId &&
+    project.metadata?.hasApp === true &&
+    !!token &&
+    !unauthorized &&
+    !requestReadOnly &&
+    !awaitingFeatureRequest &&
+    !isAgentRunChat &&
+    context.type !== 'AGENT_RUN_TASK' &&
+    plainComposer &&
+    !chatClosure(chat).locked
+  const launchApp = useCallback(() => {
+    if (offerApp) setAppLaunch({ owner: { ...context }, token, baseUrl })
+  }, [offerApp, context, token, baseUrl])
+  const currentLaunch = useRef<typeof launchApp | null>(null)
+  useLayoutEffect(() => {
+    currentLaunch.current = launchApp
+    return () => {
+      currentLaunch.current = null
+    }
+  }, [launchApp])
+  const showApp = (): void => {
+    if (!appHost) return launchApp()
+    appHost.requestOpen(() => {
+      if (currentLaunch.current === launchApp) launchApp()
+    })
+  }
+  const appIsOpen =
+    offerApp &&
+    appLaunch &&
+    appLaunch.token === token &&
+    appLaunch.baseUrl === baseUrl &&
+    getChatContextKey(appLaunch.owner) === contextKey
+  const liveAppLaunch = useRef<typeof appLaunch>(null)
+  useLayoutEffect(() => {
+    liveAppLaunch.current = appIsOpen ? appLaunch : null
+    if (appLaunch && !appIsOpen) setAppLaunch(null)
+    return () => {
+      liveAppLaunch.current = null
+    }
+  }, [appLaunch, appIsOpen])
+  const hasOpenApp = !!appIsOpen
+  const setHostOpen = appHost?.setOpen
+  useLayoutEffect(() => {
+    if (!hasOpenApp || !setHostOpen) return
+    setHostOpen(true)
+    return () => setHostOpen(false)
+  }, [hasOpenApp, setHostOpen])
+  const closeApp = (): void => {
+    if (liveAppLaunch.current !== appLaunch) return
+    liveAppLaunch.current = null
+    setAppLaunch(null)
+  }
+  const addAppNote = (note: AppNote): void => {
+    if (!appOwner || liveAppLaunch.current !== appLaunch || note.projectId !== appOwner.projectId)
+      return
+    updateDraftState(appOwner, (prev) => {
+      const notes = prev.appNotes ?? []
+      return notes.some(({ id }) => id === note.id)
+        ? prev
+        : setDraftAppNotes(prev, [...notes, note])
+    })
+  }
   const getAttachmentPreviewUrl = useCallback(
     (path: string) =>
       baseUrl
@@ -659,7 +752,7 @@ export default function ChatBodyForContext({
         inputOverride={inputOverride}
         inputValue={composer.text}
         onInputChange={onInputChange}
-        pendingQueue={requestReadOnly ? undefined : composer.queue}
+        pendingQueue={requestReadOnly || !plainComposer ? undefined : composer.queue}
         inputProps={{
           filePaths: paths,
           ...(references.searchFiles ? { searchFiles: references.searchFiles } : {}),
@@ -678,8 +771,24 @@ export default function ChatBodyForContext({
             : inputProps?.placeholder,
           autoFocus: inputProps?.autoFocus,
           restoreKey: contextKey,
+          // The shared composer owns the take/restore for app-note sends. A second
+          // clear from ChatInput could race a new pick or a chat switch.
+          clearOnSend: !plainComposer || !composer.appNotes?.length,
+          appNotes: plainComposer ? composer.appNotes : undefined,
+          onChangeAppNotes: plainComposer ? composer.setAppNotes : undefined,
+          onShowApp: offerApp ? showApp : undefined,
         }}
       />
+      {appIsOpen && appOwner?.projectId && (
+        <ChatAppSnapshotDialog
+          key={contextKey}
+          context={appOwner}
+          projectId={appOwner.projectId}
+          onClose={closeApp}
+          addNote={addAppNote}
+          noteIds={() => (getDraftState(appOwner).appNotes ?? []).map((note) => note.id)}
+        />
+      )}
       <FeatureRequestFullModal
         requestId={fullRequestId}
         onClose={() => setFullRequestId(undefined)}
