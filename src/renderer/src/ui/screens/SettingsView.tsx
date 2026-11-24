@@ -19,7 +19,9 @@ import {
   AgentTypeSettings,
   CapabilitySettings,
   DeliverySettings,
+  GroupSlackSettings,
   GroupTicketSettings,
+  GroupTicketTabsSettings,
   McpServerSettings,
   ProjectCheckHostConsentSettings,
   ProjectDeviceSettings,
@@ -214,6 +216,8 @@ export default function SettingsView({ scope }: { scope: SettingsScope }): React
           {activeCategory === 'group' && scope.kind === 'group' && (
             <div className="flex flex-col gap-8">
               <GroupTicketSettings groupId={scope.groupId} />
+              <GroupSlackSettings groupId={scope.groupId} />
+              <GroupTicketTabsSettings groupId={scope.groupId} />
               <McpServerSettings owner={{ kind: 'group', groupId: scope.groupId }} />
               <SignOffOutputSettings owner={{ kind: 'group', groupId: scope.groupId }} />
               <DeliverySettings owner={{ kind: 'group', groupId: scope.groupId }} />
