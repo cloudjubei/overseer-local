@@ -1,7 +1,6 @@
 import { useCallback } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import type { ChatContext } from 'thefactory-ui/headless/api'
-import { useProjectsGroups } from 'thefactory-ui/headless'
 import { GroupTicketsScreen } from 'thefactory-ui/web'
 import { getChatContextKey } from '@core/chats/chatKey'
 import { renderLaunchModelChip } from '@ui/components/agents/RunModelChipConnected'
@@ -14,13 +13,9 @@ import { renderLaunchModelChip } from '@ui/components/agents/RunModelChipConnect
 export default function GroupTicketsView(): React.JSX.Element | null {
   const { groupId } = useParams<{ groupId: string }>()
   const navigate = useNavigate()
-  const { groups } = useProjectsGroups()
-  const homeProjectId = groups.find((g) => g.id === groupId)?.projects[0]
   const onOpenRun = useCallback(
-    (runId: string) => {
-      if (homeProjectId) navigate(`/projects/${homeProjectId}/process-runs/${runId}`)
-    },
-    [navigate, homeProjectId],
+    (projectId: string, runId: string) => navigate(`/projects/${projectId}/process-runs/${runId}`),
+    [navigate],
   )
   const onOpenStory = useCallback(
     (groupStoryId: string) => navigate(`/groups/${groupId}/stories/${groupStoryId}`),
@@ -52,7 +47,7 @@ export default function GroupTicketsView(): React.JSX.Element | null {
         onOpenSettings={onOpenSettings}
         onOpenTicket={onOpenTicket}
         renderModelChip={(slot) => renderLaunchModelChip(slot, { type: 'GROUP', groupId })}
-        {...(homeProjectId ? { onOpenRun } : {})}
+        onOpenRun={onOpenRun}
       />
     </div>
   )

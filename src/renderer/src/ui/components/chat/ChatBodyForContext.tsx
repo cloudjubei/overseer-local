@@ -31,6 +31,7 @@ import {
 } from 'thefactory-ui/headless/api'
 import {
   composerMessageRoute,
+  composerRunIdOfChat,
   featureRequestChatContext,
   useReviewChatSlot,
   useAgents,
@@ -399,8 +400,9 @@ export default function ChatBodyForContext({
     baseUrl: typeof baseUrl
   } | null>(null)
   const reviewSlot = useReviewChatSlot(contextKey)
+  const ownRun = useProcessRun(composerRunIdOfChat(contextKey))
   const plainComposer =
-    !reviewSlot.kind && composerMessageRoute(grants, reviewSlot.liveRun).kind === 'send'
+    reviewSlot.kind !== 'reply' && composerMessageRoute(grants, ownRun.run).kind === 'send'
   const appOwner = appLaunch?.owner
   const offerApp =
     !!context.projectId &&
