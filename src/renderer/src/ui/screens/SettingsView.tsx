@@ -19,6 +19,7 @@ import {
   AgentTypeSettings,
   CapabilitySettings,
   DeliverySettings,
+  GroupRecordingsSettings,
   GroupSlackSettings,
   GroupTicketSettings,
   GroupTicketTabsSettings,
@@ -217,6 +218,7 @@ export default function SettingsView({ scope }: { scope: SettingsScope }): React
             <div className="flex flex-col gap-8">
               <GroupTicketSettings groupId={scope.groupId} />
               <GroupSlackSettings groupId={scope.groupId} />
+              <GroupRecordingsSettings />
               <GroupTicketTabsSettings groupId={scope.groupId} />
               <McpServerSettings owner={{ kind: 'group', groupId: scope.groupId }} />
               <SignOffOutputSettings owner={{ kind: 'group', groupId: scope.groupId }} />
@@ -238,15 +240,7 @@ export default function SettingsView({ scope }: { scope: SettingsScope }): React
           {activeCategory === 'cross-project' &&
             (scope.kind === 'global' ? <GlobalCrossProjectSettings /> : <CrossProjectSettings />)}
           {activeCategory === 'rules' && <SavedRulesSettings onOpenChat={openChat} />}
-          {activeCategory === 'github' && (
-            // Electron renderer can't redirect cleanly (file:// host) — use
-            // the device flow only. window.open is trapped by the main
-            // process's setWindowOpenHandler, which routes to
-            // shell.openExternal, so the default openExternalUrl works.
-            <GitCredentialsSettings
-              hostCapabilities={{ canRedirect: false, canOpenBrowser: true }}
-            />
-          )}
+          {activeCategory === 'github' && <GitCredentialsSettings />}
           {activeCategory === 'tickets' && <ProviderConnectionsSettings />}
           {activeCategory === 'websearch' && <WebSearchSettings />}
           {activeCategory === 'video' && (

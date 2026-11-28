@@ -43,6 +43,7 @@ import { WebSearchKeysProvider } from 'thefactory-ui/headless'
 import { ProviderConnectionsProvider } from 'thefactory-ui/headless'
 import { ShortcutsProviderConnected } from 'thefactory-ui/web'
 import { CommandMenu } from 'thefactory-ui/web'
+import { SignInSessionHost } from 'thefactory-ui/web'
 import { ShortcutsHelp } from 'thefactory-ui/web'
 import { DiagnosticsOverlay } from 'thefactory-ui/web'
 import DisconnectedBanner from '@ui/components/shell/DisconnectedBanner'
@@ -101,8 +102,6 @@ const GroupTicketView = lazy(() => import('@ui/screens/GroupTicketView'))
  *
  * - No `BrowserRouter` here (it's a `HashRouter` mounted in `main.tsx` because
  *   the renderer loads from `file://` in production).
- * - No `/auth/github/callback` route — desktop's `LoginScreen` is paste-and-
- *   store against `safeStorage` IPC; the OAuth callback flow is web-only.
  * - `BackendGate` is a layout route hosting all data providers; `LoginScreen`
  *   lives outside it. Web doesn't need this — its `baseUrl` is a build-time
  *   constant and its `token` loads synchronously from `localStorage`, so its
@@ -153,6 +152,7 @@ function BackendGate(): React.JSX.Element {
                                                 <DiagnosticsOverlay />
                                                 <ShortcutsHelp />
                                                 <CommandMenu />
+                                                <SignInSessionHost />
                                                 <ChatDropController />
                                                 <div className="flex h-full w-full flex-col">
                                                   <DisconnectedBanner />

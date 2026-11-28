@@ -33,7 +33,6 @@ vi.mock('thefactory-ui/headless', () => ({
     setRepoName: vi.fn(),
     status: 'unknown',
     connect: vi.fn(),
-    cancelConnect: vi.fn(),
     connecting: false,
   }),
   projectCheckEnvError: () => null,
